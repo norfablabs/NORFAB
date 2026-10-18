@@ -7556,7 +7556,7 @@
 <h3 id="stream-payload"><code>STREAM</code> payload<a class="headerlink" href="#stream-payload" title="Permanent link">¤</a></h3>
 <p>A stream chunk originates from the worker job via <code>Job.stream(data)</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="n">msg</span> <span class="o">=</span> <span class="p">[</span>
-  <span class="n">client_address</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">juuid</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;200&quot;</span><span class="p">,</span> <span class="n">data_bytes</span>
+  <span class="n">client_address</span><span class="p">,</span> <span class="sa">b</span><span class="s2">""</span><span class="p">,</span> <span class="n">juuid</span><span class="p">,</span> <span class="sa">b</span><span class="s2">"200"</span><span class="p">,</span> <span class="n">data_bytes</span>
 <span class="p">]</span>
 <span class="n">worker</span><span class="o">.</span><span class="n">send_to_broker</span><span class="p">(</span><span class="n">NFP</span><span class="o">.</span><span class="n">STREAM</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
 </code></pre></div>

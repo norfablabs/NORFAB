@@ -7336,7 +7336,7 @@
 inventory data from locally stored files.</p>
 <p>Sample inventory file</p>
 <div class="highlight"><pre><span></span><code><span class="nt">broker</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tcp://127.0.0.1:5555&quot;</span>
+<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"tcp://127.0.0.1:5555"</span>
 
 <span class="nt">logging</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">handlers</span><span class="p">:</span>
@@ -7358,7 +7358,7 @@ inventory data from locally stored files.</p>
 </code></pre></div>
 <p>where <code>nornir/common.yaml</code> contains</p>
 <div class="highlight"><pre><span></span><code>service: nornir
-broker_endpoint: &quot;tcp://127.0.0.1:5555&quot;
+broker_endpoint: "tcp://127.0.0.1:5555"
 runner:
   plugin: RetryRunner
   options:
@@ -7674,7 +7674,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 <span class="normal">396</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Initialize NorFab Simple Inventory object.</span>
 
 <span class="sd">    Args:</span>
@@ -7684,7 +7684,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RuntimeError: If neither path nor data is provided.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">broker</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">workers</span> <span class="o">=</span> <span class="p">{}</span>
@@ -7702,7 +7702,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-            <span class="s2">&quot;Either path to inventory.yaml or inventory data dictionary must be provided.&quot;</span>
+            <span class="s2">"Either path to inventory.yaml or inventory data dictionary must be provided."</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
@@ -7810,7 +7810,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 <span class="normal">414</span>
 <span class="normal">415</span>
 <span class="normal">416</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Load and initialize various components from the provided data dictionary.</span>
 
 <span class="sd">    Args:</span>
@@ -7819,15 +7819,15 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">broker</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;broker&quot;</span><span class="p">,</span> <span class="p">{})</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;client&quot;</span><span class="p">,</span> <span class="p">{})</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">workers</span> <span class="o">=</span> <span class="n">WorkersInventory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;workers&quot;</span><span class="p">,</span> <span class="p">{}))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">topology</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;topology&quot;</span><span class="p">,</span> <span class="p">{})</span>
+<span class="sd">    """</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">broker</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"broker"</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"client"</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">workers</span> <span class="o">=</span> <span class="n">WorkersInventory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"workers"</span><span class="p">,</span> <span class="p">{}))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">topology</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"topology"</span><span class="p">,</span> <span class="p">{})</span>
     <span class="n">TopologyConfig</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topology</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">logging</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_logging_config</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;logging&quot;</span><span class="p">,</span> <span class="p">{}))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">hooks</span> <span class="o">=</span> <span class="n">make_hooks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;hooks&quot;</span><span class="p">,</span> <span class="p">{}))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">plugins</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;plugins&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">logging</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_logging_config</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"logging"</span><span class="p">,</span> <span class="p">{}))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">hooks</span> <span class="o">=</span> <span class="n">make_hooks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"hooks"</span><span class="p">,</span> <span class="p">{}))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">plugins</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"plugins"</span><span class="p">,</span> <span class="p">{})</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7853,7 +7853,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">418</span>
 <span class="normal">419</span>
 <span class="normal">420</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_logging_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logging_config</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build NorFab logging config anchored to this inventory base dir.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Build NorFab logging config anchored to this inventory base dir."""</span>
     <span class="k">return</span> <span class="n">make_norfab_logging_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">logging_config</span> <span class="ow">or</span> <span class="p">{})</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7942,7 +7942,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 <span class="normal">430</span>
 <span class="normal">431</span>
 <span class="normal">432</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_plugin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Loads and returns a plugin instance for the specified service.</span>
 
 <span class="sd">    Args:</span>
@@ -7950,7 +7950,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dictionary: Dictionary with plugin corresponding to the given service.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">make_plugin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugins</span><span class="p">,</span> <span class="n">service</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8061,7 +8061,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 <span class="normal">454</span>
 <span class="normal">455</span>
 <span class="normal">456</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Loads inventory data from a specified file path.</span>
 
 <span class="sd">    Args:</span>
@@ -8070,15 +8070,15 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 <span class="sd">    Raises:</span>
 <span class="sd">        FileNotFoundError: If the file does not exist at the specified path.</span>
 <span class="sd">        AssertionError: If the path does not point to a file.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;inventory.yaml file not found under provided path `</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">`&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"inventory.yaml file not found under provided path `</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">`"</span>
         <span class="n">log</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-    <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s2">&quot;Path not pointing to a file&quot;</span>
+    <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s2">"Path not pointing to a file"</span>
 
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">rendered</span> <span class="o">=</span> <span class="n">render_jinja2_template</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">rendered</span><span class="p">)</span>
 
@@ -8199,7 +8199,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 <span class="normal">472</span>
 <span class="normal">473</span>
 <span class="normal">474</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve an item from the inventory.</span>
 
 <span class="sd">    Args:</span>
@@ -8210,7 +8210,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        KeyError: If the key is not found in the inventory.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__slots__</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -8322,7 +8322,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 <span class="normal">488</span>
 <span class="normal">489</span>
 <span class="normal">490</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve the value of the specified item from the inventory.</span>
 
 <span class="sd">    Args:</span>
@@ -8331,7 +8331,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Any: The value of the specified item if it exists, otherwise the default value.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__slots__</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -8429,7 +8429,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 <span class="normal">531</span>
 <span class="normal">532</span>
 <span class="normal">533</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Convert the inventory object to a dictionary representation.</span>
 
 <span class="sd">    Returns:</span>
@@ -8439,35 +8439,35 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 <span class="sd">            - topology (Any): The topology information.</span>
 <span class="sd">            - logging (Any): The logging configuration.</span>
 <span class="sd">            - hooks (dict): A dictionary containing startup and exit hooks, where each</span>
-<span class="sd">                hook&#39;s function is represented by its name.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">                hook's function is represented by its name.</span>
+<span class="sd">    """</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;broker&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker</span><span class="p">,</span>
-        <span class="s2">&quot;workers&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
-        <span class="s2">&quot;topology&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">topology</span><span class="p">,</span>
-        <span class="s2">&quot;logging&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">,</span>
-        <span class="s2">&quot;client&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span>
-        <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{},</span>
-        <span class="s2">&quot;plugins&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">"broker"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker</span><span class="p">,</span>
+        <span class="s2">"workers"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+        <span class="s2">"topology"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">topology</span><span class="p">,</span>
+        <span class="s2">"logging"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">,</span>
+        <span class="s2">"client"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span>
+        <span class="s2">"hooks"</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">"plugins"</span><span class="p">:</span> <span class="p">{},</span>
     <span class="p">}</span>
 
     <span class="c1"># add hooks replacing hook function with its name</span>
     <span class="k">for</span> <span class="n">attachpoint</span><span class="p">,</span> <span class="n">hooks</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hooks</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;hooks&quot;</span><span class="p">][</span><span class="n">attachpoint</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ret</span><span class="p">[</span><span class="s2">"hooks"</span><span class="p">][</span><span class="n">attachpoint</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">hook</span> <span class="ow">in</span> <span class="n">hooks</span><span class="p">:</span>
-            <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;hooks&quot;</span><span class="p">][</span><span class="n">attachpoint</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="p">{</span><span class="o">**</span><span class="n">hook</span><span class="p">,</span> <span class="s2">&quot;function&quot;</span><span class="p">:</span> <span class="n">hook</span><span class="p">[</span><span class="s2">&quot;function&quot;</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">}</span>
+            <span class="n">ret</span><span class="p">[</span><span class="s2">"hooks"</span><span class="p">][</span><span class="n">attachpoint</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span><span class="o">**</span><span class="n">hook</span><span class="p">,</span> <span class="s2">"function"</span><span class="p">:</span> <span class="n">hook</span><span class="p">[</span><span class="s2">"function"</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">}</span>
             <span class="p">)</span>
 
     <span class="c1"># add plugins replacing plugin classes with their name</span>
     <span class="k">for</span> <span class="n">service_name</span><span class="p">,</span> <span class="n">service_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;plugins&quot;</span><span class="p">][</span><span class="n">service_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">service_data</span><span class="p">}</span>
-        <span class="k">if</span> <span class="n">service_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;worker&quot;</span><span class="p">):</span>
-            <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;plugins&quot;</span><span class="p">][</span><span class="n">service_name</span><span class="p">][</span><span class="s2">&quot;worker&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">service_data</span><span class="p">[</span><span class="s2">&quot;worker&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">service_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nfcli&quot;</span><span class="p">):</span>
-            <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;plugins&quot;</span><span class="p">][</span><span class="n">service_name</span><span class="p">][</span><span class="s2">&quot;nfcli&quot;</span><span class="p">][</span><span class="s2">&quot;shell_model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">service_data</span><span class="p">[</span>
-                <span class="s2">&quot;nfcli&quot;</span>
-            <span class="p">][</span><span class="s2">&quot;shell_model&quot;</span><span class="p">]</span>
+        <span class="n">ret</span><span class="p">[</span><span class="s2">"plugins"</span><span class="p">][</span><span class="n">service_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">service_data</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">service_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"worker"</span><span class="p">):</span>
+            <span class="n">ret</span><span class="p">[</span><span class="s2">"plugins"</span><span class="p">][</span><span class="n">service_name</span><span class="p">][</span><span class="s2">"worker"</span><span class="p">]</span> <span class="o">=</span> <span class="n">service_data</span><span class="p">[</span><span class="s2">"worker"</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">service_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"nfcli"</span><span class="p">):</span>
+            <span class="n">ret</span><span class="p">[</span><span class="s2">"plugins"</span><span class="p">][</span><span class="n">service_name</span><span class="p">][</span><span class="s2">"nfcli"</span><span class="p">][</span><span class="s2">"shell_model"</span><span class="p">]</span> <span class="o">=</span> <span class="n">service_data</span><span class="p">[</span>
+                <span class="s2">"nfcli"</span>
+            <span class="p">][</span><span class="s2">"shell_model"</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
@@ -8613,7 +8613,7 @@ with the value from the second dictionary.</p>
 <span class="normal">122</span>
 <span class="normal">123</span>
 <span class="normal">124</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">merge_recursively</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">merge</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Function to merge two dictionaries recursively.</span>
 
 <span class="sd">    This function takes two dictionaries and merges the second dictionary into the first one.</span>
@@ -8629,10 +8629,10 @@ with the value from the second dictionary.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        AssertionError: If either of the inputs is not a dictionary.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
         <span class="n">merge</span><span class="p">,</span> <span class="nb">dict</span>
-    <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Only supports dictionary/dictionary data merges, not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">merge</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">),</span> <span class="sa">f</span><span class="s2">"Only supports dictionary/dictionary data merges, not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">merge</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">merge</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
             <span class="c1"># merge two lists</span>
@@ -8807,21 +8807,21 @@ with the value from the second dictionary.</p>
 <span class="normal">166</span>
 <span class="normal">167</span>
 <span class="normal">168</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_hooks</span><span class="p">(</span><span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">hooks</span><span class="p">:</span> <span class="n">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Load and organize hook functions from specified modules.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        base_dir (str): The base directory to include in the search path for modules.</span>
 <span class="sd">        hooks (list): A list of dictionaries, each containing:</span>
-<span class="sd">            - &quot;function&quot; (str): The full path to the hook function in the format &#39;module.submodule.function&#39;.</span>
-<span class="sd">            - &quot;attachpoint&quot; (str): The key to which the hook function should be attached.</span>
+<span class="sd">            - "function" (str): The full path to the hook function in the format 'module.submodule.function'.</span>
+<span class="sd">            - "attachpoint" (str): The key to which the hook function should be attached.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: A dictionary where keys are attach points and values are lists of hook function dictionaries.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        Exception: If there is an error importing or loading a hook function.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="c1"># make sure to include current and base_dir directories in search path</span>
@@ -8835,16 +8835,16 @@ with the value from the second dictionary.</p>
         <span class="n">ret</span><span class="p">[</span><span class="n">attachpoint</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">hook</span> <span class="ow">in</span> <span class="n">hooks</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">imp_str</span><span class="p">,</span> <span class="n">hook_function_name</span> <span class="o">=</span> <span class="n">hook</span><span class="p">[</span><span class="s2">&quot;function&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Importing hook &#39;</span><span class="si">{</span><span class="n">imp_str</span><span class="si">}</span><span class="s2">&#39; function &#39;</span><span class="si">{</span><span class="n">hook_function_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-                <span class="n">hook_module</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">imp_str</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">])</span>
-                <span class="n">hook</span><span class="p">[</span><span class="s2">&quot;function&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">hook_module</span><span class="p">,</span> <span class="n">hook_function_name</span><span class="p">)</span>
+                <span class="n">imp_str</span><span class="p">,</span> <span class="n">hook_function_name</span> <span class="o">=</span> <span class="n">hook</span><span class="p">[</span><span class="s2">"function"</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Importing hook '</span><span class="si">{</span><span class="n">imp_str</span><span class="si">}</span><span class="s2">' function '</span><span class="si">{</span><span class="n">hook_function_name</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+                <span class="n">hook_module</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">imp_str</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="s2">""</span><span class="p">])</span>
+                <span class="n">hook</span><span class="p">[</span><span class="s2">"function"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">hook_module</span><span class="p">,</span> <span class="n">hook_function_name</span><span class="p">)</span>
                 <span class="n">ret</span><span class="p">[</span><span class="n">attachpoint</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hook</span><span class="p">)</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully loaded hook function </span><span class="si">{</span><span class="n">hook</span><span class="p">[</span><span class="s1">&#39;function&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Successfully loaded hook function </span><span class="si">{</span><span class="n">hook</span><span class="p">[</span><span class="s1">'function'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Failed loading hook </span><span class="si">{</span><span class="n">hook</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;function&#39;</span><span class="p">)</span><span class="si">!r}</span><span class="s2"> &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;for attach point </span><span class="si">{</span><span class="n">attachpoint</span><span class="si">!r}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Failed loading hook </span><span class="si">{</span><span class="n">hook</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'function'</span><span class="p">)</span><span class="si">!r}</span><span class="s2"> "</span>
+                    <span class="sa">f</span><span class="s2">"for attach point </span><span class="si">{</span><span class="n">attachpoint</span><span class="si">!r}</span><span class="s2">"</span>
                 <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
 
     <span class="k">return</span> <span class="n">ret</span>
@@ -9071,7 +9071,7 @@ result = make_plugin("/path/to/base_dir", plugins, example_service)</p>
 <span class="normal">251</span>
 <span class="normal">252</span>
 <span class="normal">253</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_plugin</span><span class="p">(</span><span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plugins</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Loads and initializes plugin function for the given service.</span>
 
 <span class="sd">    This function ensures that the current working directory and the specified</span>
@@ -9083,14 +9083,14 @@ result = make_plugin("/path/to/base_dir", plugins, example_service)</p>
 <span class="sd">    Args:</span>
 <span class="sd">        base_dir (str): The base directory to include in the search path.</span>
 <span class="sd">        plugins (dict): A dictionary containing plugin definition. The</span>
-<span class="sd">                        dictionary should have a key &quot;workers&quot; which maps to a</span>
+<span class="sd">                        dictionary should have a key "workers" which maps to a</span>
 <span class="sd">                        list of plugin import path. Each configuration should</span>
-<span class="sd">                        include a &quot;service&quot; key and a &quot;plugin&quot; key in the format</span>
-<span class="sd">                        &quot;module:ClassName&quot;.</span>
+<span class="sd">                        include a "service" key and a "plugin" key in the format</span>
+<span class="sd">                        "module:ClassName".</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        dict: A dictionary with a key &quot;workers&quot; mapping to worker plugin and an</span>
-<span class="sd">            &quot;nfcli&quot; key with a mapping to NFCLI shell plugin details.</span>
+<span class="sd">        dict: A dictionary with a key "workers" mapping to worker plugin and an</span>
+<span class="sd">            "nfcli" key with a mapping to NFCLI shell plugin details.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        Exception: If there is an error loading any of the plugin classes, an</span>
@@ -9099,15 +9099,15 @@ result = make_plugin("/path/to/base_dir", plugins, example_service)</p>
 
 <span class="sd">    Example:</span>
 <span class="sd">        plugins = {</span>
-<span class="sd">            &quot;workers&quot;: [</span>
+<span class="sd">            "workers": [</span>
 <span class="sd">                {</span>
-<span class="sd">                    &quot;service&quot;: &quot;example_service&quot;,</span>
-<span class="sd">                    &quot;plugin&quot;: &quot;my.path.to.example_module:ExamplePluginClass&quot;</span>
+<span class="sd">                    "service": "example_service",</span>
+<span class="sd">                    "plugin": "my.path.to.example_module:ExamplePluginClass"</span>
 <span class="sd">                }</span>
 <span class="sd">            ]</span>
 <span class="sd">        }</span>
-<span class="sd">        result = make_plugin(&quot;/path/to/base_dir&quot;, plugins, example_service)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        result = make_plugin("/path/to/base_dir", plugins, example_service)</span>
+<span class="sd">    """</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="c1"># make sure to include current and base_dir directories in search path</span>
@@ -9120,36 +9120,36 @@ result = make_plugin("/path/to/base_dir", plugins, example_service)</p>
     <span class="n">service_data</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">plugins</span><span class="p">[</span><span class="n">service</span><span class="p">])</span>
     <span class="n">ret</span><span class="p">[</span><span class="n">service</span><span class="p">]</span> <span class="o">=</span> <span class="n">service_data</span>
     <span class="c1"># import worker plugin</span>
-    <span class="k">if</span> <span class="n">service_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;worker&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">service_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"worker"</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">imp_str</span><span class="p">,</span> <span class="n">plugin_class_name</span> <span class="o">=</span> <span class="n">service_data</span><span class="p">[</span><span class="s2">&quot;worker&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+            <span class="n">imp_str</span><span class="p">,</span> <span class="n">plugin_class_name</span> <span class="o">=</span> <span class="n">service_data</span><span class="p">[</span><span class="s2">"worker"</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Importing &#39;</span><span class="si">{</span><span class="n">plugin_class_name</span><span class="si">}</span><span class="s2">&#39; worker plugin class from &#39;</span><span class="si">{</span><span class="n">imp_str</span><span class="si">}</span><span class="s2">&#39; module&quot;</span>
+                <span class="sa">f</span><span class="s2">"Importing '</span><span class="si">{</span><span class="n">plugin_class_name</span><span class="si">}</span><span class="s2">' worker plugin class from '</span><span class="si">{</span><span class="n">imp_str</span><span class="si">}</span><span class="s2">' module"</span>
             <span class="p">)</span>
-            <span class="n">plugin_module</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">imp_str</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">])</span>
-            <span class="n">service_data</span><span class="p">[</span><span class="s2">&quot;worker&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">plugin_module</span><span class="p">,</span> <span class="n">plugin_class_name</span><span class="p">)</span>
+            <span class="n">plugin_module</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">imp_str</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="s2">""</span><span class="p">])</span>
+            <span class="n">service_data</span><span class="p">[</span><span class="s2">"worker"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">plugin_module</span><span class="p">,</span> <span class="n">plugin_class_name</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Successfully loaded worker plugin </span><span class="si">{</span><span class="n">plugin_class_name</span><span class="si">}</span><span class="s2"> for service </span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"Successfully loaded worker plugin </span><span class="si">{</span><span class="n">plugin_class_name</span><span class="si">}</span><span class="s2"> for service </span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed loading worker plugin &#39;</span><span class="si">{</span><span class="n">service_data</span><span class="p">[</span><span class="s1">&#39;worker&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed loading worker plugin '</span><span class="si">{</span><span class="n">service_data</span><span class="p">[</span><span class="s1">'worker'</span><span class="p">]</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
     <span class="c1"># import nfcli pydantic model</span>
-    <span class="k">if</span> <span class="n">service_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nfcli&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">service_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"nfcli"</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">imp_str</span><span class="p">,</span> <span class="n">plugin_class_name</span> <span class="o">=</span> <span class="n">service_data</span><span class="p">[</span><span class="s2">&quot;nfcli&quot;</span><span class="p">][</span><span class="s2">&quot;shell_model&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+            <span class="n">imp_str</span><span class="p">,</span> <span class="n">plugin_class_name</span> <span class="o">=</span> <span class="n">service_data</span><span class="p">[</span><span class="s2">"nfcli"</span><span class="p">][</span><span class="s2">"shell_model"</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Importing &#39;</span><span class="si">{</span><span class="n">plugin_class_name</span><span class="si">}</span><span class="s2">&#39; nfcli pydantic model plugin class from &#39;</span><span class="si">{</span><span class="n">imp_str</span><span class="si">}</span><span class="s2">&#39; module&quot;</span>
+                <span class="sa">f</span><span class="s2">"Importing '</span><span class="si">{</span><span class="n">plugin_class_name</span><span class="si">}</span><span class="s2">' nfcli pydantic model plugin class from '</span><span class="si">{</span><span class="n">imp_str</span><span class="si">}</span><span class="s2">' module"</span>
             <span class="p">)</span>
-            <span class="n">plugin_module</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">imp_str</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">])</span>
-            <span class="n">service_data</span><span class="p">[</span><span class="s2">&quot;nfcli&quot;</span><span class="p">][</span><span class="s2">&quot;shell_model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
+            <span class="n">plugin_module</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">imp_str</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="s2">""</span><span class="p">])</span>
+            <span class="n">service_data</span><span class="p">[</span><span class="s2">"nfcli"</span><span class="p">][</span><span class="s2">"shell_model"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
                 <span class="n">plugin_module</span><span class="p">,</span> <span class="n">plugin_class_name</span>
             <span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Successfully loaded nfcli pydantic model plugin class </span><span class="si">{</span><span class="n">plugin_class_name</span><span class="si">}</span><span class="s2"> for service </span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"Successfully loaded nfcli pydantic model plugin class </span><span class="si">{</span><span class="n">plugin_class_name</span><span class="si">}</span><span class="s2"> for service </span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Failed loading nfcli pydantic model plugin class &#39;</span><span class="si">{</span><span class="n">service_data</span><span class="p">[</span><span class="s1">&#39;nfcli&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                <span class="sa">f</span><span class="s2">"Failed loading nfcli pydantic model plugin class '</span><span class="si">{</span><span class="n">service_data</span><span class="p">[</span><span class="s1">'nfcli'</span><span class="p">]</span><span class="si">}</span><span class="s2">'"</span>
             <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>
@@ -9317,7 +9317,7 @@ result = make_plugin("/path/to/base_dir", plugins, example_service)</p>
 <span class="normal">286</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">render_jinja2_template</span><span class="p">(</span>
     <span class="n">template</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">filters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Renders a Jinja2 template with the given context and custom filters.</span>
 
 <span class="sd">    Args:</span>
@@ -9330,16 +9330,16 @@ result = make_plugin("/path/to/base_dir", plugins, example_service)</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        TemplateError: If there is an error in rendering the template.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">rendered</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="sd">    """</span>
+    <span class="n">rendered</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="n">context</span> <span class="o">=</span> <span class="n">context</span> <span class="ow">or</span> <span class="p">{}</span>
 
     <span class="c1"># get OS environment variables</span>
-    <span class="n">context</span><span class="p">[</span><span class="s2">&quot;env&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="n">context</span><span class="p">[</span><span class="s2">"env"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
     <span class="c1"># render template</span>
-    <span class="n">j2env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="s2">&quot;BaseLoader&quot;</span><span class="p">)</span>
+    <span class="n">j2env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="s2">"BaseLoader"</span><span class="p">)</span>
     <span class="n">j2env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>  <span class="c1"># add custom filters</span>
     <span class="n">renderer</span> <span class="o">=</span> <span class="n">j2env</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
     <span class="n">rendered</span> <span class="o">=</span> <span class="n">renderer</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">)</span>

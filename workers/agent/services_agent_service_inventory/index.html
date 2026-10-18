@@ -7246,15 +7246,15 @@ worker-routing setting; <code>workers</code> in <code>norfab.kwargs</code> is pa
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>agent<span class="w"> </span>invoke<span class="w"> </span>name<span class="w"> </span>nf://agents/interface_check.yaml<span class="w"> </span>instructions<span class="w"> </span><span class="s2">&quot;Check interfaces on r1&quot;</span>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>agent<span class="w"> </span>invoke<span class="w"> </span>name<span class="w"> </span>nf://agents/interface_check.yaml<span class="w"> </span>instructions<span class="w"> </span><span class="s2">"Check interfaces on r1"</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;agent&quot;</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s2">&quot;invoke&quot;</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"agent"</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s2">"invoke"</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://agents/interface_check.yaml&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;instructions&quot;</span><span class="p">:</span> <span class="s2">&quot;Check interfaces on r1&quot;</span><span class="p">,</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"nf://agents/interface_check.yaml"</span><span class="p">,</span>
+        <span class="s2">"instructions"</span><span class="p">:</span> <span class="s2">"Check interfaces on r1"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>

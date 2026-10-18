@@ -7174,7 +7174,7 @@
 <h1 id="client-agent">Client Agent<a class="headerlink" href="#client-agent" title="Permanent link">¤</a></h1>
 <p>The client agent runs in your Python or NFCLI process and calls NorFab services
 through the client. It does not require an Agent service worker.</p>
-<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;norfab[clientagent,agentservice,nfcli]&quot;</span>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"norfab[clientagent,agentservice,nfcli]"</span>
 </code></pre></div>
 <p>This includes current agent construction dependencies and NFCLI. Install
 additional provider packages as needed below.</p>
@@ -7378,12 +7378,12 @@ inventory profile; <code>thread-id</code> selects a conversation.</p>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
-    <span class="n">agent</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_agent</span><span class="p">(</span><span class="n">profile</span><span class="o">=</span><span class="s2">&quot;interfaces_check_agent&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="s2">&quot;Check interfaces on r1&quot;</span><span class="p">,</span> <span class="n">thread_id</span><span class="o">=</span><span class="s2">&quot;review&quot;</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="s2">&quot;Summarize the errors&quot;</span><span class="p">,</span> <span class="n">thread_id</span><span class="o">=</span><span class="s2">&quot;review&quot;</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">list_tools</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;*interface*&quot;</span><span class="p">))</span>
+    <span class="n">agent</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_agent</span><span class="p">(</span><span class="n">profile</span><span class="o">=</span><span class="s2">"interfaces_check_agent"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="s2">"Check interfaces on r1"</span><span class="p">,</span> <span class="n">thread_id</span><span class="o">=</span><span class="s2">"review"</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="s2">"Summarize the errors"</span><span class="p">,</span> <span class="n">thread_id</span><span class="o">=</span><span class="s2">"review"</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">list_tools</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"*interface*"</span><span class="p">))</span>
 </code></pre></div>
 </div>
 </div>

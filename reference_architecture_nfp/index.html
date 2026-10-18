@@ -8167,7 +8167,7 @@ Frame 4: Disconnect body (opaque binary)
 <div class="highlight"><pre><span></span><code>POST command
 ---------------------------------------------------------------
 Frame 0: Empty (zero bytes, invisible to REQ application)
-Frame 1: “NFPC01” or &quot;NFPB01&quot; (six bytes, representing NFP/Client or NFP/Broker v0.1)
+Frame 1: “NFPC01” or "NFPB01" (six bytes, representing NFP/Client or NFP/Broker v0.1)
 Frame 2: 0x04 (one byte, representing POST)
 Frame 3: Service name (printable string)
 Frame 4: Target (printable string) workers, `all` (default), `any` or comma separated `worker names`
@@ -8195,7 +8195,7 @@ Frames 6: Response body (opaque binary)
 <div class="highlight"><pre><span></span><code>GET command
 ---------------------------------------------------------------
 Frame 0: Empty (zero bytes, invisible to REQ application)
-Frame 1: “NFPC01” or &quot;NFPB01&quot; (six bytes, representing NFP/Client or NFP/Broker v0.1)
+Frame 1: “NFPC01” or "NFPB01" (six bytes, representing NFP/Client or NFP/Broker v0.1)
 Frame 2: 0x06 (one byte, representing GET)
 Frame 3: Service name (printable string)
 Frame 4: Target (printable string) workers, `all` (default), `any` or comma separated `worker names`
@@ -8209,7 +8209,7 @@ Frames 6: GET request body (opaque binary)
 <div class="highlight"><pre><span></span><code>DELETE command
 ---------------------------------------------------------------
 Frame 0: Empty (zero bytes, invisible to REQ application)
-Frame 1: “NFPC01” or &quot;NFPB01&quot; (six bytes, representing NFP/Client or NFP/Broker v0.1)
+Frame 1: “NFPC01” or "NFPB01" (six bytes, representing NFP/Client or NFP/Broker v0.1)
 Frame 2: 0x07 (one byte, representing POST)
 Frame 3: Service name (printable string)
 Frame 4: Target (printable string) workers, `all` (default), `any` or comma separated `worker names`

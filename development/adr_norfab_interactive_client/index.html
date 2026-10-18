@@ -8132,19 +8132,19 @@ then call <code>future.result()</code> to retrieve final job results.</p>
 <h3 id="client-methods">Client Methods<a class="headerlink" href="#client-methods" title="Permanent link">¤</a></h3>
 <p>Add:</p>
 <div class="highlight"><pre><span></span><code><span class="n">future</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">submit_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show version&quot;</span><span class="p">]},</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show version"</span><span class="p">]},</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
     <span class="n">timeout</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Keep:</p>
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show version&quot;</span><span class="p">]},</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show version"</span><span class="p">]},</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
     <span class="n">timeout</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -8183,21 +8183,21 @@ recovery because <code>NFP.EVENT</code> messages emitted while a client is offli
 be delivered to the restarted client.</p>
 <p>Example <code>102</code> response payload:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;worker&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;netbox-worker-1&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;uuid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;job-uuid&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WAITING_CLIENT_INPUT&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;input_request&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input-uuid&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;question&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Apply 12 interface updates?&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;choices&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;summary&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;create&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;update&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;delete&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">  </span><span class="nt">"worker"</span><span class="p">:</span><span class="w"> </span><span class="s2">"netbox-worker-1"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"uuid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"job-uuid"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"service"</span><span class="p">:</span><span class="w"> </span><span class="s2">"netbox"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"WAITING_CLIENT_INPUT"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"input_request"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"input-uuid"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"question"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Apply 12 interface updates?"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"choices"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"metadata"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"summary"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"create"</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"update"</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"delete"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">}</span>
@@ -8238,28 +8238,28 @@ event creation is responsible for setting it automatically.</p>
 and structured data under <code>extras.input_request</code>.</p>
 <p>Example event payload:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;event_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input_request&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;uuid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;job-uuid&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;worker&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;netbox-worker-1&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;task&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sync_device_interfaces&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Apply 12 interface updates?&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;severity&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;waiting_client_input&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">  </span><span class="nt">&quot;timeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">120</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;extras&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;input_request&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input-uuid&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;question&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Apply 12 interface updates?&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;choices&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;summary&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;create&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;update&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;delete&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">  </span><span class="nt">"event_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"input_request"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"uuid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"job-uuid"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"worker"</span><span class="p">:</span><span class="w"> </span><span class="s2">"netbox-worker-1"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"service"</span><span class="p">:</span><span class="w"> </span><span class="s2">"netbox"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"task"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sync_device_interfaces"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Apply 12 interface updates?"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"severity"</span><span class="p">:</span><span class="w"> </span><span class="s2">"INFO"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"waiting_client_input"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"resource"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">"timeout"</span><span class="p">:</span><span class="w"> </span><span class="mi">120</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"extras"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"input_request"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"input-uuid"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"question"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Apply 12 interface updates?"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"choices"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"metadata"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"summary"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"create"</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"update"</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"delete"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
@@ -8267,25 +8267,25 @@ and structured data under <code>extras.input_request</code>.</p>
 <span class="p">}</span>
 </code></pre></div>
 <p>The client detects an input request by checking:</p>
-<div class="highlight"><pre><span></span><code><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;event_type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;input_request&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"event_type"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"input_request"</span>
 </code></pre></div>
 <p>and then reading:</p>
-<div class="highlight"><pre><span></span><code><span class="n">input_request</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;input_request&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">input_request</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"extras"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"input_request"</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="input-reply">Input Reply<a class="headerlink" href="#input-reply" title="Permanent link">¤</a></h3>
 <p>The client replies using <code>NFP.PUT</code>, as file streaming already does for chunk
 offset requests.</p>
 <p>Input reply payload:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;input_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input-uuid&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;cancel&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="nt">"input_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"input-uuid"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"cancel"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"metadata"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>File streaming remains unchanged and continues using payloads such as:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">256000</span>
+<span class="w">  </span><span class="nt">"offset"</span><span class="p">:</span><span class="w"> </span><span class="mi">256000</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Worker <code>_put(...)</code> can continue placing decoded <code>PUT</code> payloads into the running
@@ -8294,10 +8294,10 @@ ignores unrelated messages.</p>
 <h2 id="worker-api">Worker API<a class="headerlink" href="#worker-api" title="Permanent link">¤</a></h2>
 <p>Add <code>Job.request_input(...)</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="n">answer</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">request_input</span><span class="p">(</span>
-    <span class="n">question</span><span class="o">=</span><span class="s2">&quot;Apply changes?&quot;</span><span class="p">,</span>
+    <span class="n">question</span><span class="o">=</span><span class="s2">"Apply changes?"</span><span class="p">,</span>
     <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">timeout</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
-    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;summary&quot;</span><span class="p">:</span> <span class="n">summary</span><span class="p">},</span>
+    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">"summary"</span><span class="p">:</span> <span class="n">summary</span><span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Expected flow:</p>
@@ -8403,9 +8403,9 @@ job persistence.</p>
 <h2 id="nfcli-usage">NFCLI Usage<a class="headerlink" href="#nfcli-usage" title="Permanent link">¤</a></h2>
 <p>Simple NFCLI commands that do not consume job events can keep using <code>run_job()</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">NFCLIENT</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="n">commands</span><span class="p">,</span> <span class="s2">&quot;progress&quot;</span><span class="p">:</span> <span class="n">progress</span><span class="p">},</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"commands"</span><span class="p">:</span> <span class="n">commands</span><span class="p">,</span> <span class="s2">"progress"</span><span class="p">:</span> <span class="n">progress</span><span class="p">},</span>
     <span class="n">workers</span><span class="o">=</span><span class="n">workers</span><span class="p">,</span>
     <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
 <span class="p">)</span>
@@ -8415,21 +8415,21 @@ job persistence.</p>
 <code>event_queue</code> and requeue behavior should be removed.</p>
 <p>Synchronous shell style:</p>
 <div class="highlight"><pre><span></span><code><span class="n">future</span> <span class="o">=</span> <span class="n">NFCLIENT</span><span class="o">.</span><span class="n">submit_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;sync_device_interfaces&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;progress&quot;</span><span class="p">:</span> <span class="n">progress</span><span class="p">},</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"sync_device_interfaces"</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">"progress"</span><span class="p">:</span> <span class="n">progress</span><span class="p">},</span>
     <span class="n">workers</span><span class="o">=</span><span class="n">workers</span><span class="p">,</span>
     <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">future</span><span class="o">.</span><span class="n">events</span><span class="p">():</span>
-    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;event_type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;input_request&quot;</span><span class="p">:</span>
-        <span class="n">input_request</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;input_request&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"event_type"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"input_request"</span><span class="p">:</span>
+        <span class="n">input_request</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"extras"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"input_request"</span><span class="p">,</span> <span class="p">{})</span>
         <span class="n">answer</span> <span class="o">=</span> <span class="n">ask_user_in_shell</span><span class="p">(</span><span class="n">input_request</span><span class="p">)</span>
         <span class="n">future</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span>
-            <span class="n">input_request</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+            <span class="n">input_request</span><span class="p">[</span><span class="s2">"id"</span><span class="p">],</span>
             <span class="n">answer</span><span class="p">,</span>
-            <span class="n">worker</span><span class="o">=</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;worker&quot;</span><span class="p">),</span>
+            <span class="n">worker</span><span class="o">=</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"worker"</span><span class="p">),</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">print_progress_event</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
@@ -8447,10 +8447,10 @@ event rendering.</p>
 client API.</p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;filesharing&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;file_details&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">url</span><span class="p">},</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"filesharing"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"file_details"</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"url"</span><span class="p">:</span> <span class="n">url</span><span class="p">},</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
     <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -8459,43 +8459,43 @@ built-in client behavior.</p>
 <h2 id="python-api-usage">Python API Usage<a class="headerlink" href="#python-api-usage" title="Permanent link">¤</a></h2>
 <h3 id="existing-blocking-api">Existing Blocking API<a class="headerlink" href="#existing-blocking-api" title="Permanent link">¤</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show version&quot;</span><span class="p">]},</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show version"</span><span class="p">]},</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
     <span class="n">timeout</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
 <h3 id="future-api">Future API<a class="headerlink" href="#future-api" title="Permanent link">¤</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">future</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">submit_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show version&quot;</span><span class="p">]},</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show version"</span><span class="p">]},</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
     <span class="n">timeout</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">future</span><span class="o">.</span><span class="n">events</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="s2">&quot;message&quot;</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="s2">"message"</span><span class="p">])</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="interactive-future-api">Interactive Future API<a class="headerlink" href="#interactive-future-api" title="Permanent link">¤</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">future</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">submit_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;sync_device_interfaces&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"sync_device_interfaces"</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
     <span class="n">timeout</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">future</span><span class="o">.</span><span class="n">events</span><span class="p">():</span>
-    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;event_type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;input_request&quot;</span><span class="p">:</span>
-        <span class="n">input_request</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;input_request&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"event_type"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"input_request"</span><span class="p">:</span>
+        <span class="n">input_request</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"extras"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"input_request"</span><span class="p">,</span> <span class="p">{})</span>
         <span class="n">answer</span> <span class="o">=</span> <span class="n">ask_user</span><span class="p">(</span><span class="n">input_request</span><span class="p">)</span>
         <span class="n">future</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span>
-            <span class="n">input_request</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+            <span class="n">input_request</span><span class="p">[</span><span class="s2">"id"</span><span class="p">],</span>
             <span class="n">answer</span><span class="p">,</span>
-            <span class="n">worker</span><span class="o">=</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;worker&quot;</span><span class="p">),</span>
+            <span class="n">worker</span><span class="o">=</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"worker"</span><span class="p">),</span>
         <span class="p">)</span>
 
 <span class="n">result</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>

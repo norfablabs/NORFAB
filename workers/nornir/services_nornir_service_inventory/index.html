@@ -7054,8 +7054,8 @@
 <h1 id="nornir-worker-inventory">Nornir Worker Inventory<a class="headerlink" href="#nornir-worker-inventory" title="Permanent link">¤</a></h1>
 <p>Content of <code>inventory.yaml</code> need to be updated to include Nornir worker details:</p>
 <div class="highlight"><span class="filename">inventory.yaml</span><pre><span></span><code><span class="nt">broker</span><span class="p">:</span><span class="w"> </span>
-<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tcp://127.0.0.1:5555&quot;</span><span class="w"> </span>
-<span class="w">  </span><span class="nt">shared_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5z1:yW}]n?UXhGmz+5CeHN1&gt;:S9k!eCh6JyIhJqO&quot;</span>
+<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"tcp://127.0.0.1:5555"</span><span class="w"> </span>
+<span class="w">  </span><span class="nt">shared_key</span><span class="p">:</span><span class="w"> </span><span class="s">"5z1:yW}]n?UXhGmz+5CeHN1&gt;:S9k!eCh6JyIhJqO"</span>
 
 <span class="nt">workers</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">nornir-worker-1</span><span class="p">:</span><span class="w"> </span>
@@ -7113,15 +7113,15 @@ compatible with Netbox 4.3.0 and above.</p>
 <span class="w">  </span><span class="nt">connections</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">  </span><span class="nt">nbdata</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">  </span><span class="nt">circuits</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="w">  </span><span class="nt">primary_ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ipv4&quot;</span>
+<span class="w">  </span><span class="nt">primary_ip</span><span class="p">:</span><span class="w"> </span><span class="s">"ipv4"</span>
 <span class="w">  </span><span class="nt">devices</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fceos4</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fceos5</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fceos8</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ceos1</span>
 <span class="w">  </span><span class="nt">filters</span><span class="p">:</span><span class="w"> </span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{i_contains:</span><span class="nv"> </span><span class="s">&quot;fceos3&quot;}&#39;</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;{platform:</span><span class="nv"> </span><span class="s">{name:</span><span class="nv"> </span><span class="s">{exact:</span><span class="nv"> </span><span class="s">&quot;cisco_xr&quot;}}}&#39;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">'{i_contains:</span><span class="nv"> </span><span class="s">"fceos3"}'</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">'{platform:</span><span class="nv"> </span><span class="s">{name:</span><span class="nv"> </span><span class="s">{exact:</span><span class="nv"> </span><span class="s">"cisco_xr"}}}'</span>
 </code></pre></div>
 </div>
 </div>
@@ -7173,7 +7173,7 @@ or a particular run includes them with <code>on_failed=True</code>.</p>
 <span class="w">  </span><span class="nt">connections</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">  </span><span class="nt">nbdata</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">  </span><span class="nt">circuits</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="w">  </span><span class="nt">primary_ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ipv4&quot;</span>
+<span class="w">  </span><span class="nt">primary_ip</span><span class="p">:</span><span class="w"> </span><span class="s">"ipv4"</span>
 <span class="w">  </span><span class="nt">devices</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fceos4</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fceos5</span>

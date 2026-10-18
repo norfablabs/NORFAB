@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#02414-draft" class="md-skip">
+        <a href="#02414" class="md-skip">
           Skip to content
         </a>
       
@@ -7093,10 +7093,11 @@
   
 
 
-<h1 id="02414-draft">0.24.14 (draft)<a class="headerlink" href="#02414-draft" title="Permanent link">¤</a></h1>
+<h1 id="02414">0.24.14<a class="headerlink" href="#02414" title="Permanent link">¤</a></h1>
 <h2 id="bugs">BUGS<a class="headerlink" href="#bugs" title="Permanent link">¤</a></h2>
 <ol>
 <li>Fixed Netbox <code>get_interfaces</code> raising <code>KeyError</code> with <code>cache="force"</code> when a requested interface was missing from the cached device data. Incomplete cache entries now trigger a fresh fetch.</li>
+<li>Fixed Netbox <code>get_topology</code> ignoring <code>device_regex</code> because it used an unsupported API filter. Device selection now uses <code>name__regex</code>, while directly connected neighbors remain included in the topology.</li>
 </ol>
 <h2 id="features">FEATURES<a class="headerlink" href="#features" title="Permanent link">¤</a></h2>
 <ol>
@@ -7105,7 +7106,39 @@
 </ol>
 <h2 id="enhancements">ENHANCEMENTS<a class="headerlink" href="#enhancements" title="Permanent link">¤</a></h2>
 <ol>
-<li>Netbox <code>sync_vrrp</code> supports shared VIP addresses across VRFs, normalizes VIP roles to <code>vrrp</code>, and adds <code>vip_use_vrf=False</code> to optionally assign new VIPs to an existing VRF. Bulk updates reduce API requests; dry-run previews retain the per-device action structure used by sync orchestration.</li>
+<li>Enhanced NFCLI <code>show norfab workers</code> with a compact table showing service, status, uptime, RAM, CPU, and total retained jobs, using readable column titles. Worker <code>get_stats</code> now includes total job counts and counts by status.</li>
+<li>Removed obsolete FastAPI <code>/api/job</code> handlers and unused job response models. Synchronous <code>/api/job/run</code> and generated service-task endpoints remain available.</li>
+<li>Refactored <code>sync_vrrp</code> to support shared VIP addresses across VRFs, normalize VIP roles to <code>vrrp</code>, and added <code>vip_use_vrf=False</code> to optionally assign new VIPs to an existing VRF. Bulk updates reduce API requests; dry-run previews retain the per-device action structure used by sync orchestration.</li>
+<li>Updated dependency pins:</li>
+<li><code>pyzmq</code>: 27.1.0 -&gt; 27.2.0.</li>
+<li><code>tornado</code>: 6.5.7 -&gt; 6.5.10.</li>
+<li><code>pydantic</code>: 2.13.4 -&gt; 2.14.1.</li>
+<li><code>orjson</code>: 3.11.9 -&gt; 3.13.0.</li>
+<li><code>python-dotenv</code>: 1.2.2 -&gt; 1.2.4.</li>
+<li><code>gitpython</code>: 3.1.61 -&gt; 3.2.1.</li>
+<li><code>nornir</code>: 3.5.0 -&gt; 3.6.0.</li>
+<li><code>napalm</code>: 5.1.0 -&gt; 5.2.0.</li>
+<li><code>netmiko</code>: 4.7.0 -&gt; 4.8.0.</li>
+<li><code>nornir-napalm</code>: 0.5.0 -&gt; 0.6.0.</li>
+<li><code>nornir-scrapli</code>: 2025.1.30 -&gt; 2026.10.13.</li>
+<li><code>ntc-templates</code>: 9.2.0 -&gt; 9.3.0.</li>
+<li><code>lxml</code>: 6.1.1 -&gt; 6.1.3.</li>
+<li><code>mcp</code>: 1.28.1 -&gt; 1.30.0.</li>
+<li><code>robotframework</code>: 7.4.2 -&gt; 7.5.</li>
+<li><code>langchain</code>: 1.3.14 -&gt; 1.4.6.</li>
+<li><code>langchain-core</code>: 1.5.1 -&gt; 1.6.12.</li>
+<li><code>langchain-openai</code>: 1.4.1 -&gt; 1.7.2.</li>
+<li><code>langchain-anthropic</code>: 1.5.2 -&gt; 1.7.6.</li>
+<li><code>langchain-mcp-adapters</code>: 0.3.0 -&gt; 0.3.2.</li>
+<li><code>langgraph</code>: 1.2.9 -&gt; 1.2.16.</li>
+<li><code>ollama</code>: 0.6.2 -&gt; 0.6.3.</li>
+<li><code>fastembed</code>: 0.8.0 -&gt; 0.9.0.</li>
+<li><code>qdrant-client</code>: 1.18.0 -&gt; 1.19.1.</li>
+<li><code>datamodel-code-generator</code>: 0.71.0 -&gt; 0.85.0.</li>
+<li><code>langgraph-checkpoint-sqlite</code>: 3.1.0 -&gt; 3.1.2.</li>
+<li><code>fastapi</code>: 0.140.0 -&gt; 0.143.3.</li>
+<li><code>uvicorn</code>: 0.51.0 -&gt; 0.54.0.</li>
+<li><code>pygments</code>: 2.19.2 -&gt; 2.21.0.</li>
 </ol>
 <hr />
 <h1 id="02413">0.24.13<a class="headerlink" href="#02413" title="Permanent link">¤</a></h1>

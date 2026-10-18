@@ -7264,9 +7264,9 @@ always taken from the task request.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>Returns created, updated, and missing host or device names:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;leaf-1&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;leaf-2&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;missing&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;leaf-3&quot;</span><span class="p">],</span>
+    <span class="s2">"created"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"leaf-1"</span><span class="p">],</span>
+    <span class="s2">"updated"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"leaf-2"</span><span class="p">],</span>
+    <span class="s2">"missing"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"leaf-3"</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
 <p><code>created</code> and <code>updated</code> use the returned Nornir host names. <code>missing</code> is
@@ -7291,19 +7291,19 @@ calculated by comparing requested device names with returned host names.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;create_host_from_netbox&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">],</span>
+    <span class="s2">"nornir"</span><span class="p">,</span>
+    <span class="s2">"create_host_from_netbox"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">"nornir-worker-1"</span><span class="p">],</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;leaf-2&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s2">&quot;connections&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s2">&quot;netbox_workers&quot;</span><span class="p">:</span> <span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"leaf-1"</span><span class="p">,</span> <span class="s2">"leaf-2"</span><span class="p">],</span>
+        <span class="s2">"interfaces"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"connections"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"netbox_workers"</span><span class="p">:</span> <span class="s2">"any"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
@@ -7514,16 +7514,16 @@ the actual in-memory host replacement to <code>runtime_inventory</code>.</p>
 <span class="normal">200</span>
 <span class="normal">201</span>
 <span class="normal">202</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateHostFromNetboxInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateHostFromNetboxResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Create Nornir Hosts from NetBox Devices&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Create Nornir Hosts from NetBox Devices"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -7532,7 +7532,7 @@ the actual in-memory host replacement to <code>runtime_inventory</code>.</p>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">devices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">instance</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">netbox_workers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">netbox_workers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">"any"</span><span class="p">,</span>
     <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
     <span class="n">interfaces</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">connections</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7546,81 +7546,81 @@ the actual in-memory host replacement to <code>runtime_inventory</code>.</p>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Create or replace runtime Nornir hosts from explicit NetBox device names.</span>
 
 <span class="sd">    The task asks the NetBox service to build Nornir-compatible host data,</span>
 <span class="sd">    predicts which returned host names are new or existing, and delegates</span>
 <span class="sd">    the actual in-memory host replacement to ``runtime_inventory``.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Normalize optional list inputs used later in simple list operations.</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">netbox_hosts</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_host_from_netbox&quot;</span><span class="p">,</span>
-        <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;missing&quot;</span><span class="p">:</span> <span class="p">[]},</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_host_from_netbox"</span><span class="p">,</span>
+        <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s2">"created"</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">"updated"</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">"missing"</span><span class="p">:</span> <span class="p">[]},</span>
     <span class="p">)</span>
 
-    <span class="c1"># Start with the worker&#39;s configured NetBox inventory options, when any.</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;netbox&quot;</span><span class="p">),</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="n">nornir_netbox_options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="p">[</span><span class="s2">&quot;netbox&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="c1"># Start with the worker's configured NetBox inventory options, when any.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"netbox"</span><span class="p">),</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">nornir_netbox_options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="p">[</span><span class="s2">"netbox"</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">nornir_netbox_options</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="c1"># Task arguments that are present override worker inventory options.</span>
     <span class="k">if</span> <span class="n">interfaces</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">nornir_netbox_options</span><span class="p">[</span><span class="s2">&quot;interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interfaces</span>
+        <span class="n">nornir_netbox_options</span><span class="p">[</span><span class="s2">"interfaces"</span><span class="p">]</span> <span class="o">=</span> <span class="n">interfaces</span>
     <span class="k">if</span> <span class="n">connections</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">nornir_netbox_options</span><span class="p">[</span><span class="s2">&quot;connections&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">connections</span>
+        <span class="n">nornir_netbox_options</span><span class="p">[</span><span class="s2">"connections"</span><span class="p">]</span> <span class="o">=</span> <span class="n">connections</span>
     <span class="k">if</span> <span class="n">circuits</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">nornir_netbox_options</span><span class="p">[</span><span class="s2">&quot;circuits&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">circuits</span>
+        <span class="n">nornir_netbox_options</span><span class="p">[</span><span class="s2">"circuits"</span><span class="p">]</span> <span class="o">=</span> <span class="n">circuits</span>
     <span class="k">if</span> <span class="n">bgp_peerings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">nornir_netbox_options</span><span class="p">[</span><span class="s2">&quot;bgp_peerings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bgp_peerings</span>
+        <span class="n">nornir_netbox_options</span><span class="p">[</span><span class="s2">"bgp_peerings"</span><span class="p">]</span> <span class="o">=</span> <span class="n">bgp_peerings</span>
     <span class="k">if</span> <span class="n">nbdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">nornir_netbox_options</span><span class="p">[</span><span class="s2">&quot;nbdata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbdata</span>
+        <span class="n">nornir_netbox_options</span><span class="p">[</span><span class="s2">"nbdata"</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbdata</span>
     <span class="k">if</span> <span class="n">primary_ip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">nornir_netbox_options</span><span class="p">[</span><span class="s2">&quot;primary_ip&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">primary_ip</span>
+        <span class="n">nornir_netbox_options</span><span class="p">[</span><span class="s2">"primary_ip"</span><span class="p">]</span> <span class="o">=</span> <span class="n">primary_ip</span>
     <span class="k">if</span> <span class="n">cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">nornir_netbox_options</span><span class="p">[</span><span class="s2">&quot;cache&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cache</span>
-    <span class="n">nornir_netbox_options</span><span class="p">[</span><span class="s2">&quot;devices&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">devices</span>
-    <span class="n">nornir_netbox_options</span><span class="p">[</span><span class="s2">&quot;instance&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">instance</span>
+        <span class="n">nornir_netbox_options</span><span class="p">[</span><span class="s2">"cache"</span><span class="p">]</span> <span class="o">=</span> <span class="n">cache</span>
+    <span class="n">nornir_netbox_options</span><span class="p">[</span><span class="s2">"devices"</span><span class="p">]</span> <span class="o">=</span> <span class="n">devices</span>
+    <span class="n">nornir_netbox_options</span><span class="p">[</span><span class="s2">"instance"</span><span class="p">]</span> <span class="o">=</span> <span class="n">instance</span>
 
     <span class="c1"># NetBox owns host data construction; Nornir owns the runtime inventory write.</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;fetching Nornir inventory for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> NetBox device(s) &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;from &#39;</span><span class="si">{</span><span class="n">netbox_workers</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;any&#39;</span><span class="si">}</span><span class="s2">&#39; worker(s)&quot;</span>
+        <span class="sa">f</span><span class="s2">"fetching Nornir inventory for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> NetBox device(s) "</span>
+        <span class="sa">f</span><span class="s2">"from '</span><span class="si">{</span><span class="n">netbox_workers</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'any'</span><span class="si">}</span><span class="s2">' worker(s)"</span>
     <span class="p">)</span>
     <span class="n">nb_inventory_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;get_nornir_inventory&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"get_nornir_inventory"</span><span class="p">,</span>
         <span class="n">workers</span><span class="o">=</span><span class="n">netbox_workers</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="n">nornir_netbox_options</span><span class="p">,</span>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">nb_inventory_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - NetBox get_nornir_inventory returned no data&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - NetBox get_nornir_inventory returned no data"</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;failed&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"failed"</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="n">msg</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># Use the first NetBox worker that returns host inventory.</span>
     <span class="k">for</span> <span class="n">wname</span><span class="p">,</span> <span class="n">wdata</span> <span class="ow">in</span> <span class="n">nb_inventory_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;failed&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;result&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hosts&quot;</span><span class="p">):</span>
-            <span class="n">netbox_hosts</span> <span class="o">=</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">][</span><span class="s2">&quot;hosts&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"failed"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"result"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"hosts"</span><span class="p">):</span>
+            <span class="n">netbox_hosts</span> <span class="o">=</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">"result"</span><span class="p">][</span><span class="s2">"hosts"</span><span class="p">]</span>
             <span class="k">break</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">netbox_hosts</span><span class="p">:</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - NetBox worker(s) &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">nb_inventory_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span><span class="si">}</span><span class="s2">&#39; returned no hosts data&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - NetBox worker(s) "</span>
+            <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">nb_inventory_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span><span class="si">}</span><span class="s2">' returned no hosts data"</span>
         <span class="p">)</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;failed&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"failed"</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="n">msg</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">ret</span>
 
@@ -7628,46 +7628,46 @@ the actual in-memory host replacement to <code>runtime_inventory</code>.</p>
     <span class="n">missing</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">netbox_hosts</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - NetBox returned no host data for: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - NetBox returned no host data for: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
         <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span><span class="p">)</span>
 
     <span class="c1"># add host groups</span>
     <span class="k">for</span> <span class="n">host_data</span> <span class="ow">in</span> <span class="n">netbox_hosts</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-        <span class="n">host_data</span><span class="p">[</span><span class="s2">&quot;groups&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">host_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;groups&quot;</span><span class="p">,</span> <span class="p">[])</span> <span class="o">+</span> <span class="n">groups</span>
+        <span class="n">host_data</span><span class="p">[</span><span class="s2">"groups"</span><span class="p">]</span> <span class="o">=</span> <span class="n">host_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"groups"</span><span class="p">,</span> <span class="p">[])</span> <span class="o">+</span> <span class="n">groups</span>
 
     <span class="n">existing_hosts</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nr</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hosts</span><span class="p">)</span>
     <span class="n">created</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">netbox_hosts</span><span class="p">)</span> <span class="o">-</span> <span class="n">existing_hosts</span><span class="p">)</span>
     <span class="n">updated</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">netbox_hosts</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">existing_hosts</span><span class="p">)</span>
-    <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="n">created</span><span class="p">,</span> <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="n">updated</span><span class="p">,</span> <span class="s2">&quot;missing&quot;</span><span class="p">:</span> <span class="n">missing</span><span class="p">}</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"created"</span><span class="p">:</span> <span class="n">created</span><span class="p">,</span> <span class="s2">"updated"</span><span class="p">:</span> <span class="n">updated</span><span class="p">,</span> <span class="s2">"missing"</span><span class="p">:</span> <span class="n">missing</span><span class="p">}</span>
 
     <span class="c1"># Dry run stops after prediction and does not mutate Nornir runtime inventory.</span>
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;dry-run requested, Nornir runtime inventory not changed&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"dry-run requested, Nornir runtime inventory not changed"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># Runtime inventory load calls create_host once for each returned NetBox host.</span>
     <span class="n">inventory_actions</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="p">[{</span><span class="s2">&quot;call&quot;</span><span class="p">:</span> <span class="s2">&quot;delete_host&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nr</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hosts</span><span class="p">)}]</span>
+        <span class="p">[{</span><span class="s2">"call"</span><span class="p">:</span> <span class="s2">"delete_host"</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nr</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hosts</span><span class="p">)}]</span>
         <span class="k">if</span> <span class="n">replace</span> <span class="ow">is</span> <span class="kc">True</span>
         <span class="k">else</span> <span class="p">[]</span>
     <span class="p">)</span>
     <span class="n">inventory_actions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
         <span class="p">[</span>
-            <span class="p">{</span><span class="s2">&quot;call&quot;</span><span class="p">:</span> <span class="s2">&quot;create_host&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">host_name</span><span class="p">,</span> <span class="o">**</span><span class="n">host_data</span><span class="p">}</span>
+            <span class="p">{</span><span class="s2">"call"</span><span class="p">:</span> <span class="s2">"create_host"</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="n">host_name</span><span class="p">,</span> <span class="o">**</span><span class="n">host_data</span><span class="p">}</span>
             <span class="k">for</span> <span class="n">host_name</span><span class="p">,</span> <span class="n">host_data</span> <span class="ow">in</span> <span class="n">netbox_hosts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">]</span>
     <span class="p">)</span>
     <span class="n">inventory_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runtime_inventory</span><span class="p">(</span>
         <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
-        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;load&quot;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s2">"load"</span><span class="p">,</span>
         <span class="n">data</span><span class="o">=</span><span class="n">inventory_actions</span><span class="p">,</span>
         <span class="n">progress</span><span class="o">=</span><span class="n">progress</span> <span class="k">if</span> <span class="n">progress</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
-        <span class="c1"># Keep this task&#39;s created/updated/missing prediction and attach runtime errors.</span>
+        <span class="c1"># Keep this task's created/updated/missing prediction and attach runtime errors.</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">failed</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">status</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">inventory_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
@@ -7677,8 +7677,8 @@ the actual in-memory host replacement to <code>runtime_inventory</code>.</p>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;created&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">, updated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;updated&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;missing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;missing&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> Nornir host(s) from NetBox&quot;</span>
+        <span class="sa">f</span><span class="s2">"created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">'created'</span><span class="p">])</span><span class="si">}</span><span class="s2">, updated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">'updated'</span><span class="p">])</span><span class="si">}</span><span class="s2">, "</span>
+        <span class="sa">f</span><span class="s2">"missing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">'missing'</span><span class="p">])</span><span class="si">}</span><span class="s2"> Nornir host(s) from NetBox"</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>

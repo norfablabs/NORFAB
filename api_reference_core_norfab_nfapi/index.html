@@ -7372,11 +7372,11 @@ expressions and to NFCLI, broker, and worker processes.</p>
 multiline values, the optional <code>export</code> directive, and <code>${VAR}</code> expansion. It
 replaces variables already present in the process environment by default, so
 the local <code>.env</code> file takes precedence over shell and CI values.</p>
-<div class="highlight"><pre><span></span><code><span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>  <span class="c1"># Loads ./.env when present.</span>
+<div class="highlight"><pre><span></span><code><span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>  <span class="c1"># Loads ./.env when present.</span>
 <span class="n">environment</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">list_environment_variables</span><span class="p">()</span>
 </code></pre></div>
 <p>Set <code>load_env_override=False</code> to preserve existing process variables instead:</p>
-<div class="highlight"><pre><span></span><code><span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">,</span> <span class="n">load_env_override</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">,</span> <span class="n">load_env_override</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="python-api">Python API<a class="headerlink" href="#python-api" title="Permanent link">¤</a></h2>
 
@@ -7687,7 +7687,7 @@ with NorFab(inventory=inventory) as nf:
 <span class="normal">201</span>
 <span class="normal">202</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">inventory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">,</span>
+    <span class="n">inventory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"./inventory.yaml"</span><span class="p">,</span>
     <span class="n">inventory_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7695,7 +7695,7 @@ with NorFab(inventory=inventory) as nf:
     <span class="n">run_workers</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">load_env_override</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">configure_logging</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">logging_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;nfapi&quot;</span><span class="p">,</span>
+    <span class="n">logging_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"nfapi"</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">log_level</span> <span class="o">=</span> <span class="n">log_level</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">inventory_path</span> <span class="o">=</span> <span class="n">inventory</span>
@@ -7720,13 +7720,13 @@ with NorFab(inventory=inventory) as nf:
 
     <span class="bp">self</span><span class="o">.</span><span class="n">run_broker</span> <span class="o">=</span> <span class="n">run_broker</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">run_workers</span> <span class="o">=</span> <span class="n">run_workers</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">broker_endpoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">broker</span><span class="p">[</span><span class="s2">&quot;endpoint&quot;</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">broker_endpoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">broker</span><span class="p">[</span><span class="s2">"endpoint"</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">workers_init_timeout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-        <span class="s2">&quot;workers_init_timeout&quot;</span><span class="p">,</span> <span class="mi">300</span>
+        <span class="s2">"workers_init_timeout"</span><span class="p">,</span> <span class="mi">300</span>
     <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">workers_start_interval</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
         <span class="mf">0.0</span><span class="p">,</span>
-        <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;workers_start_interval&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)),</span>
+        <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"workers_start_interval"</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)),</span>
     <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">broker_exit_event</span> <span class="o">=</span> <span class="n">Event</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">workers_exit_event</span> <span class="o">=</span> <span class="n">Event</span><span class="p">()</span>
@@ -7734,10 +7734,10 @@ with NorFab(inventory=inventory) as nf:
 
     <span class="c1"># create needed folders to kickstart the logs</span>
     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">&quot;__norfab__&quot;</span><span class="p">,</span> <span class="s2">&quot;files&quot;</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">"__norfab__"</span><span class="p">,</span> <span class="s2">"files"</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span>
     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">&quot;__norfab__&quot;</span><span class="p">,</span> <span class="s2">&quot;logs&quot;</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">"__norfab__"</span><span class="p">,</span> <span class="s2">"logs"</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span>
 
     <span class="c1"># to fix ValueError: signal only works in main thread of the main interpreter</span>
@@ -7802,13 +7802,13 @@ with NorFab(inventory=inventory) as nf:
     <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">load_env_override</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect and load an env file before inventory initialization.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Detect and load an env file before inventory initialization."""</span>
     <span class="n">env_base_dir</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">base_dir</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
         <span class="k">if</span> <span class="n">inventory_data</span>
         <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">inventory</span><span class="p">))</span>
     <span class="p">)</span>
-    <span class="n">env_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">env_base_dir</span><span class="p">,</span> <span class="s2">&quot;.env&quot;</span><span class="p">)</span>
+    <span class="n">env_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">env_base_dir</span><span class="p">,</span> <span class="s2">".env"</span><span class="p">)</span>
     <span class="n">load_dotenv</span><span class="p">(</span><span class="n">dotenv_path</span><span class="o">=</span><span class="n">env_file</span><span class="p">,</span> <span class="n">override</span><span class="o">=</span><span class="n">load_env_override</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7849,11 +7849,11 @@ with NorFab(inventory=inventory) as nf:
 <span class="k">def</span><span class="w"> </span><span class="nf">resolve_base_dir</span><span class="p">(</span>
     <span class="n">inventory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">inventory_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve the NorFab base directory without constructing inventory.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Resolve the NorFab base directory without constructing inventory."""</span>
     <span class="k">if</span> <span class="n">inventory_data</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">base_dir</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
 
-    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">inventory</span> <span class="ow">or</span> <span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">inventory</span> <span class="ow">or</span> <span class="s2">"./inventory.yaml"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">base_dir</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7886,7 +7886,7 @@ with NorFab(inventory=inventory) as nf:
 <span class="normal">233</span>
 <span class="normal">234</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">list_environment_variables</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a copy of the environment variables visible to NFAPI.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return a copy of the environment variables visible to NFAPI."""</span>
     <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7956,25 +7956,25 @@ with NorFab(inventory=inventory) as nf:
 <span class="normal">262</span>
 <span class="normal">263</span>
 <span class="normal">264</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">register_plugins</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Registers worker plugins by iterating through the entry points in the</span>
-<span class="sd">    &#39;norfab.workers&#39; group and registering each worker plugin.</span>
+<span class="sd">    'norfab.workers' group and registering each worker plugin.</span>
 
 <span class="sd">    This method loads each entry point and registers it using the</span>
 <span class="sd">    `register_worker_plugin` method.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        Exception: Any exceptions raised by the entry point loading or registration process.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># register worker plugins from entrypoints</span>
     <span class="n">eps</span> <span class="o">=</span> <span class="n">entry_points</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">entry_point</span> <span class="ow">in</span> <span class="n">eps</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">group</span><span class="o">=</span><span class="s2">&quot;norfab.workers&quot;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">entry_point</span> <span class="ow">in</span> <span class="n">eps</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">group</span><span class="o">=</span><span class="s2">"norfab.workers"</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_worker_plugin</span><span class="p">(</span><span class="n">entry_point</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">entry_point</span><span class="p">)</span>
 
     <span class="c1"># register worker plugins from inventory</span>
     <span class="k">for</span> <span class="n">service_name</span><span class="p">,</span> <span class="n">service_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">service_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;worker&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">register_worker_plugin</span><span class="p">(</span><span class="n">service_name</span><span class="p">,</span> <span class="n">service_data</span><span class="p">[</span><span class="s2">&quot;worker&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">service_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"worker"</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_worker_plugin</span><span class="p">(</span><span class="n">service_name</span><span class="p">,</span> <span class="n">service_data</span><span class="p">[</span><span class="s2">"worker"</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -8098,7 +8098,7 @@ different from the provided plugin, an exception is raised.</p>
 <span class="normal">291</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">register_worker_plugin</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">service_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">worker_plugin</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">EntryPoint</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Registers a worker plugin for a given service.</span>
 
 <span class="sd">    This method registers a worker plugin under the specified service name.</span>
@@ -8111,15 +8111,15 @@ different from the provided plugin, an exception is raised.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        Exception: If a different plugin is already registered under the same service name.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">existing_plugin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_plugins</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">service_name</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">existing_plugin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">worker_plugins</span><span class="p">[</span><span class="n">service_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">worker_plugin</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Worker plugin </span><span class="si">{</span><span class="n">worker_plugin</span><span class="si">}</span><span class="s2"> can&#39;t be registered for &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;service &#39;</span><span class="si">{</span><span class="n">service_name</span><span class="si">}</span><span class="s2">&#39; because plugin &#39;</span><span class="si">{</span><span class="n">existing_plugin</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;was already registered under this service.&quot;</span>
+            <span class="sa">f</span><span class="s2">"Worker plugin </span><span class="si">{</span><span class="n">worker_plugin</span><span class="si">}</span><span class="s2"> can't be registered for "</span>
+            <span class="sa">f</span><span class="s2">"service '</span><span class="si">{</span><span class="n">service_name</span><span class="si">}</span><span class="s2">' because plugin '</span><span class="si">{</span><span class="n">existing_plugin</span><span class="si">}</span><span class="s2">' "</span>
+            <span class="sa">f</span><span class="s2">"was already registered under this service."</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8225,7 +8225,7 @@ termination.</p>
 <span class="normal">331</span>
 <span class="normal">332</span>
 <span class="normal">333</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">handle_ctrl_c</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signum</span><span class="p">,</span> <span class="n">frame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Handle the CTRL-C signal (SIGINT) to gracefully exit the application.</span>
 
 <span class="sd">    This method is called when the user interrupts the program with a CTRL-C</span>
@@ -8240,10 +8240,10 @@ termination.</p>
 <span class="sd">        This method reassigns the SIGINT signal to the default handler and</span>
 <span class="sd">        sends the SIGINT signal to the current process to ensure proper</span>
 <span class="sd">        termination.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exiting</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;CTRL-C, NorFab exiting, interrupted by user...&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">"CTRL-C, NorFab exiting, interrupted by user..."</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
         <span class="c1"># signal termination to main process</span>
@@ -8259,7 +8259,7 @@ termination.</p>
 
 
 <h2 id="norfab.core.nfapi.NorFab.setup_logging" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">setup_logging</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;nfapi&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span></code>
+            <code class="highlight language-python"><span class="n">setup_logging</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'nfapi'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span></code>
 
 <a href="#norfab.core.nfapi.NorFab.setup_logging" class="headerlink" title="Permanent link">¤</a></h2>
 
@@ -8360,8 +8360,8 @@ reapply logging with the inventory logging configuration.</p>
 <span class="normal">364</span>
 <span class="normal">365</span>
 <span class="normal">366</span>
-<span class="normal">367</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">setup_logging</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;nfapi&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="normal">367</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">setup_logging</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"nfapi"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Explicitly configure logging for the current process.</span>
 
 <span class="sd">    If inventory is not initialized yet, bootstrap logging with NorFab</span>
@@ -8373,13 +8373,13 @@ reapply logging with the inventory logging configuration.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Logging configuration applied to this process.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">inventory</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;inventory&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="n">inventory</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"inventory"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">inventory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">base_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve_base_dir</span><span class="p">(</span>
-            <span class="n">inventory</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;inventory_path&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="n">inventory_data</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;inventory_data&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="n">base_dir</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;base_dir&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">inventory</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"inventory_path"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">inventory_data</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"inventory_data"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">base_dir</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"base_dir"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="n">inventory_logging</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
@@ -8388,7 +8388,7 @@ reapply logging with the inventory logging configuration.</p>
 
     <span class="k">return</span> <span class="n">setup_process_logging</span><span class="p">(</span>
         <span class="n">base_dir</span><span class="o">=</span><span class="n">base_dir</span><span class="p">,</span>
-        <span class="n">role</span><span class="o">=</span><span class="s2">&quot;nfapi&quot;</span><span class="p">,</span>
+        <span class="n">role</span><span class="o">=</span><span class="s2">"nfapi"</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
         <span class="n">log_level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_level</span><span class="p">,</span>
         <span class="n">inventory_logging</span><span class="o">=</span><span class="n">inventory_logging</span><span class="p">,</span>
@@ -8495,7 +8495,7 @@ Error: If no broker endpoint is defined or if the broker fails to start.</p>
 <span class="normal">413</span>
 <span class="normal">414</span>
 <span class="normal">415</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">start_broker</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Starts the broker process if a broker endpoint is defined.</span>
 <span class="sd">    This method initializes and starts a separate process for the broker using the</span>
 <span class="sd">    provided broker endpoint. It waits for the broker to signal that it has fully</span>
@@ -8508,7 +8508,7 @@ Error: If no broker endpoint is defined or if the broker fails to start.</p>
 <span class="sd">    Logs:</span>
 <span class="sd">        Info: When the broker starts successfully.</span>
 <span class="sd">        Error: If no broker endpoint is defined or if the broker fails to start.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker_endpoint</span><span class="p">:</span>
         <span class="n">init_done_event</span> <span class="o">=</span> <span class="n">Event</span><span class="p">()</span>  <span class="c1"># for worker to signal if its fully initiated</span>
 
@@ -8532,15 +8532,15 @@ Error: If no broker endpoint is defined or if the broker fails to start.</p>
             <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Broker failed to start in 30 seconds on &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">broker_endpoint</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                <span class="sa">f</span><span class="s2">"Broker failed to start in 30 seconds on '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">broker_endpoint</span><span class="si">}</span><span class="s2">'"</span>
             <span class="p">)</span>
             <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">()</span>
 
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Started broker, broker listening for connections on &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">broker_endpoint</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="sa">f</span><span class="s2">"Started broker, broker listening for connections on '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">broker_endpoint</span><span class="si">}</span><span class="s2">'"</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to start broker, no broker endpoint defined&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"Failed to start broker, no broker endpoint defined"</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -8729,7 +8729,7 @@ Error: If no broker endpoint is defined or if the broker fails to start.</p>
 <span class="normal">477</span>
 <span class="normal">478</span>
 <span class="normal">479</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">start_worker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">worker_data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Starts a worker process if it is not already running.</span>
 
 <span class="sd">    Args:</span>
@@ -8738,42 +8738,42 @@ Error: If no broker endpoint is defined or if the broker fails to start.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RuntimeError: If a dependent process is not alive.</span>
-<span class="sd">        norfab_exceptions.ServicePluginNotRegistered: If no worker plugin is registered for the worker&#39;s service.</span>
+<span class="sd">        norfab_exceptions.ServicePluginNotRegistered: If no worker plugin is registered for the worker's service.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">worker_name</span><span class="p">):</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NFAPI PID </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2"> starting worker process&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"NFAPI PID </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2"> starting worker process"</span><span class="p">)</span>
         <span class="n">worker_inventory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="p">[</span><span class="n">worker_name</span><span class="p">]</span>
         <span class="n">init_done_event</span> <span class="o">=</span> <span class="n">Event</span><span class="p">()</span>  <span class="c1"># for worker to signal if its fully initiated</span>
 
         <span class="c1"># check dependent processes</span>
-        <span class="k">if</span> <span class="n">worker_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;depends_on&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">worker_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"depends_on"</span><span class="p">):</span>
             <span class="c1"># check if all dependent processes are alive</span>
-            <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">worker_data</span><span class="p">[</span><span class="s2">&quot;depends_on&quot;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">worker_data</span><span class="p">[</span><span class="s2">"depends_on"</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">w</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="p">[</span><span class="n">w</span><span class="p">][</span><span class="s2">&quot;process&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
-                        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dependent process is dead &#39;</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="p">[</span><span class="n">w</span><span class="p">][</span><span class="s2">"process"</span><span class="p">]</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Dependent process is dead '</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
             <span class="c1"># check if all depended process fully initialized</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
                 <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="p">[</span><span class="n">w</span><span class="p">][</span><span class="s2">&quot;init_done&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="p">[</span><span class="n">w</span><span class="p">][</span><span class="s2">"init_done"</span><span class="p">]</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span>
                     <span class="k">if</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span>
                     <span class="k">else</span> <span class="kc">False</span>
                 <span class="p">)</span>
-                <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">worker_data</span><span class="p">[</span><span class="s2">&quot;depends_on&quot;</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">worker_data</span><span class="p">[</span><span class="s2">"depends_on"</span><span class="p">]</span>
             <span class="p">):</span>
                 <span class="k">return</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_plugins</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">worker_inventory</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_plugins</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">worker_inventory</span><span class="p">[</span><span class="s2">"service"</span><span class="p">]):</span>
             <span class="k">raise</span> <span class="n">norfab_exceptions</span><span class="o">.</span><span class="n">ServicePluginNotRegistered</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;No worker plugin registered for service &#39;</span><span class="si">{</span><span class="n">worker_inventory</span><span class="p">[</span><span class="s1">&#39;service&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                <span class="sa">f</span><span class="s2">"No worker plugin registered for service '</span><span class="si">{</span><span class="n">worker_inventory</span><span class="p">[</span><span class="s1">'service'</span><span class="p">]</span><span class="si">}</span><span class="s2">'"</span>
             <span class="p">)</span>
-        <span class="n">worker_plugin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_plugins</span><span class="p">[</span><span class="n">worker_inventory</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]]</span>
+        <span class="n">worker_plugin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_plugins</span><span class="p">[</span><span class="n">worker_inventory</span><span class="p">[</span><span class="s2">"service"</span><span class="p">]]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="p">[</span><span class="n">worker_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;process&quot;</span><span class="p">:</span> <span class="n">Process</span><span class="p">(</span>
+            <span class="s2">"process"</span><span class="p">:</span> <span class="n">Process</span><span class="p">(</span>
                 <span class="n">target</span><span class="o">=</span><span class="n">start_worker_process</span><span class="p">,</span>
                 <span class="n">args</span><span class="o">=</span><span class="p">(</span>
                     <span class="n">worker_plugin</span><span class="p">,</span>
@@ -8785,12 +8785,12 @@ Error: If no broker endpoint is defined or if the broker fails to start.</p>
                     <span class="n">init_done_event</span><span class="p">,</span>
                 <span class="p">),</span>
             <span class="p">),</span>
-            <span class="s2">&quot;init_done&quot;</span><span class="p">:</span> <span class="n">init_done_event</span><span class="p">,</span>
+            <span class="s2">"init_done"</span><span class="p">:</span> <span class="n">init_done_event</span><span class="p">,</span>
         <span class="p">}</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="p">[</span><span class="n">worker_name</span><span class="p">][</span><span class="s2">&quot;process&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="p">[</span><span class="n">worker_name</span><span class="p">][</span><span class="s2">"process"</span><span class="p">]</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
-        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NFAPI PID </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2"> worker process started&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"NFAPI PID </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2"> worker process started"</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -9081,7 +9081,7 @@ when constructing NorFab. If a list, starts the specified workers.</p>
     <span class="n">run_broker</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">run_workers</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Starts the broker and specified workers.</span>
 
 <span class="sd">    Args:</span>
@@ -9104,15 +9104,15 @@ when constructing NorFab. If a list, starts the specified workers.</p>
 <span class="sd">        - If the initialization timeout expires, an error is logged and the system is destroyed.</span>
 <span class="sd">        - After starting the workers, any startup hooks defined in the inventory are executed.</span>
 <span class="sd">        - Each NorFab instance supports one startup attempt.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_lock</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_called</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="s2">&quot;NorFab.start() can only be called once per instance&quot;</span>
+                <span class="s2">"NorFab.start() can only be called once per instance"</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exiting</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="s2">&quot;NorFab cannot be started after it has been destroyed&quot;</span>
+                <span class="s2">"NorFab cannot be started after it has been destroyed"</span>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_start_called</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -9123,7 +9123,7 @@ when constructing NorFab. If a list, starts the specified workers.</p>
     <span class="n">workers_to_start</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
     <span class="c1"># start the broker</span>
-    <span class="k">if</span> <span class="n">run_broker</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;broker&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">run_broker</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"broker"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="c1"># update inventory to include build in services</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_built_in_workers_inventory</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start_broker</span><span class="p">()</span>
@@ -9139,7 +9139,7 @@ when constructing NorFab. If a list, starts the specified workers.</p>
         <span class="p">]</span>
     <span class="c1"># start workers defined in inventory</span>
     <span class="k">elif</span> <span class="n">run_workers</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">run_workers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;workers&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">run_workers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"workers"</span><span class="p">,</span> <span class="p">[])</span>
 
     <span class="c1"># exit if no workers</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">run_workers</span><span class="p">:</span>
@@ -9152,7 +9152,7 @@ when constructing NorFab. If a list, starts the specified workers.</p>
         <span class="k">if</span> <span class="n">worker_name</span><span class="p">:</span>
             <span class="n">workers_to_start</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">worker_name</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2">&#39; - worker name is bad, skipping..&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2">' - worker name is bad, skipping.."</span><span class="p">)</span>
             <span class="k">continue</span>
 
     <span class="k">while</span> <span class="n">workers_to_start</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
@@ -9183,17 +9183,17 @@ when constructing NorFab. If a list, starts the specified workers.</p>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="n">workers_to_start</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">worker_name</span><span class="p">)</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2">&#39; - failed to start worker, no inventory data found&quot;</span>
+                    <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2">' - failed to start worker, no inventory data found"</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">workers_to_start</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">worker_name</span><span class="p">)</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2">&#39; - failed to start worker, inventory file not found &#39;</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                    <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2">' - failed to start worker, inventory file not found '</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">'"</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">workers_to_start</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">worker_name</span><span class="p">)</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2">&#39; - failed to start worker, error &#39;</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                    <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2">' - failed to start worker, error '</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">'"</span>
                 <span class="p">)</span>
 
         <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
@@ -9201,19 +9201,19 @@ when constructing NorFab. If a list, starts the specified workers.</p>
     <span class="c1"># wait for workers to initialize</span>
     <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers_init_timeout</span> <span class="o">&gt;</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="s2">&quot;init_done&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="s2">"init_done"</span><span class="p">]</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
             <span class="k">break</span>
         <span class="c1"># Yield while workers initialize instead of busy-waiting on events.</span>
         <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;TimeoutError - </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">workers_init_timeout</span><span class="si">}</span><span class="s2">s workers init timeout expired&quot;</span>
+            <span class="sa">f</span><span class="s2">"TimeoutError - </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">workers_init_timeout</span><span class="si">}</span><span class="s2">s workers init timeout expired"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
 
     <span class="c1"># run startup hooks</span>
-    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hooks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;startup&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-        <span class="n">f</span><span class="p">[</span><span class="s2">&quot;function&quot;</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;args&quot;</span><span class="p">,</span> <span class="p">[]),</span> <span class="o">**</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;kwargs&quot;</span><span class="p">,</span> <span class="p">{}))</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hooks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"startup"</span><span class="p">,</span> <span class="p">[]):</span>
+        <span class="n">f</span><span class="p">[</span><span class="s2">"function"</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"args"</span><span class="p">,</span> <span class="p">[]),</span> <span class="o">**</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kwargs"</span><span class="p">,</span> <span class="p">{}))</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -9254,15 +9254,15 @@ Otherwise, it enters a loop that continues to run until the <code>exiting</code>
 <span class="normal">632</span>
 <span class="normal">633</span>
 <span class="normal">634</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Runs the main loop until a termination signal (CTRL+C) is received.</span>
 <span class="sd">    This method checks if there are any broker or worker processes running.</span>
 <span class="sd">    If none are detected, it logs a critical message and exits.</span>
 <span class="sd">    Otherwise, it enters a loop that continues to run until the `exiting` flag is set to True.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
-            <span class="s2">&quot;NorFab detected no broker or worker processes running, exiting..&quot;</span>
+            <span class="s2">"NorFab detected no broker or worker processes running, exiting.."</span>
         <span class="p">)</span>
         <span class="k">return</span>
 
@@ -9362,7 +9362,7 @@ Otherwise, it enters a loop that continues to run until the <code>exiting</code>
 <span class="normal">673</span>
 <span class="normal">674</span>
 <span class="normal">675</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Gracefully stop all NORFAB processes and clean up resources.</span>
 
 <span class="sd">    This method performs the following steps:</span>
@@ -9376,31 +9376,31 @@ Otherwise, it enters a loop that continues to run until the <code>exiting</code>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># run exit hooks</span>
-    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hooks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;exit&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-        <span class="n">f</span><span class="p">[</span><span class="s2">&quot;function&quot;</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;args&quot;</span><span class="p">,</span> <span class="p">[]),</span> <span class="o">**</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;kwargs&quot;</span><span class="p">,</span> <span class="p">{}))</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hooks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"exit"</span><span class="p">,</span> <span class="p">[]):</span>
+        <span class="n">f</span><span class="p">[</span><span class="s2">"function"</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"args"</span><span class="p">,</span> <span class="p">[]),</span> <span class="o">**</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kwargs"</span><span class="p">,</span> <span class="p">{}))</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exiting</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">exiting</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># indicate that NorFab already exiting</span>
         <span class="c1"># stop client</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;NorFab is exiting, stopping clients&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"NorFab is exiting, stopping clients"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clients_exit_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
         <span class="c1"># stop workers</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;NorFab is exiting, stopping workers&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"NorFab is exiting, stopping workers"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">workers_exit_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
         <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="p">:</span>
             <span class="n">wname</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
-            <span class="n">w</span><span class="p">[</span><span class="s2">&quot;process&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NorFab is exiting, stopped </span><span class="si">{</span><span class="n">wname</span><span class="si">}</span><span class="s2"> worker&quot;</span><span class="p">)</span>
+            <span class="n">w</span><span class="p">[</span><span class="s2">"process"</span><span class="p">]</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"NorFab is exiting, stopped </span><span class="si">{</span><span class="n">wname</span><span class="si">}</span><span class="s2"> worker"</span><span class="p">)</span>
         <span class="c1"># stop broker</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;NorFab is exiting, stopping broker&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"NorFab is exiting, stopping broker"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">broker_exit_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;NorFab is exiting&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"NorFab is exiting"</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -9554,15 +9554,15 @@ instance's client attribute.</p>
 <span class="normal">716</span>
 <span class="normal">717</span>
 <span class="normal">718</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">broker_endpoint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NFPClient</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Creates and returns an NFPClient instance.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        broker_endpoint (str, optional): The broker endpoint to connect to.</span>
-<span class="sd">            If not provided, the instance&#39;s broker_endpoint attribute will be used.</span>
+<span class="sd">            If not provided, the instance's broker_endpoint attribute will be used.</span>
 <span class="sd">        name (str, optional): Client name to use as the broker identity and</span>
 <span class="sd">            local job database folder. If not provided, defaults to</span>
-<span class="sd">            &#39;&lt;entry script filename&gt;_&lt;current folder hash&gt;_NFPClient&#39;.</span>
+<span class="sd">            '&lt;entry script filename&gt;_&lt;current folder hash&gt;_NFPClient'.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        NFPClient: The created client instance if a broker endpoint is defined.</span>
@@ -9570,18 +9570,18 @@ instance's client attribute.</p>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        If this is the first client being created, it will be assigned to the</span>
-<span class="sd">        instance&#39;s client attribute.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        instance's client attribute.</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">broker_endpoint</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker_endpoint</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">cwd_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">)</span>
             <span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()[:</span><span class="mi">6</span><span class="p">]</span>
             <span class="n">name</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">cwd_hash</span><span class="si">}</span><span class="s2">_NFPClient&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">cwd_hash</span><span class="si">}</span><span class="s2">_NFPClient"</span>
                 <span class="k">if</span> <span class="n">filename</span>
-                <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cwd_hash</span><span class="si">}</span><span class="s2">_NFPClient&quot;</span>
+                <span class="k">else</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cwd_hash</span><span class="si">}</span><span class="s2">_NFPClient"</span>
             <span class="p">)</span>
         <span class="n">client</span> <span class="o">=</span> <span class="n">NFPClient</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="p">,</span>
@@ -9593,7 +9593,7 @@ instance's client attribute.</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
         <span class="k">return</span> <span class="n">client</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to make client, no broker endpoint defined&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"Failed to make client, no broker endpoint defined"</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
             </details>

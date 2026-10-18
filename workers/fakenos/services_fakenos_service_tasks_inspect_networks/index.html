@@ -7355,32 +7355,32 @@
 <p>Context manager:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fakenos&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;inspect_networks&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"fakenos"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"inspect_networks"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"details"</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
     <span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div>
 <p>Direct lifecycle - inspect one network:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fakenos&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;inspect_networks&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"fakenos"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"inspect_networks"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="s2">&quot;lab1&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"network"</span><span class="p">:</span> <span class="s2">"lab1"</span><span class="p">,</span>
+            <span class="s2">"details"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
@@ -7401,7 +7401,7 @@ root
 <span class="w">    </span>└──<span class="w"> </span>fakenos:<span class="w">    </span>Show<span class="w"> </span>FakeNOS<span class="w"> </span>service
 <span class="w">        </span>└──<span class="w"> </span>networks:<span class="w">    </span>show<span class="w"> </span>FakeNOS<span class="w"> </span>networks<span class="w"> </span>details
 <span class="w">            </span>├──<span class="w"> </span>network:<span class="w">    </span>FakeNOS<span class="w"> </span>network<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>show<span class="p">;</span><span class="w"> </span>shows<span class="w"> </span>all<span class="w"> </span>networks<span class="w"> </span><span class="k">if</span><span class="w"> </span>omitted
-<span class="w">            </span>└──<span class="w"> </span>details:<span class="w">    </span>show<span class="w"> </span>network<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">            </span>└──<span class="w"> </span>details:<span class="w">    </span>show<span class="w"> </span>network<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
@@ -7563,21 +7563,21 @@ its host list and return extended per-network dicts.  When
 <span class="normal">526</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">FakeNOSListNetworksInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">FakeNOSInspectNetworksResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Inspect FakeNOS Networks&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Inspect FakeNOS Networks"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">inspect_networks</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">details</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Return status information for one or all FakeNOS networks.</span>
 
 <span class="sd">    When *details* is ``True`` each network entry includes the child</span>
@@ -7592,7 +7592,7 @@ its host list and return extended per-network dicts.  When
 <span class="sd">        details: When ``True`` (default) query each network process for</span>
 <span class="sd">            its host list and return extended per-network dicts.  When</span>
 <span class="sd">            ``False`` return only the list of network names.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">()</span>
 
     <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">network</span><span class="p">]</span> <span class="k">if</span> <span class="n">network</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">)</span>
@@ -7601,32 +7601,32 @@ its host list and return extended per-network dicts.  When
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">net_name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
             <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">[</span><span class="n">net_name</span><span class="p">]</span>
-            <span class="n">process</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;process&quot;</span><span class="p">]</span>
-            <span class="n">hosts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">call_network</span><span class="p">(</span><span class="n">net_name</span><span class="p">,</span> <span class="s2">&quot;_get_hosts_as_list&quot;</span><span class="p">)</span>
+            <span class="n">process</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"process"</span><span class="p">]</span>
+            <span class="n">hosts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">call_network</span><span class="p">(</span><span class="n">net_name</span><span class="p">,</span> <span class="s2">"_get_hosts_as_list"</span><span class="p">)</span>
             <span class="n">proc_info</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;pid&quot;</span><span class="p">:</span> <span class="n">process</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span>
-                <span class="s2">&quot;alive&quot;</span><span class="p">:</span> <span class="n">process</span><span class="o">.</span><span class="n">is_alive</span><span class="p">(),</span>
-                <span class="s2">&quot;hosts&quot;</span><span class="p">:</span> <span class="n">hosts</span><span class="p">,</span>
-                <span class="s2">&quot;hosts_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">hosts</span><span class="p">),</span>
+                <span class="s2">"pid"</span><span class="p">:</span> <span class="n">process</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span>
+                <span class="s2">"alive"</span><span class="p">:</span> <span class="n">process</span><span class="o">.</span><span class="n">is_alive</span><span class="p">(),</span>
+                <span class="s2">"hosts"</span><span class="p">:</span> <span class="n">hosts</span><span class="p">,</span>
+                <span class="s2">"hosts_count"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">hosts</span><span class="p">),</span>
             <span class="p">}</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">ps</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
                 <span class="n">mem</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">memory_info</span><span class="p">()</span>
                 <span class="n">uptime</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span>
-                    <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;start_time&quot;</span><span class="p">,</span> <span class="n">ps</span><span class="o">.</span><span class="n">create_time</span><span class="p">())</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"start_time"</span><span class="p">,</span> <span class="n">ps</span><span class="o">.</span><span class="n">create_time</span><span class="p">())</span>
                 <span class="p">)</span>
                 <span class="n">proc_info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">ps</span><span class="o">.</span><span class="n">status</span><span class="p">(),</span>
-                        <span class="s2">&quot;uptime_seconds&quot;</span><span class="p">:</span> <span class="n">uptime</span><span class="p">,</span>
-                        <span class="s2">&quot;cpu_percent&quot;</span><span class="p">:</span> <span class="n">ps</span><span class="o">.</span><span class="n">cpu_percent</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="mf">0.1</span><span class="p">),</span>
-                        <span class="s2">&quot;memory_rss_mb&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">mem</span><span class="o">.</span><span class="n">rss</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-                        <span class="s2">&quot;memory_vms_mb&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">mem</span><span class="o">.</span><span class="n">vms</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-                        <span class="s2">&quot;num_threads&quot;</span><span class="p">:</span> <span class="n">ps</span><span class="o">.</span><span class="n">num_threads</span><span class="p">(),</span>
+                        <span class="s2">"status"</span><span class="p">:</span> <span class="n">ps</span><span class="o">.</span><span class="n">status</span><span class="p">(),</span>
+                        <span class="s2">"uptime_seconds"</span><span class="p">:</span> <span class="n">uptime</span><span class="p">,</span>
+                        <span class="s2">"cpu_percent"</span><span class="p">:</span> <span class="n">ps</span><span class="o">.</span><span class="n">cpu_percent</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="mf">0.1</span><span class="p">),</span>
+                        <span class="s2">"memory_rss_mb"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">mem</span><span class="o">.</span><span class="n">rss</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                        <span class="s2">"memory_vms_mb"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">mem</span><span class="o">.</span><span class="n">vms</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                        <span class="s2">"num_threads"</span><span class="p">:</span> <span class="n">ps</span><span class="o">.</span><span class="n">num_threads</span><span class="p">(),</span>
                     <span class="p">}</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="p">(</span><span class="n">psutil</span><span class="o">.</span><span class="n">NoSuchProcess</span><span class="p">,</span> <span class="n">psutil</span><span class="o">.</span><span class="n">AccessDenied</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">net_name</span><span class="si">}</span><span class="s2"> - Psutil metrics unavailable: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">net_name</span><span class="si">}</span><span class="s2"> - Psutil metrics unavailable: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">net_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">proc_info</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">names</span>

@@ -7586,7 +7586,7 @@ nf#
 nf#nornir
 nf<span class="o">[</span>nornir<span class="o">]</span><span class="c1">#cli</span>
 nf<span class="o">[</span>nornir-cli<span class="o">]</span><span class="c1">#</span>
-nf<span class="o">[</span>nornir-cli<span class="o">]</span><span class="c1">#commands &quot;show clock&quot; &quot;show hostname&quot; FC ceos-spine</span>
+nf<span class="o">[</span>nornir-cli<span class="o">]</span><span class="c1">#commands "show clock" "show hostname" FC ceos-spine</span>
 ceos-spine-1:
 <span class="w">    </span>show<span class="w"> </span>clock:
 <span class="w">        </span>Sun<span class="w"> </span>Dec<span class="w">  </span><span class="m">1</span><span class="w"> </span><span class="m">10</span>:49:58<span class="w"> </span><span class="m">2024</span>
@@ -7622,15 +7622,15 @@ nf<span class="o">[</span>nornir-cli<span class="o">]</span><span class="c1">#</
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show clock&quot;</span><span class="p">,</span> <span class="s2">&quot;show hostname&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine&quot;</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show clock"</span><span class="p">,</span> <span class="s2">"show hostname"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"ceos-spine"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7641,18 +7641,18 @@ nf<span class="o">[</span>nornir-cli<span class="o">]</span><span class="c1">#</
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show clock&quot;</span><span class="p">,</span> <span class="s2">&quot;show hostname&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine&quot;</span>              
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show clock"</span><span class="p">,</span> <span class="s2">"show hostname"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"ceos-spine"</span>              
         <span class="p">}</span>
     <span class="p">)</span>
 
@@ -7662,28 +7662,28 @@ nf<span class="o">[</span>nornir-cli<span class="o">]</span><span class="c1">#</
 </code></pre></div>
 <p>Once executed, above code should produce this output:</p>
 <div class="highlight"><pre><span></span><code>C:\nf&gt;python nornir_cli.py
-{&#39;nornir-worker-1&#39;: {&#39;errors&#39;: [],
-                     &#39;failed&#39;: False,
-                     &#39;messages&#39;: [],
-                     &#39;result&#39;: {&#39;ceos-spine-1&#39;: {&#39;show clock&#39;: &#39;Sun Dec  1 &#39;
-                                                               &#39;11:10:53 2024\n&#39;
-                                                               &#39;Timezone: UTC\n&#39;
-                                                               &#39;Clock source: &#39;
-                                                               &#39;local&#39;,
-                                                 &#39;show hostname&#39;: &#39;Hostname: &#39;
-                                                                  &#39;ceos-spine-1\n&#39;
-                                                                  &#39;FQDN:     &#39;
-                                                                  &#39;ceos-spine-1&#39;},
-                                &#39;ceos-spine-2&#39;: {&#39;show clock&#39;: &#39;Sun Dec  1 &#39;
-                                                               &#39;11:10:53 2024\n&#39;
-                                                               &#39;Timezone: UTC\n&#39;
-                                                               &#39;Clock source: &#39;
-                                                               &#39;local&#39;,
-                                                 &#39;show hostname&#39;: &#39;Hostname: &#39;
-                                                                  &#39;ceos-spine-2\n&#39;
-                                                                  &#39;FQDN:     &#39;
-                                                                  &#39;ceos-spine-2&#39;}},
-                     &#39;task&#39;: &#39;nornir-worker-1:cli&#39;}}
+{'nornir-worker-1': {'errors': [],
+                     'failed': False,
+                     'messages': [],
+                     'result': {'ceos-spine-1': {'show clock': 'Sun Dec  1 '
+                                                               '11:10:53 2024\n'
+                                                               'Timezone: UTC\n'
+                                                               'Clock source: '
+                                                               'local',
+                                                 'show hostname': 'Hostname: '
+                                                                  'ceos-spine-1\n'
+                                                                  'FQDN:     '
+                                                                  'ceos-spine-1'},
+                                'ceos-spine-2': {'show clock': 'Sun Dec  1 '
+                                                               '11:10:53 2024\n'
+                                                               'Timezone: UTC\n'
+                                                               'Clock source: '
+                                                               'local',
+                                                 'show hostname': 'Hostname: '
+                                                                  'ceos-spine-2\n'
+                                                                  'FQDN:     '
+                                                                  'ceos-spine-2'}},
+                     'task': 'nornir-worker-1:cli'}}
 C:\nf&gt;                   
 </code></pre></div>
 <p>Refer to <a href="../../../norfab_getting_started/">Getting Started</a> section on 
@@ -7704,19 +7704,19 @@ how to construct  <code>inventory.yaml</code> file.</p>
 Welcome<span class="w"> </span>to<span class="w"> </span>NorFab<span class="w"> </span>Interactive<span class="w"> </span>Shell.
 nf#
 nf#nornir<span class="w"> </span>cli
-nf<span class="o">[</span>nornir-cli<span class="o">]</span><span class="c1">#commands &quot;show clock&quot; FC spine plugin netmiko</span>
+nf<span class="o">[</span>nornir-cli<span class="o">]</span><span class="c1">#commands "show clock" FC spine plugin netmiko</span>
 ---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Events<span class="w"> </span>-----------------------------------------------
 <span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57<span class="w"> </span>5ed5775b183a404181f004753f583f0c<span class="w"> </span>job<span class="w"> </span>started
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.085<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1,<span class="w"> </span>ceos-spine-2<span class="w"> </span>task<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;netmiko_send_commands&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.114<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>task_instance<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;netmiko_send_commands&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.114<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>task_instance<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;netmiko_send_commands&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.124<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>subtask<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;show clock&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.136<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>subtask<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;show clock&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.237<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>subtask<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;show clock&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.237<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>subtask<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;show clock&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.244<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>task_instance<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;netmiko_send_commands&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.245<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>task_instance<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;netmiko_send_commands&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.425<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1,<span class="w"> </span>ceos-spine-2<span class="w"> </span>task<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;netmiko_send_commands&#39;</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.085<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1,<span class="w"> </span>ceos-spine-2<span class="w"> </span>task<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">'netmiko_send_commands'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.114<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>task_instance<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">'netmiko_send_commands'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.114<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>task_instance<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">'netmiko_send_commands'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.124<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>subtask<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">'show clock'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.136<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>subtask<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">'show clock'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.237<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>subtask<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">'show clock'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.237<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>subtask<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">'show clock'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.244<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>task_instance<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">'netmiko_send_commands'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.245<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>task_instance<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">'netmiko_send_commands'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57.425<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1,<span class="w"> </span>ceos-spine-2<span class="w"> </span>task<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">'netmiko_send_commands'</span>
 <span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:37:57<span class="w"> </span>5ed5775b183a404181f004753f583f0c<span class="w"> </span>job<span class="w"> </span>completed<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">0</span>.476<span class="w"> </span>seconds
 
 ---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Results<span class="w"> </span>--------------------------------------------
@@ -7731,19 +7731,19 @@ ceos-spine-2:
 <span class="w">        </span>Sat<span class="w"> </span>Jan<span class="w">  </span><span class="m">4</span><span class="w"> </span><span class="m">12</span>:37:57<span class="w"> </span><span class="m">2025</span>
 <span class="w">        </span>Timezone:<span class="w"> </span>UTC
 <span class="w">        </span>Clock<span class="w"> </span>source:<span class="w"> </span><span class="nb">local</span>
-nf<span class="o">[</span>nornir-cli<span class="o">]</span><span class="c1">#commands &quot;show clock&quot; FC spine plugin scrapli</span>
+nf<span class="o">[</span>nornir-cli<span class="o">]</span><span class="c1">#commands "show clock" FC spine plugin scrapli</span>
 ---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Events<span class="w"> </span>-----------------------------------------------
 <span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01<span class="w"> </span>c6bd014aac4c42249594a6197175012e<span class="w"> </span>job<span class="w"> </span>started
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.116<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1,<span class="w"> </span>ceos-spine-2<span class="w"> </span>task<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;scrapli_send_commands&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.119<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>task_instance<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;scrapli_send_commands&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.128<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>subtask<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;show clock&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.141<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>subtask<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;show clock&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.148<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>task_instance<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;scrapli_send_commands&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.192<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>task_instance<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;scrapli_send_commands&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.202<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>subtask<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;show clock&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.215<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>subtask<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;show clock&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.221<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>task_instance<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;scrapli_send_commands&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.364<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1,<span class="w"> </span>ceos-spine-2<span class="w"> </span>task<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;scrapli_send_commands&#39;</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.116<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1,<span class="w"> </span>ceos-spine-2<span class="w"> </span>task<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">'scrapli_send_commands'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.119<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>task_instance<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">'scrapli_send_commands'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.128<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>subtask<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">'show clock'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.141<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>subtask<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">'show clock'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.148<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>task_instance<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">'scrapli_send_commands'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.192<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>task_instance<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">'scrapli_send_commands'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.202<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>subtask<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">'show clock'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.215<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>subtask<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">'show clock'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.221<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>task_instance<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">'scrapli_send_commands'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01.364<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1,<span class="w"> </span>ceos-spine-2<span class="w"> </span>task<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">'scrapli_send_commands'</span>
 <span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:38:01<span class="w"> </span>c6bd014aac4c42249594a6197175012e<span class="w"> </span>job<span class="w"> </span>completed<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">0</span>.497<span class="w"> </span>seconds
 
 ---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Results<span class="w"> </span>--------------------------------------------
@@ -7759,19 +7759,19 @@ ceos-spine-2:
 <span class="w">        </span>Sat<span class="w"> </span>Jan<span class="w">  </span><span class="m">4</span><span class="w"> </span><span class="m">12</span>:38:01<span class="w"> </span><span class="m">2025</span>
 <span class="w">        </span>Timezone:<span class="w"> </span>UTC
 <span class="w">        </span>Clock<span class="w"> </span>source:<span class="w"> </span><span class="nb">local</span>
-nf<span class="o">[</span>nornir-cli<span class="o">]</span><span class="c1">#commands &quot;show clock&quot; FC spine plugin napalm</span>
+nf<span class="o">[</span>nornir-cli<span class="o">]</span><span class="c1">#commands "show clock" FC spine plugin napalm</span>
 ---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Events<span class="w"> </span>-----------------------------------------------
 <span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41<span class="w"> </span>02eed090a7bb4652b27cccec1a49dab6<span class="w"> </span>job<span class="w"> </span>started
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.360<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1,<span class="w"> </span>ceos-spine-2<span class="w"> </span>task<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;napalm_send_commands&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.382<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>task_instance<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;napalm_send_commands&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.382<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>task_instance<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;napalm_send_commands&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.388<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>subtask<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;napalm_cli&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.389<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>subtask<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;napalm_cli&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.419<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>subtask<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;napalm_cli&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.424<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>subtask<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;napalm_cli&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.425<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>task_instance<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;napalm_send_commands&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.432<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>task_instance<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;napalm_send_commands&#39;</span>
-<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.599<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1,<span class="w"> </span>ceos-spine-2<span class="w"> </span>task<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;napalm_send_commands&#39;</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.360<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1,<span class="w"> </span>ceos-spine-2<span class="w"> </span>task<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">'napalm_send_commands'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.382<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>task_instance<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">'napalm_send_commands'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.382<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>task_instance<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">'napalm_send_commands'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.388<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>subtask<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">'napalm_cli'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.389<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>subtask<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">'napalm_cli'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.419<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>subtask<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">'napalm_cli'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.424<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>subtask<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">'napalm_cli'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.425<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1<span class="w"> </span>task_instance<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">'napalm_send_commands'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.432<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-2<span class="w"> </span>task_instance<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">'napalm_send_commands'</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41.599<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1,<span class="w"> </span>ceos-spine-2<span class="w"> </span>task<span class="w"> </span>completed<span class="w"> </span>-<span class="w"> </span><span class="s1">'napalm_send_commands'</span>
 <span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:43:41<span class="w"> </span>02eed090a7bb4652b27cccec1a49dab6<span class="w"> </span>job<span class="w"> </span>completed<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">0</span>.576<span class="w"> </span>seconds
 
 ---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Results<span class="w"> </span>--------------------------------------------
@@ -7806,17 +7806,17 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show clock&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;enable&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show clock"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"ceos-spine"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"netmiko"</span><span class="p">,</span>
+            <span class="s2">"enable"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7827,19 +7827,19 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show clock&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;scrapli&quot;</span>              
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show clock"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"ceos-spine"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"scrapli"</span>              
         <span class="p">}</span>
     <span class="p">)</span>
 
@@ -7849,20 +7849,20 @@ nf#
 </code></pre></div>
 <p>Once executed, above code should produce this output:</p>
 <div class="highlight"><pre><span></span><code>C:\nf&gt;python nornir_cli.py
-{&#39;nornir-worker-1&#39;: {&#39;errors&#39;: [],
-                     &#39;failed&#39;: False,
-                     &#39;messages&#39;: [],
-                     &#39;result&#39;: {&#39;ceos-spine-1&#39;: {&#39;show clock&#39;: &#39;Sun Dec  1 &#39;
-                                                               &#39;11:10:53 2024\n&#39;
-                                                               &#39;Timezone: UTC\n&#39;
-                                                               &#39;Clock source: &#39;
-                                                               &#39;local&#39;},
-                                &#39;ceos-spine-2&#39;: {&#39;show clock&#39;: &#39;Sun Dec  1 &#39;
-                                                               &#39;11:10:53 2024\n&#39;
-                                                               &#39;Timezone: UTC\n&#39;
-                                                               &#39;Clock source: &#39;
-                                                               &#39;local&#39;}},
-                     &#39;task&#39;: &#39;nornir-worker-1:cli&#39;}}
+{'nornir-worker-1': {'errors': [],
+                     'failed': False,
+                     'messages': [],
+                     'result': {'ceos-spine-1': {'show clock': 'Sun Dec  1 '
+                                                               '11:10:53 2024\n'
+                                                               'Timezone: UTC\n'
+                                                               'Clock source: '
+                                                               'local'},
+                                'ceos-spine-2': {'show clock': 'Sun Dec  1 '
+                                                               '11:10:53 2024\n'
+                                                               'Timezone: UTC\n'
+                                                               'Clock source: '
+                                                               'local'}},
+                     'task': 'nornir-worker-1:cli'}}
 C:\nf&gt;                   
 </code></pre></div>
 <p>Refer to <a href="../../../norfab_getting_started/">Getting Started</a> section on 
@@ -7878,10 +7878,10 @@ how to construct  <code>inventory.yaml</code> file.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">CLI</label><label for="__tabbed_3_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show version&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>add-details<span class="w"> </span>table<span class="w"> </span>brief
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show version"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>add-details<span class="w"> </span>table<span class="w"> </span>brief
 </code></pre></div>
 <p>Select and sort table columns:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show version&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>add-details<span class="w"> </span>table<span class="w"> </span>extend<span class="w"> </span>headers<span class="w"> </span>host<span class="w"> </span>name<span class="w"> </span>result<span class="w"> </span>sortby<span class="w"> </span>host
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show version"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>add-details<span class="w"> </span>table<span class="w"> </span>extend<span class="w"> </span>headers<span class="w"> </span>host<span class="w"> </span>name<span class="w"> </span>result<span class="w"> </span>sortby<span class="w"> </span>host
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7890,17 +7890,17 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show version&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;add_details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;to_dict&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show version"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"add_details"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"to_dict"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7911,18 +7911,18 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show version&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;add_details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show version"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"add_details"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7954,15 +7954,15 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_commands/show_baseline.txt&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="s2">"nf://nornir_commands/show_baseline.txt"</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7973,18 +7973,18 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_commands/show_baseline.txt&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="s2">"nf://nornir_commands/show_baseline.txt"</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8004,10 +8004,10 @@ how to construct  <code>inventory.yaml</code> file.</p>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Render commands with host inventory data:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show interface {{ host.data.uplink_interface }}&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>dry-run
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show interface {{ host.data.uplink_interface }}"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>dry-run
 </code></pre></div>
 <p>Render commands from a Filesharing service file:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span>nf://nornir_commands/interface_checks.j2<span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>job-data<span class="w"> </span><span class="s1">&#39;{&quot;interface&quot;: &quot;Ethernet1&quot;}&#39;</span><span class="w"> </span>dry-run
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span>nf://nornir_commands/interface_checks.j2<span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>job-data<span class="w"> </span><span class="s1">'{"interface": "Ethernet1"}'</span><span class="w"> </span>dry-run
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -8016,17 +8016,17 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show interface {{ job_data.interface }}&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet1&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show interface {{ job_data.interface }}"</span><span class="p">],</span>
+            <span class="s2">"job_data"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"interface"</span><span class="p">:</span> <span class="s2">"Ethernet1"</span><span class="p">},</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8037,19 +8037,19 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_commands/interface_checks.j2&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet1&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="s2">"nf://nornir_commands/interface_checks.j2"</span><span class="p">,</span>
+            <span class="s2">"job_data"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"interface"</span><span class="p">:</span> <span class="s2">"Ethernet1"</span><span class="p">},</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8069,7 +8069,7 @@ how to construct  <code>inventory.yaml</code> file.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">CLI</label><label for="__tabbed_6_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show bgp ipv4 unicast neighbors {{ job_data.peer }} received-routes&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>job-data<span class="w"> </span><span class="s1">&#39;{&quot;peer&quot;: &quot;192.0.2.2&quot;}&#39;</span><span class="w"> </span>dry-run
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show bgp ipv4 unicast neighbors {{ job_data.peer }} received-routes"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>job-data<span class="w"> </span><span class="s1">'{"peer": "192.0.2.2"}'</span><span class="w"> </span>dry-run
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -8078,19 +8078,19 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span>
-                <span class="s2">&quot;show bgp ipv4 unicast neighbors {{ job_data.peer }} received-routes&quot;</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">"show bgp ipv4 unicast neighbors {{ job_data.peer }} received-routes"</span>
             <span class="p">],</span>
-            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;peer&quot;</span><span class="p">:</span> <span class="s2">&quot;192.0.2.2&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"job_data"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"peer"</span><span class="p">:</span> <span class="s2">"192.0.2.2"</span><span class="p">},</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8101,19 +8101,19 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_commands/bgp_peer_checks.j2&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://job_data/bgp_peer.yaml&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="s2">"nf://nornir_commands/bgp_peer_checks.j2"</span><span class="p">,</span>
+            <span class="s2">"job_data"</span><span class="p">:</span> <span class="s2">"nf://job_data/bgp_peer.yaml"</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8132,7 +8132,7 @@ how to construct  <code>inventory.yaml</code> file.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">CLI</label><label for="__tabbed_7_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show interface {{ job_data.interface }}&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>job-data<span class="w"> </span><span class="s1">&#39;{&quot;interface&quot;: &quot;Ethernet1&quot;}&#39;</span><span class="w"> </span>dry-run
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show interface {{ job_data.interface }}"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>job-data<span class="w"> </span><span class="s1">'{"interface": "Ethernet1"}'</span><span class="w"> </span>dry-run
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -8141,17 +8141,17 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show interface {{ job_data.interface }}&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet1&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show interface {{ job_data.interface }}"</span><span class="p">],</span>
+            <span class="s2">"job_data"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"interface"</span><span class="p">:</span> <span class="s2">"Ethernet1"</span><span class="p">},</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8162,18 +8162,18 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_commands/show_baseline.txt&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="s2">"nf://nornir_commands/show_baseline.txt"</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8201,10 +8201,10 @@ how to construct  <code>inventory.yaml</code> file.</p>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Include detailed result metadata:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show version&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>add-details
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show version"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>add-details
 </code></pre></div>
 <p>Return a table with selected columns:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show version&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>add-details<span class="w"> </span>table<span class="w"> </span>extend<span class="w"> </span>headers<span class="w"> </span>host<span class="w"> </span>name<span class="w"> </span>result
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show version"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>add-details<span class="w"> </span>table<span class="w"> </span>extend<span class="w"> </span>headers<span class="w"> </span>host<span class="w"> </span>name<span class="w"> </span>result
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -8213,16 +8213,16 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show version&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;add_details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show version"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"add_details"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8233,19 +8233,19 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show version&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;add_details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;to_dict&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show version"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"add_details"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"to_dict"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8265,7 +8265,7 @@ how to construct  <code>inventory.yaml</code> file.</p>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Run a command three times and return only the latest result:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show interfaces counters errors&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span>repeat<span class="w"> </span><span class="m">3</span><span class="w"> </span>repeat-interval<span class="w"> </span><span class="m">5</span><span class="w"> </span><span class="k">return</span>-last<span class="w"> </span><span class="m">1</span>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show interfaces counters errors"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span>repeat<span class="w"> </span><span class="m">3</span><span class="w"> </span>repeat-interval<span class="w"> </span><span class="m">5</span><span class="w"> </span>return-last<span class="w"> </span><span class="m">1</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -8274,19 +8274,19 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show interfaces counters errors&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;repeat&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-            <span class="s2">&quot;repeat_interval&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-            <span class="s2">&quot;return_last&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show interfaces counters errors"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"netmiko"</span><span class="p">,</span>
+            <span class="s2">"repeat"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+            <span class="s2">"repeat_interval"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="s2">"return_last"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8297,21 +8297,21 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show interfaces counters errors&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;scrapli&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;repeat&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-            <span class="s2">&quot;repeat_interval&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-            <span class="s2">&quot;return_last&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show interfaces counters errors"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"scrapli"</span><span class="p">,</span>
+            <span class="s2">"repeat"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+            <span class="s2">"repeat_interval"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="s2">"return_last"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8330,7 +8330,7 @@ how to construct  <code>inventory.yaml</code> file.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">CLI</label><label for="__tabbed_10_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show tech-support&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span>use-ps<span class="w"> </span>use-ps-timeout<span class="w"> </span><span class="m">120</span>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show tech-support"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span>use-ps<span class="w"> </span>use-ps-timeout<span class="w"> </span><span class="m">120</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -8339,18 +8339,18 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show tech-support&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;use_ps&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;timeout&quot;</span><span class="p">:</span> <span class="mi">120</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show tech-support"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"netmiko"</span><span class="p">,</span>
+            <span class="s2">"use_ps"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"timeout"</span><span class="p">:</span> <span class="mi">120</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8361,21 +8361,21 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show tech-support&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;use_ps&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;timeout&quot;</span><span class="p">:</span> <span class="mi">120</span><span class="p">,</span>
-            <span class="s2">&quot;stop_pattern&quot;</span><span class="p">:</span> <span class="s2">&quot;*END*&quot;</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show tech-support"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"netmiko"</span><span class="p">,</span>
+            <span class="s2">"use_ps"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"timeout"</span><span class="p">:</span> <span class="mi">120</span><span class="p">,</span>
+            <span class="s2">"stop_pattern"</span><span class="p">:</span> <span class="s2">"*END*"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8396,10 +8396,10 @@ how to construct  <code>inventory.yaml</code> file.</p>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Parse command output with TextFSM through Netmiko:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show ip interface brief&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span>use-textfsm
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show ip interface brief"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span>use-textfsm
 </code></pre></div>
 <p>Parse output with a TTP template stored in the Filesharing service:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show lldp neighbors&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>run-ttp<span class="w"> </span>nf://ttp_templates/lldp_neighbors.ttp
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show lldp neighbors"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>run-ttp<span class="w"> </span>nf://ttp_templates/lldp_neighbors.ttp
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -8408,17 +8408,17 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show ip interface brief&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;use_textfsm&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show ip interface brief"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"netmiko"</span><span class="p">,</span>
+            <span class="s2">"use_textfsm"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8429,18 +8429,18 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show lldp neighbors&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;run_ttp&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://ttp_templates/lldp_neighbors.ttp&quot;</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show lldp neighbors"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"run_ttp"</span><span class="p">:</span> <span class="s2">"nf://ttp_templates/lldp_neighbors.ttp"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8460,10 +8460,10 @@ how to construct  <code>inventory.yaml</code> file.</p>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Use the shell pipe to keep lines containing <code>up</code>:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show ip interface brief&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span><span class="p">|</span><span class="w"> </span>match<span class="w"> </span>up
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show ip interface brief"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span><span class="p">|</span><span class="w"> </span>match<span class="w"> </span>up
 </code></pre></div>
 <p>Stop repeated collection when output contains a pattern:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show bgp summary&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span>repeat<span class="w"> </span><span class="m">10</span><span class="w"> </span>repeat-interval<span class="w"> </span><span class="m">5</span><span class="w"> </span>stop-pattern<span class="w"> </span><span class="s2">&quot;*Established*&quot;</span>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show bgp summary"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span>repeat<span class="w"> </span><span class="m">10</span><span class="w"> </span>repeat-interval<span class="w"> </span><span class="m">5</span><span class="w"> </span>stop-pattern<span class="w"> </span><span class="s2">"*Established*"</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -8472,20 +8472,20 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show bgp summary&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;repeat&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-            <span class="s2">&quot;repeat_interval&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-            <span class="s2">&quot;stop_pattern&quot;</span><span class="p">:</span> <span class="s2">&quot;*Established*&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;return_last&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show bgp summary"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"netmiko"</span><span class="p">,</span>
+            <span class="s2">"repeat"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+            <span class="s2">"repeat_interval"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="s2">"stop_pattern"</span><span class="p">:</span> <span class="s2">"*Established*"</span><span class="p">,</span>
+            <span class="s2">"return_last"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8496,29 +8496,29 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show ip interface brief&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show ip interface brief"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
     <span class="n">filtered</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">worker</span><span class="p">:</span> <span class="p">{</span>
             <span class="n">host</span><span class="p">:</span> <span class="p">{</span>
-                <span class="n">command</span><span class="p">:</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                    <span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">output</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="k">if</span> <span class="s2">&quot;up&quot;</span> <span class="ow">in</span> <span class="n">line</span>
+                <span class="n">command</span><span class="p">:</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">output</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="k">if</span> <span class="s2">"up"</span> <span class="ow">in</span> <span class="n">line</span>
                 <span class="p">)</span>
                 <span class="k">for</span> <span class="n">command</span><span class="p">,</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">hosts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="p">}</span>
-            <span class="k">for</span> <span class="n">host</span><span class="p">,</span> <span class="n">hosts</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">host</span><span class="p">,</span> <span class="n">hosts</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">[</span><span class="s2">"result"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">}</span>
         <span class="k">for</span> <span class="n">worker</span><span class="p">,</span> <span class="n">payload</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
     <span class="p">}</span>
@@ -8537,7 +8537,7 @@ how to construct  <code>inventory.yaml</code> file.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">CLI</label><label for="__tabbed_13_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show running-config section router bgp_br_&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span>split-lines
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show running-config section router bgp_br_"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span>split-lines
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -8546,17 +8546,17 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show running-config section router bgp_br_&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;split_lines&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show running-config section router bgp_br_"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"netmiko"</span><span class="p">,</span>
+            <span class="s2">"split_lines"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8567,20 +8567,20 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;terminal length 0__NL__show version&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;split_lines&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;new_line_char&quot;</span><span class="p">:</span> <span class="s2">&quot;__NL__&quot;</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"terminal length 0__NL__show version"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"netmiko"</span><span class="p">,</span>
+            <span class="s2">"split_lines"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"new_line_char"</span><span class="p">:</span> <span class="s2">"__NL__"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8599,10 +8599,10 @@ how to construct  <code>inventory.yaml</code> file.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">CLI</label><label for="__tabbed_14_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show version&quot;</span><span class="w"> </span><span class="s2">&quot;show ip interface brief&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>tf<span class="w"> </span>pre-change
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show version"</span><span class="w"> </span><span class="s2">"show ip interface brief"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>tf<span class="w"> </span>pre-change
 </code></pre></div>
 <p>Skip saving failed host results:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show version&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>tf<span class="w"> </span>pre-change<span class="w"> </span>tf-skip-failed
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show version"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>tf<span class="w"> </span>pre-change<span class="w"> </span>tf-skip-failed
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -8611,16 +8611,16 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show version&quot;</span><span class="p">,</span> <span class="s2">&quot;show ip interface brief&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;tf&quot;</span><span class="p">:</span> <span class="s2">&quot;pre-change&quot;</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show version"</span><span class="p">,</span> <span class="s2">"show ip interface brief"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"tf"</span><span class="p">:</span> <span class="s2">"pre-change"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8631,19 +8631,19 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show version&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;tf&quot;</span><span class="p">:</span> <span class="s2">&quot;pre-change&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;tf_skip_failed&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show version"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"tf"</span><span class="p">:</span> <span class="s2">"pre-change"</span><span class="p">,</span>
+            <span class="s2">"tf_skip_failed"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8663,10 +8663,10 @@ how to construct  <code>inventory.yaml</code> file.</p>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Save a baseline:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show version&quot;</span><span class="w"> </span><span class="s2">&quot;show ip interface brief&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>tf<span class="w"> </span>pre-change
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show version"</span><span class="w"> </span><span class="s2">"show ip interface brief"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>tf<span class="w"> </span>pre-change
 </code></pre></div>
 <p>Compare current output with the latest saved baseline:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show version&quot;</span><span class="w"> </span><span class="s2">&quot;show ip interface brief&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>diff<span class="w"> </span>pre-change<span class="w"> </span>diff-last<span class="w"> </span><span class="m">1</span>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show version"</span><span class="w"> </span><span class="s2">"show ip interface brief"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>diff<span class="w"> </span>pre-change<span class="w"> </span>diff-last<span class="w"> </span><span class="m">1</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -8675,16 +8675,16 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show version&quot;</span><span class="p">,</span> <span class="s2">&quot;show ip interface brief&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;tf&quot;</span><span class="p">:</span> <span class="s2">&quot;pre-change&quot;</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show version"</span><span class="p">,</span> <span class="s2">"show ip interface brief"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"tf"</span><span class="p">:</span> <span class="s2">"pre-change"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8695,19 +8695,19 @@ how to construct  <code>inventory.yaml</code> file.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show version&quot;</span><span class="p">,</span> <span class="s2">&quot;show ip interface brief&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;diff&quot;</span><span class="p">:</span> <span class="s2">&quot;pre-change&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;diff_last&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show version"</span><span class="p">,</span> <span class="s2">"show ip interface brief"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"diff"</span><span class="p">:</span> <span class="s2">"pre-change"</span><span class="p">,</span>
+            <span class="s2">"diff_last"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8726,8 +8726,8 @@ root
 └──<span class="w"> </span>nornir:<span class="w">    </span>Nornir<span class="w"> </span>service
 <span class="w">    </span>└──<span class="w"> </span>cli:<span class="w">    </span>Send<span class="w"> </span>CLI<span class="w"> </span>commands<span class="w"> </span>to<span class="w"> </span>devices
 <span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
-<span class="w">        </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
+<span class="w">        </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">        </span>├──<span class="w"> </span>num-workers:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>tasks<span class="w"> </span>execution
 <span class="w">        </span>├──<span class="w"> </span>num-connectors:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>device<span class="w"> </span>connections
 <span class="w">        </span>├──<span class="w"> </span>connect-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>attempts
@@ -8740,7 +8740,7 @@ root
 <span class="w">        </span>├──<span class="w"> </span>tf-skip-failed:<span class="w">    </span>Save<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>file<span class="w"> </span><span class="k">for</span><span class="w"> </span>failed<span class="w"> </span>tasks
 <span class="w">        </span>├──<span class="w"> </span>diff:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>the<span class="w"> </span>diff<span class="w"> </span><span class="k">for</span>
 <span class="w">        </span>├──<span class="w"> </span>diff-last:<span class="w">    </span>File<span class="w"> </span>version<span class="w"> </span>number<span class="w"> </span>to<span class="w"> </span>diff,<span class="w"> </span>default<span class="w"> </span>is<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="o">(</span>last<span class="o">)</span>
-<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">        </span>├──<span class="w"> </span>table:<span class="w">    </span>Table<span class="w"> </span>format<span class="w"> </span><span class="o">(</span>brief,<span class="w"> </span>terse,<span class="w"> </span>extend<span class="o">)</span><span class="w"> </span>or<span class="w"> </span>parameters<span class="w"> </span>or<span class="w"> </span>True
 <span class="w">        </span>├──<span class="w"> </span>headers:<span class="w">    </span>Table<span class="w"> </span>headers
 <span class="w">        </span>├──<span class="w"> </span>headers-exclude:<span class="w">    </span>Table<span class="w"> </span>headers<span class="w"> </span>to<span class="w"> </span>exclude
@@ -8782,7 +8782,7 @@ root
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>repeat:<span class="w">    </span>Number<span class="w"> </span>of<span class="w"> </span><span class="nb">times</span><span class="w"> </span>to<span class="w"> </span>repeat<span class="w"> </span>the<span class="w"> </span>commands
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>stop-pattern:<span class="w">    </span>Stop<span class="w"> </span>commands<span class="w"> </span>repeat<span class="w"> </span><span class="k">if</span><span class="w"> </span>output<span class="w"> </span>matches<span class="w"> </span>provided<span class="w"> </span>glob<span class="w"> </span>pattern
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>repeat-interval:<span class="w">    </span>Time<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span>to<span class="w"> </span><span class="nb">wait</span><span class="w"> </span>between<span class="w"> </span>repeating<span class="w"> </span>commands
-<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span><span class="k">return</span>-last:<span class="w">    </span>Returns<span class="w"> </span>requested<span class="w"> </span>last<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>commands<span class="w"> </span>outputs
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>return-last:<span class="w">    </span>Returns<span class="w"> </span>requested<span class="w"> </span>last<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>commands<span class="w"> </span>outputs
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>scrapli:<span class="w">    </span>Use<span class="w"> </span>Scrapli<span class="w"> </span>plugin<span class="w"> </span>to<span class="w"> </span>configure<span class="w"> </span>devices
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>strip-prompt:<span class="w">    </span>Strip<span class="w"> </span>prompt<span class="w"> </span>from<span class="w"> </span>returned<span class="w"> </span>output
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>failed-when-contains:<span class="w">    </span>String<span class="w"> </span>or<span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>strings<span class="w"> </span>indicating<span class="w"> </span>failure<span class="w"> </span><span class="k">if</span><span class="w"> </span>found<span class="w"> </span><span class="k">in</span><span class="w"> </span>response
@@ -8793,7 +8793,7 @@ root
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>repeat:<span class="w">    </span>Number<span class="w"> </span>of<span class="w"> </span><span class="nb">times</span><span class="w"> </span>to<span class="w"> </span>repeat<span class="w"> </span>the<span class="w"> </span>commands
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>stop-pattern:<span class="w">    </span>Stop<span class="w"> </span>commands<span class="w"> </span>repeat<span class="w"> </span><span class="k">if</span><span class="w"> </span>output<span class="w"> </span>matches<span class="w"> </span>provided<span class="w"> </span>glob<span class="w"> </span>pattern
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>repeat-interval:<span class="w">    </span>Time<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span>to<span class="w"> </span><span class="nb">wait</span><span class="w"> </span>between<span class="w"> </span>repeating<span class="w"> </span>commands
-<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span><span class="k">return</span>-last:<span class="w">    </span>Returns<span class="w"> </span>requested<span class="w"> </span>last<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>commands<span class="w"> </span>outputs
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>return-last:<span class="w">    </span>Returns<span class="w"> </span>requested<span class="w"> </span>last<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>commands<span class="w"> </span>outputs
 <span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>napalm:<span class="w">    </span>Use<span class="w"> </span>NAPALM<span class="w"> </span>plugin<span class="w"> </span>to<span class="w"> </span>configure<span class="w"> </span>devices
 <span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>interval:<span class="w">    </span>Interval<span class="w"> </span>between<span class="w"> </span>sending<span class="w"> </span>commands
 <span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>split-lines:<span class="w">    </span>Split<span class="w"> </span>multiline<span class="w"> </span>string<span class="w"> </span>to<span class="w"> </span>individual<span class="w"> </span>commands
@@ -9189,30 +9189,30 @@ cannot be downloaded.</p>
 <span class="normal">436</span>
 <span class="normal">437</span>
 <span class="normal">438</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CliInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CliResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Run CLI Commands&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Run CLI Commands"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s2">&quot;prompts&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"prompts"</span><span class="p">:</span> <span class="p">[</span>
             <span class="n">CLI_COLLECT_OPERATIONAL_DATA_PROMPT</span><span class="p">,</span>
             <span class="n">CLI_TROUBLESHOOT_PROMPT</span><span class="p">,</span>
         <span class="p">],</span>
-        <span class="s2">&quot;guardrails&quot;</span><span class="p">:</span> <span class="n">MCP_GUARDRAILS</span><span class="p">,</span>
-        <span class="s2">&quot;result_guardrails&quot;</span><span class="p">:</span> <span class="n">MCP_RESULT_GUARDRAILS</span><span class="p">,</span>
+        <span class="s2">"guardrails"</span><span class="p">:</span> <span class="n">MCP_GUARDRAILS</span><span class="p">,</span>
+        <span class="s2">"result_guardrails"</span><span class="p">:</span> <span class="n">MCP_RESULT_GUARDRAILS</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">cli</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">commands</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
+    <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"netmiko"</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">run_ttp</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">job_data</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -9220,7 +9220,7 @@ cannot be downloaded.</p>
     <span class="n">add_details</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Task to collect/retrieve show commands output from network devices using</span>
 <span class="sd">    Command Line Interface (CLI).</span>
 
@@ -9249,40 +9249,40 @@ cannot be downloaded.</p>
 <span class="sd">        UnsupportedPluginError: If the specified plugin is not supported.</span>
 <span class="sd">        FileNotFoundError: If the specified TTP template or job data file</span>
 <span class="sd">            cannot be downloaded.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">job_data</span> <span class="o">=</span> <span class="n">job_data</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="n">timeout</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">timeout</span> <span class="o">*</span> <span class="mf">0.9</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:cli&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{}</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="p">[])</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:cli"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{}</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="p">[])</span>
 
     <span class="n">filtered_nornir</span><span class="p">,</span> <span class="n">no_match_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_hosts_and_validate</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;no_match&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">"no_match"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># decide on what send commands task plugin to use</span>
-    <span class="k">if</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">"netmiko"</span><span class="p">:</span>
         <span class="n">task_plugin</span> <span class="o">=</span> <span class="n">netmiko_send_commands</span>
-        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_ps&quot;</span><span class="p">):</span>
-            <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;timeout&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"use_ps"</span><span class="p">):</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"timeout"</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;read_timeout&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">&quot;scrapli&quot;</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"read_timeout"</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">"scrapli"</span><span class="p">:</span>
         <span class="n">task_plugin</span> <span class="o">=</span> <span class="n">scrapli_send_commands</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;timeout_ops&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">&quot;napalm&quot;</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"timeout_ops"</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">"napalm"</span><span class="p">:</span>
         <span class="n">task_plugin</span> <span class="o">=</span> <span class="n">napalm_send_commands</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">UnsupportedPluginError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plugin &#39;</span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2">&#39; not supported&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">UnsupportedPluginError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Plugin '</span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2">' not supported"</span><span class="p">)</span>
 
     <span class="c1"># download TTP template</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">run_ttp</span><span class="p">):</span>
         <span class="n">downloaded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">run_ttp</span><span class="p">)</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;run_ttp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">downloaded</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">"run_ttp"</span><span class="p">]</span> <span class="o">=</span> <span class="n">downloaded</span>
         <span class="k">if</span> <span class="n">downloaded</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - TTP template download failed &#39;</span><span class="si">{</span><span class="n">run_ttp</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - TTP template download failed '</span><span class="si">{</span><span class="n">run_ttp</span><span class="si">}</span><span class="s2">'"</span>
             <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="c1"># use TTP template as is - inline template or ttp://xyz path</span>
     <span class="k">elif</span> <span class="n">run_ttp</span><span class="p">:</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;run_ttp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">run_ttp</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">"run_ttp"</span><span class="p">]</span> <span class="o">=</span> <span class="n">run_ttp</span>
 
     <span class="c1"># download job data</span>
     <span class="n">job_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_job_data</span><span class="p">(</span><span class="n">job_data</span><span class="p">)</span>
@@ -9299,23 +9299,23 @@ cannot be downloaded.</p>
             <span class="n">rendered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_render_templates</span><span class="p">(</span>
                 <span class="n">templates</span><span class="o">=</span><span class="n">commands</span><span class="p">,</span>
                 <span class="n">context</span><span class="o">=</span><span class="p">{</span>
-                    <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="n">host</span><span class="p">,</span>
-                    <span class="s2">&quot;norfab&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span>
-                    <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="n">job_data</span><span class="p">,</span>
-                    <span class="s2">&quot;netbox&quot;</span><span class="p">:</span> <span class="n">jinja2_netbox</span><span class="p">,</span>
+                    <span class="s2">"host"</span><span class="p">:</span> <span class="n">host</span><span class="p">,</span>
+                    <span class="s2">"norfab"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span>
+                    <span class="s2">"job_data"</span><span class="p">:</span> <span class="n">job_data</span><span class="p">,</span>
+                    <span class="s2">"netbox"</span><span class="p">:</span> <span class="n">jinja2_netbox</span><span class="p">,</span>
                 <span class="p">},</span>
                 <span class="n">filters</span><span class="o">=</span><span class="n">jinja2_filters</span><span class="p">,</span>
                 <span class="n">template_cache</span><span class="o">=</span><span class="n">jinja2_template_cache</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">host</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;__task__&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="n">rendered</span><span class="p">}</span>
+            <span class="n">host</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"__task__"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"commands"</span><span class="p">:</span> <span class="n">rendered</span><span class="p">}</span>
 
     <span class="c1"># run task</span>
     <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - running cli commands &#39;</span><span class="si">{</span><span class="n">commands</span><span class="si">}</span><span class="s2">&#39;, kwargs &#39;</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">&#39;, is cli dry run - &#39;</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - running cli commands '</span><span class="si">{</span><span class="n">commands</span><span class="si">}</span><span class="s2">', kwargs '</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">', is cli dry run - '</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">nr</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-            <span class="n">task</span><span class="o">=</span><span class="n">nr_test</span><span class="p">,</span> <span class="n">use_task_data</span><span class="o">=</span><span class="s2">&quot;commands&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;dry_run&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="n">task</span><span class="o">=</span><span class="n">nr_test</span><span class="p">,</span> <span class="n">use_task_data</span><span class="o">=</span><span class="s2">"commands"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"dry_run"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">else</span><span class="p">:</span>
@@ -9329,7 +9329,7 @@ cannot be downloaded.</p>
 
     <span class="c1"># remove __task__ data</span>
     <span class="k">for</span> <span class="n">host_name</span><span class="p">,</span> <span class="n">host_object</span> <span class="ow">in</span> <span class="n">nr</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hosts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">_</span> <span class="o">=</span> <span class="n">host_object</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;__task__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">host_object</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"__task__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="o">.</span><span class="n">connections_clean</span><span class="p">()</span>
 

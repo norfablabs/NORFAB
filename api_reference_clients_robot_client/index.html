@@ -7178,8 +7178,8 @@
 <span class="normal">37</span>
 <span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">,</span>
-    <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;WARNING&quot;</span><span class="p">,</span>
+    <span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">,</span>
+    <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"WARNING"</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ROBOT_LIBRARY_LISTENER</span> <span class="o">=</span> <span class="bp">self</span>
 
@@ -7225,13 +7225,13 @@
 <span class="normal">50</span>
 <span class="normal">51</span>
 <span class="normal">52</span>
-<span class="normal">53</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@keyword</span><span class="p">(</span><span class="s2">&quot;Workers&quot;</span><span class="p">)</span>
+<span class="normal">53</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@keyword</span><span class="p">(</span><span class="s2">"Workers"</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">workers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Collect workers to target&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Collect workers to target"""</span>
     <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
-        <span class="n">DATA</span><span class="p">[</span><span class="s2">&quot;workers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="n">DATA</span><span class="p">[</span><span class="s2">"workers"</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">DATA</span><span class="p">[</span><span class="s2">&quot;workers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;workers&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">)</span>
+        <span class="n">DATA</span><span class="p">[</span><span class="s2">"workers"</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"workers"</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7260,13 +7260,13 @@
 <span class="normal">58</span>
 <span class="normal">59</span>
 <span class="normal">60</span>
-<span class="normal">61</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@keyword</span><span class="p">(</span><span class="s2">&quot;Hosts&quot;</span><span class="p">)</span>
+<span class="normal">61</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@keyword</span><span class="p">(</span><span class="s2">"Hosts"</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">hosts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Collect hosts to target&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Collect hosts to target"""</span>
     <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
-        <span class="n">DATA</span><span class="p">[</span><span class="s2">&quot;hosts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;FB&quot;</span><span class="p">:</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">}</span>
+        <span class="n">DATA</span><span class="p">[</span><span class="s2">"hosts"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"FB"</span><span class="p">:</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">}</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">DATA</span><span class="p">[</span><span class="s2">&quot;hosts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="n">DATA</span><span class="p">[</span><span class="s2">"hosts"</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7446,50 +7446,50 @@
 <span class="normal">217</span>
 <span class="normal">218</span>
 <span class="normal">219</span>
-<span class="normal">220</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@keyword</span><span class="p">(</span><span class="s2">&quot;nr.test&quot;</span><span class="p">)</span>
+<span class="normal">220</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@keyword</span><span class="p">(</span><span class="s2">"nr.test"</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">nr_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run nr.test  task&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Run nr.test  task"""</span>
     <span class="n">tests_pass</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">tests_fail</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">tests_results</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">commands_output</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;suite&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">"suite"</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="o">**</span><span class="n">DATA</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;hosts&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;FB&quot;</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span><span class="p">}),</span>
+        <span class="o">**</span><span class="n">DATA</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"hosts"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"FB"</span><span class="p">:</span> <span class="s2">"*"</span><span class="p">}),</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="s2">&quot;remove_tasks&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="s2">&quot;add_details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s2">&quot;return_tests_suite&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s2">&quot;to_dict&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"remove_tasks"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"add_details"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"return_tests_suite"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"to_dict"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">}</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Running nr.test with kwargs &#39;</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">&#39;, global DATA &#39;</span><span class="si">{</span><span class="n">DATA</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Running nr.test with kwargs '</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">', global DATA '</span><span class="si">{</span><span class="n">DATA</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
     <span class="n">has_errors</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="c1"># run this function</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="n">DATA</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;workers&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">),</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"test"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="n">DATA</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"workers"</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">),</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1"># iterate over results and log tests and task statuses</span>
     <span class="k">for</span> <span class="n">worker</span><span class="p">,</span> <span class="n">worker_results</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">worker_results</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">][</span><span class="s2">&quot;test_results&quot;</span><span class="p">]:</span>
-            <span class="n">host</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;host&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">worker_results</span><span class="p">[</span><span class="s2">"result"</span><span class="p">][</span><span class="s2">"test_results"</span><span class="p">]:</span>
+            <span class="n">host</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">"host"</span><span class="p">]</span>
             <span class="c1"># evaluate and log test result</span>
-            <span class="k">if</span> <span class="s2">&quot;success&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">"success"</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
                 <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">result</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span>
-                    <span class="ow">or</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;exception&quot;</span><span class="p">]</span>
-                    <span class="ow">or</span> <span class="ow">not</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;success&quot;</span><span class="p">]</span>
-                    <span class="ow">or</span> <span class="s2">&quot;traceback&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                    <span class="n">result</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]</span>
+                    <span class="ow">or</span> <span class="n">result</span><span class="p">[</span><span class="s2">"exception"</span><span class="p">]</span>
+                    <span class="ow">or</span> <span class="ow">not</span> <span class="n">result</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span>
+                    <span class="ow">or</span> <span class="s2">"traceback"</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">"result"</span><span class="p">])</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
                 <span class="p">):</span>
                     <span class="n">tests_fail</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="n">has_errors</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                         <span class="p">(</span>
-                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s1"> worker, </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1"> test &quot;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot; - &#39;</span>
-                            <span class="sa">f</span><span class="s1">&#39;&lt;span style=&quot;background-color: #CE3E01&quot;&gt;&quot;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;exception&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;&lt;/span&gt;&#39;</span>
+                            <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s1"> worker, </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1"> test "</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span><span class="si">}</span><span class="s1">" - '</span>
+                            <span class="sa">f</span><span class="s1">'&lt;span style="background-color: #CE3E01"&gt;"</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">"exception"</span><span class="p">]</span><span class="si">}</span><span class="s1">"&lt;/span&gt;'</span>
                         <span class="p">),</span>
                         <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                     <span class="p">)</span>
@@ -7497,56 +7497,56 @@
                     <span class="n">tests_pass</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                         <span class="p">(</span>
-                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s1"> worker, </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1"> test &quot;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot; - &#39;</span>
-                            <span class="sa">f</span><span class="s1">&#39;&lt;span style=&quot;background-color: #97BD61&quot;&gt;success&lt;/span&gt;&#39;</span>
+                            <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s1"> worker, </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1"> test "</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span><span class="si">}</span><span class="s1">" - '</span>
+                            <span class="sa">f</span><span class="s1">'&lt;span style="background-color: #97BD61"&gt;success&lt;/span&gt;'</span>
                         <span class="p">),</span>
                         <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="c1"># save test results to log them later</span>
-                <span class="n">tests_results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;worker&quot;</span><span class="p">:</span> <span class="n">worker</span><span class="p">,</span> <span class="o">**</span><span class="n">result</span><span class="p">})</span>
+                <span class="n">tests_results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"worker"</span><span class="p">:</span> <span class="n">worker</span><span class="p">,</span> <span class="o">**</span><span class="n">result</span><span class="p">})</span>
             <span class="c1"># evaluate and log task result</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># log exception for task</span>
-                <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;exception&quot;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]</span> <span class="ow">or</span> <span class="n">result</span><span class="p">[</span><span class="s2">"exception"</span><span class="p">]:</span>
                     <span class="n">has_errors</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                         <span class="p">(</span>
-                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s1"> worker, </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1"> task &quot;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot; - &#39;</span>
-                            <span class="sa">f</span><span class="s1">&#39;&lt;span style=&quot;background-color: #CE3E01&quot;&gt;&quot;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;exception&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s1">&quot;&lt;/span&gt;&#39;</span>
+                            <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s1"> worker, </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1"> task "</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span><span class="si">}</span><span class="s1">" - '</span>
+                            <span class="sa">f</span><span class="s1">'&lt;span style="background-color: #CE3E01"&gt;"</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">"exception"</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s1">"&lt;/span&gt;'</span>
                         <span class="p">),</span>
                         <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="c1"># save device commands output to log it later</span>
                 <span class="n">commands_output</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="p">{})</span>
-                <span class="n">commands_output</span><span class="p">[</span><span class="n">host</span><span class="p">][</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span>
+                <span class="n">commands_output</span><span class="p">[</span><span class="n">host</span><span class="p">][</span><span class="n">result</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">"result"</span><span class="p">]</span>
     <span class="c1"># clear global state to prep for next test</span>
     <span class="n">clean_global_data</span><span class="p">()</span>
 
     <span class="n">tests_results_html_table</span> <span class="o">=</span> <span class="n">TabulateFormatter</span><span class="p">(</span>
         <span class="n">tests_results</span><span class="p">,</span>
-        <span class="n">tabulate</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;tablefmt&quot;</span><span class="p">:</span> <span class="s2">&quot;html&quot;</span><span class="p">},</span>
+        <span class="n">tabulate</span><span class="o">=</span><span class="p">{</span><span class="s2">"tablefmt"</span><span class="p">:</span> <span class="s2">"html"</span><span class="p">},</span>
         <span class="n">headers</span><span class="o">=</span><span class="p">[</span>
-            <span class="s2">&quot;worker&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;host&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;result&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;failed&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;task&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;test&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;criteria&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;exception&quot;</span><span class="p">,</span>
+            <span class="s2">"worker"</span><span class="p">,</span>
+            <span class="s2">"host"</span><span class="p">,</span>
+            <span class="s2">"name"</span><span class="p">,</span>
+            <span class="s2">"result"</span><span class="p">,</span>
+            <span class="s2">"failed"</span><span class="p">,</span>
+            <span class="s2">"task"</span><span class="p">,</span>
+            <span class="s2">"test"</span><span class="p">,</span>
+            <span class="s2">"criteria"</span><span class="p">,</span>
+            <span class="s2">"exception"</span><span class="p">,</span>
         <span class="p">],</span>
     <span class="p">)</span>
 
     <span class="n">tests_results_csv_table</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="sa">f</span><span class="s1">&#39;&#39;&#39;&quot;</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;worker&#39;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;,&quot;</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;host&#39;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;,&quot;</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;,&quot;</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;,&quot;</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;failed&#39;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;,&quot;</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;task&#39;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;,&quot;</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;,&quot;</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;criteria&#39;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;,&quot;</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;exception&#39;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;&#39;&#39;&#39;</span>
+        <span class="sa">f</span><span class="s1">'''"</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">'worker'</span><span class="p">]</span><span class="si">}</span><span class="s1">","</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">'host'</span><span class="p">]</span><span class="si">}</span><span class="s1">","</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s1">","</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">'result'</span><span class="p">]</span><span class="si">}</span><span class="s1">","</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">'failed'</span><span class="p">]</span><span class="si">}</span><span class="s1">","</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">'task'</span><span class="p">]</span><span class="si">}</span><span class="s1">","</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">'test'</span><span class="p">]</span><span class="si">}</span><span class="s1">","</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">'criteria'</span><span class="p">]</span><span class="si">}</span><span class="s1">","</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">'exception'</span><span class="p">]</span><span class="si">}</span><span class="s1">"'''</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tests_results</span>
     <span class="p">]</span>
     <span class="n">tests_results_csv_table</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
         <span class="mi">0</span><span class="p">,</span>
-        <span class="s1">&#39;&quot;worker&quot;,&quot;host&quot;,&quot;name&quot;,&quot;result&quot;,&quot;failed&quot;,&quot;task&quot;,&quot;test&quot;,&quot;criteria&quot;,&quot;exception&quot;&#39;</span><span class="p">,</span>
+        <span class="s1">'"worker","host","name","result","failed","task","test","criteria","exception"'</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">tests_results_csv_table</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tests_results_csv_table</span><span class="p">)</span>
+    <span class="n">tests_results_csv_table</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tests_results_csv_table</span><span class="p">)</span>
 
     <span class="c1"># form nested HTML of commands output</span>
     <span class="n">devices_output_html</span> <span class="o">=</span> <span class="p">[]</span>
@@ -7555,53 +7555,53 @@
         <span class="n">commands_output_html</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">command</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">commands</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">commands_output_html</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;&lt;p&gt;&lt;details style=&quot;margin-left:20px;&quot;&gt;&lt;summary&gt;</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s1">&lt;/summary&gt;&lt;p style=&quot;margin-left:20px;&quot;&gt;&lt;font face=&quot;courier new&quot;&gt;</span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s1">&lt;/font&gt;&lt;/p&gt;&lt;/details&gt;&lt;/p&gt;&#39;</span>
+                <span class="sa">f</span><span class="s1">'&lt;p&gt;&lt;details style="margin-left:20px;"&gt;&lt;summary&gt;</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s1">&lt;/summary&gt;&lt;p style="margin-left:20px;"&gt;&lt;font face="courier new"&gt;</span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s1">&lt;/font&gt;&lt;/p&gt;&lt;/details&gt;&lt;/p&gt;'</span>
             <span class="p">)</span>
         <span class="n">devices_output_html</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;&lt;p&gt;&lt;details&gt;&lt;summary&gt;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">commands_output_html</span><span class="p">)</span><span class="si">}</span><span class="s1"> commands)&lt;/summary&gt;&lt;p&gt;</span><span class="si">{</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">commands_output_html</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;&lt;/details&gt;&lt;/p&gt;&#39;</span>
+            <span class="sa">f</span><span class="s1">'&lt;p&gt;&lt;details&gt;&lt;summary&gt;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">commands_output_html</span><span class="p">)</span><span class="si">}</span><span class="s1"> commands)&lt;/summary&gt;&lt;p&gt;</span><span class="si">{</span><span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">commands_output_html</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;&lt;/details&gt;&lt;/p&gt;'</span>
         <span class="p">)</span>
 
     <span class="c1"># form nested HTML for devices tes suite</span>
     <span class="n">devices_test_suite</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">worker</span><span class="p">,</span> <span class="n">worker_results</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">worker_results</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">][</span><span class="s2">&quot;suite&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-            <span class="n">suite_content</span> <span class="o">=</span> <span class="n">worker_results</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">][</span><span class="s2">&quot;suite&quot;</span><span class="p">][</span><span class="n">host</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">worker_results</span><span class="p">[</span><span class="s2">"result"</span><span class="p">][</span><span class="s2">"suite"</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">suite_content</span> <span class="o">=</span> <span class="n">worker_results</span><span class="p">[</span><span class="s2">"result"</span><span class="p">][</span><span class="s2">"suite"</span><span class="p">][</span><span class="n">host</span><span class="p">]</span>
             <span class="n">devices_test_suite</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;&lt;p&gt;&lt;details&gt;&lt;summary&gt;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">suite_content</span><span class="p">)</span><span class="si">}</span><span class="s1"> tests)&lt;/summary&gt;&lt;p style=&quot;margin-left:20px;&quot;&gt;</span><span class="si">{</span><span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">suite_content</span><span class="p">,</span><span class="w"> </span><span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;&lt;/details&gt;&lt;/p&gt;&#39;</span>
+                <span class="sa">f</span><span class="s1">'&lt;p&gt;&lt;details&gt;&lt;summary&gt;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">suite_content</span><span class="p">)</span><span class="si">}</span><span class="s1"> tests)&lt;/summary&gt;&lt;p style="margin-left:20px;"&gt;</span><span class="si">{</span><span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">suite_content</span><span class="p">,</span><span class="w"> </span><span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;&lt;/details&gt;&lt;/p&gt;'</span>
             <span class="p">)</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;&lt;details&gt;&lt;summary&gt;Workers results&lt;/summary&gt;</span><span class="si">{</span><span class="n">pprint</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/details&gt;&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"&lt;details&gt;&lt;summary&gt;Workers results&lt;/summary&gt;</span><span class="si">{</span><span class="n">pprint</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/details&gt;"</span><span class="p">,</span>
         <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;&lt;details&gt;&lt;summary&gt;Test suite results details&lt;/summary&gt;&lt;p&gt;</span><span class="si">{</span><span class="n">tests_results_html_table</span><span class="si">}</span><span class="s2">&lt;/p&gt;&lt;/details&gt;&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"&lt;details&gt;&lt;summary&gt;Test suite results details&lt;/summary&gt;&lt;p&gt;</span><span class="si">{</span><span class="n">tests_results_html_table</span><span class="si">}</span><span class="s2">&lt;/p&gt;&lt;/details&gt;"</span><span class="p">,</span>
         <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;&lt;details&gt;&lt;summary&gt;Test suite results CSV table&lt;/summary&gt;&lt;p&gt;</span><span class="si">{</span><span class="n">tests_results_csv_table</span><span class="si">}</span><span class="s2">&lt;/p&gt;&lt;/details&gt;&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"&lt;details&gt;&lt;summary&gt;Test suite results CSV table&lt;/summary&gt;&lt;p&gt;</span><span class="si">{</span><span class="n">tests_results_csv_table</span><span class="si">}</span><span class="s2">&lt;/p&gt;&lt;/details&gt;"</span><span class="p">,</span>
         <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;&lt;details&gt;&lt;summary&gt;Devices tests suites content&lt;/summary&gt;</span><span class="si">{</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">devices_test_suite</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/details&gt;&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"&lt;details&gt;&lt;summary&gt;Devices tests suites content&lt;/summary&gt;</span><span class="si">{</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">devices_test_suite</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/details&gt;"</span><span class="p">,</span>
         <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;&lt;details&gt;&lt;summary&gt;Collected devices output&lt;/summary&gt;</span><span class="si">{</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">devices_output_html</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/details&gt;&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"&lt;details&gt;&lt;summary&gt;Collected devices output&lt;/summary&gt;</span><span class="si">{</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">devices_output_html</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/details&gt;"</span><span class="p">,</span>
         <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
         <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Tests completed - </span><span class="si">{</span><span class="n">tests_pass</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">tests_fail</span><span class="si">}</span><span class="s2">, &quot;</span>
-            <span class="sa">f</span><span class="s1">&#39;&lt;span style=&quot;background-color: #97BD61&quot;&gt;success - </span><span class="si">{</span><span class="n">tests_pass</span><span class="si">}</span><span class="s1">&lt;/span&gt;, &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;&lt;span style=&quot;background-color: #CE3E01&quot;&gt;failed - </span><span class="si">{</span><span class="n">tests_fail</span><span class="si">}</span><span class="s1">&lt;/span&gt;&#39;</span>
+            <span class="sa">f</span><span class="s2">"Tests completed - </span><span class="si">{</span><span class="n">tests_pass</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">tests_fail</span><span class="si">}</span><span class="s2">, "</span>
+            <span class="sa">f</span><span class="s1">'&lt;span style="background-color: #97BD61"&gt;success - </span><span class="si">{</span><span class="n">tests_pass</span><span class="si">}</span><span class="s1">&lt;/span&gt;, '</span>
+            <span class="sa">f</span><span class="s1">'&lt;span style="background-color: #CE3E01"&gt;failed - </span><span class="si">{</span><span class="n">tests_fail</span><span class="si">}</span><span class="s1">&lt;/span&gt;'</span>
         <span class="p">),</span>
         <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="c1"># raise if has errors</span>
     <span class="k">if</span> <span class="n">has_errors</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">ContinuableFailure</span><span class="p">(</span><span class="s2">&quot;Tests failed&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">ContinuableFailure</span><span class="p">(</span><span class="s2">"Tests failed"</span><span class="p">)</span>
     <span class="c1"># return test results with no errors in structured format</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
@@ -7688,60 +7688,60 @@
 <span class="normal">281</span>
 <span class="normal">282</span>
 <span class="normal">283</span>
-<span class="normal">284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@keyword</span><span class="p">(</span><span class="s2">&quot;nr.cli&quot;</span><span class="p">)</span>
+<span class="normal">284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@keyword</span><span class="p">(</span><span class="s2">"nr.cli"</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">nr_cli</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run Nornir service cli task&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Run Nornir service cli task"""</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Running nr.cli with args &#39;</span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">&#39;, kwargs &#39;</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">&#39;, global DATA &#39;</span><span class="si">{</span><span class="n">DATA</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"Running nr.cli with args '</span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">', kwargs '</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">', global DATA '</span><span class="si">{</span><span class="n">DATA</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
     <span class="n">has_errors</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;commands&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">"commands"</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span>
     <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="o">**</span><span class="n">DATA</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;hosts&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;FB&quot;</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span><span class="p">}),</span>
+        <span class="o">**</span><span class="n">DATA</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"hosts"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"FB"</span><span class="p">:</span> <span class="s2">"*"</span><span class="p">}),</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="s2">&quot;add_details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s2">&quot;to_dict&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"add_details"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"to_dict"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="c1"># run this function</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="n">DATA</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;workers&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">),</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="n">DATA</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"workers"</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">),</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1"># extract results for the host</span>
     <span class="k">for</span> <span class="n">worker</span><span class="p">,</span> <span class="n">worker_results</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">worker_results</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]:</span>
-            <span class="n">host</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;host&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">worker_results</span><span class="p">[</span><span class="s2">"result"</span><span class="p">]:</span>
+            <span class="n">host</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">"host"</span><span class="p">]</span>
             <span class="c1"># evaluate and log results</span>
             <span class="k">if</span> <span class="p">(</span>
-                <span class="n">result</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span>
-                <span class="ow">or</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;exception&quot;</span><span class="p">]</span>
-                <span class="ow">or</span> <span class="s2">&quot;traceback&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="n">result</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]</span>
+                <span class="ow">or</span> <span class="n">result</span><span class="p">[</span><span class="s2">"exception"</span><span class="p">]</span>
+                <span class="ow">or</span> <span class="s2">"traceback"</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">"result"</span><span class="p">])</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
             <span class="p">):</span>
                 <span class="n">has_errors</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                     <span class="p">(</span>
-                        <span class="sa">f</span><span class="s1">&#39;&lt;details&gt;&lt;summary&gt;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s1"> worker, </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1"> device, command &quot;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot; failed - &#39;</span>
-                        <span class="sa">f</span><span class="s1">&#39;&lt;span style=&quot;background-color: #CE3E01&quot;&gt;&quot;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;exception&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;&lt;/span&gt;&lt;/summary&gt;&#39;</span>
-                        <span class="sa">f</span><span class="s1">&#39;&lt;p style=&quot;margin-left:20px;&quot;&gt;&lt;font face=&quot;courier new&quot;&gt;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
-                        <span class="sa">f</span><span class="s2">&quot;&lt;/font&gt;&lt;/p&gt;&lt;/details&gt;&quot;</span>
+                        <span class="sa">f</span><span class="s1">'&lt;details&gt;&lt;summary&gt;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s1"> worker, </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1"> device, command "</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span><span class="si">}</span><span class="s1">" failed - '</span>
+                        <span class="sa">f</span><span class="s1">'&lt;span style="background-color: #CE3E01"&gt;"</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">"exception"</span><span class="p">]</span><span class="si">}</span><span class="s1">"&lt;/span&gt;&lt;/summary&gt;'</span>
+                        <span class="sa">f</span><span class="s1">'&lt;p style="margin-left:20px;"&gt;&lt;font face="courier new"&gt;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">"result"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span>
+                        <span class="sa">f</span><span class="s2">"&lt;/font&gt;&lt;/p&gt;&lt;/details&gt;"</span>
                     <span class="p">),</span>
                     <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                     <span class="p">(</span>
-                        <span class="sa">f</span><span class="s1">&#39;&lt;details&gt;&lt;summary&gt;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s1"> worker, </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1"> device, command &quot;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot; - &#39;</span>
-                        <span class="sa">f</span><span class="s1">&#39;&lt;span style=&quot;background-color: #97BD61&quot;&gt;success&lt;/span&gt;&lt;/summary&gt;&#39;</span>
-                        <span class="sa">f</span><span class="s1">&#39;&lt;p style=&quot;margin-left:20px;&quot;&gt;&lt;font face=&quot;courier new&quot;&gt;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
-                        <span class="sa">f</span><span class="s2">&quot;&lt;/font&gt;&lt;/p&gt;&lt;/details&gt;&quot;</span>
+                        <span class="sa">f</span><span class="s1">'&lt;details&gt;&lt;summary&gt;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s1"> worker, </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1"> device, command "</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span><span class="si">}</span><span class="s1">" - '</span>
+                        <span class="sa">f</span><span class="s1">'&lt;span style="background-color: #97BD61"&gt;success&lt;/span&gt;&lt;/summary&gt;'</span>
+                        <span class="sa">f</span><span class="s1">'&lt;p style="margin-left:20px;"&gt;&lt;font face="courier new"&gt;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">"result"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span>
+                        <span class="sa">f</span><span class="s2">"&lt;/font&gt;&lt;/p&gt;&lt;/details&gt;"</span>
                     <span class="p">),</span>
                     <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;&lt;details&gt;&lt;summary&gt;Workers results&lt;/summary&gt;</span><span class="si">{</span><span class="n">pprint</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/details&gt;&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"&lt;details&gt;&lt;summary&gt;Workers results&lt;/summary&gt;</span><span class="si">{</span><span class="n">pprint</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/details&gt;"</span><span class="p">,</span>
         <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1"># clean global state to prep for next test</span>
@@ -7835,60 +7835,60 @@
 <span class="normal">345</span>
 <span class="normal">346</span>
 <span class="normal">347</span>
-<span class="normal">348</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@keyword</span><span class="p">(</span><span class="s2">&quot;nr.cfg&quot;</span><span class="p">)</span>
+<span class="normal">348</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@keyword</span><span class="p">(</span><span class="s2">"nr.cfg"</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">nr_cfg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run Nornir service cfg task&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Run Nornir service cfg task"""</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Running nr.cfg with args &#39;</span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">&#39;, kwargs &#39;</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">&#39;, global DATA &#39;</span><span class="si">{</span><span class="n">DATA</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"Running nr.cfg with args '</span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">', kwargs '</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">', global DATA '</span><span class="si">{</span><span class="n">DATA</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">"config"</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span>
     <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="o">**</span><span class="n">DATA</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;hosts&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;FB&quot;</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span><span class="p">}),</span>
+        <span class="o">**</span><span class="n">DATA</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"hosts"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"FB"</span><span class="p">:</span> <span class="s2">"*"</span><span class="p">}),</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="s2">&quot;add_details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s2">&quot;to_dict&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"add_details"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"to_dict"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="n">has_errors</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="c1"># run this function</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="n">DATA</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;workers&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">),</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="n">DATA</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"workers"</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">),</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1"># extract results for the host</span>
     <span class="k">for</span> <span class="n">worker</span><span class="p">,</span> <span class="n">worker_results</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">worker_results</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]:</span>
-            <span class="n">host</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;host&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">worker_results</span><span class="p">[</span><span class="s2">"result"</span><span class="p">]:</span>
+            <span class="n">host</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">"host"</span><span class="p">]</span>
             <span class="c1"># evaluate and log results</span>
             <span class="k">if</span> <span class="p">(</span>
-                <span class="n">result</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span>
-                <span class="ow">or</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;exception&quot;</span><span class="p">]</span>
-                <span class="ow">or</span> <span class="s2">&quot;traceback&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="n">result</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]</span>
+                <span class="ow">or</span> <span class="n">result</span><span class="p">[</span><span class="s2">"exception"</span><span class="p">]</span>
+                <span class="ow">or</span> <span class="s2">"traceback"</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">"result"</span><span class="p">])</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
             <span class="p">):</span>
                 <span class="n">has_errors</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                     <span class="p">(</span>
-                        <span class="sa">f</span><span class="s1">&#39;&lt;details&gt;&lt;summary&gt;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s1"> worker, </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1"> device, &quot;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot; failed - &#39;</span>
-                        <span class="sa">f</span><span class="s1">&#39;&lt;span style=&quot;background-color: #CE3E01&quot;&gt;&quot;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;exception&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;&lt;/span&gt;&lt;/summary&gt;&#39;</span>
-                        <span class="sa">f</span><span class="s1">&#39;&lt;p style=&quot;margin-left:20px;&quot;&gt;&lt;font face=&quot;courier new&quot;&gt;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
-                        <span class="sa">f</span><span class="s2">&quot;&lt;/font&gt;&lt;/p&gt;&lt;/details&gt;&quot;</span>
+                        <span class="sa">f</span><span class="s1">'&lt;details&gt;&lt;summary&gt;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s1"> worker, </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1"> device, "</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span><span class="si">}</span><span class="s1">" failed - '</span>
+                        <span class="sa">f</span><span class="s1">'&lt;span style="background-color: #CE3E01"&gt;"</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">"exception"</span><span class="p">]</span><span class="si">}</span><span class="s1">"&lt;/span&gt;&lt;/summary&gt;'</span>
+                        <span class="sa">f</span><span class="s1">'&lt;p style="margin-left:20px;"&gt;&lt;font face="courier new"&gt;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">"result"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span>
+                        <span class="sa">f</span><span class="s2">"&lt;/font&gt;&lt;/p&gt;&lt;/details&gt;"</span>
                     <span class="p">),</span>
                     <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                     <span class="p">(</span>
-                        <span class="sa">f</span><span class="s1">&#39;&lt;details&gt;&lt;summary&gt;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s1"> worker, </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1"> device, &quot;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot; - &#39;</span>
-                        <span class="sa">f</span><span class="s1">&#39;&lt;span style=&quot;background-color: #97BD61&quot;&gt;success&lt;/span&gt;&lt;/summary&gt;&#39;</span>
-                        <span class="sa">f</span><span class="s1">&#39;&lt;p style=&quot;margin-left:20px;&quot;&gt;&lt;font face=&quot;courier new&quot;&gt;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
-                        <span class="sa">f</span><span class="s2">&quot;&lt;/font&gt;&lt;/p&gt;&lt;/details&gt;&quot;</span>
+                        <span class="sa">f</span><span class="s1">'&lt;details&gt;&lt;summary&gt;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s1"> worker, </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1"> device, "</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span><span class="si">}</span><span class="s1">" - '</span>
+                        <span class="sa">f</span><span class="s1">'&lt;span style="background-color: #97BD61"&gt;success&lt;/span&gt;&lt;/summary&gt;'</span>
+                        <span class="sa">f</span><span class="s1">'&lt;p style="margin-left:20px;"&gt;&lt;font face="courier new"&gt;</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">"result"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span>
+                        <span class="sa">f</span><span class="s2">"&lt;/font&gt;&lt;/p&gt;&lt;/details&gt;"</span>
                     <span class="p">),</span>
                     <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;&lt;details&gt;&lt;summary&gt;Workers results&lt;/summary&gt;</span><span class="si">{</span><span class="n">pprint</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/details&gt;&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"&lt;details&gt;&lt;summary&gt;Workers results&lt;/summary&gt;</span><span class="si">{</span><span class="n">pprint</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/details&gt;"</span><span class="p">,</span>
         <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1"># clean global state to prep for next test</span>

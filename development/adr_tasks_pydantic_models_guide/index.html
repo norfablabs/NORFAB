@@ -7249,7 +7249,7 @@ This is a mandatory style requirement: do not define task-specific input, output
 <span class="k">class</span><span class="w"> </span><span class="nc">GetThingsResult</span><span class="p">(</span><span class="n">Result</span><span class="p">):</span>
     <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">,</span> <span class="n">ThingPayload</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="p">{},</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Thing data keyed by device name&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Thing data keyed by device name"</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="c1"># norfab/workers/netbox_worker/&lt;feature&gt;_tasks.py</span>
@@ -7263,7 +7263,7 @@ This is a mandatory style requirement: do not define task-specific input, output
     <span class="nd">@Task</span><span class="p">(</span>
         <span class="nb">input</span><span class="o">=</span><span class="n">GetThingsInput</span><span class="p">,</span>
         <span class="n">output</span><span class="o">=</span><span class="n">GetThingsResult</span><span class="p">,</span>
-        <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+        <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_things</span><span class="p">(</span><span class="o">...</span><span class="p">):</span>
         <span class="o">...</span>
@@ -7291,18 +7291,18 @@ This is a mandatory style requirement: do not define task-specific input, output
 <div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SyncDeviceIpInput</span><span class="p">(</span><span class="n">NetboxCommonArgs</span><span class="p">,</span> <span class="n">use_enum_values</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">populate_by_name</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;List of NetBox device names to sync IP addresses for&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"List of NetBox device names to sync IP addresses for"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">ignore_vrf</span><span class="p">:</span> <span class="n">StrictBool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">True</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Ignore discovered interface VRFs during IP sync&quot;</span><span class="p">,</span>
-        <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;ignore-vrf&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Ignore discovered interface VRFs during IP sync"</span><span class="p">,</span>
+        <span class="n">alias</span><span class="o">=</span><span class="s2">"ignore-vrf"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">filter_by_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Glob pattern to restrict interfaces by name&quot;</span><span class="p">,</span>
-        <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;filter-by-name&quot;</span><span class="p">,</span>
-        <span class="n">examples</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Loopback*&quot;</span><span class="p">,</span> <span class="s2">&quot;Ethernet*&quot;</span><span class="p">,</span> <span class="s2">&quot;Port-Channel*&quot;</span><span class="p">],</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Glob pattern to restrict interfaces by name"</span><span class="p">,</span>
+        <span class="n">alias</span><span class="o">=</span><span class="s2">"filter-by-name"</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="p">[</span><span class="s2">"Loopback*"</span><span class="p">,</span> <span class="s2">"Ethernet*"</span><span class="p">,</span> <span class="s2">"Port-Channel*"</span><span class="p">],</span>
     <span class="p">)</span>
 </code></pre></div>
 <h2 id="output-models">Output Models<a class="headerlink" href="#output-models" title="Permanent link">¤</a></h2>
@@ -7328,7 +7328,7 @@ This is a mandatory style requirement: do not define task-specific input, output
 <span class="k">class</span><span class="w"> </span><span class="nc">SyncDeviceIpResult</span><span class="p">(</span><span class="n">Result</span><span class="p">):</span>
     <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">,</span> <span class="n">SyncActionsPayload</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="p">{},</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;IP sync actions keyed by device name&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"IP sync actions keyed by device name"</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div>
 <h2 id="validators">Validators<a class="headerlink" href="#validators" title="Permanent link">¤</a></h2>
@@ -7341,10 +7341,10 @@ This is a mandatory style requirement: do not define task-specific input, output
 <li>Validate mutually exclusive fields, such as <code>object_id</code> versus <code>filters</code>.</li>
 </ul>
 <p>Keep validation close to the model and prefer <code>model_validator(mode="after")</code> for cross-field checks.</p>
-<div class="highlight"><pre><span></span><code><span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;after&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">validate_selectors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GetInterfacesInput&quot;</span><span class="p">:</span>
+<div class="highlight"><pre><span></span><code><span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_selectors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"GetInterfacesInput"</span><span class="p">:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">devices</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provide devices or filters&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Provide devices or filters"</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div>
 <h2 id="picle-readiness">PICLE Readiness<a class="headerlink" href="#picle-readiness" title="Permanent link">¤</a></h2>
@@ -7371,7 +7371,7 @@ This is a mandatory style requirement: do not define task-specific input, output
 <span class="p">):</span>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Device names to query&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Device names to query"</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div>
 <p>Only override <code>devices</code> here because the shell accepts a single command value as well as a list. Leave inherited fields such as <code>dry_run</code>, <code>branch</code>, <code>timeout</code>, and <code>filters</code> alone unless the CLI must parse comma-separated strings, JSON strings, use a PICLE enum, or add a completion source.</p>
@@ -7399,28 +7399,28 @@ This is a mandatory style requirement: do not define task-specific input, output
 <li>Do not refactor unrelated code while adding models.</li>
 </ol>
 <p>Useful audit command:</p>
-<div class="highlight"><pre><span></span><code>rg<span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;@Task\\(&quot;</span><span class="w"> </span>norfab/workers
+<div class="highlight"><pre><span></span><code>rg<span class="w"> </span>-n<span class="w"> </span><span class="s2">"@Task\\("</span><span class="w"> </span>norfab/workers
 </code></pre></div>
 <p>Useful AST audits:</p>
-<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;PY&#39;</span>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'PY'</span>
 <span class="s">import ast</span>
 <span class="s">from pathlib import Path</span>
 
 <span class="s">missing = []</span>
-<span class="s">for path in Path(&quot;norfab/workers/netbox_worker&quot;).glob(&quot;*.py&quot;):</span>
-<span class="s">    tree = ast.parse(path.read_text(encoding=&quot;utf-8&quot;, errors=&quot;ignore&quot;))</span>
+<span class="s">for path in Path("norfab/workers/netbox_worker").glob("*.py"):</span>
+<span class="s">    tree = ast.parse(path.read_text(encoding="utf-8", errors="ignore"))</span>
 <span class="s">    for node in ast.walk(tree):</span>
 <span class="s">        if isinstance(node, ast.FunctionDef):</span>
 <span class="s">            for dec in node.decorator_list:</span>
-<span class="s">                if isinstance(dec, ast.Call) and getattr(dec.func, &quot;id&quot;, &quot;&quot;) == &quot;Task&quot;:</span>
+<span class="s">                if isinstance(dec, ast.Call) and getattr(dec.func, "id", "") == "Task":</span>
 <span class="s">                    keys = {kw.arg for kw in dec.keywords}</span>
-<span class="s">                    if &quot;input&quot; not in keys or &quot;output&quot; not in keys:</span>
+<span class="s">                    if "input" not in keys or "output" not in keys:</span>
 <span class="s">                        missing.append((str(path), node.name))</span>
 <span class="s">print(missing)</span>
 <span class="s">PY</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>compileall<span class="w"> </span>-q<span class="w"> </span>norfab/workers/netbox_worker<span class="w"> </span>norfab/clients/nfcli_shell/netbox
-rg<span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;Optional\\[|default_factory&quot;</span><span class="w"> </span>norfab/workers/netbox_worker<span class="w"> </span>norfab/clients/nfcli_shell/netbox
+rg<span class="w"> </span>-n<span class="w"> </span><span class="s2">"Optional\\[|default_factory"</span><span class="w"> </span>norfab/workers/netbox_worker<span class="w"> </span>norfab/clients/nfcli_shell/netbox
 </code></pre></div>
 <h2 id="common-pitfalls">Common Pitfalls<a class="headerlink" href="#common-pitfalls" title="Permanent link">¤</a></h2>
 <ul>

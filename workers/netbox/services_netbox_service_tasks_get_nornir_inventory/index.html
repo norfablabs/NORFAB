@@ -7259,15 +7259,15 @@
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>Returns a Nornir inventory dictionary:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;hosts&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;hostname&quot;</span><span class="p">:</span> <span class="s2">&quot;192.0.2.11&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="s2">&quot;eos&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;lab&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">},</span>
-                <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="p">{},</span>
-                <span class="s2">&quot;connections&quot;</span><span class="p">:</span> <span class="p">{},</span>
+    <span class="s2">"hosts"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"ceos-leaf-1"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"hostname"</span><span class="p">:</span> <span class="s2">"192.0.2.11"</span><span class="p">,</span>
+            <span class="s2">"platform"</span><span class="p">:</span> <span class="s2">"eos"</span><span class="p">,</span>
+            <span class="s2">"groups"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"lab"</span><span class="p">],</span>
+            <span class="s2">"data"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"site"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"lab"</span><span class="p">},</span>
+                <span class="s2">"interfaces"</span><span class="p">:</span> <span class="p">{},</span>
+                <span class="s2">"connections"</span><span class="p">:</span> <span class="p">{},</span>
             <span class="p">},</span>
         <span class="p">},</span>
     <span class="p">},</span>
@@ -7287,51 +7287,51 @@
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
 <span class="c1"># build inventory for specific devices</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_nornir_inventory&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"get_nornir_inventory"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-leaf-2&quot;</span><span class="p">],</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">,</span> <span class="s2">"ceos-leaf-2"</span><span class="p">],</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># build inventory from NetBox filters</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_nornir_inventory&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"get_nornir_inventory"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">}],</span>
+        <span class="s2">"filters"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"site"</span><span class="p">:</span> <span class="s2">"lab"</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"active"</span><span class="p">}],</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># include related interface and connection data</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_nornir_inventory&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"get_nornir_inventory"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
-        <span class="s2">&quot;connections&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s2">&quot;cache&quot;</span><span class="p">:</span> <span class="s2">&quot;refresh&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">],</span>
+        <span class="s2">"interfaces"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"ip_addresses"</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+        <span class="s2">"connections"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"cache"</span><span class="p">:</span> <span class="s2">"refresh"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># use IPv6 primary addresses for hostnames</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_nornir_inventory&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"get_nornir_inventory"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;primary_ip&quot;</span><span class="p">:</span> <span class="s2">&quot;ip6&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">],</span>
+        <span class="s2">"primary_ip"</span><span class="p">:</span> <span class="s2">"ip6"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
@@ -7798,14 +7798,14 @@
 <span class="normal">234</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetNornirInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetNornirInventoryResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Nornir Inventory&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Nornir Inventory"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -7821,10 +7821,10 @@
     <span class="n">circuits</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">nbdata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">bgp_peerings</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">primary_ip</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ip4&quot;</span><span class="p">,</span>
+    <span class="n">primary_ip</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"ip4"</span><span class="p">,</span>
     <span class="n">cache</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve and construct Nornir inventory from NetBox data.</span>
 
 <span class="sd">    Args:</span>
@@ -7839,38 +7839,38 @@
 <span class="sd">                in the inventory. If a dict, use it as arguments for the get_connections method.</span>
 <span class="sd">        circuits (Union[dict, bool], optional): If True, include circuits data in the</span>
 <span class="sd">                inventory. If a dict, use it as arguments for the get_circuits method.</span>
-<span class="sd">        nbdata (bool, optional): If True, include a copy of NetBox device&#39;s data in the host&#39;s data.</span>
-<span class="sd">        primary_ip (str, optional): Specify whether to use &#39;ip4&#39; or &#39;ip6&#39; for the primary</span>
-<span class="sd">                IP address. Defaults to &#39;ip4&#39;.</span>
+<span class="sd">        nbdata (bool, optional): If True, include a copy of NetBox device's data in the host's data.</span>
+<span class="sd">        primary_ip (str, optional): Specify whether to use 'ip4' or 'ip6' for the primary</span>
+<span class="sd">                IP address. Defaults to 'ip4'.</span>
 <span class="sd">        cache (Union[bool, str], optional): Cache usage options:</span>
 
 <span class="sd">            - True: Use data stored in cache if it is up to date, refresh it otherwise.</span>
 <span class="sd">            - False: Do not use cache and do not update cache.</span>
-<span class="sd">            - &quot;refresh&quot;: Ignore data in cache and replace it with data fetched from Netbox.</span>
-<span class="sd">            - &quot;force&quot;: Use data in cache without checking if it is up to date.</span>
+<span class="sd">            - "refresh": Ignore data in cache and replace it with data fetched from Netbox.</span>
+<span class="sd">            - "force": Use data in cache without checking if it is up to date.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Nornir inventory dictionary containing hosts and their respective data.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">hosts</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cache</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">inventory</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;hosts&quot;</span><span class="p">:</span> <span class="n">hosts</span><span class="p">}</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_nornir_inventory&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="n">inventory</span><span class="p">)</span>
+    <span class="n">inventory</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"hosts"</span><span class="p">:</span> <span class="n">hosts</span><span class="p">}</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_nornir_inventory"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="n">inventory</span><span class="p">)</span>
 
     <span class="c1"># check Netbox status</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;checking NetBox status for &#39;</span><span class="si">{</span><span class="n">instance</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"checking NetBox status for '</span><span class="si">{</span><span class="n">instance</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
     <span class="n">netbox_status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_netbox_status</span><span class="p">(</span><span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">netbox_status</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span><span class="p">][</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">netbox_status</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span><span class="p">][</span><span class="s2">"status"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="s2">&quot;NetBox status check failed for Nornir inventory&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
+            <span class="s2">"NetBox status check failed for Nornir inventory"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># retrieve devices data</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;fetching devices data for Nornir inventory&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"fetching devices data for Nornir inventory"</span><span class="p">)</span>
     <span class="n">nb_devices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_devices</span><span class="p">(</span>
         <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
         <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
@@ -7880,137 +7880,137 @@
         <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">nb_devices</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;failed to fetch devices for Nornir inventory&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"failed to fetch devices for Nornir inventory"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nb_devices</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nb_devices</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) for Nornir inventory&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nb_devices</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) for Nornir inventory"</span><span class="p">)</span>
 
     <span class="c1"># form Nornir hosts inventory</span>
     <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">nb_devices</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">host</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s2">&quot;config_context&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span> <span class="p">{})</span>
-        <span class="n">host</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">{})</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">host</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">device_name</span><span class="p">)</span>
+        <span class="n">host</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s2">"config_context"</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"nornir"</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">host</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"data"</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">host</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="n">device_name</span><span class="p">)</span>
         <span class="n">hosts</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">host</span>
         <span class="c1"># add platform if not provided in device config context</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">host</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;platform&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">device</span><span class="p">[</span><span class="s2">&quot;platform&quot;</span><span class="p">]:</span>
-                <span class="n">host</span><span class="p">[</span><span class="s2">&quot;platform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s2">&quot;platform&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">host</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"platform"</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">device</span><span class="p">[</span><span class="s2">"platform"</span><span class="p">]:</span>
+                <span class="n">host</span><span class="p">[</span><span class="s2">"platform"</span><span class="p">]</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s2">"platform"</span><span class="p">][</span><span class="s2">"name"</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - No platform found for &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; device&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - No platform found for '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' device"</span><span class="p">)</span>
         <span class="c1"># add hostname if not provided in config context</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">host</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hostname&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">device</span><span class="p">[</span><span class="s2">&quot;primary_ip4&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">primary_ip</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;ip4&quot;</span><span class="p">,</span> <span class="s2">&quot;ipv4&quot;</span><span class="p">]:</span>
-                <span class="n">host</span><span class="p">[</span><span class="s2">&quot;hostname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s2">&quot;primary_ip4&quot;</span><span class="p">][</span><span class="s2">&quot;address&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">elif</span> <span class="n">device</span><span class="p">[</span><span class="s2">&quot;primary_ip6&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">primary_ip</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;ip6&quot;</span><span class="p">,</span> <span class="s2">&quot;ipv6&quot;</span><span class="p">]:</span>
-                <span class="n">host</span><span class="p">[</span><span class="s2">&quot;hostname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s2">&quot;primary_ip6&quot;</span><span class="p">][</span><span class="s2">&quot;address&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">host</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"hostname"</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">device</span><span class="p">[</span><span class="s2">"primary_ip4"</span><span class="p">]</span> <span class="ow">and</span> <span class="n">primary_ip</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"ip4"</span><span class="p">,</span> <span class="s2">"ipv4"</span><span class="p">]:</span>
+                <span class="n">host</span><span class="p">[</span><span class="s2">"hostname"</span><span class="p">]</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s2">"primary_ip4"</span><span class="p">][</span><span class="s2">"address"</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">device</span><span class="p">[</span><span class="s2">"primary_ip6"</span><span class="p">]</span> <span class="ow">and</span> <span class="n">primary_ip</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"ip6"</span><span class="p">,</span> <span class="s2">"ipv6"</span><span class="p">]:</span>
+                <span class="n">host</span><span class="p">[</span><span class="s2">"hostname"</span><span class="p">]</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s2">"primary_ip6"</span><span class="p">][</span><span class="s2">"address"</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">host</span><span class="p">[</span><span class="s2">&quot;hostname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="c1"># add netbox data to host&#39;s data</span>
+                <span class="n">host</span><span class="p">[</span><span class="s2">"hostname"</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="c1"># add netbox data to host's data</span>
         <span class="k">if</span> <span class="n">nbdata</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">host</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">host</span><span class="p">[</span><span class="s2">"data"</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 
     <span class="c1"># return if no hosts found for provided parameters</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">hosts</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - No viable hosts returned by Netbox&quot;</span><span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no viable Nornir hosts returned by NetBox&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - No viable hosts returned by Netbox"</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no viable Nornir hosts returned by NetBox"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># add interfaces data</span>
     <span class="k">if</span> <span class="n">interfaces</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching interfaces for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> Nornir host(s)&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"fetching interfaces for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> Nornir host(s)"</span><span class="p">)</span>
         <span class="c1"># decide on get_interfaces arguments</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="n">interfaces</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interfaces</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;cache&quot;</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;branch&quot;</span><span class="p">,</span> <span class="n">branch</span><span class="p">)</span>
-        <span class="c1"># add &#39;interfaces&#39; key to all hosts&#39; data</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"cache"</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"branch"</span><span class="p">,</span> <span class="n">branch</span><span class="p">)</span>
+        <span class="c1"># add 'interfaces' key to all hosts' data</span>
         <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">hosts</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">host</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;interfaces&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">host</span><span class="p">[</span><span class="s2">"data"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"interfaces"</span><span class="p">,</span> <span class="p">{})</span>
         <span class="c1"># query interfaces data from netbox</span>
         <span class="n">nb_interfaces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_interfaces</span><span class="p">(</span>
             <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">hosts</span><span class="p">),</span> <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">nb_interfaces</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="s2">&quot;interface retrieval completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span>
+                <span class="s2">"interface retrieval completed with errors"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span>
             <span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nb_interfaces</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="c1"># save interfaces data to hosts&#39; inventory</span>
+        <span class="c1"># save interfaces data to hosts' inventory</span>
         <span class="k">while</span> <span class="n">nb_interfaces</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
             <span class="n">device</span><span class="p">,</span> <span class="n">device_interfaces</span> <span class="o">=</span> <span class="n">nb_interfaces</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
-            <span class="n">hosts</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_interfaces</span>
+            <span class="n">hosts</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"data"</span><span class="p">][</span><span class="s2">"interfaces"</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_interfaces</span>
 
     <span class="c1"># add connections data</span>
     <span class="k">if</span> <span class="n">connections</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching connections for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> Nornir host(s)&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"fetching connections for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> Nornir host(s)"</span><span class="p">)</span>
         <span class="c1"># decide on get_interfaces arguments</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="n">connections</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">connections</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;cache&quot;</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;branch&quot;</span><span class="p">,</span> <span class="n">branch</span><span class="p">)</span>
-        <span class="c1"># add &#39;connections&#39; key to all hosts&#39; data</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"cache"</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"branch"</span><span class="p">,</span> <span class="n">branch</span><span class="p">)</span>
+        <span class="c1"># add 'connections' key to all hosts' data</span>
         <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">hosts</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">host</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;connections&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">host</span><span class="p">[</span><span class="s2">"data"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"connections"</span><span class="p">,</span> <span class="p">{})</span>
         <span class="c1"># query connections data from netbox</span>
         <span class="n">nb_connections</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_connections</span><span class="p">(</span>
             <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">hosts</span><span class="p">),</span> <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">nb_connections</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="s2">&quot;connection retrieval completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span>
+                <span class="s2">"connection retrieval completed with errors"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span>
             <span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nb_connections</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="c1"># save connections data to hosts&#39; inventory</span>
+        <span class="c1"># save connections data to hosts' inventory</span>
         <span class="k">while</span> <span class="n">nb_connections</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
             <span class="n">device</span><span class="p">,</span> <span class="n">device_connections</span> <span class="o">=</span> <span class="n">nb_connections</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
-            <span class="n">hosts</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;connections&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_connections</span>
+            <span class="n">hosts</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"data"</span><span class="p">][</span><span class="s2">"connections"</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_connections</span>
 
     <span class="c1"># add circuits data</span>
     <span class="k">if</span> <span class="n">circuits</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching circuits for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> Nornir host(s)&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"fetching circuits for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> Nornir host(s)"</span><span class="p">)</span>
         <span class="c1"># decide on get_interfaces arguments</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="n">circuits</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">circuits</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;cache&quot;</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;branch&quot;</span><span class="p">,</span> <span class="n">branch</span><span class="p">)</span>
-        <span class="c1"># add &#39;circuits&#39; key to all hosts&#39; data</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"cache"</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"branch"</span><span class="p">,</span> <span class="n">branch</span><span class="p">)</span>
+        <span class="c1"># add 'circuits' key to all hosts' data</span>
         <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">hosts</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">host</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;circuits&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">host</span><span class="p">[</span><span class="s2">"data"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"circuits"</span><span class="p">,</span> <span class="p">{})</span>
         <span class="c1"># query circuits data from netbox</span>
         <span class="n">nb_circuits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_circuits</span><span class="p">(</span>
             <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">hosts</span><span class="p">),</span> <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">nb_circuits</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;circuit retrieval completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"circuit retrieval completed with errors"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nb_circuits</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="c1"># save circuits data to hosts&#39; inventory</span>
+        <span class="c1"># save circuits data to hosts' inventory</span>
         <span class="k">while</span> <span class="n">nb_circuits</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
             <span class="n">device</span><span class="p">,</span> <span class="n">device_circuits</span> <span class="o">=</span> <span class="n">nb_circuits</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
-            <span class="n">hosts</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;circuits&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_circuits</span>
+            <span class="n">hosts</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"data"</span><span class="p">][</span><span class="s2">"circuits"</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_circuits</span>
 
     <span class="c1"># add bgp peerings data</span>
     <span class="k">if</span> <span class="n">bgp_peerings</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching BGP peerings for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> Nornir host(s)&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"fetching BGP peerings for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> Nornir host(s)"</span><span class="p">)</span>
         <span class="c1"># decide on get_interfaces arguments</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="n">bgp_peerings</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bgp_peerings</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;cache&quot;</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;branch&quot;</span><span class="p">,</span> <span class="n">branch</span><span class="p">)</span>
-        <span class="c1"># add &#39;bgp_peerings&#39; key to all hosts&#39; data</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"cache"</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"branch"</span><span class="p">,</span> <span class="n">branch</span><span class="p">)</span>
+        <span class="c1"># add 'bgp_peerings' key to all hosts' data</span>
         <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">hosts</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">host</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;bgp_peerings&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">host</span><span class="p">[</span><span class="s2">"data"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"bgp_peerings"</span><span class="p">,</span> <span class="p">{})</span>
         <span class="c1"># query bgp_peerings data from netbox</span>
         <span class="n">nb_bgp_peerings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bgp_peerings</span><span class="p">(</span>
             <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">hosts</span><span class="p">),</span> <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">nb_bgp_peerings</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="s2">&quot;BGP peering retrieval completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span>
+                <span class="s2">"BGP peering retrieval completed with errors"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span>
             <span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nb_bgp_peerings</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="c1"># save circuits data to hosts&#39; inventory</span>
+        <span class="c1"># save circuits data to hosts' inventory</span>
         <span class="k">while</span> <span class="n">nb_bgp_peerings</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
             <span class="n">device</span><span class="p">,</span> <span class="n">device_bgp_peerings</span> <span class="o">=</span> <span class="n">nb_bgp_peerings</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
-            <span class="n">hosts</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;bgp_peerings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_bgp_peerings</span>
+            <span class="n">hosts</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"data"</span><span class="p">][</span><span class="s2">"bgp_peerings"</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_bgp_peerings</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Nornir inventory build complete: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> host(s)&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Nornir inventory build complete: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> host(s)"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>

@@ -7303,9 +7303,9 @@ ASN. Role/site lookup does not fall back to description.</p>
 a description. The range, role, and site must already exist.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="mi">64512</span><span class="p">,</span>
-    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;edge routing&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;created&quot;</span><span class="p">,</span>
+    <span class="s2">"asn"</span><span class="p">:</span> <span class="mi">64512</span><span class="p">,</span>
+    <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"edge routing"</span><span class="p">,</span>
+    <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"created"</span><span class="p">,</span>
 <span class="p">}</span>
 </code></pre></div>
 <p><code>status</code> is <code>create</code> or <code>update</code> during dry-run and <code>created</code> or <code>updated</code> after an applied operation.</p>
@@ -7313,32 +7313,32 @@ a description. The range, role, and site must already exist.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>netbox<span class="w"> </span>create<span class="w"> </span>asn<span class="w"> </span>asn-range<span class="w"> </span>PRIVATE-ASNS<span class="w"> </span>description<span class="w"> </span><span class="s2">&quot;edge routing&quot;</span><span class="w"> </span>sites<span class="w"> </span>BRANCH-001,BRANCH-002
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>netbox<span class="w"> </span>create<span class="w"> </span>asn<span class="w"> </span>asn-range<span class="w"> </span>PRIVATE-ASNS<span class="w"> </span>description<span class="w"> </span><span class="s2">"edge routing"</span><span class="w"> </span>sites<span class="w"> </span>BRANCH-001,BRANCH-002
 nf#<span class="w"> </span>netbox<span class="w"> </span>create<span class="w"> </span>asn<span class="w"> </span>asn<span class="w"> </span><span class="m">65001</span><span class="w"> </span>rir<span class="w"> </span>Private<span class="w"> </span>sites<span class="w"> </span>BRANCH-001
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">allocated</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;create_asn&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"create_asn"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;asn_range&quot;</span><span class="p">:</span> <span class="s2">&quot;PRIVATE-ASNS&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;sites&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;BRANCH-001&quot;</span><span class="p">,</span> <span class="s2">&quot;BRANCH-002&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;edge routing&quot;</span><span class="p">,</span>
+            <span class="s2">"asn_range"</span><span class="p">:</span> <span class="s2">"PRIVATE-ASNS"</span><span class="p">,</span>
+            <span class="s2">"sites"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"BRANCH-001"</span><span class="p">,</span> <span class="s2">"BRANCH-002"</span><span class="p">],</span>
+            <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"edge routing"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
     <span class="n">explicit</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;create_asn&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="mi">65001</span><span class="p">,</span> <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;Private&quot;</span><span class="p">},</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"create_asn"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"asn"</span><span class="p">:</span> <span class="mi">65001</span><span class="p">,</span> <span class="s2">"rir"</span><span class="p">:</span> <span class="s2">"Private"</span><span class="p">},</span>
     <span class="p">)</span>
 </code></pre></div>
 </div>
@@ -7910,16 +7910,16 @@ the description or role/sites; or the range has no free ASNs.</p>
 <span class="normal">229</span>
 <span class="normal">230</span>
 <span class="normal">231</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateBgpAsnInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateBgpAsnResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Create BGP ASN&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Create BGP ASN"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -7939,7 +7939,7 @@ the description or role/sites; or the range has no free ASNs.</p>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create, update, or allocate one ASN in NetBox.</span>
+<span class="w">    </span><span class="sd">"""Create, update, or allocate one ASN in NetBox.</span>
 
 <span class="sd">    An explicit ASN is matched globally by number. Without one, range searches</span>
 <span class="sd">    use role and sites when both are supplied, matching an ASN in the range</span>
@@ -7947,7 +7947,7 @@ the description or role/sites; or the range has no free ASNs.</p>
 <span class="sd">    by description within the range. If the selected lookup finds no match,</span>
 <span class="sd">    it allocates the first available number. Without either lookup, repeated</span>
 <span class="sd">    range calls can allocate different ASNs. A non-empty sites</span>
-<span class="sd">    list adds to the ASN&#39;s site assignments; an empty or omitted list</span>
+<span class="sd">    list adds to the ASN's site assignments; an empty or omitted list</span>
 <span class="sd">    leaves them alone. Tags and array custom fields are also additive.</span>
 <span class="sd">    Dry-run reports the selected number without writing relationships.</span>
 
@@ -7965,7 +7965,7 @@ the description or role/sites; or the range has no free ASNs.</p>
 <span class="sd">            must identify exactly one object. Arrays merged with existing values;</span>
 <span class="sd">            empty arrays preserve existing arrays. Null and scalar values</span>
 <span class="sd">            replace existing values.</span>
-<span class="sd">        sites: Optional site names to add to the ASN&#39;s assignments. With role,</span>
+<span class="sd">        sites: Optional site names to add to the ASN's assignments. With role,</span>
 <span class="sd">            also used to reuse a range allocation assigned to any of these sites.</span>
 <span class="sd">        role: Optional IPAM role name. With sites, also used for range lookup</span>
 <span class="sd">            before description matching.</span>
@@ -7982,10 +7982,10 @@ the description or role/sites; or the range has no free ASNs.</p>
 <span class="sd">        ValueError: The range, RIR, site, or related custom-field object is</span>
 <span class="sd">            missing; a related name is ambiguous; more than one ASN matches</span>
 <span class="sd">            the description or role/sites; or the range has no free ASNs.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_asn&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_asn"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="p">{},</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
         <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
@@ -7993,7 +7993,7 @@ the description or role/sites; or the range has no free ASNs.</p>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="n">nb_range</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">asn_ranges</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">asn_range</span><span class="p">)</span> <span class="k">if</span> <span class="n">asn_range</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">asn_range</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">nb_range</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ASN range &#39;</span><span class="si">{</span><span class="n">asn_range</span><span class="si">}</span><span class="s2">&#39; not found in NetBox&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"ASN range '</span><span class="si">{</span><span class="n">asn_range</span><span class="si">}</span><span class="s2">' not found in NetBox"</span><span class="p">)</span>
 
     <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">asn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -8018,44 +8018,44 @@ the description or role/sites; or the range has no free ASNs.</p>
         <span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;ASN lookup matched more than one ASN in range &#39;</span><span class="si">{</span><span class="n">asn_range</span><span class="si">}</span><span class="s2">&#39; (description=</span><span class="si">{</span><span class="n">description</span><span class="si">!r}</span><span class="s2">, role=</span><span class="si">{</span><span class="n">role</span><span class="si">!r}</span><span class="s2">, sites=</span><span class="si">{</span><span class="n">sites</span><span class="si">!r}</span><span class="s2">)&quot;</span>
+            <span class="sa">f</span><span class="s2">"ASN lookup matched more than one ASN in range '</span><span class="si">{</span><span class="n">asn_range</span><span class="si">}</span><span class="s2">' (description=</span><span class="si">{</span><span class="n">description</span><span class="si">!r}</span><span class="s2">, role=</span><span class="si">{</span><span class="n">role</span><span class="si">!r}</span><span class="s2">, sites=</span><span class="si">{</span><span class="n">sites</span><span class="si">!r}</span><span class="s2">)"</span>
         <span class="p">)</span>
 
     <span class="n">nb_asn</span> <span class="o">=</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">matches</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_asn</span> <span class="ow">and</span> <span class="n">asn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">available</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nb_range</span><span class="o">.</span><span class="n">available_asns</span><span class="o">.</span><span class="n">list</span><span class="p">())</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">available</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ASN range &#39;</span><span class="si">{</span><span class="n">asn_range</span><span class="si">}</span><span class="s2">&#39; has no available ASNs&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"ASN range '</span><span class="si">{</span><span class="n">asn_range</span><span class="si">}</span><span class="s2">' has no available ASNs"</span><span class="p">)</span>
         <span class="n">asn</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
-            <span class="n">available</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;asn&quot;</span><span class="p">]</span>
+            <span class="n">available</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"asn"</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">available</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)</span>
-            <span class="k">else</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">available</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;asn&quot;</span><span class="p">,</span> <span class="n">available</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">else</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">available</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">"asn"</span><span class="p">,</span> <span class="n">available</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="p">)</span>
     <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">nb_asn</span><span class="o">.</span><span class="n">asn</span><span class="p">)</span> <span class="k">if</span> <span class="n">nb_asn</span> <span class="k">else</span> <span class="n">asn</span><span class="p">,</span>
-            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
-            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;update&quot;</span> <span class="k">if</span> <span class="n">nb_asn</span> <span class="k">else</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span>
+            <span class="s2">"asn"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">nb_asn</span><span class="o">.</span><span class="n">asn</span><span class="p">)</span> <span class="k">if</span> <span class="n">nb_asn</span> <span class="k">else</span> <span class="n">asn</span><span class="p">,</span>
+            <span class="s2">"description"</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
+            <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"update"</span> <span class="k">if</span> <span class="n">nb_asn</span> <span class="k">else</span> <span class="s2">"create"</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_asn</span> <span class="ow">and</span> <span class="n">nb_range</span><span class="p">:</span>
-        <span class="n">nb_asn</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">asns</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="n">asn</span><span class="p">,</span> <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="n">nb_range</span><span class="o">.</span><span class="n">rir</span><span class="o">.</span><span class="n">id</span><span class="p">})</span>
+        <span class="n">nb_asn</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">asns</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"asn"</span><span class="p">:</span> <span class="n">asn</span><span class="p">,</span> <span class="s2">"rir"</span><span class="p">:</span> <span class="n">nb_range</span><span class="o">.</span><span class="n">rir</span><span class="o">.</span><span class="n">id</span><span class="p">})</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="n">nb_asn</span><span class="p">:</span>
         <span class="n">rir_object</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">rirs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">rir</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">rir_object</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RIR &#39;</span><span class="si">{</span><span class="n">rir</span><span class="si">}</span><span class="s2">&#39; not found in NetBox&quot;</span><span class="p">)</span>
-        <span class="n">nb_asn</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">asns</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="n">asn</span><span class="p">,</span> <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="n">rir_object</span><span class="o">.</span><span class="n">id</span><span class="p">})</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"RIR '</span><span class="si">{</span><span class="n">rir</span><span class="si">}</span><span class="s2">' not found in NetBox"</span><span class="p">)</span>
+        <span class="n">nb_asn</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">asns</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"asn"</span><span class="p">:</span> <span class="n">asn</span><span class="p">,</span> <span class="s2">"rir"</span><span class="p">:</span> <span class="n">rir_object</span><span class="o">.</span><span class="n">id</span><span class="p">})</span>
 
     <span class="n">changed</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">nb_asn</span><span class="o">.</span><span class="n">description</span> <span class="o">!=</span> <span class="n">description</span><span class="p">:</span>
         <span class="n">nb_asn</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
         <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">tenant</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_asn</span><span class="o">.</span><span class="n">tenant</span><span class="p">)</span> <span class="o">!=</span> <span class="n">tenant</span><span class="p">:</span>
-        <span class="n">nb_asn</span><span class="o">.</span><span class="n">tenant</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tenant</span><span class="p">}</span>
+        <span class="n">nb_asn</span><span class="o">.</span><span class="n">tenant</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">tenant</span><span class="p">}</span>
         <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">role</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_asn</span><span class="o">.</span><span class="n">role</span><span class="p">)</span> <span class="o">!=</span> <span class="n">role</span><span class="p">:</span>
-        <span class="n">nb_asn</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">role</span><span class="p">}</span>
+        <span class="n">nb_asn</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">role</span><span class="p">}</span>
         <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">site_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">sites</span> <span class="ow">or</span> <span class="p">[]))</span>
     <span class="k">if</span> <span class="n">site_names</span><span class="p">:</span>
@@ -8063,7 +8063,7 @@ the description or role/sites; or the range has no free ASNs.</p>
         <span class="n">site_ids</span> <span class="o">=</span> <span class="p">{</span><span class="n">item</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">nb_sites</span><span class="p">}</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">site_ids</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">site_names</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;ASN sites not found: </span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">site_names</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">set</span><span class="p">(</span><span class="n">site_ids</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"ASN sites not found: </span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">site_names</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">set</span><span class="p">(</span><span class="n">site_ids</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
         <span class="n">current_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">nb_asn</span><span class="o">.</span><span class="n">sites</span><span class="p">]</span>
         <span class="n">merged_ids</span> <span class="o">=</span> <span class="n">merge_array_values</span><span class="p">(</span>
@@ -8076,19 +8076,19 @@ the description or role/sites; or the range has no free ASNs.</p>
         <span class="n">current_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">nb_asn</span><span class="o">.</span><span class="n">tags</span><span class="p">]</span>
         <span class="n">merged_names</span> <span class="o">=</span> <span class="n">merge_array_values</span><span class="p">(</span><span class="n">current_names</span><span class="p">,</span> <span class="n">tags</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">merged_names</span> <span class="o">!=</span> <span class="n">current_names</span><span class="p">:</span>
-            <span class="n">nb_asn</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">merged_names</span><span class="p">]</span>
+            <span class="n">nb_asn</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">merged_names</span><span class="p">]</span>
             <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">custom_fields</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">reference_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">,</span>
-            <span class="n">object_type</span><span class="o">=</span><span class="s2">&quot;ipam.asn&quot;</span><span class="p">,</span>
-            <span class="nb">type</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;multiobject&quot;</span><span class="p">],</span>
+            <span class="n">object_type</span><span class="o">=</span><span class="s2">"ipam.asn"</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="p">[</span><span class="s2">"object"</span><span class="p">,</span> <span class="s2">"multiobject"</span><span class="p">],</span>
         <span class="p">)</span>
         <span class="n">object_fields</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span>
+            <span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">"object"</span>
         <span class="p">]</span>
         <span class="n">multiobject_fields</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;multiobject&quot;</span>
+            <span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">"multiobject"</span>
         <span class="p">]</span>
         <span class="n">current_fields</span><span class="p">,</span> <span class="n">merged_fields</span> <span class="o">=</span> <span class="n">merge_resolved_custom_fields</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -8104,13 +8104,13 @@ the description or role/sites; or the range has no free ASNs.</p>
     <span class="k">if</span> <span class="n">changed</span><span class="p">:</span>
         <span class="n">nb_asn</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
-    <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;updated&quot;</span> <span class="k">if</span> <span class="n">matches</span> <span class="k">else</span> <span class="s2">&quot;created&quot;</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"updated"</span> <span class="k">if</span> <span class="n">matches</span> <span class="k">else</span> <span class="s2">"created"</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">nb_asn</span><span class="o">.</span><span class="n">asn</span><span class="p">),</span>
-        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">nb_asn</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
-        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+        <span class="s2">"asn"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">nb_asn</span><span class="o">.</span><span class="n">asn</span><span class="p">),</span>
+        <span class="s2">"description"</span><span class="p">:</span> <span class="n">nb_asn</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+        <span class="s2">"status"</span><span class="p">:</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
     <span class="p">}</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ret</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="s2"> ASN </span><span class="si">{</span><span class="n">nb_asn</span><span class="o">.</span><span class="n">asn</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ret</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="s2"> ASN </span><span class="si">{</span><span class="n">nb_asn</span><span class="o">.</span><span class="n">asn</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>

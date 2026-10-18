@@ -7000,7 +7000,7 @@ pip install norfab[nornirservice]
 </code></pre></div>
 <p>This will create <code>norfab</code> folder and inside of it will create <code>inventory.yaml</code>, file name is important as NORFAB by default searches for <code>inventory.yaml</code>, file content is:</p>
 <div class="highlight"><span class="filename">inventory.yaml</span><pre><span></span><code><span class="nt">broker</span><span class="p">:</span><span class="w"> </span><span class="c1"># (1)!</span>
-<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tcp://127.0.0.1:5555&quot;</span><span class="w"> </span><span class="c1"># (2)!</span>
+<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"tcp://127.0.0.1:5555"</span><span class="w"> </span><span class="c1"># (2)!</span>
 
 <span class="nt">workers</span><span class="p">:</span><span class="w"> </span><span class="c1"># (3)!</span>
 <span class="w">  </span><span class="nt">nornir-*</span><span class="p">:</span><span class="w"> </span><span class="c1"># (4)!</span>
@@ -7025,7 +7025,7 @@ pip install norfab[nornirservice]
 </ol>
 <p>Command <code>--create-env</code> assumes we are working with Nornir service and creates <code>nornir</code> folder and inside of it creates two files. First file <code>common.yaml</code> to host configuration common for all Nornir service workers:</p>
 <div class="highlight"><span class="filename">common.yaml</span><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir</span><span class="w"> </span><span class="c1"># (1)!</span>
-<span class="nt">broker_endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tcp://127.0.0.1:5555&quot;</span><span class="w"> </span><span class="c1"># (2)!</span>
+<span class="nt">broker_endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"tcp://127.0.0.1:5555"</span><span class="w"> </span><span class="c1"># (2)!</span>
 
 <span class="c1"># Nornir inventory and configuration</span>
 <span class="nt">runner</span><span class="p">:</span><span class="w"> </span><span class="c1"># (3)!</span>

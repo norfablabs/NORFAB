@@ -7893,8 +7893,8 @@ accidentally run the entire test repository.</p>
 <p>Examples:</p>
 <div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-core
 poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-test-nornir<span class="w"> </span>--selector<span class="o">=</span>tests/services/nornir/test_worker.py
-poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-nornir<span class="w"> </span>--keyword<span class="o">=</span>test_list_tasks<span class="w"> </span>--pytest-args<span class="o">=</span><span class="s2">&quot;-x -s&quot;</span>
-poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-netbox<span class="w"> </span>--marker<span class="o">=</span><span class="s2">&quot;netbox and netbox_get_devices&quot;</span>
+poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-nornir<span class="w"> </span>--keyword<span class="o">=</span>test_list_tasks<span class="w"> </span>--pytest-args<span class="o">=</span><span class="s2">"-x -s"</span>
+poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-netbox<span class="w"> </span>--marker<span class="o">=</span><span class="s2">"netbox and netbox_get_devices"</span>
 poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-core<span class="w"> </span>--python-version<span class="o">=</span><span class="m">3</span>.13<span class="w"> </span>--build
 poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-netbox<span class="w"> </span>--parallel-runs<span class="o">=</span><span class="m">2</span>
 </code></pre></div>

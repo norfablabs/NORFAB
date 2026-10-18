@@ -6987,8 +6987,8 @@
 <h1 id="fasapi-worker-inventory">FasAPI Worker Inventory<a class="headerlink" href="#fasapi-worker-inventory" title="Permanent link">¤</a></h1>
 <p>Content of <code>inventory.yaml</code> need to be updated to include FastAPI worker details:</p>
 <div class="highlight"><span class="filename">inventory.yaml</span><pre><span></span><code><span class="nt">broker</span><span class="p">:</span><span class="w"> </span>
-<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tcp://127.0.0.1:5555&quot;</span><span class="w"> </span>
-<span class="w">  </span><span class="nt">shared_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5z1:yW}]n?UXhGmz+5CeHN1&gt;:S9k!eCh6JyIhJqO&quot;</span>
+<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"tcp://127.0.0.1:5555"</span><span class="w"> </span>
+<span class="w">  </span><span class="nt">shared_key</span><span class="p">:</span><span class="w"> </span><span class="s">"5z1:yW}]n?UXhGmz+5CeHN1&gt;:S9k!eCh6JyIhJqO"</span>
 
 <span class="nt">workers</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">fastapi-worker-1</span><span class="p">:</span><span class="w"> </span>
@@ -7011,8 +7011,8 @@ nfcli --show-broker-shared-key
 <span class="c1"># https://fastapi.tiangolo.com/reference/fastapi/#fastapi.FastAPI</span>
 <span class="nt">fastapi</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FastAPI</span>
-<span class="w">  </span><span class="nt">docs_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/docs&quot;</span>
-<span class="w">  </span><span class="nt">redoc_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/redoc&quot;</span>
+<span class="w">  </span><span class="nt">docs_url</span><span class="p">:</span><span class="w"> </span><span class="s">"/docs"</span>
+<span class="w">  </span><span class="nt">redoc_url</span><span class="p">:</span><span class="w"> </span><span class="s">"/redoc"</span>
 <span class="w">  </span><span class="c1"># ..etc</span>
 
 <span class="c1"># below parameters passed onto config = uvicorn.Config(app, **uvicorn_inventory)</span>

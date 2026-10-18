@@ -7447,10 +7447,10 @@ controls whether a service task is published and callable:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">tools</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">policy</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir</span>
-<span class="w">      </span><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;cli&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"cli"</span><span class="p p-Indicator">]</span>
 <span class="w">      </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">allow</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
-<span class="w">      </span><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">"*"</span>
+<span class="w">      </span><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"*"</span><span class="p p-Indicator">]</span>
 <span class="w">      </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reject</span>
 </code></pre></div>
 <p>Policy answers the coarse question: "May this MCP server expose and call this
@@ -7470,88 +7470,88 @@ to task definitions and as inventory-defined overlays in the FastMCP worker.</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CliInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CliResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Run CLI Commands&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Run CLI Commands"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s2">&quot;guardrails&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"guardrails"</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that reboot, reload, or restart devices.&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(reboot|reload|restart)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+(reboot|power-off)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*admin</span><span class="se">\\</span><span class="s2">s+reboot</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Reject CLI commands that reboot, reload, or restart devices."</span><span class="p">,</span>
+                <span class="s2">"field"</span><span class="p">:</span> <span class="s2">"commands"</span><span class="p">,</span>
+                <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"regex"</span><span class="p">,</span>
+                <span class="s2">"match"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*(reboot|reload|restart)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+(reboot|power-off)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*admin</span><span class="se">\\</span><span class="s2">s+reboot</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
                 <span class="p">],</span>
-                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected a reboot, reload, or restart command.&quot;</span><span class="p">,</span>
+                <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"MCP guardrail rejected a reboot, reload, or restart command."</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="p">{</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that enter configuration mode.&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*configure</span><span class="se">\\</span><span class="s2">s+(terminal|private|exclusive)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*configuration</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*conf</span><span class="se">\\</span><span class="s2">s+t</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*edit</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*system-view</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Reject CLI commands that enter configuration mode."</span><span class="p">,</span>
+                <span class="s2">"field"</span><span class="p">:</span> <span class="s2">"commands"</span><span class="p">,</span>
+                <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"regex"</span><span class="p">,</span>
+                <span class="s2">"match"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*configure</span><span class="se">\\</span><span class="s2">s+(terminal|private|exclusive)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*configuration</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*conf</span><span class="se">\\</span><span class="s2">s+t</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*edit</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*system-view</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
                 <span class="p">],</span>
-                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected a configuration mode command.&quot;</span><span class="p">,</span>
+                <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"MCP guardrail rejected a configuration mode command."</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="p">{</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that commit, delete, debug, or clear state.&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*commit</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(delete|erase|format|factory-reset|clear|debug|undebug|monitor|test|reset)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+zeroize</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Reject CLI commands that commit, delete, debug, or clear state."</span><span class="p">,</span>
+                <span class="s2">"field"</span><span class="p">:</span> <span class="s2">"commands"</span><span class="p">,</span>
+                <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"regex"</span><span class="p">,</span>
+                <span class="s2">"match"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*commit</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*(delete|erase|format|factory-reset|clear|debug|undebug|monitor|test|reset)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+zeroize</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
                 <span class="p">],</span>
-                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected a destructive or state-changing command.&quot;</span><span class="p">,</span>
+                <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"MCP guardrail rejected a destructive or state-changing command."</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="p">{</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that enter device shell modes.&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(bash|shell|sh)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*start</span><span class="se">\\</span><span class="s2">s+shell</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+shell</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*run</span><span class="se">\\</span><span class="s2">s+(bash|shell|sh)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(guestshell|run</span><span class="se">\\</span><span class="s2">s+guestshell)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Reject CLI commands that enter device shell modes."</span><span class="p">,</span>
+                <span class="s2">"field"</span><span class="p">:</span> <span class="s2">"commands"</span><span class="p">,</span>
+                <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"regex"</span><span class="p">,</span>
+                <span class="s2">"match"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*(bash|shell|sh)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*start</span><span class="se">\\</span><span class="s2">s+shell</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+shell</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*run</span><span class="se">\\</span><span class="s2">s+(bash|shell|sh)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*(guestshell|run</span><span class="se">\\</span><span class="s2">s+guestshell)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
                 <span class="p">],</span>
-                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected a shell mode command.&quot;</span><span class="p">,</span>
+                <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"MCP guardrail rejected a shell mode command."</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="p">{</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that change device software or boot images.&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*install</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+software</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*software</span><span class="se">\\</span><span class="s2">s+(install|add|activate|commit|rollback|clean|remove)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*boot</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*package</span><span class="se">\\</span><span class="s2">s+(install|add|delete|remove|activate)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Reject CLI commands that change device software or boot images."</span><span class="p">,</span>
+                <span class="s2">"field"</span><span class="p">:</span> <span class="s2">"commands"</span><span class="p">,</span>
+                <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"regex"</span><span class="p">,</span>
+                <span class="s2">"match"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*install</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+software</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*software</span><span class="se">\\</span><span class="s2">s+(install|add|activate|commit|rollback|clean|remove)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*boot</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*package</span><span class="se">\\</span><span class="s2">s+(install|add|delete|remove|activate)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
                 <span class="p">],</span>
-                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected an OS/image/package operation command.&quot;</span><span class="p">,</span>
+                <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"MCP guardrail rejected an OS/image/package operation command."</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="p">{</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that open outbound device sessions.&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
-                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(ssh|telnet)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Reject CLI commands that open outbound device sessions."</span><span class="p">,</span>
+                <span class="s2">"field"</span><span class="p">:</span> <span class="s2">"commands"</span><span class="p">,</span>
+                <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"regex"</span><span class="p">,</span>
+                <span class="s2">"match"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*(ssh|telnet)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
                 <span class="p">],</span>
-                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected an outbound session command.&quot;</span><span class="p">,</span>
+                <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"MCP guardrail rejected an outbound session command."</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">],</span>
-        <span class="s2">&quot;prompts&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"prompts"</span><span class="p">:</span> <span class="p">[</span>
             <span class="o">...</span>
         <span class="p">],</span>
     <span class="p">},</span>
@@ -7562,7 +7562,7 @@ to task definitions and as inventory-defined overlays in the FastMCP worker.</p>
 <p>FastMCP inventory can add deployment-specific guardrails. Built-in task
 guardrails are enabled by default:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fastmcp</span>
-<span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1&quot;</span>
+<span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="s">"127.0.0.1"</span>
 <span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8001</span>
 
 <span class="nt">tools</span><span class="p">:</span>
@@ -7572,8 +7572,8 @@ guardrails are enabled by default:</p>
 <span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Reject reload commands from MCP clients.</span>
 <span class="w">      </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">commands</span>
 <span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">regex</span>
-<span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(?i)^\\s*reload\\b.*&quot;</span>
-<span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;MCP</span><span class="nv"> </span><span class="s">guardrail</span><span class="nv"> </span><span class="s">rejected</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">reload</span><span class="nv"> </span><span class="s">command.&quot;</span>
+<span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">"(?i)^\\s*reload\\b.*"</span>
+<span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">"MCP</span><span class="nv"> </span><span class="s">guardrail</span><span class="nv"> </span><span class="s">rejected</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">reload</span><span class="nv"> </span><span class="s">command."</span>
 </code></pre></div>
 <p>Operators can disable task-defined guardrails while keeping inventory-defined
 guardrails active:</p>
@@ -7584,8 +7584,8 @@ guardrails active:</p>
 <span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cli</span>
 <span class="w">      </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">commands</span>
 <span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">regex</span>
-<span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(?i)^\\s*reload\\b.*&quot;</span>
-<span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;MCP</span><span class="nv"> </span><span class="s">guardrail</span><span class="nv"> </span><span class="s">rejected</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">reload</span><span class="nv"> </span><span class="s">command.&quot;</span>
+<span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">"(?i)^\\s*reload\\b.*"</span>
+<span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">"MCP</span><span class="nv"> </span><span class="s">guardrail</span><span class="nv"> </span><span class="s">rejected</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">reload</span><span class="nv"> </span><span class="s">command."</span>
 </code></pre></div>
 <p>The FastMCP worker evaluates all matching guardrails before calling
 <code>self.client.run_job(...)</code>. If any guardrail matches, the MCP tool call is
@@ -7667,11 +7667,11 @@ inside the existing <code>mcp</code> dictionary:</p>
     <span class="nb">input</span><span class="o">=</span><span class="n">SomeInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SomeOutput</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
-        <span class="s2">&quot;guardrails&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
+        <span class="s2">"guardrails"</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span><span class="o">...</span><span class="p">},</span>
         <span class="p">],</span>
-        <span class="s2">&quot;prompts&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"prompts"</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span><span class="o">...</span><span class="p">},</span>
         <span class="p">],</span>
     <span class="p">},</span>
@@ -7718,15 +7718,15 @@ inside the existing <code>mcp</code> dictionary:</p>
 MCP SDK <code>Tool</code> model. The FastMCP worker must remove it from the copied MCP
 metadata before constructing <code>types.Tool(...)</code>, the same way it removes
 <code>prompts</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="n">tool_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;mcp&quot;</span><span class="p">])</span>
-<span class="n">prompts_metadata</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;prompts&quot;</span><span class="p">,</span> <span class="p">[])</span>
-<span class="n">guardrails_metadata</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;guardrails&quot;</span><span class="p">,</span> <span class="p">[])</span>
+<div class="highlight"><pre><span></span><code><span class="n">tool_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">task</span><span class="p">[</span><span class="s2">"mcp"</span><span class="p">])</span>
+<span class="n">prompts_metadata</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"prompts"</span><span class="p">,</span> <span class="p">[])</span>
+<span class="n">guardrails_metadata</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"guardrails"</span><span class="p">,</span> <span class="p">[])</span>
 
 <span class="n">tool</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="n">derived_tool_name</span><span class="p">,</span>
-    <span class="n">description</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
-    <span class="n">inputSchema</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;inputSchema&quot;</span><span class="p">],</span>
-    <span class="n">outputSchema</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;outputSchema&quot;</span><span class="p">],</span>
+    <span class="n">description</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">"description"</span><span class="p">],</span>
+    <span class="n">inputSchema</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">"inputSchema"</span><span class="p">],</span>
+    <span class="n">outputSchema</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">"outputSchema"</span><span class="p">],</span>
     <span class="o">**</span><span class="n">tool_metadata</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -7827,7 +7827,7 @@ still applying inventory-defined guardrails.</p>
 <span class="w">      </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">commands</span>
 <span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">contains</span>
 <span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">commit confirmed</span>
-<span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;MCP</span><span class="nv"> </span><span class="s">guardrail</span><span class="nv"> </span><span class="s">rejected</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">commit</span><span class="nv"> </span><span class="s">confirmed</span><span class="nv"> </span><span class="s">command.&quot;</span>
+<span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">"MCP</span><span class="nv"> </span><span class="s">guardrail</span><span class="nv"> </span><span class="s">rejected</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">commit</span><span class="nv"> </span><span class="s">confirmed</span><span class="nv"> </span><span class="s">command."</span>
 </code></pre></div>
 <p>Inventory options:</p>
 <table>
@@ -7907,10 +7907,10 @@ still applying inventory-defined guardrails.</p>
 <code>tools.disable_builtin_guardrails</code> is <code>true</code>.</p>
 <h2 id="enforcement-flow">Enforcement Flow<a class="headerlink" href="#enforcement-flow" title="Permanent link">¤</a></h2>
 <p>FastMCP tool discovery will store guardrails with the registered tool data:</p>
-<div class="highlight"><pre><span></span><code><span class="n">result</span><span class="p">[</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]][</span><span class="n">task_tool</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;tool&quot;</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span><span class="o">**</span><span class="n">task_tool</span><span class="p">),</span>
-    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span>
-    <span class="s2">&quot;guardrails&quot;</span><span class="p">:</span> <span class="n">effective_guardrails</span><span class="p">,</span>
+<div class="highlight"><pre><span></span><code><span class="n">result</span><span class="p">[</span><span class="n">task</span><span class="p">[</span><span class="s2">"service"</span><span class="p">]][</span><span class="n">task_tool</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"tool"</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span><span class="o">**</span><span class="n">task_tool</span><span class="p">),</span>
+    <span class="s2">"task"</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span>
+    <span class="s2">"guardrails"</span><span class="p">:</span> <span class="n">effective_guardrails</span><span class="p">,</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>MCP <code>tools/call</code> will follow this sequence:</p>
@@ -7928,7 +7928,7 @@ still applying inventory-defined guardrails.</p>
     <span class="n">service</span><span class="o">=</span><span class="n">service</span><span class="p">,</span>
     <span class="n">task</span><span class="o">=</span><span class="n">task_name</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="n">arguments</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>This prevents a rejected call from creating a NorFab job, reaching a service
@@ -7943,89 +7943,89 @@ worker, or producing partial side effects.</p>
 <li>Not call <code>self.client.run_job(...)</code>.</li>
 </ul>
 <p>Example client-facing message:</p>
-<div class="highlight"><pre><span></span><code>MCP tool call &#39;service_nornir__task_cli&#39; rejected by guardrail
+<div class="highlight"><pre><span></span><code>MCP tool call 'service_nornir__task_cli' rejected by guardrail
 MCP guardrail rejected a configuration mode command.
 </code></pre></div>
 <h2 id="nornir-cli-default-guardrails">Nornir CLI Default Guardrails<a class="headerlink" href="#nornir-cli-default-guardrails" title="Permanent link">¤</a></h2>
 <p>The Nornir <code>cli</code> task should ship with six default MCP guardrails:</p>
 <div class="highlight"><pre><span></span><code><span class="n">MCP_GUARDRAILS</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">{</span>
-        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that reboot, reload, or restart devices.&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(reboot|reload|restart)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+(reboot|power-off)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*admin</span><span class="se">\\</span><span class="s2">s+reboot</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+        <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Reject CLI commands that reboot, reload, or restart devices."</span><span class="p">,</span>
+        <span class="s2">"field"</span><span class="p">:</span> <span class="s2">"commands"</span><span class="p">,</span>
+        <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"regex"</span><span class="p">,</span>
+        <span class="s2">"match"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*(reboot|reload|restart)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+(reboot|power-off)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*admin</span><span class="se">\\</span><span class="s2">s+reboot</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
         <span class="p">],</span>
-        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected a reboot, reload, or restart command.&quot;</span><span class="p">,</span>
+        <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"MCP guardrail rejected a reboot, reload, or restart command."</span><span class="p">,</span>
     <span class="p">},</span>
     <span class="p">{</span>
-        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that enter configuration mode.&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*configure</span><span class="se">\\</span><span class="s2">s+(terminal|private|exclusive)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*configuration</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*conf</span><span class="se">\\</span><span class="s2">s+t</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*edit</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*system-view</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+        <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Reject CLI commands that enter configuration mode."</span><span class="p">,</span>
+        <span class="s2">"field"</span><span class="p">:</span> <span class="s2">"commands"</span><span class="p">,</span>
+        <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"regex"</span><span class="p">,</span>
+        <span class="s2">"match"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*configure</span><span class="se">\\</span><span class="s2">s+(terminal|private|exclusive)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*configuration</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*conf</span><span class="se">\\</span><span class="s2">s+t</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*edit</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*system-view</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
         <span class="p">],</span>
-        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected a configuration mode command.&quot;</span><span class="p">,</span>
+        <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"MCP guardrail rejected a configuration mode command."</span><span class="p">,</span>
     <span class="p">},</span>
     <span class="p">{</span>
-        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that commit, delete, debug, or clear state.&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*commit</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(delete|erase|format|factory-reset|clear|debug|undebug|monitor|test|reset)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+zeroize</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+        <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Reject CLI commands that commit, delete, debug, or clear state."</span><span class="p">,</span>
+        <span class="s2">"field"</span><span class="p">:</span> <span class="s2">"commands"</span><span class="p">,</span>
+        <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"regex"</span><span class="p">,</span>
+        <span class="s2">"match"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*commit</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*(delete|erase|format|factory-reset|clear|debug|undebug|monitor|test|reset)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+zeroize</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
         <span class="p">],</span>
-        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected a destructive or state-changing command.&quot;</span><span class="p">,</span>
+        <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"MCP guardrail rejected a destructive or state-changing command."</span><span class="p">,</span>
     <span class="p">},</span>
     <span class="p">{</span>
-        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that enter device shell modes.&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(bash|shell|sh)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*start</span><span class="se">\\</span><span class="s2">s+shell</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+shell</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*run</span><span class="se">\\</span><span class="s2">s+(bash|shell|sh)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(guestshell|run</span><span class="se">\\</span><span class="s2">s+guestshell)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+        <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Reject CLI commands that enter device shell modes."</span><span class="p">,</span>
+        <span class="s2">"field"</span><span class="p">:</span> <span class="s2">"commands"</span><span class="p">,</span>
+        <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"regex"</span><span class="p">,</span>
+        <span class="s2">"match"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*(bash|shell|sh)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*start</span><span class="se">\\</span><span class="s2">s+shell</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+shell</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*run</span><span class="se">\\</span><span class="s2">s+(bash|shell|sh)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*(guestshell|run</span><span class="se">\\</span><span class="s2">s+guestshell)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
         <span class="p">],</span>
-        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected a shell mode command.&quot;</span><span class="p">,</span>
+        <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"MCP guardrail rejected a shell mode command."</span><span class="p">,</span>
     <span class="p">},</span>
     <span class="p">{</span>
-        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that change device software or boot images.&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*install</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+software</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*software</span><span class="se">\\</span><span class="s2">s+(install|add|activate|commit|rollback|clean|remove)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*boot</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*package</span><span class="se">\\</span><span class="s2">s+(install|add|delete|remove|activate)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+        <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Reject CLI commands that change device software or boot images."</span><span class="p">,</span>
+        <span class="s2">"field"</span><span class="p">:</span> <span class="s2">"commands"</span><span class="p">,</span>
+        <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"regex"</span><span class="p">,</span>
+        <span class="s2">"match"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*install</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+software</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*software</span><span class="se">\\</span><span class="s2">s+(install|add|activate|commit|rollback|clean|remove)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*boot</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*package</span><span class="se">\\</span><span class="s2">s+(install|add|delete|remove|activate)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
         <span class="p">],</span>
-        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected an OS/image/package operation command.&quot;</span><span class="p">,</span>
+        <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"MCP guardrail rejected an OS/image/package operation command."</span><span class="p">,</span>
     <span class="p">},</span>
     <span class="p">{</span>
-        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that open outbound device sessions.&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(ssh|telnet)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+        <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Reject CLI commands that open outbound device sessions."</span><span class="p">,</span>
+        <span class="s2">"field"</span><span class="p">:</span> <span class="s2">"commands"</span><span class="p">,</span>
+        <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"regex"</span><span class="p">,</span>
+        <span class="s2">"match"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">"(?im)^</span><span class="se">\\</span><span class="s2">s*(ssh|telnet)</span><span class="se">\\</span><span class="s2">b.*"</span><span class="p">,</span>
         <span class="p">],</span>
-        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected an outbound session command.&quot;</span><span class="p">,</span>
+        <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"MCP guardrail rejected an outbound session command."</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">]</span>
 </code></pre></div>
 <p>These guardrails apply whether <code>commands</code> is a string or a list of strings:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">&quot;commands&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;show version&quot;</span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">"commands"</span><span class="p">:</span><span class="w"> </span><span class="s2">"show version"</span><span class="p">}</span>
 </code></pre></div>
 <p>passes, while:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">&quot;commands&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;show version&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;conf t&quot;</span><span class="p">]}</span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">"commands"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"show version"</span><span class="p">,</span><span class="w"> </span><span class="s2">"conf t"</span><span class="p">]}</span>
 </code></pre></div>
 <p>is rejected before FastMCP dispatches the NorFab job.</p>
 <p>The guardrails apply even when <code>dry_run=true</code>. <code>dry_run</code> is a service task

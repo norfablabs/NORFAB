@@ -7253,17 +7253,17 @@
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>Returns BGP session data keyed by device name and session name:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;fceos4&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;fceos4-fceos5-eth105&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fceos4-fceos5-eth105&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;BGP peering between fceos4 and fceos5 on eth105&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Active&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;local_address&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.2.1/30&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;remote_address&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.2.2/30&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="mi">65100</span><span class="p">},</span>
-            <span class="s2">&quot;remote_as&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="mi">65101</span><span class="p">},</span>
-            <span class="s2">&quot;peer_group&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;TEST_BGP_PEER_GROUP_1&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;...&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">,</span>
+    <span class="s2">"fceos4"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"fceos4-fceos5-eth105"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"fceos4-fceos5-eth105"</span><span class="p">,</span>
+            <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"BGP peering between fceos4 and fceos5 on eth105"</span><span class="p">,</span>
+            <span class="s2">"status"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"label"</span><span class="p">:</span> <span class="s2">"Active"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="s2">"active"</span><span class="p">},</span>
+            <span class="s2">"local_address"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"address"</span><span class="p">:</span> <span class="s2">"10.0.2.1/30"</span><span class="p">},</span>
+            <span class="s2">"remote_address"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"address"</span><span class="p">:</span> <span class="s2">"10.0.2.2/30"</span><span class="p">},</span>
+            <span class="s2">"local_as"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"asn"</span><span class="p">:</span> <span class="mi">65100</span><span class="p">},</span>
+            <span class="s2">"remote_as"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"asn"</span><span class="p">:</span> <span class="mi">65101</span><span class="p">},</span>
+            <span class="s2">"peer_group"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"TEST_BGP_PEER_GROUP_1"</span><span class="p">},</span>
+            <span class="s2">"..."</span><span class="p">:</span> <span class="s2">"..."</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">},</span>
 <span class="p">}</span>
@@ -7296,33 +7296,33 @@
 <p>Context manager:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;get_bgp_peerings&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"get_bgp_peerings"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fceos4&quot;</span><span class="p">,</span> <span class="s2">&quot;fceos5&quot;</span><span class="p">],</span>
+            <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"fceos4"</span><span class="p">,</span> <span class="s2">"fceos5"</span><span class="p">],</span>
         <span class="p">},</span>
     <span class="p">)</span>
 </code></pre></div>
 <p>Direct lifecycle:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;get_bgp_peerings&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"get_bgp_peerings"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fceos4&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;cache&quot;</span><span class="p">:</span> <span class="s2">&quot;refresh&quot;</span><span class="p">,</span>
+            <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"fceos4"</span><span class="p">],</span>
+            <span class="s2">"cache"</span><span class="p">:</span> <span class="s2">"refresh"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 <span class="k">finally</span><span class="p">:</span>
@@ -7339,14 +7339,14 @@ root
 <span class="w">    </span>└──<span class="w"> </span>get:<span class="w">    </span>Query<span class="w"> </span>data<span class="w"> </span>from<span class="w"> </span>Netbox
 <span class="w">        </span>└──<span class="w"> </span>bgp-peerings:<span class="w">    </span>Query<span class="w"> </span>Netbox<span class="w"> </span>BGP<span class="w"> </span>Peerings<span class="w"> </span>data
 <span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'any'</span>
+<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
+<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
 <span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Only<span class="w"> </span><span class="k">return</span><span class="w"> </span>query<span class="w"> </span>content,<span class="w"> </span><span class="k">do</span><span class="w"> </span>not<span class="w"> </span>run<span class="w"> </span>it
 <span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>Branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
 <span class="w">            </span>├──<span class="w"> </span>*devices:<span class="w">    </span>Device<span class="w"> </span>names<span class="w"> </span>to<span class="w"> </span>query<span class="w"> </span>data<span class="w"> </span><span class="k">for</span>
-<span class="w">            </span>└──<span class="w"> </span>cache:<span class="w">    </span>How<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span>cache,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>└──<span class="w"> </span>cache:<span class="w">    </span>How<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span>cache,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
@@ -7486,120 +7486,120 @@ nf#
     </table>
         <p>Example return data for single bgp peering - same data as returned by NetBox built-in REST
 API explorer:</p>
-<div class="highlight"><pre><span></span><code>&quot;fceos4-fceos5-eth105&quot;: {
-    &quot;comments&quot;: &quot;&quot;,
-    &quot;created&quot;: &quot;2026-04-08T10:29:13.404863Z&quot;,
-    &quot;custom_fields&quot;: {},
-    &quot;description&quot;: &quot;BGP peering between fceos4 and fceos5 on eth105&quot;,
-    &quot;device&quot;: {
-        &quot;description&quot;: &quot;&quot;,
-        &quot;display&quot;: &quot;fceos4 (UUID-123451)&quot;,
-        &quot;id&quot;: 119,
-        &quot;name&quot;: &quot;fceos4&quot;,
-        &quot;url&quot;: &quot;http://netbox.lab:8000/api/dcim/devices/119/&quot;
+<div class="highlight"><pre><span></span><code>"fceos4-fceos5-eth105": {
+    "comments": "",
+    "created": "2026-04-08T10:29:13.404863Z",
+    "custom_fields": {},
+    "description": "BGP peering between fceos4 and fceos5 on eth105",
+    "device": {
+        "description": "",
+        "display": "fceos4 (UUID-123451)",
+        "id": 119,
+        "name": "fceos4",
+        "url": "http://netbox.lab:8000/api/dcim/devices/119/"
     },
-    &quot;display&quot;: &quot;fceos4 (UUID-123451):fceos4-fceos5-eth105&quot;,
-    &quot;export_policies&quot;: [
+    "display": "fceos4 (UUID-123451):fceos4-fceos5-eth105",
+    "export_policies": [
         {
-            &quot;description&quot;: &quot;&quot;,
-            &quot;display&quot;: &quot;RPL1&quot;,
-            &quot;id&quot;: 1,
-            &quot;name&quot;: &quot;RPL1&quot;,
-            &quot;url&quot;: &quot;http://netbox.lab:8000/api/plugins/bgp/routing-policy/1/&quot;
+            "description": "",
+            "display": "RPL1",
+            "id": 1,
+            "name": "RPL1",
+            "url": "http://netbox.lab:8000/api/plugins/bgp/routing-policy/1/"
         }
     ],
-    &quot;id&quot;: 7,
-    &quot;import_policies&quot;: [
+    "id": 7,
+    "import_policies": [
         {
-            &quot;description&quot;: &quot;&quot;,
-            &quot;display&quot;: &quot;RPL1&quot;,
-            &quot;id&quot;: 1,
-            &quot;name&quot;: &quot;RPL1&quot;,
-            &quot;url&quot;: &quot;http://netbox.lab:8000/api/plugins/bgp/routing-policy/1/&quot;
+            "description": "",
+            "display": "RPL1",
+            "id": 1,
+            "name": "RPL1",
+            "url": "http://netbox.lab:8000/api/plugins/bgp/routing-policy/1/"
         }
     ],
-    &quot;last_updated&quot;: &quot;2026-04-18T21:39:38.947199Z&quot;,
-    &quot;local_address&quot;: {
-        &quot;address&quot;: &quot;10.0.2.1/30&quot;,
-        &quot;description&quot;: &quot;&quot;,
-        &quot;display&quot;: &quot;10.0.2.1/30&quot;,
-        &quot;family&quot;: {
-            &quot;label&quot;: &quot;IPv4&quot;,
-            &quot;value&quot;: 4
+    "last_updated": "2026-04-18T21:39:38.947199Z",
+    "local_address": {
+        "address": "10.0.2.1/30",
+        "description": "",
+        "display": "10.0.2.1/30",
+        "family": {
+            "label": "IPv4",
+            "value": 4
         },
-        &quot;id&quot;: 489,
-        &quot;url&quot;: &quot;http://netbox.lab:8000/api/ipam/ip-addresses/489/&quot;
+        "id": 489,
+        "url": "http://netbox.lab:8000/api/ipam/ip-addresses/489/"
     },
-    &quot;local_as&quot;: {
-        &quot;asn&quot;: 65100,
-        &quot;description&quot;: &quot;BGP ASN for fceos4&quot;,
-        &quot;display&quot;: &quot;AS65100&quot;,
-        &quot;id&quot;: 3,
-        &quot;url&quot;: &quot;http://netbox.lab:8000/api/ipam/asns/3/&quot;
+    "local_as": {
+        "asn": 65100,
+        "description": "BGP ASN for fceos4",
+        "display": "AS65100",
+        "id": 3,
+        "url": "http://netbox.lab:8000/api/ipam/asns/3/"
     },
-    &quot;name&quot;: &quot;fceos4-fceos5-eth105&quot;,
-    &quot;peer_group&quot;: {
-        &quot;description&quot;: &quot;Test BGP peer group 1 for standard peerings&quot;,
-        &quot;display&quot;: &quot;TEST_BGP_PEER_GROUP_1&quot;,
-        &quot;id&quot;: 3,
-        &quot;name&quot;: &quot;TEST_BGP_PEER_GROUP_1&quot;,
-        &quot;url&quot;: &quot;http://netbox.lab:8000/api/plugins/bgp/bgppeergroup/3/&quot;
+    "name": "fceos4-fceos5-eth105",
+    "peer_group": {
+        "description": "Test BGP peer group 1 for standard peerings",
+        "display": "TEST_BGP_PEER_GROUP_1",
+        "id": 3,
+        "name": "TEST_BGP_PEER_GROUP_1",
+        "url": "http://netbox.lab:8000/api/plugins/bgp/bgppeergroup/3/"
     },
-    &quot;prefix_list_in&quot;: {
-        &quot;description&quot;: &quot;&quot;,
-        &quot;display&quot;: &quot;PFL1&quot;,
-        &quot;id&quot;: 1,
-        &quot;name&quot;: &quot;PFL1&quot;,
-        &quot;url&quot;: &quot;http://netbox.lab:8000/api/plugins/bgp/prefix-list/1/&quot;
+    "prefix_list_in": {
+        "description": "",
+        "display": "PFL1",
+        "id": 1,
+        "name": "PFL1",
+        "url": "http://netbox.lab:8000/api/plugins/bgp/prefix-list/1/"
     },
-    &quot;prefix_list_out&quot;: {
-        &quot;description&quot;: &quot;&quot;,
-        &quot;display&quot;: &quot;PFL1&quot;,
-        &quot;id&quot;: 1,
-        &quot;name&quot;: &quot;PFL1&quot;,
-        &quot;url&quot;: &quot;http://netbox.lab:8000/api/plugins/bgp/prefix-list/1/&quot;
+    "prefix_list_out": {
+        "description": "",
+        "display": "PFL1",
+        "id": 1,
+        "name": "PFL1",
+        "url": "http://netbox.lab:8000/api/plugins/bgp/prefix-list/1/"
     },
-    &quot;remote_address&quot;: {
-        &quot;address&quot;: &quot;10.0.2.2/30&quot;,
-        &quot;description&quot;: &quot;&quot;,
-        &quot;display&quot;: &quot;10.0.2.2/30&quot;,
-        &quot;family&quot;: {
-            &quot;label&quot;: &quot;IPv4&quot;,
-            &quot;value&quot;: 4
+    "remote_address": {
+        "address": "10.0.2.2/30",
+        "description": "",
+        "display": "10.0.2.2/30",
+        "family": {
+            "label": "IPv4",
+            "value": 4
         },
-        &quot;id&quot;: 490,
-        &quot;url&quot;: &quot;http://netbox.lab:8000/api/ipam/ip-addresses/490/&quot;
+        "id": 490,
+        "url": "http://netbox.lab:8000/api/ipam/ip-addresses/490/"
     },
-    &quot;remote_as&quot;: {
-        &quot;asn&quot;: 65101,
-        &quot;description&quot;: &quot;BGP ASN for fceos5&quot;,
-        &quot;display&quot;: &quot;AS65101&quot;,
-        &quot;id&quot;: 4,
-        &quot;url&quot;: &quot;http://netbox.lab:8000/api/ipam/asns/4/&quot;
+    "remote_as": {
+        "asn": 65101,
+        "description": "BGP ASN for fceos5",
+        "display": "AS65101",
+        "id": 4,
+        "url": "http://netbox.lab:8000/api/ipam/asns/4/"
     },
-    &quot;site&quot;: {
-        &quot;description&quot;: &quot;&quot;,
-        &quot;display&quot;: &quot;SALTNORNIR-LAB&quot;,
-        &quot;id&quot;: 13,
-        &quot;name&quot;: &quot;SALTNORNIR-LAB&quot;,
-        &quot;slug&quot;: &quot;saltnornir-lab&quot;,
-        &quot;url&quot;: &quot;http://netbox.lab:8000/api/dcim/sites/13/&quot;
+    "site": {
+        "description": "",
+        "display": "SALTNORNIR-LAB",
+        "id": 13,
+        "name": "SALTNORNIR-LAB",
+        "slug": "saltnornir-lab",
+        "url": "http://netbox.lab:8000/api/dcim/sites/13/"
     },
-    &quot;status&quot;: {
-        &quot;label&quot;: &quot;Active&quot;,
-        &quot;value&quot;: &quot;active&quot;
+    "status": {
+        "label": "Active",
+        "value": "active"
     },
-    &quot;tags&quot;: [],
-    &quot;tenant&quot;: {
-        &quot;description&quot;: &quot;&quot;,
-        &quot;display&quot;: &quot;SALTNORNIR&quot;,
-        &quot;id&quot;: 10,
-        &quot;name&quot;: &quot;SALTNORNIR&quot;,
-        &quot;slug&quot;: &quot;saltnornir&quot;,
-        &quot;url&quot;: &quot;http://netbox.lab:8000/api/tenancy/tenants/10/&quot;
+    "tags": [],
+    "tenant": {
+        "description": "",
+        "display": "SALTNORNIR",
+        "id": 10,
+        "name": "SALTNORNIR",
+        "slug": "saltnornir",
+        "url": "http://netbox.lab:8000/api/tenancy/tenants/10/"
     },
-    &quot;url&quot;: &quot;http://netbox.lab:8000/api/plugins/bgp/bgpsession/7/&quot;,
-    &quot;virtualmachine&quot;: null
+    "url": "http://netbox.lab:8000/api/plugins/bgp/bgpsession/7/",
+    "virtualmachine": null
 }
 </code></pre></div>
 
@@ -7957,14 +7957,14 @@ API explorer:</p>
 <span class="normal">1076</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetBgpPeeringsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetBgpPeeringsResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get BGP Peerings&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get BGP Peerings"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -7976,7 +7976,7 @@ API explorer:</p>
     <span class="n">cache</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve device BGP peerings from NetBox using REST API.</span>
 
 <span class="sd">    Args:</span>
@@ -7998,140 +7998,140 @@ API explorer:</p>
 <span class="sd">    API explorer:</span>
 
 <span class="sd">    ```</span>
-<span class="sd">    &quot;fceos4-fceos5-eth105&quot;: {</span>
-<span class="sd">        &quot;comments&quot;: &quot;&quot;,</span>
-<span class="sd">        &quot;created&quot;: &quot;2026-04-08T10:29:13.404863Z&quot;,</span>
-<span class="sd">        &quot;custom_fields&quot;: {},</span>
-<span class="sd">        &quot;description&quot;: &quot;BGP peering between fceos4 and fceos5 on eth105&quot;,</span>
-<span class="sd">        &quot;device&quot;: {</span>
-<span class="sd">            &quot;description&quot;: &quot;&quot;,</span>
-<span class="sd">            &quot;display&quot;: &quot;fceos4 (UUID-123451)&quot;,</span>
-<span class="sd">            &quot;id&quot;: 119,</span>
-<span class="sd">            &quot;name&quot;: &quot;fceos4&quot;,</span>
-<span class="sd">            &quot;url&quot;: &quot;http://netbox.lab:8000/api/dcim/devices/119/&quot;</span>
+<span class="sd">    "fceos4-fceos5-eth105": {</span>
+<span class="sd">        "comments": "",</span>
+<span class="sd">        "created": "2026-04-08T10:29:13.404863Z",</span>
+<span class="sd">        "custom_fields": {},</span>
+<span class="sd">        "description": "BGP peering between fceos4 and fceos5 on eth105",</span>
+<span class="sd">        "device": {</span>
+<span class="sd">            "description": "",</span>
+<span class="sd">            "display": "fceos4 (UUID-123451)",</span>
+<span class="sd">            "id": 119,</span>
+<span class="sd">            "name": "fceos4",</span>
+<span class="sd">            "url": "http://netbox.lab:8000/api/dcim/devices/119/"</span>
 <span class="sd">        },</span>
-<span class="sd">        &quot;display&quot;: &quot;fceos4 (UUID-123451):fceos4-fceos5-eth105&quot;,</span>
-<span class="sd">        &quot;export_policies&quot;: [</span>
+<span class="sd">        "display": "fceos4 (UUID-123451):fceos4-fceos5-eth105",</span>
+<span class="sd">        "export_policies": [</span>
 <span class="sd">            {</span>
-<span class="sd">                &quot;description&quot;: &quot;&quot;,</span>
-<span class="sd">                &quot;display&quot;: &quot;RPL1&quot;,</span>
-<span class="sd">                &quot;id&quot;: 1,</span>
-<span class="sd">                &quot;name&quot;: &quot;RPL1&quot;,</span>
-<span class="sd">                &quot;url&quot;: &quot;http://netbox.lab:8000/api/plugins/bgp/routing-policy/1/&quot;</span>
+<span class="sd">                "description": "",</span>
+<span class="sd">                "display": "RPL1",</span>
+<span class="sd">                "id": 1,</span>
+<span class="sd">                "name": "RPL1",</span>
+<span class="sd">                "url": "http://netbox.lab:8000/api/plugins/bgp/routing-policy/1/"</span>
 <span class="sd">            }</span>
 <span class="sd">        ],</span>
-<span class="sd">        &quot;id&quot;: 7,</span>
-<span class="sd">        &quot;import_policies&quot;: [</span>
+<span class="sd">        "id": 7,</span>
+<span class="sd">        "import_policies": [</span>
 <span class="sd">            {</span>
-<span class="sd">                &quot;description&quot;: &quot;&quot;,</span>
-<span class="sd">                &quot;display&quot;: &quot;RPL1&quot;,</span>
-<span class="sd">                &quot;id&quot;: 1,</span>
-<span class="sd">                &quot;name&quot;: &quot;RPL1&quot;,</span>
-<span class="sd">                &quot;url&quot;: &quot;http://netbox.lab:8000/api/plugins/bgp/routing-policy/1/&quot;</span>
+<span class="sd">                "description": "",</span>
+<span class="sd">                "display": "RPL1",</span>
+<span class="sd">                "id": 1,</span>
+<span class="sd">                "name": "RPL1",</span>
+<span class="sd">                "url": "http://netbox.lab:8000/api/plugins/bgp/routing-policy/1/"</span>
 <span class="sd">            }</span>
 <span class="sd">        ],</span>
-<span class="sd">        &quot;last_updated&quot;: &quot;2026-04-18T21:39:38.947199Z&quot;,</span>
-<span class="sd">        &quot;local_address&quot;: {</span>
-<span class="sd">            &quot;address&quot;: &quot;10.0.2.1/30&quot;,</span>
-<span class="sd">            &quot;description&quot;: &quot;&quot;,</span>
-<span class="sd">            &quot;display&quot;: &quot;10.0.2.1/30&quot;,</span>
-<span class="sd">            &quot;family&quot;: {</span>
-<span class="sd">                &quot;label&quot;: &quot;IPv4&quot;,</span>
-<span class="sd">                &quot;value&quot;: 4</span>
+<span class="sd">        "last_updated": "2026-04-18T21:39:38.947199Z",</span>
+<span class="sd">        "local_address": {</span>
+<span class="sd">            "address": "10.0.2.1/30",</span>
+<span class="sd">            "description": "",</span>
+<span class="sd">            "display": "10.0.2.1/30",</span>
+<span class="sd">            "family": {</span>
+<span class="sd">                "label": "IPv4",</span>
+<span class="sd">                "value": 4</span>
 <span class="sd">            },</span>
-<span class="sd">            &quot;id&quot;: 489,</span>
-<span class="sd">            &quot;url&quot;: &quot;http://netbox.lab:8000/api/ipam/ip-addresses/489/&quot;</span>
+<span class="sd">            "id": 489,</span>
+<span class="sd">            "url": "http://netbox.lab:8000/api/ipam/ip-addresses/489/"</span>
 <span class="sd">        },</span>
-<span class="sd">        &quot;local_as&quot;: {</span>
-<span class="sd">            &quot;asn&quot;: 65100,</span>
-<span class="sd">            &quot;description&quot;: &quot;BGP ASN for fceos4&quot;,</span>
-<span class="sd">            &quot;display&quot;: &quot;AS65100&quot;,</span>
-<span class="sd">            &quot;id&quot;: 3,</span>
-<span class="sd">            &quot;url&quot;: &quot;http://netbox.lab:8000/api/ipam/asns/3/&quot;</span>
+<span class="sd">        "local_as": {</span>
+<span class="sd">            "asn": 65100,</span>
+<span class="sd">            "description": "BGP ASN for fceos4",</span>
+<span class="sd">            "display": "AS65100",</span>
+<span class="sd">            "id": 3,</span>
+<span class="sd">            "url": "http://netbox.lab:8000/api/ipam/asns/3/"</span>
 <span class="sd">        },</span>
-<span class="sd">        &quot;name&quot;: &quot;fceos4-fceos5-eth105&quot;,</span>
-<span class="sd">        &quot;peer_group&quot;: {</span>
-<span class="sd">            &quot;description&quot;: &quot;Test BGP peer group 1 for standard peerings&quot;,</span>
-<span class="sd">            &quot;display&quot;: &quot;TEST_BGP_PEER_GROUP_1&quot;,</span>
-<span class="sd">            &quot;id&quot;: 3,</span>
-<span class="sd">            &quot;name&quot;: &quot;TEST_BGP_PEER_GROUP_1&quot;,</span>
-<span class="sd">            &quot;url&quot;: &quot;http://netbox.lab:8000/api/plugins/bgp/bgppeergroup/3/&quot;</span>
+<span class="sd">        "name": "fceos4-fceos5-eth105",</span>
+<span class="sd">        "peer_group": {</span>
+<span class="sd">            "description": "Test BGP peer group 1 for standard peerings",</span>
+<span class="sd">            "display": "TEST_BGP_PEER_GROUP_1",</span>
+<span class="sd">            "id": 3,</span>
+<span class="sd">            "name": "TEST_BGP_PEER_GROUP_1",</span>
+<span class="sd">            "url": "http://netbox.lab:8000/api/plugins/bgp/bgppeergroup/3/"</span>
 <span class="sd">        },</span>
-<span class="sd">        &quot;prefix_list_in&quot;: {</span>
-<span class="sd">            &quot;description&quot;: &quot;&quot;,</span>
-<span class="sd">            &quot;display&quot;: &quot;PFL1&quot;,</span>
-<span class="sd">            &quot;id&quot;: 1,</span>
-<span class="sd">            &quot;name&quot;: &quot;PFL1&quot;,</span>
-<span class="sd">            &quot;url&quot;: &quot;http://netbox.lab:8000/api/plugins/bgp/prefix-list/1/&quot;</span>
+<span class="sd">        "prefix_list_in": {</span>
+<span class="sd">            "description": "",</span>
+<span class="sd">            "display": "PFL1",</span>
+<span class="sd">            "id": 1,</span>
+<span class="sd">            "name": "PFL1",</span>
+<span class="sd">            "url": "http://netbox.lab:8000/api/plugins/bgp/prefix-list/1/"</span>
 <span class="sd">        },</span>
-<span class="sd">        &quot;prefix_list_out&quot;: {</span>
-<span class="sd">            &quot;description&quot;: &quot;&quot;,</span>
-<span class="sd">            &quot;display&quot;: &quot;PFL1&quot;,</span>
-<span class="sd">            &quot;id&quot;: 1,</span>
-<span class="sd">            &quot;name&quot;: &quot;PFL1&quot;,</span>
-<span class="sd">            &quot;url&quot;: &quot;http://netbox.lab:8000/api/plugins/bgp/prefix-list/1/&quot;</span>
+<span class="sd">        "prefix_list_out": {</span>
+<span class="sd">            "description": "",</span>
+<span class="sd">            "display": "PFL1",</span>
+<span class="sd">            "id": 1,</span>
+<span class="sd">            "name": "PFL1",</span>
+<span class="sd">            "url": "http://netbox.lab:8000/api/plugins/bgp/prefix-list/1/"</span>
 <span class="sd">        },</span>
-<span class="sd">        &quot;remote_address&quot;: {</span>
-<span class="sd">            &quot;address&quot;: &quot;10.0.2.2/30&quot;,</span>
-<span class="sd">            &quot;description&quot;: &quot;&quot;,</span>
-<span class="sd">            &quot;display&quot;: &quot;10.0.2.2/30&quot;,</span>
-<span class="sd">            &quot;family&quot;: {</span>
-<span class="sd">                &quot;label&quot;: &quot;IPv4&quot;,</span>
-<span class="sd">                &quot;value&quot;: 4</span>
+<span class="sd">        "remote_address": {</span>
+<span class="sd">            "address": "10.0.2.2/30",</span>
+<span class="sd">            "description": "",</span>
+<span class="sd">            "display": "10.0.2.2/30",</span>
+<span class="sd">            "family": {</span>
+<span class="sd">                "label": "IPv4",</span>
+<span class="sd">                "value": 4</span>
 <span class="sd">            },</span>
-<span class="sd">            &quot;id&quot;: 490,</span>
-<span class="sd">            &quot;url&quot;: &quot;http://netbox.lab:8000/api/ipam/ip-addresses/490/&quot;</span>
+<span class="sd">            "id": 490,</span>
+<span class="sd">            "url": "http://netbox.lab:8000/api/ipam/ip-addresses/490/"</span>
 <span class="sd">        },</span>
-<span class="sd">        &quot;remote_as&quot;: {</span>
-<span class="sd">            &quot;asn&quot;: 65101,</span>
-<span class="sd">            &quot;description&quot;: &quot;BGP ASN for fceos5&quot;,</span>
-<span class="sd">            &quot;display&quot;: &quot;AS65101&quot;,</span>
-<span class="sd">            &quot;id&quot;: 4,</span>
-<span class="sd">            &quot;url&quot;: &quot;http://netbox.lab:8000/api/ipam/asns/4/&quot;</span>
+<span class="sd">        "remote_as": {</span>
+<span class="sd">            "asn": 65101,</span>
+<span class="sd">            "description": "BGP ASN for fceos5",</span>
+<span class="sd">            "display": "AS65101",</span>
+<span class="sd">            "id": 4,</span>
+<span class="sd">            "url": "http://netbox.lab:8000/api/ipam/asns/4/"</span>
 <span class="sd">        },</span>
-<span class="sd">        &quot;site&quot;: {</span>
-<span class="sd">            &quot;description&quot;: &quot;&quot;,</span>
-<span class="sd">            &quot;display&quot;: &quot;SALTNORNIR-LAB&quot;,</span>
-<span class="sd">            &quot;id&quot;: 13,</span>
-<span class="sd">            &quot;name&quot;: &quot;SALTNORNIR-LAB&quot;,</span>
-<span class="sd">            &quot;slug&quot;: &quot;saltnornir-lab&quot;,</span>
-<span class="sd">            &quot;url&quot;: &quot;http://netbox.lab:8000/api/dcim/sites/13/&quot;</span>
+<span class="sd">        "site": {</span>
+<span class="sd">            "description": "",</span>
+<span class="sd">            "display": "SALTNORNIR-LAB",</span>
+<span class="sd">            "id": 13,</span>
+<span class="sd">            "name": "SALTNORNIR-LAB",</span>
+<span class="sd">            "slug": "saltnornir-lab",</span>
+<span class="sd">            "url": "http://netbox.lab:8000/api/dcim/sites/13/"</span>
 <span class="sd">        },</span>
-<span class="sd">        &quot;status&quot;: {</span>
-<span class="sd">            &quot;label&quot;: &quot;Active&quot;,</span>
-<span class="sd">            &quot;value&quot;: &quot;active&quot;</span>
+<span class="sd">        "status": {</span>
+<span class="sd">            "label": "Active",</span>
+<span class="sd">            "value": "active"</span>
 <span class="sd">        },</span>
-<span class="sd">        &quot;tags&quot;: [],</span>
-<span class="sd">        &quot;tenant&quot;: {</span>
-<span class="sd">            &quot;description&quot;: &quot;&quot;,</span>
-<span class="sd">            &quot;display&quot;: &quot;SALTNORNIR&quot;,</span>
-<span class="sd">            &quot;id&quot;: 10,</span>
-<span class="sd">            &quot;name&quot;: &quot;SALTNORNIR&quot;,</span>
-<span class="sd">            &quot;slug&quot;: &quot;saltnornir&quot;,</span>
-<span class="sd">            &quot;url&quot;: &quot;http://netbox.lab:8000/api/tenancy/tenants/10/&quot;</span>
+<span class="sd">        "tags": [],</span>
+<span class="sd">        "tenant": {</span>
+<span class="sd">            "description": "",</span>
+<span class="sd">            "display": "SALTNORNIR",</span>
+<span class="sd">            "id": 10,</span>
+<span class="sd">            "name": "SALTNORNIR",</span>
+<span class="sd">            "slug": "saltnornir",</span>
+<span class="sd">            "url": "http://netbox.lab:8000/api/tenancy/tenants/10/"</span>
 <span class="sd">        },</span>
-<span class="sd">        &quot;url&quot;: &quot;http://netbox.lab:8000/api/plugins/bgp/bgpsession/7/&quot;,</span>
-<span class="sd">        &quot;virtualmachine&quot;: null</span>
+<span class="sd">        "url": "http://netbox.lab:8000/api/plugins/bgp/bgpsession/7/",</span>
+<span class="sd">        "virtualmachine": null</span>
 <span class="sd">    }</span>
 <span class="sd">    ```</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get BGP peerings: Fetching BGP peerings for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; NetBox&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get BGP peerings: Fetching BGP peerings for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">' NetBox"</span>
     <span class="p">)</span>
     <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_use</span> <span class="k">if</span> <span class="n">cache</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">cache</span>
     <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cache</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_bgp_peerings&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_bgp_peerings"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">},</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
     <span class="p">)</span>
 
     <span class="c1"># Check if BGP plugin is installed</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_plugin</span><span class="p">(</span><span class="s2">&quot;netbox_bgp&quot;</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2"> NetBox instance has no BGP Plugin installed&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_plugin</span><span class="p">(</span><span class="s2">"netbox_bgp"</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2"> NetBox instance has no BGP Plugin installed"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
 
@@ -8143,7 +8143,7 @@ API explorer:</p>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">devices_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Failed to retrieve device details: </span><span class="si">{</span><span class="n">devices_result</span><span class="o">.</span><span class="n">errors</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"Failed to retrieve device details: </span><span class="si">{</span><span class="n">devices_result</span><span class="o">.</span><span class="n">errors</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
 
@@ -8152,21 +8152,21 @@ API explorer:</p>
     <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
         <span class="c1"># Skip devices not found in NetBox</span>
         <span class="k">if</span> <span class="n">device_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">devices_result</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Device &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; not found in NetBox&quot;</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Device '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">' not found in NetBox"</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">continue</span>
 
-        <span class="n">device_id</span> <span class="o">=</span> <span class="n">devices_result</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
-        <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;get_bgp_peerings::</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">device_id</span> <span class="o">=</span> <span class="n">devices_result</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"id"</span><span class="p">]</span>
+        <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"get_bgp_peerings::</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">"</span>
         <span class="n">cached_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
 
         <span class="c1"># Mode: force with cached data - use cache directly</span>
-        <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;force&quot;</span> <span class="ow">and</span> <span class="n">cached_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">"force"</span> <span class="ow">and</span> <span class="n">cached_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cached_data</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;using cached BGP peerings for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; (forced)&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"using cached BGP peerings for '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">' (forced)"</span><span class="p">,</span>
                 <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">continue</span>
@@ -8178,34 +8178,34 @@ API explorer:</p>
             <span class="p">):</span>
                 <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]:</span>
                     <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;duplicate BGP session name &#39;</span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; found on device &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;; skipping duplicate&quot;</span>
+                        <span class="sa">f</span><span class="s2">"duplicate BGP session name '</span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">' found on device "</span>
+                        <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">'; skipping duplicate"</span>
                     <span class="p">)</span>
-                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">resource</span><span class="o">=</span><span class="n">device_name</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-                    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">resource</span><span class="o">=</span><span class="n">device_name</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                     <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                     <span class="k">continue</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">])</span><span class="si">}</span><span class="s2"> BGP session(s) for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">])</span><span class="si">}</span><span class="s2"> BGP session(s) for '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">'"</span><span class="p">,</span>
                 <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">continue</span>
 
         <span class="c1"># Mode: refresh or no cached data - fetch and cache</span>
-        <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;refresh&quot;</span> <span class="ow">or</span> <span class="n">cached_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;refresh&quot;</span> <span class="ow">and</span> <span class="n">cached_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">"refresh"</span> <span class="ow">or</span> <span class="n">cached_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">"refresh"</span> <span class="ow">and</span> <span class="n">cached_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">retry</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="n">device_id</span><span class="o">=</span><span class="n">device_id</span>
             <span class="p">):</span>
                 <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]:</span>
                     <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;duplicate BGP session name &#39;</span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; found on device &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;; skipping duplicate&quot;</span>
+                        <span class="sa">f</span><span class="s2">"duplicate BGP session name '</span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">' found on device "</span>
+                        <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">'; skipping duplicate"</span>
                     <span class="p">)</span>
-                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">resource</span><span class="o">=</span><span class="n">device_name</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-                    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">resource</span><span class="o">=</span><span class="n">device_name</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                     <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                     <span class="k">continue</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
@@ -8213,7 +8213,7 @@ API explorer:</p>
                 <span class="n">cache_key</span><span class="p">,</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">],</span> <span class="n">expire</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_ttl</span>
             <span class="p">)</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;fetched and cached </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">])</span><span class="si">}</span><span class="s2"> BGP session(s) for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"fetched and cached </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">])</span><span class="si">}</span><span class="s2"> BGP session(s) for '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">'"</span><span class="p">,</span>
                 <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">continue</span>
@@ -8221,7 +8221,7 @@ API explorer:</p>
         <span class="c1"># Mode: cache=True with cached data - smart update (only fetch changed sessions)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cached_data</span><span class="p">)</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">cached_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session(s) from cache for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">cached_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session(s) from cache for '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">'"</span><span class="p">,</span>
             <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -8229,36 +8229,36 @@ API explorer:</p>
         <span class="n">brief_sessions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="p">,</span>
             <span class="n">device_id</span><span class="o">=</span><span class="n">device_id</span><span class="p">,</span>
-            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,last_updated,name&quot;</span><span class="p">,</span>
+            <span class="n">fields</span><span class="o">=</span><span class="s2">"id,last_updated,name"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">seen_session_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">brief_sessions</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">seen_session_names</span><span class="p">:</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;duplicate BGP session name &#39;</span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; found on device &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;; skipping duplicate&quot;</span>
+                    <span class="sa">f</span><span class="s2">"duplicate BGP session name '</span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">' found on device "</span>
+                    <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">'; skipping duplicate"</span>
                 <span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">resource</span><span class="o">=</span><span class="n">device_name</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">resource</span><span class="o">=</span><span class="n">device_name</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">seen_session_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">netbox_sessions</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;last_updated&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">last_updated</span><span class="p">}</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">"last_updated"</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">last_updated</span><span class="p">}</span>
             <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">brief_sessions</span>
         <span class="p">}</span>
 
         <span class="c1"># Build lookup maps</span>
-        <span class="n">cached_by_id</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]:</span> <span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">cached_data</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">cached_by_id</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]:</span> <span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">cached_data</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="n">session_ids_to_fetch</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">sessions_to_remove</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Find stale sessions (exist in both but timestamps differ) and deleted sessions</span>
         <span class="k">for</span> <span class="n">session_name</span><span class="p">,</span> <span class="n">cached_session</span> <span class="ow">in</span> <span class="n">cached_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">cached_id</span> <span class="o">=</span> <span class="n">cached_session</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+            <span class="n">cached_id</span> <span class="o">=</span> <span class="n">cached_session</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">cached_id</span> <span class="ow">in</span> <span class="n">netbox_sessions</span><span class="p">:</span>
                 <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">cached_session</span><span class="p">[</span><span class="s2">&quot;last_updated&quot;</span><span class="p">]</span>
-                    <span class="o">!=</span> <span class="n">netbox_sessions</span><span class="p">[</span><span class="n">cached_id</span><span class="p">][</span><span class="s2">&quot;last_updated&quot;</span><span class="p">]</span>
+                    <span class="n">cached_session</span><span class="p">[</span><span class="s2">"last_updated"</span><span class="p">]</span>
+                    <span class="o">!=</span> <span class="n">netbox_sessions</span><span class="p">[</span><span class="n">cached_id</span><span class="p">][</span><span class="s2">"last_updated"</span><span class="p">]</span>
                 <span class="p">):</span>
                     <span class="n">session_ids_to_fetch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cached_id</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -8273,20 +8273,20 @@ API explorer:</p>
         <span class="k">for</span> <span class="n">session_name</span> <span class="ow">in</span> <span class="n">sessions_to_remove</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">session_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;removed deleted session &#39;</span><span class="si">{</span><span class="n">session_name</span><span class="si">}</span><span class="s2">&#39; from cache for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                <span class="sa">f</span><span class="s2">"removed deleted session '</span><span class="si">{</span><span class="n">session_name</span><span class="si">}</span><span class="s2">' from cache for '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">'"</span>
             <span class="p">)</span>
 
         <span class="c1"># Fetch updated/new sessions</span>
         <span class="k">if</span> <span class="n">session_ids_to_fetch</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;fetching </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">session_ids_to_fetch</span><span class="p">)</span><span class="si">}</span><span class="s2"> updated BGP session(s) for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"fetching </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">session_ids_to_fetch</span><span class="p">)</span><span class="si">}</span><span class="s2"> updated BGP session(s) for '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">'"</span><span class="p">,</span>
                 <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">session_ids_to_fetch</span>
             <span class="p">):</span>
                 <span class="n">existing_session</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">existing_session</span> <span class="ow">and</span> <span class="n">existing_session</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">session</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">existing_session</span> <span class="ow">and</span> <span class="n">existing_session</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span> <span class="o">!=</span> <span class="n">session</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
                     <span class="k">continue</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
 
@@ -8295,10 +8295,10 @@ API explorer:</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
                 <span class="n">cache_key</span><span class="p">,</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">],</span> <span class="n">expire</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_ttl</span>
             <span class="p">)</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updated cache for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"updated cache for '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">'"</span><span class="p">,</span> <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;using cache, it is up to date for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"using cache, it is up to date for '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">'"</span><span class="p">,</span>
                 <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
             <span class="p">)</span>
 

@@ -7473,7 +7473,7 @@ string, not the downloaded or rendered file content.</p>
 <div class="highlight"><pre><span></span><code>C:<span class="se">\n</span>f&gt;nfcli
 Welcome<span class="w"> </span>to<span class="w"> </span>NorFab<span class="w"> </span>Interactive<span class="w"> </span>Shell.
 nf#
-nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;ntp server 10.0.0.1&quot;</span><span class="w"> </span><span class="s2">&quot;ntp server 10.0.0.2&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine,leaf
+nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">"ntp server 10.0.0.1"</span><span class="w"> </span><span class="s2">"ntp server 10.0.0.2"</span><span class="w"> </span>FC<span class="w"> </span>spine,leaf
 ---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Events<span class="w"> </span>-----------------------------------------------
 &lt;omitted<span class="w"> </span><span class="k">for</span><span class="w"> </span>brevity&gt;
 ---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Results<span class="w"> </span>----------------------------------------------
@@ -7496,15 +7496,15 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ntp server 10.0.0.1&quot;</span><span class="p">,</span> <span class="s2">&quot;ntp server 10.0.0.2&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine,leaf&quot;</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ntp server 10.0.0.1"</span><span class="p">,</span> <span class="s2">"ntp server 10.0.0.2"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine,leaf"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7515,18 +7515,18 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ntp server 10.0.0.1&quot;</span><span class="p">,</span> <span class="s2">&quot;ntp server 10.0.0.2&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine,leaf&quot;</span>              
+            <span class="s2">"config"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ntp server 10.0.0.1"</span><span class="p">,</span> <span class="s2">"ntp server 10.0.0.2"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine,leaf"</span>              
         <span class="p">}</span>
     <span class="p">)</span>
 
@@ -7547,13 +7547,13 @@ nf#
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Use Netmiko and enter enable mode before sending configuration:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span><span class="nb">enable</span>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">"logging host 10.0.0.10"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span><span class="nb">enable</span>
 </code></pre></div>
 <p>Use Scrapli and stop execution when a device rejects a command:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>scrapli<span class="w"> </span>stop-on-failed
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">"logging host 10.0.0.10"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>scrapli<span class="w"> </span>stop-on-failed
 </code></pre></div>
 <p>Use NAPALM to merge configuration:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>napalm
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">"logging host 10.0.0.10"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>napalm
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7562,17 +7562,17 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;enable&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"logging host 10.0.0.10"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"netmiko"</span><span class="p">,</span>
+            <span class="s2">"enable"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7583,19 +7583,19 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;scrapli&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;stop_on_failed&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"logging host 10.0.0.10"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"scrapli"</span><span class="p">,</span>
+            <span class="s2">"stop_on_failed"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7614,7 +7614,7 @@ nf#
 <div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">CLI</label><label for="__tabbed_3_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;interface Loopback100&quot;</span><span class="w"> </span><span class="s2">&quot;description managed by NorFab&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>dry-run
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">"interface Loopback100"</span><span class="w"> </span><span class="s2">"description managed by NorFab"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>dry-run
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7623,19 +7623,19 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span>
-                <span class="s2">&quot;interface Loopback100&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;description managed by NorFab&quot;</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">"interface Loopback100"</span><span class="p">,</span>
+                <span class="s2">"description managed by NorFab"</span><span class="p">,</span>
             <span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7646,25 +7646,25 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span>
-                <span class="s2">&quot;interface {{ job_data.interface }}&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;description {{ job_data.description }}&quot;</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">"interface {{ job_data.interface }}"</span><span class="p">,</span>
+                <span class="s2">"description {{ job_data.description }}"</span><span class="p">,</span>
             <span class="p">],</span>
-            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Loopback100&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;managed by NorFab&quot;</span><span class="p">,</span>
+            <span class="s2">"job_data"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"interface"</span><span class="p">:</span> <span class="s2">"Loopback100"</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"managed by NorFab"</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7683,7 +7683,7 @@ nf#
 <div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">CLI</label><label for="__tabbed_4_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;set system services netconf ssh&quot;</span><span class="w"> </span>FC<span class="w"> </span>junos<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span>commit-confirm<span class="w"> </span>commit-confirm-delay<span class="w"> </span><span class="m">5</span><span class="w"> </span>commit-comment<span class="w"> </span><span class="s2">&quot;NorFab staged change&quot;</span>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">"set system services netconf ssh"</span><span class="w"> </span>FC<span class="w"> </span>junos<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span>commit-confirm<span class="w"> </span>commit-confirm-delay<span class="w"> </span><span class="m">5</span><span class="w"> </span>commit-comment<span class="w"> </span><span class="s2">"NorFab staged change"</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7692,20 +7692,20 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;set system services netconf ssh&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;junos&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;commit&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;confirm&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s2">&quot;confirm_delay&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-                <span class="s2">&quot;comment&quot;</span><span class="p">:</span> <span class="s2">&quot;NorFab staged change&quot;</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"set system services netconf ssh"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"junos"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"netmiko"</span><span class="p">,</span>
+            <span class="s2">"commit"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"confirm"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">"confirm_delay"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                <span class="s2">"comment"</span><span class="p">:</span> <span class="s2">"NorFab staged change"</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">},</span>
     <span class="p">)</span>
@@ -7717,19 +7717,19 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;set system services netconf ssh&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;junos&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;napalm&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;revert_in&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"set system services netconf ssh"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"junos"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"napalm"</span><span class="p">,</span>
+            <span class="s2">"revert_in"</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7757,16 +7757,16 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_configs/common_ntp.cfg&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="s2">"nf://nornir_configs/common_ntp.cfg"</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7777,18 +7777,18 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_configs/common_ntp.cfg&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;scrapli&quot;</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="s2">"nf://nornir_configs/common_ntp.cfg"</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"scrapli"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7813,7 +7813,7 @@ nf#
   ip address {{ host.data.loopback_ip }}/32
 </code></pre></div>
 <p>Render the template without applying it:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span>nf://nornir_templates/loopback.j2<span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>job-data<span class="w"> </span><span class="s1">&#39;{&quot;interface&quot;: &quot;Loopback100&quot;}&#39;</span><span class="w"> </span>dry-run
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span>nf://nornir_templates/loopback.j2<span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>job-data<span class="w"> </span><span class="s1">'{"interface": "Loopback100"}'</span><span class="w"> </span>dry-run
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7822,17 +7822,17 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_templates/loopback.j2&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Loopback100&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="s2">"nf://nornir_templates/loopback.j2"</span><span class="p">,</span>
+            <span class="s2">"job_data"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"interface"</span><span class="p">:</span> <span class="s2">"Loopback100"</span><span class="p">},</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7843,22 +7843,22 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span>
-                <span class="s2">&quot;interface {{ job_data.interface }}&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;description {{ host.name }} managed loopback&quot;</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">"interface {{ job_data.interface }}"</span><span class="p">,</span>
+                <span class="s2">"description {{ host.name }} managed loopback"</span><span class="p">,</span>
             <span class="p">],</span>
-            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Loopback100&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"job_data"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"interface"</span><span class="p">:</span> <span class="s2">"Loopback100"</span><span class="p">},</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7877,7 +7877,7 @@ nf#
 <div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">CLI</label><label for="__tabbed_7_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;router bgp {{ job_data.asn }}&quot;</span><span class="w"> </span><span class="s2">&quot;neighbor {{ job_data.peer }} remote-as {{ job_data.peer_as }}&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>job-data<span class="w"> </span><span class="s1">&#39;{&quot;asn&quot;: 65001, &quot;peer&quot;: &quot;192.0.2.2&quot;, &quot;peer_as&quot;: 65002}&#39;</span><span class="w"> </span>dry-run
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">"router bgp {{ job_data.asn }}"</span><span class="w"> </span><span class="s2">"neighbor {{ job_data.peer }} remote-as {{ job_data.peer_as }}"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>job-data<span class="w"> </span><span class="s1">'{"asn": 65001, "peer": "192.0.2.2", "peer_as": 65002}'</span><span class="w"> </span>dry-run
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7886,24 +7886,24 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span>
-                <span class="s2">&quot;router bgp {{ job_data.asn }}&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;neighbor {{ job_data.peer }} remote-as {{ job_data.peer_as }}&quot;</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">"router bgp {{ job_data.asn }}"</span><span class="p">,</span>
+                <span class="s2">"neighbor {{ job_data.peer }} remote-as {{ job_data.peer_as }}"</span><span class="p">,</span>
             <span class="p">],</span>
-            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="mi">65001</span><span class="p">,</span>
-                <span class="s2">&quot;peer&quot;</span><span class="p">:</span> <span class="s2">&quot;192.0.2.2&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;peer_as&quot;</span><span class="p">:</span> <span class="mi">65002</span><span class="p">,</span>
+            <span class="s2">"job_data"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"asn"</span><span class="p">:</span> <span class="mi">65001</span><span class="p">,</span>
+                <span class="s2">"peer"</span><span class="p">:</span> <span class="s2">"192.0.2.2"</span><span class="p">,</span>
+                <span class="s2">"peer_as"</span><span class="p">:</span> <span class="mi">65002</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7914,19 +7914,19 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_templates/bgp_neighbor.j2&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://job_data/bgp_neighbor.yaml&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="s2">"nf://nornir_templates/bgp_neighbor.j2"</span><span class="p">,</span>
+            <span class="s2">"job_data"</span><span class="p">:</span> <span class="s2">"nf://job_data/bgp_neighbor.yaml"</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7947,12 +7947,12 @@ nf#
 <div class="tabbed-block">
 <p>Template file stored on the broker as <code>nf://nornir_templates/ensure_ntp.j2</code>:</p>
 <div class="highlight"><pre><span></span><code>{% set ntp_output = norfab.run_job(
-    service=&quot;nornir&quot;,
-    task=&quot;cli&quot;,
-    workers=&quot;any&quot;,
-    kwargs={&quot;commands&quot;: [&quot;show running-config | include ntp server&quot;], &quot;FL&quot;: [host.name]}
+    service="nornir",
+    task="cli",
+    workers="any",
+    kwargs={"commands": ["show running-config | include ntp server"], "FL": [host.name]}
 ) %}
-{% if &quot;10.0.0.1&quot; not in ntp_output | string %}
+{% if "10.0.0.1" not in ntp_output | string %}
 ntp server 10.0.0.1
 {% endif %}
 </code></pre></div>
@@ -7966,16 +7966,16 @@ ntp server 10.0.0.1
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_templates/ensure_ntp.j2&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="s2">"nf://nornir_templates/ensure_ntp.j2"</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7986,18 +7986,18 @@ ntp server 10.0.0.1
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_templates/ensure_ntp.j2&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="s2">"nf://nornir_templates/ensure_ntp.j2"</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"netmiko"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8016,7 +8016,7 @@ ntp server 10.0.0.1
 <div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">CLI</label><label for="__tabbed_9_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>add-details<span class="w"> </span>table<span class="w"> </span>brief
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">"logging host 10.0.0.10"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>add-details<span class="w"> </span>table<span class="w"> </span>brief
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -8025,17 +8025,17 @@ ntp server 10.0.0.1
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;add_details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;to_dict&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"logging host 10.0.0.10"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"add_details"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"to_dict"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8046,18 +8046,18 @@ ntp server 10.0.0.1
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;add_details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"logging host 10.0.0.10"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"add_details"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8084,10 +8084,10 @@ ntp server 10.0.0.1
 <div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">CLI</label><label for="__tabbed_10_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>add-details
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">"logging host 10.0.0.10"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>add-details
 </code></pre></div>
 <p>Save results to a worker file group for later diff:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>tf<span class="w"> </span>cfg-baseline
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">"logging host 10.0.0.10"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>tf<span class="w"> </span>cfg-baseline
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -8096,16 +8096,16 @@ ntp server 10.0.0.1
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;add_details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"logging host 10.0.0.10"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"add_details"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8116,18 +8116,18 @@ ntp server 10.0.0.1
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;tf&quot;</span><span class="p">:</span> <span class="s2">&quot;cfg-baseline&quot;</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"logging host 10.0.0.10"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"tf"</span><span class="p">:</span> <span class="s2">"cfg-baseline"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8146,7 +8146,7 @@ ntp server 10.0.0.1
 <div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">CLI</label><label for="__tabbed_11_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;banner motd ^CAuthorized access only^C&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span>read-timeout<span class="w"> </span><span class="m">30</span><span class="w"> </span>cmd-verify<span class="w"> </span><span class="nb">false</span>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">"banner motd ^CAuthorized access only^C"</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span>read-timeout<span class="w"> </span><span class="m">30</span><span class="w"> </span>cmd-verify<span class="w"> </span><span class="nb">false</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -8155,18 +8155,18 @@ ntp server 10.0.0.1
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;banner motd ^CAuthorized access only^C&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;read_timeout&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
-            <span class="s2">&quot;cmd_verify&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"banner motd ^CAuthorized access only^C"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"netmiko"</span><span class="p">,</span>
+            <span class="s2">"read_timeout"</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+            <span class="s2">"cmd_verify"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8177,20 +8177,20 @@ ntp server 10.0.0.1
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"cfg"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;banner motd ^CAuthorized access only^C&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;terminator&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;#&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;read_timeout&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+            <span class="s2">"config"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"banner motd ^CAuthorized access only^C"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"netmiko"</span><span class="p">,</span>
+            <span class="s2">"terminator"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"#"</span><span class="p">,</span>
+            <span class="s2">"read_timeout"</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -8209,8 +8209,8 @@ root
 └──<span class="w"> </span>nornir:<span class="w">    </span>Nornir<span class="w"> </span>service
 <span class="w">    </span>└──<span class="w"> </span>cfg:<span class="w">    </span>Configure<span class="w"> </span>devices<span class="w"> </span>over<span class="w"> </span>CLI<span class="w"> </span>interface
 <span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
-<span class="w">        </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
+<span class="w">        </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">        </span>├──<span class="w"> </span>num-workers:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>tasks<span class="w"> </span>execution
 <span class="w">        </span>├──<span class="w"> </span>num-connectors:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>device<span class="w"> </span>connections
 <span class="w">        </span>├──<span class="w"> </span>connect-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>attempts
@@ -8223,7 +8223,7 @@ root
 <span class="w">        </span>├──<span class="w"> </span>tf-skip-failed:<span class="w">    </span>Save<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>file<span class="w"> </span><span class="k">for</span><span class="w"> </span>failed<span class="w"> </span>tasks
 <span class="w">        </span>├──<span class="w"> </span>diff:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>the<span class="w"> </span>diff<span class="w"> </span><span class="k">for</span>
 <span class="w">        </span>├──<span class="w"> </span>diff-last:<span class="w">    </span>File<span class="w"> </span>version<span class="w"> </span>number<span class="w"> </span>to<span class="w"> </span>diff,<span class="w"> </span>default<span class="w"> </span>is<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="o">(</span>last<span class="o">)</span>
-<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">        </span>├──<span class="w"> </span>table:<span class="w">    </span>Table<span class="w"> </span>format<span class="w"> </span><span class="o">(</span>brief,<span class="w"> </span>terse,<span class="w"> </span>extend<span class="o">)</span><span class="w"> </span>or<span class="w"> </span>parameters<span class="w"> </span>or<span class="w"> </span>True
 <span class="w">        </span>├──<span class="w"> </span>headers:<span class="w">    </span>Table<span class="w"> </span>headers
 <span class="w">        </span>├──<span class="w"> </span>headers-exclude:<span class="w">    </span>Table<span class="w"> </span>headers<span class="w"> </span>to<span class="w"> </span>exclude
@@ -8255,7 +8255,7 @@ root
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>error-pattern:<span class="w">    </span>Regular<span class="w"> </span>expression<span class="w"> </span>pattern<span class="w"> </span>to<span class="w"> </span>detect<span class="w"> </span>config<span class="w"> </span>errors<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>output
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>terminator:<span class="w">    </span>Regular<span class="w"> </span>expression<span class="w"> </span>pattern<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span>as<span class="w"> </span>an<span class="w"> </span>alternate<span class="w"> </span>terminator
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>bypass-commands:<span class="w">    </span>Regular<span class="w"> </span>expression<span class="w"> </span>pattern<span class="w"> </span>indicating<span class="w"> </span>configuration<span class="w"> </span>commands,<span class="w"> </span>cmd_verify<span class="w"> </span>is<span class="w"> </span>automatically<span class="w"> </span>disabled
-<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>commit:<span class="w">    </span>Commit<span class="w"> </span>configuration,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>commit:<span class="w">    </span>Commit<span class="w"> </span>configuration,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>commit-confirm:<span class="w">    </span>Perform<span class="w"> </span>commit<span class="w"> </span>confirm<span class="w"> </span>on<span class="w"> </span>supported<span class="w"> </span>platforms
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>commit-confirm-delay:<span class="w">    </span>Confirmed<span class="w"> </span>commit<span class="w"> </span>rollback<span class="w"> </span>timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>minutes,<span class="w"> </span>used<span class="w"> </span>with<span class="w"> </span>commit-confirm
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>commit-final-delay:<span class="w">    </span>Time<span class="w"> </span>to<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span>before<span class="w"> </span>doing<span class="w"> </span>final<span class="w"> </span>commit,<span class="w"> </span>used<span class="w"> </span>with<span class="w"> </span>commit-confirm
@@ -8613,32 +8613,32 @@ URL that resolves to a file.</p>
 <span class="normal">190</span>
 <span class="normal">191</span>
 <span class="normal">192</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CfgInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CfgResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Configure Devices&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Configure Devices"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s2">&quot;guardrails&quot;</span><span class="p">:</span> <span class="n">MCP_GUARDRAILS</span><span class="p">,</span>
+        <span class="s2">"guardrails"</span><span class="p">:</span> <span class="n">MCP_GUARDRAILS</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">cfg</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">config</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
-    <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
+    <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"netmiko"</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">to_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">add_details</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">job_data</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Task to send configuration commands to devices using Command Line Interface (CLI).</span>
 
 <span class="sd">    Args:</span>
@@ -8663,23 +8663,23 @@ URL that resolves to a file.</p>
 <span class="sd">    Raises:</span>
 <span class="sd">        UnsupportedPluginError: If the specified plugin is not supported.</span>
 <span class="sd">        FileNotFoundError: If the specified job data file cannot be downloaded.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">config</span> <span class="o">=</span> <span class="n">config</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">config</span><span class="p">]</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:cfg&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{}</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="p">[])</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:cfg"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{}</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="p">[])</span>
 
     <span class="n">filtered_nornir</span><span class="p">,</span> <span class="n">no_match_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_hosts_and_validate</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;no_match&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">"no_match"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># decide on what send commands task plugin to use</span>
-    <span class="k">if</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">"netmiko"</span><span class="p">:</span>
         <span class="n">task_plugin</span> <span class="o">=</span> <span class="n">netmiko_send_config</span>
-    <span class="k">elif</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">&quot;scrapli&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">"scrapli"</span><span class="p">:</span>
         <span class="n">task_plugin</span> <span class="o">=</span> <span class="n">scrapli_send_config</span>
-    <span class="k">elif</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">&quot;napalm&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">"napalm"</span><span class="p">:</span>
         <span class="n">task_plugin</span> <span class="o">=</span> <span class="n">napalm_configure</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">UnsupportedPluginError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plugin &#39;</span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2">&#39; not supported&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">UnsupportedPluginError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Plugin '</span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2">' not supported"</span><span class="p">)</span>
 
     <span class="n">job_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_job_data</span><span class="p">(</span><span class="n">job_data</span><span class="p">)</span>
 
@@ -8693,23 +8693,23 @@ URL that resolves to a file.</p>
         <span class="n">rendered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_render_templates</span><span class="p">(</span>
             <span class="n">templates</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
             <span class="n">context</span><span class="o">=</span><span class="p">{</span>
-                <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="n">host</span><span class="p">,</span>
-                <span class="s2">&quot;norfab&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span>
-                <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="n">job_data</span><span class="p">,</span>
-                <span class="s2">&quot;netbox&quot;</span><span class="p">:</span> <span class="n">jinja2_netbox</span><span class="p">,</span>
+                <span class="s2">"host"</span><span class="p">:</span> <span class="n">host</span><span class="p">,</span>
+                <span class="s2">"norfab"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span>
+                <span class="s2">"job_data"</span><span class="p">:</span> <span class="n">job_data</span><span class="p">,</span>
+                <span class="s2">"netbox"</span><span class="p">:</span> <span class="n">jinja2_netbox</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">filters</span><span class="o">=</span><span class="n">jinja2_filters</span><span class="p">,</span>
             <span class="n">template_cache</span><span class="o">=</span><span class="n">jinja2_template_cache</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">host</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;__task__&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="n">rendered</span><span class="p">}</span>
+        <span class="n">host</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"__task__"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"config"</span><span class="p">:</span> <span class="n">rendered</span><span class="p">}</span>
 
     <span class="c1"># run task</span>
     <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - sending config commands &#39;</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">&#39;, kwargs &#39;</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">&#39;, is dry_run - &#39;</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - sending config commands '</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">', kwargs '</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">', is dry_run - '</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">nr</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-            <span class="n">task</span><span class="o">=</span><span class="n">nr_test</span><span class="p">,</span> <span class="n">use_task_data</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;dry_run&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="n">task</span><span class="o">=</span><span class="n">nr_test</span><span class="p">,</span> <span class="n">use_task_data</span><span class="o">=</span><span class="s2">"config"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"dry_run"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">else</span><span class="p">:</span>
@@ -8723,7 +8723,7 @@ URL that resolves to a file.</p>
 
     <span class="c1"># remove __task__ data</span>
     <span class="k">for</span> <span class="n">host_name</span><span class="p">,</span> <span class="n">host_object</span> <span class="ow">in</span> <span class="n">nr</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hosts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">_</span> <span class="o">=</span> <span class="n">host_object</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;__task__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">host_object</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"__task__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="o">.</span><span class="n">connections_clean</span><span class="p">()</span>
 

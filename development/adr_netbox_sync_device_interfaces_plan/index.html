@@ -7557,20 +7557,20 @@ stable ordering for list fields (<code>tagged_vlans</code>, <code>ipv4_addresses
 <h2 id="action-planning-model">Action Planning Model<a class="headerlink" href="#action-planning-model" title="Permanent link">¤</a></h2>
 <p>For each device, create an internal plan structure:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-  <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
-    <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
-    <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+  <span class="s2">"interfaces"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">"create"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
+    <span class="s2">"update"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
+    <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>
   <span class="p">},</span>
-  <span class="s2">&quot;mac_addresses&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
-    <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
-    <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+  <span class="s2">"mac_addresses"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">"create"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
+    <span class="s2">"update"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
+    <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>
   <span class="p">},</span>
-  <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
-    <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
-    <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+  <span class="s2">"ip_addresses"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">"create"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
+    <span class="s2">"update"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
+    <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -7651,23 +7651,23 @@ stable ordering for list fields (<code>tagged_vlans</code>, <code>ipv4_addresses
 <h2 id="dry-run-behavior">Dry-Run Behavior<a class="headerlink" href="#dry-run-behavior" title="Permanent link">¤</a></h2>
 <p>Dry-run returns planned actions only, with no NetBox writes:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-  <span class="s2">&quot;device1&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="p">{</span>
-      <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Ethernet10&quot;</span><span class="p">],</span>
-      <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;diff&quot;</span><span class="p">],</span>
-      <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[]</span>
+  <span class="s2">"device1"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">"interfaces"</span><span class="p">:</span> <span class="p">{</span>
+      <span class="s2">"create"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Ethernet10"</span><span class="p">],</span>
+      <span class="s2">"update"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"diff"</span><span class="p">],</span>
+      <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[]</span>
     <span class="p">},</span>
-    <span class="s2">&quot;mac_addresses&quot;</span><span class="p">:</span> <span class="p">{</span>
-      <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Ethernet1&quot;</span><span class="p">],</span>
-      <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;diff&quot;</span><span class="p">],</span>
-      <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[]</span>
+    <span class="s2">"mac_addresses"</span><span class="p">:</span> <span class="p">{</span>
+      <span class="s2">"create"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Ethernet1"</span><span class="p">],</span>
+      <span class="s2">"update"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"diff"</span><span class="p">],</span>
+      <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[]</span>
     <span class="p">},</span>
-    <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="p">{</span>
-      <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Ethernet1:10.0.0.1/31&quot;</span><span class="p">],</span>
-      <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;diff&quot;</span><span class="p">],</span>
-      <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[]</span>
+    <span class="s2">"ip_addresses"</span><span class="p">:</span> <span class="p">{</span>
+      <span class="s2">"create"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Ethernet1:10.0.0.1/31"</span><span class="p">],</span>
+      <span class="s2">"update"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"diff"</span><span class="p">],</span>
+      <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[]</span>
     <span class="p">},</span>
-    <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Loopback0&quot;</span><span class="p">],</span>
+    <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Loopback0"</span><span class="p">],</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>

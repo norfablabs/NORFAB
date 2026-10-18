@@ -5847,6 +5847,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#norfab.clients.nfcli_shell.nfcli_shell_client.ShowNorfabWorkersModel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ShowNorfabWorkersModel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ShowNorfabWorkersModel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#norfab.clients.nfcli_shell.nfcli_shell_client.ShowNorfabWorkersModel.run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        run
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#norfab.clients.nfcli_shell.nfcli_shell_client.NorFabShell" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -7067,6 +7095,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#norfab.clients.nfcli_shell.nfcli_shell_client.ShowNorfabWorkersModel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ShowNorfabWorkersModel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ShowNorfabWorkersModel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#norfab.clients.nfcli_shell.nfcli_shell_client.ShowNorfabWorkersModel.run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        run
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#norfab.clients.nfcli_shell.nfcli_shell_client.NorFabShell" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -7171,6 +7227,181 @@
 
 
 
+<h2 id="norfab.clients.nfcli_shell.nfcli_shell_client.ShowNorfabWorkersModel" class="doc doc-heading">
+            <code>ShowNorfabWorkersModel</code>
+
+
+<a href="#norfab.clients.nfcli_shell.nfcli_shell_client.ShowNorfabWorkersModel" class="headerlink" title="Permanent link">¤</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="norfab.clients.nfcli_shell.nfcli_shell_client.ShowNorfabWorkersModel.run" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">run</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+<a href="#norfab.clients.nfcli_shell.nfcli_shell_client.ShowNorfabWorkersModel.run" class="headerlink" title="Permanent link">¤</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Show broker-known workers with live process metrics, grouped by service.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>norfab\clients\nfcli_shell\nfcli_shell_client.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Show broker-known workers with live process metrics, grouped by service."""</span>
+    <span class="n">nfclient</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">builtins</span><span class="p">,</span> <span class="s2">"NFCLIENT"</span><span class="p">,</span> <span class="n">NFCLIENT</span><span class="p">)</span>
+    <span class="n">reply</span> <span class="o">=</span> <span class="n">nfclient</span><span class="o">.</span><span class="n">mmi</span><span class="p">(</span><span class="s2">"mmi.service.broker"</span><span class="p">,</span> <span class="s2">"show_workers"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">reply</span><span class="p">[</span><span class="s2">"errors"</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">reply</span><span class="p">[</span><span class="s2">"errors"</span><span class="p">])</span>
+
+    <span class="n">workers</span> <span class="o">=</span> <span class="p">[</span><span class="n">worker</span> <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="n">reply</span><span class="p">[</span><span class="s2">"results"</span><span class="p">]</span> <span class="k">if</span> <span class="n">worker</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]]</span>
+    <span class="n">alive</span> <span class="o">=</span> <span class="p">[</span><span class="n">worker</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="n">workers</span> <span class="k">if</span> <span class="n">worker</span><span class="p">[</span><span class="s2">"status"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"alive"</span><span class="p">]</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">nfclient</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+            <span class="s2">"all"</span><span class="p">,</span> <span class="s2">"get_stats"</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="n">alive</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"timeout"</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">alive</span>
+        <span class="k">else</span> <span class="p">{}</span>
+    <span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">workers</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">"service"</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="s2">"name"</span><span class="p">])):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">worker</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="p">{})</span>
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"failed"</span><span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">"worker '</span><span class="si">%s</span><span class="s2">' statistics failed: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
+                <span class="n">worker</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"errors"</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"failed"</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"result"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"process"</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">"Worker"</span><span class="p">:</span> <span class="n">worker</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span>
+                <span class="s2">"Service"</span><span class="p">:</span> <span class="n">worker</span><span class="p">[</span><span class="s2">"service"</span><span class="p">],</span>
+                <span class="s2">"Status"</span><span class="p">:</span> <span class="n">worker</span><span class="p">[</span><span class="s2">"status"</span><span class="p">],</span>
+                <span class="s2">"Uptime"</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">process</span><span class="p">[</span><span class="s2">"uptime_seconds"</span><span class="p">]))</span>
+                    <span class="k">if</span> <span class="n">process</span>
+                    <span class="k">else</span> <span class="s2">"-"</span>
+                <span class="p">),</span>
+                <span class="s2">"RAM MB"</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="nb">round</span><span class="p">(</span><span class="n">process</span><span class="p">[</span><span class="s2">"memory_rss_mbyte"</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">process</span>
+                    <span class="k">else</span> <span class="s2">"-"</span>
+                <span class="p">),</span>
+                <span class="s2">"CPU"</span><span class="p">:</span> <span class="n">process</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"cpu_percent"</span><span class="p">,</span> <span class="s2">"-"</span><span class="p">),</span>
+                <span class="s2">"Jobs"</span><span class="p">:</span> <span class="n">stats</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"jobs"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"total_jobs"</span><span class="p">,</span> <span class="s2">"-"</span><span class="p">),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">rows</span><span class="p">,</span>
+        <span class="n">Outputters</span><span class="o">.</span><span class="n">outputter_tabulate_table</span><span class="p">,</span>
+        <span class="p">{</span><span class="s2">"showindex"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"tablefmt"</span><span class="p">:</span> <span class="s2">"simple"</span><span class="p">},</span>
+    <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
 <h2 id="norfab.clients.nfcli_shell.nfcli_shell_client.NorFabShell" class="doc doc-heading">
             <code>NorFabShell</code>
 
@@ -7225,12 +7456,12 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\clients\nfcli_shell\nfcli_shell_client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">468</span>
-<span class="normal">469</span>
-<span class="normal">470</span>
-<span class="normal">471</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">525</span>
+<span class="normal">526</span>
+<span class="normal">527</span>
+<span class="normal">528</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">cmd_preloop_override</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This method called before CMD loop starts&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""This method called before CMD loop starts"""</span>
     <span class="k">pass</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7337,41 +7568,41 @@ those that have an "nfcli" configuration to the shell application.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\clients\nfcli_shell\nfcli_shell_client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">515</span>
-<span class="normal">516</span>
-<span class="normal">517</span>
-<span class="normal">518</span>
-<span class="normal">519</span>
-<span class="normal">520</span>
-<span class="normal">521</span>
-<span class="normal">522</span>
-<span class="normal">523</span>
-<span class="normal">524</span>
-<span class="normal">525</span>
-<span class="normal">526</span>
-<span class="normal">527</span>
-<span class="normal">528</span>
-<span class="normal">529</span>
-<span class="normal">530</span>
-<span class="normal">531</span>
-<span class="normal">532</span>
-<span class="normal">533</span>
-<span class="normal">534</span>
-<span class="normal">535</span>
-<span class="normal">536</span>
-<span class="normal">537</span>
-<span class="normal">538</span>
-<span class="normal">539</span>
-<span class="normal">540</span>
-<span class="normal">541</span>
-<span class="normal">542</span>
-<span class="normal">543</span>
-<span class="normal">544</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mount_shell_plugins</span><span class="p">(</span><span class="n">shell</span><span class="p">:</span> <span class="n">App</span><span class="p">,</span> <span class="n">inventory</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">572</span>
+<span class="normal">573</span>
+<span class="normal">574</span>
+<span class="normal">575</span>
+<span class="normal">576</span>
+<span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span>
+<span class="normal">580</span>
+<span class="normal">581</span>
+<span class="normal">582</span>
+<span class="normal">583</span>
+<span class="normal">584</span>
+<span class="normal">585</span>
+<span class="normal">586</span>
+<span class="normal">587</span>
+<span class="normal">588</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span>
+<span class="normal">596</span>
+<span class="normal">597</span>
+<span class="normal">598</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mount_shell_plugins</span><span class="p">(</span><span class="n">shell</span><span class="p">:</span> <span class="n">App</span><span class="p">,</span> <span class="n">inventory</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Mounts shell plugins to the given shell application.</span>
 
 <span class="sd">    This function iterates over the plugins in the inventory and mounts</span>
-<span class="sd">    those that have an &quot;nfcli&quot; configuration to the shell application.</span>
+<span class="sd">    those that have an "nfcli" configuration to the shell application.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        shell (App): The shell application to which the plugins will be mounted.</span>
@@ -7381,20 +7612,20 @@ those that have an "nfcli" configuration to the shell application.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">for</span> <span class="n">service_name</span><span class="p">,</span> <span class="n">service_data</span> <span class="ow">in</span> <span class="n">inventory</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">service_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nfcli&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">service_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"nfcli"</span><span class="p">):</span>
             <span class="n">plugin</span> <span class="o">=</span> <span class="n">inventory</span><span class="o">.</span><span class="n">load_plugin</span><span class="p">(</span><span class="n">service_name</span><span class="p">)</span>
             <span class="n">shell</span><span class="o">.</span><span class="n">model_mount</span><span class="p">(</span>
-                <span class="n">path</span><span class="o">=</span><span class="n">plugin</span><span class="p">[</span><span class="n">service_name</span><span class="p">][</span><span class="s2">&quot;nfcli&quot;</span><span class="p">][</span><span class="s2">&quot;mount_path&quot;</span><span class="p">],</span>
-                <span class="n">model</span><span class="o">=</span><span class="n">plugin</span><span class="p">[</span><span class="n">service_name</span><span class="p">][</span><span class="s2">&quot;nfcli&quot;</span><span class="p">][</span><span class="s2">&quot;shell_model&quot;</span><span class="p">],</span>
+                <span class="n">path</span><span class="o">=</span><span class="n">plugin</span><span class="p">[</span><span class="n">service_name</span><span class="p">][</span><span class="s2">"nfcli"</span><span class="p">][</span><span class="s2">"mount_path"</span><span class="p">],</span>
+                <span class="n">model</span><span class="o">=</span><span class="n">plugin</span><span class="p">[</span><span class="n">service_name</span><span class="p">][</span><span class="s2">"nfcli"</span><span class="p">][</span><span class="s2">"shell_model"</span><span class="p">],</span>
             <span class="p">)</span>
 
     <span class="c1"># mount MAN commands</span>
     <span class="n">shell</span><span class="o">.</span><span class="n">model_mount</span><span class="p">(</span>
-        <span class="n">path</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;man&quot;</span><span class="p">,</span> <span class="s2">&quot;tasks&quot;</span><span class="p">],</span>
+        <span class="n">path</span><span class="o">=</span><span class="p">[</span><span class="s2">"man"</span><span class="p">,</span> <span class="s2">"tasks"</span><span class="p">],</span>
         <span class="n">model</span><span class="o">=</span><span class="n">ManTasks</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;SHow NorFab services tasks documentation&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"SHow NorFab services tasks documentation"</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>

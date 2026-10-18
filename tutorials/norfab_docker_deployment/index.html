@@ -7109,8 +7109,8 @@ docker compose build
  ✔ Container norfab-broker          Created                   0.0s 
  ✔ Container norfab-service-nornir  Created                   0.0s 
 Attaching to norfab-broker, norfab-service-nornir
-norfab-broker          | 2025-02-02 10:40:20.453 INFO [norfab.core.nfapi:210 ] -- Started broker, broker listening for connections on &#39;tcp://10.0.0.100:5555&#39;
-norfab-service-nornir  | 2025-02-02 10:40:21.528 INFO [norfab.core.worker:557 ] -- nornir-worker-1 - registered to broker at &#39;tcp://10.0.0.100:5555&#39;, service &#39;nornir&#39;
+norfab-broker          | 2025-02-02 10:40:20.453 INFO [norfab.core.nfapi:210 ] -- Started broker, broker listening for connections on 'tcp://10.0.0.100:5555'
+norfab-service-nornir  | 2025-02-02 10:40:21.528 INFO [norfab.core.worker:557 ] -- nornir-worker-1 - registered to broker at 'tcp://10.0.0.100:5555', service 'nornir'
 norfab-broker          | 2025-02-02 10:40:21.530 INFO [norfab.core.broker:317 ] -- NFPBroker - registered new worker nornir-worker-1
 norfab-service-nornir  | 2025-02-02 10:40:21.554 INFO [nornir_salt.plugins.inventory.DictInventory:138 ] -- nornir-salt.DictInventory inventory data validated
 norfab-service-nornir  | 2025-02-02 10:40:21.566 INFO [norfab.workers.nornir_worker:246 ] -- nornir-worker-1 - Started
@@ -7119,7 +7119,7 @@ norfab-service-nornir  | 2025-02-02 10:40:21.566 INFO [norfab.workers.nornir_wor
 <p>Folder <code>norfab/docker/norfab/norfab-docker</code> mounted to the containers as a volume under <code>/etc/norfab</code> path and this is the content of <code>inventory.yaml</code> file:</p>
 <div class="highlight"><pre><span></span><code># broker settings
 broker:
-  endpoint: &quot;tcp://10.0.0.100:5555&quot;
+  endpoint: "tcp://10.0.0.100:5555"
 
 # workers inventory section
 workers:
@@ -7147,7 +7147,7 @@ root@norfab-broker:/# cd /etc/norfab
 root@norfab-broker:/etc/norfab# nfcli --show-broker-shared-key
 NorFab broker public key content:
 
-&#39;&#39;&#39;
+'''
 #   ****  Generated on 2025-02-02 09:31:04.387927 by pyzmq  ****
 #   ZeroMQ CURVE Public Certificate
 #   Exchange securely, or use a secure mechanism to verify the contents
@@ -7156,23 +7156,23 @@ NorFab broker public key content:
 
 metadata
 curve
-    public-key = &quot;j{5-J9&lt;Qs:!@CVFsO$)UH&gt;mf%mP&lt;05[#%bBf(ofo&quot;
+    public-key = "j{5-J9&lt;Qs:!@CVFsO$)UH&gt;mf%mP&lt;05[#%bBf(ofo"
 
-&#39;&#39;&#39;
+'''
 
-Key file location: &#39;__norfab__/files/broker/public_keys/broker.key&#39;
+Key file location: '__norfab__/files/broker/public_keys/broker.key'
 
-Copy above key into NorFab clients and workers &#39;public_keys/broker.key&#39; file or 
-put public-key value into clients and workers inventory.yaml &#39;broker&#39; section 
-under &#39;shared_key&#39; parameter:
+Copy above key into NorFab clients and workers 'public_keys/broker.key' file or 
+put public-key value into clients and workers inventory.yaml 'broker' section 
+under 'shared_key' parameter:
 
 broker:
-  shared_key: &quot;j{5-J9&lt;Qs:!@CVFsO$)UH&gt;mf%mP&lt;05[#%bBf(ofo&quot;
+  shared_key: "j{5-J9&lt;Qs:!@CVFsO$)UH&gt;mf%mP&lt;05[#%bBf(ofo"
 
 root@norfab-broker:/etc/norfab# 
 </code></pre></div>
 <p>Public key value NorFab clients will need in this case is:</p>
-<div class="highlight"><pre><span></span><code>&quot;j{5-J9&lt;Qs:!@CVFsO$)UH&gt;mf%mP&lt;05[#%bBf(ofo&quot;
+<div class="highlight"><pre><span></span><code>"j{5-J9&lt;Qs:!@CVFsO$)UH&gt;mf%mP&lt;05[#%bBf(ofo"
 </code></pre></div>
 <h2 id="client-setup">Client Setup<a class="headerlink" href="#client-setup" title="Permanent link">¤</a></h2>
 <p>After broker and worker containers are running need to setup a NorFab client, client can run on any machine that can connect to the docker host on its IP address on TCP port 5555.</p>
@@ -7185,8 +7185,8 @@ root@norfab-broker:/etc/norfab#
 <p>Next need to configure broker endpoint pointing to docker host IP (<code>192.168.1.130</code> in this example) and broker encryption key in the <code>norfab-env/inventory.yaml</code> under <code>broker</code> section:</p>
 <div class="highlight"><pre><span></span><code># broker settings
 broker:
-  endpoint: &quot;tcp://192.168.1.130:5555&quot;
-  shared_key: &quot;j{5-J9&lt;Qs:!@CVFsO$)UH&gt;mf%mP&lt;05[#%bBf(ofo&quot;
+  endpoint: "tcp://192.168.1.130:5555"
+  shared_key: "j{5-J9&lt;Qs:!@CVFsO$)UH&gt;mf%mP&lt;05[#%bBf(ofo"
 </code></pre></div>
 <p>All the other <code>inventory.yaml</code> file content can be deleted, folder <code>norfab-env/nornir</code> also can be deleted. Client only need <code>inventory.yaml</code> file with broker endpoint and broker shared key details to successfully connect with the broker.</p>
 <p>Lastly, run <code>nfcli</code> client from within <code>norfab-env</code> folder:</p>
@@ -7211,10 +7211,10 @@ nf#show norfab broker status
    broker_public_key_file: /etc/norfab/__norfab__/files/broker/public_keys/broker.key
    zmq_auth: true
    ip_allowlist:
-   - &#39;*&#39;
+   - '*'
 nf#show norfab broker statistics
- schema_version: &#39;1.0&#39;
- collected_at: &#39;2026-09-07T10:30:00Z&#39;
+ schema_version: '1.0'
+ collected_at: '2026-09-07T10:30:00Z'
  name: NFPBroker
  role: broker
  status: active

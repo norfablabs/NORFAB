@@ -7308,23 +7308,23 @@
 <h2 id="device-config-context-containerlab-parameters">Device Config Context Containerlab Parameters<a class="headerlink" href="#device-config-context-containerlab-parameters" title="Permanent link">¤</a></h2>
 <p>Containerlab node details can be defined under device configuration context <code>norfab.containerlab</code> path, for example:</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;norfab&quot;: {
-        &quot;containerlab&quot;: {
-            &quot;kind&quot;: &quot;ceos&quot;,
-            &quot;image&quot;: &quot;ceos:latest&quot;,
-            &quot;mgmt-ipv4&quot;: &quot;172.100.100.10/24&quot;,
-            &quot;ports&quot;: [
+    "norfab": {
+        "containerlab": {
+            "kind": "ceos",
+            "image": "ceos:latest",
+            "mgmt-ipv4": "172.100.100.10/24",
+            "ports": [
                 {10000: 22},
                 {10001: 830}
             ],
 
             ... any other containerlab node parameters ...
 
-            &quot;interfaces_rename&quot;: [
+            "interfaces_rename": [
                 {
-                    &quot;find&quot;: &quot;Ethernet&quot;,
-                    &quot;replace&quot;: &quot;eth&quot;,
-                    &quot;use_regex&quot;: false
+                    "find": "Ethernet",
+                    "replace": "eth",
+                    "use_regex": false
                 }
             ]
         }
@@ -7421,18 +7421,18 @@
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:29.576<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span>foobar<span class="w"> </span>fetching<span class="w"> </span>lab<span class="w"> </span>topology<span class="w"> </span>data<span class="w"> </span>from<span class="w"> </span>Netbox
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.090<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span>foobar<span class="w"> </span>topology<span class="w"> </span>data<span class="w"> </span>retrieved<span class="w"> </span>from<span class="w"> </span>Netbox
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.094<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span>foobar<span class="w"> </span>topology<span class="w"> </span>data<span class="w"> </span>saved<span class="w"> </span>to<span class="w"> </span>
-<span class="s1">&#39;/home/norfab/norfab/tests/nf_containerlab/__norfab__/files/worker/containerlab-worker-1/topologies/foobar/foobar.yaml&#39;</span>
+<span class="s1">'/home/norfab/norfab/tests/nf_containerlab/__norfab__/files/worker/containerlab-worker-1/topologies/foobar/foobar.yaml'</span>
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.095<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span>foobar<span class="w"> </span>deploying<span class="w"> </span>lab<span class="w"> </span>using<span class="w"> </span>foobar.yaml<span class="w"> </span>topology<span class="w"> </span>file
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.123<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:31<span class="w"> </span>INFO<span class="w"> </span>Containerlab<span class="w"> </span>started<span class="w"> </span><span class="nv">version</span><span class="o">=</span><span class="m">0</span>.67.0
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.134<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:31<span class="w"> </span>INFO<span class="w"> </span>Parsing<span class="w"> </span><span class="p">&amp;</span><span class="w"> </span>checking<span class="w"> </span>topology<span class="w"> </span><span class="nv">file</span><span class="o">=</span>foobar.yaml
-<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.145<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:31<span class="w"> </span>INFO<span class="w"> </span>Creating<span class="w"> </span>docker<span class="w"> </span>network<span class="w"> </span><span class="nv">name</span><span class="o">=</span>br-foobar<span class="w"> </span>IPv4<span class="w"> </span><span class="nv">subnet</span><span class="o">=</span><span class="m">172</span>.100.102.0/24<span class="w"> </span>IPv6<span class="w"> </span><span class="nv">subnet</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="w"> </span><span class="nv">MTU</span><span class="o">=</span><span class="m">0</span>
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.145<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:31<span class="w"> </span>INFO<span class="w"> </span>Creating<span class="w"> </span>docker<span class="w"> </span>network<span class="w"> </span><span class="nv">name</span><span class="o">=</span>br-foobar<span class="w"> </span>IPv4<span class="w"> </span><span class="nv">subnet</span><span class="o">=</span><span class="m">172</span>.100.102.0/24<span class="w"> </span>IPv6<span class="w"> </span><span class="nv">subnet</span><span class="o">=</span><span class="s2">""</span><span class="w"> </span><span class="nv">MTU</span><span class="o">=</span><span class="m">0</span>
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.257<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:31<span class="w"> </span>INFO<span class="w"> </span>Creating<span class="w"> </span>lab<span class="w"> </span>directory<span class="w"> </span>
 <span class="nv">path</span><span class="o">=</span>/home/norfab/norfab/tests/nf_containerlab/__norfab__/files/worker/containerlab-worker-1/topologies/foobar/clab-foobar
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.268<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:31<span class="w"> </span>INFO<span class="w"> </span>config<span class="w"> </span>file<span class="w"> </span>
-<span class="s1">&#39;/home/norfab/norfab/tests/nf_containerlab/__norfab__/files/worker/containerlab-worker-1/topologies/foobar/clab-foobar/fceos4/flash/startup-config&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>node<span class="w"> </span><span class="s1">&#39;fceos4&#39;</span><span class="w"> </span>already<span class="w"> </span>exists<span class="w"> </span>and<span class="w"> </span>will<span class="w"> </span>not<span class="w"> </span>be<span class="w"> </span>generated/reset
+<span class="s1">'/home/norfab/norfab/tests/nf_containerlab/__norfab__/files/worker/containerlab-worker-1/topologies/foobar/clab-foobar/fceos4/flash/startup-config'</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>node<span class="w"> </span><span class="s1">'fceos4'</span><span class="w"> </span>already<span class="w"> </span>exists<span class="w"> </span>and<span class="w"> </span>will<span class="w"> </span>not<span class="w"> </span>be<span class="w"> </span>generated/reset
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.280<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:31<span class="w"> </span>INFO<span class="w"> </span>Creating<span class="w"> </span>container<span class="w"> </span><span class="nv">name</span><span class="o">=</span>fceos4
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.291<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:31<span class="w"> </span>INFO<span class="w"> </span>config<span class="w"> </span>file<span class="w"> </span>
-<span class="s1">&#39;/home/norfab/norfab/tests/nf_containerlab/__norfab__/files/worker/containerlab-worker-1/topologies/foobar/clab-foobar/fceos5/flash/startup-config&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>node<span class="w"> </span><span class="s1">&#39;fceos5&#39;</span><span class="w"> </span>already<span class="w"> </span>exists<span class="w"> </span>and<span class="w"> </span>will<span class="w"> </span>not<span class="w"> </span>be<span class="w"> </span>generated/reset
+<span class="s1">'/home/norfab/norfab/tests/nf_containerlab/__norfab__/files/worker/containerlab-worker-1/topologies/foobar/clab-foobar/fceos5/flash/startup-config'</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>node<span class="w"> </span><span class="s1">'fceos5'</span><span class="w"> </span>already<span class="w"> </span>exists<span class="w"> </span>and<span class="w"> </span>will<span class="w"> </span>not<span class="w"> </span>be<span class="w"> </span>generated/reset
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.302<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:31<span class="w"> </span>INFO<span class="w"> </span>Creating<span class="w"> </span>container<span class="w"> </span><span class="nv">name</span><span class="o">=</span>fceos5
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:32.065<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:32<span class="w"> </span>INFO<span class="w"> </span>Created<span class="w"> </span>link:<span class="w"> </span>fceos5:eth1<span class="w"> </span>▪┄┄▪<span class="w"> </span>fceos4:eth1
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:32.220<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:32<span class="w"> </span>INFO<span class="w"> </span>Created<span class="w"> </span>link:<span class="w"> </span>fceos5:eth2<span class="w"> </span>▪┄┄▪<span class="w"> </span>fceos4:eth2
@@ -7440,10 +7440,10 @@
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:32.744<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:32<span class="w"> </span>INFO<span class="w"> </span>Created<span class="w"> </span>link:<span class="w"> </span>fceos5:eth4<span class="w"> </span>▪┄┄▪<span class="w"> </span>fceos4:eth4
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:32.844<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:32<span class="w"> </span>INFO<span class="w"> </span>Created<span class="w"> </span>link:<span class="w"> </span>fceos5:eth6<span class="w"> </span>▪┄┄▪<span class="w"> </span>fceos4:eth6
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:32.953<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:32<span class="w"> </span>INFO<span class="w"> </span>Created<span class="w"> </span>link:<span class="w"> </span>fceos5:eth7<span class="w"> </span>▪┄┄▪<span class="w"> </span>fceos4:eth7
-<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:32.964<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:32<span class="w"> </span>INFO<span class="w"> </span>Running<span class="w"> </span>postdeploy<span class="w"> </span>actions<span class="w"> </span><span class="k">for</span><span class="w"> </span>Arista<span class="w"> </span>cEOS<span class="w"> </span><span class="s1">&#39;fceos5&#39;</span><span class="w"> </span>node
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:32.964<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:32<span class="w"> </span>INFO<span class="w"> </span>Running<span class="w"> </span>postdeploy<span class="w"> </span>actions<span class="w"> </span><span class="k">for</span><span class="w"> </span>Arista<span class="w"> </span>cEOS<span class="w"> </span><span class="s1">'fceos5'</span><span class="w"> </span>node
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:33.005<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:33<span class="w"> </span>INFO<span class="w"> </span>Created<span class="w"> </span>link:<span class="w"> </span>fceos5:eth8<span class="w"> </span>▪┄┄▪<span class="w"> </span>fceos4:eth101
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:33.053<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:33<span class="w"> </span>INFO<span class="w"> </span>Created<span class="w"> </span>link:<span class="w"> </span>fceos5:eth11<span class="w"> </span>▪┄┄▪<span class="w"> </span>fceos4:eth11
-<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:33.064<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:33<span class="w"> </span>INFO<span class="w"> </span>Running<span class="w"> </span>postdeploy<span class="w"> </span>actions<span class="w"> </span><span class="k">for</span><span class="w"> </span>Arista<span class="w"> </span>cEOS<span class="w"> </span><span class="s1">&#39;fceos4&#39;</span><span class="w"> </span>node
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:33.064<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:33<span class="w"> </span>INFO<span class="w"> </span>Running<span class="w"> </span>postdeploy<span class="w"> </span>actions<span class="w"> </span><span class="k">for</span><span class="w"> </span>Arista<span class="w"> </span>cEOS<span class="w"> </span><span class="s1">'fceos4'</span><span class="w"> </span>node
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:54.730<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:54<span class="w"> </span>INFO<span class="w"> </span>Adding<span class="w"> </span>host<span class="w"> </span>entries<span class="w"> </span><span class="nv">path</span><span class="o">=</span>/etc/hosts
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:54.742<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:54<span class="w"> </span>INFO<span class="w"> </span>Adding<span class="w"> </span>SSH<span class="w"> </span>config<span class="w"> </span><span class="k">for</span><span class="w"> </span>nodes<span class="w"> </span><span class="nv">path</span><span class="o">=</span>/etc/ssh/ssh_config.d/clab-foobar.conf
 <span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:54.859<span class="w"> </span>9e3b29210e1140f8b3a311e8c4669ca4<span class="w"> </span>job<span class="w"> </span>completed<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">25</span>.334<span class="w"> </span>seconds
@@ -7514,16 +7514,16 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;deploy_netbox&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"containerlab"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"deploy_netbox"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fceos4&quot;</span><span class="p">,</span> <span class="s2">&quot;fceos5&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;foobar&quot;</span><span class="p">,</span>
+            <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"fceos4"</span><span class="p">,</span> <span class="s2">"fceos5"</span><span class="p">],</span>
+            <span class="s2">"lab_name"</span><span class="p">:</span> <span class="s2">"foobar"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7534,24 +7534,24 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;deploy_netbox&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"containerlab"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"deploy_netbox"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;leaf-lab&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;leaf&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+            <span class="s2">"lab_name"</span><span class="p">:</span> <span class="s2">"leaf-lab"</span><span class="p">,</span>
+            <span class="s2">"filters"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"role"</span><span class="p">:</span> <span class="s2">"leaf"</span><span class="p">,</span>
+                <span class="s2">"site"</span><span class="p">:</span> <span class="s2">"lab"</span><span class="p">,</span>
+                <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"active"</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="s2">&quot;netbox_instance&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"netbox_instance"</span><span class="p">:</span> <span class="s2">"lab"</span><span class="p">,</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7564,22 +7564,22 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;deploy_netbox&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"containerlab"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"deploy_netbox"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;tenant-lab&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;tenant&quot;</span><span class="p">:</span> <span class="s2">&quot;engineering&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;ipv4_subnet&quot;</span><span class="p">:</span> <span class="s2">&quot;172.100.120.0/24&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="s2">&quot;ceosimage:4.30.0F&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;ports&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">12000</span><span class="p">,</span> <span class="mi">13000</span><span class="p">],</span>
-            <span class="s2">&quot;reconfigure&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"lab_name"</span><span class="p">:</span> <span class="s2">"tenant-lab"</span><span class="p">,</span>
+            <span class="s2">"tenant"</span><span class="p">:</span> <span class="s2">"engineering"</span><span class="p">,</span>
+            <span class="s2">"ipv4_subnet"</span><span class="p">:</span> <span class="s2">"172.100.120.0/24"</span><span class="p">,</span>
+            <span class="s2">"image"</span><span class="p">:</span> <span class="s2">"ceosimage:4.30.0F"</span><span class="p">,</span>
+            <span class="s2">"ports"</span><span class="p">:</span> <span class="p">[</span><span class="mi">12000</span><span class="p">,</span> <span class="mi">13000</span><span class="p">],</span>
+            <span class="s2">"reconfigure"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7601,8 +7601,8 @@ nf#
 └──<span class="w"> </span>containerlab:<span class="w">    </span>Containerlab<span class="w"> </span>service
 <span class="w">    </span>└──<span class="w"> </span>deploy-netbox:<span class="w">    </span>Spins<span class="w"> </span>up<span class="w"> </span>a<span class="w"> </span>lab<span class="w"> </span>using<span class="w"> </span>devices<span class="w"> </span>data<span class="w"> </span>from<span class="w"> </span>NetBox
 <span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
-<span class="w">        </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'any'</span>
+<span class="w">        </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">        </span>├──<span class="w"> </span>lab-name:<span class="w">    </span>Lab<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>generate<span class="w"> </span>lab<span class="w"> </span>inventory<span class="w"> </span><span class="k">for</span>
 <span class="w">        </span>├──<span class="w"> </span>tenant:<span class="w">    </span>Tenant<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>generate<span class="w"> </span>lab<span class="w"> </span>inventory<span class="w"> </span><span class="k">for</span>
 <span class="w">        </span>├──<span class="w"> </span>filters:<span class="w">    </span>NetBox<span class="w"> </span>device<span class="w"> </span>filters<span class="w"> </span>to<span class="w"> </span>generate<span class="w"> </span>lab<span class="w"> </span>inventory<span class="w"> </span><span class="k">for</span>
@@ -7616,12 +7616,12 @@ nf#
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>status:<span class="w">    </span>Filter<span class="w"> </span>devices<span class="w"> </span>by<span class="w"> </span>statuses
 <span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>tag:<span class="w">    </span>Filter<span class="w"> </span>devices<span class="w"> </span>by<span class="w"> </span>tags
 <span class="w">        </span>├──<span class="w"> </span>devices:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>devices<span class="w"> </span>to<span class="w"> </span>generate<span class="w"> </span>lab<span class="w"> </span>inventory<span class="w"> </span><span class="k">for</span>
-<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">        </span>├──<span class="w"> </span>netbox-instance:<span class="w">    </span>Name<span class="w"> </span>of<span class="w"> </span>NetBox<span class="w"> </span>instance<span class="w"> </span>to<span class="w"> </span>pull<span class="w"> </span>inventory<span class="w"> </span>from
-<span class="w">        </span>├──<span class="w"> </span>ipv4-subnet:<span class="w">    </span>IPv4<span class="w"> </span>management<span class="w"> </span>subnet<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="k">for</span><span class="w"> </span>lab,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;172.100.100.0/24&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>ipv4-subnet:<span class="w">    </span>IPv4<span class="w"> </span>management<span class="w"> </span>subnet<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="k">for</span><span class="w"> </span>lab,<span class="w"> </span>default<span class="w"> </span><span class="s1">'172.100.100.0/24'</span>
 <span class="w">        </span>├──<span class="w"> </span>image:<span class="w">    </span>Docker<span class="w"> </span>image<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="k">for</span><span class="w"> </span>all<span class="w"> </span>nodes
-<span class="w">        </span>├──<span class="w"> </span>ports:<span class="w">    </span>Range<span class="w"> </span>of<span class="w"> </span>TCP/UDP<span class="w"> </span>ports<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="k">for</span><span class="w"> </span>nodes,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;[12000, 13000]&#39;</span>
-<span class="w">        </span>├──<span class="w"> </span>reconfigure:<span class="w">    </span>Destroy<span class="w"> </span>the<span class="w"> </span>lab<span class="w"> </span>and<span class="w"> </span><span class="k">then</span><span class="w"> </span>re-deploy<span class="w"> </span>it.,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>ports:<span class="w">    </span>Range<span class="w"> </span>of<span class="w"> </span>TCP/UDP<span class="w"> </span>ports<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="k">for</span><span class="w"> </span>nodes,<span class="w"> </span>default<span class="w"> </span><span class="s1">'[12000, 13000]'</span>
+<span class="w">        </span>├──<span class="w"> </span>reconfigure:<span class="w">    </span>Destroy<span class="w"> </span>the<span class="w"> </span>lab<span class="w"> </span>and<span class="w"> </span><span class="k">then</span><span class="w"> </span>re-deploy<span class="w"> </span>it.,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">        </span>└──<span class="w"> </span>dry-run:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span>deploy,<span class="w"> </span>only<span class="w"> </span>fetch<span class="w"> </span>inventory<span class="w"> </span>from<span class="w"> </span>NetBox
 nf#
 </code></pre></div>
@@ -8162,14 +8162,14 @@ inventory without deploying.</p>
 <span class="normal">1118</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">DeployNetboxInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">DeployNetboxResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Deploy NetBox Lab&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Deploy NetBox Lab"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -8183,7 +8183,7 @@ inventory without deploying.</p>
     <span class="n">instance</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">image</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">ipv4_subnet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;172.100.100.0/24&quot;</span><span class="p">,</span>
+    <span class="n">ipv4_subnet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"172.100.100.0/24"</span><span class="p">,</span>
     <span class="n">ports</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12000</span><span class="p">,</span> <span class="mi">15000</span><span class="p">),</span>
     <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">reconfigure</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -8191,7 +8191,7 @@ inventory without deploying.</p>
     <span class="n">node_filter</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Deploys a containerlab topology using device data from the Netbox database.</span>
 
 <span class="sd">    This method orchestrates the deployment of a containerlab topology by:</span>
@@ -8236,11 +8236,11 @@ inventory without deploying.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        Exception: If the topology file cannot be fetched.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="ow">or</span> <span class="mi">600</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:deploy_netbox&quot;</span><span class="p">)</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:deploy_netbox"</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Deploy Netbox: Preparing topology for lab &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">tenant</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;auto&#39;</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Deploy Netbox: Preparing topology for lab '</span><span class="si">{</span><span class="n">lab_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">tenant</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'auto'</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
     <span class="n">subnets_in_use</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">ports_in_use</span> <span class="o">=</span> <span class="p">{}</span>
@@ -8250,106 +8250,106 @@ inventory without deploying.</p>
         <span class="n">lab_name</span> <span class="o">=</span> <span class="n">tenant</span>
 
     <span class="c1"># inspect existing containers</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;checking existing containers&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"checking existing containers"</span><span class="p">)</span>
     <span class="n">get_containers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inspect</span><span class="p">(</span><span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">get_containers</span><span class="o">.</span><span class="n">failed</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">get_containers</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:deploy_netbox&quot;</span>
+        <span class="n">get_containers</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:deploy_netbox"</span>
         <span class="k">return</span> <span class="n">get_containers</span>
 
     <span class="c1"># collect TCP/UDP ports and subnets in use</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;existing containers found, retrieving details&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"existing containers found, retrieving details"</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">lname</span><span class="p">,</span> <span class="n">containers</span> <span class="ow">in</span> <span class="n">get_containers</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">container</span> <span class="ow">in</span> <span class="n">containers</span><span class="p">:</span>
-            <span class="n">clab_name</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Labels&quot;</span><span class="p">][</span><span class="s2">&quot;containerlab&quot;</span><span class="p">]</span>
-            <span class="n">clab_topo</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Labels&quot;</span><span class="p">][</span><span class="s2">&quot;clab-topo-file&quot;</span><span class="p">]</span>
-            <span class="n">node_name</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Labels&quot;</span><span class="p">][</span><span class="s2">&quot;clab-node-name&quot;</span><span class="p">]</span>
+            <span class="n">clab_name</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">"Labels"</span><span class="p">][</span><span class="s2">"containerlab"</span><span class="p">]</span>
+            <span class="n">clab_topo</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">"Labels"</span><span class="p">][</span><span class="s2">"clab-topo-file"</span><span class="p">]</span>
+            <span class="n">node_name</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">"Labels"</span><span class="p">][</span><span class="s2">"clab-node-name"</span><span class="p">]</span>
             <span class="c1"># reuse port mappings only from the target lab</span>
             <span class="k">if</span> <span class="n">clab_name</span> <span class="o">==</span> <span class="n">lab_name</span><span class="p">:</span>
                 <span class="n">ports_in_use</span><span class="p">[</span><span class="n">node_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
                     <span class="nb">set</span><span class="p">(</span>
                         <span class="p">[</span>
-                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;host_port&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;port&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;protocol&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-                            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Ports&quot;</span><span class="p">]</span>
-                            <span class="k">if</span> <span class="s2">&quot;host_port&quot;</span> <span class="ow">in</span> <span class="n">p</span> <span class="ow">and</span> <span class="s2">&quot;port&quot;</span> <span class="ow">in</span> <span class="n">p</span> <span class="ow">and</span> <span class="s2">&quot;protocol&quot;</span> <span class="ow">in</span> <span class="n">p</span>
+                            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">'host_port'</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">'port'</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">'protocol'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+                            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">container</span><span class="p">[</span><span class="s2">"Ports"</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="s2">"host_port"</span> <span class="ow">in</span> <span class="n">p</span> <span class="ow">and</span> <span class="s2">"port"</span> <span class="ow">in</span> <span class="n">p</span> <span class="ow">and</span> <span class="s2">"protocol"</span> <span class="ow">in</span> <span class="n">p</span>
                         <span class="p">]</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="c1"># check existing subnets</span>
             <span class="k">if</span> <span class="p">(</span>
-                <span class="n">container</span><span class="p">[</span><span class="s2">&quot;NetworkSettings&quot;</span><span class="p">][</span><span class="s2">&quot;IPv4addr&quot;</span><span class="p">]</span>
-                <span class="ow">and</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;NetworkSettings&quot;</span><span class="p">][</span><span class="s2">&quot;IPv4pLen&quot;</span><span class="p">]</span>
+                <span class="n">container</span><span class="p">[</span><span class="s2">"NetworkSettings"</span><span class="p">][</span><span class="s2">"IPv4addr"</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">container</span><span class="p">[</span><span class="s2">"NetworkSettings"</span><span class="p">][</span><span class="s2">"IPv4pLen"</span><span class="p">]</span>
             <span class="p">):</span>
                 <span class="n">ip</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">container</span><span class="p">[</span><span class="s1">&#39;NetworkSettings&#39;</span><span class="p">][</span><span class="s1">&#39;IPv4addr&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">container</span><span class="p">[</span><span class="s1">&#39;NetworkSettings&#39;</span><span class="p">][</span><span class="s1">&#39;IPv4pLen&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">container</span><span class="p">[</span><span class="s1">'NetworkSettings'</span><span class="p">][</span><span class="s1">'IPv4addr'</span><span class="p">]</span><span class="si">}</span><span class="s2">/"</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">container</span><span class="p">[</span><span class="s1">'NetworkSettings'</span><span class="p">][</span><span class="s1">'IPv4pLen'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
                 <span class="n">subnet</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">with_prefixlen</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">clab_topo</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">clab_topo</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                     <span class="n">clab_topo_data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
-                    <span class="k">if</span> <span class="n">clab_topo_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mgmt&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ipv4-subnet&quot;</span><span class="p">):</span>
-                        <span class="n">subnet</span> <span class="o">=</span> <span class="n">clab_topo_data</span><span class="p">[</span><span class="s2">&quot;mgmt&quot;</span><span class="p">][</span><span class="s2">&quot;ipv4-subnet&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">clab_topo_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"mgmt"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ipv4-subnet"</span><span class="p">):</span>
+                        <span class="n">subnet</span> <span class="o">=</span> <span class="n">clab_topo_data</span><span class="p">[</span><span class="s2">"mgmt"</span><span class="p">][</span><span class="s2">"ipv4-subnet"</span><span class="p">]</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">clab_name</span><span class="si">}</span><span class="s2"> lab </span><span class="si">{</span><span class="n">node_name</span><span class="si">}</span><span class="s2"> node failed to determine mgmt subnet&quot;</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">clab_name</span><span class="si">}</span><span class="s2"> lab </span><span class="si">{</span><span class="n">node_name</span><span class="si">}</span><span class="s2"> node failed to determine mgmt subnet"</span>
                         <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span><span class="p">)</span>
                         <span class="k">continue</span>
             <span class="n">subnets_in_use</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">subnet</span><span class="p">)</span>
             <span class="c1"># reuse existing lab subnet</span>
             <span class="k">if</span> <span class="n">clab_name</span> <span class="o">==</span> <span class="n">lab_name</span><span class="p">:</span>
                 <span class="n">ipv4_subnet</span> <span class="o">=</span> <span class="n">subnet</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ipv4_subnet</span><span class="si">}</span><span class="s2"> not in use by existing containers, using it&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ipv4_subnet</span><span class="si">}</span><span class="s2"> not in use by existing containers, using it"</span>
                 <span class="p">)</span>
             <span class="c1"># allocate new subnet if its in use by other lab</span>
             <span class="k">elif</span> <span class="n">clab_name</span> <span class="o">!=</span> <span class="n">lab_name</span> <span class="ow">and</span> <span class="n">ipv4_subnet</span> <span class="o">==</span> <span class="n">subnet</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ipv4_subnet</span><span class="si">}</span><span class="s2"> already in use, allocating new subnet&quot;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ipv4_subnet</span><span class="si">}</span><span class="s2"> already in use, allocating new subnet"</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">ipv4_subnet</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;collected TCP/UDP ports used by existing containers&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"collected TCP/UDP ports used by existing containers"</span><span class="p">)</span>
 
     <span class="c1"># allocate new subnet</span>
     <span class="k">if</span> <span class="n">ipv4_subnet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">pool</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;172.100.</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.0/24&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="sa">f</span><span class="s2">"172.100.</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.0/24"</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
         <span class="n">ipv4_subnet</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">subnets_in_use</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2"> allocated new subnet </span><span class="si">{</span><span class="n">ipv4_subnet</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2"> allocated new subnet </span><span class="si">{</span><span class="n">ipv4_subnet</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2"> fetching lab topology data from Netbox&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2"> fetching lab topology data from Netbox"</span><span class="p">)</span>
 
     <span class="c1"># download inventory data from Netbox</span>
     <span class="n">netbox_reply</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;get_containerlab_inventory&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"get_containerlab_inventory"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="n">lab_name</span><span class="p">,</span>
-            <span class="s2">&quot;tenant&quot;</span><span class="p">:</span> <span class="n">tenant</span><span class="p">,</span>
-            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
-            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">,</span>
-            <span class="s2">&quot;instance&quot;</span><span class="p">:</span> <span class="n">instance</span><span class="p">,</span>
-            <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="n">branch</span><span class="p">,</span>
-            <span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="n">image</span><span class="p">,</span>
-            <span class="s2">&quot;ipv4_subnet&quot;</span><span class="p">:</span> <span class="n">ipv4_subnet</span><span class="p">,</span>
-            <span class="s2">&quot;ports&quot;</span><span class="p">:</span> <span class="n">ports</span><span class="p">,</span>
-            <span class="s2">&quot;ports_map&quot;</span><span class="p">:</span> <span class="n">ports_in_use</span><span class="p">,</span>
-            <span class="s2">&quot;progress&quot;</span><span class="p">:</span> <span class="n">progress</span><span class="p">,</span>
+            <span class="s2">"lab_name"</span><span class="p">:</span> <span class="n">lab_name</span><span class="p">,</span>
+            <span class="s2">"tenant"</span><span class="p">:</span> <span class="n">tenant</span><span class="p">,</span>
+            <span class="s2">"filters"</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
+            <span class="s2">"devices"</span><span class="p">:</span> <span class="n">devices</span><span class="p">,</span>
+            <span class="s2">"instance"</span><span class="p">:</span> <span class="n">instance</span><span class="p">,</span>
+            <span class="s2">"branch"</span><span class="p">:</span> <span class="n">branch</span><span class="p">,</span>
+            <span class="s2">"image"</span><span class="p">:</span> <span class="n">image</span><span class="p">,</span>
+            <span class="s2">"ipv4_subnet"</span><span class="p">:</span> <span class="n">ipv4_subnet</span><span class="p">,</span>
+            <span class="s2">"ports"</span><span class="p">:</span> <span class="n">ports</span><span class="p">,</span>
+            <span class="s2">"ports_map"</span><span class="p">:</span> <span class="n">ports_in_use</span><span class="p">,</span>
+            <span class="s2">"progress"</span><span class="p">:</span> <span class="n">progress</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
     <span class="c1"># use inventory from first worker that returned hosts data</span>
     <span class="k">for</span> <span class="n">wname</span><span class="p">,</span> <span class="n">wdata</span> <span class="ow">in</span> <span class="n">netbox_reply</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]:</span>
-            <span class="n">topology_inventory</span> <span class="o">=</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">"result"</span><span class="p">]:</span>
+            <span class="n">topology_inventory</span> <span class="o">=</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">"result"</span><span class="p">]</span>
             <span class="k">break</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Netbox returned no data for &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39; lab&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Netbox returned no data for '</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">' lab"</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2"> topology data retrieved from Netbox&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2"> topology data retrieved from Netbox"</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">topology_inventory</span>
@@ -8360,18 +8360,18 @@ inventory without deploying.</p>
     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">topology_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># create topology file</span>
-    <span class="n">topology_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">topology_folder</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">.yaml&quot;</span><span class="p">)</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">topology_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tf</span><span class="p">:</span>
+    <span class="n">topology_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">topology_folder</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">.yaml"</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">topology_file</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">tf</span><span class="p">:</span>
         <span class="n">tf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">topology_inventory</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2"> topology data saved to &#39;</span><span class="si">{</span><span class="n">topology_file</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2"> topology data saved to '</span><span class="si">{</span><span class="n">topology_file</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deploy</span><span class="p">(</span>
         <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
         <span class="n">topology</span><span class="o">=</span><span class="n">topology_file</span><span class="p">,</span>
         <span class="n">reconfigure</span><span class="o">=</span><span class="n">reconfigure</span><span class="p">,</span>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-        <span class="n">node_filter</span><span class="o">=</span><span class="n">node_filter</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">node_filter</span><span class="o">=</span><span class="n">node_filter</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>

@@ -7320,30 +7320,30 @@ requested change and hosts marked failed. Subsequent tasks reconnect as needed.<
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">create_result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;runtime_inventory&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">],</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"runtime_inventory"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">"nornir-worker-1"</span><span class="p">],</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;create_host&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;foobar&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;hostname&quot;</span><span class="p">:</span> <span class="s2">&quot;192.0.2.10&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="s2">&quot;arista_eos&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;admin&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;password&quot;</span><span class="p">:</span> <span class="s2">&quot;admin&quot;</span><span class="p">,</span>
+            <span class="s2">"action"</span><span class="p">:</span> <span class="s2">"create_host"</span><span class="p">,</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"foobar"</span><span class="p">,</span>
+            <span class="s2">"hostname"</span><span class="p">:</span> <span class="s2">"192.0.2.10"</span><span class="p">,</span>
+            <span class="s2">"platform"</span><span class="p">:</span> <span class="s2">"arista_eos"</span><span class="p">,</span>
+            <span class="s2">"username"</span><span class="p">:</span> <span class="s2">"admin"</span><span class="p">,</span>
+            <span class="s2">"password"</span><span class="p">:</span> <span class="s2">"admin"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
     <span class="n">read_result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;runtime_inventory&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">],</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"runtime_inventory"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">"nornir-worker-1"</span><span class="p">],</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;read_host&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;foobar&quot;</span><span class="p">,</span>
+            <span class="s2">"action"</span><span class="p">:</span> <span class="s2">"read_host"</span><span class="p">,</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"foobar"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7355,19 +7355,19 @@ requested change and hosts marked failed. Subsequent tasks reconnect as needed.<
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;nornir_inventory_load_containerlab&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">],</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"nornir_inventory_load_containerlab"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">"nornir-worker-1"</span><span class="p">],</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;three-routers-lab&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;clab_workers&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;containerlab-worker-1&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;containerlab&quot;</span><span class="p">],</span>
+            <span class="s2">"lab_name"</span><span class="p">:</span> <span class="s2">"three-routers-lab"</span><span class="p">,</span>
+            <span class="s2">"clab_workers"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"containerlab-worker-1"</span><span class="p">],</span>
+            <span class="s2">"groups"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"containerlab"</span><span class="p">],</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7398,14 +7398,14 @@ requested change and hosts marked failed. Subsequent tasks reconnect as needed.<
 <div class="highlight"><pre><span></span><code>nf#nornir<span class="w"> </span>inventory<span class="w"> </span>create-host<span class="w"> </span>name<span class="w"> </span>foobar
 ---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Events<span class="w"> </span>-----------------------------------------------
 <span class="m">15</span>-Feb-2025<span class="w"> </span><span class="m">11</span>:12:38.908<span class="w"> </span>d42e073070b94d408225af2a880d1d26<span class="w"> </span>job<span class="w"> </span>started
-<span class="m">15</span>-Feb-2025<span class="w"> </span><span class="m">11</span>:12:38.939<span class="w"> </span>INFO<span class="w"> </span>nornir-worker-5<span class="w"> </span>running<span class="w"> </span>nornir.runtime_inventory<span class="w">  </span>-<span class="w"> </span>Performing<span class="w"> </span><span class="s1">&#39;create_host&#39;</span><span class="w"> </span>action
+<span class="m">15</span>-Feb-2025<span class="w"> </span><span class="m">11</span>:12:38.939<span class="w"> </span>INFO<span class="w"> </span>nornir-worker-5<span class="w"> </span>running<span class="w"> </span>nornir.runtime_inventory<span class="w">  </span>-<span class="w"> </span>Performing<span class="w"> </span><span class="s1">'create_host'</span><span class="w"> </span>action
 <span class="m">15</span>-Feb-2025<span class="w"> </span><span class="m">11</span>:12:39.162<span class="w"> </span>d42e073070b94d408225af2a880d1d26<span class="w"> </span>job<span class="w"> </span>completed<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">0</span>.254<span class="w"> </span>seconds
 
 ---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Results<span class="w"> </span>--------------------------------------------
 
 <span class="o">{</span>
-<span class="w">    </span><span class="s2">&quot;nornir-worker-5&quot;</span>:<span class="w"> </span><span class="o">{</span>
-<span class="w">        </span><span class="s2">&quot;foobar&quot;</span>:<span class="w"> </span><span class="nb">true</span>
+<span class="w">    </span><span class="s2">"nornir-worker-5"</span>:<span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="s2">"foobar"</span>:<span class="w"> </span><span class="nb">true</span>
 <span class="w">    </span><span class="o">}</span>
 <span class="o">}</span>
 nf#
@@ -7417,20 +7417,20 @@ inventory items, connections, circuits with interface details, and BGP peerings.
 Worker Netbox inventory settings are ignored, and reads bypass caches by default.
 A dictionary overrides these defaults, for example:</p>
 <div class="highlight"><pre><span></span><code><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;nornir_inventory_load_containerlab&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">,</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"nornir_inventory_load_containerlab"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"nornir-worker-1"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;demo-4-routers&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;clab_workers&quot;</span><span class="p">:</span> <span class="s2">&quot;containerlab-worker-1&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;load_netbox_branch&quot;</span><span class="p">:</span> <span class="s2">&quot;demo&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;load_netbox_instance&quot;</span><span class="p">:</span> <span class="s2">&quot;prod&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;load_netbox&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
-            <span class="s2">&quot;connections&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;bgp_peerings&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"lab_name"</span><span class="p">:</span> <span class="s2">"demo-4-routers"</span><span class="p">,</span>
+        <span class="s2">"clab_workers"</span><span class="p">:</span> <span class="s2">"containerlab-worker-1"</span><span class="p">,</span>
+        <span class="s2">"load_netbox_branch"</span><span class="p">:</span> <span class="s2">"demo"</span><span class="p">,</span>
+        <span class="s2">"load_netbox_instance"</span><span class="p">:</span> <span class="s2">"prod"</span><span class="p">,</span>
+        <span class="s2">"load_netbox"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"interfaces"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"ip_addresses"</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+            <span class="s2">"connections"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"bgp_peerings"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -7461,9 +7461,9 @@ When omitted, the supplied instance or Netbox service's default instance is used
 <div class="highlight"><pre><span></span><code>nf#nornir<span class="w"> </span>inventory<span class="w"> </span>load<span class="w"> </span>containerlab<span class="w"> </span>clab-workers<span class="w"> </span>containerlab-worker-1<span class="w"> </span>workers<span class="w"> </span>nornir-worker-1<span class="w"> </span>lab-name<span class="w"> </span>three-routers-lab
 ---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Events<span class="w"> </span>-----------------------------------------------
 <span class="m">05</span>-May-2025<span class="w"> </span><span class="m">21</span>:32:07.155<span class="w"> </span>ed210f6c91ac40ada02149118eede2c9<span class="w"> </span>job<span class="w"> </span>started
-<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">21</span>:32:07.172<span class="w"> </span>INFO<span class="w"> </span>nornir-worker-1<span class="w"> </span>running<span class="w"> </span>nornir.nornir_inventory_load_containerlab<span class="w">  </span>-<span class="w"> </span>Pulling<span class="w"> </span>Containerlab<span class="w"> </span><span class="s1">&#39;three-routers-lab&#39;</span><span class="w"> </span>lab<span class="w"> </span>inventory<span class="w"> </span>from<span class="w"> </span><span class="s1">&#39;containerlab-worker-1&#39;</span><span class="w"> </span>workers
-<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">21</span>:32:07.393<span class="w"> </span>INFO<span class="w"> </span>nornir-worker-1<span class="w"> </span>running<span class="w"> </span>nornir.nornir_inventory_load_containerlab<span class="w">  </span>-<span class="w"> </span>Pulled<span class="w"> </span>Containerlab<span class="w"> </span><span class="s1">&#39;three-routers-lab&#39;</span><span class="w"> </span>lab<span class="w"> </span>inventory
-<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">21</span>:32:07.399<span class="w"> </span>INFO<span class="w"> </span>nornir-worker-1<span class="w"> </span>running<span class="w"> </span>nornir.nornir_inventory_load_containerlab<span class="w">  </span>-<span class="w"> </span>Merged<span class="w"> </span>Containerlab<span class="w"> </span><span class="s1">&#39;three-routers-lab&#39;</span><span class="w"> </span>lab<span class="w"> </span>inventory<span class="w"> </span>with<span class="w"> </span>Nornir<span class="w"> </span>runtime<span class="w"> </span>inventory
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">21</span>:32:07.172<span class="w"> </span>INFO<span class="w"> </span>nornir-worker-1<span class="w"> </span>running<span class="w"> </span>nornir.nornir_inventory_load_containerlab<span class="w">  </span>-<span class="w"> </span>Pulling<span class="w"> </span>Containerlab<span class="w"> </span><span class="s1">'three-routers-lab'</span><span class="w"> </span>lab<span class="w"> </span>inventory<span class="w"> </span>from<span class="w"> </span><span class="s1">'containerlab-worker-1'</span><span class="w"> </span>workers
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">21</span>:32:07.393<span class="w"> </span>INFO<span class="w"> </span>nornir-worker-1<span class="w"> </span>running<span class="w"> </span>nornir.nornir_inventory_load_containerlab<span class="w">  </span>-<span class="w"> </span>Pulled<span class="w"> </span>Containerlab<span class="w"> </span><span class="s1">'three-routers-lab'</span><span class="w"> </span>lab<span class="w"> </span>inventory
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">21</span>:32:07.399<span class="w"> </span>INFO<span class="w"> </span>nornir-worker-1<span class="w"> </span>running<span class="w"> </span>nornir.nornir_inventory_load_containerlab<span class="w">  </span>-<span class="w"> </span>Merged<span class="w"> </span>Containerlab<span class="w"> </span><span class="s1">'three-routers-lab'</span><span class="w"> </span>lab<span class="w"> </span>inventory<span class="w"> </span>with<span class="w"> </span>Nornir<span class="w"> </span>runtime<span class="w"> </span>inventory
 <span class="m">05</span>-May-2025<span class="w"> </span><span class="m">21</span>:32:07.916<span class="w"> </span>ed210f6c91ac40ada02149118eede2c9<span class="w"> </span>job<span class="w"> </span>completed<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">0</span>.76<span class="w"> </span>seconds
 
 ---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Results<span class="w"> </span>--------------------------------------------
@@ -7478,19 +7478,19 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">],</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;nornir_inventory_load_containerlab&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">"nornir-worker-1"</span><span class="p">],</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"nornir_inventory_load_containerlab"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;three-routers-lab&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;clab_workers&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;containerlab-worker-1&quot;</span><span class="p">],</span>
+            <span class="s2">"lab_name"</span><span class="p">:</span> <span class="s2">"three-routers-lab"</span><span class="p">,</span>
+            <span class="s2">"clab_workers"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"containerlab-worker-1"</span><span class="p">],</span>
         <span class="p">}</span>
     <span class="p">)</span>
 
@@ -7510,43 +7510,43 @@ root
 <span class="w">    </span>└──<span class="w"> </span>inventory:<span class="w">    </span>Work<span class="w"> </span>with<span class="w"> </span>Nornir<span class="w"> </span>inventory
 <span class="w">        </span>├──<span class="w"> </span>create-host:<span class="w">    </span>Create<span class="w"> </span>new<span class="w"> </span>host
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Nornir<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Nornir<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'any'</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>*name:<span class="w">    </span>Name<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>host
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>username:<span class="w">    </span>Host<span class="w"> </span>connections<span class="w"> </span>username
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>password:<span class="w">    </span>Host<span class="w"> </span>connections<span class="w"> </span>password
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>platform:<span class="w">    </span>Host<span class="w"> </span>platform<span class="w"> </span>recognized<span class="w"> </span>by<span class="w"> </span>connection<span class="w"> </span>plugin
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>hostname:<span class="w">    </span>Hostname<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>host<span class="w"> </span>to<span class="w"> </span>initiate<span class="w"> </span>connection<span class="w"> </span>with,<span class="w"> </span>IP<span class="w"> </span>address<span class="w"> </span>or<span class="w"> </span>FQDN
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>port:<span class="w">    </span>TCP<span class="w"> </span>port<span class="w"> </span>to<span class="w"> </span>initiate<span class="w"> </span>connection<span class="w"> </span>with,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;22&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>port:<span class="w">    </span>TCP<span class="w"> </span>port<span class="w"> </span>to<span class="w"> </span>initiate<span class="w"> </span>connection<span class="w"> </span>with,<span class="w"> </span>default<span class="w"> </span><span class="s1">'22'</span>
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>connection-options:<span class="w">    </span>JSON<span class="w"> </span>string<span class="w"> </span>with<span class="w"> </span>connection<span class="w"> </span>options
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>groups:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>groups<span class="w"> </span>to<span class="w"> </span>associate<span class="w"> </span>with<span class="w"> </span>this<span class="w"> </span>host
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>data:<span class="w">    </span>JSON<span class="w"> </span>string<span class="w"> </span>with<span class="w"> </span>arbitrary<span class="w"> </span>host<span class="w"> </span>data
-<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">        </span>├──<span class="w"> </span>update-host:<span class="w">    </span>Update<span class="w"> </span>existing<span class="w"> </span>host<span class="w"> </span>details
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Nornir<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Nornir<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>*name:<span class="w">    </span>Name<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>host
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>username:<span class="w">    </span>Host<span class="w"> </span>connections<span class="w"> </span>username
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>password:<span class="w">    </span>Host<span class="w"> </span>connections<span class="w"> </span>password
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>platform:<span class="w">    </span>Host<span class="w"> </span>platform<span class="w"> </span>recognized<span class="w"> </span>by<span class="w"> </span>connection<span class="w"> </span>plugin
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>hostname:<span class="w">    </span>Hostname<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>host<span class="w"> </span>to<span class="w"> </span>initiate<span class="w"> </span>connection<span class="w"> </span>with,<span class="w"> </span>IP<span class="w"> </span>address<span class="w"> </span>or<span class="w"> </span>FQDN
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>port:<span class="w">    </span>TCP<span class="w"> </span>port<span class="w"> </span>to<span class="w"> </span>initiate<span class="w"> </span>connection<span class="w"> </span>with,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;22&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>port:<span class="w">    </span>TCP<span class="w"> </span>port<span class="w"> </span>to<span class="w"> </span>initiate<span class="w"> </span>connection<span class="w"> </span>with,<span class="w"> </span>default<span class="w"> </span><span class="s1">'22'</span>
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>connection-options:<span class="w">    </span>JSON<span class="w"> </span>string<span class="w"> </span>with<span class="w"> </span>connection<span class="w"> </span>options
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>groups:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>groups<span class="w"> </span>to<span class="w"> </span>associate<span class="w"> </span>with<span class="w"> </span>this<span class="w"> </span>host
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>groups-action:<span class="w">    </span>Action<span class="w"> </span>to<span class="w"> </span>perform<span class="w"> </span>with<span class="w"> </span>groups,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;append&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>groups-action:<span class="w">    </span>Action<span class="w"> </span>to<span class="w"> </span>perform<span class="w"> </span>with<span class="w"> </span>groups,<span class="w"> </span>default<span class="w"> </span><span class="s1">'append'</span>
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>data:<span class="w">    </span>JSON<span class="w"> </span>string<span class="w"> </span>with<span class="w"> </span>arbitrary<span class="w"> </span>host<span class="w"> </span>data
-<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">        </span>├──<span class="w"> </span>delete-host:<span class="w">    </span>Delete<span class="w"> </span>host<span class="w"> </span>from<span class="w"> </span>inventory
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Nornir<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Nornir<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>*name:<span class="w">    </span>Name<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>host
-<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">        </span>├──<span class="w"> </span>read-host-data:<span class="w">    </span>Return<span class="w"> </span>host<span class="w"> </span>data<span class="w"> </span>at<span class="w"> </span>given<span class="w"> </span>dor-separated<span class="w"> </span>key<span class="w"> </span>path
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Nornir<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Nornir<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FO:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>using<span class="w"> </span>Filter<span class="w"> </span>Object
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FB:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Glob<span class="w"> </span>Patterns
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FH:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname
@@ -7558,15 +7558,15 @@ root
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FX:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>excluding<span class="w"> </span>them<span class="w"> </span>by<span class="w"> </span>name
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FN:<span class="w">    </span>Negate<span class="w"> </span>the<span class="w"> </span>match
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>*keys:<span class="w">    </span>Dot<span class="w"> </span>separated<span class="w"> </span>path<span class="w"> </span>within<span class="w"> </span>host<span class="w"> </span>data,<span class="w"> </span>examples:<span class="w"> </span>config.interfaces.Lo0
-<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">        </span>└──<span class="w"> </span>load:<span class="w">    </span>Load<span class="w"> </span>inventory<span class="w"> </span>from<span class="w"> </span>external<span class="w"> </span><span class="nb">source</span>
 <span class="w">            </span>└──<span class="w"> </span>containerlab:<span class="w">    </span>Load<span class="w"> </span>inventory<span class="w"> </span>from<span class="w"> </span>running<span class="w"> </span>Containerlab<span class="w"> </span>lab<span class="o">(</span>s<span class="o">)</span>
 <span class="w">                </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
 <span class="w">                </span>├──<span class="w"> </span>*workers:<span class="w">    </span>Nornir<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>load<span class="w"> </span>inventory<span class="w"> </span>into
-<span class="w">                </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">                </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">                </span>├──<span class="w"> </span>clab-workers:<span class="w">    </span>Containerlab<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>load<span class="w"> </span>inventory<span class="w"> </span>from
-<span class="w">                </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
-<span class="w">                </span>├──<span class="w"> </span>lab-name:<span class="w">    </span>Name<span class="w"> </span>of<span class="w"> </span>Containerlab<span class="w"> </span>lab<span class="w"> </span>to<span class="w"> </span>load<span class="w"> </span>hosts<span class="err">&#39;</span><span class="w"> </span>inventory
+<span class="w">                </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
+<span class="w">                </span>├──<span class="w"> </span>lab-name:<span class="w">    </span>Name<span class="w"> </span>of<span class="w"> </span>Containerlab<span class="w"> </span>lab<span class="w"> </span>to<span class="w"> </span>load<span class="w"> </span>hosts<span class="err">'</span><span class="w"> </span>inventory
 <span class="w">                </span>├──<span class="w"> </span>groups:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>Nornir<span class="w"> </span>groups<span class="w"> </span>to<span class="w"> </span>associate<span class="w"> </span>with<span class="w"> </span>hosts
 <span class="w">                </span>├──<span class="w"> </span>use-default-credentials:<span class="w">    </span>Use<span class="w"> </span>Containerlab<span class="w"> </span>default<span class="w"> </span>credentials<span class="w"> </span><span class="k">for</span><span class="w"> </span>all<span class="w"> </span>hosts
 <span class="w">                </span>└──<span class="w"> </span>dry-run:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span>refresh<span class="w"> </span>Nornir,<span class="w"> </span>only<span class="w"> </span><span class="k">return</span><span class="w"> </span>pulled<span class="w"> </span>inventory
@@ -7717,21 +7717,21 @@ worker before changing the inventory.</p>
 <span class="normal">627</span>
 <span class="normal">628</span>
 <span class="normal">629</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">RuntimeInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">RuntimeInventoryResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Update Runtime Inventory&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Update Runtime Inventory"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">runtime_inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Task to work with Nornir runtime (in-memory) inventory.</span>
 
 <span class="sd">    Create, delete, and load actions close all connections for all hosts on this</span>
@@ -7746,23 +7746,23 @@ worker before changing the inventory.</p>
 <span class="sd">    - `delete_host` or `delete` - deletes host object from Nornir Inventory</span>
 <span class="sd">    - `load` - to simplify calling multiple functions</span>
 <span class="sd">    - `read_inventory` - read inventory content for groups, default and hosts</span>
-<span class="sd">    - `read_host_data` - to return host&#39;s data under provided path keys</span>
-<span class="sd">    - `list_hosts` - return a list of inventory&#39;s host names</span>
-<span class="sd">    - `list_hosts_platforms` - return a dictionary of hosts&#39; platforms</span>
+<span class="sd">    - `read_host_data` - to return host's data under provided path keys</span>
+<span class="sd">    - `list_hosts` - return a list of inventory's host names</span>
+<span class="sd">    - `list_hosts_platforms` - return a dictionary of hosts' platforms</span>
 <span class="sd">    - `update_defaults` - non recursively update defaults attributes</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab Job object containing relevant metadata</span>
 <span class="sd">        action: action to perform on inventory</span>
 <span class="sd">        kwargs: arguments to use with the calling action</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># clean up kwargs</span>
-    <span class="n">_</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;progress&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;performing &#39;</span><span class="si">{</span><span class="n">action</span><span class="si">}</span><span class="s2">&#39; action&quot;</span><span class="p">)</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"progress"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"performing '</span><span class="si">{</span><span class="n">action</span><span class="si">}</span><span class="s2">' action"</span><span class="p">)</span>
     <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_lock</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;delete_host&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="s2">&quot;create_host&quot;</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="s2">&quot;load&quot;</span><span class="p">}:</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">"delete_host"</span><span class="p">,</span> <span class="s2">"delete"</span><span class="p">,</span> <span class="s2">"create_host"</span><span class="p">,</span> <span class="s2">"create"</span><span class="p">,</span> <span class="s2">"load"</span><span class="p">}:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">nr</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-                <span class="n">task</span><span class="o">=</span><span class="n">nr_connections</span><span class="p">,</span> <span class="n">call</span><span class="o">=</span><span class="s2">&quot;close&quot;</span><span class="p">,</span> <span class="n">conn_name</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">on_failed</span><span class="o">=</span><span class="kc">True</span>
+                <span class="n">task</span><span class="o">=</span><span class="n">nr_connections</span><span class="p">,</span> <span class="n">call</span><span class="o">=</span><span class="s2">"close"</span><span class="p">,</span> <span class="n">conn_name</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span> <span class="n">on_failed</span><span class="o">=</span><span class="kc">True</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="o">.</span><span class="n">connections_data</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="n">InventoryFun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nr</span><span class="p">,</span> <span class="n">call</span><span class="o">=</span><span class="n">action</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>

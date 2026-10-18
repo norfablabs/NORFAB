@@ -7451,21 +7451,21 @@
 </tbody>
 </table>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code>name_template=&quot;{device}_BGP_{name}&quot;
+<div class="highlight"><pre><span></span><code>name_template="{device}_BGP_{name}"
 # ceos-leaf-1_BGP_to-spine-1
 </code></pre></div>
 <h2 id="execution-modes">Execution Modes<a class="headerlink" href="#execution-modes" title="Permanent link">¤</a></h2>
 <p><strong>Dry-run mode</strong> (<code>dry_run=True</code>) returns the diff without any NetBox writes:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;&lt;device&gt;&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;create&quot;</span><span class="p">:</span>  <span class="p">[</span><span class="s2">&quot;&lt;session_name&gt;&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
-        <span class="s2">&quot;delete&quot;</span><span class="p">:</span>  <span class="p">[</span><span class="s2">&quot;&lt;session_name&gt;&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
-        <span class="s2">&quot;update&quot;</span><span class="p">:</span>  <span class="p">{</span>
-            <span class="s2">&quot;&lt;session_name&gt;&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;&lt;field&gt;&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;old_value&quot;</span><span class="p">:</span> <span class="o">...</span><span class="p">,</span> <span class="s2">&quot;new_value&quot;</span><span class="p">:</span> <span class="o">...</span><span class="p">},</span>
+    <span class="s2">"&lt;device&gt;"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"create"</span><span class="p">:</span>  <span class="p">[</span><span class="s2">"&lt;session_name&gt;"</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="s2">"delete"</span><span class="p">:</span>  <span class="p">[</span><span class="s2">"&lt;session_name&gt;"</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="s2">"update"</span><span class="p">:</span>  <span class="p">{</span>
+            <span class="s2">"&lt;session_name&gt;"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"&lt;field&gt;"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"old_value"</span><span class="p">:</span> <span class="o">...</span><span class="p">,</span> <span class="s2">"new_value"</span><span class="p">:</span> <span class="o">...</span><span class="p">},</span>
             <span class="p">},</span>
         <span class="p">},</span>
-        <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;session_name&gt;&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"&lt;session_name&gt;"</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -7551,7 +7551,7 @@ successful batches.</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync bgp-peerings devices ceos-leaf-1 ceos-leaf-2 rir lab process-deletions
 </code></pre></div>
 <p>Use a custom session naming template:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox sync bgp-peerings devices ceos-leaf-1 rir lab name-template &quot;{device}_BGP_{name}&quot;
+<div class="highlight"><pre><span></span><code>nf#netbox sync bgp-peerings devices ceos-leaf-1 rir lab name-template "{device}_BGP_{name}"
 </code></pre></div>
 <p>Sync sessions into a NetBox branch:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync bgp-peerings devices ceos-leaf-1 rir lab branch my-bgp-branch
@@ -7566,120 +7566,120 @@ successful batches.</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync bgp-peerings devices ceos-leaf-1 rir lab filter-by-peer-group EBGP_PEERS
 </code></pre></div>
 <p>Sync only sessions whose description matches a glob pattern:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox sync bgp-peerings devices ceos-leaf-1 rir lab filter-by-description &quot;*spine uplink*&quot;
+<div class="highlight"><pre><span></span><code>nf#netbox sync bgp-peerings devices ceos-leaf-1 rir lab filter-by-description "*spine uplink*"
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
 <span class="c1"># sync BGP sessions for specific devices</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_bgp_peerings&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_bgp_peerings"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-leaf-2&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">,</span> <span class="s2">"ceos-leaf-2"</span><span class="p">],</span>
+        <span class="s2">"rir"</span><span class="p">:</span> <span class="s2">"lab"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># dry run — preview creates/updates/deletes without writing</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_bgp_peerings&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_bgp_peerings"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">],</span>
+        <span class="s2">"rir"</span><span class="p">:</span> <span class="s2">"lab"</span><span class="p">,</span>
+        <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># sync and remove stale sessions</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_bgp_peerings&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_bgp_peerings"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-leaf-2&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;process_deletions&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">,</span> <span class="s2">"ceos-leaf-2"</span><span class="p">],</span>
+        <span class="s2">"rir"</span><span class="p">:</span> <span class="s2">"lab"</span><span class="p">,</span>
+        <span class="s2">"process_deletions"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># custom session name template</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_bgp_peerings&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_bgp_peerings"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;name_template&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{device}</span><span class="s2">_BGP_</span><span class="si">{name}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">],</span>
+        <span class="s2">"rir"</span><span class="p">:</span> <span class="s2">"lab"</span><span class="p">,</span>
+        <span class="s2">"name_template"</span><span class="p">:</span> <span class="s2">"</span><span class="si">{device}</span><span class="s2">_BGP_</span><span class="si">{name}</span><span class="s2">"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># sync into a NetBox branch</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_bgp_peerings&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_bgp_peerings"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="s2">&quot;my-bgp-branch&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">],</span>
+        <span class="s2">"rir"</span><span class="p">:</span> <span class="s2">"lab"</span><span class="p">,</span>
+        <span class="s2">"branch"</span><span class="p">:</span> <span class="s2">"my-bgp-branch"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># use Nornir host filters instead of explicit device names</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_bgp_peerings&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_bgp_peerings"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;FG&quot;</span><span class="p">:</span> <span class="s2">&quot;spine-group&quot;</span><span class="p">,</span>
+        <span class="s2">"rir"</span><span class="p">:</span> <span class="s2">"lab"</span><span class="p">,</span>
+        <span class="s2">"FG"</span><span class="p">:</span> <span class="s2">"spine-group"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># sync only sessions with a specific remote AS</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_bgp_peerings&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_bgp_peerings"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;filter_by_remote_as&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">65001</span><span class="p">,</span> <span class="mi">65002</span><span class="p">],</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">],</span>
+        <span class="s2">"rir"</span><span class="p">:</span> <span class="s2">"lab"</span><span class="p">,</span>
+        <span class="s2">"filter_by_remote_as"</span><span class="p">:</span> <span class="p">[</span><span class="mi">65001</span><span class="p">,</span> <span class="mi">65002</span><span class="p">],</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># sync only sessions belonging to a peer group</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_bgp_peerings&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_bgp_peerings"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;filter_by_peer_group&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;EBGP_PEERS&quot;</span><span class="p">],</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">],</span>
+        <span class="s2">"rir"</span><span class="p">:</span> <span class="s2">"lab"</span><span class="p">,</span>
+        <span class="s2">"filter_by_peer_group"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"EBGP_PEERS"</span><span class="p">],</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># sync only sessions whose description matches a glob pattern</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_bgp_peerings&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_bgp_peerings"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;filter_by_description&quot;</span><span class="p">:</span> <span class="s2">&quot;*spine uplink*&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;preserve_description&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">],</span>
+        <span class="s2">"rir"</span><span class="p">:</span> <span class="s2">"lab"</span><span class="p">,</span>
+        <span class="s2">"filter_by_description"</span><span class="p">:</span> <span class="s2">"*spine uplink*"</span><span class="p">,</span>
+        <span class="s2">"preserve_description"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
@@ -7696,13 +7696,13 @@ used for all reads and writes.  The parameter is forwarded to both <code>create_
 and <code>update_bgp_peering</code> internally so all normalisation, diff, and write operations
 use the same field consistently.</p>
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_bgp_peerings&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_bgp_peerings"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;vrf_custom_field&quot;</span><span class="p">:</span> <span class="s2">&quot;tenant_vrf&quot;</span><span class="p">,</span>  <span class="c1"># BGP Sessions custom field -&gt; Object-type VRF</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">],</span>
+        <span class="s2">"rir"</span><span class="p">:</span> <span class="s2">"lab"</span><span class="p">,</span>
+        <span class="s2">"vrf_custom_field"</span><span class="p">:</span> <span class="s2">"tenant_vrf"</span><span class="p">,</span>  <span class="c1"># BGP Sessions custom field -&gt; Object-type VRF</span>
     <span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -7714,23 +7714,23 @@ root
     └── sync:    Sync Netbox data
         └── bgp-peerings:    Sync BGP peering sessions
             ├── timeout:    Job timeout
-            ├── workers:    Filter worker to target, default &#39;any&#39;
-            ├── verbose-result:    Control output details, default &#39;False&#39;
-            ├── progress:    Display progress events, default &#39;True&#39;
+            ├── workers:    Filter worker to target, default 'any'
+            ├── verbose-result:    Control output details, default 'False'
+            ├── progress:    Display progress events, default 'True'
             ├── instance:    Netbox instance name to target
             ├── branch:    Branching plugin branch name to use
             ├── dry-run:    Return diff without writing to NetBox
             ├── devices:    List of device names to process
-            ├── status:    Status for created/updated sessions, default &#39;active&#39;
-            ├── process-deletions:    Delete NetBox sessions absent on device, default &#39;False&#39;
-            ├── rir:    RIR name for ASN creation (e.g. &#39;RFC 1918&#39;)
+            ├── status:    Status for created/updated sessions, default 'active'
+            ├── process-deletions:    Delete NetBox sessions absent on device, default 'False'
+            ├── rir:    RIR name for ASN creation (e.g. 'RFC 1918')
             ├── message:    Changelog message for all NetBox write operations
-            ├── name-template:    Template for BGP session names in NetBox, default &#39;{device}_{name}&#39;
+            ├── name-template:    Template for BGP session names in NetBox, default '{device}_{name}'
             ├── filter-by-remote-as:    Only sync sessions with matching remote AS number(s)
             ├── filter-by-peer-group:    Only sync sessions with matching peer group name(s)
             ├── filter-by-description:    Only sync sessions whose description matches this glob pattern
             ├── preserve-description:    Preserve NetBox descriptions always (true), when live text is empty (null), or never (false)
-            ├── vrf-custom-field:    BGP session field for VRF reference, default &#39;vrf&#39;
+            ├── vrf-custom-field:    BGP session field for VRF reference, default 'vrf'
             ├── FO:    Filter hosts using Filter Object
             ├── FB:    Filter hosts by name using Glob Patterns
             ├── FH:    Filter hosts by hostname
@@ -8753,16 +8753,16 @@ live text.</p>
 <span class="normal">2732</span>
 <span class="normal">2733</span>
 <span class="normal">2734</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncBgpPeeringsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncBgpPeeringsResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Sync BGP Peerings&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Sync BGP Peerings"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -8771,7 +8771,7 @@ live text.</p>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"active"</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">with_approval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">process_deletions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -8779,21 +8779,21 @@ live text.</p>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">rir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">message</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">name_template</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;{{device}}_{{name}}&quot;</span><span class="p">,</span>
+    <span class="n">name_template</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"{{device}}_{{name}}"</span><span class="p">,</span>
     <span class="n">filter_by_remote_as</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filter_by_peer_group</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filter_by_description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">ignore_peer_ranges</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">vrf_custom_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;vrf&quot;</span><span class="p">,</span>
+    <span class="n">vrf_custom_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"vrf"</span><span class="p">,</span>
     <span class="n">preserve_description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Synchronize BGP sessions between live devices and NetBox.</span>
 
 <span class="sd">    Collects BGP session data from devices via Nornir ``parse_ttp`` with</span>
-<span class="sd">    ``get=&quot;bgp_neighbors&quot;``, compares against existing NetBox BGP sessions and</span>
+<span class="sd">    ``get="bgp_neighbors"``, compares against existing NetBox BGP sessions and</span>
 <span class="sd">    creates, updates, or (optionally) deletes sessions in NetBox accordingly.</span>
 <span class="sd">    Matched sessions are updated by NetBox ID, including sessions with no name.</span>
 
@@ -8824,20 +8824,20 @@ live text.</p>
 <span class="sd">            - ``state`` — device-reported state (e.g. ``established``)</span>
 <span class="sd">            - ``peer_group`` — peer group name or ``None``</span>
 
-<span class="sd">            Default: ``&quot;{{device}}_{{name}}&quot;``.</span>
+<span class="sd">            Default: ``"{{device}}_{{name}}"``.</span>
 <span class="sd">        filter_by_remote_as (list of int, optional): Only include sessions whose remote AS number</span>
 <span class="sd">            matches one of the provided integer values. Applied to both NetBox and live device sessions.</span>
 <span class="sd">        filter_by_peer_group (list, optional): Only include sessions whose peer group name matches</span>
 <span class="sd">            one of the provided values. Applied to both NetBox and live device sessions.</span>
 <span class="sd">        filter_by_description (str, optional): Only include sessions whose description matches</span>
-<span class="sd">            this glob pattern (e.g. ``&#39;*uplink*&#39;``). Applied to both NetBox and live device sessions.</span>
+<span class="sd">            this glob pattern (e.g. ``'*uplink*'``). Applied to both NetBox and live device sessions.</span>
 <span class="sd">        ignore_peer_ranges (list, optional): provide prefixes to ignore BGP peers</span>
 <span class="sd">        vrf_custom_field (str): Name of the BGP session custom field that stores</span>
 <span class="sd">            the VRF object reference.  The custom field must be of type Object in</span>
 <span class="sd">            NetBox pointing to the VRF content-type.  The value is always a single</span>
 <span class="sd">            VRF object reference read from and written into</span>
-<span class="sd">            ``custom_fields[vrf_custom_field]``.  Default ``&#39;vrf&#39;`` means</span>
-<span class="sd">            ``custom_fields[&#39;vrf&#39;]``.</span>
+<span class="sd">            ``custom_fields[vrf_custom_field]``.  Default ``'vrf'`` means</span>
+<span class="sd">            ``custom_fields['vrf']``.</span>
 <span class="sd">        preserve_description (bool, optional): Description preservation policy.</span>
 <span class="sd">            ``None`` preserves NetBox text when the live description is empty,</span>
 <span class="sd">            ``True`` always preserves NetBox text, and ``False`` always uses</span>
@@ -8848,29 +8848,29 @@ live text.</p>
 <span class="sd">        Normal run result keyed by device name::</span>
 
 <span class="sd">            {</span>
-<span class="sd">                &quot;&lt;device&gt;&quot;: {</span>
-<span class="sd">                    &quot;created&quot;: [&quot;&lt;session_name&gt;&quot;, ...],</span>
-<span class="sd">                    &quot;updated&quot;: [&quot;&lt;session_name&gt;&quot;, ...],</span>
-<span class="sd">                    &quot;deleted&quot;: [&quot;&lt;session_name&gt;&quot;, ...],</span>
-<span class="sd">                    &quot;in_sync&quot;: [&quot;&lt;session_name&gt;&quot;, ...],</span>
+<span class="sd">                "&lt;device&gt;": {</span>
+<span class="sd">                    "created": ["&lt;session_name&gt;", ...],</span>
+<span class="sd">                    "updated": ["&lt;session_name&gt;", ...],</span>
+<span class="sd">                    "deleted": ["&lt;session_name&gt;", ...],</span>
+<span class="sd">                    "in_sync": ["&lt;session_name&gt;", ...],</span>
 <span class="sd">                }</span>
 <span class="sd">            }</span>
 
 <span class="sd">        Dry-run result keyed by device name::</span>
 
 <span class="sd">            {</span>
-<span class="sd">                &quot;&lt;device&gt;&quot;: {</span>
-<span class="sd">                    &quot;create&quot;: [&quot;&lt;session_name&gt;&quot;, ...],</span>
-<span class="sd">                    &quot;delete&quot;: [&quot;&lt;session_name&gt;&quot;, ...],</span>
-<span class="sd">                    &quot;update&quot;: {&quot;&lt;session_name&gt;&quot;: {&quot;&lt;field&gt;&quot;: {&quot;old_value&quot;: ..., &quot;new_value&quot;: ...}, ...}, ...},</span>
-<span class="sd">                    &quot;in_sync&quot;: [&quot;&lt;session_name&gt;&quot;, ...],</span>
+<span class="sd">                "&lt;device&gt;": {</span>
+<span class="sd">                    "create": ["&lt;session_name&gt;", ...],</span>
+<span class="sd">                    "delete": ["&lt;session_name&gt;", ...],</span>
+<span class="sd">                    "update": {"&lt;session_name&gt;": {"&lt;field&gt;": {"old_value": ..., "new_value": ...}, ...}, ...},</span>
+<span class="sd">                    "in_sync": ["&lt;session_name&gt;", ...],</span>
 <span class="sd">                }</span>
 <span class="sd">            }</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_bgp_peerings&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_bgp_peerings"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="n">SyncActionSummaryMap</span><span class="p">()</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
     <span class="p">)</span>
@@ -8881,26 +8881,26 @@ live text.</p>
     <span class="n">lookup_cache</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="c1"># handle ranges</span>
     <span class="n">ignore_peer_ranges</span> <span class="o">=</span> <span class="n">ignore_peer_ranges</span> <span class="ow">or</span> <span class="p">[</span>
-        <span class="s2">&quot;127.0.0.0/8&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;224.0.0.0/24&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;fe80::/10&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ff02::/16&quot;</span><span class="p">,</span>
+        <span class="s2">"127.0.0.0/8"</span><span class="p">,</span>
+        <span class="s2">"224.0.0.0/24"</span><span class="p">,</span>
+        <span class="s2">"fe80::/10"</span><span class="p">,</span>
+        <span class="s2">"ff02::/16"</span><span class="p">,</span>
     <span class="p">]</span>
     <span class="n">ignore_peer_nets</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_network</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pfx</span><span class="p">),</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">pfx</span> <span class="ow">in</span> <span class="n">ignore_peer_ranges</span>
     <span class="p">]</span>
 
     <span class="c1"># Validate BGP plugin</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;validating NetBox BGP plugin for &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_plugin</span><span class="p">(</span><span class="s2">&quot;netbox_bgp&quot;</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; NetBox instance has no BGP plugin installed&quot;</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"validating NetBox BGP plugin for '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_plugin</span><span class="p">(</span><span class="s2">"netbox_bgp"</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">' NetBox instance has no BGP plugin installed"</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># Validate VRF custom field</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;validating BGP session VRF custom field&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"validating BGP session VRF custom field"</span><span class="p">)</span>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="n">vrf_custom_field</span> <span class="o">=</span> <span class="n">_resolve_vrf_custom_field</span><span class="p">(</span>
         <span class="n">vrf_custom_field</span><span class="p">,</span> <span class="n">nb</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
@@ -8908,38 +8908,38 @@ live text.</p>
 
     <span class="c1"># Source additional devices from Nornir filters</span>
     <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;resolving devices from Nornir filters&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"resolving devices from Nornir filters"</span><span class="p">)</span>
         <span class="n">nornir_hosts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nornir_hosts</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">nornir_hosts</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">host</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
                 <span class="n">devices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;resolved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nornir_hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from Nornir filters, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> total device(s) selected&quot;</span>
+            <span class="sa">f</span><span class="s2">"resolved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nornir_hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from Nornir filters, "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> total device(s) selected"</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;no devices specified&quot;</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">"no devices specified"</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync BGP peerings: processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync BGP peerings: processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;syncing BGP peerings for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;, dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"syncing BGP peerings for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">', dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
 
     <span class="c1"># Fetch existing NetBox BGP sessions directly. get_bgp_peerings returns</span>
     <span class="c1"># name-keyed data and cannot represent multiple sessions with the same name.</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching BGP session data from NetBox for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"fetching BGP session data from NetBox for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)"</span><span class="p">)</span>
     <span class="n">devices_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_devices</span><span class="p">(</span>
         <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">devices</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">devices_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;failed to fetch device data from NetBox&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"failed to fetch device data from NetBox"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">devices_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
@@ -8948,8 +8948,8 @@ live text.</p>
     <span class="n">valid_devices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">devices_result</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
     <span class="n">missing_devices</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span> <span class="o">-</span> <span class="n">valid_devices</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">missing_devices</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;device &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; not found in NetBox&quot;</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"device '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">' not found in NetBox"</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
@@ -8961,7 +8961,7 @@ live text.</p>
 
     <span class="n">nb_sessions</span> <span class="o">=</span> <span class="p">{</span><span class="n">device_name</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">}</span>
     <span class="n">device_names_by_id</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">device_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]:</span> <span class="n">device_name</span>
+        <span class="n">device_data</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]:</span> <span class="n">device_name</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">device_data</span> <span class="ow">in</span> <span class="n">devices_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span>
     <span class="p">}</span>
@@ -8977,18 +8977,18 @@ live text.</p>
 
     <span class="c1"># Fetch live BGP data from devices via Nornir parse_ttp</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;fetching BGP session data from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) via Nornir parse_ttp&quot;</span>
+        <span class="sa">f</span><span class="s2">"fetching BGP session data from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) via Nornir parse_ttp"</span>
     <span class="p">)</span>
     <span class="n">parse_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;parse_ttp&quot;</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;get&quot;</span><span class="p">:</span> <span class="s2">&quot;bgp_neighbors&quot;</span><span class="p">,</span> <span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">},</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+        <span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="s2">"parse_ttp"</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"get"</span><span class="p">:</span> <span class="s2">"bgp_neighbors"</span><span class="p">,</span> <span class="s2">"FL"</span><span class="p">:</span> <span class="n">devices</span><span class="p">},</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="c1"># Build NetBox BGP sessions normalised dicts per device</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;normalising NetBox BGP session data&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"normalising NetBox BGP session data"</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
         <span class="c1"># Normalise NetBox sessions for this device</span>
         <span class="n">normalised_nb</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -9000,103 +9000,103 @@ live text.</p>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - failed to normalise NetBox session &#39;</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2">&#39; for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - failed to normalise NetBox session '</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2">' for '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">': </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
                 <span class="k">continue</span>
             <span class="n">identity</span> <span class="o">=</span> <span class="n">bgp_session_identity</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="n">normalised</span><span class="p">)</span>
             <span class="n">normalised_nb</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">identity</span><span class="p">]</span> <span class="o">=</span> <span class="n">normalised</span>
     <span class="n">nb_session_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">)</span> <span class="k">for</span> <span class="n">sessions</span> <span class="ow">in</span> <span class="n">normalised_nb</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;normalised </span><span class="si">{</span><span class="n">nb_session_count</span><span class="si">}</span><span class="s2"> NetBox BGP session(s)&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"normalised </span><span class="si">{</span><span class="n">nb_session_count</span><span class="si">}</span><span class="s2"> NetBox BGP session(s)"</span><span class="p">)</span>
 
     <span class="c1"># pre-seed lookup cache from fetched NetBox sessions and all parsed live</span>
     <span class="c1"># sessions before rendering live session names.</span>
     <span class="n">sessions_for_cache</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">sessions</span> <span class="ow">in</span> <span class="n">normalised_nb</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">session_data</span> <span class="ow">in</span> <span class="n">sessions</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">sessions_for_cache</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span> <span class="o">**</span><span class="n">session_data</span><span class="p">})</span>
+            <span class="n">sessions_for_cache</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"device"</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span> <span class="o">**</span><span class="n">session_data</span><span class="p">})</span>
     <span class="k">for</span> <span class="n">wdata</span> <span class="ow">in</span> <span class="n">parse_data</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;failed&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"failed"</span><span class="p">):</span>
             <span class="k">continue</span>
-        <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">host_sessions</span> <span class="ow">in</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;result&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">host_sessions</span> <span class="ow">in</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"result"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">host_sessions</span><span class="p">:</span>
                 <span class="n">sessions_for_cache</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
-                        <span class="s2">&quot;local_address&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;local_address&quot;</span><span class="p">),</span>
-                        <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;local_as&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;remote_address&quot;</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;remote_address&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;remote_as&quot;</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;remote_as&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vrf&quot;</span><span class="p">),</span>
+                        <span class="s2">"device"</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
+                        <span class="s2">"local_address"</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"local_address"</span><span class="p">),</span>
+                        <span class="s2">"local_as"</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s2">"local_as"</span><span class="p">],</span>
+                        <span class="s2">"remote_address"</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s2">"remote_address"</span><span class="p">],</span>
+                        <span class="s2">"remote_as"</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s2">"remote_as"</span><span class="p">],</span>
+                        <span class="s2">"vrf"</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"vrf"</span><span class="p">),</span>
                     <span class="p">}</span>
                 <span class="p">)</span>
     <span class="k">if</span> <span class="n">sessions_for_cache</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;pre-seeding BGP lookup cache from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions_for_cache</span><span class="p">)</span><span class="si">}</span><span class="s2"> NetBox/live session(s)&quot;</span>
+            <span class="sa">f</span><span class="s2">"pre-seeding BGP lookup cache from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions_for_cache</span><span class="p">)</span><span class="si">}</span><span class="s2"> NetBox/live session(s)"</span>
         <span class="p">)</span>
         <span class="n">preseed_bgp_lookup_cache</span><span class="p">(</span>
             <span class="n">nb</span><span class="p">,</span> <span class="n">sessions_for_cache</span><span class="p">,</span> <span class="n">lookup_cache</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
         <span class="p">)</span>
 
     <span class="c1"># Normalize live parse data per device</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;normalising live BGP session data&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"normalising live BGP session data"</span><span class="p">)</span>
     <span class="n">failed_devices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">wname</span><span class="p">,</span> <span class="n">wdata</span> <span class="ow">in</span> <span class="n">parse_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">resources_failed</span> <span class="o">=</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resources_failed&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="n">resources_failed</span> <span class="o">=</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"resources_failed"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">resources_failed</span><span class="p">:</span>
             <span class="n">failed_devices</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">resources_failed</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
                 <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">resources_failed</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">wname</span><span class="si">}</span><span class="s2"> failed to fetch BGP session data from devices &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">resources_failed</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">wname</span><span class="si">}</span><span class="s2"> failed to fetch BGP session data from devices "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">resources_failed</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;failed&quot;</span><span class="p">):</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">wname</span><span class="si">}</span><span class="s2"> - failed to parse BGP session data from devices&quot;</span>
+        <span class="k">if</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"failed"</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">wname</span><span class="si">}</span><span class="s2"> - failed to parse BGP session data from devices"</span>
             <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span><span class="p">)</span>
             <span class="k">continue</span>
-        <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">host_sessions</span> <span class="ow">in</span> <span class="p">(</span><span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;result&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">host_sessions</span> <span class="ow">in</span> <span class="p">(</span><span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"result"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">normalised_live</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="p">{})</span>
             <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">host_sessions</span><span class="p">:</span>
-                <span class="n">parsed_name</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
-                <span class="n">description</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
-                <span class="n">local_address</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;local_address&quot;</span><span class="p">)</span>
+                <span class="n">parsed_name</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">)</span>
+                <span class="n">description</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"description"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span>
+                <span class="n">local_address</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"local_address"</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">local_address</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">local_address</span><span class="p">)</span>
                     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                         <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parsed_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;unknown&#39;</span><span class="si">}</span><span class="s2"> - skipping, parsed local ip &quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">local_address</span><span class="si">}</span><span class="s2">&#39; is not a valid IP address&quot;</span>
+                            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">parsed_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'unknown'</span><span class="si">}</span><span class="s2"> - skipping, parsed local ip "</span>
+                            <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">local_address</span><span class="si">}</span><span class="s2">' is not a valid IP address"</span>
                         <span class="p">)</span>
                         <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span><span class="p">)</span>
                         <span class="k">continue</span>
-                <span class="n">local_as</span> <span class="o">=</span> <span class="n">_normalise_bgp_identity_asn</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;local_as&quot;</span><span class="p">])</span>
-                <span class="n">remote_address</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;remote_address&quot;</span><span class="p">]</span>
-                <span class="n">remote_as</span> <span class="o">=</span> <span class="n">_normalise_bgp_identity_asn</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;remote_as&quot;</span><span class="p">])</span>
-                <span class="n">peer_group</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;peer_group&quot;</span><span class="p">)</span>
+                <span class="n">local_as</span> <span class="o">=</span> <span class="n">_normalise_bgp_identity_asn</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">"local_as"</span><span class="p">])</span>
+                <span class="n">remote_address</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="s2">"remote_address"</span><span class="p">]</span>
+                <span class="n">remote_as</span> <span class="o">=</span> <span class="n">_normalise_bgp_identity_asn</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">"remote_as"</span><span class="p">])</span>
+                <span class="n">peer_group</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"peer_group"</span><span class="p">)</span>
                 <span class="n">session_data</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
-                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">parsed_name</span><span class="p">,</span>
-                    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
-                    <span class="s2">&quot;local_address&quot;</span><span class="p">:</span> <span class="n">local_address</span><span class="p">,</span>
-                    <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="n">local_as</span><span class="p">,</span>
-                    <span class="s2">&quot;remote_address&quot;</span><span class="p">:</span> <span class="n">remote_address</span><span class="p">,</span>
-                    <span class="s2">&quot;remote_as&quot;</span><span class="p">:</span> <span class="n">remote_as</span><span class="p">,</span>
-                    <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vrf&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="p">(</span>
-                        <span class="s2">&quot;active&quot;</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;established&quot;</span> <span class="k">else</span> <span class="n">status</span>
+                    <span class="s2">"device"</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
+                    <span class="s2">"name"</span><span class="p">:</span> <span class="n">parsed_name</span><span class="p">,</span>
+                    <span class="s2">"description"</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
+                    <span class="s2">"local_address"</span><span class="p">:</span> <span class="n">local_address</span><span class="p">,</span>
+                    <span class="s2">"local_as"</span><span class="p">:</span> <span class="n">local_as</span><span class="p">,</span>
+                    <span class="s2">"remote_address"</span><span class="p">:</span> <span class="n">remote_address</span><span class="p">,</span>
+                    <span class="s2">"remote_as"</span><span class="p">:</span> <span class="n">remote_as</span><span class="p">,</span>
+                    <span class="s2">"vrf"</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"vrf"</span><span class="p">),</span>
+                    <span class="s2">"status"</span><span class="p">:</span> <span class="p">(</span>
+                        <span class="s2">"active"</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"established"</span> <span class="k">else</span> <span class="n">status</span>
                     <span class="p">),</span>
-                    <span class="s2">&quot;peer_group&quot;</span><span class="p">:</span> <span class="n">peer_group</span><span class="p">,</span>
-                    <span class="s2">&quot;import_policies&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;import_policies&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;export_policies&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;export_policies&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;prefix_list_in&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prefix_list_in&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;prefix_list_out&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prefix_list_out&quot;</span><span class="p">),</span>
+                    <span class="s2">"peer_group"</span><span class="p">:</span> <span class="n">peer_group</span><span class="p">,</span>
+                    <span class="s2">"import_policies"</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"import_policies"</span><span class="p">),</span>
+                    <span class="s2">"export_policies"</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"export_policies"</span><span class="p">),</span>
+                    <span class="s2">"prefix_list_in"</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"prefix_list_in"</span><span class="p">),</span>
+                    <span class="s2">"prefix_list_out"</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"prefix_list_out"</span><span class="p">),</span>
                 <span class="p">}</span>
                 <span class="c1"># attempt to resolve local ip if empty</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">local_address</span><span class="p">:</span>
@@ -9105,16 +9105,16 @@ live text.</p>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">local_address</span><span class="p">:</span>
                         <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parsed_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">remote_address</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;unknown&#39;</span><span class="si">}</span><span class="s2"> &quot;</span>
-                            <span class="s2">&quot;- skipping, no local ip in parsed data, failed to resolve using peer ip&quot;</span>
+                            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">parsed_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">remote_address</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'unknown'</span><span class="si">}</span><span class="s2"> "</span>
+                            <span class="s2">"- skipping, no local ip in parsed data, failed to resolve using peer ip"</span>
                         <span class="p">)</span>
                         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
                         <span class="k">continue</span>
-                    <span class="n">session_data</span><span class="p">[</span><span class="s2">&quot;local_address&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_address</span>
+                    <span class="n">session_data</span><span class="p">[</span><span class="s2">"local_address"</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_address</span>
                     <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parsed_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">remote_address</span><span class="si">}</span><span class="s2"> - resolved local ip &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">local_address</span><span class="si">}</span><span class="s2">&#39; using peer ip&quot;</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">parsed_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">remote_address</span><span class="si">}</span><span class="s2"> - resolved local ip "</span>
+                        <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">local_address</span><span class="si">}</span><span class="s2">' using peer ip"</span>
                     <span class="p">)</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
@@ -9124,12 +9124,12 @@ live text.</p>
                     <span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
                     <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;failed to render name_template &#39;</span><span class="si">{</span><span class="n">name_template</span><span class="si">}</span><span class="s2">&#39; for session &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">parsed_name</span><span class="si">}</span><span class="s2">&#39; on &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="sa">f</span><span class="s2">"failed to render name_template '</span><span class="si">{</span><span class="n">name_template</span><span class="si">}</span><span class="s2">' for session "</span>
+                        <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">parsed_name</span><span class="si">}</span><span class="s2">' on '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">': </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
                     <span class="p">)</span>
                     <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-                    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                     <span class="k">continue</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">bgp_session_matches_filters</span><span class="p">(</span>
                     <span class="n">session_data</span><span class="p">,</span>
@@ -9139,13 +9139,13 @@ live text.</p>
                     <span class="n">ignore_peer_nets</span><span class="o">=</span><span class="n">ignore_peer_nets</span><span class="p">,</span>
                 <span class="p">):</span>
                     <span class="k">continue</span>
-                <span class="n">session_data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">session_name</span>
+                <span class="n">session_data</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="o">=</span> <span class="n">session_name</span>
                 <span class="n">identity</span> <span class="o">=</span> <span class="n">bgp_session_identity</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="n">session_data</span><span class="p">)</span>
-                <span class="n">session_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;device&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">session_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"device"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="n">normalised_live</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">identity</span><span class="p">]</span> <span class="o">=</span> <span class="n">session_data</span>
     <span class="n">live_session_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">)</span> <span class="k">for</span> <span class="n">sessions</span> <span class="ow">in</span> <span class="n">normalised_live</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;normalised </span><span class="si">{</span><span class="n">live_session_count</span><span class="si">}</span><span class="s2"> live BGP session(s) after applying filters&quot;</span>
+        <span class="sa">f</span><span class="s2">"normalised </span><span class="si">{</span><span class="n">live_session_count</span><span class="si">}</span><span class="s2"> live BGP session(s) after applying filters"</span>
     <span class="p">)</span>
 
     <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">failed_devices</span><span class="p">:</span>
@@ -9154,104 +9154,104 @@ live text.</p>
     <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">sessions</span> <span class="ow">in</span> <span class="n">normalised_live</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">identity</span><span class="p">,</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">sessions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">identity</span> <span class="ow">in</span> <span class="n">normalised_nb</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="p">{}):</span>
-                <span class="n">session</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">apply_description_policy</span><span class="p">(</span>
-                    <span class="n">session</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
-                    <span class="n">normalised_nb</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">identity</span><span class="p">][</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+                <span class="n">session</span><span class="p">[</span><span class="s2">"description"</span><span class="p">]</span> <span class="o">=</span> <span class="n">apply_description_policy</span><span class="p">(</span>
+                    <span class="n">session</span><span class="p">[</span><span class="s2">"description"</span><span class="p">],</span>
+                    <span class="n">normalised_nb</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">identity</span><span class="p">][</span><span class="s2">"description"</span><span class="p">],</span>
                     <span class="n">preserve_description</span><span class="p">,</span>
                 <span class="p">)</span>
 
     <span class="c1"># Single diff on the full normalised datasets</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;calculating BGP session sync diff&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"calculating BGP session sync diff"</span><span class="p">)</span>
     <span class="n">identity_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_diff</span><span class="p">(</span><span class="n">normalised_live</span><span class="p">,</span> <span class="n">normalised_nb</span><span class="p">)</span>
     <span class="n">full_diff</span> <span class="o">=</span> <span class="n">bgp_session_name_from_identity_diff</span><span class="p">(</span>
         <span class="n">identity_diff</span><span class="p">,</span> <span class="n">normalised_live</span><span class="p">,</span> <span class="n">normalised_nb</span>
     <span class="p">)</span>
-    <span class="n">create_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">identity_diff</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-    <span class="n">update_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">identity_diff</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-    <span class="n">delete_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;delete&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">identity_diff</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">create_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">"create"</span><span class="p">])</span> <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">identity_diff</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">update_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">"update"</span><span class="p">])</span> <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">identity_diff</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">delete_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">"delete"</span><span class="p">])</span> <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">identity_diff</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="n">in_sync_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span>
-        <span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">identity_diff</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">"in_sync"</span><span class="p">])</span> <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">identity_diff</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
     <span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="s2">&quot;BGP session sync diff complete: &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">create_count</span><span class="si">}</span><span class="s2"> create, </span><span class="si">{</span><span class="n">update_count</span><span class="si">}</span><span class="s2"> update, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">delete_count</span><span class="si">}</span><span class="s2"> delete, </span><span class="si">{</span><span class="n">in_sync_count</span><span class="si">}</span><span class="s2"> in sync&quot;</span>
+        <span class="s2">"BGP session sync diff complete: "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">create_count</span><span class="si">}</span><span class="s2"> create, </span><span class="si">{</span><span class="n">update_count</span><span class="si">}</span><span class="s2"> update, "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">delete_count</span><span class="si">}</span><span class="s2"> delete, </span><span class="si">{</span><span class="n">in_sync_count</span><span class="si">}</span><span class="s2"> in sync"</span>
     <span class="p">)</span>
 
     <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="n">full_diff</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">device_name</span><span class="p">:</span> <span class="n">SyncActionSummary</span><span class="p">(</span><span class="n">in_sync</span><span class="o">=</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
+        <span class="n">device_name</span><span class="p">:</span> <span class="n">SyncActionSummary</span><span class="p">(</span><span class="n">in_sync</span><span class="o">=</span><span class="n">actions</span><span class="p">[</span><span class="s2">"in_sync"</span><span class="p">])</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
     <span class="p">}</span>
     <span class="n">device_results</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span>
     <span class="c1"># Return dry-run results per device.</span>
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="s2">&quot;dry-run requested, returning BGP session sync diff without changes&quot;</span>
+            <span class="s2">"dry-run requested, returning BGP session sync diff without changes"</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">full_diff</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span><span class="n">full_diff</span><span class="p">):</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no BGP peerings sync changes required&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no BGP peerings sync changes required"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="k">if</span> <span class="n">with_approval</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span>
-        <span class="n">job</span><span class="p">,</span> <span class="s2">&quot;BGP peerings sync&quot;</span><span class="p">,</span> <span class="n">full_diff</span>
+        <span class="n">job</span><span class="p">,</span> <span class="s2">"BGP peerings sync"</span><span class="p">,</span> <span class="n">full_diff</span>
     <span class="p">):</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"skipped"</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">full_diff</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;review declined; changes were not applied&quot;</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"review declined; changes were not applied"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># Build bulk_create list from full_diff — split pipe-separated policies to lists</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;preparing BGP session create payloads&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"preparing BGP session create payloads"</span><span class="p">)</span>
     <span class="n">bulk_create</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">identity_diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">identity</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">identity</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">"create"</span><span class="p">]:</span>
             <span class="n">session_data</span> <span class="o">=</span> <span class="n">normalised_live</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">identity</span><span class="p">]</span>
             <span class="n">bulk_create</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="p">{</span>
-                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
-                    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;local_address&quot;</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;local_address&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;local_as&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;remote_address&quot;</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;remote_address&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;remote_as&quot;</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;remote_as&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vrf&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="s2">&quot;active&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;peer_group&quot;</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;peer_group&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;import_policies&quot;</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;import_policies&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;export_policies&quot;</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;export_policies&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;prefix_list_in&quot;</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prefix_list_in&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;prefix_list_out&quot;</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prefix_list_out&quot;</span><span class="p">),</span>
+                    <span class="s2">"name"</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">),</span>
+                    <span class="s2">"device"</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
+                    <span class="s2">"description"</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"description"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">,</span>
+                    <span class="s2">"local_address"</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"local_address"</span><span class="p">),</span>
+                    <span class="s2">"local_as"</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"local_as"</span><span class="p">),</span>
+                    <span class="s2">"remote_address"</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"remote_address"</span><span class="p">),</span>
+                    <span class="s2">"remote_as"</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"remote_as"</span><span class="p">),</span>
+                    <span class="s2">"vrf"</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"vrf"</span><span class="p">),</span>
+                    <span class="s2">"status"</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"status"</span><span class="p">,</span> <span class="s2">"active"</span><span class="p">),</span>
+                    <span class="s2">"peer_group"</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"peer_group"</span><span class="p">),</span>
+                    <span class="s2">"import_policies"</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"import_policies"</span><span class="p">),</span>
+                    <span class="s2">"export_policies"</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"export_policies"</span><span class="p">),</span>
+                    <span class="s2">"prefix_list_in"</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"prefix_list_in"</span><span class="p">),</span>
+                    <span class="s2">"prefix_list_out"</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"prefix_list_out"</span><span class="p">),</span>
                 <span class="p">}</span>
             <span class="p">)</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;prepared </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session create payload(s)&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"prepared </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session create payload(s)"</span><span class="p">)</span>
 
     <span class="c1"># Build bulk_update list from full_diff</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;preparing BGP session update payloads&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"preparing BGP session update payloads"</span><span class="p">)</span>
     <span class="n">bulk_update</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">identity_diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">identity</span><span class="p">,</span> <span class="n">field_changes</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">entry</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">normalised_nb</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">identity</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">]}</span>
+        <span class="k">for</span> <span class="n">identity</span><span class="p">,</span> <span class="n">field_changes</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">"update"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">entry</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"id"</span><span class="p">:</span> <span class="n">normalised_nb</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">identity</span><span class="p">][</span><span class="s2">"id"</span><span class="p">]}</span>
             <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">change</span> <span class="ow">in</span> <span class="n">field_changes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">new_value</span> <span class="o">=</span> <span class="n">change</span><span class="p">[</span><span class="s2">&quot;new_value&quot;</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">field</span> <span class="o">==</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span>
-                    <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;new_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
-                <span class="k">elif</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;import_policies&quot;</span><span class="p">,</span> <span class="s2">&quot;export_policies&quot;</span><span class="p">):</span>
+                <span class="n">new_value</span> <span class="o">=</span> <span class="n">change</span><span class="p">[</span><span class="s2">"new_value"</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">field</span> <span class="o">==</span> <span class="s2">"name"</span><span class="p">:</span>
+                    <span class="n">entry</span><span class="p">[</span><span class="s2">"new_name"</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+                <span class="k">elif</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"import_policies"</span><span class="p">,</span> <span class="s2">"export_policies"</span><span class="p">):</span>
                     <span class="n">entry</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span> <span class="k">if</span> <span class="n">new_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
-                <span class="k">elif</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;prefix_list_in&quot;</span><span class="p">,</span> <span class="s2">&quot;prefix_list_out&quot;</span><span class="p">):</span>
+                <span class="k">elif</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"prefix_list_in"</span><span class="p">,</span> <span class="s2">"prefix_list_out"</span><span class="p">):</span>
                     <span class="n">entry</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span> <span class="k">if</span> <span class="n">new_value</span> <span class="k">else</span> <span class="kc">None</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">entry</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
             <span class="n">bulk_update</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;prepared </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session update payload(s)&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"prepared </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session update payload(s)"</span><span class="p">)</span>
 
     <span class="c1"># Delegate writes to create_bgp_peering and update_bgp_peering</span>
     <span class="k">if</span> <span class="n">bulk_create</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;creating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session(s) from sync diff&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"creating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session(s) from sync diff"</span><span class="p">)</span>
         <span class="n">create_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_bgp_peering</span><span class="p">(</span>
             <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
             <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
@@ -9265,19 +9265,19 @@ live text.</p>
             <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">create_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="n">created_names</span> <span class="o">=</span> <span class="n">create_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">created_names</span> <span class="o">=</span> <span class="n">create_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"created"</span><span class="p">,</span> <span class="p">[])</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">for</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">"create"</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">created_names</span><span class="p">:</span>
-                    <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
+                    <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"created"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">create_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span> <span class="n">ret</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no BGP sessions to create&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no BGP sessions to create"</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">bulk_update</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session(s) from sync diff&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"updating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session(s) from sync diff"</span><span class="p">)</span>
         <span class="n">update_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_bgp_peering</span><span class="p">(</span>
             <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
             <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
@@ -9290,63 +9290,63 @@ live text.</p>
             <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">update_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="n">updated_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">update_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;updated&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+        <span class="n">updated_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">update_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"updated"</span><span class="p">,</span> <span class="p">[]))</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">identity_diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">for</span> <span class="n">identity</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">identity</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">"update"</span><span class="p">]:</span>
                 <span class="n">old_session</span> <span class="o">=</span> <span class="n">normalised_nb</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">identity</span><span class="p">]</span>
-                <span class="n">old_name</span> <span class="o">=</span> <span class="n">old_session</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">old_session</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">updated_ids</span><span class="p">:</span>
-                    <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="n">old_name</span> <span class="ow">or</span> <span class="n">normalised_live</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">identity</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+                <span class="n">old_name</span> <span class="o">=</span> <span class="n">old_session</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">old_session</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span> <span class="ow">in</span> <span class="n">updated_ids</span><span class="p">:</span>
+                    <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"updated"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">old_name</span> <span class="ow">or</span> <span class="n">normalised_live</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">identity</span><span class="p">][</span><span class="s2">"name"</span><span class="p">]</span>
                     <span class="p">)</span>
         <span class="k">if</span> <span class="n">update_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span> <span class="n">ret</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no BGP sessions to update&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no BGP sessions to update"</span><span class="p">)</span>
 
     <span class="c1"># Deletion — batch-fetch all candidate sessions then delete individually</span>
     <span class="k">if</span> <span class="n">process_deletions</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;processing BGP session deletions&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"processing BGP session deletions"</span><span class="p">)</span>
         <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">message</span><span class="p">:</span>
-            <span class="n">nb</span><span class="o">.</span><span class="n">http_session</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-Changelog-Message&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">message</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">http_session</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">"X-Changelog-Message"</span><span class="p">]</span> <span class="o">=</span> <span class="n">message</span>
         <span class="c1"># Map session name → device name for all sessions to delete across devices</span>
         <span class="n">all_deletions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">for</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;delete&quot;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">"delete"</span><span class="p">]:</span>
                 <span class="n">all_deletions</span><span class="p">[</span><span class="n">sname</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_name</span>
         <span class="k">if</span> <span class="n">all_deletions</span><span class="p">:</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_deletions</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session(s) to delete&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"fetching </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_deletions</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session(s) to delete"</span><span class="p">)</span>
             <span class="n">sessions_to_delete</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="p">,</span>
                 <span class="n">name</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">all_deletions</span><span class="p">),</span>
-                <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name&quot;</span><span class="p">,</span>
+                <span class="n">fields</span><span class="o">=</span><span class="s2">"id,name"</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">sessions_to_delete</span><span class="p">:</span>
                 <span class="n">device_name</span> <span class="o">=</span> <span class="n">all_deletions</span><span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-                    <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;deleted&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"deleted"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
                     <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;deleted BGP session &#39;</span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                        <span class="sa">f</span><span class="s2">"deleted BGP session '</span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">' for '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">'"</span>
                     <span class="p">)</span>
                     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to delete BGP session &#39;</span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"failed to delete BGP session '</span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">' for '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">': </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span>
                     <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no BGP sessions to delete&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no BGP sessions to delete"</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">delete_count</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;skipping </span><span class="si">{</span><span class="n">delete_count</span><span class="si">}</span><span class="s2"> BGP session deletion(s), process_deletions=False&quot;</span>
+            <span class="sa">f</span><span class="s2">"skipping </span><span class="si">{</span><span class="n">delete_count</span><span class="si">}</span><span class="s2"> BGP session deletion(s), process_deletions=False"</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no BGP sessions to delete&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no BGP sessions to delete"</span><span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;BGP peerings sync complete&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"BGP peerings sync complete"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>

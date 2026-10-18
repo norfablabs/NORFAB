@@ -7164,18 +7164,18 @@
 </table>
 <h2 id="example">Example<a class="headerlink" href="#example" title="Permanent link">¤</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;create_vlan_group&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"create_vlan_group"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;SITE-001 VLANS&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="s2">&quot;SITE-001&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;vid_ranges&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">99</span><span class="p">]],</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"SITE-001 VLANS"</span><span class="p">,</span>
+        <span class="s2">"site"</span><span class="p">:</span> <span class="s2">"SITE-001"</span><span class="p">,</span>
+        <span class="s2">"vid_ranges"</span><span class="p">:</span> <span class="p">[[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">99</span><span class="p">]],</span>
     <span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>In a design:</p>
-<div class="highlight"><pre><span></span><code>{% set vlan_group = netbox.create_vlan_group(name=context.site ~ &quot; VLANS&quot;, site=context.site, vid_ranges=[[10, 99]]) %}
+<div class="highlight"><pre><span></span><code>{% set vlan_group = netbox.create_vlan_group(name=context.site ~ " VLANS", site=context.site, vid_ranges=[[10, 99]]) %}
 </code></pre></div>
 <p>The site must exist before the task runs.</p>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
@@ -7434,7 +7434,7 @@ action without writing to NetBox.</p>
 <span class="normal">349</span>
 <span class="normal">350</span>
 <span class="normal">351</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateVlanGroupInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateVlanGroupResult</span><span class="p">,</span>
 <span class="p">)</span>
@@ -7448,7 +7448,7 @@ action without writing to NetBox.</p>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create or update a VLAN group scoped to one NetBox site.</span>
+<span class="w">    </span><span class="sd">"""Create or update a VLAN group scoped to one NetBox site.</span>
 
 <span class="sd">    Groups are matched by name, not by site. An existing group is patched</span>
 <span class="sd">    with the supplied site and VID ranges. A dry run reports the planned</span>
@@ -7468,35 +7468,35 @@ action without writing to NetBox.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: The named site does not exist.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_vlan_group&quot;</span><span class="p">,</span>
-        <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span> <span class="s2">&quot;vid_ranges&quot;</span><span class="p">:</span> <span class="n">vid_ranges</span><span class="p">},</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_vlan_group"</span><span class="p">,</span>
+        <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">"site"</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span> <span class="s2">"vid_ranges"</span><span class="p">:</span> <span class="n">vid_ranges</span><span class="p">},</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
         <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="n">nb_site</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">sites</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">site</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_site</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Site &#39;</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&#39; not found in NetBox&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Site '</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">' not found in NetBox"</span><span class="p">)</span>
     <span class="n">group</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vlan_groups</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
     <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
-        <span class="s2">&quot;slug&quot;</span><span class="p">:</span> <span class="n">slugify</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
-        <span class="s2">&quot;scope_type&quot;</span><span class="p">:</span> <span class="s2">&quot;dcim.site&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;scope_id&quot;</span><span class="p">:</span> <span class="n">nb_site</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-        <span class="s2">&quot;vid_ranges&quot;</span><span class="p">:</span> <span class="n">vid_ranges</span><span class="p">,</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+        <span class="s2">"slug"</span><span class="p">:</span> <span class="n">slugify</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+        <span class="s2">"scope_type"</span><span class="p">:</span> <span class="s2">"dcim.site"</span><span class="p">,</span>
+        <span class="s2">"scope_id"</span><span class="p">:</span> <span class="n">nb_site</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="s2">"vid_ranges"</span><span class="p">:</span> <span class="n">vid_ranges</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;updated&quot;</span> <span class="k">if</span> <span class="n">group</span> <span class="k">else</span> <span class="s2">&quot;created&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"updated"</span> <span class="k">if</span> <span class="n">group</span> <span class="k">else</span> <span class="s2">"created"</span>
     <span class="k">elif</span> <span class="n">group</span><span class="p">:</span>
         <span class="n">group</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;updated&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"updated"</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vlan_groups</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;created&quot;</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ret</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="s2"> VLAN group &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"created"</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ret</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="s2"> VLAN group '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>

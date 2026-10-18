@@ -7199,19 +7199,19 @@
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>Returns workflow execution results keyed by workflow name and step name:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;workflow_1&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;step1&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;show version&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">}},</span>
-                <span class="s2">&quot;failed&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="s2">"workflow_1"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"step1"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"nornir-worker-1"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"result"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"ceos-spine-1"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"show version"</span><span class="p">:</span> <span class="s2">"..."</span><span class="p">}},</span>
+                <span class="s2">"failed"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">"errors"</span><span class="p">:</span> <span class="p">[],</span>
             <span class="p">},</span>
         <span class="p">},</span>
-        <span class="s2">&quot;step2&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;nornir-worker-2&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;show hostname&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">}},</span>
-                <span class="s2">&quot;failed&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">"step2"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"nornir-worker-2"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"result"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"ceos-leaf-1"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"show hostname"</span><span class="p">:</span> <span class="s2">"..."</span><span class="p">}},</span>
+                <span class="s2">"failed"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">"errors"</span><span class="p">:</span> <span class="p">[],</span>
             <span class="p">},</span>
         <span class="p">},</span>
     <span class="p">},</span>
@@ -7258,15 +7258,15 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;workflow&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;run&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"workflow"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"run"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;workflow&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://workflow/workflow-1.yaml&quot;</span><span class="p">,</span>
+            <span class="s2">"workflow"</span><span class="p">:</span> <span class="s2">"nf://workflow/workflow-1.yaml"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
     <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
@@ -7277,36 +7277,36 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
 <span class="n">workflow</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;inline_workflow&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Collect basic command output from lab devices.&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;show_version&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;service&quot;</span><span class="p">:</span> <span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="s2">&quot;cli&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;kwargs&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show version&quot;</span><span class="p">],</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"inline_workflow"</span><span class="p">,</span>
+    <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Collect basic command output from lab devices."</span><span class="p">,</span>
+    <span class="s2">"show_version"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"service"</span><span class="p">:</span> <span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="s2">"task"</span><span class="p">:</span> <span class="s2">"cli"</span><span class="p">,</span>
+        <span class="s2">"kwargs"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show version"</span><span class="p">],</span>
         <span class="p">},</span>
     <span class="p">},</span>
-    <span class="s2">&quot;show_hostname&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;service&quot;</span><span class="p">:</span> <span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="s2">&quot;cli&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;kwargs&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;leaf&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show hostname&quot;</span><span class="p">],</span>
+    <span class="s2">"show_hostname"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"service"</span><span class="p">:</span> <span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="s2">"task"</span><span class="p">:</span> <span class="s2">"cli"</span><span class="p">,</span>
+        <span class="s2">"kwargs"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"leaf"</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show hostname"</span><span class="p">],</span>
         <span class="p">},</span>
     <span class="p">},</span>
 <span class="p">}</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;workflow&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;run&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;workflow&quot;</span><span class="p">:</span> <span class="n">workflow</span><span class="p">},</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"workflow"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"run"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"workflow"</span><span class="p">:</span> <span class="n">workflow</span><span class="p">},</span>
     <span class="p">)</span>
     <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 <span class="k">finally</span><span class="p">:</span>
@@ -7322,9 +7322,9 @@ root
 └──<span class="w"> </span>workflow:<span class="w">    </span>Workflow<span class="w"> </span>service
 <span class="w">    </span>└──<span class="w"> </span>run:<span class="w">    </span>Run<span class="w"> </span>workflows
 <span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
 <span class="w">        </span>├──<span class="w"> </span>workflow:<span class="w">    </span>Workflow<span class="w"> </span>to<span class="w"> </span>run
-<span class="w">        </span>└──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>└──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
@@ -7555,19 +7555,19 @@ nf#
 <span class="normal">407</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">RunInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">RunResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Run Workflow&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Run Workflow"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">workflow</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Executes a workflow defined by a dictionary.</span>
 
 <span class="sd">    Args:</span>
@@ -7579,24 +7579,24 @@ nf#
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: If the workflow is not a valid URL or dictionary.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:run&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{})</span>
+<span class="sd">    """</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:run"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{})</span>
 
     <span class="c1"># load workflow from URL</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">workflow</span><span class="p">):</span>
         <span class="n">workflow_name</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">workflow</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.yml&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">workflow</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">".yaml"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">".yml"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">workflow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span>
         <span class="n">workflow</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span>
 
     <span class="c1"># extract workflow parameters</span>
-    <span class="n">workflow_name</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;workflow&quot;</span><span class="p">)</span>
-    <span class="n">workflow_description</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="n">remove_no_match_results</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;remove_no_match_results&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">workflow_name</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="s2">"workflow"</span><span class="p">)</span>
+    <span class="n">workflow_description</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"description"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="n">remove_no_match_results</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"remove_no_match_results"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;starting workflow &#39;</span><span class="si">{</span><span class="n">workflow_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting workflow &#39;</span><span class="si">{</span><span class="n">workflow_name</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">workflow_description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"starting workflow '</span><span class="si">{</span><span class="n">workflow_name</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Starting workflow '</span><span class="si">{</span><span class="n">workflow_name</span><span class="si">}</span><span class="s2">': </span><span class="si">{</span><span class="n">workflow_description</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -7608,46 +7608,46 @@ nf#
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">skip_status</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">][</span><span class="n">step</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;all-workers&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;failed&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                    <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;skipped&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;task&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[],</span>
-                    <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">message</span><span class="p">],</span>
-                    <span class="s2">&quot;juuid&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s2">"all-workers"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">"failed"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">"result"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"skipped"</span><span class="p">,</span>
+                    <span class="s2">"task"</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">"task"</span><span class="p">],</span>
+                    <span class="s2">"errors"</span><span class="p">:</span> <span class="p">[],</span>
+                    <span class="s2">"messages"</span><span class="p">:</span> <span class="p">[</span><span class="n">message</span><span class="p">],</span>
+                    <span class="s2">"juuid"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="p">}</span>
             <span class="p">}</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;skipping workflow step &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39;, one of run_if_x conditions not satisfied&quot;</span>
+                <span class="sa">f</span><span class="s2">"skipping workflow step '</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">', one of run_if_x conditions not satisfied"</span>
             <span class="p">)</span>
             <span class="k">continue</span>
         <span class="c1"># stop workflow execution on error</span>
-        <span class="k">elif</span> <span class="n">skip_status</span> <span class="o">==</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">skip_status</span> <span class="o">==</span> <span class="s2">"error"</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">][</span><span class="n">step</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;all-workers&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;failed&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                    <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;task&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">message</span><span class="p">],</span>
-                    <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[],</span>
-                    <span class="s2">&quot;juuid&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s2">"all-workers"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">"failed"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">"result"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"error"</span><span class="p">,</span>
+                    <span class="s2">"task"</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">"task"</span><span class="p">],</span>
+                    <span class="s2">"errors"</span><span class="p">:</span> <span class="p">[</span><span class="n">message</span><span class="p">],</span>
+                    <span class="s2">"messages"</span><span class="p">:</span> <span class="p">[],</span>
+                    <span class="s2">"juuid"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="p">}</span>
             <span class="p">}</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
             <span class="k">break</span>
 
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;doing workflow step &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"doing workflow step '</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
 
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">][</span><span class="n">step</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-            <span class="n">service</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">],</span>
-            <span class="n">task</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;task&quot;</span><span class="p">],</span>
-            <span class="n">workers</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;workers&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">),</span>
-            <span class="n">kwargs</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;kwargs&quot;</span><span class="p">,</span> <span class="p">{}),</span>
-            <span class="n">args</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;args&quot;</span><span class="p">,</span> <span class="p">[]),</span>
-            <span class="n">timeout</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timeout&quot;</span><span class="p">,</span> <span class="mi">600</span><span class="p">),</span>
+            <span class="n">service</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">"service"</span><span class="p">],</span>
+            <span class="n">task</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">"task"</span><span class="p">],</span>
+            <span class="n">workers</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"workers"</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">),</span>
+            <span class="n">kwargs</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kwargs"</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="n">args</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"args"</span><span class="p">,</span> <span class="p">[]),</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"timeout"</span><span class="p">,</span> <span class="mi">600</span><span class="p">),</span>
         <span class="p">)</span>
 
         <span class="c1"># check if need to stop workflow based on stop_if_fail flag</span>
@@ -7656,7 +7656,7 @@ nf#
             <span class="ow">is</span> <span class="kc">True</span>
         <span class="p">):</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;stopping workflow, step &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39; failed and has stop_if_fail flag&quot;</span>
+                <span class="sa">f</span><span class="s2">"stopping workflow, step '</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">' failed and has stop_if_fail flag"</span>
             <span class="p">)</span>
             <span class="k">break</span>
 
@@ -7666,7 +7666,7 @@ nf#
         <span class="p">)</span>
 
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Completed workflow &#39;</span><span class="si">{</span><span class="n">workflow_name</span><span class="si">}</span><span class="s2">&#39; with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">])</span><span class="si">}</span><span class="s2"> step result(s)&quot;</span>
+        <span class="sa">f</span><span class="s2">"Completed workflow '</span><span class="si">{</span><span class="n">workflow_name</span><span class="si">}</span><span class="s2">' with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">])</span><span class="si">}</span><span class="s2"> step result(s)"</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>

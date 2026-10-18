@@ -7312,7 +7312,7 @@
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>parse<span class="w"> </span>ttp<span class="w"> </span>template<span class="w"> </span>ttp://platform/arista_eos_show_interfaces.txt<span class="w"> </span>FC<span class="w"> </span>spine
 </code></pre></div>
 <p>Parse command output with TextFSM and NTC-Templates auto-detection:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>parse<span class="w"> </span>textfsm<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show ip interface brief&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>parse<span class="w"> </span>textfsm<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show ip interface brief"</span><span class="w"> </span>FC<span class="w"> </span>spine
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7321,15 +7321,15 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;parse_napalm&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"parse_napalm"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;getters&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;get_facts&quot;</span><span class="p">,</span> <span class="s2">&quot;get_interfaces&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">"getters"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"get_facts"</span><span class="p">,</span> <span class="s2">"get_interfaces"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7340,17 +7340,17 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;parse_textfsm&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"parse_textfsm"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show ip interface brief&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show ip interface brief"</span><span class="p">],</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7363,17 +7363,17 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;parse_ttp&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"parse_ttp"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;template&quot;</span><span class="p">:</span> <span class="s2">&quot;ttp://platform/arista_eos_show_interfaces.txt&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">"template"</span><span class="p">:</span> <span class="s2">"ttp://platform/arista_eos_show_interfaces.txt"</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7396,11 +7396,11 @@ root
 <span class="w">    </span>└──<span class="w"> </span>parse:<span class="w">    </span>Parse<span class="w"> </span>network<span class="w"> </span>devices<span class="w"> </span>output
 <span class="w">        </span>├──<span class="w"> </span>napalm:<span class="w">    </span>Parse<span class="w"> </span>devices<span class="w"> </span>output<span class="w"> </span>using<span class="w"> </span>NAPALM<span class="w"> </span>getters
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>nowait:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>job<span class="w"> </span>to<span class="w"> </span>complete,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>nowait:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>job<span class="w"> </span>to<span class="w"> </span>complete,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>num-workers:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>tasks<span class="w"> </span>execution
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>num-connectors:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>device<span class="w"> </span>connections
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>connect-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>attempts
@@ -7427,11 +7427,11 @@ root
 <span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>getters<span class="w"> </span><span class="o">(</span>R<span class="o">)</span>:<span class="w">    </span>Select<span class="w"> </span>NAPALM<span class="w"> </span>getters
 <span class="w">        </span>├──<span class="w"> </span>ttp:<span class="w">    </span>Parse<span class="w"> </span>devices<span class="w"> </span>output<span class="w"> </span>using<span class="w"> </span>TTP<span class="w"> </span>templates
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>nowait:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>job<span class="w"> </span>to<span class="w"> </span>complete,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>nowait:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>job<span class="w"> </span>to<span class="w"> </span>complete,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>num-workers:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>tasks<span class="w"> </span>execution
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>num-connectors:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>device<span class="w"> </span>connections
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>connect-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>attempts
@@ -7482,7 +7482,7 @@ root
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>repeat:<span class="w">    </span>Number<span class="w"> </span>of<span class="w"> </span><span class="nb">times</span><span class="w"> </span>to<span class="w"> </span>repeat<span class="w"> </span>the<span class="w"> </span>commands
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>stop-pattern:<span class="w">    </span>Stop<span class="w"> </span>commands<span class="w"> </span>repeat<span class="w"> </span><span class="k">if</span><span class="w"> </span>output<span class="w"> </span>matches<span class="w"> </span>provided<span class="w"> </span>glob<span class="w"> </span>pattern
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>repeat-interval:<span class="w">    </span>Time<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span>to<span class="w"> </span><span class="nb">wait</span><span class="w"> </span>between<span class="w"> </span>repeating<span class="w"> </span>commands
-<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span><span class="k">return</span>-last:<span class="w">    </span>Returns<span class="w"> </span>requested<span class="w"> </span>last<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>commands<span class="w"> </span>outputs
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>return-last:<span class="w">    </span>Returns<span class="w"> </span>requested<span class="w"> </span>last<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>commands<span class="w"> </span>outputs
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>scrapli:<span class="w">    </span>Use<span class="w"> </span>Scrapli<span class="w"> </span>plugin<span class="w"> </span>to<span class="w"> </span>collect<span class="w"> </span>output<span class="w"> </span>from<span class="w"> </span>devices
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>strip-prompt:<span class="w">    </span>Strip<span class="w"> </span>prompt<span class="w"> </span>from<span class="w"> </span>returned<span class="w"> </span>output
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>failed-when-contains:<span class="w">    </span>String<span class="w"> </span>or<span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>strings<span class="w"> </span>indicating<span class="w"> </span>failure<span class="w"> </span><span class="k">if</span><span class="w"> </span>found<span class="w"> </span><span class="k">in</span><span class="w"> </span>response
@@ -7493,7 +7493,7 @@ root
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>repeat:<span class="w">    </span>Number<span class="w"> </span>of<span class="w"> </span><span class="nb">times</span><span class="w"> </span>to<span class="w"> </span>repeat<span class="w"> </span>the<span class="w"> </span>commands
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>stop-pattern:<span class="w">    </span>Stop<span class="w"> </span>commands<span class="w"> </span>repeat<span class="w"> </span><span class="k">if</span><span class="w"> </span>output<span class="w"> </span>matches<span class="w"> </span>provided<span class="w"> </span>glob<span class="w"> </span>pattern
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>repeat-interval:<span class="w">    </span>Time<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span>to<span class="w"> </span><span class="nb">wait</span><span class="w"> </span>between<span class="w"> </span>repeating<span class="w"> </span>commands
-<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span><span class="k">return</span>-last:<span class="w">    </span>Returns<span class="w"> </span>requested<span class="w"> </span>last<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>commands<span class="w"> </span>outputs
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>return-last:<span class="w">    </span>Returns<span class="w"> </span>requested<span class="w"> </span>last<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>commands<span class="w"> </span>outputs
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>napalm:<span class="w">    </span>Use<span class="w"> </span>NAPALM<span class="w"> </span>plugin<span class="w"> </span>to<span class="w"> </span>collect<span class="w"> </span>output<span class="w"> </span>from<span class="w"> </span>devices
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">       </span>├──<span class="w"> </span>interval:<span class="w">    </span>Interval<span class="w"> </span>between<span class="w"> </span>sending<span class="w"> </span>commands
 <span class="w">        </span>│<span class="w">   </span>│<span class="w">       </span>├──<span class="w"> </span>split-lines:<span class="w">    </span>Split<span class="w"> </span>multiline<span class="w"> </span>string<span class="w"> </span>to<span class="w"> </span>individual<span class="w"> </span>commands
@@ -7502,11 +7502,11 @@ root
 <span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>structure:<span class="w">    </span>TTP<span class="w"> </span>Results<span class="w"> </span>structure
 <span class="w">        </span>└──<span class="w"> </span>textfsm:<span class="w">    </span>Parse<span class="w"> </span>devices<span class="w"> </span>output<span class="w"> </span>using<span class="w"> </span>TextFSM<span class="w"> </span>templates
 <span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>nowait:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>job<span class="w"> </span>to<span class="w"> </span>complete,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
+<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
+<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
+<span class="w">            </span>├──<span class="w"> </span>nowait:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>job<span class="w"> </span>to<span class="w"> </span>complete,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
+<span class="w">            </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">            </span>├──<span class="w"> </span>num-workers:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>tasks<span class="w"> </span>execution
 <span class="w">            </span>├──<span class="w"> </span>num-connectors:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>device<span class="w"> </span>connections
 <span class="w">            </span>├──<span class="w"> </span>connect-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>attempts
@@ -7713,28 +7713,28 @@ nf#
 <span class="normal">77</span>
 <span class="normal">78</span>
 <span class="normal">79</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">ParseNapalmInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">ParseNapalmResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Parse NAPALM Output&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Parse NAPALM Output"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">parse_napalm</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
-    <span class="n">getters</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">&quot;get_facts&quot;</span><span class="p">,</span>
+    <span class="n">getters</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">"get_facts"</span><span class="p">,</span>
     <span class="n">to_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">add_details</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parse network device output using NAPALM getters.</span>
 
 <span class="sd">    Args:</span>
@@ -7746,16 +7746,16 @@ nf#
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Result containing parsed NAPALM getter data.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">(</span>
         <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
-        <span class="n">plugin</span><span class="o">=</span><span class="s2">&quot;nornir_napalm.plugins.tasks.napalm_get&quot;</span><span class="p">,</span>
+        <span class="n">plugin</span><span class="o">=</span><span class="s2">"nornir_napalm.plugins.tasks.napalm_get"</span><span class="p">,</span>
         <span class="n">getters</span><span class="o">=</span><span class="n">getters</span><span class="p">,</span>
         <span class="n">to_dict</span><span class="o">=</span><span class="n">to_dict</span><span class="p">,</span>
         <span class="n">add_details</span><span class="o">=</span><span class="n">add_details</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">ret</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:parse_napalm&quot;</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:parse_napalm"</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8124,16 +8124,16 @@ definitions, then parses the collected output with TTP.</p>
 <span class="normal">307</span>
 <span class="normal">308</span>
 <span class="normal">309</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">ParseTTPInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">ParseTTPResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Parse TTP Output&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Parse TTP Output"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -8142,16 +8142,16 @@ definitions, then parses the collected output with TTP.</p>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">template</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">structure</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;flat_list&quot;</span><span class="p">,</span>
+    <span class="n">structure</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"flat_list"</span><span class="p">,</span>
     <span class="n">commands</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">get</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
+    <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"netmiko"</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parse network device output using a TTP template.</span>
 
-<span class="sd">    Fetches CLI output from devices based on the template&#39;s input</span>
+<span class="sd">    Fetches CLI output from devices based on the template's input</span>
 <span class="sd">    definitions, then parses the collected output with TTP.</span>
 
 <span class="sd">    Args:</span>
@@ -8169,49 +8169,49 @@ definitions, then parses the collected output with TTP.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RuntimeError: If ``strict=True`` and a host produces empty results.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;to_dict&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;add_details&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="sd">    """</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">"to_dict"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">"add_details"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">filters</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">FFun_functions</span><span class="p">}</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:parse_ttp&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{})</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:parse_ttp"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{})</span>
 
     <span class="c1"># check has hosts to run for</span>
     <span class="n">filtered_nornir</span><span class="p">,</span> <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_hosts_and_validate</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;no_match&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">"no_match"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># download TTP template</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">template</span><span class="p">):</span>
         <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">template</span> <span class="ow">and</span> <span class="n">template</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;ttp://&quot;</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="n">template</span> <span class="ow">and</span> <span class="n">template</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"ttp://"</span><span class="p">):</span>
         <span class="n">template</span> <span class="o">=</span> <span class="n">get_template</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">template</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">get</span><span class="p">:</span>
         <span class="n">template</span> <span class="o">=</span> <span class="n">get_template</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="n">get</span><span class="p">)</span>
 
-    <span class="c1"># go over template&#39;s inputs and collect commands to fetch from devices</span>
+    <span class="c1"># go over template's inputs and collect commands to fetch from devices</span>
     <span class="n">cli_runs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">parser</span> <span class="o">=</span> <span class="n">ttp</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">ttp</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">template_name</span><span class="p">,</span> <span class="n">inputs</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">get_input_load</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span> <span class="ow">or</span> <span class="p">{</span><span class="s2">&quot;Default_Input&quot;</span><span class="p">:</span> <span class="p">{}}</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span> <span class="ow">or</span> <span class="p">{</span><span class="s2">"Default_Input"</span><span class="p">:</span> <span class="p">{}}</span>
         <span class="k">for</span> <span class="n">input_name</span><span class="p">,</span> <span class="n">input_params</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">cli_runs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="p">{</span>
-                    <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="n">input_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;commands&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">commands</span><span class="p">,</span>
-                    <span class="s2">&quot;input_name&quot;</span><span class="p">:</span> <span class="n">input_name</span><span class="p">,</span>
-                    <span class="s2">&quot;template_name&quot;</span><span class="p">:</span> <span class="n">template_name</span><span class="p">,</span>
-                    <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="n">input_params</span><span class="p">,</span>
+                    <span class="s2">"commands"</span><span class="p">:</span> <span class="n">input_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"commands"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">commands</span><span class="p">,</span>
+                    <span class="s2">"input_name"</span><span class="p">:</span> <span class="n">input_name</span><span class="p">,</span>
+                    <span class="s2">"template_name"</span><span class="p">:</span> <span class="n">template_name</span><span class="p">,</span>
+                    <span class="s2">"params"</span><span class="p">:</span> <span class="n">input_params</span><span class="p">,</span>
                 <span class="p">}</span>
             <span class="p">)</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;collecting output from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filtered_nornir</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> devices for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">cli_runs</span><span class="p">)</span><span class="si">}</span><span class="s2"> TTP template input(s)&quot;</span>
+        <span class="sa">f</span><span class="s2">"collecting output from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filtered_nornir</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> devices for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">cli_runs</span><span class="p">)</span><span class="si">}</span><span class="s2"> TTP template input(s)"</span>
     <span class="p">)</span>
 
     <span class="c1"># collect commands output from devices</span>
     <span class="k">for</span> <span class="n">cli_run</span> <span class="ow">in</span> <span class="n">cli_runs</span><span class="p">:</span>
         <span class="n">cli_run_filters</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">k</span><span class="p">:</span> <span class="n">cli_run</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cli_run</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">cli_run</span><span class="p">[</span><span class="s2">"params"</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cli_run</span><span class="p">[</span><span class="s2">"params"</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">FFun_functions</span>
         <span class="p">}</span>
         <span class="n">cli_run_kwargs</span> <span class="o">=</span> <span class="p">{</span>
@@ -8219,10 +8219,10 @@ definitions, then parses the collected output with TTP.</p>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="o">**</span><span class="n">cli_run_filters</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="k">if</span> <span class="n">cli_run</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;platform&quot;</span><span class="p">):</span>
-            <span class="n">cli_run_kwargs</span><span class="p">[</span><span class="s2">&quot;FM&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cli_run</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">][</span><span class="s2">&quot;platform&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">cli_run</span><span class="p">[</span><span class="s2">"params"</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"platform"</span><span class="p">):</span>
+            <span class="n">cli_run_kwargs</span><span class="p">[</span><span class="s2">"FM"</span><span class="p">]</span> <span class="o">=</span> <span class="n">cli_run</span><span class="p">[</span><span class="s2">"params"</span><span class="p">][</span><span class="s2">"platform"</span><span class="p">]</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
-            <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">commands</span><span class="o">=</span><span class="n">cli_run</span><span class="p">[</span><span class="s2">&quot;commands&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">cli_run_kwargs</span><span class="p">,</span> <span class="n">plugin</span><span class="o">=</span><span class="n">plugin</span>
+            <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">commands</span><span class="o">=</span><span class="n">cli_run</span><span class="p">[</span><span class="s2">"commands"</span><span class="p">],</span> <span class="o">**</span><span class="n">cli_run_kwargs</span><span class="p">,</span> <span class="n">plugin</span><span class="o">=</span><span class="n">plugin</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">resources</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources</span> <span class="o">+</span> <span class="n">result</span><span class="o">.</span><span class="n">resources</span><span class="p">))</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
@@ -8230,9 +8230,9 @@ definitions, then parses the collected output with TTP.</p>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Failed collecting commands output, errors: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">errors</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">result</span><span class="o">.</span><span class="n">messages</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"Failed collecting commands output, errors: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">errors</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">result</span><span class="o">.</span><span class="n">messages</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;failed collecting commands output&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"failed collecting commands output"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">messages</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">result</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">result</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
@@ -8241,31 +8241,31 @@ definitions, then parses the collected output with TTP.</p>
         <span class="k">for</span> <span class="n">hname</span><span class="p">,</span> <span class="n">hres</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">input_data</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">cmdname</span><span class="p">,</span> <span class="n">cmdres</span> <span class="ow">in</span> <span class="n">hres</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">cmdres</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]:</span>
-                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Failed collecting command &#39;</span><span class="si">{</span><span class="n">cmdname</span><span class="si">}</span><span class="s2">&#39; output from &#39;</span><span class="si">{</span><span class="n">hname</span><span class="si">}</span><span class="s2">&#39;, error: </span><span class="si">{</span><span class="n">cmdres</span><span class="p">[</span><span class="s1">&#39;exception&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="k">if</span> <span class="n">cmdres</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Failed collecting command '</span><span class="si">{</span><span class="n">cmdname</span><span class="si">}</span><span class="s2">' output from '</span><span class="si">{</span><span class="n">hname</span><span class="si">}</span><span class="s2">', error: </span><span class="si">{</span><span class="n">cmdres</span><span class="p">[</span><span class="s1">'exception'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                     <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
                     <span class="k">continue</span>
-                <span class="n">input_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cmdres</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">])</span>
+                <span class="n">input_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cmdres</span><span class="p">[</span><span class="s2">"result"</span><span class="p">])</span>
             <span class="c1"># parse command results</span>
             <span class="k">if</span> <span class="n">input_data</span><span class="p">:</span>
-                <span class="n">parser</span> <span class="o">=</span> <span class="n">ttp</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">parser</span> <span class="o">=</span> <span class="n">ttp</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
                 <span class="n">parser</span><span class="o">.</span><span class="n">add_input</span><span class="p">(</span>
-                    <span class="n">data</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">input_data</span><span class="p">),</span>
-                    <span class="n">input_name</span><span class="o">=</span><span class="n">cli_run</span><span class="p">[</span><span class="s2">&quot;input_name&quot;</span><span class="p">],</span>
-                    <span class="n">template_name</span><span class="o">=</span><span class="n">cli_run</span><span class="p">[</span><span class="s2">&quot;template_name&quot;</span><span class="p">],</span>
+                    <span class="n">data</span><span class="o">=</span><span class="s2">"</span><span class="se">\n\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">input_data</span><span class="p">),</span>
+                    <span class="n">input_name</span><span class="o">=</span><span class="n">cli_run</span><span class="p">[</span><span class="s2">"input_name"</span><span class="p">],</span>
+                    <span class="n">template_name</span><span class="o">=</span><span class="n">cli_run</span><span class="p">[</span><span class="s2">"template_name"</span><span class="p">],</span>
                 <span class="p">)</span>
                 <span class="c1"># run parsing in single process</span>
                 <span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">one</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">hname</span><span class="p">]</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">result</span><span class="p">(</span>
-                    <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span> <span class="n">templates</span><span class="o">=</span><span class="n">cli_run</span><span class="p">[</span><span class="s2">&quot;template_name&quot;</span><span class="p">]</span>
+                    <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span> <span class="n">templates</span><span class="o">=</span><span class="n">cli_run</span><span class="p">[</span><span class="s2">"template_name"</span><span class="p">]</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;No input data collected for &#39;</span><span class="si">{</span><span class="n">hname</span><span class="si">}</span><span class="s2">&#39; device&quot;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"No input data collected for '</span><span class="si">{</span><span class="n">hname</span><span class="si">}</span><span class="s2">' device"</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
@@ -8273,7 +8273,7 @@ definitions, then parses the collected output with TTP.</p>
     <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">hname</span><span class="p">,</span> <span class="n">hres</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">hres</span> <span class="ow">or</span> <span class="n">hres</span> <span class="ow">in</span> <span class="p">[[{}],</span> <span class="p">[],</span> <span class="p">{},</span> <span class="p">[[]]]:</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">hname</span><span class="si">}</span><span class="s2"> host parsing produced no results&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">hname</span><span class="si">}</span><span class="s2"> host parsing produced no results"</span><span class="p">)</span>
 
     <span class="c1"># if no parsing results and have errors, mark job as failed</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="ow">and</span> <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
@@ -8510,16 +8510,16 @@ and the CLI collection task.</p>
 <span class="normal">149</span>
 <span class="normal">150</span>
 <span class="normal">151</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">ParseTextfsmInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">ParseTextfsmResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Parse TextFSM Output&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Parse TextFSM Output"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -8532,7 +8532,7 @@ and the CLI collection task.</p>
     <span class="n">add_details</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parse network device output using TextFSM templates.</span>
 
 <span class="sd">    Collects CLI output from devices and parses it using a TextFSM template.</span>
@@ -8552,11 +8552,11 @@ and the CLI collection task.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Result containing per-host TextFSM parsed output.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:parse_textfsm&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{}</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="p">[])</span>
+<span class="sd">    """</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:parse_textfsm"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{}</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="p">[])</span>
 
     <span class="n">filtered_nornir</span><span class="p">,</span> <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_hosts_and_validate</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;no_match&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">"no_match"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># resolve template from URL or local nf:// path</span>
@@ -8566,7 +8566,7 @@ and the CLI collection task.</p>
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
         <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
         <span class="n">commands</span><span class="o">=</span><span class="n">commands</span><span class="p">,</span>
-        <span class="n">plugin</span><span class="o">=</span><span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
+        <span class="n">plugin</span><span class="o">=</span><span class="s2">"netmiko"</span><span class="p">,</span>
         <span class="n">to_dict</span><span class="o">=</span><span class="n">to_dict</span><span class="p">,</span>
         <span class="n">add_details</span><span class="o">=</span><span class="n">add_details</span><span class="p">,</span>
         <span class="n">use_textfsm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>

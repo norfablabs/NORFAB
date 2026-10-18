@@ -7317,10 +7317,10 @@
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>Both dry-run and live-run return the same structure, keyed by device name:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;&lt;device&gt;&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;aa:bb:cc:dd:ee:01&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;aa:bb:cc:dd:ee:02&quot;</span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;aa:bb:cc:dd:ee:03&quot;</span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;aa:bb:cc:dd:ee:04&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="nt">"&lt;device&gt;"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"created"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"aa:bb:cc:dd:ee:01"</span><span class="p">,</span><span class="w"> </span><span class="s2">"aa:bb:cc:dd:ee:02"</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">"updated"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"aa:bb:cc:dd:ee:03"</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">"in_sync"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"aa:bb:cc:dd:ee:04"</span><span class="p">]</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -7370,13 +7370,13 @@ successful batches.</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync mac-addresses devices ceos-spine-1 dry-run
 </code></pre></div>
 <p>Restrict sync to Ethernet interfaces only:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox sync mac-addresses devices ceos-spine-1 filter-by-name &quot;Ethernet*&quot;
+<div class="highlight"><pre><span></span><code>nf#netbox sync mac-addresses devices ceos-spine-1 filter-by-name "Ethernet*"
 </code></pre></div>
 <p>Restrict sync to interfaces whose description matches a glob pattern:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox sync mac-addresses devices ceos-spine-1 filter-by-description &quot;uplink*&quot;
+<div class="highlight"><pre><span></span><code>nf#netbox sync mac-addresses devices ceos-spine-1 filter-by-description "uplink*"
 </code></pre></div>
 <p>Restrict sync to a specific MAC prefix:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox sync mac-addresses devices ceos-spine-1 filter-by-mac &quot;aa:bb:cc:*&quot;
+<div class="highlight"><pre><span></span><code>nf#netbox sync mac-addresses devices ceos-spine-1 filter-by-mac "aa:bb:cc:*"
 </code></pre></div>
 <p>Sync MAC addresses into a NetBox branch:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync mac-addresses devices ceos-spine-1 ceos-spine-2 branch sprint-42-macs
@@ -7388,82 +7388,82 @@ successful batches.</p>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
 <span class="c1"># sync MAC addresses for specific devices</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_mac_addresses&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_mac_addresses"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-spine-2&quot;</span><span class="p">],</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">,</span> <span class="s2">"ceos-spine-2"</span><span class="p">],</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># dry run — preview creates/updates without writing</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_mac_addresses&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_mac_addresses"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-spine-2&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">,</span> <span class="s2">"ceos-spine-2"</span><span class="p">],</span>
+        <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># restrict sync to Ethernet interfaces only</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_mac_addresses&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_mac_addresses"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;filter_by_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet*&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">],</span>
+        <span class="s2">"filter_by_name"</span><span class="p">:</span> <span class="s2">"Ethernet*"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># restrict sync to interfaces with a specific description pattern</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_mac_addresses&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_mac_addresses"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;filter_by_description&quot;</span><span class="p">:</span> <span class="s2">&quot;uplink*&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">],</span>
+        <span class="s2">"filter_by_description"</span><span class="p">:</span> <span class="s2">"uplink*"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># restrict sync to a specific MAC prefix</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_mac_addresses&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_mac_addresses"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;filter_by_mac&quot;</span><span class="p">:</span> <span class="s2">&quot;aa:bb:cc:*&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">],</span>
+        <span class="s2">"filter_by_mac"</span><span class="p">:</span> <span class="s2">"aa:bb:cc:*"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># sync into a NetBox branch</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_mac_addresses&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_mac_addresses"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-spine-2&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="s2">&quot;sprint-42-macs&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">,</span> <span class="s2">"ceos-spine-2"</span><span class="p">],</span>
+        <span class="s2">"branch"</span><span class="p">:</span> <span class="s2">"sprint-42-macs"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># use Nornir host filters instead of explicit device names</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_mac_addresses&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_mac_addresses"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+        <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
@@ -7480,15 +7480,15 @@ root
     └── sync:    Sync Netbox data
         └── mac-addresses:    Sync device MAC addresses with NetBox
             ├── timeout:    Job timeout in seconds
-            ├── workers:    Filter worker to target, default &#39;any&#39;
-            ├── verbose-result:    Control output details, default &#39;False&#39;
-            ├── progress:    Display progress events, default &#39;True&#39;
+            ├── workers:    Filter worker to target, default 'any'
+            ├── verbose-result:    Control output details, default 'False'
+            ├── progress:    Display progress events, default 'True'
             ├── instance:    Netbox instance name to target
             ├── dry-run:    Return reconciliation plan without pushing changes to NetBox
             ├── devices:    List of NetBox device names to sync
-            ├── filter-by-name:    Glob pattern to restrict sync by interface name, e.g. &#39;Ethernet*&#39;
+            ├── filter-by-name:    Glob pattern to restrict sync by interface name, e.g. 'Ethernet*'
             ├── filter-by-description:    Glob pattern to restrict sync by interface description
-            ├── filter-by-mac:    Glob pattern to restrict sync by MAC address, e.g. &#39;aa:bb:*&#39;
+            ├── filter-by-mac:    Glob pattern to restrict sync by MAC address, e.g. 'aa:bb:*'
             ├── branch:    Branching plugin branch name to push changes into
             ├── FO:    Filter Nornir hosts using Filter Object
             ├── FB:    Filter Nornir hosts by name using Glob Patterns
@@ -7524,10 +7524,10 @@ nf#
 <p><strong>Dry-run mode</strong> (<code>dry_run=True</code>): returns the reconciliation plan without
 making any changes. Result is keyed by device name::</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;&lt;device&gt;&quot;: {
-        &quot;created&quot;: [&quot;aa:bb:cc:dd:ee:01&quot;, ...],
-        &quot;updated&quot;: [&quot;aa:bb:cc:dd:ee:02&quot;, ...],
-        &quot;in_sync&quot;: [&quot;aa:bb:cc:dd:ee:03&quot;, ...]
+    "&lt;device&gt;": {
+        "created": ["aa:bb:cc:dd:ee:01", ...],
+        "updated": ["aa:bb:cc:dd:ee:02", ...],
+        "in_sync": ["aa:bb:cc:dd:ee:03", ...]
     }
 }
 </code></pre></div>
@@ -8152,16 +8152,16 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
 <span class="normal">2044</span>
 <span class="normal">2045</span>
 <span class="normal">2046</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncMacAddressesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncMacAddressesResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Sync MAC Addresses&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Sync MAC Addresses"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -8180,7 +8180,7 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
     <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Synchronize MAC addresses from live devices into NetBox.</span>
 
 <span class="sd">    The task follows a three-step pipeline:</span>
@@ -8196,10 +8196,10 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
 
 <span class="sd">    ```</span>
 <span class="sd">    {</span>
-<span class="sd">        &quot;&lt;device&gt;&quot;: {</span>
-<span class="sd">            &quot;created&quot;: [&quot;aa:bb:cc:dd:ee:01&quot;, ...],</span>
-<span class="sd">            &quot;updated&quot;: [&quot;aa:bb:cc:dd:ee:02&quot;, ...],</span>
-<span class="sd">            &quot;in_sync&quot;: [&quot;aa:bb:cc:dd:ee:03&quot;, ...]</span>
+<span class="sd">        "&lt;device&gt;": {</span>
+<span class="sd">            "created": ["aa:bb:cc:dd:ee:01", ...],</span>
+<span class="sd">            "updated": ["aa:bb:cc:dd:ee:02", ...],</span>
+<span class="sd">            "in_sync": ["aa:bb:cc:dd:ee:03", ...]</span>
 <span class="sd">        }</span>
 <span class="sd">    }</span>
 <span class="sd">    ```</span>
@@ -8216,111 +8216,111 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
 <span class="sd">        devices (list, optional): List of device names to sync.</span>
 <span class="sd">        branch (str, optional): NetBox branch name to use.</span>
 <span class="sd">        filter_by_name (str, optional): Glob pattern to restrict which interfaces</span>
-<span class="sd">            are included by name, e.g. ``&#39;Loopback*&#39;`` or ``&#39;Eth*&#39;``.</span>
+<span class="sd">            are included by name, e.g. ``'Loopback*'`` or ``'Eth*'``.</span>
 <span class="sd">        filter_by_description (str, optional): Glob pattern to restrict which</span>
-<span class="sd">            interfaces are included by description, e.g. ``&#39;uplink*&#39;``.</span>
+<span class="sd">            interfaces are included by description, e.g. ``'uplink*'``.</span>
 <span class="sd">        filter_by_mac (str, optional): Glob pattern to restrict which MAC addresses</span>
-<span class="sd">            are included, e.g. ``&#39;aa:bb:*&#39;``.</span>
+<span class="sd">            are included, e.g. ``'aa:bb:*'``.</span>
 <span class="sd">        **kwargs: Additional Nornir host filter keyword arguments passed to</span>
 <span class="sd">            ``parse_ttp`` (e.g. ``FL``, ``FC``, ``FB``).</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: Per-device action summary with ``created``, ``updated``, and</span>
 <span class="sd">            ``in_sync`` MAC address lists.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_mac_addresses&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_mac_addresses"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="n">SyncActionSummaryMap</span><span class="p">()</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
         <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync MAC addresses: Processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync MAC addresses: Processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
 
     <span class="c1"># source additional hosts from Nornir filters</span>
     <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;resolving devices from Nornir filters&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"resolving devices from Nornir filters"</span><span class="p">)</span>
         <span class="n">nornir_hosts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nornir_hosts</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">nornir_hosts</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">host</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
                 <span class="n">devices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;resolved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nornir_hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from Nornir filters, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> total device(s) selected&quot;</span>
+            <span class="sa">f</span><span class="s2">"resolved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nornir_hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from Nornir filters, "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> total device(s) selected"</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;no devices specified&quot;</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">"no devices specified"</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;syncing MAC addresses for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> devices, dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"syncing MAC addresses for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> devices, dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
 
     <span class="c1"># filter out devices not defined in NetBox</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;validating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) exist in NetBox&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"validating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) exist in NetBox"</span><span class="p">)</span>
     <span class="n">nb_devices_data</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">}</span>
-        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name&quot;</span><span class="p">)</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="p">{</span><span class="s2">"id"</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">"id,name"</span><span class="p">)</span>
     <span class="p">}</span>
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_devices_data</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2"> - device not found in Netbox&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2"> - device not found in Netbox"</span>
             <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">devices</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="s2">&quot;no valid NetBox devices remain after validation&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
+            <span class="s2">"no valid NetBox devices remain after validation"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;validated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in NetBox&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"validated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in NetBox"</span><span class="p">)</span>
 
     <span class="c1"># gather live interface data from Nornir parse_ttp</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieving live interfaces for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> devices&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"retrieving live interfaces for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> devices"</span><span class="p">)</span>
     <span class="n">parse_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;parse_ttp&quot;</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;get&quot;</span><span class="p">:</span> <span class="s2">&quot;interfaces&quot;</span><span class="p">,</span> <span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">},</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+        <span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="s2">"parse_ttp"</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"get"</span><span class="p">:</span> <span class="s2">"interfaces"</span><span class="p">,</span> <span class="s2">"FL"</span><span class="p">:</span> <span class="n">devices</span><span class="p">},</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="c1"># collect all discovered MAC addresses applying interface and MAC filters</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;collecting live MAC address candidates&quot;</span><span class="p">)</span>
-    <span class="n">all_mac_live</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># {mac: {&quot;device&quot;: ..., &quot;interface&quot;: ...}}</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"collecting live MAC address candidates"</span><span class="p">)</span>
+    <span class="n">all_mac_live</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># {mac: {"device": ..., "interface": ...}}</span>
     <span class="k">for</span> <span class="n">wname</span><span class="p">,</span> <span class="n">wdata</span> <span class="ow">in</span> <span class="n">parse_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">resources_failed</span> <span class="o">=</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resources_failed&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="n">resources_failed</span> <span class="o">=</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"resources_failed"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">resources_failed</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
                 <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">resources_failed</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">wname</span><span class="si">}</span><span class="s2"> failed to fetch interface data from devices &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">resources_failed</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">wname</span><span class="si">}</span><span class="s2"> failed to fetch interface data from devices "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">resources_failed</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;failed&quot;</span><span class="p">):</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">wname</span><span class="si">}</span><span class="s2"> - failed to parse interface data from devices&quot;</span>
+        <span class="k">if</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"failed"</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">wname</span><span class="si">}</span><span class="s2"> - failed to parse interface data from devices"</span>
             <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span><span class="p">)</span>
             <span class="k">continue</span>
-        <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">host_interfaces</span> <span class="ow">in</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">host_interfaces</span> <span class="ow">in</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">"result"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">host_interfaces</span><span class="p">:</span>
-                <span class="n">intf_name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
-                <span class="n">intf_description</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span>
-                <span class="n">mac</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">]</span>
+                <span class="n">intf_name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span>
+                <span class="n">intf_description</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"description"</span><span class="p">]</span>
+                <span class="n">mac</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"mac_address"</span><span class="p">]</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">mac</span><span class="p">:</span>
                     <span class="k">continue</span>
                 <span class="k">if</span> <span class="n">filter_by_name</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span>
@@ -8336,31 +8336,31 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
                 <span class="k">if</span> <span class="n">filter_by_mac</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">mac</span><span class="p">,</span> <span class="n">filter_by_mac</span><span class="p">):</span>
                     <span class="k">continue</span>
                 <span class="n">all_mac_live</span><span class="p">[</span><span class="n">mac</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
-                    <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">intf_name</span><span class="p">,</span>
+                    <span class="s2">"device"</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
+                    <span class="s2">"interface"</span><span class="p">:</span> <span class="n">intf_name</span><span class="p">,</span>
                 <span class="p">}</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">all_mac_live</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync MAC addresses: no MAC addresses found in live data&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync MAC addresses: no MAC addresses found in live data"</span>
         <span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no MAC addresses found in live data&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no MAC addresses found in live data"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;collected </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_mac_live</span><span class="p">)</span><span class="si">}</span><span class="s2"> live MAC address candidate(s)&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"collected </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_mac_live</span><span class="p">)</span><span class="si">}</span><span class="s2"> live MAC address candidate(s)"</span><span class="p">)</span>
 
     <span class="c1"># fetch interfaces data from NetBox to resolve interface IDs</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;fetching NetBox interfaces to resolve MAC assignments&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"fetching NetBox interfaces to resolve MAC assignments"</span><span class="p">)</span>
     <span class="n">nb_interfaces_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_interfaces</span><span class="p">(</span>
         <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
         <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
         <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
         <span class="n">devices</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span>
         <span class="n">ip_addresses</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">cache</span><span class="o">=</span><span class="s2">&quot;refresh&quot;</span><span class="p">,</span>
+        <span class="n">cache</span><span class="o">=</span><span class="s2">"refresh"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">nb_interfaces_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="s2">&quot;failed to fetch NetBox interfaces for MAC sync&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
+            <span class="s2">"failed to fetch NetBox interfaces for MAC sync"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nb_interfaces_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
@@ -8371,30 +8371,30 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
     <span class="c1"># unassigned ones so that a conflicting assignment is not silently</span>
     <span class="c1"># overwritten by a later unassigned copy during dict construction.</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;fetching </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_mac_live</span><span class="p">)</span><span class="si">}</span><span class="s2"> matching MAC address object(s) from NetBox&quot;</span>
+        <span class="sa">f</span><span class="s2">"fetching </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_mac_live</span><span class="p">)</span><span class="si">}</span><span class="s2"> matching MAC address object(s) from NetBox"</span>
     <span class="p">)</span>
     <span class="n">nb_macs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">_m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
         <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">mac_addresses</span><span class="p">,</span>
         <span class="n">mac_address</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">all_mac_live</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
-        <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,mac_address,assigned_object&quot;</span><span class="p">,</span>
+        <span class="n">fields</span><span class="o">=</span><span class="s2">"id,mac_address,assigned_object"</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">_mac</span> <span class="o">=</span> <span class="n">_m</span><span class="o">.</span><span class="n">mac_address</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="n">_entry</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">_m</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-            <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="p">(</span>
+            <span class="s2">"id"</span><span class="p">:</span> <span class="n">_m</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s2">"device"</span><span class="p">:</span> <span class="p">(</span>
                 <span class="n">_m</span><span class="o">.</span><span class="n">assigned_object</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">_m</span><span class="o">.</span><span class="n">assigned_object</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="p">),</span>
-            <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">_m</span><span class="o">.</span><span class="n">assigned_object</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">_m</span><span class="o">.</span><span class="n">assigned_object</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">"interface"</span><span class="p">:</span> <span class="n">_m</span><span class="o">.</span><span class="n">assigned_object</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">_m</span><span class="o">.</span><span class="n">assigned_object</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="c1"># keep the entry if we haven&#39;t seen this MAC yet, or if the new</span>
+        <span class="c1"># keep the entry if we haven't seen this MAC yet, or if the new</span>
         <span class="c1"># entry is assigned (has an interface) and the stored one is not</span>
         <span class="k">if</span> <span class="n">_mac</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_macs</span> <span class="ow">or</span> <span class="p">(</span>
-            <span class="n">_entry</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">_mac</span><span class="p">][</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="n">_entry</span><span class="p">[</span><span class="s2">"interface"</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">_mac</span><span class="p">][</span><span class="s2">"interface"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
         <span class="p">):</span>
             <span class="n">nb_macs</span><span class="p">[</span><span class="n">_mac</span><span class="p">]</span> <span class="o">=</span> <span class="n">_entry</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nb_macs</span><span class="p">)</span><span class="si">}</span><span class="s2"> matching MAC address object(s) from NetBox&quot;</span>
+        <span class="sa">f</span><span class="s2">"retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nb_macs</span><span class="p">)</span><span class="si">}</span><span class="s2"> matching MAC address object(s) from NetBox"</span>
     <span class="p">)</span>
 
     <span class="c1"># per-device result tracking</span>
@@ -8407,145 +8407,145 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
     <span class="n">bulk_create_mac</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># process and compare live MACs versus NetBox MACs</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;calculating MAC address sync actions&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"calculating MAC address sync actions"</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">mac</span><span class="p">,</span> <span class="n">mac_data</span> <span class="ow">in</span> <span class="n">all_mac_live</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">device_name</span> <span class="o">=</span> <span class="n">mac_data</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
-        <span class="n">intf_name</span> <span class="o">=</span> <span class="n">mac_data</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span>
+        <span class="n">device_name</span> <span class="o">=</span> <span class="n">mac_data</span><span class="p">[</span><span class="s2">"device"</span><span class="p">]</span>
+        <span class="n">intf_name</span> <span class="o">=</span> <span class="n">mac_data</span><span class="p">[</span><span class="s2">"interface"</span><span class="p">]</span>
         <span class="n">nb_raw</span> <span class="o">=</span> <span class="n">nb_interfaces_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="p">{})</span>
         <span class="k">if</span> <span class="n">intf_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_raw</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">intf_name</span><span class="si">}</span><span class="s2"> - interface not found in NetBox, skipping MAC </span><span class="si">{</span><span class="n">mac</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">intf_name</span><span class="si">}</span><span class="s2"> - interface not found in NetBox, skipping MAC </span><span class="si">{</span><span class="n">mac</span><span class="si">}</span><span class="s2">"</span>
             <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">continue</span>
         <span class="c1"># MAC already assigned to a different interface</span>
         <span class="k">if</span> <span class="p">(</span>
-            <span class="n">nb_macs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mac</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;interface&quot;</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">mac</span><span class="p">][</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">intf_name</span>
+            <span class="n">nb_macs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mac</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"interface"</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">mac</span><span class="p">][</span><span class="s2">"interface"</span><span class="p">]</span> <span class="o">!=</span> <span class="n">intf_name</span>
         <span class="p">):</span>
-            <span class="n">exist_intf</span> <span class="o">=</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">mac</span><span class="p">][</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span>
-            <span class="n">exist_device</span> <span class="o">=</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">mac</span><span class="p">][</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
+            <span class="n">exist_intf</span> <span class="o">=</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">mac</span><span class="p">][</span><span class="s2">"interface"</span><span class="p">]</span>
+            <span class="n">exist_device</span> <span class="o">=</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">mac</span><span class="p">][</span><span class="s2">"device"</span><span class="p">]</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">intf_name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">mac</span><span class="si">}</span><span class="s2"> already assigned to &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;a different interface </span><span class="si">{</span><span class="n">exist_device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">exist_intf</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">intf_name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">mac</span><span class="si">}</span><span class="s2"> already assigned to "</span>
+                <span class="sa">f</span><span class="s2">"a different interface </span><span class="si">{</span><span class="n">exist_device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">exist_intf</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
             <span class="k">continue</span>
         <span class="c1"># MAC already assigned to correct interface</span>
-        <span class="k">elif</span> <span class="n">mac</span> <span class="ow">in</span> <span class="n">nb_macs</span> <span class="ow">and</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">mac</span><span class="p">][</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">intf_name</span><span class="p">:</span>
-            <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mac</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mac</span> <span class="ow">in</span> <span class="n">nb_macs</span> <span class="ow">and</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">mac</span><span class="p">][</span><span class="s2">"interface"</span><span class="p">]</span> <span class="o">==</span> <span class="n">intf_name</span><span class="p">:</span>
+            <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"in_sync"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mac</span><span class="p">)</span>
         <span class="c1"># update existing MAC if it is not associated with any interface</span>
-        <span class="k">elif</span> <span class="n">mac</span> <span class="ow">in</span> <span class="n">nb_macs</span> <span class="ow">and</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">mac</span><span class="p">][</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">mac</span> <span class="ow">in</span> <span class="n">nb_macs</span> <span class="ow">and</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">mac</span><span class="p">][</span><span class="s2">"interface"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mac</span><span class="p">)</span>
+                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"updated"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mac</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">bulk_update_mac</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">mac</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;mac_address&quot;</span><span class="p">:</span> <span class="n">mac</span><span class="p">,</span>
-                        <span class="s2">&quot;assigned_object_type&quot;</span><span class="p">:</span> <span class="s2">&quot;dcim.interface&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;assigned_object_id&quot;</span><span class="p">:</span> <span class="n">nb_raw</span><span class="p">[</span><span class="n">intf_name</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                        <span class="s2">"id"</span><span class="p">:</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">mac</span><span class="p">][</span><span class="s2">"id"</span><span class="p">],</span>
+                        <span class="s2">"mac_address"</span><span class="p">:</span> <span class="n">mac</span><span class="p">,</span>
+                        <span class="s2">"assigned_object_type"</span><span class="p">:</span> <span class="s2">"dcim.interface"</span><span class="p">,</span>
+                        <span class="s2">"assigned_object_id"</span><span class="p">:</span> <span class="n">nb_raw</span><span class="p">[</span><span class="n">intf_name</span><span class="p">][</span><span class="s2">"id"</span><span class="p">],</span>
                     <span class="p">}</span>
                 <span class="p">)</span>
         <span class="c1"># create new MAC address entry</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mac</span><span class="p">)</span>
+                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"created"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mac</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">bulk_create_mac</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;mac_address&quot;</span><span class="p">:</span> <span class="n">mac</span><span class="p">,</span>
-                        <span class="s2">&quot;assigned_object_type&quot;</span><span class="p">:</span> <span class="s2">&quot;dcim.interface&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;assigned_object_id&quot;</span><span class="p">:</span> <span class="n">nb_raw</span><span class="p">[</span><span class="n">intf_name</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                        <span class="s2">"mac_address"</span><span class="p">:</span> <span class="n">mac</span><span class="p">,</span>
+                        <span class="s2">"assigned_object_type"</span><span class="p">:</span> <span class="s2">"dcim.interface"</span><span class="p">,</span>
+                        <span class="s2">"assigned_object_id"</span><span class="p">:</span> <span class="n">nb_raw</span><span class="p">[</span><span class="n">intf_name</span><span class="p">][</span><span class="s2">"id"</span><span class="p">],</span>
                     <span class="p">}</span>
                 <span class="p">)</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;MAC address sync actions: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_mac</span><span class="p">)</span><span class="si">}</span><span class="s2"> create, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_mac</span><span class="p">)</span><span class="si">}</span><span class="s2"> update&quot;</span>
+        <span class="sa">f</span><span class="s2">"MAC address sync actions: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_mac</span><span class="p">)</span><span class="si">}</span><span class="s2"> create, "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_mac</span><span class="p">)</span><span class="si">}</span><span class="s2"> update"</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="s2">&quot;dry-run requested, returning MAC address sync plan without changes&quot;</span>
+            <span class="s2">"dry-run requested, returning MAC address sync plan without changes"</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">bulk_create_mac</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">bulk_update_mac</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no MAC address sync changes required&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no MAC address sync changes required"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="k">if</span> <span class="n">with_approval</span><span class="p">:</span>
         <span class="n">mac_preview_result</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">device_name</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">device_result</span><span class="p">[</span><span class="s2">&quot;created&quot;</span><span class="p">]),</span>
-                <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">device_result</span><span class="p">[</span><span class="s2">&quot;updated&quot;</span><span class="p">]),</span>
-                <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">device_result</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]),</span>
+                <span class="s2">"created"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">device_result</span><span class="p">[</span><span class="s2">"created"</span><span class="p">]),</span>
+                <span class="s2">"updated"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">device_result</span><span class="p">[</span><span class="s2">"updated"</span><span class="p">]),</span>
+                <span class="s2">"in_sync"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">device_result</span><span class="p">[</span><span class="s2">"in_sync"</span><span class="p">]),</span>
             <span class="p">}</span>
             <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">device_result</span> <span class="ow">in</span> <span class="n">device_results</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">}</span>
         <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">bulk_create_mac</span><span class="p">:</span>
-            <span class="n">device_name</span> <span class="o">=</span> <span class="n">all_mac_live</span><span class="p">[</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">]][</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
-            <span class="n">mac_preview_result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">])</span>
+            <span class="n">device_name</span> <span class="o">=</span> <span class="n">all_mac_live</span><span class="p">[</span><span class="n">m</span><span class="p">[</span><span class="s2">"mac_address"</span><span class="p">]][</span><span class="s2">"device"</span><span class="p">]</span>
+            <span class="n">mac_preview_result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"created"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">"mac_address"</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">bulk_update_mac</span><span class="p">:</span>
-            <span class="n">device_name</span> <span class="o">=</span> <span class="n">all_mac_live</span><span class="p">[</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">]][</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
-            <span class="n">mac_preview_result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">])</span>
+            <span class="n">device_name</span> <span class="o">=</span> <span class="n">all_mac_live</span><span class="p">[</span><span class="n">m</span><span class="p">[</span><span class="s2">"mac_address"</span><span class="p">]][</span><span class="s2">"device"</span><span class="p">]</span>
+            <span class="n">mac_preview_result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"updated"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">"mac_address"</span><span class="p">])</span>
         <span class="c1"># request confirmation from user</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="s2">&quot;MAC address sync&quot;</span><span class="p">,</span> <span class="n">mac_preview_result</span><span class="p">):</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="s2">"MAC address sync"</span><span class="p">,</span> <span class="n">mac_preview_result</span><span class="p">):</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"skipped"</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">mac_preview_result</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;review declined; changes were not applied&quot;</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"review declined; changes were not applied"</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
     <span class="k">if</span> <span class="n">bulk_create_mac</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;creating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_mac</span><span class="p">)</span><span class="si">}</span><span class="s2"> MAC address(es)&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"creating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_mac</span><span class="p">)</span><span class="si">}</span><span class="s2"> MAC address(es)"</span><span class="p">)</span>
         <span class="n">total_batches</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_mac</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">batch_size</span>
         <span class="k">for</span> <span class="n">batch_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_mac</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
             <span class="n">batch</span> <span class="o">=</span> <span class="n">bulk_create_mac</span><span class="p">[</span><span class="n">batch_start</span> <span class="p">:</span> <span class="n">batch_start</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
             <span class="n">batch_number</span> <span class="o">=</span> <span class="n">batch_start</span> <span class="o">//</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;creating MAC address batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> address(es))&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"creating MAC address batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> address(es))"</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">mac_addresses</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to create MAC address batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"failed to create MAC address batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">ret</span>
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
-                <span class="n">device_name</span> <span class="o">=</span> <span class="n">all_mac_live</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">]][</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
-                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">])</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_mac</span><span class="p">)</span><span class="si">}</span><span class="s2"> MAC addresses&quot;</span><span class="p">)</span>
+                <span class="n">device_name</span> <span class="o">=</span> <span class="n">all_mac_live</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s2">"mac_address"</span><span class="p">]][</span><span class="s2">"device"</span><span class="p">]</span>
+                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"created"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">"mac_address"</span><span class="p">])</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_mac</span><span class="p">)</span><span class="si">}</span><span class="s2"> MAC addresses"</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no MAC addresses to create&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no MAC addresses to create"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">bulk_update_mac</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_mac</span><span class="p">)</span><span class="si">}</span><span class="s2"> MAC address(es)&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"updating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_mac</span><span class="p">)</span><span class="si">}</span><span class="s2"> MAC address(es)"</span><span class="p">)</span>
         <span class="n">total_batches</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_mac</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">batch_size</span>
         <span class="k">for</span> <span class="n">batch_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_mac</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
             <span class="n">batch</span> <span class="o">=</span> <span class="n">bulk_update_mac</span><span class="p">[</span><span class="n">batch_start</span> <span class="p">:</span> <span class="n">batch_start</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
             <span class="n">batch_number</span> <span class="o">=</span> <span class="n">batch_start</span> <span class="o">//</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;updating MAC address batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> address(es))&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"updating MAC address batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> address(es))"</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">mac_addresses</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to update MAC address batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"failed to update MAC address batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">ret</span>
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
-                <span class="n">device_name</span> <span class="o">=</span> <span class="n">all_mac_live</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">]][</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
-                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">])</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_mac</span><span class="p">)</span><span class="si">}</span><span class="s2"> MAC addresses&quot;</span><span class="p">)</span>
+                <span class="n">device_name</span> <span class="o">=</span> <span class="n">all_mac_live</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s2">"mac_address"</span><span class="p">]][</span><span class="s2">"device"</span><span class="p">]</span>
+                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"updated"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">"mac_address"</span><span class="p">])</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"updated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_mac</span><span class="p">)</span><span class="si">}</span><span class="s2"> MAC addresses"</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no MAC addresses to update&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no MAC addresses to update"</span><span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;MAC address sync complete&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"MAC address sync complete"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>

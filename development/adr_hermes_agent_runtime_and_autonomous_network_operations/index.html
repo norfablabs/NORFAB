@@ -7629,14 +7629,14 @@ profile names, not aliases. <code>workers</code> selects the Hermes host.</p>
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>hermes<span class="w"> </span>agents
 nf#<span class="w"> </span>hermes<span class="w"> </span>agents<span class="w"> </span>workers<span class="w"> </span>hermes-lab-*
 nf#<span class="w"> </span>hermes<span class="w"> </span>status<span class="w"> </span>workers<span class="w"> </span>hermes-lab-1
-nf#<span class="w"> </span>hermes<span class="w"> </span>invoke<span class="w"> </span>interfaces<span class="w"> </span><span class="s2">&quot;Check interfaces on r1&quot;</span>
-nf#<span class="w"> </span>hermes<span class="w"> </span>invoke<span class="w"> </span>interfaces<span class="w"> </span><span class="s2">&quot;Check interfaces on r1&quot;</span><span class="w"> </span>workers<span class="w"> </span>hermes-lab-1
+nf#<span class="w"> </span>hermes<span class="w"> </span>invoke<span class="w"> </span>interfaces<span class="w"> </span><span class="s2">"Check interfaces on r1"</span>
+nf#<span class="w"> </span>hermes<span class="w"> </span>invoke<span class="w"> </span>interfaces<span class="w"> </span><span class="s2">"Check interfaces on r1"</span><span class="w"> </span>workers<span class="w"> </span>hermes-lab-1
 nf#<span class="w"> </span>hermes<span class="w"> </span>chat<span class="w"> </span>interfaces<span class="w"> </span>workers<span class="w"> </span>hermes-lab-1
 </code></pre></div>
 <p><strong>Sessions and runs:</strong></p>
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>hermes<span class="w"> </span>sessions<span class="w"> </span>interfaces<span class="w"> </span>workers<span class="w"> </span>hermes-lab-1
 nf#<span class="w"> </span>hermes<span class="w"> </span>chat<span class="w"> </span>interfaces<span class="w"> </span>session<span class="w"> </span>session-123<span class="w"> </span>workers<span class="w"> </span>hermes-lab-1
-nf#<span class="w"> </span>hermes<span class="w"> </span>invoke<span class="w"> </span>interfaces<span class="w"> </span><span class="s2">&quot;Summarize the errors&quot;</span><span class="w"> </span>session<span class="w"> </span>session-123<span class="w"> </span>workers<span class="w"> </span>hermes-lab-1
+nf#<span class="w"> </span>hermes<span class="w"> </span>invoke<span class="w"> </span>interfaces<span class="w"> </span><span class="s2">"Summarize the errors"</span><span class="w"> </span>session<span class="w"> </span>session-123<span class="w"> </span>workers<span class="w"> </span>hermes-lab-1
 nf#<span class="w"> </span>hermes<span class="w"> </span>interrupt<span class="w"> </span>interfaces<span class="w"> </span>run<span class="w"> </span>run-456<span class="w"> </span>workers<span class="w"> </span>hermes-lab-1
 </code></pre></div>
 <p>Use returned session/run IDs. <code>session</code> maps to task <code>session_id</code>; <code>run</code> maps

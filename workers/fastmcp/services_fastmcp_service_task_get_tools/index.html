@@ -7217,7 +7217,7 @@ NorFab inspection fields and are not added to the MCP SDK Tool schema. With
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>show<span class="w"> </span>fastmcp<span class="w"> </span>tools<span class="w"> </span>service<span class="w"> </span>nornir<span class="w"> </span>brief
 </code></pre></div>
 <p>Filter tools by name using glob patterns:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>show<span class="w"> </span>fastmcp<span class="w"> </span>tools<span class="w"> </span>name<span class="w"> </span><span class="s2">&quot;*cli&quot;</span><span class="w"> </span>brief
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>show<span class="w"> </span>fastmcp<span class="w"> </span>tools<span class="w"> </span>name<span class="w"> </span><span class="s2">"*cli"</span><span class="w"> </span>brief
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7226,14 +7226,14 @@ NorFab inspection fields and are not added to the MCP SDK Tool schema. With
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fastmcp&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;get_tools&quot;</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;brief&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;service&quot;</span><span class="p">:</span> <span class="s2">&quot;nornir&quot;</span><span class="p">},</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"fastmcp"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"get_tools"</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"brief"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"service"</span><span class="p">:</span> <span class="s2">"nornir"</span><span class="p">},</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div>
@@ -7242,16 +7242,16 @@ NorFab inspection fields and are not added to the MCP SDK Tool schema. With
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fastmcp&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;get_tools&quot;</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;brief&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;*cli&quot;</span><span class="p">},</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"fastmcp"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"get_tools"</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"brief"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"*cli"</span><span class="p">},</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 <span class="k">finally</span><span class="p">:</span>
@@ -7271,7 +7271,7 @@ root
 <span class="w">            </span>├──<span class="w"> </span>brief:<span class="w">    </span>show<span class="w"> </span>tools<span class="w"> </span>names<span class="w"> </span>only
 <span class="w">            </span>├──<span class="w"> </span>service:<span class="w">    </span>filter<span class="w"> </span>tools<span class="w"> </span>by<span class="w"> </span>service<span class="w"> </span>name
 <span class="w">            </span>├──<span class="w"> </span>name:<span class="w">    </span>filter<span class="w"> </span>tools<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>glob<span class="w"> </span>pattern
-<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'any'</span>
 <span class="w">            </span>└──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
 nf#
 </code></pre></div>
@@ -7442,21 +7442,21 @@ names to their details.</p>
 <span class="normal">728</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetToolsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetToolsResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get MCP Tools&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get MCP Tools"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_tools</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">brief</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">brief</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"all"</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"*"</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve tools from the available norfab services, optionally filtered by service</span>
 <span class="sd">    name and tool name pattern.</span>
 
@@ -7464,37 +7464,37 @@ names to their details.</p>
 <span class="sd">        brief (bool, optional): If True, returns a list of tool names. If False,</span>
 <span class="sd">            returns a dictionary with tool details.</span>
 <span class="sd">        service (str, optional): The name of the service to filter tools by.</span>
-<span class="sd">            Use &quot;all&quot; to include all services.</span>
+<span class="sd">            Use "all" to include all services.</span>
 <span class="sd">        name (str, optional): A glob pattern to match tool names.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: An object containing the filtered tools. If brief is True, result</span>
 <span class="sd">            is a list of tool names. Otherwise, result is a dictionary mapping tool</span>
 <span class="sd">            names to their details.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
         <span class="n">result</span><span class="o">=</span><span class="p">{},</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_tools&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_tools"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">brief</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">service_name</span><span class="p">,</span> <span class="n">tasks</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">norfab_services_tasks</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">service</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span> <span class="ow">or</span> <span class="n">service_name</span> <span class="o">==</span> <span class="n">service</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">service</span> <span class="o">==</span> <span class="s2">"all"</span> <span class="ow">or</span> <span class="n">service_name</span> <span class="o">==</span> <span class="n">service</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">tool_name</span><span class="p">,</span> <span class="n">tool_data</span> <span class="ow">in</span> <span class="n">tasks</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="k">if</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">tool_name</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
                         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tool_name</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">service_name</span><span class="p">,</span> <span class="n">tasks</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">norfab_services_tasks</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">service</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span> <span class="ow">or</span> <span class="n">service_name</span> <span class="o">==</span> <span class="n">service</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">service</span> <span class="o">==</span> <span class="s2">"all"</span> <span class="ow">or</span> <span class="n">service_name</span> <span class="o">==</span> <span class="n">service</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">tool_name</span><span class="p">,</span> <span class="n">tool_data</span> <span class="ow">in</span> <span class="n">tasks</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="k">if</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">tool_name</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-                        <span class="n">tool_definition</span> <span class="o">=</span> <span class="n">tool_data</span><span class="p">[</span><span class="s2">&quot;tool&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
-                        <span class="n">guardrails</span> <span class="o">=</span> <span class="n">tool_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;guardrails&quot;</span><span class="p">)</span>
+                        <span class="n">tool_definition</span> <span class="o">=</span> <span class="n">tool_data</span><span class="p">[</span><span class="s2">"tool"</span><span class="p">]</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
+                        <span class="n">guardrails</span> <span class="o">=</span> <span class="n">tool_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"guardrails"</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">guardrails</span><span class="p">:</span>
-                            <span class="n">tool_definition</span><span class="p">[</span><span class="s2">&quot;guardrails&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">guardrails</span>
-                        <span class="n">result_guardrails</span> <span class="o">=</span> <span class="n">tool_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;result_guardrails&quot;</span><span class="p">)</span>
+                            <span class="n">tool_definition</span><span class="p">[</span><span class="s2">"guardrails"</span><span class="p">]</span> <span class="o">=</span> <span class="n">guardrails</span>
+                        <span class="n">result_guardrails</span> <span class="o">=</span> <span class="n">tool_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"result_guardrails"</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">result_guardrails</span><span class="p">:</span>
-                            <span class="n">tool_definition</span><span class="p">[</span><span class="s2">&quot;result_guardrails&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result_guardrails</span>
+                            <span class="n">tool_definition</span><span class="p">[</span><span class="s2">"result_guardrails"</span><span class="p">]</span> <span class="o">=</span> <span class="n">result_guardrails</span>
                         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">tool_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">tool_definition</span>
 
     <span class="k">return</span> <span class="n">ret</span>

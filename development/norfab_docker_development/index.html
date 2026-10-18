@@ -7232,7 +7232,7 @@ entry points installed by the image.</p>
 <p>Confirm the import path:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker/norfab-docker-dev/docker-compose.yaml<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="nb">exec</span><span class="w"> </span>norfab<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import norfab; print(norfab.__file__)&quot;</span>
+<span class="w">  </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import norfab; print(norfab.__file__)"</span>
 </code></pre></div>
 <p>The printed path should be under
 <code>/usr/local/lib/pythonX.Y/site-packages/norfab</code>.</p>

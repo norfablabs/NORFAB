@@ -7695,7 +7695,7 @@ functions in the NetBox codebase, placed in <code>norfab/utils/text.py</code> so
 reusable by any part of the codebase (not just the BGP tasks).</p>
 <h3 id="function-signature">Function signature<a class="headerlink" href="#function-signature" title="Permanent link">¤</a></h3>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">expand_interface_range</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Expand a bracket-notation pattern into a list of concrete strings.</span>
 
 <span class="sd">    Bracket groups ``[...]`` may contain:</span>
@@ -7709,28 +7709,28 @@ reusable by any part of the codebase (not just the BGP tasks).</p>
 
 <span class="sd">    Examples::</span>
 
-<span class="sd">        expand_interface_range(&quot;[ge,xe]-0/0/[0-1]&quot;)</span>
-<span class="sd">        # [&quot;ge-0/0/0&quot;, &quot;ge-0/0/1&quot;, &quot;xe-0/0/0&quot;, &quot;xe-0/0/1&quot;]</span>
+<span class="sd">        expand_interface_range("[ge,xe]-0/0/[0-1]")</span>
+<span class="sd">        # ["ge-0/0/0", "ge-0/0/1", "xe-0/0/0", "xe-0/0/1"]</span>
 
-<span class="sd">        expand_interface_range(&quot;Ethernet[1-4]/1.101&quot;)</span>
-<span class="sd">        # [&quot;Ethernet1/1.101&quot;, &quot;Ethernet2/1.101&quot;, &quot;Ethernet3/1.101&quot;, &quot;Ethernet4/1.101&quot;]</span>
+<span class="sd">        expand_interface_range("Ethernet[1-4]/1.101")</span>
+<span class="sd">        # ["Ethernet1/1.101", "Ethernet2/1.101", "Ethernet3/1.101", "Ethernet4/1.101"]</span>
 
-<span class="sd">        expand_interface_range(&quot;eth0&quot;)</span>
-<span class="sd">        # [&quot;eth0&quot;]</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        expand_interface_range("eth0")</span>
+<span class="sd">        # ["eth0"]</span>
+<span class="sd">    """</span>
 </code></pre></div>
 <h3 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">¤</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">product</span>
 
-<span class="n">BRACKET_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\[([^\]]+)\]&quot;</span><span class="p">)</span>
+<span class="n">BRACKET_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\[([^\]]+)\]"</span><span class="p">)</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">expand_bracket</span><span class="p">(</span><span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Expand a single bracket group content into a list of string alternatives.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Expand a single bracket group content into a list of string alternatives."""</span>
     <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">):</span>
         <span class="n">token</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(\d+)-(\d+)&quot;</span><span class="p">,</span> <span class="n">token</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(\d+)-(\d+)"</span><span class="p">,</span> <span class="n">token</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
             <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
             <span class="n">step</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">end</span> <span class="o">&gt;=</span> <span class="n">start</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
@@ -7840,27 +7840,27 @@ that side).  Supports two input forms:</p>
   object is used (e.g. <code>{"tenant": "lab", "rir": "RFC 1918"}</code>).</li>
 </ul>
 <p>Examples:</p>
-<div class="highlight"><pre><span></span><code>asn_source=&quot;custom_fields.asn&quot;                          # str: path through device data
-asn_source=&quot;config_context.bgp.local_as&quot;                # str: nested path
-asn_source=&quot;custom_fields.asn.0&quot;                        # str: first element of a list
-asn_source={&quot;tenant&quot;: &quot;lab&quot;, &quot;rir&quot;: &quot;RFC 1918&quot;}         # dict: IPAM ASN query
+<div class="highlight"><pre><span></span><code>asn_source="custom_fields.asn"                          # str: path through device data
+asn_source="config_context.bgp.local_as"                # str: nested path
+asn_source="custom_fields.asn.0"                        # str: first element of a list
+asn_source={"tenant": "lab", "rir": "RFC 1918"}         # dict: IPAM ASN query
 </code></pre></div>
 <p>Resolution logic (module-level function <code>resolve_asn_from_source</code>):</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">resolve_asn_from_source</span><span class="p">(</span><span class="n">device_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">asn_source</span><span class="p">,</span> <span class="n">nb</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Resolve an ASN from device data or a NetBox IPAM query.</span>
 
 <span class="sd">    asn_source can be:</span>
 <span class="sd">    - str  → dot-separated path through device_data dict/list</span>
 <span class="sd">    - dict → kwargs passed to nb.ipam.asn.get(**asn_source); uses asn_obj.asn</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">asn_source</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="n">asn_obj</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">asn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">asn_source</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">asn_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">asn_obj</span><span class="o">.</span><span class="n">asn</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">node</span> <span class="o">=</span> <span class="n">device_data</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">asn_source</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">asn_source</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                 <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -7890,11 +7890,11 @@ asn_source={&quot;tenant&quot;: &quot;lab&quot;, &quot;rir&quot;: &quot;RFC 1918
 </ul>
 <p>This enables the minimal-input usage pattern:</p>
 <div class="highlight"><pre><span></span><code><span class="n">create_bgp_peering</span><span class="p">(</span>
-    <span class="n">device</span><span class="o">=</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span>
-    <span class="n">local_interface</span><span class="o">=</span><span class="s2">&quot;Ethernet[1-4]/1.101&quot;</span><span class="p">,</span>  <span class="c1"># range expansion → 4 interfaces</span>
-    <span class="n">asn_source</span><span class="o">=</span><span class="s2">&quot;custom_fields.asn&quot;</span><span class="p">,</span>          <span class="c1"># str path or dict query</span>
-    <span class="n">rir</span><span class="o">=</span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-    <span class="n">name_template</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{device}</span><span class="s2">_BGP_</span><span class="si">{name}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">device</span><span class="o">=</span><span class="s2">"ceos-leaf-1"</span><span class="p">,</span>
+    <span class="n">local_interface</span><span class="o">=</span><span class="s2">"Ethernet[1-4]/1.101"</span><span class="p">,</span>  <span class="c1"># range expansion → 4 interfaces</span>
+    <span class="n">asn_source</span><span class="o">=</span><span class="s2">"custom_fields.asn"</span><span class="p">,</span>          <span class="c1"># str path or dict query</span>
+    <span class="n">rir</span><span class="o">=</span><span class="s2">"lab"</span><span class="p">,</span>
+    <span class="n">name_template</span><span class="o">=</span><span class="s2">"</span><span class="si">{device}</span><span class="s2">_BGP_</span><span class="si">{name}</span><span class="s2">"</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>This creates one BGP session per interface, resolving IPs from the interface IPAM
@@ -7912,27 +7912,27 @@ an explicit argument — no closures, no implicit state.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># --- top of bgp_peerings_tasks.py, above all classes ---</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">resolve_ip</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">nb</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">ret</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve or create an IP address in IPAM, return its NetBox ID or None.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Resolve or create an IP address in IPAM, return its NetBox ID or None."""</span>
     <span class="o">...</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">resolve_asn</span><span class="p">(</span><span class="n">asn_str</span><span class="p">,</span> <span class="n">nb</span><span class="p">,</span> <span class="n">rir_id</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">ret</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve or create an ASN, return its NetBox ID or None.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Resolve or create an ASN, return its NetBox ID or None."""</span>
     <span class="o">...</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">resolve_or_create</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">obj_type</span><span class="p">,</span> <span class="n">nb</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">ret</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve or create a named BGP object (peer group / routing policy / prefix list).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Resolve or create a named BGP object (peer group / routing policy / prefix list)."""</span>
     <span class="o">...</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">get_addr_family</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return &#39;ipv4&#39; or &#39;ipv6&#39; based on the IP address version.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return 'ipv4' or 'ipv6' based on the IP address version."""</span>
     <span class="o">...</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">get_p2p_peer_ip</span><span class="p">(</span><span class="n">cidr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the peer IP for a P2P subnet (/30, /31, /127) or None for other prefixes.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return the peer IP for a P2P subnet (/30, /31, /127) or None for other prefixes."""</span>
     <span class="o">...</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">resolve_asn_from_source</span><span class="p">(</span><span class="n">device_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">asn_source</span><span class="p">,</span> <span class="n">nb</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve ASN from device data (dot-path str) or NetBox IPAM query (dict); return ASN string or None.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Resolve ASN from device data (dot-path str) or NetBox IPAM query (dict); return ASN string or None."""</span>
     <span class="o">...</span>
 </code></pre></div>
 <p>All three tasks (<code>create_bgp_peering</code>, <code>update_bgp_peering</code>, <code>sync_bgp_peerings</code>)
@@ -7954,7 +7954,7 @@ and <code>BgpSessionStatusEnum</code>. No changes to <code>netbox_models.py</cod
     <span class="n">remote_address</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># derived from P2P peer when omitted</span>
     <span class="n">local_as</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>        <span class="c1"># derived from asn_source when omitted</span>
     <span class="n">remote_as</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>       <span class="c1"># derived from asn_source on remote device</span>
-    <span class="n">status</span><span class="p">:</span> <span class="n">BgpSessionStatusEnum</span> <span class="o">=</span> <span class="s2">&quot;active&quot;</span>
+    <span class="n">status</span><span class="p">:</span> <span class="n">BgpSessionStatusEnum</span> <span class="o">=</span> <span class="s2">"active"</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">vrf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">peer_group</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -7974,7 +7974,7 @@ and <code>BgpSessionStatusEnum</code>. No changes to <code>netbox_models.py</cod
     <span class="n">remote_address</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># explicit IP string; derived when local_interface + P2P</span>
     <span class="n">local_as</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>        <span class="c1"># explicit AS string; derived when asn_source set</span>
     <span class="n">remote_as</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>       <span class="c1"># explicit AS string; derived when asn_source set</span>
-    <span class="n">status</span><span class="p">:</span> <span class="n">BgpSessionStatusEnum</span> <span class="o">=</span> <span class="s2">&quot;active&quot;</span>
+    <span class="n">status</span><span class="p">:</span> <span class="n">BgpSessionStatusEnum</span> <span class="o">=</span> <span class="s2">"active"</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">vrf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">peer_group</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -7987,10 +7987,10 @@ and <code>BgpSessionStatusEnum</code>. No changes to <code>netbox_models.py</cod
     <span class="n">local_interface</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
     <span class="n">asn_source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Dot-path string or IPAM query dict for automatic ASN resolution.&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Dot-path string or IPAM query dict for automatic ASN resolution."</span><span class="p">,</span>
         <span class="n">examples</span><span class="o">=</span><span class="p">[</span>
-            <span class="s2">&quot;str: dot-separated path through device data, e.g. &#39;custom_fields.asn&#39;. &quot;</span>
-            <span class="s2">&quot;dict: kwargs for nb.ipam.asn.get, e.g. {&#39;tenant&#39;: &#39;lab&#39;, &#39;rir&#39;: &#39;RFC 1918&#39;}.&quot;</span>
+            <span class="s2">"str: dot-separated path through device data, e.g. 'custom_fields.asn'. "</span>
+            <span class="s2">"dict: kwargs for nb.ipam.asn.get, e.g. {'tenant': 'lab', 'rir': 'RFC 1918'}."</span>
         <span class="p">],</span>
     <span class="p">)</span>
     <span class="n">name_template</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
@@ -7998,39 +7998,39 @@ and <code>BgpSessionStatusEnum</code>. No changes to <code>netbox_models.py</cod
     <span class="c1"># --- Mirror session ---</span>
     <span class="n">create_reverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">True</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;When True, also create a reverse BGP session on the remote device with local and remote IPs/ASNs swapped.&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"When True, also create a reverse BGP session on the remote device with local and remote IPs/ASNs swapped."</span><span class="p">,</span>
         <span class="n">examples</span><span class="o">=</span><span class="p">[</span>
-            <span class="s2">&quot;Set to False to create only the local-device session and skip the automatic &quot;</span>
-            <span class="s2">&quot;mirror session on the remote device.&quot;</span>
+            <span class="s2">"Set to False to create only the local-device session and skip the automatic "</span>
+            <span class="s2">"mirror session on the remote device."</span>
         <span class="p">],</span>
     <span class="p">)</span>
 
     <span class="c1"># --- Bulk mode ---</span>
     <span class="n">bulk_create</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">BgpSessionFields</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;List of BGP session objects to create in bulk.&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"List of BGP session objects to create in bulk."</span><span class="p">,</span>
         <span class="n">examples</span><span class="o">=</span><span class="p">[</span>
-            <span class="s2">&quot;List of BgpSessionFields dicts, each requiring at minimum &#39;name&#39;, &#39;device&#39;, &quot;</span>
-            <span class="s2">&quot;and either &#39;local_address&#39; or &#39;local_interface&#39;. &quot;</span>
-            <span class="s2">&quot;Example: [{&#39;name&#39;: &#39;leaf1_10.0.0.1_10.0.0.0&#39;, &#39;device&#39;: &#39;leaf1&#39;, &quot;</span>
-            <span class="s2">&quot;&#39;local_address&#39;: &#39;10.0.0.1&#39;, &#39;remote_address&#39;: &#39;10.0.0.0&#39;, &quot;</span>
-            <span class="s2">&quot;&#39;local_as&#39;: &#39;65001&#39;, &#39;remote_as&#39;: &#39;65002&#39;}].&quot;</span>
+            <span class="s2">"List of BgpSessionFields dicts, each requiring at minimum 'name', 'device', "</span>
+            <span class="s2">"and either 'local_address' or 'local_interface'. "</span>
+            <span class="s2">"Example: [{'name': 'leaf1_10.0.0.1_10.0.0.0', 'device': 'leaf1', "</span>
+            <span class="s2">"'local_address': '10.0.0.1', 'remote_address': '10.0.0.0', "</span>
+            <span class="s2">"'local_as': '65001', 'remote_as': '65002'}]."</span>
         <span class="p">],</span>
     <span class="p">)</span>
 
     <span class="c1"># --- Shared resolution options ---</span>
     <span class="n">rir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;RIR name used when auto-creating ASNs in NetBox.&quot;</span><span class="p">,</span>
-        <span class="n">examples</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;RIR name as it appears in NetBox, e.g. &#39;RFC 1918&#39;, &#39;ARIN&#39;, &#39;RIPE&#39;.&quot;</span><span class="p">],</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"RIR name used when auto-creating ASNs in NetBox."</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="p">[</span><span class="s2">"RIR name as it appears in NetBox, e.g. 'RFC 1918', 'ARIN', 'RIPE'."</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="n">message</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Changelog message recorded on every NetBox write.&quot;</span><span class="p">,</span>
-        <span class="n">examples</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Free-text string written to the NetBox changelog, e.g. &#39;Provisioned by NorFab&#39;.&quot;</span><span class="p">],</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Changelog message recorded on every NetBox write."</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="p">[</span><span class="s2">"Free-text string written to the NetBox changelog, e.g. 'Provisioned by NorFab'."</span><span class="p">],</span>
     <span class="p">)</span>
 
-    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;after&quot;</span><span class="p">)</span>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">validate_single_or_bulk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_create</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># In single-session mode device is always required.</span>
@@ -8038,10 +8038,10 @@ and <code>BgpSessionStatusEnum</code>. No changes to <code>netbox_models.py</cod
             <span class="c1"># remote_address may be omitted when local_interface resolves a P2P subnet.</span>
             <span class="c1"># local_as / remote_as may be omitted when asn_source is provided.</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Single-session mode requires &#39;device&#39;.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Single-session mode requires 'device'."</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_address</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_interface</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;Single-session mode requires either &#39;local_address&#39; or &#39;local_interface&#39;.&quot;</span>
+                    <span class="s2">"Single-session mode requires either 'local_address' or 'local_interface'."</span>
                 <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div>
@@ -8066,8 +8066,8 @@ and <code>BgpSessionStatusEnum</code>. No changes to <code>netbox_models.py</cod
     <span class="c1"># --- Single-session mode ---</span>
     <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Existing session name to update.&quot;</span><span class="p">,</span>
-        <span class="n">examples</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Name of the BGP session as stored in NetBox, e.g. &#39;leaf1_10.0.0.1_10.0.0.0&#39;.&quot;</span><span class="p">],</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Existing session name to update."</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="p">[</span><span class="s2">"Name of the BGP session as stored in NetBox, e.g. 'leaf1_10.0.0.1_10.0.0.0'."</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">status</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BgpSessionStatusEnum</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -8085,10 +8085,10 @@ and <code>BgpSessionStatusEnum</code>. No changes to <code>netbox_models.py</cod
     <span class="c1"># --- Bulk mode ---</span>
     <span class="n">bulk_update</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">BgpSessionUpdateFields</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;List of BGP sessions to update in bulk.&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"List of BGP sessions to update in bulk."</span><span class="p">,</span>
         <span class="n">examples</span><span class="o">=</span><span class="p">[</span>
-            <span class="s2">&quot;List of BgpSessionUpdateFields dicts, each requiring &#39;name&#39; plus any fields to change. &quot;</span>
-            <span class="s2">&quot;Example: [{&#39;name&#39;: &#39;leaf1_10.0.0.1_10.0.0.0&#39;, &#39;description&#39;: &#39;uplink&#39;, &#39;status&#39;: &#39;active&#39;}].&quot;</span>
+            <span class="s2">"List of BgpSessionUpdateFields dicts, each requiring 'name' plus any fields to change. "</span>
+            <span class="s2">"Example: [{'name': 'leaf1_10.0.0.1_10.0.0.0', 'description': 'uplink', 'status': 'active'}]."</span>
         <span class="p">],</span>
     <span class="p">)</span>
 
@@ -8096,11 +8096,11 @@ and <code>BgpSessionStatusEnum</code>. No changes to <code>netbox_models.py</cod
     <span class="n">rir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">message</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;after&quot;</span><span class="p">)</span>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">validate_single_or_bulk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_update</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Either &#39;name&#39; (single-session mode) or &#39;bulk_update&#39; (bulk mode) is required.&quot;</span>
+                <span class="s2">"Either 'name' (single-session mode) or 'bulk_update' (bulk mode) is required."</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div>
@@ -8109,7 +8109,7 @@ and <code>BgpSessionStatusEnum</code>. No changes to <code>netbox_models.py</cod
 <p><strong>Location:</strong> <code>norfab/workers/netbox_worker/bgp_peerings_tasks.py</code> — new method on
 <code>NetboxBgpPeeringsTasks</code>.</p>
 <p><strong>Decorator:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()})</span>
+<div class="highlight"><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()})</span>
 </code></pre></div>
 <p><strong>Signature:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_bgp_peering</span><span class="p">(</span>
@@ -8123,7 +8123,7 @@ and <code>BgpSessionStatusEnum</code>. No changes to <code>netbox_models.py</cod
     <span class="n">remote_address</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">local_as</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">remote_as</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"active"</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">vrf</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">peer_group</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -8249,21 +8249,21 @@ one BGP session per interface.  Session <code>name</code> is derived from <code>
 provided, otherwise defaults to <code>"{device}_{local_address}_{remote_address}"</code>.</p>
 <p><strong>Return structure (normal run):</strong></p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;session-name-1&quot;</span><span class="p">,</span> <span class="s2">&quot;session-name-2&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;exists&quot;</span><span class="p">:</span>  <span class="p">[</span><span class="s2">&quot;session-name-3&quot;</span><span class="p">],</span>  <span class="c1"># already in NetBox, not re-created</span>
+    <span class="s2">"created"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"session-name-1"</span><span class="p">,</span> <span class="s2">"session-name-2"</span><span class="p">],</span>
+    <span class="s2">"exists"</span><span class="p">:</span>  <span class="p">[</span><span class="s2">"session-name-3"</span><span class="p">],</span>  <span class="c1"># already in NetBox, not re-created</span>
 <span class="p">}</span>
 </code></pre></div>
 <p><strong>Return structure (dry run):</strong></p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;session-name-1&quot;</span><span class="p">,</span> <span class="s2">&quot;session-name-2&quot;</span><span class="p">],</span>  <span class="c1"># names that would be created</span>
-    <span class="s2">&quot;exists&quot;</span><span class="p">:</span>  <span class="p">[</span><span class="s2">&quot;session-name-3&quot;</span><span class="p">],</span>                     <span class="c1"># names that already exist</span>
+    <span class="s2">"create"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"session-name-1"</span><span class="p">,</span> <span class="s2">"session-name-2"</span><span class="p">],</span>  <span class="c1"># names that would be created</span>
+    <span class="s2">"exists"</span><span class="p">:</span>  <span class="p">[</span><span class="s2">"session-name-3"</span><span class="p">],</span>                     <span class="c1"># names that already exist</span>
 <span class="p">}</span>
 </code></pre></div>
 <hr />
 <h2 id="4-new-task-update_bgp_peering">4. New Task: <code>update_bgp_peering</code><a class="headerlink" href="#4-new-task-update_bgp_peering" title="Permanent link">¤</a></h2>
 <p><strong>Location:</strong> same file, new method on <code>NetboxBgpPeeringsTasks</code>.</p>
 <p><strong>Decorator:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()})</span>
+<div class="highlight"><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"PATCH"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()})</span>
 </code></pre></div>
 <p><strong>Signature:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_bgp_peering</span><span class="p">(</span>
@@ -8326,19 +8326,19 @@ provided, otherwise defaults to <code>"{device}_{local_address}_{remote_address}
 </ol>
 <p><strong>Return structure (normal run):</strong></p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;session-name-1&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;session-name-2&quot;</span><span class="p">],</span>  <span class="c1"># no changes needed</span>
+    <span class="s2">"updated"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"session-name-1"</span><span class="p">],</span>
+    <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"session-name-2"</span><span class="p">],</span>  <span class="c1"># no changes needed</span>
 <span class="p">}</span>
 </code></pre></div>
 <p><strong>Return structure (dry run):</strong></p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="s2">"update"</span><span class="p">:</span> <span class="p">[</span>
         <span class="p">{</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;session-name-1&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;diff&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;values_changed&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;root[&#39;description&#39;]&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;new_value&quot;</span><span class="p">:</span> <span class="s2">&quot;new&quot;</span><span class="p">,</span> <span class="s2">&quot;old_value&quot;</span><span class="p">:</span> <span class="s2">&quot;old&quot;</span><span class="p">}}}</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"session-name-1"</span><span class="p">,</span>
+            <span class="s2">"diff"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"values_changed"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"root['description']"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"new_value"</span><span class="p">:</span> <span class="s2">"new"</span><span class="p">,</span> <span class="s2">"old_value"</span><span class="p">:</span> <span class="s2">"old"</span><span class="p">}}}</span>
         <span class="p">}</span>
     <span class="p">],</span>
-    <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;session-name-2&quot;</span><span class="p">],</span>
+    <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"session-name-2"</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
 <hr />
@@ -8348,17 +8348,17 @@ tasks.  After computing <code>full_diff</code>, it builds two flat lists and cal
 <div class="highlight"><pre><span></span><code><span class="c1"># Build bulk_create list from full_diff</span>
 <span class="n">bulk_create</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="k">for</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">]:</span>
+    <span class="k">for</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">"create"</span><span class="p">]:</span>
         <span class="n">s</span> <span class="o">=</span> <span class="n">normalised_live</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">sname</span><span class="p">]</span>
-        <span class="n">bulk_create</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">sname</span><span class="p">,</span> <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span> <span class="o">**</span><span class="n">s</span><span class="p">})</span>
+        <span class="n">bulk_create</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">sname</span><span class="p">,</span> <span class="s2">"device"</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span> <span class="o">**</span><span class="n">s</span><span class="p">})</span>
 
 <span class="c1"># Build bulk_update list from full_diff</span>
 <span class="n">bulk_update</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="k">for</span> <span class="n">sname</span><span class="p">,</span> <span class="n">field_changes</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">entry</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">sname</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">sname</span><span class="p">,</span> <span class="n">field_changes</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">"update"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">sname</span><span class="p">}</span>
         <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">change</span> <span class="ow">in</span> <span class="n">field_changes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">entry</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">change</span><span class="p">[</span><span class="s2">&quot;new_value&quot;</span><span class="p">]</span>
+            <span class="n">entry</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">change</span><span class="p">[</span><span class="s2">"new_value"</span><span class="p">]</span>
         <span class="n">bulk_update</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
 
 <span class="c1"># Delegate writes</span>
@@ -8502,9 +8502,9 @@ Follow the same structure as `TestSyncBgpPeerings`:
 | `test_create_bgp_peering_local_interface` | `local_interface` resolves `local_address` from IPAM |
 | `test_create_bgp_peering_local_interface_p2p_derives_remote` | P2P /31 — `remote_address` derived automatically |
 | `test_create_bgp_peering_local_interface_range` | Range pattern expands to multiple sessions |
-| `test_create_bgp_peering_asn_source_custom_fields` | `asn_source=&quot;custom_fields.asn&quot;` resolves both ASNs |
-| `test_create_bgp_peering_asn_source_config_context` | `asn_source=&quot;config_context.bgp.local_as&quot;` resolves ASNs |
-| `test_create_bgp_peering_asn_source_ipam_dict` | `asn_source={&quot;tenant&quot;: &quot;lab&quot;}` queries IPAM directly |
+| `test_create_bgp_peering_asn_source_custom_fields` | `asn_source="custom_fields.asn"` resolves both ASNs |
+| `test_create_bgp_peering_asn_source_config_context` | `asn_source="config_context.bgp.local_as"` resolves ASNs |
+| `test_create_bgp_peering_asn_source_ipam_dict` | `asn_source={"tenant": "lab"}` queries IPAM directly |
 | `test_create_bgp_peering_interface_and_asn_source_combined` | Minimal input: device + interface range + asn_source |
 | `test_create_bgp_peering_non_p2p_interface_requires_remote` | Non-P2P prefix — error if `remote_address` missing |
 
@@ -8546,7 +8546,7 @@ Create two new files modelled **exactly** on
 5. **Prerequisites** — BGP plugin requirement, any other hard dependencies.
 6. **Branching Support** paragraph (same boilerplate as sync doc).
 7. **Dry Run Mode** — describe return structure with a fenced code block.
-8. **Examples** — tabbed `=== &quot;CLI&quot;` / `=== &quot;Python&quot;` blocks covering:
+8. **Examples** — tabbed `=== "CLI"` / `=== "Python"` blocks covering:
    - Single-session mode
    - Bulk mode
    - Dry-run

@@ -7249,16 +7249,16 @@
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>Normal mode returns a dictionary keyed by device name and interface name:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;Ethernet1&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet1&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;1000base-t&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;1000BASE-T&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="s2">&quot;192.0.2.1/31&quot;</span><span class="p">}],</span>
-            <span class="s2">&quot;inventory_items&quot;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">&quot;child_interfaces&quot;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">&quot;member_interfaces&quot;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">&quot;...&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">,</span>
+    <span class="s2">"ceos-leaf-1"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"Ethernet1"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Ethernet1"</span><span class="p">,</span>
+            <span class="s2">"type"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"value"</span><span class="p">:</span> <span class="s2">"1000base-t"</span><span class="p">,</span> <span class="s2">"label"</span><span class="p">:</span> <span class="s2">"1000BASE-T"</span><span class="p">},</span>
+            <span class="s2">"enabled"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"ip_addresses"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"address"</span><span class="p">:</span> <span class="s2">"192.0.2.1/31"</span><span class="p">}],</span>
+            <span class="s2">"inventory_items"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"child_interfaces"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"member_interfaces"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"..."</span><span class="p">:</span> <span class="s2">"..."</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">},</span>
 <span class="p">}</span>
@@ -7286,7 +7286,7 @@
 <div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>interfaces<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>interface-list<span class="w"> </span>Ethernet1<span class="w"> </span>Ethernet2
 </code></pre></div>
 <p>Match interfaces by regex and include IP addresses:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>interfaces<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>interface-regex<span class="w"> </span><span class="s2">&quot;Ethernet.*&quot;</span><span class="w"> </span>ip-addresses
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>interfaces<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>interface-regex<span class="w"> </span><span class="s2">"Ethernet.*"</span><span class="w"> </span>ip-addresses
 </code></pre></div>
 <p>Include inventory items and refresh cache:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>interfaces<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>inventory-items<span class="w"> </span>cache<span class="w"> </span>refresh
@@ -7299,46 +7299,46 @@
 <p>Context manager:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;get_interfaces&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"get_interfaces"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;interface_list&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Ethernet1&quot;</span><span class="p">,</span> <span class="s2">&quot;Ethernet2&quot;</span><span class="p">],</span>
+            <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">],</span>
+            <span class="s2">"interface_list"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Ethernet1"</span><span class="p">,</span> <span class="s2">"Ethernet2"</span><span class="p">],</span>
         <span class="p">},</span>
     <span class="p">)</span>
 </code></pre></div>
 <p>Direct lifecycle:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;get_interfaces&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"get_interfaces"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;interface_regex&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet.*&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;inventory_items&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">],</span>
+            <span class="s2">"interface_regex"</span><span class="p">:</span> <span class="s2">"Ethernet.*"</span><span class="p">,</span>
+            <span class="s2">"ip_addresses"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"inventory_items"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
     <span class="n">branch_result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;get_interfaces&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"get_interfaces"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="s2">&quot;my-branch&quot;</span><span class="p">,</span>
+            <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">],</span>
+            <span class="s2">"branch"</span><span class="p">:</span> <span class="s2">"my-branch"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 <span class="k">finally</span><span class="p">:</span>
@@ -7356,7 +7356,7 @@ root
 <span class="w">        </span>└──<span class="w"> </span>interfaces:<span class="w">    </span>Query<span class="w"> </span>Netbox<span class="w"> </span>device<span class="w"> </span>interfaces<span class="w"> </span>data
 <span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
 <span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>Branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
-<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'any'</span>
 <span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
 <span class="w">            </span>├──<span class="w"> </span>devices:<span class="w">    </span>Devices<span class="w"> </span>to<span class="w"> </span>retrieve<span class="w"> </span>interface<span class="w"> </span><span class="k">for</span>
 <span class="w">            </span>├──<span class="w"> </span>interface-list:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>interface<span class="w"> </span>names<span class="w"> </span>to<span class="w"> </span>retrieve
@@ -7855,16 +7855,16 @@ results in  certain format.</p>
 <span class="normal">414</span>
 <span class="normal">415</span>
 <span class="normal">416</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetInterfacesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetInterfacesResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Interfaces&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Interfaces"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -7883,7 +7883,7 @@ results in  certain format.</p>
     <span class="n">brief</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">raise_on_empty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve device interfaces from Netbox using Pynetbox REST API.</span>
 
 <span class="sd">    Args:</span>
@@ -7896,7 +7896,7 @@ results in  certain format.</p>
 <span class="sd">        inventory_items (bool, optional): If True, retrieves interface inventory items. Defaults to False.</span>
 <span class="sd">        dry_run (bool, optional): If True, only return REST filter params, do not run. Defaults to False.</span>
 <span class="sd">        cache: ``True`` - use cache if up to date; ``False`` - skip cache;</span>
-<span class="sd">            ``&quot;refresh&quot;`` - fetch and overwrite cache; ``&quot;force&quot;`` - use cache without staleness check.</span>
+<span class="sd">            ``"refresh"`` - fetch and overwrite cache; ``"force"`` - use cache without staleness check.</span>
 <span class="sd">            Missing requested interfaces trigger a fresh fetch.</span>
 <span class="sd">        brief (bool, optional): If True, return stripped-down interface data for MCP/LLM context</span>
 <span class="sd">            window optimization. Full data is still fetched; brief mode only affects what is returned.</span>
@@ -7921,7 +7921,7 @@ results in  certain format.</p>
 
 <span class="sd">    Can also pipe results through `json`, `yaml`, `nested` or `pprint`  formatters to output</span>
 <span class="sd">    results in  certain format.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
@@ -7929,10 +7929,10 @@ results in  certain format.</p>
     <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cache</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get interfaces: Fetching interfaces for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get interfaces: Fetching interfaces for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_interfaces_pynetbox&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_interfaces_pynetbox"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">},</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
     <span class="p">)</span>
@@ -7946,26 +7946,26 @@ results in  certain format.</p>
 
     <span class="c1"># build REST filter params</span>
     <span class="k">if</span> <span class="n">devices</span><span class="p">:</span>
-        <span class="n">filter_params</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">devices</span>
+        <span class="n">filter_params</span><span class="p">[</span><span class="s2">"device"</span><span class="p">]</span> <span class="o">=</span> <span class="n">devices</span>
     <span class="k">if</span> <span class="n">interface_list</span><span class="p">:</span>
-        <span class="n">filter_params</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_list</span>
+        <span class="n">filter_params</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_list</span>
     <span class="k">if</span> <span class="n">interface_regex</span><span class="p">:</span>
-        <span class="n">filter_params</span><span class="p">[</span><span class="s2">&quot;name__regex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_regex</span>
+        <span class="n">filter_params</span><span class="p">[</span><span class="s2">"name__regex"</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_regex</span>
 
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;filter_params&quot;</span><span class="p">:</span> <span class="n">filter_params</span><span class="p">}</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"filter_params"</span><span class="p">:</span> <span class="n">filter_params</span><span class="p">}</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieving interfaces for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"retrieving interfaces for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)"</span><span class="p">)</span>
 
     <span class="n">devices_to_fetch</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;force&quot;</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;checking cache for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">"force"</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"checking cache for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)"</span><span class="p">)</span>
         <span class="c1"># quick REST call to get current last_updated for all matching interfaces</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
-            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="p">,</span> <span class="o">**</span><span class="n">filter_params</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;name,last_updated,device&quot;</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="p">,</span> <span class="o">**</span><span class="n">filter_params</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">"name,last_updated,device"</span>
         <span class="p">)</span>
         <span class="c1"># build per-device last_updated map</span>
         <span class="k">for</span> <span class="n">intf</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
@@ -7976,16 +7976,16 @@ results in  certain format.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">expire</span><span class="p">()</span>  <span class="c1"># remove expired items from cache</span>
         <span class="n">devices_to_fetch</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">intf_last_updated</span> <span class="ow">in</span> <span class="n">last_updated_by_device</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">device_cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;get_interfaces::</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">device_cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"get_interfaces::</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">"</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="n">device_cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span>
                 <span class="ow">and</span> <span class="n">intf_last_updated</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">device_cache_key</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
             <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
-                <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;force&quot;</span>
+                <span class="n">cache</span> <span class="o">==</span> <span class="s2">"force"</span>
                 <span class="ow">or</span> <span class="nb">all</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">device_cache_key</span><span class="p">]</span>
                     <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">intf_name</span><span class="p">,</span> <span class="p">{})</span>
-                    <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;last_updated&quot;</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"last_updated"</span><span class="p">)</span>
                     <span class="o">==</span> <span class="n">lu</span>
                     <span class="k">for</span> <span class="n">intf_name</span><span class="p">,</span> <span class="n">lu</span> <span class="ow">in</span> <span class="n">intf_last_updated</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                 <span class="p">)</span>
@@ -7996,29 +7996,29 @@ results in  certain format.</p>
                         <span class="n">device_cache_key</span>
                     <span class="p">][</span><span class="n">intf_name</span><span class="p">]</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;serving &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; interfaces from cache (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">intf_last_updated</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s))&quot;</span>
+                    <span class="sa">f</span><span class="s2">"serving '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">' interfaces from cache (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">intf_last_updated</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s))"</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">devices_to_fetch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">device_name</span><span class="p">)</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; cache miss or stale, fetching fresh data&quot;</span>
+                    <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">' cache miss or stale, fetching fresh data"</span>
                 <span class="p">)</span>
-    <span class="k">elif</span> <span class="n">cache</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;refresh&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">cache</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">"refresh"</span><span class="p">:</span>
         <span class="k">pass</span>  <span class="c1"># fetch all devices fresh</span>
 
     <span class="c1"># build fetch filter params restricted to devices needing fresh data</span>
-    <span class="k">if</span> <span class="n">devices</span> <span class="ow">and</span> <span class="n">cache</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;force&quot;</span><span class="p">):</span>
-        <span class="n">fetch_filter_params</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">filter_params</span><span class="p">,</span> <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">devices_to_fetch</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">devices</span> <span class="ow">and</span> <span class="n">cache</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">"force"</span><span class="p">):</span>
+        <span class="n">fetch_filter_params</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">filter_params</span><span class="p">,</span> <span class="s2">"device"</span><span class="p">:</span> <span class="n">devices_to_fetch</span><span class="p">}</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">fetch_filter_params</span> <span class="o">=</span> <span class="n">filter_params</span>
 
     <span class="c1"># fetch all matching interfaces in one call</span>
     <span class="k">if</span> <span class="n">devices_to_fetch</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;fetching interfaces from NetBox for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices_to_fetch</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span>
+            <span class="sa">f</span><span class="s2">"fetching interfaces from NetBox for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices_to_fetch</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)"</span>
         <span class="p">)</span>
         <span class="n">all_interfaces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="p">,</span> <span class="o">**</span><span class="n">fetch_filter_params</span><span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s) from NetBox&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s) from NetBox"</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="p">(</span>
         <span class="n">raise_on_empty</span>
@@ -8026,8 +8026,8 @@ results in  certain format.</p>
         <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">)</span>
     <span class="p">):</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - no interfaces data returned by &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;for devices </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - no interfaces data returned by '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">' "</span>
+            <span class="sa">f</span><span class="s2">"for devices </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
 
     <span class="c1"># build relationship lookup maps from fetched data</span>
@@ -8039,21 +8039,21 @@ results in  certain format.</p>
 
     <span class="c1"># fetch IP addresses if requested (one bulk call keyed by assigned_object_id)</span>
     <span class="k">if</span> <span class="n">ip_addresses</span> <span class="ow">and</span> <span class="n">devices_to_fetch</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching IP addresses for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices_to_fetch</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"fetching IP addresses for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices_to_fetch</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)"</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">devices_to_fetch</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_id</span>
-                <span class="ow">and</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">==</span> <span class="s2">&quot;dcim.interface&quot;</span>
+                <span class="ow">and</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">==</span> <span class="s2">"dcim.interface"</span>
             <span class="p">):</span>
                 <span class="n">ip_by_intf_id</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_id</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span>
 
     <span class="c1"># fetch inventory items if requested (one bulk call keyed by component_id)</span>
     <span class="k">if</span> <span class="n">inventory_items</span> <span class="ow">and</span> <span class="n">devices_to_fetch</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching inventory items for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices_to_fetch</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"fetching inventory items for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices_to_fetch</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)"</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">inventory_items</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">devices_to_fetch</span>
         <span class="p">):</span>
-            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">component_id</span> <span class="ow">and</span> <span class="n">item</span><span class="o">.</span><span class="n">component_type</span> <span class="o">==</span> <span class="s2">&quot;dcim.interface&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">component_id</span> <span class="ow">and</span> <span class="n">item</span><span class="o">.</span><span class="n">component_type</span> <span class="o">==</span> <span class="s2">"dcim.interface"</span><span class="p">:</span>
                 <span class="n">inv_by_intf_id</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">component_id</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
 
     <span class="c1"># transform pynetbox records into result dict keyed by device / interface name</span>
@@ -8064,27 +8064,27 @@ results in  certain format.</p>
 
         <span class="n">intf_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">intf</span><span class="p">)</span>
         <span class="c1"># add extra fields</span>
-        <span class="n">intf_data</span><span class="p">[</span><span class="s2">&quot;child_interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">intf_data</span><span class="p">[</span><span class="s2">"child_interfaces"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">vrf</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="n">ip_by_intf_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">[]),</span>
+                <span class="s2">"name"</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s2">"vrf"</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">vrf</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s2">"ip_addresses"</span><span class="p">:</span> <span class="n">ip_by_intf_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">[]),</span>
             <span class="p">}</span>
             <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children_by_parent_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">intf</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">[])</span>
         <span class="p">]</span>
-        <span class="n">intf_data</span><span class="p">[</span><span class="s2">&quot;member_interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">intf_data</span><span class="p">[</span><span class="s2">"member_interfaces"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">m</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">member_intf_by_lag_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">intf</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">[])</span>
         <span class="p">]</span>
-        <span class="n">intf_data</span><span class="p">[</span><span class="s2">&quot;ip_addresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_by_intf_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">intf</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">[])</span>
-        <span class="n">intf_data</span><span class="p">[</span><span class="s2">&quot;inventory_items&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inv_by_intf_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">intf</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">intf_data</span><span class="p">[</span><span class="s2">"ip_addresses"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_by_intf_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">intf</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">intf_data</span><span class="p">[</span><span class="s2">"inventory_items"</span><span class="p">]</span> <span class="o">=</span> <span class="n">inv_by_intf_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">intf</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">[])</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">intf</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">intf_data</span>
 
     <span class="c1"># cache freshly fetched interfaces per device</span>
     <span class="k">if</span> <span class="n">cache</span> <span class="o">!=</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;caching interfaces data for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices_to_fetch</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"caching interfaces data for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices_to_fetch</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)"</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices_to_fetch</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
-                <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;get_interfaces::</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"get_interfaces::</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">"</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
                     <span class="n">cache_key</span><span class="p">,</span>
                     <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">],</span>

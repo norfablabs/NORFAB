@@ -7729,21 +7729,21 @@
 <span class="w">  </span><span class="nt">additionalProperties</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 
 <span class="nt">sites</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">context.site</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">context.site</span><span class="nv"> </span><span class="s">}}"</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">design_input_schema</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nf://netbox/designs/site_input.py</span>
 
 <span class="nt">sites</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">context.site</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">context.site</span><span class="nv"> </span><span class="s">}}"</span>
 <span class="w">    </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">active</span>
 </code></pre></div>
 <p>The referenced <code>nf://netbox/designs/site_input.py</code> contains:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">ConfigDict</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">DesignInput</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">)</span>
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">"forbid"</span><span class="p">)</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span>
 </code></pre></div>
 </div>
@@ -7760,8 +7760,8 @@
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">devices</span><span class="p">:</span>
 <span class="p p-Indicator">{</span><span class="err">%</span><span class="w"> </span><span class="nv">for name in context.devices %</span><span class="p p-Indicator">}</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">name</span><span class="nv"> </span><span class="s">}}&quot;</span>
-<span class="w">    </span><span class="nt">site</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">context.site</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">name</span><span class="nv"> </span><span class="s">}}"</span>
+<span class="w">    </span><span class="nt">site</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">context.site</span><span class="nv"> </span><span class="s">}}"</span>
 <span class="w">    </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ROUTER</span>
 <span class="w">    </span><span class="nt">device_type</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">manufacturer</span><span class="p">:</span><span class="w"> </span><span class="nv">ACME</span><span class="p p-Indicator">,</span><span class="nt"> model</span><span class="p">:</span><span class="w"> </span><span class="nv">ROUTER</span><span class="p p-Indicator">}</span>
 <span class="p p-Indicator">{</span><span class="err">%</span><span class="w"> </span><span class="nv">endfor %</span><span class="p p-Indicator">}</span>
@@ -7772,12 +7772,12 @@
 <span class="w">  </span><span class="nt">site_label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nf://netbox/designs/site_label.py</span>
 
 <span class="nt">sites</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">context.site</span><span class="nv"> </span><span class="s">}}&quot;</span>
-<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">context.site</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">site_label(&#39;ACME&#39;)</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">context.site</span><span class="nv"> </span><span class="s">}}"</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">context.site</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">site_label('ACME')</span><span class="nv"> </span><span class="s">}}"</span>
 </code></pre></div>
 <p>The referenced <code>nf://netbox/designs/site_label.py</code> contains:</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">site_label</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2"> site: </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2"> site: </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">"</span>
 </code></pre></div>
 <p>In <code>context.site | site_label('ACME')</code>, Jinja2 passes <code>context.site</code> as <code>site</code> and <code>'ACME'</code> as <code>prefix</code>. The function does not receive <code>context</code> or <code>netbox</code> unless the template passes them explicitly.</p>
 </div>
@@ -7786,12 +7786,12 @@
 <span class="w">  </span><span class="nt">site_label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nf://netbox/designs/site_label.py</span>
 
 <span class="nt">sites</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">context.site</span><span class="nv"> </span><span class="s">}}&quot;</span>
-<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">site_label(context.site,</span><span class="nv"> </span><span class="s">&#39;ACME&#39;)</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">context.site</span><span class="nv"> </span><span class="s">}}"</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">site_label(context.site,</span><span class="nv"> </span><span class="s">'ACME')</span><span class="nv"> </span><span class="s">}}"</span>
 </code></pre></div>
 <p>The referenced <code>nf://netbox/designs/site_label.py</code> contains:</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">site_label</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2"> site: </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2"> site: </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">"</span>
 </code></pre></div>
 <p>In <code>site_label(context.site, 'ACME')</code>, the template passes <code>site</code> and <code>prefix</code> explicitly. Pass <code>netbox</code> explicitly too if the function needs to query it.</p>
 </div>
@@ -8446,8 +8446,8 @@ objects to exist.</p>
 <span class="w">      </span><span class="nt">manufacturer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACME</span>
 <span class="w">      </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH ROUTER</span>
 <span class="w">    </span><span class="nt">custom_fields</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">management_ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.0.2.10/32&quot;</span>
-<span class="w">      </span><span class="nt">peer_ips</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;192.0.2.11/32&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;192.0.2.12/32&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">management_ip</span><span class="p">:</span><span class="w"> </span><span class="s">"192.0.2.10/32"</span>
+<span class="w">      </span><span class="nt">peer_ips</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"192.0.2.11/32"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"192.0.2.12/32"</span><span class="p p-Indicator">]</span>
 </code></pre></div>
 <p>The site, role, device type, custom-field definitions, and reference IPs must
 exist before this example is deployed. Multiobject updates add references
@@ -8580,19 +8580,19 @@ without removing existing members.</p>
 <p>The referenced <code>nf://netbox/designs/allocate_bgp_route_target.py</code> contains:</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">allocate_bgp_route_target</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">netbox</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">,</span> <span class="n">tenant</span><span class="p">,</span> <span class="n">description</span><span class="p">):</span>
     <span class="c1"># Replace this fixed value with a real allocation rule when needed.</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;65000:100&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"65000:100"</span>
     <span class="n">existing</span> <span class="o">=</span> <span class="n">netbox</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">route_targets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">existing</span><span class="p">:</span>
-            <span class="n">existing</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;tenant&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tenant</span><span class="p">},</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">})</span>
+            <span class="n">existing</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">"tenant"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">tenant</span><span class="p">},</span> <span class="s2">"description"</span><span class="p">:</span> <span class="n">description</span><span class="p">})</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">netbox</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">route_targets</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;tenant&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tenant</span><span class="p">},</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">}</span>
+                <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">"tenant"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">tenant</span><span class="p">},</span> <span class="s2">"description"</span><span class="p">:</span> <span class="n">description</span><span class="p">}</span>
             <span class="p">)</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
 </code></pre></div>
 <p>The <code>tenant</code> and <code>description</code> fields become function arguments. Deployment supplies <code>context</code>, <code>netbox</code>, and <code>dry_run</code>, so do not put them in the record. This dummy allocator chooses <code>65000:100</code> and creates or updates that route target unless <code>dry_run</code> is true. Its <code>return {"name": name}</code> produces this excerpt of the deployment result:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">&quot;route_targets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;custom&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;allocate_bgp_route_target&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;result&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;65000:100&quot;</span><span class="p">}}]}}</span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">"route_targets"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"custom"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">"function"</span><span class="p">:</span><span class="w"> </span><span class="s2">"allocate_bgp_route_target"</span><span class="p">,</span><span class="w"> </span><span class="nt">"result"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"65000:100"</span><span class="p">}}]}}</span>
 </code></pre></div>
 <p>The dictionary describes what the function did; the returned <code>name</code> is not used for the Netbox write or for later VRF or L2VPN references. Returning <code>name</code> as a string would instead put <code>"65000:100"</code> in <code>result</code>. Custom functions must handle their own lookups and writes, including dry-run behavior. Only load trusted Python files.</p>
 </div>
@@ -8612,19 +8612,19 @@ without removing existing members.</p>
 </code></pre></div>
 <p>The referenced <code>nf://netbox/designs/create_profile_vlan.py</code> contains:</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_profile_vlan</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">netbox</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">profile</span><span class="p">):</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">profile</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">vid</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">profile</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">vid</span><span class="si">}</span><span class="s2">"</span>
     <span class="n">vlan_group</span> <span class="o">=</span> <span class="n">netbox</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vlan_groups</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">group</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">vlan_group</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;VLAN group not found: </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"VLAN group not found: </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="n">existing</span> <span class="o">=</span> <span class="n">netbox</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vlans</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group_id</span><span class="o">=</span><span class="n">vlan_group</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">vid</span><span class="o">=</span><span class="n">vid</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">existing</span><span class="p">:</span>
-            <span class="n">existing</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">})</span>
+            <span class="n">existing</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">})</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">netbox</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vlans</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-                <span class="p">{</span><span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="n">vlan_group</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;vid&quot;</span><span class="p">:</span> <span class="n">vid</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
+                <span class="p">{</span><span class="s2">"group"</span><span class="p">:</span> <span class="n">vlan_group</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">"vid"</span><span class="p">:</span> <span class="n">vid</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
             <span class="p">)</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="n">group</span><span class="p">,</span> <span class="s2">&quot;vid&quot;</span><span class="p">:</span> <span class="n">vid</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"group"</span><span class="p">:</span> <span class="n">group</span><span class="p">,</span> <span class="s2">"vid"</span><span class="p">:</span> <span class="n">vid</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
 </code></pre></div>
 <p><code>group</code>, <code>vid</code>, and <code>profile</code> are passed unchanged from the design record. The calculated name is <code>FOO-120</code>. Because this is a custom-function record, the function performs its own lookup and write. Its return value appears under <code>vlans.custom</code>.</p>
 </div>
@@ -8636,33 +8636,33 @@ without removing existing members.</p>
 <span class="nt">bgp_communities</span><span class="p">:</span>
 <span class="p p-Indicator">{</span><span class="err">%</span><span class="w"> </span><span class="nv">for device in context.devices %</span><span class="p p-Indicator">}</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">custom_function</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">allocate_device_community</span>
-<span class="w">    </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">device</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">    </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">device</span><span class="nv"> </span><span class="s">}}"</span>
 <span class="p p-Indicator">{</span><span class="err">%</span><span class="w"> </span><span class="nv">endfor %</span><span class="p p-Indicator">}</span>
 </code></pre></div>
 <p>Supply a context such as <code>{"devices": ["branch-rtr-1", "branch-rtr-2"], "asn": 65100}</code>. The referenced <code>nf://netbox/designs/allocate_device_community.py</code> contains:</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">allocate_device_community</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">netbox</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
-    <span class="n">asn</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="s2">&quot;asn&quot;</span><span class="p">]</span>
-    <span class="n">description</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Community for </span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">asn</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="s2">"asn"</span><span class="p">]</span>
+    <span class="n">description</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Community for </span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">"</span>
     <span class="n">communities</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">netbox</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">community</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
     <span class="n">existing</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
         <span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">communities</span>
          <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">description</span> <span class="o">==</span> <span class="n">description</span>
-         <span class="ow">and</span> <span class="n">item</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">asn</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">)}),</span>
+         <span class="ow">and</span> <span class="n">item</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="p">{</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">asn</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">)}),</span>
         <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">used</span> <span class="o">=</span> <span class="p">{</span><span class="n">item</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">communities</span><span class="p">}</span>
     <span class="n">value</span> <span class="o">=</span> <span class="n">existing</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="n">existing</span> <span class="k">else</span> <span class="nb">next</span><span class="p">(</span>
-        <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">asn</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-         <span class="k">if</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">asn</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">used</span><span class="p">),</span>
+        <span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">asn</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+         <span class="k">if</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">asn</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">used</span><span class="p">),</span>
         <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No free BGP community in </span><span class="si">{</span><span class="n">asn</span><span class="si">}</span><span class="s2">:100-199&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"No free BGP community in </span><span class="si">{</span><span class="n">asn</span><span class="si">}</span><span class="s2">:100-199"</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span> <span class="ow">and</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">netbox</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">community</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-            <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">}</span>
+            <span class="p">{</span><span class="s2">"value"</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span> <span class="s2">"description"</span><span class="p">:</span> <span class="n">description</span><span class="p">}</span>
         <span class="p">)</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"device"</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
 </code></pre></div>
 <p>The design context passes <code>asn=65100</code> to the function, so allocated values start at <code>65100:100</code>. Each created community is identified on repeat deployment by <code>Community for &lt;device&gt;</code>. The returned dictionary appears under <code>bgp_communities.custom</code>. A dry run makes no reservations, so multiple records may propose the same free value.</p>
 <p>This simplified allocator is intended for sequential deployments. It does not reserve values against concurrent allocations. The built-in handler for explicit community records matches <code>value</code> and, when supplied, <code>description</code>. A different description creates a separate community. If description is omitted, more than one matching value is an error.</p>
@@ -9052,7 +9052,7 @@ without removing existing members.</p>
 <span class="w">    </span><span class="nt">interfaces</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">Vlan100</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">virtual</span>
-<span class="w">        </span><span class="nt">vrf</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="nv">BRANCH VRF</span><span class="p p-Indicator">,</span><span class="nt"> rd</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;65100:100&quot;</span><span class="p p-Indicator">,</span><span class="nt"> description</span><span class="p">:</span><span class="w"> </span><span class="nv">Branch routing</span><span class="p p-Indicator">}</span>
+<span class="w">        </span><span class="nt">vrf</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="nv">BRANCH VRF</span><span class="p p-Indicator">,</span><span class="nt"> rd</span><span class="p">:</span><span class="w"> </span><span class="s">"65100:100"</span><span class="p p-Indicator">,</span><span class="nt"> description</span><span class="p">:</span><span class="w"> </span><span class="nv">Branch routing</span><span class="p p-Indicator">}</span>
 </code></pre></div>
 <p>Equivalent using top-level keys:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">vrfs</span><span class="p">:</span>
@@ -9447,10 +9447,10 @@ in each entry.</p>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vxlan</span>
 <span class="w">    </span><span class="nt">import_route_targets</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">query</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;65100:100&quot;</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"65100:100"</span>
 <span class="w">    </span><span class="nt">export_route_targets</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">query</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">cf_customer_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">context.customer_id</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">          </span><span class="nt">cf_customer_id</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">context.customer_id</span><span class="nv"> </span><span class="s">}}"</span>
 </code></pre></div>
 <p>The same syntax works under <code>vrfs</code>. Supported filter keys depend on your Netbox
 instance and its custom-field definitions.</p>
@@ -9475,9 +9475,9 @@ from another L2VPN. Omitted terminations are not deleted.</p>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vxlan</span>
 <span class="w">    </span><span class="nt">identifier</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10100</span>
 <span class="w">    </span><span class="nt">import_route_targets</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;65100:100&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"65100:100"</span>
 <span class="w">    </span><span class="nt">export_route_targets</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;65100:100&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"65100:100"</span>
 <span class="w">    </span><span class="nt">terminations</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-router-1</span>
 <span class="w">        </span><span class="nt">interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ethernet1</span>
@@ -9530,12 +9530,12 @@ therefore have no IDs yet.</p>
 <p>Prerequisites: none for these IPAM objects. Route targets are created before the VRF and associated through its import/export fields.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">vrfs</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH VRF</span>
-<span class="w">    </span><span class="nt">rd</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;65100:100&quot;</span>
+<span class="w">    </span><span class="nt">rd</span><span class="p">:</span><span class="w"> </span><span class="s">"65100:100"</span>
 <span class="w">    </span><span class="nt">import_route_targets</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;65100:100&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"65100:100"</span>
 <span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Branch routes</span>
 <span class="w">    </span><span class="nt">export_route_targets</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;65100:100&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"65100:100"</span>
 <span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Branch routes</span>
 </code></pre></div>
 <p>Equivalent using top-level keys:</p>
@@ -9563,11 +9563,11 @@ therefore have no IDs yet.</p>
 <span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">virtual</span>
 <span class="w">        </span><span class="nt">vrf</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH VRF</span>
-<span class="w">          </span><span class="nt">rd</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;65100:100&quot;</span>
+<span class="w">          </span><span class="nt">rd</span><span class="p">:</span><span class="w"> </span><span class="s">"65100:100"</span>
 <span class="w">          </span><span class="nt">import_route_targets</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;65100:100&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"65100:100"</span>
 <span class="w">          </span><span class="nt">export_route_targets</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;65100:100&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"65100:100"</span>
 </code></pre></div>
 <p>Equivalent using top-level keys:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">route_targets</span><span class="p">:</span>
@@ -9691,10 +9691,10 @@ therefore have no IDs yet.</p>
 <span class="k">def</span><span class="w"> </span><span class="nf">site_services_context</span><span class="p">(</span><span class="n">services_prefix</span><span class="p">):</span>
     <span class="n">subnet</span> <span class="o">=</span> <span class="n">ip_network</span><span class="p">(</span><span class="n">services_prefix</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">subnet</span><span class="o">.</span><span class="n">num_addresses</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Services subnet needs at least eight addresses&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Services subnet needs at least eight addresses"</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;dns&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;servers&quot;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">subnet</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">subnet</span><span class="p">[</span><span class="mi">3</span><span class="p">])]},</span>
-        <span class="s2">&quot;ntp&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;servers&quot;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">subnet</span><span class="p">[</span><span class="mi">4</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">subnet</span><span class="p">[</span><span class="mi">5</span><span class="p">])]},</span>
+        <span class="s2">"dns"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"servers"</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">subnet</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">subnet</span><span class="p">[</span><span class="mi">3</span><span class="p">])]},</span>
+        <span class="s2">"ntp"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"servers"</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">subnet</span><span class="p">[</span><span class="mi">4</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">subnet</span><span class="p">[</span><span class="mi">5</span><span class="p">])]},</span>
     <span class="p">}</span>
 </code></pre></div>
 <p>For <code>192.0.2.0/24</code>, the function returns DNS servers <code>192.0.2.2</code> and <code>192.0.2.3</code>, plus NTP servers <code>192.0.2.4</code> and <code>192.0.2.5</code>. <code>tojson</code> renders the returned dictionary as valid YAML content. The function does not query or mutate Netbox. Calculation from objects created by the same design would require support for a deployment-time calculator inside <code>config_context.data</code>, which the handler does not currently provide.</p>
@@ -9842,7 +9842,7 @@ therefore have no IDs yet.</p>
 <span class="w">    </span><span class="nt">local_context_data</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">custom_function</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">calculate_isis_context</span>
 <span class="w">      </span><span class="nt">interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Loopback0</span>
-<span class="w">      </span><span class="nt">area</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;49.0001&quot;</span>
+<span class="w">      </span><span class="nt">area</span><span class="p">:</span><span class="w"> </span><span class="s">"49.0001"</span>
 </code></pre></div>
 <p>Equivalent using top-level keys:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">custom_functions</span><span class="p">:</span>
@@ -9874,7 +9874,7 @@ therefore have no IDs yet.</p>
 <span class="w">  </span><span class="nt">local_context_data</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">custom_function</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">calculate_isis_context</span>
 <span class="w">    </span><span class="nt">interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Loopback0</span>
-<span class="w">    </span><span class="nt">area</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;49.0001&#39;</span>
+<span class="w">    </span><span class="nt">area</span><span class="p">:</span><span class="w"> </span><span class="s">'49.0001'</span>
 </code></pre></div>
 <p>The referenced <code>nf://netbox/designs/calculate_isis_context.py</code> contains:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">ip_interface</span>
@@ -9893,26 +9893,26 @@ therefore have no IDs yet.</p>
     <span class="n">area</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
     <span class="n">loopback</span> <span class="o">=</span> <span class="n">netbox</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-        <span class="n">device_id</span><span class="o">=</span><span class="n">device</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">interface</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name&quot;</span>
+        <span class="n">device_id</span><span class="o">=</span><span class="n">device</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">interface</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">"id,name"</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">loopback</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Interface not found: </span><span class="si">{</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Interface not found: </span><span class="si">{</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="n">addresses</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">netbox</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
-        <span class="n">interface_id</span><span class="o">=</span><span class="n">loopback</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,address&quot;</span>
+        <span class="n">interface_id</span><span class="o">=</span><span class="n">loopback</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">"id,address"</span>
     <span class="p">))</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">addresses</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Expected one IPv4 address on </span><span class="si">{</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">addresses</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"Expected one IPv4 address on </span><span class="si">{</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">, "</span>
+            <span class="sa">f</span><span class="s2">"found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">addresses</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
     <span class="n">address</span> <span class="o">=</span> <span class="n">ip_interface</span><span class="p">(</span><span class="n">addresses</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">address</span><span class="p">)</span><span class="o">.</span><span class="n">ip</span>
-    <span class="n">digits</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">octet</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">octet</span> <span class="ow">in</span> <span class="n">address</span><span class="o">.</span><span class="n">packed</span><span class="p">)</span>
-    <span class="n">system_id</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">digits</span><span class="p">[</span><span class="n">index</span><span class="p">:</span><span class="n">index</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+    <span class="n">digits</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">octet</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">octet</span> <span class="ow">in</span> <span class="n">address</span><span class="o">.</span><span class="n">packed</span><span class="p">)</span>
+    <span class="n">system_id</span> <span class="o">=</span> <span class="s2">"."</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">digits</span><span class="p">[</span><span class="n">index</span><span class="p">:</span><span class="n">index</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-        <span class="s2">&quot;routing&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;router_id&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">address</span><span class="p">),</span>
-            <span class="s2">&quot;isis&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;net&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">area</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">system_id</span><span class="si">}</span><span class="s2">.00&quot;</span><span class="p">},</span>
+        <span class="s2">"device"</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="s2">"routing"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"router_id"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">address</span><span class="p">),</span>
+            <span class="s2">"isis"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"net"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">area</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">system_id</span><span class="si">}</span><span class="s2">.00"</span><span class="p">},</span>
         <span class="p">}</span>
     <span class="p">}</span>
 </code></pre></div>
@@ -9938,8 +9938,8 @@ therefore have no IDs yet.</p>
 <p>With <code>dry_run_render=True</code>, <code>result</code> contains the rendered text and the result's <code>dry_run</code> flag is <code>True</code>. Dictionary designs return the supplied dictionary unchanged. This option takes precedence over <code>dry_run</code> and returns before YAML parsing, flattening, design validation, lookups, or deployment-time custom functions. Context and initial metadata parsing, input-schema validation, Netbox client setup, and Jinja2 functions still run.</p>
 <p>Deployment and ordinary dry-run results are keyed by collection. Each collection reports object identities in <code>created</code> and <code>updated</code>. No-op allocation results are omitted. Repeat deployments can report updates because existing records are sent to Netbox without a local diff.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;tenants&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ACME&quot;</span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]},</span>
-<span class="w">  </span><span class="nt">&quot;sites&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;BRANCH-1&quot;</span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]}</span>
+<span class="w">  </span><span class="nt">"tenants"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"created"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"ACME"</span><span class="p">],</span><span class="w"> </span><span class="nt">"updated"</span><span class="p">:</span><span class="w"> </span><span class="p">[]},</span>
+<span class="w">  </span><span class="nt">"sites"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"created"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"BRANCH-1"</span><span class="p">],</span><span class="w"> </span><span class="nt">"updated"</span><span class="p">:</span><span class="w"> </span><span class="p">[]}</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Errors identify the collection that stopped deployment. Earlier collections are not rolled back.</p>
@@ -9947,39 +9947,39 @@ therefore have no IDs yet.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="13:4"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><input id="__tabbed_13_3" name="__tabbed_13" type="radio" /><input id="__tabbed_13_4" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">CLI</label><label for="__tabbed_13_2">Python</label><label for="__tabbed_13_3">FastAPI</label><label for="__tabbed_13_4">MCP</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>netbox<span class="w"> </span>design<span class="w"> </span>deploy<span class="w"> </span>design<span class="w"> </span>nf://netbox/designs/branch.yaml<span class="w"> </span>context<span class="w"> </span><span class="s1">&#39;{&quot;site&quot;:&quot;BRANCH-1&quot;}&#39;</span>
-nf#<span class="w"> </span>netbox<span class="w"> </span>design<span class="w"> </span>deploy<span class="w"> </span>design<span class="w"> </span>nf://netbox/designs/branch.yaml<span class="w"> </span>context<span class="w"> </span><span class="s1">&#39;{&quot;site&quot;:&quot;BRANCH-1&quot;}&#39;</span><span class="w"> </span>dry-run-render
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>netbox<span class="w"> </span>design<span class="w"> </span>deploy<span class="w"> </span>design<span class="w"> </span>nf://netbox/designs/branch.yaml<span class="w"> </span>context<span class="w"> </span><span class="s1">'{"site":"BRANCH-1"}'</span>
+nf#<span class="w"> </span>netbox<span class="w"> </span>design<span class="w"> </span>deploy<span class="w"> </span>design<span class="w"> </span>nf://netbox/designs/branch.yaml<span class="w"> </span>context<span class="w"> </span><span class="s1">'{"site":"BRANCH-1"}'</span><span class="w"> </span>dry-run-render
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;design_deploy&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"design_deploy"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;design&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://netbox/designs/branch.yaml&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="s2">&quot;BRANCH-1&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;dry_run_render&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Preview the rendered design.</span>
+            <span class="s2">"design"</span><span class="p">:</span> <span class="s2">"nf://netbox/designs/branch.yaml"</span><span class="p">,</span>
+            <span class="s2">"context"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="s2">"BRANCH-1"</span><span class="p">},</span>
+            <span class="s2">"dry_run_render"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Preview the rendered design.</span>
         <span class="p">},</span>
     <span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <p>Enable the Netbox service endpoints on the NorFab FastAPI worker and configure a bearer token. Send task arguments directly in the JSON body, without a <code>kwargs</code> wrapper. Replace the API address and token with your environment's values. This example deploys to branch <code>branch-review</code>, which requires Netbox branching.</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;http://localhost:8000/api/netbox/design_deploy/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer &lt;TOKEN&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;design&quot;:&quot;nf://netbox/designs/branch.yaml&quot;,&quot;context&quot;:{&quot;site&quot;:&quot;BRANCH-1&quot;},&quot;branch&quot;:&quot;branch-review&quot;,&quot;workers&quot;:&quot;any&quot;}&#39;</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">"http://localhost:8000/api/netbox/design_deploy/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer &lt;TOKEN&gt;"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{"design":"nf://netbox/designs/branch.yaml","context":{"site":"BRANCH-1"},"branch":"branch-review","workers":"any"}'</span>
 </code></pre></div>
 <p>See <a href="../../fastapi/services_fastapi_service/">FastAPI setup and authentication</a> for service configuration. Inspect the response's worker results for deployment errors.</p>
 </div>
 <div class="tabbed-block">
 <p>Connect your agent to the NorFab MCP service with the Netbox <code>design_deploy</code> tool exposed. Ask it to deploy using a chat message such as:</p>
 <div class="highlight"><pre><span></span><code>Use the NorFab Netbox design_deploy tool to instantiate the design at
-nf://netbox/designs/branch.yaml with context {&quot;site&quot;: &quot;BRANCH-1&quot;}.
+nf://netbox/designs/branch.yaml with context {"site": "BRANCH-1"}.
 Deploy to Netbox branch `branch-review`. If branching is unavailable,
 stop and ask before writing to main data. Report the deployment result
 and any errors.
@@ -10006,15 +10006,15 @@ root
 <span class="w">    </span>└──<span class="w"> </span>design:<span class="w">    </span>Deploy<span class="w"> </span>NetBox<span class="w"> </span>designs
 <span class="w">        </span>└──<span class="w"> </span>deploy:<span class="w">    </span>Deploy<span class="w"> </span>an<span class="w"> </span>additive<span class="w"> </span>NetBox<span class="w"> </span>design
 <span class="w">            </span>├──<span class="w"> </span>design<span class="w"> </span><span class="o">(</span>R<span class="o">)</span>:<span class="w">    </span>NetBox<span class="w"> </span>design<span class="w"> </span>as<span class="w"> </span>YAML<span class="w"> </span>text,<span class="w"> </span>file<span class="w"> </span>URL,<span class="w"> </span>or<span class="w"> </span>parsed<span class="w"> </span>dictionary
-<span class="w">            </span>├──<span class="w"> </span>context:<span class="w">    </span>Template<span class="w"> </span>context<span class="w"> </span>validated<span class="w"> </span>by<span class="w"> </span>design_input_schema,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;{}&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>context:<span class="w">    </span>Template<span class="w"> </span>context<span class="w"> </span>validated<span class="w"> </span>by<span class="w"> </span>design_input_schema,<span class="w"> </span>default<span class="w"> </span><span class="s1">'{}'</span>
 <span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>NetBox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
-<span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Validate<span class="w"> </span>design<span class="w"> </span>without<span class="w"> </span>writing<span class="w"> </span>to<span class="w"> </span>NetBox,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>dry-run-render:<span class="w">    </span>Return<span class="w"> </span>rendered<span class="w"> </span>design<span class="w"> </span>before<span class="w"> </span>parsing<span class="w"> </span>or<span class="w"> </span>deployment,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Validate<span class="w"> </span>design<span class="w"> </span>without<span class="w"> </span>writing<span class="w"> </span>to<span class="w"> </span>NetBox,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
+<span class="w">            </span>├──<span class="w"> </span>dry-run-render:<span class="w">    </span>Return<span class="w"> </span>rendered<span class="w"> </span>design<span class="w"> </span>before<span class="w"> </span>parsing<span class="w"> </span>or<span class="w"> </span>deployment,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>NetBox<span class="w"> </span>branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
 <span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
-<span class="w">            </span>└──<span class="w"> </span>nowait:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>job<span class="w"> </span>to<span class="w"> </span>complete,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'any'</span>
+<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
+<span class="w">            </span>└──<span class="w"> </span>nowait:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>job<span class="w"> </span>to<span class="w"> </span>complete,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
@@ -10541,14 +10541,14 @@ functions still run.</p>
 <span class="normal">4345</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">DesignDeployInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">DesignDeployResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Deploy Design&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Deploy Design"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -10562,7 +10562,7 @@ functions still run.</p>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run_render</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render and flatten a design, validate it, then deploy ordered collections.</span>
+<span class="w">    </span><span class="sd">"""Render and flatten a design, validate it, then deploy ordered collections.</span>
 
 <span class="sd">    Updates add tags, custom-field list entries, and the supported native</span>
 <span class="sd">    relationship lists. Scalar fields and context-data dictionaries replace</span>
@@ -10572,7 +10572,7 @@ functions still run.</p>
 <span class="sd">        job: NorFab job injected by the task framework.</span>
 <span class="sd">        design: YAML text, NorFab file URL, or parsed design dictionary.</span>
 <span class="sd">        context: Jinja2 variables, optionally checked by design_input_schema.</span>
-<span class="sd">        instance: NetBox instance name; defaults to the worker&#39;s instance.</span>
+<span class="sd">        instance: NetBox instance name; defaults to the worker's instance.</span>
 <span class="sd">        dry_run: Return planned writes without changing NetBox.</span>
 <span class="sd">        branch: NetBox Branching plugin branch name.</span>
 <span class="sd">        dry_run_render: Return rendered text before YAML parsing, flattening,</span>
@@ -10587,15 +10587,15 @@ functions still run.</p>
 <span class="sd">        deployment errors, including job timeout expiry, are reported in a</span>
 <span class="sd">        failed Result. Timeout checks stop subsequent operations; in-flight</span>
 <span class="sd">        calls are not interrupted.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:design_deploy&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:design_deploy"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="p">{},</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
         <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;starting netbox design deployment: instance=</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">, branch=</span><span class="si">{</span><span class="n">branch</span><span class="si">}</span><span class="s2">, dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"starting netbox design deployment: instance=</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">, branch=</span><span class="si">{</span><span class="n">branch</span><span class="si">}</span><span class="s2">, dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">"</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
@@ -10605,7 +10605,7 @@ functions still run.</p>
                 <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">context</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">context</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Design context must be a YAML mapping&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"Design context must be a YAML mapping"</span><span class="p">)</span>
 
         <span class="n">design_url</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">design</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">design</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
@@ -10614,8 +10614,8 @@ functions still run.</p>
             <span class="n">document</span> <span class="o">=</span> <span class="n">design</span>
             <span class="n">metadata</span> <span class="o">=</span> <span class="n">DesignDocument</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span>
                 <span class="p">{</span>
-                    <span class="s2">&quot;design_input_schema&quot;</span><span class="p">:</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;design_input_schema&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;jinja_functions&quot;</span><span class="p">:</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;jinja_functions&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+                    <span class="s2">"design_input_schema"</span><span class="p">:</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"design_input_schema"</span><span class="p">),</span>
+                    <span class="s2">"jinja_functions"</span><span class="p">:</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"jinja_functions"</span><span class="p">,</span> <span class="p">{}),</span>
                 <span class="p">}</span>
             <span class="p">)</span>
             <span class="n">template</span> <span class="o">=</span> <span class="kc">None</span>
@@ -10632,21 +10632,21 @@ functions still run.</p>
                     <span class="ow">and</span> <span class="ow">not</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isspace</span><span class="p">()</span>
                     <span class="ow">and</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span>
                         <span class="p">(</span>
-                            <span class="s2">&quot;#&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;design_input_schema:&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;jinja_functions:&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;custom_functions:&quot;</span><span class="p">,</span>
+                            <span class="s2">"#"</span><span class="p">,</span>
+                            <span class="s2">"design_input_schema:"</span><span class="p">,</span>
+                            <span class="s2">"jinja_functions:"</span><span class="p">,</span>
+                            <span class="s2">"custom_functions:"</span><span class="p">,</span>
                         <span class="p">)</span>
                     <span class="p">)</span>
                 <span class="p">):</span>
                     <span class="k">break</span>
                 <span class="n">metadata_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
             <span class="n">metadata</span> <span class="o">=</span> <span class="n">DesignDocument</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span>
-                <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">metadata_lines</span><span class="p">))</span> <span class="ow">or</span> <span class="p">{}</span>
+                <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">metadata_lines</span><span class="p">))</span> <span class="ow">or</span> <span class="p">{}</span>
             <span class="p">)</span>
             <span class="n">template</span> <span class="o">=</span> <span class="n">source</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Design must be YAML text, a file URL, or a dictionary&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"Design must be YAML text, a file URL, or a dictionary"</span><span class="p">)</span>
 
         <span class="n">input_schema</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">design_input_schema</span>
         <span class="n">jinja_functions</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">jinja_functions</span>
@@ -10655,7 +10655,7 @@ functions still run.</p>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_schema</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">input_schema</span><span class="p">):</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;Design input model must use an nf:// or git:// URL&quot;</span>
+                        <span class="s2">"Design input model must use an nf:// or git:// URL"</span>
                     <span class="p">)</span>
                 <span class="n">model_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">input_schema</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_schema</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
@@ -10663,22 +10663,22 @@ functions still run.</p>
                     <span class="n">input_schema</span><span class="p">,</span>
                     <span class="n">input_file_type</span><span class="o">=</span><span class="n">InputFileType</span><span class="o">.</span><span class="n">JsonSchema</span><span class="p">,</span>
                     <span class="n">output_model_type</span><span class="o">=</span><span class="n">DataModelType</span><span class="o">.</span><span class="n">PydanticV2BaseModel</span><span class="p">,</span>
-                    <span class="n">class_name</span><span class="o">=</span><span class="s2">&quot;DesignInput&quot;</span><span class="p">,</span>
+                    <span class="n">class_name</span><span class="o">=</span><span class="s2">"DesignInput"</span><span class="p">,</span>
                     <span class="n">disable_timestamp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                     <span class="n">formatters</span><span class="o">=</span><span class="p">[],</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="s2">&quot;Design input schema must be JSON Schema or a model URL&quot;</span>
+                    <span class="s2">"Design input schema must be JSON Schema or a model URL"</span>
                 <span class="p">)</span>
             <span class="n">model_globals</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">exec</span><span class="p">(</span><span class="n">model_source</span><span class="p">,</span> <span class="n">model_globals</span><span class="p">,</span> <span class="n">model_globals</span><span class="p">)</span>  <span class="c1"># nosec B102</span>
-            <span class="n">input_model</span> <span class="o">=</span> <span class="n">model_globals</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;DesignInput&quot;</span><span class="p">)</span>
+            <span class="n">input_model</span> <span class="o">=</span> <span class="n">model_globals</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"DesignInput"</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_model</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span>
                 <span class="n">input_model</span><span class="p">,</span> <span class="n">BaseModel</span>
             <span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;Design input schema must define a Pydantic DesignInput model&quot;</span>
+                    <span class="s2">"Design input schema must define a Pydantic DesignInput model"</span>
                 <span class="p">)</span>
             <span class="n">input_model</span><span class="o">.</span><span class="n">model_rebuild</span><span class="p">(</span><span class="n">_types_namespace</span><span class="o">=</span><span class="n">model_globals</span><span class="p">)</span>
             <span class="n">context</span> <span class="o">=</span> <span class="n">input_model</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">context</span><span class="p">)</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
@@ -10687,7 +10687,7 @@ functions still run.</p>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">jinja_functions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Jinja function &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; must use an nf:// or git:// URL&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Jinja function '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' must use an nf:// or git:// URL"</span>
                 <span class="p">)</span>
             <span class="n">namespace</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">exec</span><span class="p">(</span>
@@ -10696,7 +10696,7 @@ functions still run.</p>
             <span class="n">function</span> <span class="o">=</span> <span class="n">namespace</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Jinja function &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; is not callable in &#39;</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Jinja function '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' is not callable in '</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">'"</span>
                 <span class="p">)</span>
             <span class="n">filters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">function</span>
 
@@ -10711,7 +10711,7 @@ functions still run.</p>
             <span class="n">environment</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">loader</span><span class="p">)</span>
             <span class="n">environment</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
             <span class="n">environment</span><span class="o">.</span><span class="n">globals</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
-            <span class="n">environment</span><span class="o">.</span><span class="n">globals</span><span class="p">[</span><span class="s2">&quot;netbox&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb</span>
+            <span class="n">environment</span><span class="o">.</span><span class="n">globals</span><span class="p">[</span><span class="s2">"netbox"</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb</span>
             <span class="n">document</span> <span class="o">=</span> <span class="n">environment</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">template</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
 
         <span class="n">job</span><span class="o">.</span><span class="n">check_timeout</span><span class="p">()</span>
@@ -10723,7 +10723,7 @@ functions still run.</p>
         <span class="k">if</span> <span class="n">template</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">document</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">document</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
 
-        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;flattening and validating netbox design&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">"flattening and validating netbox design"</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">flattened</span> <span class="o">=</span> <span class="n">flatten_design</span><span class="p">(</span><span class="n">document</span><span class="p">)</span>
@@ -10733,7 +10733,7 @@ functions still run.</p>
         <span class="n">custom_functions</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">validated</span><span class="o">.</span><span class="n">custom_functions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;custom function &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; must use a file URL&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"custom function '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' must use a file URL"</span><span class="p">)</span>
             <span class="n">namespace</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">exec</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">namespace</span>
@@ -10741,31 +10741,31 @@ functions still run.</p>
             <span class="n">function</span> <span class="o">=</span> <span class="n">namespace</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;custom function &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; is not callable in &#39;</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                    <span class="sa">f</span><span class="s2">"custom function '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' is not callable in '</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">'"</span>
                 <span class="p">)</span>
             <span class="n">custom_functions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">function</span>
         <span class="k">for</span> <span class="n">collection</span> <span class="ow">in</span> <span class="n">DESIGN_HANDLERS_ORDER</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">validated</span><span class="p">,</span> <span class="n">collection</span><span class="p">):</span>
-                <span class="k">if</span> <span class="s2">&quot;custom_function&quot;</span> <span class="ow">in</span> <span class="n">record</span><span class="p">:</span>
-                    <span class="n">function</span> <span class="o">=</span> <span class="n">custom_functions</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;custom_function&quot;</span><span class="p">]]</span>
+                <span class="k">if</span> <span class="s2">"custom_function"</span> <span class="ow">in</span> <span class="n">record</span><span class="p">:</span>
+                    <span class="n">function</span> <span class="o">=</span> <span class="n">custom_functions</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">"custom_function"</span><span class="p">]]</span>
                     <span class="n">arguments</span> <span class="o">=</span> <span class="p">{</span>
                         <span class="n">key</span><span class="p">:</span> <span class="n">value</span>
                         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                        <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;custom_function&quot;</span>
+                        <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">"custom_function"</span>
                     <span class="p">}</span>
                     <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">function</span><span class="p">)</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span>
                         <span class="o">**</span><span class="n">arguments</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span> <span class="n">netbox</span><span class="o">=</span><span class="n">nb</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span>
                     <span class="p">)</span>
         <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">validated</span><span class="o">.</span><span class="n">local_context_data</span><span class="p">:</span>
-            <span class="n">local_context</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;local_context_data&quot;</span><span class="p">]</span>
-            <span class="k">if</span> <span class="s2">&quot;custom_function&quot;</span> <span class="ow">in</span> <span class="n">local_context</span><span class="p">:</span>
+            <span class="n">local_context</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">"local_context_data"</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">"custom_function"</span> <span class="ow">in</span> <span class="n">local_context</span><span class="p">:</span>
                 <span class="n">function_kwargs</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="n">key</span><span class="p">:</span> <span class="n">value</span>
                     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">local_context</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;custom_function&quot;</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">"custom_function"</span>
                 <span class="p">}</span>
                 <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span>
-                    <span class="n">custom_functions</span><span class="p">[</span><span class="n">local_context</span><span class="p">[</span><span class="s2">&quot;custom_function&quot;</span><span class="p">]]</span>
+                    <span class="n">custom_functions</span><span class="p">[</span><span class="n">local_context</span><span class="p">[</span><span class="s2">"custom_function"</span><span class="p">]]</span>
                 <span class="p">)</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span>
                     <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
@@ -10774,24 +10774,24 @@ functions still run.</p>
                     <span class="o">**</span><span class="n">function_kwargs</span><span class="p">,</span>
                 <span class="p">)</span>
         <span class="n">handlers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">DESIGN_HANDLERS_ORDER</span><span class="p">)</span>
-        <span class="n">handlers</span><span class="p">[</span><span class="s2">&quot;local_context_data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
+        <span class="n">handlers</span><span class="p">[</span><span class="s2">"local_context_data"</span><span class="p">]</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
             <span class="n">process_local_context_data</span><span class="p">,</span>
             <span class="n">custom_functions</span><span class="o">=</span><span class="n">custom_functions</span><span class="p">,</span>
             <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to prepare netbox design: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"failed to prepare netbox design: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
         <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="k">for</span> <span class="n">collection</span><span class="p">,</span> <span class="n">handler</span> <span class="ow">in</span> <span class="n">handlers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">records</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">validated</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">collection</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">collection</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"created"</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">"updated"</span><span class="p">:</span> <span class="p">[]}</span>
             <span class="k">continue</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;deploying </span><span class="si">{</span><span class="n">collection</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">)</span><span class="si">}</span><span class="s2"> records, dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"deploying </span><span class="si">{</span><span class="n">collection</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">)</span><span class="si">}</span><span class="s2"> records, dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">"</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
@@ -10799,7 +10799,7 @@ functions still run.</p>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">collection</span><span class="p">]</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span>
                 <span class="bp">self</span><span class="p">,</span>
                 <span class="n">nb</span><span class="p">,</span>
-                <span class="p">[</span><span class="n">record</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span> <span class="k">if</span> <span class="s2">&quot;custom_function&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">record</span><span class="p">],</span>
+                <span class="p">[</span><span class="n">record</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span> <span class="k">if</span> <span class="s2">"custom_function"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">record</span><span class="p">],</span>
                 <span class="n">dry_run</span><span class="p">,</span>
                 <span class="n">lookup_cache</span><span class="o">=</span><span class="n">lookup_cache</span><span class="p">,</span>
                 <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
@@ -10818,23 +10818,23 @@ functions still run.</p>
             <span class="n">job</span><span class="o">.</span><span class="n">check_timeout</span><span class="p">()</span>
             <span class="n">changes</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">collection</span><span class="p">]</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;completed </span><span class="si">{</span><span class="n">collection</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">changes</span><span class="p">[</span><span class="s1">&#39;created&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> created, &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">changes</span><span class="p">[</span><span class="s1">&#39;updated&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> updated, &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">changes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;custom&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2"> custom calls&quot;</span>
+                <span class="sa">f</span><span class="s2">"completed </span><span class="si">{</span><span class="n">collection</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">changes</span><span class="p">[</span><span class="s1">'created'</span><span class="p">])</span><span class="si">}</span><span class="s2"> created, "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">changes</span><span class="p">[</span><span class="s1">'updated'</span><span class="p">])</span><span class="si">}</span><span class="s2"> updated, "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">changes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'custom'</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2"> custom calls"</span>
             <span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to deploy </span><span class="si">{</span><span class="n">collection</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"failed to deploy </span><span class="si">{</span><span class="n">collection</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
             <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span> <span class="n">ret</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;netbox design complete: &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="s1">&#39;created&#39;</span><span class="p">])</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">items</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="si">}</span><span class="s2"> objects created, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="s1">&#39;updated&#39;</span><span class="p">])</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">items</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="si">}</span><span class="s2"> objects updated&quot;</span>
+        <span class="sa">f</span><span class="s2">"netbox design complete: "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="s1">'created'</span><span class="p">])</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">items</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="si">}</span><span class="s2"> objects created, "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="s1">'updated'</span><span class="p">])</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">items</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="si">}</span><span class="s2"> objects updated"</span>
     <span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>

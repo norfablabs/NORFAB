@@ -7308,18 +7308,18 @@ synchronized before its source interface exists in NetBox.</p>
 <p>The result is global because the same prefix can be reported by several
 devices:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;10.0.0.0/31&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;10.0.1.0/31&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;2001:db8::1/128&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="nt">"created"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"10.0.0.0/31"</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"updated"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"10.0.1.0/31"</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"in_sync"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"2001:db8::1/128"</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>The top-level <code>diff</code> field always contains a global reconciliation plan:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;global&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;create&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">        </span><span class="nt">&quot;update&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
-<span class="w">        </span><span class="nt">&quot;delete&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">        </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;2001:db8::1/128&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="nt">"global"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"create"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">        </span><span class="nt">"update"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">        </span><span class="nt">"delete"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">        </span><span class="nt">"in_sync"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"2001:db8::1/128"</span><span class="p">]</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -7399,7 +7399,7 @@ successful batches.</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync prefixes devices ceos-spine-1
 </code></pre></div>
 <p>Preview prefixes derived from loopbacks:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox sync prefixes devices ceos-spine-1 filter-by-name &quot;Loopback*&quot; dry-run
+<div class="highlight"><pre><span></span><code>nf#netbox sync prefixes devices ceos-spine-1 filter-by-name "Loopback*" dry-run
 </code></pre></div>
 <p>Associate prefixes with live VRFs and device sites:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync prefixes devices ceos-spine-1 ignore-vrf false ignore-site false
@@ -7410,24 +7410,24 @@ successful batches.</p>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_device_prefixes&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_device_prefixes"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-spine-2&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">,</span> <span class="s2">"ceos-spine-2"</span><span class="p">],</span>
+        <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_device_prefixes&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_device_prefixes"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;ignore_vrf&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="s2">&quot;ignore_site&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="s2">&quot;filter_by_prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.0/8&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">],</span>
+        <span class="s2">"ignore_vrf"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"ignore_site"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"filter_by_prefix"</span><span class="p">:</span> <span class="s2">"10.0.0.0/8"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -8062,16 +8062,16 @@ the site of the alphabetically first device reporting a prefix is used.</p>
 <span class="normal">2016</span>
 <span class="normal">2017</span>
 <span class="normal">2018</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDevicePrefixesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDevicePrefixesResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Sync Device Prefixes&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Sync Device Prefixes"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -8093,7 +8093,7 @@ the site of the alphabetically first device reporting a prefix is used.</p>
     <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Synchronize prefixes derived from live interface addresses into NetBox.</span>
+<span class="w">    </span><span class="sd">"""Synchronize prefixes derived from live interface addresses into NetBox.</span>
 
 <span class="sd">    Prefixes are collected from the Nornir TTP ``interfaces`` getter without</span>
 <span class="sd">    requiring corresponding NetBox interfaces. Existing prefixes are matched</span>
@@ -8122,19 +8122,19 @@ the site of the alphabetically first device reporting a prefix is used.</p>
 <span class="sd">            ``Result.diff`` contains a ``global`` reconciliation plan with</span>
 <span class="sd">            ``create``, ``update``, ``delete``, and ``in_sync`` actions;</span>
 <span class="sd">            ``delete`` is always empty because this task does not delete prefixes.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">devices</span> <span class="ow">or</span> <span class="p">[])</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_device_prefixes&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_device_prefixes"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="n">SyncActionSummary</span><span class="p">()</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
         <span class="n">diff</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;global&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="p">[],</span>
-                <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">{},</span>
-                <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[],</span>
-                <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"global"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"create"</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">"update"</span><span class="p">:</span> <span class="p">{},</span>
+                <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[],</span>
             <span class="p">}</span>
         <span class="p">},</span>
         <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
@@ -8142,12 +8142,12 @@ the site of the alphabetically first device reporting a prefix is used.</p>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;resolving devices from Nornir filters&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"resolving devices from Nornir filters"</span><span class="p">)</span>
         <span class="n">devices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_nornir_hosts</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">timeout</span><span class="p">))</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">devices</span><span class="p">))</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;no devices specified&quot;</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">"no devices specified"</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
@@ -8157,13 +8157,13 @@ the site of the alphabetically first device reporting a prefix is used.</p>
         <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span>
-            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;name,site&quot;</span><span class="p">,</span>
+            <span class="n">fields</span><span class="o">=</span><span class="s2">"name,site"</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="p">}</span>
     <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">devices</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_devices</span><span class="p">]:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2"> - device not found in Netbox&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2"> - device not found in Netbox"</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">devices</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">nb_devices</span><span class="p">]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
@@ -8180,7 +8180,7 @@ the site of the alphabetically first device reporting a prefix is used.</p>
         <span class="n">filter_by_description</span><span class="o">=</span><span class="n">filter_by_description</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;collecting live prefix candidates&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"collecting live prefix candidates"</span><span class="p">)</span>
     <span class="n">ignore_ranges</span> <span class="o">=</span> <span class="n">ignore_ranges</span> <span class="ow">or</span> <span class="n">DEFAULT_IGNORE_RANGES</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ignore_ranges</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">ignore_ranges</span> <span class="o">=</span> <span class="p">[</span><span class="n">ignore_ranges</span><span class="p">]</span>
@@ -8198,15 +8198,15 @@ the site of the alphabetically first device reporting a prefix is used.</p>
             <span class="k">continue</span>
         <span class="n">site_id</span> <span class="o">=</span> <span class="n">nb_devices</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">interface_data</span> <span class="ow">in</span> <span class="n">normalised_live_all</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">vrf_name</span> <span class="o">=</span> <span class="n">interface_data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span>
+            <span class="n">vrf_name</span> <span class="o">=</span> <span class="n">interface_data</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">ignore_vrf</span><span class="p">:</span>
                 <span class="n">vrf_name</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">elif</span> <span class="n">vrf_name</span> <span class="ow">and</span> <span class="n">vrf_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;global&quot;</span><span class="p">,</span> <span class="s2">&quot;default&quot;</span><span class="p">]:</span>
+            <span class="k">elif</span> <span class="n">vrf_name</span> <span class="ow">and</span> <span class="n">vrf_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"global"</span><span class="p">,</span> <span class="s2">"default"</span><span class="p">]:</span>
                 <span class="n">vrf_name</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">for</span> <span class="n">address_data</span> <span class="ow">in</span> <span class="p">(</span><span class="n">interface_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ipv4_addresses&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span> <span class="o">+</span> <span class="p">(</span>
-                <span class="n">interface_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ipv6_addresses&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">address_data</span> <span class="ow">in</span> <span class="p">(</span><span class="n">interface_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ipv4_addresses"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span> <span class="o">+</span> <span class="p">(</span>
+                <span class="n">interface_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ipv6_addresses"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
             <span class="p">):</span>
-                <span class="n">address</span> <span class="o">=</span> <span class="n">address_data</span><span class="p">[</span><span class="s2">&quot;ip&quot;</span><span class="p">]</span>
+                <span class="n">address</span> <span class="o">=</span> <span class="n">address_data</span><span class="p">[</span><span class="s2">"ip"</span><span class="p">]</span>
                 <span class="n">prefix_net</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">address</span><span class="p">))</span><span class="o">.</span><span class="n">network</span>
                 <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
                     <span class="n">prefix_net</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="n">ignore_net</span><span class="o">.</span><span class="n">version</span>
@@ -8223,18 +8223,18 @@ the site of the alphabetically first device reporting a prefix is used.</p>
                 <span class="n">key</span> <span class="o">=</span> <span class="n">prefix</span> <span class="k">if</span> <span class="n">ignore_vrf</span> <span class="k">else</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">vrf_name</span><span class="p">)</span>
                 <span class="n">desired_prefixes</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
                     <span class="n">key</span><span class="p">,</span>
-                    <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">vrf_name</span><span class="p">,</span> <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site_id</span><span class="p">},</span>
+                    <span class="p">{</span><span class="s2">"prefix"</span><span class="p">:</span> <span class="n">prefix</span><span class="p">,</span> <span class="s2">"vrf"</span><span class="p">:</span> <span class="n">vrf_name</span><span class="p">,</span> <span class="s2">"site"</span><span class="p">:</span> <span class="n">site_id</span><span class="p">},</span>
                 <span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">desired_prefixes</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no prefixes found in live data&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no prefixes found in live data"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;collected </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">desired_prefixes</span><span class="p">)</span><span class="si">}</span><span class="s2"> unique prefix candidate(s)&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"collected </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">desired_prefixes</span><span class="p">)</span><span class="si">}</span><span class="s2"> unique prefix candidate(s)"</span><span class="p">)</span>
 
     <span class="n">nb_prefixes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
         <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="p">,</span>
-        <span class="n">prefix</span><span class="o">=</span><span class="nb">sorted</span><span class="p">({</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">desired_prefixes</span><span class="o">.</span><span class="n">values</span><span class="p">()}),</span>
-        <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,prefix,vrf,scope_type,scope_id&quot;</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="o">=</span><span class="nb">sorted</span><span class="p">({</span><span class="n">item</span><span class="p">[</span><span class="s2">"prefix"</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">desired_prefixes</span><span class="o">.</span><span class="n">values</span><span class="p">()}),</span>
+        <span class="n">fields</span><span class="o">=</span><span class="s2">"id,prefix,vrf,scope_type,scope_id"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">create_prefixes</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">update_prefixes</span> <span class="o">=</span> <span class="p">{}</span>
@@ -8243,65 +8243,65 @@ the site of the alphabetically first device reporting a prefix is used.</p>
         <span class="n">matching</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">prefix</span>
             <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="n">nb_prefixes</span>
-            <span class="k">if</span> <span class="n">prefix</span><span class="o">.</span><span class="n">prefix</span> <span class="o">==</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">prefix</span><span class="o">.</span><span class="n">prefix</span> <span class="o">==</span> <span class="n">desired</span><span class="p">[</span><span class="s2">"prefix"</span><span class="p">]</span>
             <span class="ow">and</span> <span class="p">(</span>
                 <span class="n">ignore_vrf</span>
-                <span class="ow">or</span> <span class="p">(</span><span class="n">prefix</span><span class="o">.</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">prefix</span><span class="o">.</span><span class="n">vrf</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="n">prefix</span><span class="o">.</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">prefix</span><span class="o">.</span><span class="n">vrf</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="n">desired</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">]</span>
             <span class="p">)</span>
         <span class="p">]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">matching</span><span class="p">:</span>
-            <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]}</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"prefix"</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">"prefix"</span><span class="p">]}</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_site</span><span class="p">:</span>
                 <span class="n">payload</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-                    <span class="p">{</span><span class="s2">&quot;scope_type&quot;</span><span class="p">:</span> <span class="s2">&quot;dcim.site&quot;</span><span class="p">,</span> <span class="s2">&quot;scope_id&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]}</span>
+                    <span class="p">{</span><span class="s2">"scope_type"</span><span class="p">:</span> <span class="s2">"dcim.site"</span><span class="p">,</span> <span class="s2">"scope_id"</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">"site"</span><span class="p">]}</span>
                 <span class="p">)</span>
             <span class="n">create_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span>
             <span class="k">continue</span>
 
         <span class="n">current</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">matching</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">prefix</span><span class="p">:</span> <span class="n">prefix</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
         <span class="n">current_site</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="nb">getattr</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="s2">&quot;scope_id&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="s2">&quot;scope_type&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;dcim.site&quot;</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="s2">"scope_id"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="s2">"scope_type"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"dcim.site"</span>
             <span class="k">else</span> <span class="kc">None</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_site</span> <span class="ow">and</span> <span class="n">current_site</span> <span class="o">!=</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_site</span> <span class="ow">and</span> <span class="n">current_site</span> <span class="o">!=</span> <span class="n">desired</span><span class="p">[</span><span class="s2">"site"</span><span class="p">]:</span>
             <span class="n">update_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">current</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-                <span class="s2">&quot;scope_type&quot;</span><span class="p">:</span> <span class="s2">&quot;dcim.site&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;scope_id&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">],</span>
+                <span class="s2">"id"</span><span class="p">:</span> <span class="n">current</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="s2">"scope_type"</span><span class="p">:</span> <span class="s2">"dcim.site"</span><span class="p">,</span>
+                <span class="s2">"scope_id"</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">"site"</span><span class="p">],</span>
             <span class="p">}</span>
             <span class="n">update_prefixes_diff</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;old_value&quot;</span><span class="p">:</span> <span class="n">current_site</span><span class="p">,</span>
-                    <span class="s2">&quot;new_value&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">],</span>
+                <span class="s2">"site"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">"old_value"</span><span class="p">:</span> <span class="n">current_site</span><span class="p">,</span>
+                    <span class="s2">"new_value"</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">"site"</span><span class="p">],</span>
                 <span class="p">}</span>
             <span class="p">}</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">desired</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">])</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"in_sync"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">desired</span><span class="p">[</span><span class="s2">"prefix"</span><span class="p">])</span>
 
     <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;global&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span>
-                <span class="p">{</span><span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;prefix&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">create_prefixes</span><span class="p">}</span>
+        <span class="s2">"global"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"create"</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="p">{</span><span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"prefix"</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">create_prefixes</span><span class="p">}</span>
             <span class="p">),</span>
-            <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;prefix&quot;</span><span class="p">]:</span> <span class="n">update_prefixes_diff</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="s2">"update"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"prefix"</span><span class="p">]:</span> <span class="n">update_prefixes_diff</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
                 <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
                     <span class="n">update_prefixes_diff</span><span class="p">,</span>
-                    <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">item</span><span class="p">][</span><span class="s2">&quot;prefix&quot;</span><span class="p">],</span>
+                    <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">item</span><span class="p">][</span><span class="s2">"prefix"</span><span class="p">],</span>
                 <span class="p">)</span>
             <span class="p">},</span>
-            <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">])),</span>
+            <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"in_sync"</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"in_sync"</span><span class="p">])),</span>
         <span class="p">}</span>
     <span class="p">}</span>
 
     <span class="n">preview</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
-    <span class="n">preview</span><span class="p">[</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;prefix&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">create_prefixes</span>
+    <span class="n">preview</span><span class="p">[</span><span class="s2">"created"</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"prefix"</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">create_prefixes</span>
     <span class="p">)</span>
-    <span class="n">preview</span><span class="p">[</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;prefix&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">update_prefixes</span>
+    <span class="n">preview</span><span class="p">[</span><span class="s2">"updated"</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"prefix"</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">update_prefixes</span>
     <span class="p">)</span>
     <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">preview</span><span class="p">:</span>
         <span class="n">preview</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">preview</span><span class="p">[</span><span class="n">action</span><span class="p">]))</span>
@@ -8310,18 +8310,18 @@ the site of the alphabetically first device reporting a prefix is used.</p>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">):</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no prefix sync changes required&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no prefix sync changes required"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="k">if</span> <span class="n">with_approval</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="s2">&quot;prefix sync&quot;</span><span class="p">,</span> <span class="n">preview</span><span class="p">):</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="s2">"prefix sync"</span><span class="p">,</span> <span class="n">preview</span><span class="p">):</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"skipped"</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">preview</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;review declined; changes were not applied&quot;</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"review declined; changes were not applied"</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
     <span class="n">vrf_ids</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">create_prefixes</span><span class="p">):</span>
-        <span class="n">vrf_name</span> <span class="o">=</span> <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span>
+        <span class="n">vrf_name</span> <span class="o">=</span> <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"vrf"</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">vrf_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="k">if</span> <span class="n">vrf_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">vrf_ids</span><span class="p">:</span>
@@ -8329,7 +8329,7 @@ the site of the alphabetically first device reporting a prefix is used.</p>
         <span class="k">if</span> <span class="n">vrf_ids</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">create_prefixes</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
             <span class="k">continue</span>
-        <span class="n">create_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrf_ids</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">]</span>
+        <span class="n">create_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"vrf"</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrf_ids</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">update_prefixes</span><span class="p">:</span>
         <span class="n">update_items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">update_prefixes</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
@@ -8337,49 +8337,49 @@ the site of the alphabetically first device reporting a prefix is used.</p>
         <span class="k">for</span> <span class="n">batch_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">update_items</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
             <span class="n">batch</span> <span class="o">=</span> <span class="n">update_items</span><span class="p">[</span><span class="n">batch_start</span> <span class="p">:</span> <span class="n">batch_start</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
             <span class="n">batch_number</span> <span class="o">=</span> <span class="n">batch_start</span> <span class="o">//</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;updating prefix batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> prefix(es))&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"updating prefix batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> prefix(es))"</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="o">.</span><span class="n">update</span><span class="p">([</span><span class="n">payload</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">payload</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">])</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to update prefix batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"failed to update prefix batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">ret</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;prefix&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"updated"</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"prefix"</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span>
             <span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update_prefixes</span><span class="p">)</span><span class="si">}</span><span class="s2"> prefix(es)&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"updated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update_prefixes</span><span class="p">)</span><span class="si">}</span><span class="s2"> prefix(es)"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">create_prefixes</span><span class="p">:</span>
         <span class="n">create_items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">create_prefixes</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
         <span class="n">total_batches</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">create_items</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">batch_size</span>
         <span class="k">for</span> <span class="n">batch_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">create_items</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
             <span class="n">batch</span> <span class="o">=</span> <span class="n">create_items</span><span class="p">[</span><span class="n">batch_start</span> <span class="p">:</span> <span class="n">batch_start</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
             <span class="n">batch_number</span> <span class="o">=</span> <span class="n">batch_start</span> <span class="o">//</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;creating prefix batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> prefix(es))&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"creating prefix batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> prefix(es))"</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="o">.</span><span class="n">create</span><span class="p">([</span><span class="n">payload</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">payload</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">])</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to create prefix batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"failed to create prefix batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">ret</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;prefix&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"created"</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"prefix"</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span>
             <span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">create_prefixes</span><span class="p">)</span><span class="si">}</span><span class="s2"> prefix(es)&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">create_prefixes</span><span class="p">)</span><span class="si">}</span><span class="s2"> prefix(es)"</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">action</span><span class="p">]))</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;device prefix sync complete&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"device prefix sync complete"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>

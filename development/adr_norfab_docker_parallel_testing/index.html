@@ -7501,29 +7501,29 @@ pytest:</p>
 letting each cell keep normal pytest behavior.</p>
 <p>The framework should be driven by a small matrix file, for example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">python</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;3.10&quot;</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;3.11&quot;</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;3.12&quot;</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;3.13&quot;</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;3.14&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"3.10"</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"3.11"</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"3.12"</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"3.13"</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"3.14"</span>
 
 <span class="nt">cells</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">core</span>
 <span class="w">    </span><span class="nt">topology</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aio</span>
-<span class="w">    </span><span class="nt">pytest</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;core&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">pytest</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"core"</span><span class="p p-Indicator">]</span>
 <span class="w">    </span><span class="nt">scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">small</span>
 
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir</span>
 <span class="w">    </span><span class="nt">topology</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">split</span>
-<span class="w">    </span><span class="nt">pytest</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;services/nornir&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">pytest</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"services/nornir"</span><span class="p p-Indicator">]</span>
 <span class="w">    </span><span class="nt">workers</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">nornir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 <span class="w">    </span><span class="nt">scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">medium</span>
 
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">netbox</span>
 <span class="w">    </span><span class="nt">topology</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">split</span>
-<span class="w">    </span><span class="nt">pytest</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;services/netbox&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">    </span><span class="nt">dependencies</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;netbox&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">pytest</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"services/netbox"</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">dependencies</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"netbox"</span><span class="p p-Indicator">]</span>
 <span class="w">    </span><span class="nt">workers</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">netbox</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">    </span><span class="nt">scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">large</span>
@@ -7652,7 +7652,7 @@ Compose stack:</p>
 </ul>
 <p>Broker endpoint inside generated inventory should prefer service DNS:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">broker</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tcp://norfab-broker:5555&quot;</span>
+<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"tcp://norfab-broker:5555"</span>
 </code></pre></div>
 <p>The pytest runner container joins the same Compose network and uses the same
 inventory, so host port publication is unnecessary for most tests.</p>
@@ -7776,12 +7776,12 @@ parallel cell limits.</p>
 Python version.</p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">exclude</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">python</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.13&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">python</span><span class="p">:</span><span class="w"> </span><span class="s">"3.13"</span>
 <span class="w">    </span><span class="nt">cell</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fakenos</span>
-<span class="w">    </span><span class="nt">reason</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;fakenos</span><span class="nv"> </span><span class="s">dependency</span><span class="nv"> </span><span class="s">supports</span><span class="nv"> </span><span class="s">Python</span><span class="nv"> </span><span class="s">&lt;3.13&quot;</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">python</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.14&quot;</span>
+<span class="w">    </span><span class="nt">reason</span><span class="p">:</span><span class="w"> </span><span class="s">"fakenos</span><span class="nv"> </span><span class="s">dependency</span><span class="nv"> </span><span class="s">supports</span><span class="nv"> </span><span class="s">Python</span><span class="nv"> </span><span class="s">&lt;3.13"</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">python</span><span class="p">:</span><span class="w"> </span><span class="s">"3.14"</span>
 <span class="w">    </span><span class="nt">cell</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fakenos</span>
-<span class="w">    </span><span class="nt">reason</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;fakenos</span><span class="nv"> </span><span class="s">dependency</span><span class="nv"> </span><span class="s">supports</span><span class="nv"> </span><span class="s">Python</span><span class="nv"> </span><span class="s">&lt;3.13&quot;</span>
+<span class="w">    </span><span class="nt">reason</span><span class="p">:</span><span class="w"> </span><span class="s">"fakenos</span><span class="nv"> </span><span class="s">dependency</span><span class="nv"> </span><span class="s">supports</span><span class="nv"> </span><span class="s">Python</span><span class="nv"> </span><span class="s">&lt;3.13"</span>
 </code></pre></div>
 <p>Keep the default developer smoke profile on one Python version, likely the
 project's current default Docker build version. Run the full Python matrix in
@@ -7830,7 +7830,7 @@ NORFAB_TEST_RUN_ID
 NORFAB_TEST_CELL_ID
 </code></pre></div>
 <p>If these variables are absent, keep current local behavior:</p>
-<div class="highlight"><pre><span></span><code><span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./nf_tests_inventory/inventory.yaml&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./nf_tests_inventory/inventory.yaml"</span><span class="p">)</span>
 </code></pre></div>
 <p>Inside Docker cells, the orchestrator sets:</p>
 <div class="highlight"><pre><span></span><code>NORFAB_TEST_INVENTORY=/cell/inventory/inventory.yaml

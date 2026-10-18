@@ -7913,10 +7913,10 @@
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">worker</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">worker</span> <span class="o">=</span> <span class="n">worker</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">connections_idle_timeout</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-        <span class="s2">&quot;connections_idle_timeout&quot;</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="s2">"connections_idle_timeout"</span><span class="p">,</span> <span class="kc">None</span>
     <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_recovery_timeout</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-        <span class="s2">&quot;failed_hosts_recovery_timeout&quot;</span><span class="p">,</span> <span class="mi">60</span>
+        <span class="s2">"failed_hosts_recovery_timeout"</span><span class="p">,</span> <span class="mi">60</span>
     <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">connections_data</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># store connections use timestamps</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_data</span> <span class="o">=</span> <span class="p">{}</span>
@@ -7983,21 +7983,21 @@
 <span class="normal">130</span>
 <span class="normal">131</span>
 <span class="normal">132</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return Nornir-specific values for the worker monitoring snapshot.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return Nornir-specific values for the worker monitoring snapshot."""</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;dead_connections_cleaned&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dead_connections_cleaned</span><span class="p">,</span>
-        <span class="s2">&quot;idle_connections_cleaned&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">idle_connections_cleaned</span><span class="p">,</span>
-        <span class="s2">&quot;failed_hosts_recovered&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_recovered</span><span class="p">,</span>
-        <span class="s2">&quot;errdisabled_hosts&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">nr</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">failed_hosts</span><span class="p">),</span>
-        <span class="s2">&quot;nornir_hosts&quot;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s2">"dead_connections_cleaned"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dead_connections_cleaned</span><span class="p">,</span>
+        <span class="s2">"idle_connections_cleaned"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">idle_connections_cleaned</span><span class="p">,</span>
+        <span class="s2">"failed_hosts_recovered"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_recovered</span><span class="p">,</span>
+        <span class="s2">"errdisabled_hosts"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">nr</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">failed_hosts</span><span class="p">),</span>
+        <span class="s2">"nornir_hosts"</span><span class="p">:</span> <span class="p">(</span>
             <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">nr</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hosts</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">nr</span> <span class="k">else</span> <span class="mi">0</span>
         <span class="p">),</span>
-        <span class="s2">&quot;sid_inventory_status&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sid_inventory_status&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;netbox_inventory_status&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-            <span class="s2">&quot;netbox_inventory_status&quot;</span>
+        <span class="s2">"sid_inventory_status"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sid_inventory_status"</span><span class="p">),</span>
+        <span class="s2">"netbox_inventory_status"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">"netbox_inventory_status"</span>
         <span class="p">),</span>
-        <span class="s2">&quot;containerlab_inventory_status&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-            <span class="s2">&quot;containerlab_inventory_status&quot;</span>
+        <span class="s2">"containerlab_inventory_status"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">"containerlab_inventory_status"</span>
         <span class="p">),</span>
     <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
@@ -8066,20 +8066,20 @@
 <span class="normal">147</span>
 <span class="normal">148</span>
 <span class="normal">149</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Returns the configuration settings for the worker.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Dict: A dictionary containing the configuration settings:</span>
 
-<span class="sd">            - &quot;watchdog_interval&quot; (int): The interval for the watchdog timer.</span>
-<span class="sd">            - &quot;connections_idle_timeout&quot; (int): The timeout for idle connections.</span>
-<span class="sd">            - &quot;failed_hosts_recovery_timeout&quot; (int): The failed-host timeout.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">            - "watchdog_interval" (int): The interval for the watchdog timer.</span>
+<span class="sd">            - "connections_idle_timeout" (int): The timeout for idle connections.</span>
+<span class="sd">            - "failed_hosts_recovery_timeout" (int): The failed-host timeout.</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;watchdog_interval&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">watchdog_interval</span><span class="p">,</span>
-        <span class="s2">&quot;connections_idle_timeout&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_idle_timeout</span><span class="p">,</span>
-        <span class="s2">&quot;failed_hosts_recovery_timeout&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_recovery_timeout</span><span class="p">,</span>
+        <span class="s2">"watchdog_interval"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">watchdog_interval</span><span class="p">,</span>
+        <span class="s2">"connections_idle_timeout"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_idle_timeout</span><span class="p">,</span>
+        <span class="s2">"failed_hosts_recovery_timeout"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_recovery_timeout</span><span class="p">,</span>
     <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8126,15 +8126,15 @@
 <span class="normal">171</span>
 <span class="normal">172</span>
 <span class="normal">173</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">failed_hosts_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Track when hosts enter Nornir&#39;s shared failed-host state.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Track when hosts enter Nornir's shared failed-host state."""</span>
     <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">failed_results</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s2">&quot;failed_hosts&quot;</span><span class="p">,</span> <span class="p">{})</span> <span class="k">if</span> <span class="n">result</span> <span class="k">else</span> <span class="p">{}</span>
+    <span class="n">failed_results</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s2">"failed_hosts"</span><span class="p">,</span> <span class="p">{})</span> <span class="k">if</span> <span class="n">result</span> <span class="k">else</span> <span class="p">{}</span>
 
     <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_lock</span><span class="p">:</span>
         <span class="n">failed_hosts</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">nr</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">failed_hosts</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">host_name</span> <span class="ow">in</span> <span class="n">failed_hosts</span><span class="p">:</span>
             <span class="n">host_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_data</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
-                <span class="n">host_name</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;errdisabled_at&quot;</span><span class="p">:</span> <span class="n">now</span><span class="p">}</span>
+                <span class="n">host_name</span><span class="p">,</span> <span class="p">{</span><span class="s2">"errdisabled_at"</span><span class="p">:</span> <span class="n">now</span><span class="p">}</span>
             <span class="p">)</span>
             <span class="n">host_result</span> <span class="o">=</span> <span class="n">failed_results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">host_name</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">host_result</span><span class="p">:</span>
@@ -8143,7 +8143,7 @@
                         <span class="k">continue</span>
                     <span class="n">reason</span> <span class="o">=</span> <span class="n">task_result</span><span class="o">.</span><span class="n">exception</span> <span class="ow">or</span> <span class="n">task_result</span><span class="o">.</span><span class="n">result</span>
                     <span class="k">if</span> <span class="n">reason</span><span class="p">:</span>
-                        <span class="n">host_data</span><span class="p">[</span><span class="s2">&quot;reason&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">reason</span><span class="p">)</span>
+                        <span class="n">host_data</span><span class="p">[</span><span class="s2">"reason"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">reason</span><span class="p">)</span>
                     <span class="k">break</span>
 
         <span class="k">for</span> <span class="n">host_name</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_data</span><span class="p">)</span> <span class="o">-</span> <span class="n">failed_hosts</span><span class="p">:</span>
@@ -8191,24 +8191,24 @@
 <span class="normal">193</span>
 <span class="normal">194</span>
 <span class="normal">195</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">failed_hosts_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return tracked failed hosts and their remaining recovery time.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return tracked failed hosts and their remaining recovery time."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_update</span><span class="p">()</span>
     <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
     <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_lock</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">host_name</span><span class="p">,</span> <span class="n">host_data</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_data</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
-            <span class="n">age</span> <span class="o">=</span> <span class="n">now</span> <span class="o">-</span> <span class="n">host_data</span><span class="p">[</span><span class="s2">&quot;errdisabled_at&quot;</span><span class="p">]</span>
+            <span class="n">age</span> <span class="o">=</span> <span class="n">now</span> <span class="o">-</span> <span class="n">host_data</span><span class="p">[</span><span class="s2">"errdisabled_at"</span><span class="p">]</span>
             <span class="n">recovery_time_left</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
                 <span class="mi">0</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_recovery_timeout</span> <span class="o">-</span> <span class="n">age</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="n">item</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="n">host_name</span><span class="p">,</span>
-                <span class="s2">&quot;errdisabled_at&quot;</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">(</span><span class="n">host_data</span><span class="p">[</span><span class="s2">&quot;errdisabled_at&quot;</span><span class="p">]),</span>
-                <span class="s2">&quot;recovery_time_left&quot;</span><span class="p">:</span> <span class="n">recovery_time_left</span><span class="p">,</span>
+                <span class="s2">"host"</span><span class="p">:</span> <span class="n">host_name</span><span class="p">,</span>
+                <span class="s2">"errdisabled_at"</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">(</span><span class="n">host_data</span><span class="p">[</span><span class="s2">"errdisabled_at"</span><span class="p">]),</span>
+                <span class="s2">"recovery_time_left"</span><span class="p">:</span> <span class="n">recovery_time_left</span><span class="p">,</span>
             <span class="p">}</span>
-            <span class="k">if</span> <span class="n">host_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;reason&quot;</span><span class="p">):</span>
-                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;reason&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">host_data</span><span class="p">[</span><span class="s2">&quot;reason&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">host_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"reason"</span><span class="p">):</span>
+                <span class="n">item</span><span class="p">[</span><span class="s2">"reason"</span><span class="p">]</span> <span class="o">=</span> <span class="n">host_data</span><span class="p">[</span><span class="s2">"reason"</span><span class="p">]</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
@@ -8241,7 +8241,7 @@
 <span class="normal">202</span>
 <span class="normal">203</span>
 <span class="normal">204</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">failed_hosts_clear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recover all hosts currently marked as failed by Nornir.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Recover all hosts currently marked as failed by Nornir."""</span>
     <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_lock</span><span class="p">:</span>
         <span class="n">recovered</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">nr</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">failed_hosts</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">nr</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">reset_failed_hosts</span><span class="p">()</span>
@@ -8289,14 +8289,14 @@
 <span class="normal">222</span>
 <span class="normal">223</span>
 <span class="normal">224</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">failed_hosts_recover</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recover hosts after the configured errdisabled timeout expires.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Recover hosts after the configured errdisabled timeout expires."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_update</span><span class="p">()</span>
     <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
     <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_lock</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">host_name</span><span class="p">,</span> <span class="n">host_data</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_data</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
             <span class="k">if</span> <span class="p">(</span>
-                <span class="n">now</span> <span class="o">-</span> <span class="n">host_data</span><span class="p">[</span><span class="s2">&quot;errdisabled_at&quot;</span><span class="p">]</span>
+                <span class="n">now</span> <span class="o">-</span> <span class="n">host_data</span><span class="p">[</span><span class="s2">"errdisabled_at"</span><span class="p">]</span>
                 <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_recovery_timeout</span>
             <span class="p">):</span>
                 <span class="k">continue</span>
@@ -8304,8 +8304,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">host_name</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">failed_hosts_recovered</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> watchdog, recovered errdisabled host &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">host_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> watchdog, recovered errdisabled host "</span>
+                <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">host_name</span><span class="si">}</span><span class="s2">'"</span>
             <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8362,14 +8362,14 @@
 <span class="normal">233</span>
 <span class="normal">234</span>
 <span class="normal">235</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">connections_get</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve the current connections data.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Dict: A dictionary containing the current connections data.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;connections&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_data</span><span class="p">,</span>
+        <span class="s2">"connections"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_data</span><span class="p">,</span>
     <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8460,24 +8460,24 @@
 <span class="normal">254</span>
 <span class="normal">255</span>
 <span class="normal">256</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">connections_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nr</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Update connection use timestamps while the caller holds connections_lock.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        nr: Nornir object</span>
 <span class="sd">        plugin: connection plugin name</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">conn_stats</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;last_use&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="s2">&quot;last_keepalive&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="s2">&quot;keepalive_count&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">"last_use"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">"last_keepalive"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">"keepalive_count"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="k">for</span> <span class="n">host_name</span> <span class="ow">in</span> <span class="n">nr</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hosts</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">connections_data</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">host_name</span><span class="p">,</span> <span class="p">{})</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">connections_data</span><span class="p">[</span><span class="n">host_name</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="n">conn_stats</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">connections_data</span><span class="p">[</span><span class="n">host_name</span><span class="p">][</span><span class="n">plugin</span><span class="p">][</span><span class="s2">&quot;last_use&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connections_data</span><span class="p">[</span><span class="n">host_name</span><span class="p">][</span><span class="n">plugin</span><span class="p">][</span><span class="s2">"last_use"</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">()</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - updated connections use timestamps for &#39;</span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - updated connections use timestamps for '</span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8601,7 +8601,7 @@ connections data. It logs the disconnection actions and updates the
 <span class="normal">320</span>
 <span class="normal">321</span>
 <span class="normal">322</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">connections_clean</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Cleans up idle connections based on the configured idle timeout.</span>
 
 <span class="sd">    This method checks for connections that have been idle for longer than the</span>
@@ -8619,23 +8619,23 @@ connections data. It logs the disconnection actions and updates the
 
 <span class="sd">    Raises:</span>
 <span class="sd">        Exception: If an error occurs while attempting to disconnect idle connections, an error message is logged.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># dictionary keyed by plugin name and value as a list of hosts</span>
     <span class="n">disconnect</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connections_lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">(</span><span class="n">blocking</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">return</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># if idle timeout not set, connections don&#39;t age out</span>
+        <span class="c1"># if idle timeout not set, connections don't age out</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_idle_timeout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">disconnect</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="c1"># disconnect all connections for all hosts</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_idle_timeout</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">disconnect</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;all&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connections_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())}</span>
+            <span class="n">disconnect</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"all"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connections_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())}</span>
         <span class="c1"># only disconnect aged/idle connections</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_idle_timeout</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">host_name</span><span class="p">,</span> <span class="n">plugins</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">for</span> <span class="n">plugin</span><span class="p">,</span> <span class="n">conn_data</span> <span class="ow">in</span> <span class="n">plugins</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="n">last_use</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">mktime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">conn_data</span><span class="p">[</span><span class="s2">&quot;last_use&quot;</span><span class="p">]))</span>
+                    <span class="n">last_use</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">mktime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">conn_data</span><span class="p">[</span><span class="s2">"last_use"</span><span class="p">]))</span>
                     <span class="n">age</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">last_use</span>
                     <span class="k">if</span> <span class="n">age</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_idle_timeout</span><span class="p">:</span>
                         <span class="n">disconnect</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="p">[])</span>
@@ -8645,23 +8645,23 @@ connections data. It logs the disconnection actions and updates the
             <span class="k">if</span> <span class="ow">not</span> <span class="n">hosts</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="n">aged_hosts</span> <span class="o">=</span> <span class="n">FFun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">nr</span><span class="p">,</span> <span class="n">FL</span><span class="o">=</span><span class="n">hosts</span><span class="p">)</span>
-            <span class="n">aged_hosts</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">nr_connections</span><span class="p">,</span> <span class="n">call</span><span class="o">=</span><span class="s2">&quot;close&quot;</span><span class="p">,</span> <span class="n">conn_name</span><span class="o">=</span><span class="n">plugin</span><span class="p">)</span>
+            <span class="n">aged_hosts</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">nr_connections</span><span class="p">,</span> <span class="n">call</span><span class="o">=</span><span class="s2">"close"</span><span class="p">,</span> <span class="n">conn_name</span><span class="o">=</span><span class="n">plugin</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> watchdog, disconnected &#39;</span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;connections for &#39;</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">hosts</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> watchdog, disconnected '</span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2">' "</span>
+                <span class="sa">f</span><span class="s2">"connections for '</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">hosts</span><span class="p">)</span><span class="si">}</span><span class="s2">'"</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">idle_connections_cleaned</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">hosts</span><span class="p">)</span>
             <span class="c1"># wipe out connections data if all connection closed</span>
-            <span class="k">if</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">"all"</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">connections_data</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="k">break</span>
-            <span class="c1"># remove disconnected plugin from host&#39;s connections_data</span>
+            <span class="c1"># remove disconnected plugin from host's connections_data</span>
             <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">hosts</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">connections_data</span><span class="p">[</span><span class="n">host</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">plugin</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_data</span><span class="p">[</span><span class="n">host</span><span class="p">]:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">connections_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - watchdog failed to close idle connections, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - watchdog failed to close idle connections, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">finally</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connections_lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
@@ -8775,7 +8775,7 @@ connections data. It logs the disconnection actions and updates the
 <span class="normal">374</span>
 <span class="normal">375</span>
 <span class="normal">376</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">connections_keepalive</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Keepalive connections and clean up dead connections if any.</span>
 
 <span class="sd">    This method performs the following tasks:</span>
@@ -8792,15 +8792,15 @@ connections data. It logs the disconnection actions and updates the
 
 <span class="sd">    Raises:</span>
 <span class="sd">        Exception: If an error occurs during the keepalive process, it is logged as an error.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_idle_timeout</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># do not keepalive if idle is 0</span>
         <span class="k">return</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connections_lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">(</span><span class="n">blocking</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">return</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - watchdog running connections keepalive&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - watchdog running connections keepalive"</span><span class="p">)</span>
         <span class="n">stats</span> <span class="o">=</span> <span class="n">HostsKeepalive</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">nr</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dead_connections_cleaned</span> <span class="o">+=</span> <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;dead_connections_cleaned&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dead_connections_cleaned</span> <span class="o">+=</span> <span class="n">stats</span><span class="p">[</span><span class="s2">"dead_connections_cleaned"</span><span class="p">]</span>
         <span class="c1"># remove connections that are no longer present in Nornir inventory</span>
         <span class="k">for</span> <span class="n">host_name</span><span class="p">,</span> <span class="n">host_connections</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connections_data</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
             <span class="c1"># check if host is still in Nornir inventory</span>
@@ -8820,10 +8820,10 @@ connections data. It logs the disconnection actions and updates the
         <span class="c1"># update connections statistics</span>
         <span class="k">for</span> <span class="n">plugins</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_data</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">plugins</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-                <span class="n">plugin</span><span class="p">[</span><span class="s2">&quot;last_keepalive&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">()</span>
-                <span class="n">plugin</span><span class="p">[</span><span class="s2">&quot;keepalive_count&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">plugin</span><span class="p">[</span><span class="s2">"last_keepalive"</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">()</span>
+                <span class="n">plugin</span><span class="p">[</span><span class="s2">"keepalive_count"</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - watchdog HostsKeepalive check error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - watchdog HostsKeepalive check error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">finally</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connections_lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
@@ -9096,11 +9096,11 @@ connections data. It logs the disconnection actions and updates the
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">inventory</span><span class="p">,</span> <span class="n">broker</span><span class="p">,</span> <span class="n">SERVICE</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">exit_event</span><span class="p">,</span> <span class="n">log_level</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">init_done_event</span> <span class="o">=</span> <span class="n">init_done_event</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">tf_base_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">&quot;tf&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tf_base_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">"tf"</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
         <span class="p">{</span>
-            <span class="s2">&quot;netbox_inventory_status&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="s2">&quot;containerlab_inventory_status&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">"netbox_inventory_status"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">"containerlab_inventory_status"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">)</span>
 
@@ -9116,13 +9116,13 @@ connections data. It logs the disconnection actions and updates the
         <span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
     <span class="c1"># run startup hooks</span>
-    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hooks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nornir-startup&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-        <span class="n">f</span><span class="p">[</span><span class="s2">&quot;function&quot;</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;args&quot;</span><span class="p">,</span> <span class="p">[]),</span> <span class="o">**</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;kwargs&quot;</span><span class="p">,</span> <span class="p">{}))</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hooks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"nornir-startup"</span><span class="p">,</span> <span class="p">[]):</span>
+        <span class="n">f</span><span class="p">[</span><span class="s2">"function"</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"args"</span><span class="p">,</span> <span class="p">[]),</span> <span class="o">**</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kwargs"</span><span class="p">,</span> <span class="p">{}))</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_done_event</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">init_done_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
 
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Started&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Started"</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -9174,19 +9174,19 @@ and keyword arguments specified in the hook.</p>
 <span class="normal">466</span>
 <span class="normal">467</span>
 <span class="normal">468</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">worker_exit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Executes all functions registered under the &quot;nornir-exit&quot; hook in the inventory.</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Executes all functions registered under the "nornir-exit" hook in the inventory.</span>
 
-<span class="sd">    This method iterates through the list of hooks associated with the &quot;nornir-exit&quot;</span>
-<span class="sd">    key in the inventory&#39;s hooks.</span>
+<span class="sd">    This method iterates through the list of hooks associated with the "nornir-exit"</span>
+<span class="sd">    key in the inventory's hooks.</span>
 
 <span class="sd">    For each hook, it calls the function specified in the hook, passing the current</span>
 <span class="sd">    instance (`self`) as the first argument, followed by any additional positional</span>
 <span class="sd">    and keyword arguments specified in the hook.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># run exit hooks</span>
-    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hooks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nornir-exit&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-        <span class="n">f</span><span class="p">[</span><span class="s2">&quot;function&quot;</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;args&quot;</span><span class="p">,</span> <span class="p">[]),</span> <span class="o">**</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;kwargs&quot;</span><span class="p">,</span> <span class="p">{}))</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hooks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"nornir-exit"</span><span class="p">,</span> <span class="p">[]):</span>
+        <span class="n">f</span><span class="p">[</span><span class="s2">"function"</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"args"</span><span class="p">,</span> <span class="p">[]),</span> <span class="o">**</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kwargs"</span><span class="p">,</span> <span class="p">{}))</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -9273,7 +9273,7 @@ configuration for logging, runner, hosts, groups, defaults, and user-defined set
 <span class="normal">497</span>
 <span class="normal">498</span>
 <span class="normal">499</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">init_nornir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inventory</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Initializes the Nornir automation framework with the provided inventory.</span>
 
 <span class="sd">    This method first closes any existing Nornir connections if present, optionally emitting a progress event.</span>
@@ -9282,7 +9282,7 @@ configuration for logging, runner, hosts, groups, defaults, and user-defined set
 
 <span class="sd">    Args:</span>
 <span class="sd">        inventory (dict): A dictionary containing Nornir inventory and configuration options.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># clean up existing Nornir instance</span>
     <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_lock</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hosts</span><span class="p">:</span>
@@ -9290,17 +9290,17 @@ configuration for logging, runner, hosts, groups, defaults, and user-defined set
 
         <span class="c1"># initiate Nornir</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nr</span> <span class="o">=</span> <span class="n">InitNornir</span><span class="p">(</span>
-            <span class="n">logging</span><span class="o">=</span><span class="n">inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;logging&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}),</span>
-            <span class="n">runner</span><span class="o">=</span><span class="n">inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;runner&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="n">logging</span><span class="o">=</span><span class="n">inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"logging"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"enabled"</span><span class="p">:</span> <span class="kc">False</span><span class="p">}),</span>
+            <span class="n">runner</span><span class="o">=</span><span class="n">inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"runner"</span><span class="p">,</span> <span class="p">{}),</span>
             <span class="n">inventory</span><span class="o">=</span><span class="p">{</span>
-                <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;DictInventory&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;hosts&quot;</span><span class="p">:</span> <span class="n">inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hosts&quot;</span><span class="p">,</span> <span class="p">{}),</span>
-                    <span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="n">inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;groups&quot;</span><span class="p">,</span> <span class="p">{}),</span>
-                    <span class="s2">&quot;defaults&quot;</span><span class="p">:</span> <span class="n">inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;defaults&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+                <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"DictInventory"</span><span class="p">,</span>
+                <span class="s2">"options"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">"hosts"</span><span class="p">:</span> <span class="n">inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"hosts"</span><span class="p">,</span> <span class="p">{}),</span>
+                    <span class="s2">"groups"</span><span class="p">:</span> <span class="n">inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"groups"</span><span class="p">,</span> <span class="p">{}),</span>
+                    <span class="s2">"defaults"</span><span class="p">:</span> <span class="n">inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"defaults"</span><span class="p">,</span> <span class="p">{}),</span>
                 <span class="p">},</span>
             <span class="p">},</span>
-            <span class="n">user_defined</span><span class="o">=</span><span class="n">inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user_defined&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="n">user_defined</span><span class="o">=</span><span class="n">inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"user_defined"</span><span class="p">,</span> <span class="p">{}),</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -9377,16 +9377,16 @@ configuration for logging, runner, hosts, groups, defaults, and user-defined set
 <span class="normal">527</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_hosts_and_validate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">ret</span><span class="p">:</span> <span class="n">Result</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Result</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Helper method to filter hosts and validate results.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        tuple: (filtered_nornir, Result) where Result status set to</span>
 <span class="sd">            `no_match` if no hosts matched.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;reset_failed_hosts_before_task&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"reset_failed_hosts_before_task"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nr</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">reset_failed_hosts</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;watchdog&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"watchdog"</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="o">.</span><span class="n">failed_hosts_update</span><span class="p">()</span>
 
     <span class="n">filters</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">FFun_functions</span><span class="p">}</span>
@@ -9394,11 +9394,11 @@ configuration for logging, runner, hosts, groups, defaults, and user-defined set
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">filtered_nornir</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hosts</span><span class="p">:</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - nothing to do, no hosts matched by filters &#39;</span><span class="si">{</span><span class="n">filters</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - nothing to do, no hosts matched by filters '</span><span class="si">{</span><span class="n">filters</span><span class="si">}</span><span class="s2">'"</span>
         <span class="p">)</span>
         <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;no_match&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"no_match"</span>
 
     <span class="k">return</span> <span class="n">filtered_nornir</span><span class="p">,</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
@@ -9428,7 +9428,7 @@ configuration for logging, runner, hosts, groups, defaults, and user-defined set
 <span class="normal">531</span>
 <span class="normal">532</span>
 <span class="normal">533</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_nornir_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ret</span><span class="p">:</span> <span class="n">Result</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Track failed hosts and add executed and failed hosts to the result.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Track failed hosts and add executed and failed hosts to the result."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="o">.</span><span class="n">failed_hosts_update</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">resources</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">failed_hosts</span><span class="p">)</span>
@@ -9531,7 +9531,7 @@ configuration for logging, runner, hosts, groups, defaults, and user-defined set
 <span class="normal">702</span>
 <span class="normal">703</span>
 <span class="normal">704</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_job_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Helper function to download job data YAML files and load it.</span>
 
 <span class="sd">    Args:</span>
@@ -9542,11 +9542,11 @@ configuration for logging, runner, hosts, groups, defaults, and user-defined set
 
 <span class="sd">    Raises:</span>
 <span class="sd">        FileNotFoundError: If the job data is a URL and the file download fails.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">job_data</span><span class="p">):</span>
         <span class="n">job_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">job_data</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">job_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - &#39;</span><span class="si">{</span><span class="n">job_data</span><span class="si">}</span><span class="s2">&#39; job data file download failed&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - '</span><span class="si">{</span><span class="n">job_data</span><span class="si">}</span><span class="s2">' job data file download failed"</span>
             <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">job_data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">job_data</span><span class="p">)</span>
 
@@ -9664,7 +9664,7 @@ each address will include the prefix length.</p>
 <span class="normal">726</span>
 <span class="normal">727</span>
 <span class="normal">728</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">jinja2_network_hosts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pfxlen</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Custom Jinja2 filter that return a list of hosts for a given IP network.</span>
 
 <span class="sd">    Args:</span>
@@ -9675,12 +9675,12 @@ each address will include the prefix length.</p>
 <span class="sd">    Returns:</span>
 <span class="sd">        list: A list of host addresses as strings. If pfxlen is True,</span>
 <span class="sd">            each address will include the prefix length.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">ip_interface</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="n">network</span><span class="p">)</span>
     <span class="n">prefixlen</span> <span class="o">=</span> <span class="n">ip_interface</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">prefixlen</span>
     <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="n">ip_interface</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">hosts</span><span class="p">():</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ip</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">pfxlen</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ip</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">pfxlen</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -9729,25 +9729,25 @@ prefix using Netbox service.</p>
 <span class="normal">751</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">jinja2_nb_create_ip</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">interface</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Jinja2 filter to get or create next available IP address from</span>
 <span class="sd">    prefix using Netbox service.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix</span>
-    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">device</span>
-    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface</span>
+<span class="sd">    """</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">"prefix"</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">"device"</span><span class="p">]</span> <span class="o">=</span> <span class="n">device</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">"interface"</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface</span>
     <span class="n">reply</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;create_ip&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"create_ip"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1"># reply is a dict of {worker_name: results_dict}</span>
     <span class="n">res</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">reply</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;errors&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;messages&quot;</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">][</span><span class="s2">&quot;address&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">res</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">"errors"</span><span class="p">]</span> <span class="ow">or</span> <span class="n">res</span><span class="p">[</span><span class="s2">"messages"</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">res</span><span class="p">[</span><span class="s2">"result"</span><span class="p">][</span><span class="s2">"address"</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -9796,26 +9796,26 @@ parent prefix using Netbox service.</p>
 <span class="normal">775</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">jinja2_nb_create_prefix</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefixlen</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Jinja2 filter to get or create next available prefix from</span>
 <span class="sd">    parent prefix using Netbox service.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent</span>
-    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">description</span>
-    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;prefixlen&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefixlen</span>
+<span class="sd">    """</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">"parent"</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">"description"</span><span class="p">]</span> <span class="o">=</span> <span class="n">description</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">"prefixlen"</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefixlen</span>
     <span class="n">reply</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;create_prefix&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"create_prefix"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1"># reply is a dict of {worker_name: results_dict}</span>
     <span class="n">res</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">reply</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;errors&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;messages&quot;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">res</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">"errors"</span><span class="p">]</span> <span class="ow">or</span> <span class="n">res</span><span class="p">[</span><span class="s2">"messages"</span><span class="p">])</span>
 
-    <span class="k">return</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">][</span><span class="s2">&quot;prefix&quot;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">res</span><span class="p">[</span><span class="s2">"result"</span><span class="p">][</span><span class="s2">"prefix"</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -9863,26 +9863,26 @@ parent prefix using Netbox service.</p>
 <span class="normal">799</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">jinja2_nb_filter</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">object_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fields</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">filters</span><span class="p">:</span> <span class="nb">object</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Jinja2 helper to filter objects from NetBox.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">reply</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;crud_read&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"crud_read"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;object_type&quot;</span><span class="p">:</span> <span class="n">object_type</span><span class="p">,</span>
-            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
-            <span class="s2">&quot;fields&quot;</span><span class="p">:</span> <span class="n">fields</span><span class="p">,</span>
+            <span class="s2">"object_type"</span><span class="p">:</span> <span class="n">object_type</span><span class="p">,</span>
+            <span class="s2">"filters"</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
+            <span class="s2">"fields"</span><span class="p">:</span> <span class="n">fields</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1"># reply is a dict of {worker_name: results_dict}</span>
     <span class="n">res</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">reply</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;errors&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;messages&quot;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">res</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">"errors"</span><span class="p">]</span> <span class="ow">or</span> <span class="n">res</span><span class="p">[</span><span class="s2">"messages"</span><span class="p">])</span>
 
-    <span class="k">return</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">][</span><span class="s2">&quot;results&quot;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">res</span><span class="p">[</span><span class="s2">"result"</span><span class="p">][</span><span class="s2">"results"</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -9933,31 +9933,31 @@ parent prefix using Netbox service.</p>
 <span class="normal">826</span>
 <span class="normal">827</span>
 <span class="normal">828</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">jinja2_call_netbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">netbox_task</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">callable</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Returns a callable function to execute arbitrary NetBox service task.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">call_netbox</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="n">reply</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-            <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+            <span class="s2">"netbox"</span><span class="p">,</span>
             <span class="n">netbox_task</span><span class="p">,</span>
             <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
             <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
-            <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+            <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
             <span class="n">timeout</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">res</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">reply</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># check if has an error</span>
-        <span class="k">if</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;errors&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;messages&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">res</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">"errors"</span><span class="p">]</span> <span class="ow">or</span> <span class="n">res</span><span class="p">[</span><span class="s2">"messages"</span><span class="p">])</span>
 
         <span class="c1"># return result for single host only</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;devices&quot;</span><span class="p">,</span> <span class="p">[]))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">][</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;devices&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"devices"</span><span class="p">,</span> <span class="p">[]))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">res</span><span class="p">[</span><span class="s2">"result"</span><span class="p">][</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">"devices"</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
         <span class="c1"># return full results</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">res</span><span class="p">[</span><span class="s2">"result"</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">call_netbox</span>
 </code></pre></div></td></tr></table></div>
@@ -9999,20 +9999,20 @@ for the ease of use within Jinja2 templates.</p>
 <span class="normal">843</span>
 <span class="normal">844</span>
 <span class="normal">845</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_jinja2_netbox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Aggregates Jinja2 NetBox-related methods and functions into a dictionary</span>
 <span class="sd">    for the ease of use within Jinja2 templates.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;get_connections&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_call_netbox</span><span class="p">(</span><span class="s2">&quot;get_connections&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;get_interfaces&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_call_netbox</span><span class="p">(</span><span class="s2">&quot;get_interfaces&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;get_circuits&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_call_netbox</span><span class="p">(</span><span class="s2">&quot;get_circuits&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;get_devices&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_call_netbox</span><span class="p">(</span><span class="s2">&quot;get_devices&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;filter&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_nb_filter</span><span class="p">,</span>
-        <span class="s2">&quot;rest&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_call_netbox</span><span class="p">(</span><span class="s2">&quot;rest&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;graphql&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_call_netbox</span><span class="p">(</span><span class="s2">&quot;graphql&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;create_ip&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_nb_create_ip</span><span class="p">,</span>
-        <span class="s2">&quot;create_prefix&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_nb_create_prefix</span><span class="p">,</span>
+        <span class="s2">"get_connections"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_call_netbox</span><span class="p">(</span><span class="s2">"get_connections"</span><span class="p">),</span>
+        <span class="s2">"get_interfaces"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_call_netbox</span><span class="p">(</span><span class="s2">"get_interfaces"</span><span class="p">),</span>
+        <span class="s2">"get_circuits"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_call_netbox</span><span class="p">(</span><span class="s2">"get_circuits"</span><span class="p">),</span>
+        <span class="s2">"get_devices"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_call_netbox</span><span class="p">(</span><span class="s2">"get_devices"</span><span class="p">),</span>
+        <span class="s2">"filter"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_nb_filter</span><span class="p">,</span>
+        <span class="s2">"rest"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_call_netbox</span><span class="p">(</span><span class="s2">"rest"</span><span class="p">),</span>
+        <span class="s2">"graphql"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_call_netbox</span><span class="p">(</span><span class="s2">"graphql"</span><span class="p">),</span>
+        <span class="s2">"create_ip"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_nb_create_ip</span><span class="p">,</span>
+        <span class="s2">"create_prefix"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_nb_create_prefix</span><span class="p">,</span>
     <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -10082,21 +10082,21 @@ and the values are the corresponding filter functions.</p>
 <span class="normal">861</span>
 <span class="normal">862</span>
 <span class="normal">863</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_jinja2_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Adds custom filters for use in Jinja2 templates using `|` syntaxis.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict (Dict): A dictionary where the keys are the names of the filters</span>
 <span class="sd">            and the values are the corresponding filter functions.</span>
 
-<span class="sd">            - &quot;nb_create_ip&quot;: Method to get the next IP address.</span>
-<span class="sd">            - &quot;nb_create_prefix&quot;: Method to get next available prefix.</span>
-<span class="sd">            - &quot;network_hosts&quot;: Method to get IP network hosts.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">            - "nb_create_ip": Method to get the next IP address.</span>
+<span class="sd">            - "nb_create_prefix": Method to get next available prefix.</span>
+<span class="sd">            - "network_hosts": Method to get IP network hosts.</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;netbox.create_ip&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_nb_create_ip</span><span class="p">,</span>
-        <span class="s2">&quot;netbox.create_prefix&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_nb_create_prefix</span><span class="p">,</span>
-        <span class="s2">&quot;network_hosts&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_network_hosts</span><span class="p">,</span>
+        <span class="s2">"netbox.create_ip"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_nb_create_ip</span><span class="p">,</span>
+        <span class="s2">"netbox.create_prefix"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_nb_create_prefix</span><span class="p">,</span>
+        <span class="s2">"network_hosts"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_network_hosts</span><span class="p">,</span>
     <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -10221,21 +10221,21 @@ an empty string.</p>
 <span class="normal">938</span>
 <span class="normal">939</span>
 <span class="normal">940</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetVersionInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetVersionResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Version&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Version"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve the versions of various libraries and system information.</span>
 
 <span class="sd">    This method collects the version information of a predefined set of libraries</span>
@@ -10247,42 +10247,42 @@ an empty string.</p>
 <span class="sd">        dict: a dictionary with the library names as keys and their respective</span>
 <span class="sd">            version numbers as values. If a library is not found, its value will be</span>
 <span class="sd">            an empty string.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">libs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;norfab&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;scrapli&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;scrapli-netconf&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;scrapli-community&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;paramiko&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;netmiko&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;napalm&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;nornir&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ncclient&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;nornir-netmiko&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;nornir-napalm&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;nornir-scrapli&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;nornir-utils&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;tabulate&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;xmltodict&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;puresnmp&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;pygnmi&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;pyyaml&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;jmespath&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;jinja2&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ttp&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;nornir-salt&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;lxml&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ttp-templates&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ntc-templates&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;cerberus&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;pydantic&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;requests&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;textfsm&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;N2G&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;dnspython&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;pythonping&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;python&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
-        <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
+        <span class="s2">"norfab"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"scrapli"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"scrapli-netconf"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"scrapli-community"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"paramiko"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"netmiko"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"napalm"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"nornir"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"ncclient"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"nornir-netmiko"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"nornir-napalm"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"nornir-scrapli"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"nornir-utils"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"tabulate"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"xmltodict"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"puresnmp"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"pygnmi"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"pyyaml"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"jmespath"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"jinja2"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"ttp"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"nornir-salt"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"lxml"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"ttp-templates"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"ntc-templates"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"cerberus"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"pydantic"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"requests"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"textfsm"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"N2G"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"dnspython"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"pythonping"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"python"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">" "</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s2">"platform"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="c1"># get version of packages installed</span>
     <span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="n">libs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -10361,27 +10361,27 @@ watchdog connections.</p>
 <span class="normal">962</span>
 <span class="normal">963</span>
 <span class="normal">964</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetWatchdogConnectionsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetWatchdogConnectionsResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Watchdog Connections&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Watchdog Connections"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_watchdog_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve the list of connections currently managed by watchdog.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: An instance of the Result class containing the current</span>
 <span class="sd">            watchdog connections.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="o">.</span><span class="n">connections_get</span><span class="p">())</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -10425,23 +10425,23 @@ watchdog connections.</p>
 <span class="normal">983</span>
 <span class="normal">984</span>
 <span class="normal">985</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">ErrdisabledHostsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">ErrdisabledHostsListResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;List Errdisabled Hosts&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"List Errdisabled Hosts"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">errdisabled_hosts_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;List hosts currently held in Nornir&#39;s failed-host state.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""List hosts currently held in Nornir's failed-host state."""</span>
     <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:errdisabled_hosts_list&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:errdisabled_hosts_list"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="o">.</span><span class="n">failed_hosts_list</span><span class="p">(),</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -10486,23 +10486,23 @@ watchdog connections.</p>
 <span class="normal">1004</span>
 <span class="normal">1005</span>
 <span class="normal">1006</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">ErrdisabledHostsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">ErrdisabledHostsClearResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Recover Errdisabled Hosts&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Recover Errdisabled Hosts"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">errdisabled_hosts_clear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recover all hosts currently held in Nornir&#39;s failed-host state.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Recover all hosts currently held in Nornir's failed-host state."""</span>
     <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:errdisabled_hosts_clear&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:errdisabled_hosts_clear"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="o">.</span><span class="n">failed_hosts_clear</span><span class="p">(),</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -10635,16 +10635,16 @@ watchdog connections.</p>
 <span class="normal">1073</span>
 <span class="normal">1074</span>
 <span class="normal">1075</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">RefreshNornirInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">RefreshNornirResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Refresh Nornir Inventory&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Refresh Nornir Inventory"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -10652,7 +10652,7 @@ watchdog connections.</p>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Refreshes the Nornir instance by reloading the inventory from configured sources.</span>
 
 <span class="sd">    This method performs the following steps:</span>
@@ -10666,40 +10666,40 @@ watchdog connections.</p>
 
 <span class="sd">    The inventory configuration is expected to be a dictionary with the following keys:</span>
 
-<span class="sd">    - &quot;logging&quot;: A dictionary specifying logging configuration (default: {&quot;enabled&quot;: False}).</span>
-<span class="sd">    - &quot;runner&quot;: A dictionary specifying runner options (default: {}).</span>
-<span class="sd">    - &quot;hosts&quot;: A dictionary specifying host details (default: {}).</span>
-<span class="sd">    - &quot;groups&quot;: A dictionary specifying group details (default: {}).</span>
-<span class="sd">    - &quot;defaults&quot;: A dictionary specifying default values (default: {}).</span>
-<span class="sd">    - &quot;user_defined&quot;: A dictionary specifying user-defined options (default: {}).</span>
+<span class="sd">    - "logging": A dictionary specifying logging configuration (default: {"enabled": False}).</span>
+<span class="sd">    - "runner": A dictionary specifying runner options (default: {}).</span>
+<span class="sd">    - "hosts": A dictionary specifying host details (default: {}).</span>
+<span class="sd">    - "groups": A dictionary specifying group details (default: {}).</span>
+<span class="sd">    - "defaults": A dictionary specifying default values (default: {}).</span>
+<span class="sd">    - "user_defined": A dictionary specifying user-defined options (default: {}).</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: A Result object indicating the outcome of the refresh operation.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:refresh_nornir&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:refresh_nornir"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># get inventory from broker</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">nornir_worker_inventory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_inventory</span><span class="p">()</span>
 
     <span class="c1"># pull Nornir inventory from Netbox</span>
-    <span class="k">if</span> <span class="s2">&quot;netbox&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="p">:</span>
+    <span class="k">if</span> <span class="s2">"netbox"</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nornir_inventory_load_netbox</span><span class="p">(</span><span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;pulled Nornir inventory data from Netbox&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"pulled Nornir inventory data from Netbox"</span><span class="p">)</span>
 
     <span class="c1"># pull Nornir inventory from Containerlab</span>
-    <span class="k">if</span> <span class="s2">&quot;containerlab&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="p">:</span>
+    <span class="k">if</span> <span class="s2">"containerlab"</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nornir_inventory_load_containerlab</span><span class="p">(</span>
             <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
-            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="p">[</span><span class="s2">&quot;containerlab&quot;</span><span class="p">],</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="p">[</span><span class="s2">"containerlab"</span><span class="p">],</span>
             <span class="n">re_init_nornir</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;pulled Nornir inventory data from Containerlab&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"pulled Nornir inventory data from Containerlab"</span><span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;pulled inventories, refreshing Nornir instance&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"pulled inventories, refreshing Nornir instance"</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">init_nornir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;nornir instance refreshed&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"nornir instance refreshed"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>

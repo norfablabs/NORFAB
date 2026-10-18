@@ -7393,21 +7393,21 @@ reuse.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>Both dry-run and live-run modes return the same per-device structure keyed by device name:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;&lt;device&gt;&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;10.0.0.1/31&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;192.168.1.1/32&quot;</span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;10.0.0.3/31&quot;</span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;10.0.0.5/31&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;2001:db8::1/128&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="nt">"&lt;device&gt;"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"created"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"10.0.0.1/31"</span><span class="p">,</span><span class="w"> </span><span class="s2">"192.168.1.1/32"</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">"updated"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"10.0.0.3/31"</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">"in_sync"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"10.0.0.5/31"</span><span class="p">,</span><span class="w"> </span><span class="s2">"2001:db8::1/128"</span><span class="p">]</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>The top-level <code>diff</code> field always contains the per-device reconciliation plan,
 including when every address is already synchronized:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;&lt;device&gt;&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;create&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">        </span><span class="nt">&quot;update&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
-<span class="w">        </span><span class="nt">&quot;delete&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">        </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;10.0.0.5/31&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;2001:db8::1/128&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="nt">"&lt;device&gt;"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"create"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">        </span><span class="nt">"update"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">        </span><span class="nt">"delete"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">        </span><span class="nt">"in_sync"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"10.0.0.5/31"</span><span class="p">,</span><span class="w"> </span><span class="s2">"2001:db8::1/128"</span><span class="p">]</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -7436,10 +7436,10 @@ and literal interface-name substring wins. Mapping occurs before
 for <code>sync_device_interfaces</code> and <code>sync_device_ip</code> so IP addresses are assigned
 to the interfaces created by interface sync.</p>
 <p>Rules can be supplied inline or through an <code>nf://</code> YAML file:</p>
-<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">device_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;fn-ceos-sp-*&quot;</span>
-<span class="w">  </span><span class="nt">device_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Arista</span><span class="nv"> </span><span class="s">*&quot;</span>
-<span class="w">  </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Loopback&quot;</span>
-<span class="w">  </span><span class="nt">replace</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;NetBoxLoopback&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">device_name</span><span class="p">:</span><span class="w"> </span><span class="s">"fn-ceos-sp-*"</span>
+<span class="w">  </span><span class="nt">device_type</span><span class="p">:</span><span class="w"> </span><span class="s">"Arista</span><span class="nv"> </span><span class="s">*"</span>
+<span class="w">  </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">"Loopback"</span>
+<span class="w">  </span><span class="nt">replace</span><span class="p">:</span><span class="w"> </span><span class="s">"NetBoxLoopback"</span>
 </code></pre></div>
 <h2 id="existing-ip-selection">Existing IP Selection<a class="headerlink" href="#existing-ip-selection" title="Permanent link">¤</a></h2>
 <p>For each live address, the task uses this order:</p>
@@ -7512,9 +7512,9 @@ receives the <code>anycast</code> role. This applies even when <code>anycast_ran
 provided.</p>
 </div>
 <p>Set <code>anycast_ranges</code> to a prefix string, list of prefixes, or an <code>nf://</code> URL to a YAML file containing a list of prefixes:</p>
-<div class="highlight"><pre><span></span><code><span class="n">anycast_ranges</span> <span class="o">=</span> <span class="s2">&quot;10.0.250.0/24&quot;</span>
-<span class="n">anycast_ranges</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;10.0.250.0/24&quot;</span><span class="p">,</span> <span class="s2">&quot;2001:db8:ffff::/48&quot;</span><span class="p">]</span>
-<span class="n">anycast_ranges</span> <span class="o">=</span> <span class="s2">&quot;nf://netbox/anycast_ranges.yaml&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">anycast_ranges</span> <span class="o">=</span> <span class="s2">"10.0.250.0/24"</span>
+<span class="n">anycast_ranges</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"10.0.250.0/24"</span><span class="p">,</span> <span class="s2">"2001:db8:ffff::/48"</span><span class="p">]</span>
+<span class="n">anycast_ranges</span> <span class="o">=</span> <span class="s2">"nf://netbox/anycast_ranges.yaml"</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.0.250.0/24</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:ffff::/48</span>
@@ -7542,13 +7542,13 @@ successful batches.</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync ip-addresses devices ceos-spine-1 dry-run
 </code></pre></div>
 <p>Sync only loopback interface addresses:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox sync ip-addresses devices ceos-spine-1 filter-by-name &quot;Loopback*&quot;
+<div class="highlight"><pre><span></span><code>nf#netbox sync ip-addresses devices ceos-spine-1 filter-by-name "Loopback*"
 </code></pre></div>
 <p>Map live interface names before filtering and assignment:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox sync ip-addresses devices fn-ceos-sp-1 interface-map nf://netbox/interface_map.yaml filter-by-name &quot;NetBoxLoopback*&quot;
+<div class="highlight"><pre><span></span><code>nf#netbox sync ip-addresses devices fn-ceos-sp-1 interface-map nf://netbox/interface_map.yaml filter-by-name "NetBoxLoopback*"
 </code></pre></div>
 <p>Sync only addresses within a specific prefix:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox sync ip-addresses devices ceos-spine-1 filter-by-prefix &quot;10.3.0.0/16&quot;
+<div class="highlight"><pre><span></span><code>nf#netbox sync ip-addresses devices ceos-spine-1 filter-by-prefix "10.3.0.0/16"
 </code></pre></div>
 <p>Classify addresses in an anycast range and sync all devices:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync ip-addresses devices ceos-spine-1 ceos-spine-2 ceos-leaf-1 anycast-ranges 10.0.250.0/24
@@ -7566,151 +7566,151 @@ successful batches.</p>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
 <span class="c1"># sync IP addresses for specific devices</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_device_ip&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_device_ip"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-spine-2&quot;</span><span class="p">],</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">,</span> <span class="s2">"ceos-spine-2"</span><span class="p">],</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># dry run — preview creates/updates without writing to NetBox</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_device_ip&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_device_ip"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-spine-2&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">,</span> <span class="s2">"ceos-spine-2"</span><span class="p">],</span>
+        <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># restrict sync to loopback interfaces only</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_device_ip&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_device_ip"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;filter_by_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Loopback*&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">],</span>
+        <span class="s2">"filter_by_name"</span><span class="p">:</span> <span class="s2">"Loopback*"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># restrict sync to addresses within a specific prefix</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_device_ip&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_device_ip"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-spine-2&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;filter_by_prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;10.3.0.0/16&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">,</span> <span class="s2">"ceos-spine-2"</span><span class="p">],</span>
+        <span class="s2">"filter_by_prefix"</span><span class="p">:</span> <span class="s2">"10.3.0.0/16"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># restrict sync to addresses matching a glob pattern</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_device_ip&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_device_ip"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;filter_by_ip&quot;</span><span class="p">:</span> <span class="s2">&quot;10.3.4.*&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">],</span>
+        <span class="s2">"filter_by_ip"</span><span class="p">:</span> <span class="s2">"10.3.4.*"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># restrict sync to interfaces with a specific description pattern</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_device_ip&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_device_ip"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;filter_by_description&quot;</span><span class="p">:</span> <span class="s2">&quot;uplink*&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">],</span>
+        <span class="s2">"filter_by_description"</span><span class="p">:</span> <span class="s2">"uplink*"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># classify addresses in anycast ranges and sync all fabric devices</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_device_ip&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_device_ip"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-spine-2&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-leaf-2&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;anycast_ranges&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.250.0/24&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">,</span> <span class="s2">"ceos-spine-2"</span><span class="p">,</span> <span class="s2">"ceos-leaf-1"</span><span class="p">,</span> <span class="s2">"ceos-leaf-2"</span><span class="p">],</span>
+        <span class="s2">"anycast_ranges"</span><span class="p">:</span> <span class="s2">"10.0.250.0/24"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># multiple anycast ranges (IPv4 and IPv6)</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_device_ip&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_device_ip"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-spine-2&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;anycast_ranges&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;10.0.250.0/24&quot;</span><span class="p">,</span> <span class="s2">&quot;2001:db8:ffff::/48&quot;</span><span class="p">],</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">,</span> <span class="s2">"ceos-spine-2"</span><span class="p">],</span>
+        <span class="s2">"anycast_ranges"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"10.0.250.0/24"</span><span class="p">,</span> <span class="s2">"2001:db8:ffff::/48"</span><span class="p">],</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># associate IPs with discovered interface VRFs</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_device_ip&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_device_ip"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;ignore_vrf&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">],</span>
+        <span class="s2">"ignore_vrf"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># map live interface names to their NetBox names</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_device_ip&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_device_ip"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fn-ceos-sp-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;interface_map&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://netbox/interface_map.yaml&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;filter_by_name&quot;</span><span class="p">:</span> <span class="s2">&quot;NetBoxLoopback*&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"fn-ceos-sp-1"</span><span class="p">],</span>
+        <span class="s2">"interface_map"</span><span class="p">:</span> <span class="s2">"nf://netbox/interface_map.yaml"</span><span class="p">,</span>
+        <span class="s2">"filter_by_name"</span><span class="p">:</span> <span class="s2">"NetBoxLoopback*"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># sync into a NetBox branch</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_device_ip&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_device_ip"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-spine-2&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="s2">&quot;sprint-42-ips&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">,</span> <span class="s2">"ceos-spine-2"</span><span class="p">],</span>
+        <span class="s2">"branch"</span><span class="p">:</span> <span class="s2">"sprint-42-ips"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># use Nornir host filters instead of explicit device names</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_device_ip&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_device_ip"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+        <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># combine filters: loopback interfaces within a specific prefix, dry run</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sync_device_ip&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"sync_device_ip"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-spine-2&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;filter_by_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Loopback*&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;filter_by_prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;10.3.4.0/24&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-spine-1"</span><span class="p">,</span> <span class="s2">"ceos-spine-2"</span><span class="p">],</span>
+        <span class="s2">"filter_by_name"</span><span class="p">:</span> <span class="s2">"Loopback*"</span><span class="p">,</span>
+        <span class="s2">"filter_by_prefix"</span><span class="p">:</span> <span class="s2">"10.3.4.0/24"</span><span class="p">,</span>
+        <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
@@ -7727,19 +7727,19 @@ root
 <span class="w">    </span>└──<span class="w"> </span>sync:<span class="w">    </span>Sync<span class="w"> </span>Netbox<span class="w"> </span>data
 <span class="w">        </span>└──<span class="w"> </span>ip-addresses:<span class="w">    </span>Sync<span class="w"> </span>device<span class="w"> </span>IP<span class="w"> </span>addresses<span class="w"> </span>with<span class="w"> </span>NetBox
 <span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds
-<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'any'</span>
+<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
+<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
 <span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Return<span class="w"> </span>reconciliation<span class="w"> </span>plan<span class="w"> </span>without<span class="w"> </span>pushing<span class="w"> </span>changes<span class="w"> </span>to<span class="w"> </span>NetBox
 <span class="w">            </span>├──<span class="w"> </span>devices:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>NetBox<span class="w"> </span>device<span class="w"> </span>names<span class="w"> </span>to<span class="w"> </span>sync
 <span class="w">            </span>├──<span class="w"> </span>anycast-ranges:<span class="w">    </span>IP<span class="w"> </span>prefix<span class="o">(</span>es<span class="o">)</span><span class="w"> </span>used<span class="w"> </span>to<span class="w"> </span>classify<span class="w"> </span>addresses<span class="w"> </span>as<span class="w"> </span>anycast<span class="w"> </span>role
 <span class="w">            </span>├──<span class="w"> </span>ignore-vrf:<span class="w">    </span>Ignore<span class="w"> </span>discovered<span class="w"> </span>interface<span class="w"> </span>VRFs<span class="w"> </span>during<span class="w"> </span>IP<span class="w"> </span>sync
 <span class="w">            </span>├──<span class="w"> </span>interface-map:<span class="w">    </span>Ordered<span class="w"> </span>rules<span class="w"> </span>mapping<span class="w"> </span>live<span class="w"> </span>interface<span class="w"> </span>names<span class="w"> </span>to<span class="w"> </span>preferred<span class="w"> </span>NetBox<span class="w"> </span>names
-<span class="w">            </span>├──<span class="w"> </span>filter-by-name:<span class="w">    </span>Glob<span class="w"> </span>pattern<span class="w"> </span>to<span class="w"> </span>restrict<span class="w"> </span>sync<span class="w"> </span>by<span class="w"> </span>interface<span class="w"> </span>name,<span class="w"> </span>e.g.<span class="w"> </span><span class="s1">&#39;Loopback*&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>filter-by-name:<span class="w">    </span>Glob<span class="w"> </span>pattern<span class="w"> </span>to<span class="w"> </span>restrict<span class="w"> </span>sync<span class="w"> </span>by<span class="w"> </span>interface<span class="w"> </span>name,<span class="w"> </span>e.g.<span class="w"> </span><span class="s1">'Loopback*'</span>
 <span class="w">            </span>├──<span class="w"> </span>filter-by-description:<span class="w">    </span>Glob<span class="w"> </span>pattern<span class="w"> </span>to<span class="w"> </span>restrict<span class="w"> </span>sync<span class="w"> </span>by<span class="w"> </span>interface<span class="w"> </span>description
-<span class="w">            </span>├──<span class="w"> </span>filter-by-prefix:<span class="w">    </span>CIDR<span class="w"> </span>prefix<span class="w"> </span>to<span class="w"> </span>restrict<span class="w"> </span>sync<span class="w"> </span>to<span class="w"> </span>addresses<span class="w"> </span>within<span class="w"> </span>it,<span class="w"> </span>e.g.<span class="w"> </span><span class="s1">&#39;10.0.0.0/8&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>filter-by-ip:<span class="w">    </span>Glob<span class="w"> </span>pattern<span class="w"> </span>to<span class="w"> </span>restrict<span class="w"> </span>sync<span class="w"> </span>by<span class="w"> </span>IP<span class="w"> </span>host<span class="w"> </span>address,<span class="w"> </span>e.g.<span class="w"> </span><span class="s1">&#39;10.0.1.*&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>filter-by-prefix:<span class="w">    </span>CIDR<span class="w"> </span>prefix<span class="w"> </span>to<span class="w"> </span>restrict<span class="w"> </span>sync<span class="w"> </span>to<span class="w"> </span>addresses<span class="w"> </span>within<span class="w"> </span>it,<span class="w"> </span>e.g.<span class="w"> </span><span class="s1">'10.0.0.0/8'</span>
+<span class="w">            </span>├──<span class="w"> </span>filter-by-ip:<span class="w">    </span>Glob<span class="w"> </span>pattern<span class="w"> </span>to<span class="w"> </span>restrict<span class="w"> </span>sync<span class="w"> </span>by<span class="w"> </span>IP<span class="w"> </span>host<span class="w"> </span>address,<span class="w"> </span>e.g.<span class="w"> </span><span class="s1">'10.0.1.*'</span>
 <span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>Branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>push<span class="w"> </span>changes<span class="w"> </span>into
 <span class="w">            </span>├──<span class="w"> </span>FO:<span class="w">    </span>Filter<span class="w"> </span>Nornir<span class="w"> </span>hosts<span class="w"> </span>using<span class="w"> </span>Filter<span class="w"> </span>Object
 <span class="w">            </span>├──<span class="w"> </span>FB:<span class="w">    </span>Filter<span class="w"> </span>Nornir<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Glob<span class="w"> </span>Patterns
@@ -7775,10 +7775,10 @@ nf#
 <p><strong>Dry-run mode</strong> (<code>dry_run=True</code>): returns the reconciliation plan without
 making any changes. Result is keyed by device name::</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;&lt;device&gt;&quot;: {
-        &quot;created&quot;: [&quot;10.0.0.1/31&quot;, ...],
-        &quot;updated&quot;: [&quot;10.0.0.3/31&quot;, ...],
-        &quot;in_sync&quot;: [&quot;10.0.0.5/31&quot;, ...]
+    "&lt;device&gt;": {
+        "created": ["10.0.0.1/31", ...],
+        "updated": ["10.0.0.3/31", ...],
+        "in_sync": ["10.0.0.5/31", ...]
     }
 }
 </code></pre></div>
@@ -8771,16 +8771,16 @@ does not delete IP addresses.</p>
 <span class="normal">1695</span>
 <span class="normal">1696</span>
 <span class="normal">1697</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceIpInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceIpResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Sync Device IP Addresses&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Sync Device IP Addresses"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -8804,7 +8804,7 @@ does not delete IP addresses.</p>
     <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Synchronize IP addresses from live devices into NetBox.</span>
 
 <span class="sd">    The task follows a three-step pipeline:</span>
@@ -8820,10 +8820,10 @@ does not delete IP addresses.</p>
 
 <span class="sd">    ```</span>
 <span class="sd">    {</span>
-<span class="sd">        &quot;&lt;device&gt;&quot;: {</span>
-<span class="sd">            &quot;created&quot;: [&quot;10.0.0.1/31&quot;, ...],</span>
-<span class="sd">            &quot;updated&quot;: [&quot;10.0.0.3/31&quot;, ...],</span>
-<span class="sd">            &quot;in_sync&quot;: [&quot;10.0.0.5/31&quot;, ...]</span>
+<span class="sd">        "&lt;device&gt;": {</span>
+<span class="sd">            "created": ["10.0.0.1/31", ...],</span>
+<span class="sd">            "updated": ["10.0.0.3/31", ...],</span>
+<span class="sd">            "in_sync": ["10.0.0.5/31", ...]</span>
 <span class="sd">        }</span>
 <span class="sd">    }</span>
 <span class="sd">    ```</span>
@@ -8833,7 +8833,7 @@ does not delete IP addresses.</p>
 
 <span class="sd">    **Side Effects**</span>
 
-<span class="sd">    1. Parsed live anycast addresses extend the task&#39;s anycast ranges with</span>
+<span class="sd">    1. Parsed live anycast addresses extend the task's anycast ranges with</span>
 <span class="sd">        IPv4 /32 or IPv6 /128 host networks, regardless of VRF. Overlapping</span>
 <span class="sd">        NetBox IP records have their role updated to `anycast`.</span>
 <span class="sd">    2. Parsed TTP IP roles are synchronized to NetBox, except for FHRP</span>
@@ -8851,7 +8851,7 @@ does not delete IP addresses.</p>
 <span class="sd">        branch (str, optional): NetBox branch name to use.</span>
 <span class="sd">        anycast_ranges (list, optional): IP prefix(es) used to classify</span>
 <span class="sd">            IP addresses as anycast role, or an ``nf://`` or ``git://&lt;remote&gt;/`` YAML</span>
-<span class="sd">            file containing a list of prefixes, e.g. ``&#39;10.3.250.0/24&#39;``.</span>
+<span class="sd">            file containing a list of prefixes, e.g. ``'10.3.250.0/24'``.</span>
 <span class="sd">        ignore_ranges (list, optional): Prefixes to ignore IP addresses for, includes</span>
 <span class="sd">            by default 127.0.0.0/8, 224.0.0.0/24 and others</span>
 <span class="sd">        ignore_vrf (bool, optional): If True, discovered interface VRFs are ignored</span>
@@ -8861,13 +8861,13 @@ does not delete IP addresses.</p>
 <span class="sd">            file containing them. Mapping is applied before interface filtering</span>
 <span class="sd">            and NetBox interface lookup. The first matching rule wins.</span>
 <span class="sd">        filter_by_name (str, optional): Glob pattern to restrict which interfaces</span>
-<span class="sd">            are included by name, e.g. ``&#39;Loopback*&#39;`` or ``&#39;Eth*&#39;``.</span>
+<span class="sd">            are included by name, e.g. ``'Loopback*'`` or ``'Eth*'``.</span>
 <span class="sd">        filter_by_description (str, optional): Glob pattern to restrict which</span>
-<span class="sd">            interfaces are included by description, e.g. ``&#39;uplink*&#39;``.</span>
+<span class="sd">            interfaces are included by description, e.g. ``'uplink*'``.</span>
 <span class="sd">        filter_by_prefix (str, optional): IP prefix to restrict which IP addresses</span>
-<span class="sd">            are included, e.g. ``&#39;10.0.0.0/8&#39;``. Skips IPs not within this prefix.</span>
+<span class="sd">            are included, e.g. ``'10.0.0.0/8'``. Skips IPs not within this prefix.</span>
 <span class="sd">        filter_by_ip (str, optional): Glob pattern to restrict which IP addresses</span>
-<span class="sd">            are included, e.g. ``&#39;10.0.*&#39;``.</span>
+<span class="sd">            are included, e.g. ``'10.0.*'``.</span>
 <span class="sd">        **kwargs: Additional Nornir host filter keyword arguments passed to</span>
 <span class="sd">            ``parse_ttp`` (e.g. ``FL``, ``FC``, ``FB``).</span>
 
@@ -8877,19 +8877,19 @@ does not delete IP addresses.</p>
 <span class="sd">            corresponding ``create``, ``update``, ``delete``, and ``in_sync``</span>
 <span class="sd">            reconciliation plan; ``delete`` is always empty because this task</span>
 <span class="sd">            does not delete IP addresses.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">interface_map</span><span class="p">):</span>
         <span class="n">interface_map</span> <span class="o">=</span> <span class="n">TypeAdapter</span><span class="p">(</span><span class="nb">list</span><span class="p">[</span><span class="n">InterfaceMapRule</span><span class="p">])</span><span class="o">.</span><span class="n">validate_python</span><span class="p">(</span>
             <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">interface_map</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="p">)</span>
     <span class="n">interface_map</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">rule</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="s2">&quot;model_dump&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+        <span class="n">rule</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="s2">"model_dump"</span><span class="p">)</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">interface_map</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="p">]</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_device_ip&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_device_ip"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="n">SyncActionSummaryMap</span><span class="p">()</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
         <span class="n">diff</span><span class="o">=</span><span class="p">{},</span>
@@ -8897,7 +8897,7 @@ does not delete IP addresses.</p>
     <span class="p">)</span>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync device IP: Processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync device IP: Processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
 
     <span class="c1"># pre-process anycast ranges</span>
@@ -8924,53 +8924,53 @@ does not delete IP addresses.</p>
 
     <span class="c1"># source additional hosts from Nornir filters</span>
     <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;resolving devices from Nornir filters&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"resolving devices from Nornir filters"</span><span class="p">)</span>
         <span class="n">nornir_hosts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nornir_hosts</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">nornir_hosts</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">host</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
                 <span class="n">devices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;resolved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nornir_hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from Nornir filters, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> total device(s) selected&quot;</span>
+            <span class="sa">f</span><span class="s2">"resolved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nornir_hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from Nornir filters, "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> total device(s) selected"</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;no devices specified&quot;</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">"no devices specified"</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;syncing IP addresses for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> devices, dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"syncing IP addresses for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> devices, dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="c1"># filter out devices not defined in NetBox</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;validating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) exist in NetBox&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"validating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) exist in NetBox"</span><span class="p">)</span>
     <span class="n">nb_devices_data</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-            <span class="s2">&quot;device_type&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">device_type</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+            <span class="s2">"id"</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">"device_type"</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">device_type</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span>
-            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,device_type&quot;</span><span class="p">,</span>
+            <span class="n">fields</span><span class="o">=</span><span class="s2">"id,name,device_type"</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="p">}</span>
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_devices_data</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2"> - device not found in Netbox&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2"> - device not found in Netbox"</span>
             <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">devices</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="s2">&quot;no valid NetBox devices remain after validation&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
+            <span class="s2">"no valid NetBox devices remain after validation"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;validated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in NetBox&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"validated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in NetBox"</span><span class="p">)</span>
 
     <span class="c1"># gather and filter live interface data from Nornir parse_ttp</span>
     <span class="n">normalised_live_all</span> <span class="o">=</span> <span class="n">collect_live_interface_ip_data</span><span class="p">(</span>
@@ -8981,24 +8981,24 @@ does not delete IP addresses.</p>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
         <span class="n">interface_map</span><span class="o">=</span><span class="n">interface_map</span><span class="p">,</span>
         <span class="n">device_types</span><span class="o">=</span><span class="p">{</span>
-            <span class="n">name</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;device_type&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">nb_devices_data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="n">name</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">"device_type"</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">nb_devices_data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">},</span>
         <span class="n">filter_by_name</span><span class="o">=</span><span class="n">filter_by_name</span><span class="p">,</span>
         <span class="n">filter_by_description</span><span class="o">=</span><span class="n">filter_by_description</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="c1"># fetch interfaces data from NetBox to resolve interface IDs</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;fetching NetBox interfaces to resolve IP assignments&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"fetching NetBox interfaces to resolve IP assignments"</span><span class="p">)</span>
     <span class="n">nb_interfaces_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_interfaces</span><span class="p">(</span>
         <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
         <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
         <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
         <span class="n">devices</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span>
         <span class="n">ip_addresses</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">cache</span><span class="o">=</span><span class="s2">&quot;refresh&quot;</span><span class="p">,</span>
+        <span class="n">cache</span><span class="o">=</span><span class="s2">"refresh"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">nb_interfaces_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;failed to fetch NetBox interfaces for IP sync&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"failed to fetch NetBox interfaces for IP sync"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nb_interfaces_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
@@ -9010,16 +9010,16 @@ does not delete IP addresses.</p>
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">device_results</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">device_name</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">{},</span>
-            <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"create"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"update"</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[],</span>
         <span class="p">}</span>
         <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span>
     <span class="p">}</span>
 
     <span class="c1"># collect all discovered IP addresses</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;collecting live IP address candidates&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"collecting live IP address candidates"</span><span class="p">)</span>
     <span class="n">all_ip_live</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">interfaces</span> <span class="ow">in</span> <span class="n">normalised_live_all</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">device_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_devices_data</span><span class="p">:</span>
@@ -9028,12 +9028,12 @@ does not delete IP addresses.</p>
         <span class="k">for</span> <span class="n">intf_name</span><span class="p">,</span> <span class="n">intf_data</span> <span class="ow">in</span> <span class="n">interfaces</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">intf_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_raw</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="k">for</span> <span class="n">ip_data</span> <span class="ow">in</span> <span class="p">(</span><span class="n">intf_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ipv4_addresses&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span> <span class="o">+</span> <span class="p">(</span>
-                <span class="n">intf_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ipv6_addresses&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">ip_data</span> <span class="ow">in</span> <span class="p">(</span><span class="n">intf_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ipv4_addresses"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span> <span class="o">+</span> <span class="p">(</span>
+                <span class="n">intf_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ipv6_addresses"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
             <span class="p">):</span>
-                <span class="n">ip</span> <span class="o">=</span> <span class="n">ip_data</span><span class="p">[</span><span class="s2">&quot;ip&quot;</span><span class="p">]</span>
-                <span class="n">parsed_ip_role</span> <span class="o">=</span> <span class="n">ip_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ip_address_role&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span>
-                <span class="k">if</span> <span class="n">parsed_ip_role</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;vrrp&quot;</span><span class="p">,</span> <span class="s2">&quot;glbp&quot;</span><span class="p">,</span> <span class="s2">&quot;hsrp&quot;</span><span class="p">,</span> <span class="s2">&quot;carp&quot;</span><span class="p">):</span>
+                <span class="n">ip</span> <span class="o">=</span> <span class="n">ip_data</span><span class="p">[</span><span class="s2">"ip"</span><span class="p">]</span>
+                <span class="n">parsed_ip_role</span> <span class="o">=</span> <span class="n">ip_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ip_address_role"</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">parsed_ip_role</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"vrrp"</span><span class="p">,</span> <span class="s2">"glbp"</span><span class="p">,</span> <span class="s2">"hsrp"</span><span class="p">,</span> <span class="s2">"carp"</span><span class="p">):</span>
                     <span class="k">continue</span>
                 <span class="n">host_address</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span><span class="o">.</span><span class="n">ip</span>
                 <span class="k">if</span> <span class="n">filter_prefix_net</span> <span class="ow">and</span> <span class="n">host_address</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">filter_prefix_net</span><span class="p">:</span>
@@ -9047,94 +9047,94 @@ does not delete IP addresses.</p>
                 <span class="n">vrf</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="kc">None</span>
                     <span class="k">if</span> <span class="n">ignore_vrf</span>
-                    <span class="k">else</span> <span class="n">resolve_vrf</span><span class="p">(</span><span class="n">intf_data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">],</span> <span class="n">nb</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">ret</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="k">else</span> <span class="n">resolve_vrf</span><span class="p">(</span><span class="n">intf_data</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">],</span> <span class="n">nb</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">ret</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
                 <span class="p">)</span>
                 <span class="n">resolved_ip_role</span> <span class="o">=</span> <span class="n">resolve_ip_role</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">intf_name</span><span class="p">,</span> <span class="n">anycast_nets</span><span class="p">)</span>
                 <span class="c1"># Preserve explicit roles parsed from the device, while anycast</span>
                 <span class="c1"># detection remains authoritative for configured anycast ranges.</span>
-                <span class="k">if</span> <span class="n">parsed_ip_role</span> <span class="ow">and</span> <span class="n">resolved_ip_role</span> <span class="o">!=</span> <span class="s2">&quot;anycast&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">parsed_ip_role</span> <span class="ow">and</span> <span class="n">resolved_ip_role</span> <span class="o">!=</span> <span class="s2">"anycast"</span><span class="p">:</span>
                     <span class="n">resolved_ip_role</span> <span class="o">=</span> <span class="n">parsed_ip_role</span>
-                <span class="k">if</span> <span class="n">resolved_ip_role</span> <span class="o">==</span> <span class="s2">&quot;anycast&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">resolved_ip_role</span> <span class="o">==</span> <span class="s2">"anycast"</span><span class="p">:</span>
                     <span class="n">anycast_nets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                         <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_network</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">host_address</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">host_address</span><span class="o">.</span><span class="n">max_prefixlen</span><span class="si">}</span><span class="s2">&quot;</span>
+                            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">host_address</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">host_address</span><span class="o">.</span><span class="n">max_prefixlen</span><span class="si">}</span><span class="s2">"</span>
                         <span class="p">)</span>
                     <span class="p">)</span>
                 <span class="n">ip_live</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
-                    <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">intf_name</span><span class="p">,</span>
-                    <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="n">ip</span><span class="p">,</span>
-                    <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">,</span>
-                    <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="n">resolved_ip_role</span><span class="p">,</span>
-                    <span class="s2">&quot;assigned_object_type&quot;</span><span class="p">:</span> <span class="s2">&quot;dcim.interface&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;assigned_object_id&quot;</span><span class="p">:</span> <span class="n">nb_raw</span><span class="p">[</span><span class="n">intf_name</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                    <span class="s2">"device"</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
+                    <span class="s2">"interface"</span><span class="p">:</span> <span class="n">intf_name</span><span class="p">,</span>
+                    <span class="s2">"address"</span><span class="p">:</span> <span class="n">ip</span><span class="p">,</span>
+                    <span class="s2">"vrf"</span><span class="p">:</span> <span class="n">vrf</span><span class="p">,</span>
+                    <span class="s2">"role"</span><span class="p">:</span> <span class="n">resolved_ip_role</span><span class="p">,</span>
+                    <span class="s2">"assigned_object_type"</span><span class="p">:</span> <span class="s2">"dcim.interface"</span><span class="p">,</span>
+                    <span class="s2">"assigned_object_id"</span><span class="p">:</span> <span class="n">nb_raw</span><span class="p">[</span><span class="n">intf_name</span><span class="p">][</span><span class="s2">"id"</span><span class="p">],</span>
                 <span class="p">}</span>
                 <span class="n">all_ip_live</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ip_live</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">all_ip_live</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync device IP: no IP addresses found in live data&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync device IP: no IP addresses found in live data"</span>
         <span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no IP addresses found in live data&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no IP addresses found in live data"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;collected </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_ip_live</span><span class="p">)</span><span class="si">}</span><span class="s2"> live IP address candidate(s)&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"collected </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_ip_live</span><span class="p">)</span><span class="si">}</span><span class="s2"> live IP address candidate(s)"</span><span class="p">)</span>
 
     <span class="c1"># fetch existing IP addresses from NetBox</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_ip_live</span><span class="p">)</span><span class="si">}</span><span class="s2"> matching IP address(es) from NetBox&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"fetching </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_ip_live</span><span class="p">)</span><span class="si">}</span><span class="s2"> matching IP address(es) from NetBox"</span><span class="p">)</span>
     <span class="n">nb_ips</span> <span class="o">=</span> <span class="p">[</span>
         <span class="p">{</span>
-            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">ip</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-            <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="n">ip</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
-            <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">ip</span><span class="o">.</span><span class="n">vrf</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">vrf</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">role</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
-            <span class="s2">&quot;assigned_object_type&quot;</span><span class="p">:</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_type</span><span class="p">,</span>
-            <span class="s2">&quot;assigned_object_id&quot;</span><span class="p">:</span> <span class="p">(</span>
+            <span class="s2">"id"</span><span class="p">:</span> <span class="n">ip</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s2">"address"</span><span class="p">:</span> <span class="n">ip</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
+            <span class="s2">"vrf"</span><span class="p">:</span> <span class="n">ip</span><span class="o">.</span><span class="n">vrf</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">vrf</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">"role"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">role</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+            <span class="s2">"assigned_object_type"</span><span class="p">:</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_type</span><span class="p">,</span>
+            <span class="s2">"assigned_object_id"</span><span class="p">:</span> <span class="p">(</span>
                 <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="p">),</span>
-            <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="p">(</span>
+            <span class="s2">"device"</span><span class="p">:</span> <span class="p">(</span>
                 <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span>
                 <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span>
-                <span class="ow">and</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">==</span> <span class="s2">&quot;dcim.interface&quot;</span>
+                <span class="ow">and</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">==</span> <span class="s2">"dcim.interface"</span>
                 <span class="k">else</span> <span class="kc">None</span>
             <span class="p">),</span>
-            <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="p">(</span>
+            <span class="s2">"interface"</span><span class="p">:</span> <span class="p">(</span>
                 <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span><span class="o">.</span><span class="n">name</span>
                 <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span>
-                <span class="ow">and</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">==</span> <span class="s2">&quot;dcim.interface&quot;</span>
+                <span class="ow">and</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">==</span> <span class="s2">"dcim.interface"</span>
                 <span class="k">else</span> <span class="kc">None</span>
             <span class="p">),</span>
         <span class="p">}</span>
         <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">endpoint</span><span class="o">=</span><span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="p">,</span>
-            <span class="n">address</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">all_ip_live</span><span class="p">],</span>
+            <span class="n">address</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="s2">"address"</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">all_ip_live</span><span class="p">],</span>
             <span class="n">fields</span><span class="o">=</span><span class="p">(</span>
-                <span class="s2">&quot;id,address,vrf,role,assigned_object,&quot;</span>
-                <span class="s2">&quot;assigned_object_type,assigned_object_id&quot;</span>
+                <span class="s2">"id,address,vrf,role,assigned_object,"</span>
+                <span class="s2">"assigned_object_type,assigned_object_id"</span>
             <span class="p">),</span>
         <span class="p">)</span>
     <span class="p">]</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nb_ips</span><span class="p">)</span><span class="si">}</span><span class="s2"> matching IP address object(s) from NetBox&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nb_ips</span><span class="p">)</span><span class="si">}</span><span class="s2"> matching IP address object(s) from NetBox"</span><span class="p">)</span>
 
     <span class="c1"># process IP addresses</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;calculating IP address sync actions&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"calculating IP address sync actions"</span><span class="p">)</span>
     <span class="n">bulk_update_ip</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># {(device, intf, ip): {ip data}}</span>
     <span class="n">bulk_create_ip</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># {(device, intf, ip): {ip data}}</span>
 
     <span class="k">for</span> <span class="n">ip_live</span> <span class="ow">in</span> <span class="n">all_ip_live</span><span class="p">:</span>
-        <span class="n">device_name</span> <span class="o">=</span> <span class="n">ip_live</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;device&quot;</span><span class="p">)</span>
-        <span class="n">intf_name</span> <span class="o">=</span> <span class="n">ip_live</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;interface&quot;</span><span class="p">)</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="n">intf_name</span><span class="p">,</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">])</span>
+        <span class="n">device_name</span> <span class="o">=</span> <span class="n">ip_live</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"device"</span><span class="p">)</span>
+        <span class="n">intf_name</span> <span class="o">=</span> <span class="n">ip_live</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"interface"</span><span class="p">)</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="n">intf_name</span><span class="p">,</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">"address"</span><span class="p">])</span>
         <span class="c1"># find existing NetBox IPs of same value</span>
-        <span class="n">ip_live_no_mask</span> <span class="o">=</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ip_live_no_mask</span> <span class="o">=</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">"address"</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="c1"># do IP comparison ignoring mask, in case live and netbox IPs have mask mismatch</span>
         <span class="n">matching_nb_ips</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nb_ips</span> <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ip_live_no_mask</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span>
+            <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nb_ips</span> <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="s2">"address"</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ip_live_no_mask</span><span class="si">}</span><span class="s2">/"</span><span class="p">)</span>
         <span class="p">]</span>
         <span class="c1"># Prefer the matching IP already assigned to the target interface.</span>
         <span class="k">for</span> <span class="n">nb_ip</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span>
-                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;assigned_object_type&quot;</span><span class="p">]</span>
-                <span class="ow">and</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span>
+                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"assigned_object_type"</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">"assigned_object_type"</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"assigned_object_id"</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">"assigned_object_id"</span><span class="p">]</span>
             <span class="p">):</span>
                 <span class="n">matching_nb_ips</span> <span class="o">=</span> <span class="p">[</span><span class="n">nb_ip</span><span class="p">]</span>
                 <span class="k">break</span>
@@ -9142,15 +9142,15 @@ does not delete IP addresses.</p>
             <span class="c1"># Restrict fallback matches to the live VRF when VRFs are enforced.</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_vrf</span><span class="p">:</span>
                 <span class="n">matching_nb_ips</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span> <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span>
+                    <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span> <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">]</span>
                 <span class="p">]</span>
         <span class="c1"># Exclude records owned by non-interface objects while retaining valid</span>
         <span class="c1"># interface-assigned and unassigned candidates for reconciliation.</span>
         <span class="n">eligible_nb_ips</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">i</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span>
-            <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
-            <span class="ow">or</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;assigned_object_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;dcim.interface&quot;</span>
+            <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="s2">"assigned_object_id"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="n">i</span><span class="p">[</span><span class="s2">"assigned_object_type"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"dcim.interface"</span>
         <span class="p">]</span>
         <span class="k">if</span> <span class="n">matching_nb_ips</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">eligible_nb_ips</span><span class="p">:</span>
             <span class="k">continue</span>
@@ -9161,33 +9161,33 @@ does not delete IP addresses.</p>
             <span class="k">continue</span>
         <span class="c1"># check if existing IP already assigned to same interface</span>
         <span class="k">for</span> <span class="n">nb_ip</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"assigned_object_id"</span><span class="p">]:</span>
                 <span class="c1"># ip already assigned to same interface</span>
                 <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;assigned_object_type&quot;</span><span class="p">]</span>
-                    <span class="ow">and</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span>
+                    <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"assigned_object_type"</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">"assigned_object_type"</span><span class="p">]</span>
+                    <span class="ow">and</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"assigned_object_id"</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">"assigned_object_id"</span><span class="p">]</span>
                 <span class="p">):</span>
                     <span class="c1"># Preserve a shared role already assigned in NetBox.</span>
                     <span class="k">if</span> <span class="p">(</span>
-                        <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;anycast&quot;</span><span class="p">,</span> <span class="s2">&quot;vip&quot;</span><span class="p">)</span>
-                        <span class="ow">and</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;anycast&quot;</span>
+                        <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"anycast"</span><span class="p">,</span> <span class="s2">"vip"</span><span class="p">)</span>
+                        <span class="ow">and</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"anycast"</span>
                     <span class="p">):</span>
-                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;found existing NetBox IP with &#39;</span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; role </span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, assigning </span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> role to live IP&quot;</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"found existing NetBox IP with '</span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">'role'</span><span class="p">]</span><span class="si">}</span><span class="s2">' role </span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">'address'</span><span class="p">]</span><span class="si">}</span><span class="s2">, assigning </span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">'role'</span><span class="p">]</span><span class="si">}</span><span class="s2"> role to live IP"</span>
                         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                        <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span>
+                        <span class="n">ip_live</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span>
                     <span class="c1"># check if vrf or role need an update</span>
                     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
                         <span class="n">nb_ip</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">!=</span> <span class="n">ip_live</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
-                        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">,</span> <span class="s2">&quot;vrf&quot;</span><span class="p">]</span>
-                        <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;vrf&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ignore_vrf</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ip_live</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"role"</span><span class="p">,</span> <span class="s2">"vrf"</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">==</span> <span class="s2">"vrf"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ignore_vrf</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ip_live</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
                     <span class="p">):</span>
                         <span class="n">payload</span> <span class="o">=</span> <span class="n">_ip_payload</span><span class="p">(</span><span class="n">ip_live</span><span class="p">,</span> <span class="n">ignore_vrf</span><span class="p">)</span>
-                        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+                        <span class="n">payload</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span>
                         <span class="n">bulk_update_ip</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                            <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">]</span>
+                        <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"in_sync"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="n">ip_live</span><span class="p">[</span><span class="s2">"address"</span><span class="p">]</span>
                         <span class="p">)</span>
                     <span class="k">break</span>
         <span class="c1"># no IP assigned to same interface</span>
@@ -9196,92 +9196,92 @@ does not delete IP addresses.</p>
             <span class="n">nb_ip</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">for</span> <span class="n">candidate_nb_ip</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span><span class="p">:</span>
                 <span class="c1"># Prefer reassigning an available IP over creating a duplicate.</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">candidate_nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">candidate_nb_ip</span><span class="p">[</span><span class="s2">"assigned_object_id"</span><span class="p">]:</span>
                     <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">candidate_nb_ip</span>
                     <span class="k">break</span>
             <span class="k">if</span> <span class="n">nb_ip</span><span class="p">:</span>
                 <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;anycast&quot;</span><span class="p">,</span> <span class="s2">&quot;vip&quot;</span><span class="p">)</span>
-                    <span class="ow">and</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;anycast&quot;</span>
+                    <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"anycast"</span><span class="p">,</span> <span class="s2">"vip"</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"anycast"</span>
                 <span class="p">):</span>
-                    <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span>
+                    <span class="n">ip_live</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span>
                 <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
-                    <span class="ow">and</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span>
-                    <span class="ow">and</span> <span class="p">(</span><span class="n">ignore_vrf</span> <span class="ow">or</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">])</span>
+                    <span class="n">ip_live</span><span class="p">[</span><span class="s2">"assigned_object_id"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+                    <span class="ow">and</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span>
+                    <span class="ow">and</span> <span class="p">(</span><span class="n">ignore_vrf</span> <span class="ow">or</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">])</span>
                 <span class="p">):</span>
-                    <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">]</span>
+                    <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"in_sync"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">ip_live</span><span class="p">[</span><span class="s2">"address"</span><span class="p">]</span>
                     <span class="p">)</span>
                     <span class="k">continue</span>
                 <span class="n">payload</span> <span class="o">=</span> <span class="n">_ip_payload</span><span class="p">(</span><span class="n">ip_live</span><span class="p">,</span> <span class="n">ignore_vrf</span><span class="p">)</span>
-                <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+                <span class="n">payload</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span>
                 <span class="n">bulk_update_ip</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span>
 
                 <span class="c1"># Reflect the planned assignment in the local NetBox snapshot so</span>
                 <span class="c1"># that another live interface cannot reuse the same unassigned</span>
                 <span class="c1"># record before the bulk update is applied.</span>
-                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;assigned_object_type&quot;</span><span class="p">]</span>
-                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span>
-                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_name</span>
-                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">intf_name</span>
-                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span>
+                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"assigned_object_type"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">"assigned_object_type"</span><span class="p">]</span>
+                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"assigned_object_id"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">"assigned_object_id"</span><span class="p">]</span>
+                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"device"</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_name</span>
+                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"interface"</span><span class="p">]</span> <span class="o">=</span> <span class="n">intf_name</span>
+                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_vrf</span><span class="p">:</span>
-                    <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span>
+                    <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">]</span>
                 <span class="k">continue</span>
 
             <span class="k">for</span> <span class="n">nb_ip</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span><span class="p">:</span>
                 <span class="c1"># existing NB IP already assigned to an interface</span>
-                <span class="k">if</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"assigned_object_id"</span><span class="p">]:</span>
                     <span class="c1"># Inherit a shared role from an existing NetBox assignment.</span>
                     <span class="k">if</span> <span class="p">(</span>
-                        <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;anycast&quot;</span><span class="p">,</span> <span class="s2">&quot;vip&quot;</span><span class="p">)</span>
-                        <span class="ow">and</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;anycast&quot;</span>
+                        <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"anycast"</span><span class="p">,</span> <span class="s2">"vip"</span><span class="p">)</span>
+                        <span class="ow">and</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"anycast"</span>
                     <span class="p">):</span>
-                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;found existing NetBox IP with &#39;</span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; role </span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, using </span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> role for live IP&quot;</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"found existing NetBox IP with '</span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">'role'</span><span class="p">]</span><span class="si">}</span><span class="s2">' role </span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">'address'</span><span class="p">]</span><span class="si">}</span><span class="s2">, using </span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">'role'</span><span class="p">]</span><span class="si">}</span><span class="s2"> role for live IP"</span>
                         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                        <span class="n">nb_ip_resolved_role</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span>
-                        <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span>
+                        <span class="n">nb_ip_resolved_role</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span>
+                        <span class="n">ip_live</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span>
                     <span class="c1"># attempt to resolve IP role</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">nb_ip_resolved_role</span> <span class="o">=</span> <span class="p">(</span>
                             <span class="n">resolve_ip_role</span><span class="p">(</span>
-                                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">],</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">],</span> <span class="n">anycast_nets</span>
+                                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"address"</span><span class="p">],</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"interface"</span><span class="p">],</span> <span class="n">anycast_nets</span>
                             <span class="p">)</span>
-                            <span class="ow">or</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span>
+                            <span class="ow">or</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span>
                         <span class="p">)</span>
                     <span class="c1"># add existing IP to updates if its role needs correcting</span>
-                    <span class="k">if</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">nb_ip_resolved_role</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span> <span class="o">!=</span> <span class="n">nb_ip_resolved_role</span><span class="p">:</span>
                         <span class="n">nb_ip_key</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">],</span>
-                            <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">],</span>
-                            <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">],</span>
+                            <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"device"</span><span class="p">],</span>
+                            <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"interface"</span><span class="p">],</span>
+                            <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"address"</span><span class="p">],</span>
                         <span class="p">)</span>
                         <span class="n">bulk_update_ip</span><span class="p">[</span><span class="n">nb_ip_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
-                            <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="n">nb_ip_resolved_role</span><span class="p">,</span>
+                            <span class="s2">"id"</span><span class="p">:</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">"id"</span><span class="p">],</span>
+                            <span class="s2">"role"</span><span class="p">:</span> <span class="n">nb_ip_resolved_role</span><span class="p">,</span>
                         <span class="p">}</span>
                     <span class="c1"># Shared addresses need a record for each interface.</span>
-                    <span class="k">if</span> <span class="n">nb_ip_resolved_role</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">ip_live</span><span class="p">[</span>
-                        <span class="s2">&quot;role&quot;</span>
-                    <span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;anycast&quot;</span><span class="p">,</span> <span class="s2">&quot;vip&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">nb_ip_resolved_role</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span> <span class="ow">and</span> <span class="n">ip_live</span><span class="p">[</span>
+                        <span class="s2">"role"</span>
+                    <span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"anycast"</span><span class="p">,</span> <span class="s2">"vip"</span><span class="p">):</span>
                         <span class="n">bulk_create_ip</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ip_payload</span><span class="p">(</span><span class="n">ip_live</span><span class="p">,</span> <span class="n">ignore_vrf</span><span class="p">)</span>
                         <span class="k">break</span>
                     <span class="c1"># A non-shared address assigned elsewhere is a conflict.</span>
-                    <span class="k">if</span> <span class="n">nb_ip_resolved_role</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;anycast&quot;</span><span class="p">,</span> <span class="s2">&quot;vip&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">nb_ip_resolved_role</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"anycast"</span><span class="p">,</span> <span class="s2">"vip"</span><span class="p">):</span>
                         <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;duplicate non anycast, non vip ip found, live IP </span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">intf_name</span><span class="si">}</span><span class="s2">-&gt;</span><span class="si">{</span><span class="n">ip_live</span><span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, &quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;overlaps with Netbox IP </span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">&#39;interface&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">-&gt;</span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                            <span class="sa">f</span><span class="s2">"duplicate non anycast, non vip ip found, live IP </span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">intf_name</span><span class="si">}</span><span class="s2">-&gt;</span><span class="si">{</span><span class="n">ip_live</span><span class="p">[</span><span class="s1">'address'</span><span class="p">]</span><span class="si">}</span><span class="s2">, "</span>
+                            <span class="sa">f</span><span class="s2">"overlaps with Netbox IP </span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">'device'</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">'interface'</span><span class="p">]</span><span class="si">}</span><span class="s2">-&gt;</span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">'address'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
                         <span class="p">)</span>
                         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
                         <span class="k">break</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;IP address sync actions: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_ip</span><span class="p">)</span><span class="si">}</span><span class="s2"> create, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_ip</span><span class="p">)</span><span class="si">}</span><span class="s2"> update&quot;</span>
+        <span class="sa">f</span><span class="s2">"IP address sync actions: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_ip</span><span class="p">)</span><span class="si">}</span><span class="s2"> create, "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_ip</span><span class="p">)</span><span class="si">}</span><span class="s2"> update"</span>
     <span class="p">)</span>
 
     <span class="c1"># make sure all devices present in results</span>
@@ -9293,24 +9293,24 @@ does not delete IP addresses.</p>
 
     <span class="c1"># check that update and create payloads have no non-shared duplicate IPs</span>
     <span class="c1"># Netbox has a bug allowing to create duplicate IPs in single create request</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;checking IP address payloads for duplicate non-shared addresses&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"checking IP address payloads for duplicate non-shared addresses"</span><span class="p">)</span>
     <span class="n">ip_address_seen</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># {address: [key, ...]}</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">ip_data</span> <span class="ow">in</span> <span class="p">{</span><span class="o">**</span><span class="n">bulk_create_ip</span><span class="p">,</span> <span class="o">**</span><span class="n">bulk_update_ip</span><span class="p">}</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">addr</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
-        <span class="n">role</span> <span class="o">=</span> <span class="n">ip_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">role</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;anycast&quot;</span><span class="p">,</span> <span class="s2">&quot;vip&quot;</span><span class="p">):</span>
+        <span class="n">role</span> <span class="o">=</span> <span class="n">ip_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"role"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span>
+        <span class="k">if</span> <span class="n">role</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"anycast"</span><span class="p">,</span> <span class="s2">"vip"</span><span class="p">):</span>
             <span class="n">ip_address_seen</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">addr</span><span class="p">,</span> <span class="n">dup_keys</span> <span class="ow">in</span> <span class="n">ip_address_seen</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dup_keys</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dup_keys</span><span class="p">:</span>
                 <span class="n">device_name</span><span class="p">,</span> <span class="n">intf_name</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">key</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;found duplicate non-anycast IP </span><span class="si">{</span><span class="n">addr</span><span class="si">}</span><span class="s2"> in payload for &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">intf_name</span><span class="si">}</span><span class="s2">, skipping&quot;</span>
+                    <span class="sa">f</span><span class="s2">"found duplicate non-anycast IP </span><span class="si">{</span><span class="n">addr</span><span class="si">}</span><span class="s2"> in payload for "</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">intf_name</span><span class="si">}</span><span class="s2">, skipping"</span>
                 <span class="p">)</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
                 <span class="n">bulk_create_ip</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="n">bulk_update_ip</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
@@ -9318,119 +9318,119 @@ does not delete IP addresses.</p>
     <span class="c1"># the actions that remain eligible for application.</span>
     <span class="n">full_diff</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">device_name</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">{},</span>
-            <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">])),</span>
+            <span class="s2">"create"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"update"</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"in_sync"</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">"in_sync"</span><span class="p">])),</span>
         <span class="p">}</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">device_results</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
     <span class="p">}</span>
-    <span class="n">nb_ips_by_id</span> <span class="o">=</span> <span class="p">{</span><span class="n">ip_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]:</span> <span class="n">ip_data</span> <span class="k">for</span> <span class="n">ip_data</span> <span class="ow">in</span> <span class="n">nb_ips</span><span class="p">}</span>
+    <span class="n">nb_ips_by_id</span> <span class="o">=</span> <span class="p">{</span><span class="n">ip_data</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]:</span> <span class="n">ip_data</span> <span class="k">for</span> <span class="n">ip_data</span> <span class="ow">in</span> <span class="n">nb_ips</span><span class="p">}</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">bulk_create_ip</span><span class="p">:</span>
-        <span class="n">full_diff</span><span class="p">[</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s2">&quot;create&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">full_diff</span><span class="p">[</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s2">"create"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">payload</span> <span class="ow">in</span> <span class="n">bulk_update_ip</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">current</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">nb_ips_by_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="p">{}))</span>
-        <span class="k">if</span> <span class="n">current</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
-            <span class="n">current</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">full_diff</span><span class="p">[</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s2">&quot;update&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">field</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;old_value&quot;</span><span class="p">:</span> <span class="n">current</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">),</span> <span class="s2">&quot;new_value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">nb_ips_by_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="s2">"id"</span><span class="p">],</span> <span class="p">{}))</span>
+        <span class="k">if</span> <span class="n">current</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"role"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"none"</span><span class="p">:</span>
+            <span class="n">current</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">full_diff</span><span class="p">[</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s2">"update"</span><span class="p">][</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">field</span><span class="p">:</span> <span class="p">{</span><span class="s2">"old_value"</span><span class="p">:</span> <span class="n">current</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">),</span> <span class="s2">"new_value"</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
             <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">payload</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">field</span> <span class="o">!=</span> <span class="s2">&quot;id&quot;</span> <span class="ow">and</span> <span class="n">current</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="o">!=</span> <span class="n">value</span>
+            <span class="k">if</span> <span class="n">field</span> <span class="o">!=</span> <span class="s2">"id"</span> <span class="ow">and</span> <span class="n">current</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="o">!=</span> <span class="n">value</span>
         <span class="p">}</span>
     <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-        <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">]))</span>
-        <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">address</span><span class="p">:</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">][</span><span class="n">address</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">address</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">])</span>
+        <span class="n">actions</span><span class="p">[</span><span class="s2">"create"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">"create"</span><span class="p">]))</span>
+        <span class="n">actions</span><span class="p">[</span><span class="s2">"update"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">address</span><span class="p">:</span> <span class="n">actions</span><span class="p">[</span><span class="s2">"update"</span><span class="p">][</span><span class="n">address</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">address</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">"update"</span><span class="p">])</span>
         <span class="p">}</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="n">full_diff</span>
 
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="s2">&quot;dry-run requested, returning IP address sync plan without changes&quot;</span>
+            <span class="s2">"dry-run requested, returning IP address sync plan without changes"</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">bulk_create_ip</span><span class="p">:</span>
             <span class="n">device_name</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"created"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">bulk_update_ip</span><span class="p">:</span>
             <span class="n">device_name</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"updated"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span><span class="n">full_diff</span><span class="p">):</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no IP address sync changes required&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no IP address sync changes required"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="k">if</span> <span class="n">with_approval</span><span class="p">:</span>
         <span class="n">ip_preview_result</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">device_results</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">bulk_create_ip</span><span class="p">:</span>
             <span class="n">device_name</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">ip_preview_result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">ip_preview_result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"created"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">bulk_update_ip</span><span class="p">:</span>
             <span class="n">device_name</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">ip_preview_result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="s2">&quot;IP address sync&quot;</span><span class="p">,</span> <span class="n">ip_preview_result</span><span class="p">):</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
+            <span class="n">ip_preview_result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"updated"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="s2">"IP address sync"</span><span class="p">,</span> <span class="n">ip_preview_result</span><span class="p">):</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"skipped"</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">ip_preview_result</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;review declined; changes were not applied&quot;</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"review declined; changes were not applied"</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
     <span class="c1"># update first, since existing IPs might change role to anycast</span>
     <span class="k">if</span> <span class="n">bulk_update_ip</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_ip</span><span class="p">)</span><span class="si">}</span><span class="s2"> IP address(es)&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"updating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_ip</span><span class="p">)</span><span class="si">}</span><span class="s2"> IP address(es)"</span><span class="p">)</span>
         <span class="n">update_items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bulk_update_ip</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
         <span class="n">total_batches</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">update_items</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">batch_size</span>
         <span class="k">for</span> <span class="n">batch_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">update_items</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
             <span class="n">batch</span> <span class="o">=</span> <span class="n">update_items</span><span class="p">[</span><span class="n">batch_start</span> <span class="p">:</span> <span class="n">batch_start</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
             <span class="n">batch_number</span> <span class="o">=</span> <span class="n">batch_start</span> <span class="o">//</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;updating IP address batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> address(es))&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"updating IP address batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> address(es))"</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">update</span><span class="p">([</span><span class="n">payload</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">payload</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">])</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to update IP address batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"failed to update IP address batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">ret</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
                 <span class="n">device_name</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">ip_address</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ip_address</span><span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_ip</span><span class="p">)</span><span class="si">}</span><span class="s2"> IP addresses&quot;</span><span class="p">)</span>
+                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"updated"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ip_address</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"updated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_ip</span><span class="p">)</span><span class="si">}</span><span class="s2"> IP addresses"</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no IP addresses to update&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no IP addresses to update"</span><span class="p">)</span>
 
     <span class="c1"># create new IPs next</span>
     <span class="k">if</span> <span class="n">bulk_create_ip</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;creating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_ip</span><span class="p">)</span><span class="si">}</span><span class="s2"> IP address(es)&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"creating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_ip</span><span class="p">)</span><span class="si">}</span><span class="s2"> IP address(es)"</span><span class="p">)</span>
         <span class="n">create_items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bulk_create_ip</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
         <span class="n">total_batches</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">create_items</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">batch_size</span>
         <span class="k">for</span> <span class="n">batch_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">create_items</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
             <span class="n">batch</span> <span class="o">=</span> <span class="n">create_items</span><span class="p">[</span><span class="n">batch_start</span> <span class="p">:</span> <span class="n">batch_start</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
             <span class="n">batch_number</span> <span class="o">=</span> <span class="n">batch_start</span> <span class="o">//</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;creating IP address batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> address(es))&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"creating IP address batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> address(es))"</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">create</span><span class="p">([</span><span class="n">payload</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">payload</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">])</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to create IP address batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"failed to create IP address batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">ret</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
                 <span class="n">device_name</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">ip_address</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ip_address</span><span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_ip</span><span class="p">)</span><span class="si">}</span><span class="s2"> IP addresses&quot;</span><span class="p">)</span>
+                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"created"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ip_address</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_ip</span><span class="p">)</span><span class="si">}</span><span class="s2"> IP addresses"</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no IP addresses to create&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no IP addresses to create"</span><span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;IP address sync complete&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"IP address sync complete"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>

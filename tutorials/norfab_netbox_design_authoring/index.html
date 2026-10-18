@@ -7356,10 +7356,10 @@ uses a previously defined site-scoped pool with the IPAM role <code>LOOPBACKS</c
 <span class="w">  </span><span class="nt">ip_addresses</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">create_ip</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">prefix</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">site</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">context.site</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">          </span><span class="nt">site</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">context.site</span><span class="nv"> </span><span class="s">}}"</span>
 <span class="w">          </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LOOPBACKS</span>
 <span class="w">        </span><span class="nt">mask_len</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
-<span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">context.site</span><span class="nv"> </span><span class="s">}}</span><span class="nv"> </span><span class="s">spine-1</span><span class="nv"> </span><span class="s">Loopback0&quot;</span>
+<span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">context.site</span><span class="nv"> </span><span class="s">}}</span><span class="nv"> </span><span class="s">spine-1</span><span class="nv"> </span><span class="s">Loopback0"</span>
 <span class="w">        </span><span class="nt">is_primary</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
 <h3 id="handle-unsupported-relationships-explicitly">Handle unsupported relationships explicitly<a class="headerlink" href="#handle-unsupported-relationships-explicitly" title="Permanent link">¤</a></h3>
@@ -7413,12 +7413,12 @@ custom writes belong in deployment-time functions that honor <code>dry_run</code
 <span class="w">  </span><span class="nt">additionalProperties</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 
 <span class="nt">prefixes</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">context.parent_prefix</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">context.parent_prefix</span><span class="nv"> </span><span class="s">}}"</span>
 <span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EXAMPLE branch allocation pool</span>
 
 <span class="nt">ip_addresses</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">create_ip</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">context.parent_prefix</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">      </span><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">context.parent_prefix</span><span class="nv"> </span><span class="s">}}"</span>
 <span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EXAMPLE branch service address</span>
 </code></pre></div>
 <p>Example context: <code>{"parent_prefix": "192.0.2.0/24"}</code>. Interface assignment and more allocation patterns are in the <a href="../../workers/netbox/services_netbox_service_tasks_design_deploy/#built-in-next-available-allocation-functions">task reference</a>.</p>
@@ -7426,10 +7426,10 @@ custom writes belong in deployment-time functions that honor <code>dry_run</code
 <p>If NorFab MCP is available, discover the exposed Netbox <code>design_deploy</code> tool and use it when the user authorizes execution. Supply the worker-accessible design path as <code>design</code>, template inputs as <code>context</code>, and the agreed <code>instance</code> and <code>branch</code>. Use <code>dry_run: true</code> for a preview. Inspect the returned worker results for <code>failed</code> and <code>errors</code> before reporting success. Tool availability alone does not authorize deployment. See the <a href="../../workers/netbox/services_netbox_service_tasks_design_deploy/#examples">MCP invocation example</a>.</p>
 <p>Example task arguments for a preview, assuming branching is available:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;design&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nf://netbox/designs/branch.yaml&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;site&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BRANCH-1&quot;</span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;branch&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;branch-review&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;dry_run&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="nt">"design"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nf://netbox/designs/branch.yaml"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"context"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"site"</span><span class="p">:</span><span class="w"> </span><span class="s2">"BRANCH-1"</span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"branch"</span><span class="p">:</span><span class="w"> </span><span class="s2">"branch-review"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"dry_run"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Adapt the arguments to the discovered tool's schema and the design's input schema. For an authorized deployment, call the same tool with <code>dry_run: false</code>. If MCP is unavailable, provide the CLI or Python invocation instead of claiming the design was deployed.</p>

@@ -7902,35 +7902,35 @@ dictionary:</p>
     <span class="nb">input</span><span class="o">=</span><span class="n">SomeInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SomeOutput</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;guardrails&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"guardrails"</span><span class="p">:</span> <span class="p">[</span>
             <span class="c1"># Existing input guardrails.</span>
         <span class="p">],</span>
-        <span class="s2">&quot;result_guardrails&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"result_guardrails"</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Keep this task result below 128 KiB.&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;limit&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="mi">131072</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Keep this task result below 128 KiB."</span><span class="p">,</span>
+                <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"limit"</span><span class="p">,</span>
+                <span class="s2">"limit"</span><span class="p">:</span> <span class="mi">131072</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="p">{</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Redact passwords from command output.&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;replace&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="s2">&quot;(?i)(password</span><span class="se">\\</span><span class="s2">s*[=:]</span><span class="se">\\</span><span class="s2">s*)</span><span class="se">\\</span><span class="s2">S+&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;replace&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">1[REDACTED:PASSWORD]&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Sensitive task result content was redacted.&quot;</span><span class="p">],</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Redact passwords from command output."</span><span class="p">,</span>
+                <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"replace"</span><span class="p">,</span>
+                <span class="s2">"match"</span><span class="p">:</span> <span class="s2">"(?i)(password</span><span class="se">\\</span><span class="s2">s*[=:]</span><span class="se">\\</span><span class="s2">s*)</span><span class="se">\\</span><span class="s2">S+"</span><span class="p">,</span>
+                <span class="s2">"replace"</span><span class="p">:</span> <span class="s2">"</span><span class="se">\\</span><span class="s2">1[REDACTED:PASSWORD]"</span><span class="p">,</span>
+                <span class="s2">"messages"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Sensitive task result content was redacted."</span><span class="p">],</span>
             <span class="p">},</span>
             <span class="p">{</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Block known instruction injection text.&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
-                    <span class="s2">&quot;(?i)ignore (all |the )?previous instructions&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;(?i)system message begins&quot;</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Block known instruction injection text."</span><span class="p">,</span>
+                <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"regex"</span><span class="p">,</span>
+                <span class="s2">"match"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">"(?i)ignore (all |the )?previous instructions"</span><span class="p">,</span>
+                    <span class="s2">"(?i)system message begins"</span><span class="p">,</span>
                 <span class="p">],</span>
-                <span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span>
-                    <span class="s2">&quot;Task result contained an unsafe instruction pattern.&quot;</span>
+                <span class="s2">"errors"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">"Task result contained an unsafe instruction pattern."</span>
                 <span class="p">],</span>
             <span class="p">},</span>
         <span class="p">],</span>
-        <span class="s2">&quot;prompts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
+        <span class="s2">"prompts"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">some_task</span><span class="p">(</span><span class="o">...</span><span class="p">):</span>
@@ -7939,10 +7939,10 @@ dictionary:</p>
 <p><code>mcp["result_guardrails"]</code> is NorFab metadata, not an MCP SDK <code>Tool</code> field.
 Discovery must remove it from a copied metadata dictionary before constructing
 <code>types.Tool(...)</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="n">tool_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;mcp&quot;</span><span class="p">])</span>
-<span class="n">prompts_metadata</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;prompts&quot;</span><span class="p">,</span> <span class="p">[])</span>
-<span class="n">call_guardrails_metadata</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;guardrails&quot;</span><span class="p">,</span> <span class="p">[])</span>
-<span class="n">result_guardrails_metadata</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;result_guardrails&quot;</span><span class="p">,</span> <span class="p">[])</span>
+<div class="highlight"><pre><span></span><code><span class="n">tool_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">task</span><span class="p">[</span><span class="s2">"mcp"</span><span class="p">])</span>
+<span class="n">prompts_metadata</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"prompts"</span><span class="p">,</span> <span class="p">[])</span>
+<span class="n">call_guardrails_metadata</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"guardrails"</span><span class="p">,</span> <span class="p">[])</span>
+<span class="n">result_guardrails_metadata</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"result_guardrails"</span><span class="p">,</span> <span class="p">[])</span>
 </code></pre></div>
 <p>The split must not mutate the task metadata retained for inspection or later
 discovery cycles.</p>
@@ -7983,33 +7983,33 @@ guardrails are evaluated through FastMCP.</p>
 <code>tools.result_guardrails</code>, matching the shape of existing inventory call
 guardrails:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fastmcp</span>
-<span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1&quot;</span>
+<span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="s">"127.0.0.1"</span>
 <span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8001</span>
 
 <span class="nt">tools</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">result_guardrails</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
-<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">"*"</span>
+<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="s">"*"</span>
 <span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Keep all MCP task results below 256 KiB.</span>
 <span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">limit</span>
 <span class="w">      </span><span class="nt">limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">262144</span>
 
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
-<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">"*"</span>
+<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="s">"*"</span>
 <span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Redact PEM private keys.</span>
 <span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">replace</span>
-<span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(?s)-----BEGIN</span><span class="nv"> </span><span class="s">(?:RSA</span><span class="nv"> </span><span class="s">|EC</span><span class="nv"> </span><span class="s">|OPENSSH</span><span class="nv"> </span><span class="s">)?PRIVATE</span><span class="nv"> </span><span class="s">KEY-----.*?-----END</span><span class="nv"> </span><span class="s">(?:RSA</span><span class="nv"> </span><span class="s">|EC</span><span class="nv"> </span><span class="s">|OPENSSH</span><span class="nv"> </span><span class="s">)?PRIVATE</span><span class="nv"> </span><span class="s">KEY-----&quot;</span>
-<span class="w">      </span><span class="nt">replace</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;[REDACTED:PRIVATE_KEY]&quot;</span>
+<span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">"(?s)-----BEGIN</span><span class="nv"> </span><span class="s">(?:RSA</span><span class="nv"> </span><span class="s">|EC</span><span class="nv"> </span><span class="s">|OPENSSH</span><span class="nv"> </span><span class="s">)?PRIVATE</span><span class="nv"> </span><span class="s">KEY-----.*?-----END</span><span class="nv"> </span><span class="s">(?:RSA</span><span class="nv"> </span><span class="s">|EC</span><span class="nv"> </span><span class="s">|OPENSSH</span><span class="nv"> </span><span class="s">)?PRIVATE</span><span class="nv"> </span><span class="s">KEY-----"</span>
+<span class="w">      </span><span class="nt">replace</span><span class="p">:</span><span class="w"> </span><span class="s">"[REDACTED:PRIVATE_KEY]"</span>
 <span class="w">      </span><span class="nt">messages</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;Private</span><span class="nv"> </span><span class="s">key</span><span class="nv"> </span><span class="s">content</span><span class="nv"> </span><span class="s">was</span><span class="nv"> </span><span class="s">redacted</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">task</span><span class="nv"> </span><span class="s">result.&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"Private</span><span class="nv"> </span><span class="s">key</span><span class="nv"> </span><span class="s">content</span><span class="nv"> </span><span class="s">was</span><span class="nv"> </span><span class="s">redacted</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">task</span><span class="nv"> </span><span class="s">result."</span>
 
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir</span>
 <span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cli</span>
 <span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Block a deployment-specific instruction banner.</span>
 <span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">regex</span>
-<span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(?i)instructions</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">network</span><span class="nv"> </span><span class="s">administrator:&quot;</span>
+<span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">"(?i)instructions</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">network</span><span class="nv"> </span><span class="s">administrator:"</span>
 <span class="w">      </span><span class="nt">errors</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;Task</span><span class="nv"> </span><span class="s">result</span><span class="nv"> </span><span class="s">contained</span><span class="nv"> </span><span class="s">an</span><span class="nv"> </span><span class="s">unsafe</span><span class="nv"> </span><span class="s">instruction</span><span class="nv"> </span><span class="s">banner.&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"Task</span><span class="nv"> </span><span class="s">result</span><span class="nv"> </span><span class="s">contained</span><span class="nv"> </span><span class="s">an</span><span class="nv"> </span><span class="s">unsafe</span><span class="nv"> </span><span class="s">instruction</span><span class="nv"> </span><span class="s">banner."</span>
 </code></pre></div>
 <p>Each inventory entry requires <code>service</code> and <code>task</code>. Selectors use <code>fnmatch</code>
 semantics so operators can define global rules with <code>"*"</code> or restrict rules to
@@ -8021,8 +8021,8 @@ same explicit pattern used for input guardrails:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">tools</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">disable_builtin_guardrails</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">  </span><span class="nt">result_guardrails</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
-<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">"*"</span>
+<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="s">"*"</span>
 <span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">limit</span>
 <span class="w">      </span><span class="nt">limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">262144</span>
 </code></pre></div>
@@ -8183,11 +8183,11 @@ result stays unchanged in the client database.</p>
 <span class="w">  </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cli</span>
 <span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">replace</span>
 <span class="w">  </span><span class="nt">match</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;(?i)(authorization:\\s*bearer\\s+)\\S+&quot;</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;(?i)(password\\s*[=:]\\s*)\\S+&quot;</span>
-<span class="w">  </span><span class="nt">replace</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;\\1[REDACTED]&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"(?i)(authorization:\\s*bearer\\s+)\\S+"</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"(?i)(password\\s*[=:]\\s*)\\S+"</span>
+<span class="w">  </span><span class="nt">replace</span><span class="p">:</span><span class="w"> </span><span class="s">"\\1[REDACTED]"</span>
 <span class="w">  </span><span class="nt">messages</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;Sensitive</span><span class="nv"> </span><span class="s">content</span><span class="nv"> </span><span class="s">was</span><span class="nv"> </span><span class="s">redacted</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">task</span><span class="nv"> </span><span class="s">result.&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"Sensitive</span><span class="nv"> </span><span class="s">content</span><span class="nv"> </span><span class="s">was</span><span class="nv"> </span><span class="s">redacted</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">task</span><span class="nv"> </span><span class="s">result."</span>
 </code></pre></div>
 <p>For each worker, FastMCP walks the values stored in the worker's <code>result</code> and
 <code>diff</code> fields in a copied aggregate result. Either field may contain a string,
@@ -8247,10 +8247,10 @@ actual result formats they expose.</p>
 <span class="w">  </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cli</span>
 <span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">regex</span>
 <span class="w">  </span><span class="nt">match</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;(?i)ignore</span><span class="nv"> </span><span class="s">previous</span><span class="nv"> </span><span class="s">instructions&quot;</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;(?i)call</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">following</span><span class="nv"> </span><span class="s">tool&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"(?i)ignore</span><span class="nv"> </span><span class="s">previous</span><span class="nv"> </span><span class="s">instructions"</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"(?i)call</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">following</span><span class="nv"> </span><span class="s">tool"</span>
 <span class="w">  </span><span class="nt">errors</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;Task</span><span class="nv"> </span><span class="s">result</span><span class="nv"> </span><span class="s">contained</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">blocked</span><span class="nv"> </span><span class="s">instruction</span><span class="nv"> </span><span class="s">pattern.&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"Task</span><span class="nv"> </span><span class="s">result</span><span class="nv"> </span><span class="s">contained</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">blocked</span><span class="nv"> </span><span class="s">instruction</span><span class="nv"> </span><span class="s">pattern."</span>
 </code></pre></div>
 <p>For each worker, FastMCP recursively inspects every string leaf inside the raw
 <code>result</code> and <code>diff</code> fields. A match from any configured expression withholds
@@ -8340,7 +8340,7 @@ with the worker name and key path. If the rule does not configure <code>messages
 or configures an empty list, FastMCP appends this default text with the same
 context:</p>
 <div class="highlight"><pre><span></span><code>FastMCP result guardrail replaced sensitive content for worker
-&#39;nornir-worker-1&#39; at path &#39;result.devices[0].password&#39;.
+'nornir-worker-1' at path 'result.devices[0].password'.
 </code></pre></div>
 <p>Messages are appended only when at least one replacement occurred. Repeated
 matches at the same worker/path for the same rule produce one set of notices;
@@ -8370,19 +8370,19 @@ not copied. In particular, <code>errors</code> and <code>messages</code> are emp
 is not misrepresented as a task execution failure.</p>
 <p>Example worker value after a result exceeds its limit:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;result&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Task result omitted because its serialized size of 917504 bytes exceeded the FastMCP limit of 262144 bytes. Retrieve the raw result from the FastMCP client database using job UUID &#39;5d2c7c8625bd4ad6aa456c06f8abfa52&#39;. The stored result has not been sanitized.&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;failed&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;errors&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">  </span><span class="nt">&quot;task&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">  </span><span class="nt">&quot;juuid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5d2c7c8625bd4ad6aa456c06f8abfa52&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;task_started&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;task_completed&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;diff&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;dry_run&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">  </span><span class="nt">"result"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Task result omitted because its serialized size of 917504 bytes exceeded the FastMCP limit of 262144 bytes. Retrieve the raw result from the FastMCP client database using job UUID '5d2c7c8625bd4ad6aa456c06f8abfa52'. The stored result has not been sanitized."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"failed"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"errors"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">"task"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"messages"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">"juuid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5d2c7c8625bd4ad6aa456c06f8abfa52"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"resources"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"task_started"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"task_completed"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"service"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"diff"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"dry_run"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>The reconstructed limit response is terminal and intentionally is not checked
@@ -8408,9 +8408,9 @@ dependency and can still disclose secrets or follow injected instructions.</p>
 <p>The FastMCP worker's <code>NFPClient</code> already stores job results in its client-side
 SQLite database. Trusted local code can retrieve a result using the existing
 worker result <code>juuid</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="n">juuid</span> <span class="o">=</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;juuid&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><span class="n">juuid</span> <span class="o">=</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">"juuid"</span><span class="p">]</span>
 <span class="n">job</span> <span class="o">=</span> <span class="n">fastmcp_worker</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">job_db</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="n">juuid</span><span class="p">)</span>
-<span class="n">raw_result</span> <span class="o">=</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;result_data&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">job</span> <span class="k">else</span> <span class="kc">None</span>
+<span class="n">raw_result</span> <span class="o">=</span> <span class="n">job</span><span class="p">[</span><span class="s2">"result_data"</span><span class="p">]</span> <span class="k">if</span> <span class="n">job</span> <span class="k">else</span> <span class="kc">None</span>
 </code></pre></div>
 <p>The stored result is raw and has not passed through <code>replace</code> guardrails. It may
 be large or sensitive and must be handled accordingly.</p>

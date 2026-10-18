@@ -7902,7 +7902,7 @@ as soon as the client is constructed, without waiting for all local worker
 processes to finish initialization.</p>
 <p><code>NorFab.start()</code> must no longer expose or use a public <code>wait</code> argument. Startup
 uses one simple path:</p>
-<div class="highlight"><pre><span></span><code><span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">)</span>
 <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 </code></pre></div>
@@ -7912,7 +7912,7 @@ behavior. Broker and workers continue starting in the background.</p>
 <p><code>NorFab.__enter__()</code> must support the same behavior as direct lifecycle usage.
 Context manager usage should remain valid and should not require a separate
 NFCLI flow:</p>
-<div class="highlight"><pre><span></span><code><span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<div class="highlight"><pre><span></span><code><span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">client</span>
 </code></pre></div>
 <p>NFCLI default shell mode should keep using <code>with NorFab(...) as nf</code>, with all
@@ -8023,7 +8023,7 @@ a local broker is being started in the same NorFab instance.</p>
 <h3 id="norfab-constructor">NorFab Constructor<a class="headerlink" href="#norfab-constructor" title="Permanent link">¤</a></h3>
 <p>Add optional arguments:</p>
 <div class="highlight"><pre><span></span><code><span class="n">NorFab</span><span class="p">(</span>
-    <span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">,</span>
+    <span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">,</span>
     <span class="n">inventory_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">base_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">log_level</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -8124,7 +8124,7 @@ flow would break current semantics.</p>
 <div class="highlight"><pre><span></span><code><span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">(</span>
     <span class="n">broker_endpoint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">broker_token</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;NFPClient&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"NFPClient"</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Behavior:</p>
@@ -8241,13 +8241,13 @@ inventory load.</p>
 </ul>
 <h3 id="2-apply-broker-overrides-centrally">2. Apply Broker Overrides Centrally<a class="headerlink" href="#2-apply-broker-overrides-centrally" title="Permanent link">¤</a></h3>
 <p>After inventory is loaded, apply:</p>
-<div class="highlight"><pre><span></span><code><span class="n">broker_url</span> <span class="o">=</span> <span class="n">broker_url</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NORFAB_BROKER_URL&quot;</span><span class="p">)</span>
-<span class="n">broker_token</span> <span class="o">=</span> <span class="n">broker_token</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;NORFAB_BROKER_TOKEN&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">broker_url</span> <span class="o">=</span> <span class="n">broker_url</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"NORFAB_BROKER_URL"</span><span class="p">)</span>
+<span class="n">broker_token</span> <span class="o">=</span> <span class="n">broker_token</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"NORFAB_BROKER_TOKEN"</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="n">broker_url</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">broker</span><span class="p">[</span><span class="s2">&quot;endpoint&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">broker_url</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">broker</span><span class="p">[</span><span class="s2">"endpoint"</span><span class="p">]</span> <span class="o">=</span> <span class="n">broker_url</span>
 <span class="k">if</span> <span class="n">broker_token</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">broker</span><span class="p">[</span><span class="s2">&quot;shared_key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">broker_token</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">broker</span><span class="p">[</span><span class="s2">"shared_key"</span><span class="p">]</span> <span class="o">=</span> <span class="n">broker_token</span>
 </code></pre></div>
 <p>If neither explicit arguments nor environment variables are present, do not
 modify these inventory fields. Then set <code>self.broker_endpoint</code> from the final
@@ -8309,7 +8309,7 @@ future restart paths can call it more than once. It should not insert duplicate
 <div class="highlight"><pre><span></span><code><span class="bp">self</span><span class="o">.</span><span class="n">startup_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span>
     <span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_start_components</span><span class="p">,</span>
     <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">run_broker</span><span class="p">,</span> <span class="n">run_workers</span><span class="p">),</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;norfab-startup&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"norfab-startup"</span><span class="p">,</span>
     <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="bp">self</span><span class="o">.</span><span class="n">startup_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
@@ -8354,8 +8354,8 @@ processes while shutdown is trying to stop them.</p>
 <p>Restart support should be implemented after the client-first startup change.
 It should be a normal supported feature, not experimental.</p>
 <p>Required public Python API methods:</p>
-<div class="highlight"><pre><span></span><code><span class="n">nf</span><span class="o">.</span><span class="n">restart_worker</span><span class="p">(</span><span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;client-request&quot;</span><span class="p">)</span>
-<span class="n">nf</span><span class="o">.</span><span class="n">restart_broker</span><span class="p">(</span><span class="n">reason</span><span class="o">=</span><span class="s2">&quot;client-request&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">nf</span><span class="o">.</span><span class="n">restart_worker</span><span class="p">(</span><span class="s2">"nornir-worker-1"</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s2">"client-request"</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">restart_broker</span><span class="p">(</span><span class="n">reason</span><span class="o">=</span><span class="s2">"client-request"</span><span class="p">)</span>
 </code></pre></div>
 <p>Do not add <code>restart_all</code> in the first restart implementation.</p>
 <p>Lifecycle commands should be serialized through one NFAPI-owned
@@ -8365,11 +8365,11 @@ and child processes. The lifecycle supervisor is the only place that mutates
 broker/worker process state.</p>
 <p>Use plain dictionary lifecycle signals initially:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;restart_worker&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="s2">&quot;worker-request&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span>
+    <span class="s2">"action"</span><span class="p">:</span> <span class="s2">"restart_worker"</span><span class="p">,</span>
+    <span class="s2">"target"</span><span class="p">:</span> <span class="s2">"nornir-worker-1"</span><span class="p">,</span>
+    <span class="s2">"reason"</span><span class="p">:</span> <span class="s2">"worker-request"</span><span class="p">,</span>
+    <span class="s2">"source"</span><span class="p">:</span> <span class="s2">"nornir-worker-1"</span><span class="p">,</span>
+    <span class="s2">"timestamp"</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span>
 <span class="p">}</span>
 </code></pre></div>
 <h3 id="worker-restart">Worker Restart<a class="headerlink" href="#worker-restart" title="Permanent link">¤</a></h3>

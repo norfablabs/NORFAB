@@ -7287,14 +7287,14 @@ successful batches.</p>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;sync_bgp_asn&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"sync_bgp_asn"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;edge-1&quot;</span><span class="p">,</span> <span class="s2">&quot;edge-2&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;Private&quot;</span><span class="p">,</span>
+            <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"edge-1"</span><span class="p">,</span> <span class="s2">"edge-2"</span><span class="p">],</span>
+            <span class="s2">"rir"</span><span class="p">:</span> <span class="s2">"Private"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
@@ -7916,16 +7916,16 @@ observed. ASNs and device associations are never deleted.</p>
 <span class="normal">583</span>
 <span class="normal">584</span>
 <span class="normal">585</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncBgpAsnInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncBgpAsnResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Sync BGP ASNs&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Sync BGP ASNs"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -7939,13 +7939,13 @@ observed. ASNs and device associations are never deleted.</p>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">rir</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">device_custom_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;devices&quot;</span><span class="p">,</span>
+    <span class="n">device_custom_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"devices"</span><span class="p">,</span>
     <span class="n">ignore_asn_by_range</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">preserve_description</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Synchronize globally unique live BGP ASNs with NetBox.</span>
+<span class="w">    </span><span class="sd">"""Synchronize globally unique live BGP ASNs with NetBox.</span>
 
 <span class="sd">    Existing ASNs are updated without requiring an RIR. Missing ASNs are</span>
 <span class="sd">    created only when ``rir`` identifies an existing NetBox RIR. The</span>
@@ -7968,11 +7968,11 @@ observed. ASNs and device associations are never deleted.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: Global ASN synchronization actions.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">devices</span> <span class="ow">or</span> <span class="p">[])</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_bgp_asn&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_bgp_asn"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="n">SyncActionSummaryMap</span><span class="p">()</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
         <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
@@ -7980,22 +7980,22 @@ observed. ASNs and device associations are never deleted.</p>
     <span class="p">)</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;starting BGP ASN sync using NetBox instance &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; for &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> explicit device(s)&quot;</span>
+        <span class="sa">f</span><span class="s2">"starting BGP ASN sync using NetBox instance '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">' for "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> explicit device(s)"</span>
     <span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync BGP ASNs: instance &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;, dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync BGP ASNs: instance '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">', dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;resolving devices from Nornir filters&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"resolving devices from Nornir filters"</span><span class="p">)</span>
         <span class="n">devices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_nornir_hosts</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">timeout</span><span class="p">))</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">devices</span><span class="p">))</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;no devices specified&quot;</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync BGP ASNs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">"no devices specified"</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync BGP ASNs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
@@ -8005,19 +8005,19 @@ observed. ASNs and device associations are never deleted.</p>
         <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span>
-            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name&quot;</span><span class="p">,</span>
+            <span class="n">fields</span><span class="o">=</span><span class="s2">"id,name"</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="p">}</span>
     <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">devices</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_devices</span><span class="p">]:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;device &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; not found in NetBox&quot;</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync BGP ASNs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"device '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">' not found in NetBox"</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync BGP ASNs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">devices</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">nb_devices</span><span class="p">]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;validated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> NetBox device(s)&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"validated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> NetBox device(s)"</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">custom_fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">device_custom_field</span><span class="p">):</span>
         <span class="n">device_custom_field</span> <span class="o">=</span> <span class="kc">None</span>
@@ -8025,15 +8025,15 @@ observed. ASNs and device associations are never deleted.</p>
     <span class="n">ignored_asns</span> <span class="o">=</span> <span class="p">{</span>
         <span class="nb">int</span><span class="p">(</span><span class="n">asn</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">asn_range</span> <span class="ow">in</span> <span class="n">ignore_asn_by_range</span> <span class="ow">or</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">asn</span> <span class="ow">in</span> <span class="n">expand_alphanumeric_range</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">asn_range</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">asn</span> <span class="ow">in</span> <span class="n">expand_alphanumeric_range</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="n">asn_range</span><span class="si">}</span><span class="s2">]"</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;collecting live BGP ASNs from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"collecting live BGP ASNs from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)"</span><span class="p">)</span>
     <span class="n">parse_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;parse_ttp&quot;</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;get&quot;</span><span class="p">:</span> <span class="s2">&quot;bgp_asn&quot;</span><span class="p">,</span> <span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">},</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+        <span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="s2">"parse_ttp"</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"get"</span><span class="p">:</span> <span class="s2">"bgp_asn"</span><span class="p">,</span> <span class="s2">"FL"</span><span class="p">:</span> <span class="n">devices</span><span class="p">},</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">observations</span> <span class="o">=</span> <span class="p">{}</span>
@@ -8041,74 +8041,74 @@ observed. ASNs and device associations are never deleted.</p>
     <span class="n">failed_devices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">parsed_count</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">worker_data</span> <span class="ow">in</span> <span class="n">parse_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">resources_failed</span> <span class="o">=</span> <span class="n">worker_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resources_failed&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="n">resources_failed</span> <span class="o">=</span> <span class="n">worker_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"resources_failed"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">resources_failed</span><span class="p">:</span>
             <span class="n">failed_devices</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">resources_failed</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
                 <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">resources_failed</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2"> failed to fetch BGP ASN data from devices &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">resources_failed</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2"> failed to fetch BGP ASN data from devices "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">resources_failed</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync BGP ASNs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync BGP ASNs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">worker_data</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;worker &#39;</span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2">&#39; failed to collect live BGP ASN data&quot;</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync BGP ASNs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">worker_data</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"worker '</span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2">' failed to collect live BGP ASN data"</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync BGP ASNs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">continue</span>
-        <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">records</span> <span class="ow">in</span> <span class="n">worker_data</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">records</span> <span class="ow">in</span> <span class="n">worker_data</span><span class="p">[</span><span class="s2">"result"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">device_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_devices</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="n">result_devices</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">device_name</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;asn&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">ignored_asns</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">"asn"</span><span class="p">]</span> <span class="ow">in</span> <span class="n">ignored_asns</span><span class="p">:</span>
                     <span class="k">continue</span>
-                <span class="n">observations</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;asn&quot;</span><span class="p">],</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">observations</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">"asn"</span><span class="p">],</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
-                        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;local_asn&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;local_asn&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+                        <span class="s2">"device"</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
+                        <span class="s2">"description"</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">"description"</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">,</span>
+                        <span class="s2">"local_asn"</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"local_asn"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
                     <span class="p">}</span>
                 <span class="p">)</span>
                 <span class="n">parsed_count</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">device_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result_devices</span> <span class="ow">and</span> <span class="n">device_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">failed_devices</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;device &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; is missing a live BGP ASN result&quot;</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync BGP ASNs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"device '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">' is missing a live BGP ASN result"</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync BGP ASNs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result_devices</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;parsed </span><span class="si">{</span><span class="n">parsed_count</span><span class="si">}</span><span class="s2"> live BGP ASN record(s) from &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result_devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span>
+        <span class="sa">f</span><span class="s2">"parsed </span><span class="si">{</span><span class="n">parsed_count</span><span class="si">}</span><span class="s2"> live BGP ASN record(s) from "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result_devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)"</span>
     <span class="p">)</span>
 
     <span class="n">live_asns</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">asn</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">observations</span><span class="p">):</span>
-        <span class="n">records</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">observations</span><span class="p">[</span><span class="n">asn</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
+        <span class="n">records</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">observations</span><span class="p">[</span><span class="n">asn</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">"device"</span><span class="p">])</span>
         <span class="n">live_asns</span><span class="p">[</span><span class="n">asn</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="nb">next</span><span class="p">(</span>
+            <span class="s2">"description"</span><span class="p">:</span> <span class="nb">next</span><span class="p">(</span>
                 <span class="p">(</span>
-                    <span class="n">record</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span>
+                    <span class="n">record</span><span class="p">[</span><span class="s2">"description"</span><span class="p">]</span>
                     <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span>
-                    <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">"description"</span><span class="p">]</span>
                 <span class="p">),</span>
-                <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="s2">""</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">}</span>
         <span class="k">if</span> <span class="n">device_custom_field</span><span class="p">:</span>
             <span class="n">live_asns</span><span class="p">[</span><span class="n">asn</span><span class="p">][</span><span class="n">device_custom_field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
                 <span class="p">{</span>
-                    <span class="n">nb_devices</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">id</span>
+                    <span class="n">nb_devices</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">"device"</span><span class="p">]]</span><span class="o">.</span><span class="n">id</span>
                     <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span>
-                    <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;local_asn&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">"local_asn"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span>
                 <span class="p">}</span>
             <span class="p">)</span>
 
@@ -8119,21 +8119,21 @@ observed. ASNs and device associations are never deleted.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">asns</span><span class="p">,</span>
             <span class="n">asn</span><span class="o">=</span><span class="n">asn_numbers</span><span class="p">,</span>
-            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,asn,description,custom_fields&quot;</span><span class="p">,</span>
+            <span class="n">fields</span><span class="o">=</span><span class="s2">"id,asn,description,custom_fields"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">asn_numbers</span>
         <span class="k">else</span> <span class="p">[]</span>
     <span class="p">)</span>
     <span class="k">for</span> <span class="n">asn</span> <span class="ow">in</span> <span class="n">netbox_asn_records</span><span class="p">:</span>
-        <span class="n">current</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">asn</span><span class="o">.</span><span class="n">description</span><span class="p">}</span>
-        <span class="n">live_asns</span><span class="p">[</span><span class="n">asn</span><span class="o">.</span><span class="n">asn</span><span class="p">][</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">apply_description_policy</span><span class="p">(</span>
-            <span class="n">live_asns</span><span class="p">[</span><span class="n">asn</span><span class="o">.</span><span class="n">asn</span><span class="p">][</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
-            <span class="n">current</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"description"</span><span class="p">:</span> <span class="n">asn</span><span class="o">.</span><span class="n">description</span><span class="p">}</span>
+        <span class="n">live_asns</span><span class="p">[</span><span class="n">asn</span><span class="o">.</span><span class="n">asn</span><span class="p">][</span><span class="s2">"description"</span><span class="p">]</span> <span class="o">=</span> <span class="n">apply_description_policy</span><span class="p">(</span>
+            <span class="n">live_asns</span><span class="p">[</span><span class="n">asn</span><span class="o">.</span><span class="n">asn</span><span class="p">][</span><span class="s2">"description"</span><span class="p">],</span>
+            <span class="n">current</span><span class="p">[</span><span class="s2">"description"</span><span class="p">],</span>
             <span class="n">preserve_description</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">device_custom_field</span><span class="p">:</span>
             <span class="n">current</span><span class="p">[</span><span class="n">device_custom_field</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">device</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+                <span class="n">device</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span>
                 <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="p">(</span><span class="n">asn</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">[</span><span class="n">device_custom_field</span><span class="p">]</span> <span class="ow">or</span> <span class="p">[])</span>
             <span class="p">]</span>
             <span class="n">live_asns</span><span class="p">[</span><span class="n">asn</span><span class="o">.</span><span class="n">asn</span><span class="p">][</span><span class="n">device_custom_field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
@@ -8144,50 +8144,50 @@ observed. ASNs and device associations are never deleted.</p>
         <span class="n">netbox_objects</span><span class="p">[</span><span class="n">asn</span><span class="o">.</span><span class="n">asn</span><span class="p">]</span> <span class="o">=</span> <span class="n">asn</span>
 
     <span class="n">asn_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_diff</span><span class="p">(</span>
-        <span class="p">{</span><span class="s2">&quot;asns&quot;</span><span class="p">:</span> <span class="n">live_asns</span><span class="p">},</span>
-        <span class="p">{</span><span class="s2">&quot;asns&quot;</span><span class="p">:</span> <span class="n">netbox_asns</span><span class="p">},</span>
-    <span class="p">)[</span><span class="s2">&quot;asns&quot;</span><span class="p">]</span>
-    <span class="n">asn_diff</span><span class="p">[</span><span class="s2">&quot;delete&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">create_numbers</span> <span class="o">=</span> <span class="n">asn_diff</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">]</span>
-    <span class="n">update</span> <span class="o">=</span> <span class="n">asn_diff</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span>
-    <span class="n">in_sync</span> <span class="o">=</span> <span class="n">asn_diff</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]</span>
+        <span class="p">{</span><span class="s2">"asns"</span><span class="p">:</span> <span class="n">live_asns</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">"asns"</span><span class="p">:</span> <span class="n">netbox_asns</span><span class="p">},</span>
+    <span class="p">)[</span><span class="s2">"asns"</span><span class="p">]</span>
+    <span class="n">asn_diff</span><span class="p">[</span><span class="s2">"delete"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">create_numbers</span> <span class="o">=</span> <span class="n">asn_diff</span><span class="p">[</span><span class="s2">"create"</span><span class="p">]</span>
+    <span class="n">update</span> <span class="o">=</span> <span class="n">asn_diff</span><span class="p">[</span><span class="s2">"update"</span><span class="p">]</span>
+    <span class="n">in_sync</span> <span class="o">=</span> <span class="n">asn_diff</span><span class="p">[</span><span class="s2">"in_sync"</span><span class="p">]</span>
     <span class="n">full_diff</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;global&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="n">create_numbers</span><span class="p">,</span>
-            <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">asn</span><span class="p">):</span> <span class="n">changes</span> <span class="k">for</span> <span class="n">asn</span><span class="p">,</span> <span class="n">changes</span> <span class="ow">in</span> <span class="n">update</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
-            <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="n">in_sync</span><span class="p">,</span>
+        <span class="s2">"global"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"create"</span><span class="p">:</span> <span class="n">create_numbers</span><span class="p">,</span>
+            <span class="s2">"update"</span><span class="p">:</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">asn</span><span class="p">):</span> <span class="n">changes</span> <span class="k">for</span> <span class="n">asn</span><span class="p">,</span> <span class="n">changes</span> <span class="ow">in</span> <span class="n">update</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
+            <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"in_sync"</span><span class="p">:</span> <span class="n">in_sync</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">}</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="s2">&quot;bgp asn sync diff complete: &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">create_numbers</span><span class="p">)</span><span class="si">}</span><span class="s2"> create, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update</span><span class="p">)</span><span class="si">}</span><span class="s2"> update, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">in_sync</span><span class="p">)</span><span class="si">}</span><span class="s2"> in sync&quot;</span>
+        <span class="s2">"bgp asn sync diff complete: "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">create_numbers</span><span class="p">)</span><span class="si">}</span><span class="s2"> create, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update</span><span class="p">)</span><span class="si">}</span><span class="s2"> update, "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">in_sync</span><span class="p">)</span><span class="si">}</span><span class="s2"> in sync"</span>
     <span class="p">)</span>
 
     <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="n">full_diff</span>
-    <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;global&quot;</span><span class="p">:</span> <span class="n">SyncActionSummary</span><span class="p">(</span><span class="n">in_sync</span><span class="o">=</span><span class="n">in_sync</span><span class="p">)</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()}</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"global"</span><span class="p">:</span> <span class="n">SyncActionSummary</span><span class="p">(</span><span class="n">in_sync</span><span class="o">=</span><span class="n">in_sync</span><span class="p">)</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()}</span>
     <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">full_diff</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span><span class="n">full_diff</span><span class="p">):</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no BGP ASN sync changes required&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no BGP ASN sync changes required"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="k">if</span> <span class="n">with_approval</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span>
-        <span class="n">job</span><span class="p">,</span> <span class="s2">&quot;BGP ASN sync&quot;</span><span class="p">,</span> <span class="n">full_diff</span>
+        <span class="n">job</span><span class="p">,</span> <span class="s2">"BGP ASN sync"</span><span class="p">,</span> <span class="n">full_diff</span>
     <span class="p">):</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"skipped"</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">full_diff</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;review declined; changes were not applied&quot;</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"review declined; changes were not applied"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="n">rir_obj</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">rirs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">rir</span><span class="p">)</span> <span class="k">if</span> <span class="n">rir</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">rir</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">rir_obj</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;RIR &#39;</span><span class="si">{</span><span class="n">rir</span><span class="si">}</span><span class="s2">&#39; not found in NetBox, ASN creation will be skipped&quot;</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"RIR '</span><span class="si">{</span><span class="n">rir</span><span class="si">}</span><span class="s2">' not found in NetBox, ASN creation will be skipped"</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="n">create_items</span> <span class="o">=</span> <span class="p">[]</span>
@@ -8195,49 +8195,49 @@ observed. ASNs and device associations are never deleted.</p>
         <span class="k">for</span> <span class="n">asn</span> <span class="ow">in</span> <span class="n">create_numbers</span><span class="p">:</span>
             <span class="n">desired</span> <span class="o">=</span> <span class="n">live_asns</span><span class="p">[</span><span class="n">asn</span><span class="p">]</span>
             <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="n">asn</span><span class="p">,</span>
-                <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="n">rir_obj</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+                <span class="s2">"asn"</span><span class="p">:</span> <span class="n">asn</span><span class="p">,</span>
+                <span class="s2">"rir"</span><span class="p">:</span> <span class="n">rir_obj</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">"description"</span><span class="p">],</span>
             <span class="p">}</span>
             <span class="k">if</span> <span class="n">device_custom_field</span><span class="p">:</span>
-                <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">payload</span><span class="p">[</span><span class="s2">"custom_fields"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="n">device_custom_field</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="n">device_custom_field</span><span class="p">]</span>
                 <span class="p">}</span>
             <span class="n">create_items</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">asn</span><span class="p">,</span> <span class="n">payload</span><span class="p">))</span>
     <span class="k">elif</span> <span class="n">create_numbers</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">rir</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;cannot create missing ASNs: no RIR provided, use &#39;rir&#39; parameter&quot;</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">"cannot create missing ASNs: no RIR provided, use 'rir' parameter"</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">create_items</span><span class="p">:</span>
         <span class="n">total_batches</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">create_items</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">batch_size</span>
         <span class="k">for</span> <span class="n">batch_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">create_items</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
             <span class="n">batch</span> <span class="o">=</span> <span class="n">create_items</span><span class="p">[</span><span class="n">batch_start</span> <span class="p">:</span> <span class="n">batch_start</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
             <span class="n">batch_number</span> <span class="o">=</span> <span class="n">batch_start</span> <span class="o">//</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;creating ASN batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> ASN(s))&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"creating ASN batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> ASN(s))"</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">asns</span><span class="o">.</span><span class="n">create</span><span class="p">([</span><span class="n">payload</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">payload</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">])</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to create ASN batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"failed to create ASN batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">return</span> <span class="n">ret</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;global&quot;</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">asn</span> <span class="k">for</span> <span class="n">asn</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">create_items</span><span class="p">)</span><span class="si">}</span><span class="s2"> NetBox ASN(s)&quot;</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"global"</span><span class="p">][</span><span class="s2">"created"</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">asn</span> <span class="k">for</span> <span class="n">asn</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">create_items</span><span class="p">)</span><span class="si">}</span><span class="s2"> NetBox ASN(s)"</span><span class="p">)</span>
 
     <span class="n">update_payloads</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">asn</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">update</span><span class="p">):</span>
         <span class="n">desired</span> <span class="o">=</span> <span class="n">live_asns</span><span class="p">[</span><span class="n">asn</span><span class="p">]</span>
-        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">netbox_objects</span><span class="p">[</span><span class="n">asn</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">}</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"id"</span><span class="p">:</span> <span class="n">netbox_objects</span><span class="p">[</span><span class="n">asn</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">}</span>
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">update</span><span class="p">[</span><span class="n">asn</span><span class="p">]:</span>
-            <span class="k">if</span> <span class="n">field</span> <span class="o">==</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">field</span> <span class="o">==</span> <span class="s2">"description"</span><span class="p">:</span>
                 <span class="n">payload</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">desired</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
             <span class="k">elif</span> <span class="n">field</span> <span class="o">==</span> <span class="n">device_custom_field</span><span class="p">:</span>
-                <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">payload</span><span class="p">[</span><span class="s2">"custom_fields"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="n">device_custom_field</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="n">device_custom_field</span><span class="p">]</span>
                 <span class="p">}</span>
         <span class="n">update_payloads</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">asn</span><span class="p">,</span> <span class="n">payload</span><span class="p">))</span>
@@ -8246,26 +8246,26 @@ observed. ASNs and device associations are never deleted.</p>
         <span class="k">for</span> <span class="n">batch_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">update_payloads</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
             <span class="n">batch</span> <span class="o">=</span> <span class="n">update_payloads</span><span class="p">[</span><span class="n">batch_start</span> <span class="p">:</span> <span class="n">batch_start</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
             <span class="n">batch_number</span> <span class="o">=</span> <span class="n">batch_start</span> <span class="o">//</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;updating ASN batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> ASN(s))&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"updating ASN batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> ASN(s))"</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">asns</span><span class="o">.</span><span class="n">update</span><span class="p">([</span><span class="n">payload</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">payload</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">])</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to update ASN batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"failed to update ASN batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">return</span> <span class="n">ret</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;global&quot;</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">asn</span> <span class="k">for</span> <span class="n">asn</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update_payloads</span><span class="p">)</span><span class="si">}</span><span class="s2"> NetBox ASN(s)&quot;</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"global"</span><span class="p">][</span><span class="s2">"updated"</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">asn</span> <span class="k">for</span> <span class="n">asn</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"updated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update_payloads</span><span class="p">)</span><span class="si">}</span><span class="s2"> NetBox ASN(s)"</span><span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;bgp asn sync complete&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"bgp asn sync complete"</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync BGP ASNs complete: &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;global&#39;</span><span class="p">][</span><span class="s1">&#39;created&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> created, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update</span><span class="p">)</span><span class="si">}</span><span class="s2"> updated, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">in_sync</span><span class="p">)</span><span class="si">}</span><span class="s2"> in sync&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync BGP ASNs complete: "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">'global'</span><span class="p">][</span><span class="s1">'created'</span><span class="p">])</span><span class="si">}</span><span class="s2"> created, "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update</span><span class="p">)</span><span class="si">}</span><span class="s2"> updated, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">in_sync</span><span class="p">)</span><span class="si">}</span><span class="s2"> in sync"</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>

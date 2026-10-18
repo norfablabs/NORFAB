@@ -7211,39 +7211,39 @@
 <p>Context manager:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;rest&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"rest"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;api&quot;</span><span class="p">:</span> <span class="s2">&quot;dcim/devices&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;q&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-leaf&quot;</span><span class="p">},</span>
+            <span class="s2">"api"</span><span class="p">:</span> <span class="s2">"dcim/devices"</span><span class="p">,</span>
+            <span class="s2">"method"</span><span class="p">:</span> <span class="s2">"get"</span><span class="p">,</span>
+            <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"q"</span><span class="p">:</span> <span class="s2">"ceos-leaf"</span><span class="p">},</span>
         <span class="p">},</span>
     <span class="p">)</span>
 </code></pre></div>
 <p>Direct lifecycle:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;rest&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"rest"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;api&quot;</span><span class="p">:</span> <span class="s2">&quot;extras/tags&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;post&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="s2">&quot;planned-change&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;json&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;automation-managed&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;slug&quot;</span><span class="p">:</span> <span class="s2">&quot;automation-managed&quot;</span><span class="p">,</span>
+            <span class="s2">"api"</span><span class="p">:</span> <span class="s2">"extras/tags"</span><span class="p">,</span>
+            <span class="s2">"method"</span><span class="p">:</span> <span class="s2">"post"</span><span class="p">,</span>
+            <span class="s2">"branch"</span><span class="p">:</span> <span class="s2">"planned-change"</span><span class="p">,</span>
+            <span class="s2">"json"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"automation-managed"</span><span class="p">,</span>
+                <span class="s2">"slug"</span><span class="p">:</span> <span class="s2">"automation-managed"</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">},</span>
     <span class="p">)</span>
@@ -7492,14 +7492,14 @@
 <span class="normal">1163</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">RestInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">RestResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Call NetBox REST API&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Call NetBox REST API"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -7508,18 +7508,18 @@
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span>
-    <span class="n">api</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"get"</span><span class="p">,</span>
+    <span class="n">api</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Sends a request to the Netbox REST API.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        instance (str, optional): The Netbox instance name to get parameters for.</span>
 <span class="sd">        branch (str, optional): NetBox branching plugin branch name to use.</span>
-<span class="sd">        method (str, optional): The HTTP method to use for the request (e.g., &#39;get&#39;, &#39;post&#39;). Defaults to &quot;get&quot;.</span>
-<span class="sd">        api (str, optional): The API endpoint to send the request to. Defaults to &quot;&quot;.</span>
+<span class="sd">        method (str, optional): The HTTP method to use for the request (e.g., 'get', 'post'). Defaults to "get".</span>
+<span class="sd">        api (str, optional): The API endpoint to send the request to. Defaults to "".</span>
 <span class="sd">        **kwargs: Additional arguments to pass to the request (e.g., params, data, json).</span>
 
 <span class="sd">    Returns:</span>
@@ -7527,30 +7527,30 @@
 
 <span class="sd">    Raises:</span>
 <span class="sd">        requests.exceptions.HTTPError: If the HTTP request returned an unsuccessful status code.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:rest&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{})</span>
+<span class="sd">    """</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:rest"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{})</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">nb_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_instance_params</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
-    <span class="n">api</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+    <span class="n">api</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
 
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - REST </span><span class="si">{</span><span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> &#39;</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/api/</span><span class="si">{</span><span class="n">api</span><span class="si">}</span><span class="s2">/&#39;&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - REST </span><span class="si">{</span><span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> '</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">'url'</span><span class="p">]</span><span class="si">}</span><span class="s2">/api/</span><span class="si">{</span><span class="n">api</span><span class="si">}</span><span class="s2">/'"</span><span class="p">)</span>
     <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
-        <span class="s2">&quot;timeout&quot;</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_connect_timeout</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_read_timeout</span><span class="p">)</span>
+        <span class="s2">"timeout"</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_connect_timeout</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_read_timeout</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Accept&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Token </span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">&#39;token&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s2">"Content-Type"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">,</span>
+        <span class="s2">"Accept"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">,</span>
+        <span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Token </span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">'token'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
-        <span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-NetBox-Branch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">http_session</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-NetBox-Branch&quot;</span><span class="p">]</span>
+        <span class="n">headers</span><span class="p">[</span><span class="s2">"X-NetBox-Branch"</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">http_session</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">"X-NetBox-Branch"</span><span class="p">]</span>
 
     <span class="c1"># send request to Netbox REST API</span>
     <span class="n">response</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_http_session</span><span class="p">,</span> <span class="n">method</span><span class="p">)(</span>
-        <span class="n">url</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/api/</span><span class="si">{</span><span class="n">api</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">,</span>
+        <span class="n">url</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">'url'</span><span class="p">]</span><span class="si">}</span><span class="s2">/api/</span><span class="si">{</span><span class="n">api</span><span class="si">}</span><span class="s2">/"</span><span class="p">,</span>
         <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
-        <span class="n">verify</span><span class="o">=</span><span class="n">nb_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ssl_verify&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="n">verify</span><span class="o">=</span><span class="n">nb_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ssl_verify"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -7558,7 +7558,7 @@
         <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - REST </span><span class="si">{</span><span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> &#39;</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/api/</span><span class="si">{</span><span class="n">api</span><span class="si">}</span><span class="s2">/&#39; failed, status </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - REST </span><span class="si">{</span><span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> '</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">'url'</span><span class="p">]</span><span class="si">}</span><span class="s2">/api/</span><span class="si">{</span><span class="n">api</span><span class="si">}</span><span class="s2">/' failed, status </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span>
         <span class="k">return</span> <span class="n">ret</span>
@@ -7566,7 +7566,7 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to decode json, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed to decode json, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span> <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span> <span class="k">else</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span>
 
     <span class="k">return</span> <span class="n">ret</span>

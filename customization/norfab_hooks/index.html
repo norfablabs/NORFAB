@@ -7065,22 +7065,22 @@
 <p>Sample hooks definition:</p>
 <div class="highlight"><span class="filename">inventory.yaml</span><pre><span></span><code><span class="nt">hooks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">startup</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">function</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;hooks.functions:do_on_startup&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">function</span><span class="p">:</span><span class="w"> </span><span class="s">"hooks.functions:do_on_startup"</span>
 <span class="w">      </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
 <span class="w">      </span><span class="nt">kwargs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Function</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">run</span><span class="nv"> </span><span class="s">on</span><span class="nv"> </span><span class="s">startup&quot;</span>
+<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"Function</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">run</span><span class="nv"> </span><span class="s">on</span><span class="nv"> </span><span class="s">startup"</span>
 <span class="w">  </span><span class="nt">exit</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">function</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;hooks.functions:do_on_exit&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">function</span><span class="p">:</span><span class="w"> </span><span class="s">"hooks.functions:do_on_exit"</span>
 <span class="w">      </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
 <span class="w">      </span><span class="nt">kwargs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Function</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">run</span><span class="nv"> </span><span class="s">on</span><span class="nv"> </span><span class="s">startup&quot;</span>
+<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"Function</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">run</span><span class="nv"> </span><span class="s">on</span><span class="nv"> </span><span class="s">startup"</span>
 </code></pre></div>
 <p>Where hook functions are:</p>
 <div class="highlight"><span class="filename">hooks/functions.py</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">do_on_startup</span><span class="p">(</span><span class="n">norfab</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Startup hook executed&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Startup hook executed"</span><span class="p">)</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">do_on_exit</span><span class="p">(</span><span class="n">norfab</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exit hook executed&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Exit hook executed"</span><span class="p">)</span>
 </code></pre></div>
 <p>Function import path is a dot separated path used to import module file that contains hook functions, where individual function name is a last item in dot separated path definition. For example <code>hooks.functions:do_on_startup</code> path is equivalent of running Python import <code>from hooks.functions import do_on_startup</code>.</p>
 

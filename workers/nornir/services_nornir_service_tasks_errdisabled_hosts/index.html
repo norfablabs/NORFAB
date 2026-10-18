@@ -7209,9 +7209,9 @@ and <code>failed_hosts_recovery_timeout</code> is effectively ignored.</p>
 </code></pre></div>
 <p>Python API example:</p>
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;errdisabled_hosts_list&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">],</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"errdisabled_hosts_list"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">"nornir-worker-1"</span><span class="p">],</span>
 <span class="p">)</span>
 </code></pre></div>
 <h2 id="clear-errdisabled-hosts">Clear Errdisabled Hosts<a class="headerlink" href="#clear-errdisabled-hosts" title="Permanent link">¤</a></h2>
@@ -7226,9 +7226,9 @@ there are no failed hosts; the returned list is empty.</p>
 </code></pre></div>
 <p>Python API example:</p>
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;errdisabled_hosts_clear&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">],</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"errdisabled_hosts_clear"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">"nornir-worker-1"</span><span class="p">],</span>
 <span class="p">)</span>
 </code></pre></div>
 <h2 id="run-a-task-on-errdisabled-hosts">Run a Task on Errdisabled Hosts<a class="headerlink" href="#run-a-task-on-errdisabled-hosts" title="Permanent link">¤</a></h2>
@@ -7240,18 +7240,18 @@ include failed hosts in one specific run:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">NFCLI</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>FL<span class="w"> </span>spine-1<span class="w"> </span>commands<span class="w"> </span><span class="s2">&quot;show version&quot;</span><span class="w"> </span>on-failed
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cli<span class="w"> </span>FL<span class="w"> </span>spine-1<span class="w"> </span>commands<span class="w"> </span><span class="s2">"show version"</span><span class="w"> </span>on-failed
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">],</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">"nornir-worker-1"</span><span class="p">],</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;spine-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show version&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;on_failed&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"FL"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"spine-1"</span><span class="p">],</span>
+        <span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show version"</span><span class="p">],</span>
+        <span class="s2">"on_failed"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -7326,23 +7326,23 @@ during the current execution in <code>resources_failed</code>.</p>
 <span class="normal">983</span>
 <span class="normal">984</span>
 <span class="normal">985</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">ErrdisabledHostsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">ErrdisabledHostsListResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;List Errdisabled Hosts&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"List Errdisabled Hosts"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">errdisabled_hosts_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;List hosts currently held in Nornir&#39;s failed-host state.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""List hosts currently held in Nornir's failed-host state."""</span>
     <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:errdisabled_hosts_list&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:errdisabled_hosts_list"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="o">.</span><span class="n">failed_hosts_list</span><span class="p">(),</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -7383,23 +7383,23 @@ during the current execution in <code>resources_failed</code>.</p>
 <span class="normal">1004</span>
 <span class="normal">1005</span>
 <span class="normal">1006</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">ErrdisabledHostsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">ErrdisabledHostsClearResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Recover Errdisabled Hosts&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Recover Errdisabled Hosts"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">errdisabled_hosts_clear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recover all hosts currently held in Nornir&#39;s failed-host state.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Recover all hosts currently held in Nornir's failed-host state."""</span>
     <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:errdisabled_hosts_clear&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:errdisabled_hosts_clear"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="o">.</span><span class="n">failed_hosts_clear</span><span class="p">(),</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>

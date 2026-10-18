@@ -7288,10 +7288,10 @@
 </table>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;vid&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
-    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;USERS&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;vlan_group&quot;</span><span class="p">:</span> <span class="s2">&quot;CAMPUS&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;created&quot;</span><span class="p">,</span>
+    <span class="s2">"vid"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"USERS"</span><span class="p">,</span>
+    <span class="s2">"vlan_group"</span><span class="p">:</span> <span class="s2">"CAMPUS"</span><span class="p">,</span>
+    <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"created"</span><span class="p">,</span>
 <span class="p">}</span>
 </code></pre></div>
 <p><code>status</code> is <code>create</code> or <code>update</code> during dry-run and <code>created</code> or <code>updated</code> after an applied operation.</p>
@@ -7306,24 +7306,24 @@
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">allocated</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;create_vlan&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;vlan_group&quot;</span><span class="p">:</span> <span class="s2">&quot;CAMPUS&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;USERS&quot;</span><span class="p">},</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"create_vlan"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"vlan_group"</span><span class="p">:</span> <span class="s2">"CAMPUS"</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"USERS"</span><span class="p">},</span>
     <span class="p">)</span>
 
     <span class="n">explicit</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;create_vlan&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"create_vlan"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;vlan_group&quot;</span><span class="p">:</span> <span class="s2">&quot;CAMPUS&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;SERVERS&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;vid&quot;</span><span class="p">:</span> <span class="mi">1100</span><span class="p">,</span>
+            <span class="s2">"vlan_group"</span><span class="p">:</span> <span class="s2">"CAMPUS"</span><span class="p">,</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"SERVERS"</span><span class="p">,</span>
+            <span class="s2">"vid"</span><span class="p">:</span> <span class="mi">1100</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 </code></pre></div>
@@ -7331,7 +7331,7 @@
 </div>
 </div>
 <p>In a NetBox design:</p>
-<div class="highlight"><pre><span></span><code><span class="p p-Indicator">{</span><span class="err">%</span><span class="w"> </span><span class="nv">set users_vid = &quot;CAMPUS&quot; | netbox.create_vlan(&quot;USERS&quot;) %</span><span class="p p-Indicator">}</span>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">{</span><span class="err">%</span><span class="w"> </span><span class="nv">set users_vid = "CAMPUS" | netbox.create_vlan("USERS") %</span><span class="p p-Indicator">}</span>
 
 <span class="nt">vlans</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CAMPUS</span>
@@ -7817,16 +7817,16 @@ VLAN IDs remain available for allocation.</p>
 <span class="normal">507</span>
 <span class="normal">508</span>
 <span class="normal">509</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateVlanInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateVlanResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Create VLAN&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Create VLAN"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -7836,7 +7836,7 @@ VLAN IDs remain available for allocation.</p>
     <span class="n">vlan_group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">vid</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"active"</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">tenant</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">role</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7846,7 +7846,7 @@ VLAN IDs remain available for allocation.</p>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create, update, or allocate a VLAN in an existing group.</span>
+<span class="w">    </span><span class="sd">"""Create, update, or allocate a VLAN in an existing group.</span>
 
 <span class="sd">    A supplied VID identifies the VLAN within its group. Without a VID,</span>
 <span class="sd">    an existing VLAN is matched by group and name, or the first available</span>
@@ -7881,10 +7881,10 @@ VLAN IDs remain available for allocation.</p>
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: The group is missing, the match is ambiguous, or no</span>
 <span class="sd">            VLAN IDs remain available for allocation.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_vlan&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_vlan"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="p">{},</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
         <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
@@ -7892,86 +7892,86 @@ VLAN IDs remain available for allocation.</p>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="n">group</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vlan_groups</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">vlan_group</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">group</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;VLAN group &#39;</span><span class="si">{</span><span class="n">vlan_group</span><span class="si">}</span><span class="s2">&#39; not found in NetBox&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"VLAN group '</span><span class="si">{</span><span class="n">vlan_group</span><span class="si">}</span><span class="s2">' not found in NetBox"</span><span class="p">)</span>
 
     <span class="n">filters</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="p">{</span><span class="s2">&quot;group_id&quot;</span><span class="p">:</span> <span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;vid&quot;</span><span class="p">:</span> <span class="n">vid</span><span class="p">}</span>
+        <span class="p">{</span><span class="s2">"group_id"</span><span class="p">:</span> <span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">"vid"</span><span class="p">:</span> <span class="n">vid</span><span class="p">}</span>
         <span class="k">if</span> <span class="n">vid</span>
         <span class="k">else</span> <span class="p">{</span>
-            <span class="s2">&quot;group_id&quot;</span><span class="p">:</span> <span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+            <span class="s2">"group_id"</span><span class="p">:</span> <span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">)</span>
     <span class="n">matches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vlans</span><span class="p">,</span> <span class="o">**</span><span class="n">filters</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;VLAN identity </span><span class="si">{</span><span class="n">filters</span><span class="si">}</span><span class="s2"> matched more than one VLAN&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"VLAN identity </span><span class="si">{</span><span class="n">filters</span><span class="si">}</span><span class="s2"> matched more than one VLAN"</span><span class="p">)</span>
     <span class="n">nb_vlan</span> <span class="o">=</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">matches</span> <span class="k">else</span> <span class="kc">None</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_vlan</span> <span class="ow">and</span> <span class="n">vid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">available</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">available_vlans</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">available</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;VLAN group &#39;</span><span class="si">{</span><span class="n">vlan_group</span><span class="si">}</span><span class="s2">&#39; has no available VLAN IDs&quot;</span><span class="p">)</span>
-        <span class="n">vid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">available</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;vid&quot;</span><span class="p">,</span> <span class="n">available</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"VLAN group '</span><span class="si">{</span><span class="n">vlan_group</span><span class="si">}</span><span class="s2">' has no available VLAN IDs"</span><span class="p">)</span>
+        <span class="n">vid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">available</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">"vid"</span><span class="p">,</span> <span class="n">available</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
     <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;vid&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">nb_vlan</span><span class="o">.</span><span class="n">vid</span><span class="p">)</span> <span class="k">if</span> <span class="n">nb_vlan</span> <span class="k">else</span> <span class="n">vid</span><span class="p">,</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
-            <span class="s2">&quot;vlan_group&quot;</span><span class="p">:</span> <span class="n">vlan_group</span><span class="p">,</span>
-            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;update&quot;</span> <span class="k">if</span> <span class="n">nb_vlan</span> <span class="k">else</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span>
+            <span class="s2">"vid"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">nb_vlan</span><span class="o">.</span><span class="n">vid</span><span class="p">)</span> <span class="k">if</span> <span class="n">nb_vlan</span> <span class="k">else</span> <span class="n">vid</span><span class="p">,</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+            <span class="s2">"vlan_group"</span><span class="p">:</span> <span class="n">vlan_group</span><span class="p">,</span>
+            <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"update"</span> <span class="k">if</span> <span class="n">nb_vlan</span> <span class="k">else</span> <span class="s2">"create"</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">ret</span>
 
-    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">status</span><span class="p">}</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="n">status</span><span class="p">}</span>
     <span class="k">if</span> <span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s2">"description"</span><span class="p">]</span> <span class="o">=</span> <span class="n">description</span>
     <span class="k">if</span> <span class="n">tenant</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;tenant&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tenant</span><span class="p">}</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s2">"tenant"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">tenant</span><span class="p">}</span>
     <span class="k">if</span> <span class="n">role</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">role</span><span class="p">}</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">role</span><span class="p">}</span>
     <span class="k">if</span> <span class="n">tags</span><span class="p">:</span>
-        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tag</span><span class="p">}</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">]</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s2">"tags"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">tag</span><span class="p">}</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">custom_fields</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">reference_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">,</span>
-            <span class="n">object_type</span><span class="o">=</span><span class="s2">&quot;ipam.vlan&quot;</span><span class="p">,</span>
-            <span class="nb">type</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;multiobject&quot;</span><span class="p">],</span>
+            <span class="n">object_type</span><span class="o">=</span><span class="s2">"ipam.vlan"</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="p">[</span><span class="s2">"object"</span><span class="p">,</span> <span class="s2">"multiobject"</span><span class="p">],</span>
         <span class="p">)</span>
         <span class="c1"># Resolve names on creation and merge with current values on updates.</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merge_resolved_custom_fields</span><span class="p">(</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">payload</span><span class="p">[</span><span class="s2">"custom_fields"</span><span class="p">]</span> <span class="o">=</span> <span class="n">merge_resolved_custom_fields</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">nb</span><span class="p">,</span>
             <span class="n">nb_vlan</span><span class="p">,</span>
             <span class="n">custom_fields</span><span class="p">,</span>
-            <span class="p">[</span><span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">"object"</span><span class="p">],</span>
             <span class="p">[</span>
                 <span class="n">field</span>
                 <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span>
-                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;multiobject&quot;</span>
+                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">"multiobject"</span>
             <span class="p">],</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">nb_vlan</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">tags</span><span class="p">:</span>
-            <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merge_array_values</span><span class="p">(</span>
-                <span class="n">nb_vlan</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">&quot;name&quot;</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s2">"tags"</span><span class="p">]</span> <span class="o">=</span> <span class="n">merge_array_values</span><span class="p">(</span>
+                <span class="n">nb_vlan</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">"name"</span>
             <span class="p">)</span>
         <span class="n">nb_vlan</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;updated&quot;</span>
-    <span class="k">elif</span> <span class="n">filters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vid&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"updated"</span>
+    <span class="k">elif</span> <span class="n">filters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"vid"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">nb_vlan</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">available_vlans</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;created&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"created"</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">nb_vlan</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vlans</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">&quot;vid&quot;</span><span class="p">:</span> <span class="n">vid</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="o">**</span><span class="n">payload</span><span class="p">})</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;created&quot;</span>
+        <span class="n">nb_vlan</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vlans</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"vid"</span><span class="p">:</span> <span class="n">vid</span><span class="p">,</span> <span class="s2">"group"</span><span class="p">:</span> <span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="o">**</span><span class="n">payload</span><span class="p">})</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"created"</span>
 
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">nb_vlan</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-        <span class="s2">&quot;vid&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">nb_vlan</span><span class="o">.</span><span class="n">vid</span><span class="p">),</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">nb_vlan</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-        <span class="s2">&quot;vlan_group&quot;</span><span class="p">:</span> <span class="n">vlan_group</span><span class="p">,</span>
-        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+        <span class="s2">"id"</span><span class="p">:</span> <span class="n">nb_vlan</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="s2">"vid"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">nb_vlan</span><span class="o">.</span><span class="n">vid</span><span class="p">),</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="n">nb_vlan</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="s2">"vlan_group"</span><span class="p">:</span> <span class="n">vlan_group</span><span class="p">,</span>
+        <span class="s2">"status"</span><span class="p">:</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
     <span class="p">}</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ret</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="s2"> VLAN </span><span class="si">{</span><span class="n">nb_vlan</span><span class="o">.</span><span class="n">vid</span><span class="si">}</span><span class="s2"> &#39;</span><span class="si">{</span><span class="n">nb_vlan</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ret</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="s2"> VLAN </span><span class="si">{</span><span class="n">nb_vlan</span><span class="o">.</span><span class="n">vid</span><span class="si">}</span><span class="s2"> '</span><span class="si">{</span><span class="n">nb_vlan</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>

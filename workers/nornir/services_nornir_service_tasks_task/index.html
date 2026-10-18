@@ -7248,7 +7248,7 @@ results:</p>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">task</span><span class="p">(</span><span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-    <span class="n">task</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;echo&quot;</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"echo"</span>
     <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">task</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div>
 <div class="admonition example">
@@ -7261,7 +7261,7 @@ Welcome<span class="w"> </span>to<span class="w"> </span>NorFab<span class="w"> 
 nf#
 nf#nornir
 nf<span class="o">[</span>nornir<span class="o">]</span><span class="c1">#task</span>
-nf<span class="o">[</span>nornir-task<span class="o">]</span><span class="c1">#plugin nf://nornir_tasks/echo.py arguments {&quot;foo&quot;: &quot;bar&quot;} FC spine</span>
+nf<span class="o">[</span>nornir-task<span class="o">]</span><span class="c1">#plugin nf://nornir_tasks/echo.py arguments {"foo": "bar"} FC spine</span>
 ceos-spine-1:
 <span class="w">    </span>echo:
 <span class="w">        </span>foo:<span class="w"> </span>bar
@@ -7289,16 +7289,16 @@ section on how to construct  <code>inventory.yaml</code> file</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;task&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"task"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_tasks/echo.py&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;foo&quot;</span><span class="p">:</span> <span class="s2">&quot;bar&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine&quot;</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"nf://nornir_tasks/echo.py"</span><span class="p">,</span>
+            <span class="s2">"foo"</span><span class="p">:</span> <span class="s2">"bar"</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"ceos-spine"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7309,19 +7309,19 @@ section on how to construct  <code>inventory.yaml</code> file</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;task&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"task"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_tasks/echo.py&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;foo&quot;</span><span class="p">:</span> <span class="s2">&quot;bar&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine&quot;</span>    
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"nf://nornir_tasks/echo.py"</span><span class="p">,</span>
+            <span class="s2">"foo"</span><span class="p">:</span> <span class="s2">"bar"</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"ceos-spine"</span>    
         <span class="p">}</span>
     <span class="p">)</span>
 
@@ -7331,12 +7331,12 @@ section on how to construct  <code>inventory.yaml</code> file</p>
 </code></pre></div>
 <p>Once executed, above code should produce this output:</p>
 <div class="highlight"><pre><span></span><code>C:\nf&gt;python nornir_task_docs.py
-{&#39;nornir-worker-1&#39;: {&#39;errors&#39;: [],
-                    &#39;failed&#39;: False,
-                    &#39;messages&#39;: [],
-                    &#39;result&#39;: {&#39;ceos-spine-1&#39;: {&#39;echo&#39;: {&#39;foo&#39;: &#39;bar&#39;}},
-                                &#39;ceos-spine-2&#39;: {&#39;echo&#39;: {&#39;foo&#39;: &#39;bar&#39;}}},
-                    &#39;task&#39;: &#39;nornir-worker-1:task&#39;}}
+{'nornir-worker-1': {'errors': [],
+                    'failed': False,
+                    'messages': [],
+                    'result': {'ceos-spine-1': {'echo': {'foo': 'bar'}},
+                                'ceos-spine-2': {'echo': {'foo': 'bar'}}},
+                    'task': 'nornir-worker-1:task'}}
 </code></pre></div>
 <p>Refer to <a href="../../../norfab_getting_started/">Getting Started</a> section on 
 how to construct  <code>inventory.yaml</code> file.    </p>
@@ -7360,7 +7360,7 @@ Welcome<span class="w"> </span>to<span class="w"> </span>NorFab<span class="w"> 
 nf#
 nf#nornir
 nf<span class="o">[</span>nornir<span class="o">]</span><span class="c1">#task</span>
-nf<span class="o">[</span>nornir-task<span class="o">]</span><span class="c1">#plugin &quot;nornir_netmiko.tasks.netmiko_send_command&quot; arguments {&quot;command_string&quot;: &quot;show hostname&quot;} FC spine</span>
+nf<span class="o">[</span>nornir-task<span class="o">]</span><span class="c1">#plugin "nornir_netmiko.tasks.netmiko_send_command" arguments {"command_string": "show hostname"} FC spine</span>
 ceos-spine-1:
 <span class="w">    </span>netmiko_send_command:
 <span class="w">        </span>Hostname:<span class="w"> </span>ceos-spine-1
@@ -7389,19 +7389,19 @@ section on how to construct  <code>inventory.yaml</code> file</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;task&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"task"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;nornir_netmiko.tasks.netmiko_send_command&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;command_string&quot;</span><span class="p">:</span> <span class="s2">&quot;show hostname&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine&quot;</span>    
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"nornir_netmiko.tasks.netmiko_send_command"</span><span class="p">,</span>
+            <span class="s2">"command_string"</span><span class="p">:</span> <span class="s2">"show hostname"</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"ceos-spine"</span>    
         <span class="p">}</span>
     <span class="p">)</span>
 
@@ -7414,17 +7414,17 @@ section on how to construct  <code>inventory.yaml</code> file</p>
 inside of <code>kwargs</code> dictionary.</p>
 <p>Once executed, above code should produce this output:</p>
 <div class="highlight"><pre><span></span><code>C:\nf&gt;python nornir_task_module_docs.py
-{&#39;nornir-worker-1&#39;: {&#39;errors&#39;: [],
-                    &#39;failed&#39;: False,
-                    &#39;messages&#39;: [],
-                    &#39;result&#39;: {&#39;ceos-spine-1&#39;: {&#39;netmiko_send_command&#39;: &#39;Hostname: &#39;
-                                                                        &#39;ceos-spine-1\n&#39;
-                                                                        &#39;FQDN:     &#39;
-                                                                        &#39;ceos-spine-1&#39;},
-                                &#39;ceos-spine-2&#39;: {&#39;netmiko_send_command&#39;: &#39;Hostname: &#39;
-                                                                        &#39;ceos-spine-2\n&#39;
-                                                                        &#39;FQDN:     &#39;
-                                                                        &#39;ceos-spine-2&#39;}}}
+{'nornir-worker-1': {'errors': [],
+                    'failed': False,
+                    'messages': [],
+                    'result': {'ceos-spine-1': {'netmiko_send_command': 'Hostname: '
+                                                                        'ceos-spine-1\n'
+                                                                        'FQDN:     '
+                                                                        'ceos-spine-1'},
+                                'ceos-spine-2': {'netmiko_send_command': 'Hostname: '
+                                                                        'ceos-spine-2\n'
+                                                                        'FQDN:     '
+                                                                        'ceos-spine-2'}}}
 </code></pre></div>
 <p>Refer to <a href="../../../norfab_getting_started/">Getting Started</a> section on 
 how to construct  <code>inventory.yaml</code> file.    </p>
@@ -7439,7 +7439,7 @@ root
 └──<span class="w"> </span>nornir:<span class="w">    </span>Nornir<span class="w"> </span>service
 <span class="w">    </span>└──<span class="w"> </span>task:<span class="w">    </span>Run<span class="w"> </span>Nornir<span class="w"> </span>task
 <span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
 <span class="w">        </span>├──<span class="w"> </span>add_details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results
 <span class="w">        </span>├──<span class="w"> </span>run_num_workers:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>tasks<span class="w"> </span>execution
 <span class="w">        </span>├──<span class="w"> </span>run_num_connectors:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>device<span class="w"> </span>connections
@@ -7492,7 +7492,7 @@ can refer to a file to fetch from a file service, which must contain a function
 named <code>task</code> that accepts a Nornir task object as the first positional argument.</p>
 <p>Example of a custom task function file:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># define connection name for RetryRunner to properly detect it</span>
-<span class="n">CONNECTION_NAME</span> <span class="o">=</span> <span class="s2">&quot;netmiko&quot;</span>
+<span class="n">CONNECTION_NAME</span> <span class="o">=</span> <span class="s2">"netmiko"</span>
 
 <span class="c1"># create task function</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">task</span><span class="p">(</span><span class="n">nornir_task_object</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">):</span>
@@ -7731,21 +7731,21 @@ URL to download a custom task or template URL that resolves to a file.</p>
 <span class="normal">123</span>
 <span class="normal">124</span>
 <span class="normal">125</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">TaskInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">TaskResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Run Nornir Task Plugin&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Run Nornir Task Plugin"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Execute a Nornir task plugin.</span>
 
 <span class="sd">    This method dynamically imports and executes a specified Nornir task plugin,</span>
@@ -7757,7 +7757,7 @@ URL to download a custom task or template URL that resolves to a file.</p>
 
 <span class="sd">    ```python</span>
 <span class="sd">    # define connection name for RetryRunner to properly detect it</span>
-<span class="sd">    CONNECTION_NAME = &quot;netmiko&quot;</span>
+<span class="sd">    CONNECTION_NAME = "netmiko"</span>
 
 <span class="sd">    # create task function</span>
 <span class="sd">    def task(nornir_task_object, **kwargs: object):</span>
@@ -7785,44 +7785,44 @@ URL to download a custom task or template URL that resolves to a file.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        FileNotFoundError: If the specified plugin file cannot be downloaded.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># extract attributes</span>
-    <span class="n">add_details</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;add_details&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>  <span class="c1"># ResultSerializer</span>
-    <span class="n">to_dict</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;to_dict&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>  <span class="c1"># ResultSerializer</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:task&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{}</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="p">[])</span>
+    <span class="n">add_details</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"add_details"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>  <span class="c1"># ResultSerializer</span>
+    <span class="n">to_dict</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"to_dict"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>  <span class="c1"># ResultSerializer</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:task"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{}</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="p">[])</span>
 
     <span class="n">filtered_nornir</span><span class="p">,</span> <span class="n">no_match_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_hosts_and_validate</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;no_match&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">"no_match"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># download task from broker and load it</span>
-    <span class="k">if</span> <span class="n">plugin</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;nf://&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">plugin</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"nf://"</span><span class="p">):</span>
         <span class="n">function_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">plugin</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">function_text</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - &#39;</span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2">&#39; task plugin download failed&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - '</span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2">' task plugin download failed"</span>
             <span class="p">)</span>
 
         <span class="c1"># load task function running exec</span>
         <span class="n">globals_dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">exec</span><span class="p">(</span><span class="n">function_text</span><span class="p">,</span> <span class="n">globals_dict</span><span class="p">,</span> <span class="n">globals_dict</span><span class="p">)</span>
-        <span class="n">task_function</span> <span class="o">=</span> <span class="n">globals_dict</span><span class="p">[</span><span class="s2">&quot;task&quot;</span><span class="p">]</span>
+        <span class="n">task_function</span> <span class="o">=</span> <span class="n">globals_dict</span><span class="p">[</span><span class="s2">"task"</span><span class="p">]</span>
     <span class="c1"># import task function</span>
-    <span class="k">elif</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">plugin</span><span class="p">:</span>
-        <span class="c1"># below same as &quot;from nornir.plugins.tasks import task_fun as task_function&quot;</span>
-        <span class="n">module_name</span><span class="p">,</span> <span class="n">func_name</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="s2">"."</span> <span class="ow">in</span> <span class="n">plugin</span><span class="p">:</span>
+        <span class="c1"># below same as "from nornir.plugins.tasks import task_fun as task_function"</span>
+        <span class="n">module_name</span><span class="p">,</span> <span class="n">func_name</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">module</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">module_name</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="n">func_name</span><span class="p">])</span>  <span class="c1"># nosec</span>
         <span class="n">task_function</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">func_name</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - &#39;</span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2">&#39; task should either be a path &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;to a file or a module import string&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - '</span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2">' task should either be a path "</span>
+            <span class="sa">f</span><span class="s2">"to a file or a module import string"</span>
         <span class="p">)</span>
 
     <span class="n">nr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_processors</span><span class="p">(</span><span class="n">filtered_nornir</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">job</span><span class="p">)</span>  <span class="c1"># add processors</span>
 
     <span class="c1"># run task</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - running Nornir task &#39;</span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2">&#39;, kwargs &#39;</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - running Nornir task '</span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2">', kwargs '</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
     <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_lock</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">nr</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task_function</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">update_nornir_result</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>

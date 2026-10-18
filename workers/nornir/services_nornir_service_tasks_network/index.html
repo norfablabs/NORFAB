@@ -7294,17 +7294,17 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;network&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"network"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;fun&quot;</span><span class="p">:</span> <span class="s2">&quot;ping&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-            <span class="s2">&quot;ping_timeout&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s2">"fun"</span><span class="p">:</span> <span class="s2">"ping"</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"count"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+            <span class="s2">"ping_timeout"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7315,19 +7315,19 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;network&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"network"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;fun&quot;</span><span class="p">:</span> <span class="s2">&quot;dns&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;servers&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;8.8.8.8&quot;</span><span class="p">,</span> <span class="s2">&quot;1.1.1.1&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;ipv4&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"fun"</span><span class="p">:</span> <span class="s2">"dns"</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"servers"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"8.8.8.8"</span><span class="p">,</span> <span class="s2">"1.1.1.1"</span><span class="p">],</span>
+            <span class="s2">"ipv4"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7351,8 +7351,8 @@ root
 <span class="w">    </span>└──<span class="w"> </span>network:<span class="w">    </span>Network<span class="w"> </span>utility<span class="w"> </span>functions<span class="w"> </span>-<span class="w"> </span>ping,<span class="w"> </span>dns<span class="w"> </span>etc.
 <span class="w">        </span>├──<span class="w"> </span>ping:<span class="w">    </span>Ping<span class="w"> </span>devices
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>num-workers:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>tasks<span class="w"> </span>execution
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>num-connectors:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>device<span class="w"> </span>connections
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>connect-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>attempts
@@ -7365,7 +7365,7 @@ root
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>tf-skip-failed:<span class="w">    </span>Save<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>file<span class="w"> </span><span class="k">for</span><span class="w"> </span>failed<span class="w"> </span>tasks
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>diff:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>the<span class="w"> </span>diff<span class="w"> </span><span class="k">for</span>
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>diff-last:<span class="w">    </span>File<span class="w"> </span>version<span class="w"> </span>number<span class="w"> </span>to<span class="w"> </span>diff,<span class="w"> </span>default<span class="w"> </span>is<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="o">(</span>last<span class="o">)</span>
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>table:<span class="w">    </span>Table<span class="w"> </span>format<span class="w"> </span><span class="o">(</span>brief,<span class="w"> </span>terse,<span class="w"> </span>extend<span class="o">)</span><span class="w"> </span>or<span class="w"> </span>parameters<span class="w"> </span>or<span class="w"> </span>True
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>headers:<span class="w">    </span>Table<span class="w"> </span>headers
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>headers-exclude:<span class="w">    </span>Table<span class="w"> </span>headers<span class="w"> </span>to<span class="w"> </span>exclude
@@ -7383,7 +7383,7 @@ root
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FX:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>excluding<span class="w"> </span>them<span class="w"> </span>by<span class="w"> </span>name
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FN:<span class="w">    </span>Negate<span class="w"> </span>the<span class="w"> </span>match
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>hosts:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>to<span class="w"> </span>target
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>use-host-name:<span class="w">    </span>Ping<span class="w"> </span>host<span class="s1">&#39;s name instead of host&#39;</span>s<span class="w"> </span>hostname
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>use-host-name:<span class="w">    </span>Ping<span class="w"> </span>host<span class="s1">'s name instead of host'</span>s<span class="w"> </span>hostname
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>count:<span class="w">    </span>Number<span class="w"> </span>of<span class="w"> </span>pings<span class="w"> </span>to<span class="w"> </span>run
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>ping-timeout:<span class="w">    </span>Time<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span>before<span class="w"> </span>considering<span class="w"> </span>each<span class="w"> </span>non-arrived<span class="w"> </span>reply<span class="w"> </span>permanently<span class="w"> </span>lost
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>size:<span class="w">    </span>Size<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>entire<span class="w"> </span>packet<span class="w"> </span>to<span class="w"> </span>send
@@ -7391,13 +7391,13 @@ root
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>payload:<span class="w">    </span>Payload<span class="w"> </span>content<span class="w"> </span><span class="k">if</span><span class="w"> </span>size<span class="w"> </span>is<span class="w"> </span>not<span class="w"> </span><span class="nb">set</span>
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>sweep-start:<span class="w">    </span>If<span class="w"> </span>size<span class="w"> </span>is<span class="w"> </span>not<span class="w"> </span>set,<span class="w"> </span>initial<span class="w"> </span>size<span class="w"> </span><span class="k">in</span><span class="w"> </span>a<span class="w"> </span>sweep<span class="w"> </span>of<span class="w"> </span>sizes
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>sweep-end:<span class="w">    </span>If<span class="w"> </span>size<span class="w"> </span>is<span class="w"> </span>not<span class="w"> </span>set,<span class="w"> </span>final<span class="w"> </span>size<span class="w"> </span><span class="k">in</span><span class="w"> </span>a<span class="w"> </span>sweep<span class="w"> </span>of<span class="w"> </span>sizes
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>df:<span class="w">    </span>Don<span class="s1">&#39;t Fragment flag value for IP Header</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>df:<span class="w">    </span>Don<span class="s1">'t Fragment flag value for IP Header</span>
 <span class="s1">        │   ├── match:    Do payload matching between request and reply</span>
 <span class="s1">        │   └── source:    Source IP address</span>
 <span class="s1">        └── dns:    Resolve DNS</span>
 <span class="s1">            ├── timeout:    Job timeout</span>
-<span class="s1">            ├── workers:    Filter worker to target, default &#39;</span>all<span class="s1">&#39;</span>
-<span class="s1">            ├── add-details:    Add task details to results, default &#39;</span>False<span class="s1">&#39;</span>
+<span class="s1">            ├── workers:    Filter worker to target, default '</span>all<span class="s1">'</span>
+<span class="s1">            ├── add-details:    Add task details to results, default '</span>False<span class="s1">'</span>
 <span class="s1">            ├── num-workers:    RetryRunner number of threads for tasks execution</span>
 <span class="s1">            ├── num-connectors:    RetryRunner number of threads for device connections</span>
 <span class="s1">            ├── connect-retry:    RetryRunner number of connection attempts</span>
@@ -7409,7 +7409,7 @@ root
 <span class="s1">            ├── tf:    File group name to save task results to on worker file system</span>
 <span class="s1">            ├── tf-skip-failed:    Save results to file for failed tasks</span>
 <span class="s1">            ├── diff:    File group name to run the diff for</span>
-<span class="s1">            ├── progress:    Display progress events, default &#39;</span>True<span class="s1">&#39;</span>
+<span class="s1">            ├── progress:    Display progress events, default '</span>True<span class="s1">'</span>
 <span class="s1">            ├── table:    Table format (brief, terse, extend) or parameters or True</span>
 <span class="s1">            ├── headers:    Table headers</span>
 <span class="s1">            ├── headers-exclude:    Table headers to exclude</span>
@@ -7427,11 +7427,11 @@ root
 <span class="s1">            ├── FX:    Filter hosts excluding them by name</span>
 <span class="s1">            ├── FN:    Negate the match</span>
 <span class="s1">            ├── hosts:    Filter hosts to target</span>
-<span class="s1">            ├── use-host-name:    Ping host&#39;</span>s<span class="w"> </span>name<span class="w"> </span>instead<span class="w"> </span>of<span class="w"> </span>host<span class="s1">&#39;s hostname</span>
+<span class="s1">            ├── use-host-name:    Ping host'</span>s<span class="w"> </span>name<span class="w"> </span>instead<span class="w"> </span>of<span class="w"> </span>host<span class="s1">'s hostname</span>
 <span class="s1">            ├── servers:    List of DNS servers to use</span>
 <span class="s1">            ├── dns-timeout:    Time in seconds before considering request lost</span>
-<span class="s1">            ├── ipv4:    Resolve &#39;</span>A<span class="s1">&#39; record</span>
-<span class="s1">            └── ipv6:    Resolve &#39;</span>AAAA<span class="err">&#39;</span><span class="w"> </span>record
+<span class="s1">            ├── ipv4:    Resolve '</span>A<span class="s1">' record</span>
+<span class="s1">            └── ipv6:    Resolve '</span>AAAA<span class="err">'</span><span class="w"> </span>record
 nf#
 </code></pre></div>
 <p><code>*</code> - mandatory/required command argument</p>
@@ -7608,21 +7608,21 @@ nf#
 <span class="normal">54</span>
 <span class="normal">55</span>
 <span class="normal">56</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">NetworkInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">NetworkResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Run Network Operation&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Run Network Operation"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">fun</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Task to call various network-related utility functions.</span>
 
 <span class="sd">    Args:</span>
@@ -7632,7 +7632,7 @@ nf#
 
 <span class="sd">    Available utility functions:</span>
 
-<span class="sd">    - **resolve_dns** Resolves hosts&#39; hostname DNS, returning IP addresses using</span>
+<span class="sd">    - **resolve_dns** Resolves hosts' hostname DNS, returning IP addresses using</span>
 <span class="sd">        `nornir_salt.plugins.tasks.network.resolve_dns` Nornir-Salt function.</span>
 <span class="sd">    - **ping** Executes ICMP ping to host using `nornir_salt.plugins.tasks.network.ping`</span>
 <span class="sd">        Nornir-Salt function.</span>
@@ -7642,11 +7642,11 @@ nf#
 
 <span class="sd">    Raises:</span>
 <span class="sd">        UnsupportedPluginError: If the specified utility function is not supported.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;call&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fun</span>
+<span class="sd">    """</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">"call"</span><span class="p">]</span> <span class="o">=</span> <span class="n">fun</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">(</span>
         <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
-        <span class="n">plugin</span><span class="o">=</span><span class="s2">&quot;nornir_salt.plugins.tasks.network&quot;</span><span class="p">,</span>
+        <span class="n">plugin</span><span class="o">=</span><span class="s2">"nornir_salt.plugins.tasks.network"</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>

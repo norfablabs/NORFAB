@@ -7389,14 +7389,14 @@ are not exposed as MCP tools.</p>
 <p>Store an explicit token:</p>
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>fastmcp<span class="w"> </span>auth<span class="w"> </span>create-token<span class="w"> </span>username<span class="w"> </span>automation<span class="w"> </span>token<span class="w"> </span>secret-token<span class="w"> </span>expire<span class="w"> </span><span class="m">3600</span>
 <span class="o">{</span>
-<span class="w">    </span><span class="s2">&quot;fastmcp-worker-1&quot;</span>:<span class="w"> </span><span class="nb">true</span>
+<span class="w">    </span><span class="s2">"fastmcp-worker-1"</span>:<span class="w"> </span><span class="nb">true</span>
 <span class="o">}</span>
 nf#
 </code></pre></div>
 <p>Generate and store a token automatically:</p>
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>fastmcp<span class="w"> </span>auth<span class="w"> </span>create-token<span class="w"> </span>username<span class="w"> </span>automation
 <span class="o">{</span>
-<span class="w">    </span><span class="s2">&quot;fastmcp-worker-1&quot;</span>:<span class="w"> </span><span class="nb">true</span>
+<span class="w">    </span><span class="s2">"fastmcp-worker-1"</span>:<span class="w"> </span><span class="nb">true</span>
 <span class="o">}</span>
 nf#
 </code></pre></div>
@@ -7416,21 +7416,21 @@ nf#
 <p>Delete a specific token:</p>
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>fastmcp<span class="w"> </span>auth<span class="w"> </span>delete-token<span class="w"> </span>token<span class="w"> </span>secret-token
 <span class="o">{</span>
-<span class="w">    </span><span class="s2">&quot;fastmcp-worker-1&quot;</span>:<span class="w"> </span><span class="nb">true</span>
+<span class="w">    </span><span class="s2">"fastmcp-worker-1"</span>:<span class="w"> </span><span class="nb">true</span>
 <span class="o">}</span>
 nf#
 </code></pre></div>
 <p>Delete all tokens for a user:</p>
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>fastmcp<span class="w"> </span>auth<span class="w"> </span>delete-token<span class="w"> </span>username<span class="w"> </span>automation
 <span class="o">{</span>
-<span class="w">    </span><span class="s2">&quot;fastmcp-worker-1&quot;</span>:<span class="w"> </span><span class="nb">true</span>
+<span class="w">    </span><span class="s2">"fastmcp-worker-1"</span>:<span class="w"> </span><span class="nb">true</span>
 <span class="o">}</span>
 nf#
 </code></pre></div>
 <p>Check whether a token is valid:</p>
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>fastmcp<span class="w"> </span>auth<span class="w"> </span>check-token<span class="w"> </span>token<span class="w"> </span>secret-token
 <span class="o">{</span>
-<span class="w">    </span><span class="s2">&quot;fastmcp-worker-1&quot;</span>:<span class="w"> </span><span class="nb">true</span>
+<span class="w">    </span><span class="s2">"fastmcp-worker-1"</span>:<span class="w"> </span><span class="nb">true</span>
 <span class="o">}</span>
 nf#
 </code></pre></div>
@@ -7441,25 +7441,25 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fastmcp&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;bearer_token_store&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"fastmcp"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"bearer_token_store"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;automation&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="s2">&quot;secret-token&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;expire&quot;</span><span class="p">:</span> <span class="mi">3600</span><span class="p">,</span>
+            <span class="s2">"username"</span><span class="p">:</span> <span class="s2">"automation"</span><span class="p">,</span>
+            <span class="s2">"token"</span><span class="p">:</span> <span class="s2">"secret-token"</span><span class="p">,</span>
+            <span class="s2">"expire"</span><span class="p">:</span> <span class="mi">3600</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fastmcp&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;bearer_token_list&quot;</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;automation&quot;</span><span class="p">},</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"fastmcp"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"bearer_token_list"</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"username"</span><span class="p">:</span> <span class="s2">"automation"</span><span class="p">},</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div>
@@ -7468,27 +7468,27 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fastmcp&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;bearer_token_store&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"fastmcp"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"bearer_token_store"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;automation&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="s2">&quot;secret-token&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;expire&quot;</span><span class="p">:</span> <span class="mi">3600</span><span class="p">,</span>
+            <span class="s2">"username"</span><span class="p">:</span> <span class="s2">"automation"</span><span class="p">,</span>
+            <span class="s2">"token"</span><span class="p">:</span> <span class="s2">"secret-token"</span><span class="p">,</span>
+            <span class="s2">"expire"</span><span class="p">:</span> <span class="mi">3600</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fastmcp&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;bearer_token_list&quot;</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;automation&quot;</span><span class="p">},</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"fastmcp"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"bearer_token_list"</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"username"</span><span class="p">:</span> <span class="s2">"automation"</span><span class="p">},</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 <span class="k">finally</span><span class="p">:</span>
@@ -7513,22 +7513,22 @@ root
 <span class="w">    </span>└──<span class="w"> </span>auth:<span class="w">    </span>Manage<span class="w"> </span>auth<span class="w"> </span>tokens
 <span class="w">        </span>├──<span class="w"> </span>create-token:<span class="w">    </span>Create<span class="w"> </span>authentication<span class="w"> </span>token
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>token:<span class="w">    </span>Token<span class="w"> </span>string<span class="w"> </span>to<span class="w"> </span>store,<span class="w"> </span>autogenerate<span class="w"> </span><span class="k">if</span><span class="w"> </span>not<span class="w"> </span>given
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>*username:<span class="w">    </span>User<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>store<span class="w"> </span>the<span class="w"> </span>token<span class="w"> </span><span class="k">for</span>
 <span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>expire:<span class="w">    </span>Token<span class="w"> </span>expiration<span class="w"> </span><span class="nb">time</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds
 <span class="w">        </span>├──<span class="w"> </span>list-tokens:<span class="w">    </span>Retrieve<span class="w"> </span>authentication<span class="w"> </span>tokens
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
 <span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>username:<span class="w">    </span>User<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>list<span class="w"> </span>tokens<span class="w"> </span><span class="k">for</span>
 <span class="w">        </span>├──<span class="w"> </span>delete-token:<span class="w">    </span>Delete<span class="w"> </span>existing<span class="w"> </span>authentication<span class="w"> </span>token
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
 <span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>username:<span class="w">    </span>User<span class="w"> </span>name<span class="w"> </span>whose<span class="w"> </span>tokens<span class="w"> </span>should<span class="w"> </span>be<span class="w"> </span>deleted
 <span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>token:<span class="w">    </span>Bearer<span class="w"> </span>token<span class="w"> </span>string<span class="w"> </span>to<span class="w"> </span>delete
 <span class="w">        </span>└──<span class="w"> </span>check-token:<span class="w">    </span>Check<span class="w"> </span><span class="k">if</span><span class="w"> </span>given<span class="w"> </span>token<span class="w"> </span>valid
 <span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
 <span class="w">            </span>└──<span class="w"> </span>*token:<span class="w">    </span>Bearer<span class="w"> </span>token<span class="w"> </span>string<span class="w"> </span>to<span class="w"> </span>check
 nf#
 </code></pre></div>
@@ -7574,25 +7574,25 @@ nf#
 <span class="k">def</span><span class="w"> </span><span class="nf">bearer_token_store</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">expire</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Store a bearer token in the FastMCP worker token database.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">expire</span> <span class="o">=</span> <span class="n">expire</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">fastmcp_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;auth_bearer&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-        <span class="s2">&quot;token_ttl&quot;</span><span class="p">,</span> <span class="n">expire</span>
+<span class="sd">    """</span>
+    <span class="n">expire</span> <span class="o">=</span> <span class="n">expire</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">fastmcp_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"auth_bearer"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="s2">"token_ttl"</span><span class="p">,</span> <span class="n">expire</span>
     <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">expire</span><span class="p">()</span>
-    <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;bearer_token::</span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"bearer_token::</span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">"</span>
     <span class="k">if</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
         <span class="n">user_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">user_token</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="n">token</span><span class="p">,</span>
-            <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span>
-            <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()),</span>
+            <span class="s2">"token"</span><span class="p">:</span> <span class="n">token</span><span class="p">,</span>
+            <span class="s2">"username"</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span>
+            <span class="s2">"created"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()),</span>
         <span class="p">}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">user_token</span><span class="p">,</span> <span class="n">expire</span><span class="o">=</span><span class="n">expire</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">username</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:bearer_token_store&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:bearer_token_store"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7641,28 +7641,28 @@ nf#
 <span class="k">def</span><span class="w"> </span><span class="nf">bearer_token_delete</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Delete bearer tokens by username or token value.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">expire</span><span class="p">()</span>
     <span class="n">token_removed_count</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">if</span> <span class="n">token</span><span class="p">:</span>
-        <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;bearer_token::</span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"bearer_token::</span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">"</span>
         <span class="k">if</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">retry</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
                 <span class="n">token_removed_count</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to remove </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2"> token from cache&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed to remove </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2"> token from cache"</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">username</span><span class="p">:</span>
         <span class="n">token_removed_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">evict</span><span class="p">(</span><span class="n">tag</span><span class="o">=</span><span class="n">username</span><span class="p">,</span> <span class="n">retry</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot delete, either username or token must be provided&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">"Cannot delete, either username or token must be provided"</span><span class="p">)</span>
 
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> removed </span><span class="si">{</span><span class="n">token_removed_count</span><span class="si">}</span><span class="s2"> token(s) for user </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> removed </span><span class="si">{</span><span class="n">token_removed_count</span><span class="si">}</span><span class="s2"> token(s) for user </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:bearer_token_delete&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:bearer_token_delete"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7735,14 +7735,14 @@ nf#
     <span class="n">mcp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">bearer_token_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    List bearer tokens stored in the FastMCP worker token database.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">expire</span><span class="p">()</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:bearer_token_list&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">[])</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:bearer_token_list"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">[])</span>
 
     <span class="k">for</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;bearer_token::&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"bearer_token::"</span><span class="p">):</span>
             <span class="k">continue</span>
         <span class="n">token_data</span><span class="p">,</span> <span class="n">expires</span><span class="p">,</span> <span class="n">tag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
             <span class="n">cache_key</span><span class="p">,</span> <span class="n">expire_time</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="kc">True</span>
@@ -7751,26 +7751,26 @@ nf#
             <span class="k">continue</span>
         <span class="k">if</span> <span class="n">expires</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">expires</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">expires</span><span class="p">)</span>
-        <span class="n">creation</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">token_data</span><span class="p">[</span><span class="s2">&quot;created&quot;</span><span class="p">])</span>
+        <span class="n">creation</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">token_data</span><span class="p">[</span><span class="s2">"created"</span><span class="p">])</span>
         <span class="n">age</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">creation</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="p">{</span>
-                <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">token_data</span><span class="p">[</span><span class="s2">&quot;username&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="n">token_data</span><span class="p">[</span><span class="s2">&quot;token&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">age</span><span class="p">),</span>
-                <span class="s2">&quot;creation&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">creation</span><span class="p">),</span>
-                <span class="s2">&quot;expires&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">expires</span><span class="p">),</span>
+                <span class="s2">"username"</span><span class="p">:</span> <span class="n">token_data</span><span class="p">[</span><span class="s2">"username"</span><span class="p">],</span>
+                <span class="s2">"token"</span><span class="p">:</span> <span class="n">token_data</span><span class="p">[</span><span class="s2">"token"</span><span class="p">],</span>
+                <span class="s2">"age"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">age</span><span class="p">),</span>
+                <span class="s2">"creation"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">creation</span><span class="p">),</span>
+                <span class="s2">"expires"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">expires</span><span class="p">),</span>
             <span class="p">}</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;creation&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;expires&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="s2">"username"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+                <span class="s2">"token"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+                <span class="s2">"age"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+                <span class="s2">"creation"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+                <span class="s2">"expires"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
             <span class="p">}</span>
         <span class="p">]</span>
 
@@ -7805,13 +7805,13 @@ nf#
 <span class="normal">873</span>
 <span class="normal">874</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="n">BearerTokenCheckInput</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="n">BoolResult</span><span class="p">,</span> <span class="n">fastapi</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mcp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">bearer_token_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Check if a bearer token is present and active in the FastMCP token database.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">expire</span><span class="p">()</span>
-    <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;bearer_token::</span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"bearer_token::</span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">"</span>
     <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:bearer_token_check&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:bearer_token_check"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>

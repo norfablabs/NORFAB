@@ -7117,17 +7117,17 @@ repository, and returns the corresponding <code>nf://</code> URL.</p>
 <p>File Sharing inventory contains a <code>remotes</code> list. Each item has the same fixed
 schema:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">filesharing</span>
-<span class="nt">base_dir</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;./shared&quot;</span>
+<span class="nt">base_dir</span><span class="p">:</span><span class="w"> </span><span class="s">"./shared"</span>
 
 <span class="nt">remotes</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;openclaw-main&quot;</span>
-<span class="w">    </span><span class="nt">mount</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;repositories/openclaw&quot;</span>
-<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;OpenClaw</span><span class="nv"> </span><span class="s">main</span><span class="nv"> </span><span class="s">branch&quot;</span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://github.com/openclaw/openclaw.git&quot;</span>
-<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;main&quot;</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;git&quot;</span>
-<span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;octocat&quot;</span>
-<span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{</span><span class="nv"> </span><span class="s">env[&quot;GITHUB_TOKEN&quot;]</span><span class="nv"> </span><span class="s">}}&#39;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"openclaw-main"</span>
+<span class="w">    </span><span class="nt">mount</span><span class="p">:</span><span class="w"> </span><span class="s">"repositories/openclaw"</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"OpenClaw</span><span class="nv"> </span><span class="s">main</span><span class="nv"> </span><span class="s">branch"</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">"https://github.com/openclaw/openclaw.git"</span>
+<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="s">"main"</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">"git"</span>
+<span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">"octocat"</span>
+<span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">'{{</span><span class="nv"> </span><span class="s">env["GITHUB_TOKEN"]</span><span class="nv"> </span><span class="s">}}'</span>
 <span class="w">    </span><span class="nt">auto_sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
 </code></pre></div>
@@ -7221,25 +7221,25 @@ mount owns the published folder:</p>
 </code></pre></div>
 <p>Different branches of one repository use separate remote entries and names:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">remotes</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;openclaw-main&quot;</span>
-<span class="w">    </span><span class="nt">mount</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;openclaw-main&quot;</span>
-<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Main</span><span class="nv"> </span><span class="s">branch&quot;</span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://github.com/openclaw/openclaw.git&quot;</span>
-<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;main&quot;</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;git&quot;</span>
-<span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;octocat&quot;</span>
-<span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{</span><span class="nv"> </span><span class="s">env[&quot;GITHUB_TOKEN&quot;]</span><span class="nv"> </span><span class="s">}}&#39;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"openclaw-main"</span>
+<span class="w">    </span><span class="nt">mount</span><span class="p">:</span><span class="w"> </span><span class="s">"openclaw-main"</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"Main</span><span class="nv"> </span><span class="s">branch"</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">"https://github.com/openclaw/openclaw.git"</span>
+<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="s">"main"</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">"git"</span>
+<span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">"octocat"</span>
+<span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">'{{</span><span class="nv"> </span><span class="s">env["GITHUB_TOKEN"]</span><span class="nv"> </span><span class="s">}}'</span>
 <span class="w">    </span><span class="nt">auto_sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
 
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;openclaw-development&quot;</span>
-<span class="w">    </span><span class="nt">mount</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;openclaw-development&quot;</span>
-<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Development</span><span class="nv"> </span><span class="s">branch&quot;</span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://github.com/openclaw/openclaw.git&quot;</span>
-<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;development&quot;</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;git&quot;</span>
-<span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;octocat&quot;</span>
-<span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{</span><span class="nv"> </span><span class="s">env[&quot;GITHUB_TOKEN&quot;]</span><span class="nv"> </span><span class="s">}}&#39;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"openclaw-development"</span>
+<span class="w">    </span><span class="nt">mount</span><span class="p">:</span><span class="w"> </span><span class="s">"openclaw-development"</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"Development</span><span class="nv"> </span><span class="s">branch"</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">"https://github.com/openclaw/openclaw.git"</span>
+<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="s">"development"</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">"git"</span>
+<span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">"octocat"</span>
+<span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">'{{</span><span class="nv"> </span><span class="s">env["GITHUB_TOKEN"]</span><span class="nv"> </span><span class="s">}}'</span>
 <span class="w">    </span><span class="nt">auto_sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">    </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
 </code></pre></div>
@@ -7286,7 +7286,7 @@ links.</p>
 <div class="highlight"><pre><span></span><code><span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_sync_stop</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
     <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">remote</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">remotes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">remote</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;git&quot;</span> <span class="ow">and</span> <span class="n">remote</span><span class="o">.</span><span class="n">auto_sync</span> <span class="ow">and</span> <span class="p">(</span>
+        <span class="k">if</span> <span class="n">remote</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">"git"</span> <span class="ow">and</span> <span class="n">remote</span><span class="o">.</span><span class="n">auto_sync</span> <span class="ow">and</span> <span class="p">(</span>
             <span class="n">remote</span><span class="o">.</span><span class="n">_last_sync_timer</span> <span class="ow">is</span> <span class="kc">None</span>
             <span class="ow">or</span> <span class="n">now</span> <span class="o">-</span> <span class="n">remote</span><span class="o">.</span><span class="n">_last_sync_timer</span> <span class="o">&gt;=</span> <span class="n">remote</span><span class="o">.</span><span class="n">sync_interval</span>
         <span class="p">):</span>

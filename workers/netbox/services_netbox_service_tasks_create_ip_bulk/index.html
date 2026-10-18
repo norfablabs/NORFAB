@@ -7284,10 +7284,10 @@
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>Returns allocation results keyed by device and interface:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;Ethernet1&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.1/31&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;...&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">,</span>
+    <span class="s2">"ceos-leaf-1"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"Ethernet1"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"address"</span><span class="p">:</span> <span class="s2">"10.0.0.1/31"</span><span class="p">,</span>
+            <span class="s2">"..."</span><span class="p">:</span> <span class="s2">"..."</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">},</span>
 <span class="p">}</span>
@@ -7307,7 +7307,7 @@
 <div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>ip-bulk<span class="w"> </span>prefix<span class="w"> </span><span class="m">10</span>.0.0.0/24<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>ceos-leaf-2<span class="w"> </span>interface-list<span class="w"> </span>Ethernet1<span class="w"> </span>Ethernet2
 </code></pre></div>
 <p>Allocate IPs for interfaces matching a regex:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>ip-bulk<span class="w"> </span>prefix<span class="w"> </span><span class="m">10</span>.0.0.0/24<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>interface-regex<span class="w"> </span><span class="s2">&quot;Ethernet[1-4]&quot;</span><span class="w"> </span>mask-len<span class="w"> </span><span class="m">31</span>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>ip-bulk<span class="w"> </span>prefix<span class="w"> </span><span class="m">10</span>.0.0.0/24<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>interface-regex<span class="w"> </span><span class="s2">"Ethernet[1-4]"</span><span class="w"> </span>mask-len<span class="w"> </span><span class="m">31</span>
 </code></pre></div>
 <p>Preview allocations:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>ip-bulk<span class="w"> </span>prefix<span class="w"> </span><span class="m">10</span>.0.0.0/24<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>interface-list<span class="w"> </span>Ethernet1<span class="w"> </span>dry-run
@@ -7316,33 +7316,33 @@
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
 <span class="c1"># allocate IPs for selected interfaces</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;create_ip_bulk&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"create_ip_bulk"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.0/24&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-leaf-2&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;interface_list&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Ethernet1&quot;</span><span class="p">,</span> <span class="s2">&quot;Ethernet2&quot;</span><span class="p">],</span>
+        <span class="s2">"prefix"</span><span class="p">:</span> <span class="s2">"10.0.0.0/24"</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">,</span> <span class="s2">"ceos-leaf-2"</span><span class="p">],</span>
+        <span class="s2">"interface_list"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Ethernet1"</span><span class="p">,</span> <span class="s2">"Ethernet2"</span><span class="p">],</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># allocate /31 link subnets for matching interfaces</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;create_ip_bulk&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"create_ip_bulk"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.0/24&quot;</span><span class="p">,</span> <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">},</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;interface_regex&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet[1-4]&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;mask_len&quot;</span><span class="p">:</span> <span class="mi">31</span><span class="p">,</span>
-        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;fabric uplink&quot;</span><span class="p">,</span>
+        <span class="s2">"prefix"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"prefix"</span><span class="p">:</span> <span class="s2">"10.0.0.0/24"</span><span class="p">,</span> <span class="s2">"site"</span><span class="p">:</span> <span class="s2">"lab"</span><span class="p">},</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">],</span>
+        <span class="s2">"interface_regex"</span><span class="p">:</span> <span class="s2">"Ethernet[1-4]"</span><span class="p">,</span>
+        <span class="s2">"mask_len"</span><span class="p">:</span> <span class="mi">31</span><span class="p">,</span>
+        <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"fabric uplink"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
@@ -7359,10 +7359,10 @@ root
 <span class="w">    </span>└──<span class="w"> </span>create:<span class="w">    </span>Create<span class="w"> </span>objects<span class="w"> </span><span class="k">in</span><span class="w"> </span>Netbox
 <span class="w">        </span>└──<span class="w"> </span>ip-bulk:<span class="w">    </span>Allocate<span class="w"> </span>next<span class="w"> </span>available<span class="w"> </span>IP<span class="w"> </span>address<span class="w"> </span>from<span class="w"> </span>prefix<span class="w"> </span><span class="k">for</span><span class="w"> </span>multiple<span class="w"> </span>devices<span class="w"> </span>and<span class="w"> </span>interfaces
 <span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>nowait:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>job<span class="w"> </span>to<span class="w"> </span>complete,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'any'</span>
+<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
+<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
+<span class="w">            </span>├──<span class="w"> </span>nowait:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>job<span class="w"> </span>to<span class="w"> </span>complete,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
 <span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span>commit<span class="w"> </span>to<span class="w"> </span>database
 <span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>Branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
@@ -7883,16 +7883,16 @@ of this length within the parent prefix. Ignored when <code>dry_run=True</code>.
 <span class="normal">1031</span>
 <span class="normal">1032</span>
 <span class="normal">1033</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateIpBulkInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateIpBulkResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Create IP Addresses Bulk&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Create IP Addresses Bulk"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -7918,7 +7918,7 @@ of this length within the parent prefix. Ignored when <code>dry_run=True</code>.
     <span class="n">mask_len</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">create_peer_ip</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Bulk assigns IP addresses to interfaces of specified devices.</span>
 
 <span class="sd">    .. warning::</span>
@@ -7945,8 +7945,8 @@ of this length within the parent prefix. Ignored when <code>dry_run=True</code>.
 <span class="sd">        dns_name (str, optional): DNS name for the IP addresses.</span>
 <span class="sd">        tenant (str, optional): Tenant name to associate with the IP addresses.</span>
 <span class="sd">        comments (str, optional): Additional comments for the IP addresses.</span>
-<span class="sd">        role (str, optional): Role for the IP addresses, e.g. &#39;loopback&#39;, &#39;anycast&#39;.</span>
-<span class="sd">        status (str, optional): Status for the IP addresses, e.g. &#39;active&#39;, &#39;reserved&#39;, &#39;deprecated&#39;.</span>
+<span class="sd">        role (str, optional): Role for the IP addresses, e.g. 'loopback', 'anycast'.</span>
+<span class="sd">        status (str, optional): Status for the IP addresses, e.g. 'active', 'reserved', 'deprecated'.</span>
 <span class="sd">        is_primary (bool, optional): If True, set each IP as the primary IP for its device.</span>
 <span class="sd">        mask_len (int, optional): Mask length for the IP addresses; creates a child subnet</span>
 <span class="sd">            of this length within the parent prefix. Ignored when ``dry_run=True``.</span>
@@ -7954,16 +7954,16 @@ of this length within the parent prefix. Ignored when <code>dry_run=True</code>.
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: A Result object containing per-device, per-interface IP allocation results.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Create IP bulk: Assigning IPs for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="p">[])</span><span class="si">}</span><span class="s2"> device(s) from &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; Netbox&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Create IP bulk: Assigning IPs for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="p">[])</span><span class="si">}</span><span class="s2"> device(s) from '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">' Netbox"</span>
     <span class="p">)</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_ip_bulk&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{},</span> <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_ip_bulk"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{},</span> <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span>
     <span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;creating IP addresses in bulk for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s), dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"creating IP addresses in bulk for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s), dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
 
     <span class="c1"># get list of all interfaces</span>
@@ -7977,16 +7977,16 @@ of this length within the parent prefix. Ignored when <code>dry_run=True</code>.
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">interfaces</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="s2">&quot;failed to retrieve interfaces for bulk IP creation&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
+            <span class="s2">"failed to retrieve interfaces for bulk IP creation"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="n">interface_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">interfaces</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieved </span><span class="si">{</span><span class="n">interface_count</span><span class="si">}</span><span class="s2"> interface(s) for bulk IP creation&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"retrieved </span><span class="si">{</span><span class="n">interface_count</span><span class="si">}</span><span class="s2"> interface(s) for bulk IP creation"</span><span class="p">)</span>
 
     <span class="c1"># iterate over interfaces and assign IP addresses</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;processing </span><span class="si">{</span><span class="n">interface_count</span><span class="si">}</span><span class="s2"> interface(s) for bulk IP creation&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"processing </span><span class="si">{</span><span class="n">interface_count</span><span class="si">}</span><span class="s2"> interface(s) for bulk IP creation"</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">device_interfaces</span> <span class="ow">in</span> <span class="n">interfaces</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">interface</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">device_interfaces</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
@@ -8015,7 +8015,7 @@ of this length within the parent prefix. Ignored when <code>dry_run=True</code>.
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;bulk IP address creation task complete&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"bulk IP address creation task complete"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>

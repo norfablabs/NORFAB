@@ -7694,41 +7694,41 @@ must list suppressed candidates under <code>delete_skipped</code> and explain wh
 <span class="p">):</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="n">StrictBool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">False</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Calculate the VLAN diff without writing to NetBox&quot;</span><span class="p">,</span>
-        <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;dry-run&quot;</span><span class="p">,</span>
-        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;presence&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Calculate the VLAN diff without writing to NetBox"</span><span class="p">,</span>
+        <span class="n">alias</span><span class="o">=</span><span class="s2">"dry-run"</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">"presence"</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
     <span class="p">)</span>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;List of NetBox device names to collect VLANs from&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"List of NetBox device names to collect VLANs from"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">timeout</span><span class="p">:</span> <span class="n">StrictInt</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="mi">600</span><span class="p">,</span>
         <span class="n">gt</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Timeout in seconds for Nornir host resolution and VLAN parsing&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Timeout in seconds for Nornir host resolution and VLAN parsing"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">with_approval</span><span class="p">:</span> <span class="n">StrictBool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">False</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Preview VLAN changes and ask for review before writing to NetBox&quot;</span><span class="p">,</span>
-        <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;with-approval&quot;</span><span class="p">,</span>
-        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;presence&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Preview VLAN changes and ask for review before writing to NetBox"</span><span class="p">,</span>
+        <span class="n">alias</span><span class="o">=</span><span class="s2">"with-approval"</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">"presence"</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
     <span class="p">)</span>
     <span class="n">process_deletions</span><span class="p">:</span> <span class="n">StrictBool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">False</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Delete in-range NetBox VLANs absent from successfully collected live state&quot;</span><span class="p">,</span>
-        <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;process-deletions&quot;</span><span class="p">,</span>
-        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;presence&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Delete in-range NetBox VLANs absent from successfully collected live state"</span><span class="p">,</span>
+        <span class="n">alias</span><span class="o">=</span><span class="s2">"process-deletions"</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">"presence"</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
     <span class="p">)</span>
     <span class="n">vlan_group</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">StrictStr</span><span class="p">,</span> <span class="n">StrictInt</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;VLAN group name, slug, or ID used as the reconciliation scope&quot;</span><span class="p">,</span>
-        <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;vlan-group&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"VLAN group name, slug, or ID used as the reconciliation scope"</span><span class="p">,</span>
+        <span class="n">alias</span><span class="o">=</span><span class="s2">"vlan-group"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">filter_by_vlan_ids</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;VLAN IDs or inclusive ranges to reconcile, for example 100 or 200-299&quot;</span><span class="p">,</span>
-        <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;vlan-ids&quot;</span><span class="p">,</span>
-        <span class="n">examples</span><span class="o">=</span><span class="p">[[</span><span class="s2">&quot;100&quot;</span><span class="p">,</span> <span class="s2">&quot;200-299&quot;</span><span class="p">]],</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"VLAN IDs or inclusive ranges to reconcile, for example 100 or 200-299"</span><span class="p">,</span>
+        <span class="n">alias</span><span class="o">=</span><span class="s2">"vlan-ids"</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="p">[[</span><span class="s2">"100"</span><span class="p">,</span> <span class="s2">"200-299"</span><span class="p">]],</span>
     <span class="p">)</span>
 </code></pre></div>
 <p>Add <code>model_validator(mode="after")</code> validation that:</p>
@@ -7750,7 +7750,7 @@ current sync task conventions. Keep the output broad but documented:</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SyncVlansResult</span><span class="p">(</span><span class="n">Result</span><span class="p">):</span>
     <span class="n">result</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="p">{},</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;VLAN sync actions keyed by NetBox VLAN scope&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"VLAN sync actions keyed by NetBox VLAN scope"</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div>
 <p>Do not claim a per-device result: one VLAN action can represent observations
@@ -7759,23 +7759,23 @@ from several devices.</p>
 <p>Register the task with the same API and MCP posture as other mutating,
 idempotent sync tasks:</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncVlansInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncVlansResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Sync VLANs&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Sync VLANs"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>The task must return a <code>Result</code> initialized with:</p>
 <div class="highlight"><pre><span></span><code><span class="n">Result</span><span class="p">(</span>
-    <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_vlans&quot;</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_vlans"</span><span class="p">,</span>
     <span class="n">result</span><span class="o">=</span><span class="p">{},</span>
     <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
     <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
@@ -7810,8 +7810,8 @@ idempotent sync tasks:</p>
 scoped VLAN group because direct site assignment is deprecated in NetBox 4.4.</p>
 <p>Within a scope, the reconciliation identity is <code>vid</code>. Internally use:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;group:12:CAMPUS&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="mi">100</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;vid&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;USERS&quot;</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;User access&quot;</span><span class="p">},</span>
+    <span class="s2">"group:12:CAMPUS"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="mi">100</span><span class="p">:</span> <span class="p">{</span><span class="s2">"vid"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"USERS"</span><span class="p">,</span> <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"User access"</span><span class="p">},</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -7822,10 +7822,10 @@ select the first record returned by the API.</p>
 <h2 id="live-data-collection">Live Data Collection<a class="headerlink" href="#live-data-collection" title="Permanent link">¤</a></h2>
 <p>Use one Nornir job for the complete resolved device set:</p>
 <div class="highlight"><pre><span></span><code><span class="n">parse_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;parse_ttp&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;get&quot;</span><span class="p">:</span> <span class="s2">&quot;vlans&quot;</span><span class="p">,</span> <span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">},</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="s2">"nornir"</span><span class="p">,</span>
+    <span class="s2">"parse_ttp"</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"get"</span><span class="p">:</span> <span class="s2">"vlans"</span><span class="p">,</span> <span class="s2">"FL"</span><span class="p">:</span> <span class="n">devices</span><span class="p">},</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
     <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -7839,9 +7839,9 @@ Identical duplicate host results may be collapsed.</p>
 <h2 id="normalization-and-aggregation">Normalization and Aggregation<a class="headerlink" href="#normalization-and-aggregation" title="Permanent link">¤</a></h2>
 <p>Normalize both sources to exactly these managed fields:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;vid&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
-    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;USERS&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="s2">"vid"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"USERS"</span><span class="p">,</span>
+    <span class="s2">"description"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Rules:</p>
@@ -7867,9 +7867,9 @@ desired name. Do not replace it with the interface task's <code>VLAN_100</code> 
 </ul>
 <p>A conflict entry must include every contributing device and normalized record:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;100&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;device&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;leaf-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;USERS&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User access&quot;</span><span class="p">},</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;device&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;leaf-2&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CLIENTS&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User access&quot;</span><span class="p">}</span>
+<span class="w">    </span><span class="nt">"100"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"device"</span><span class="p">:</span><span class="w"> </span><span class="s2">"leaf-1"</span><span class="p">,</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"USERS"</span><span class="p">,</span><span class="w"> </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"User access"</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"device"</span><span class="p">:</span><span class="w"> </span><span class="s2">"leaf-2"</span><span class="p">,</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"CLIENTS"</span><span class="p">,</span><span class="w"> </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"User access"</span><span class="p">}</span>
 <span class="w">    </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -7894,21 +7894,21 @@ Use the branch-aware client returned by:</p>
 <h3 id="dry-run-result">Dry-run result<a class="headerlink" href="#dry-run-result" title="Permanent link">¤</a></h3>
 <p>Dry-run returns the planned diff with scope metadata and conflicts:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;site:1:NORFAB-LAB&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;devices&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ceos-leaf-2&quot;</span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;create&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">110</span><span class="p">,</span><span class="w"> </span><span class="mi">111</span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;update&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;210&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                    </span><span class="nt">&quot;old_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;VLAN210&quot;</span><span class="p">,</span>
-<span class="w">                    </span><span class="nt">&quot;new_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TEST_L1_ACCESS&quot;</span>
+<span class="w">    </span><span class="nt">"site:1:NORFAB-LAB"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"devices"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">,</span><span class="w"> </span><span class="s2">"ceos-leaf-2"</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">"create"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">110</span><span class="p">,</span><span class="w"> </span><span class="mi">111</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">"update"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">"210"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="nt">"old_value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"VLAN210"</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">"new_value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"TEST_L1_ACCESS"</span>
 <span class="w">                </span><span class="p">}</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;delete&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">999</span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;delete_skipped&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">        </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">310</span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;conflicts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">        </span><span class="nt">"delete"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">999</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">"delete_skipped"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">        </span><span class="nt">"in_sync"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">310</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">"conflicts"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -7917,14 +7917,14 @@ Use the branch-aware client returned by:</p>
 <h3 id="live-run-result">Live-run result<a class="headerlink" href="#live-run-result" title="Permanent link">¤</a></h3>
 <p>Live-run returns applied and skipped actions:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;site:1:NORFAB-LAB&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;devices&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ceos-leaf-2&quot;</span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">110</span><span class="p">,</span><span class="w"> </span><span class="mi">111</span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">210</span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;deleted&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">        </span><span class="nt">&quot;delete_skipped&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">999</span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">310</span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;conflicts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="nt">"site:1:NORFAB-LAB"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"devices"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">,</span><span class="w"> </span><span class="s2">"ceos-leaf-2"</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">"created"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">110</span><span class="p">,</span><span class="w"> </span><span class="mi">111</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">"updated"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">210</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">"deleted"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">        </span><span class="nt">"delete_skipped"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">999</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">"in_sync"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">310</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">"conflicts"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -7935,11 +7935,11 @@ declined, set <code>ret.status = "skipped"</code>, return the dry-run shape, set
 <h3 id="create">Create<a class="headerlink" href="#create" title="Permanent link">¤</a></h3>
 <p>Create payload:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;vid&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;vid&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="n">group_id</span><span class="p">,</span>  <span class="c1"># group scope only</span>
-    <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site_id</span><span class="p">,</span>    <span class="c1"># site compatibility scope only</span>
+    <span class="s2">"vid"</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">"vid"</span><span class="p">],</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span>
+    <span class="s2">"description"</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">"description"</span><span class="p">],</span>
+    <span class="s2">"group"</span><span class="p">:</span> <span class="n">group_id</span><span class="p">,</span>  <span class="c1"># group scope only</span>
+    <span class="s2">"site"</span><span class="p">:</span> <span class="n">site_id</span><span class="p">,</span>    <span class="c1"># site compatibility scope only</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Do not set fields the live parser cannot authoritatively supply. NetBox should
@@ -7947,9 +7947,9 @@ apply its default VLAN status.</p>
 <h3 id="update">Update<a class="headerlink" href="#update" title="Permanent link">¤</a></h3>
 <p>Update payload contains the NetBox object <code>id</code> and only changed managed fields:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">current</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>       <span class="c1"># only when changed</span>
-    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>  <span class="c1"># only when changed</span>
+    <span class="s2">"id"</span><span class="p">:</span> <span class="n">current</span><span class="p">[</span><span class="s2">"id"</span><span class="p">],</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span>       <span class="c1"># only when changed</span>
+    <span class="s2">"description"</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">"description"</span><span class="p">],</span>  <span class="c1"># only when changed</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Never move an existing VLAN between a site and group or between groups. Scope
@@ -8037,7 +8037,7 @@ fails for every selected device. Partial conflicts should populate
     <span class="o">...</span>
     <span class="n">vlans</span><span class="p">:</span> <span class="n">SyncVlansShell</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Sync live VLAN configuration with NetBox&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Sync live VLAN configuration with NetBox"</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div>
 <p>The command path is:</p>

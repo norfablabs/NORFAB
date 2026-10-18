@@ -7260,17 +7260,17 @@
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>Normal mode returns circuit data keyed by device name and circuit ID:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;fceos4&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;CID1&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;provider&quot;</span><span class="p">:</span> <span class="s2">&quot;Provider1&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;DarkFibre&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="s2">&quot;eth101&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;remote_device&quot;</span><span class="p">:</span> <span class="s2">&quot;fceos5&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;remote_interface&quot;</span><span class="p">:</span> <span class="s2">&quot;eth101&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;tenant&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">&quot;custom_fields&quot;</span><span class="p">:</span> <span class="p">{},</span>
+    <span class="s2">"fceos4"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"CID1"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"provider"</span><span class="p">:</span> <span class="s2">"Provider1"</span><span class="p">,</span>
+            <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"DarkFibre"</span><span class="p">,</span>
+            <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"active"</span><span class="p">,</span>
+            <span class="s2">"interface"</span><span class="p">:</span> <span class="s2">"eth101"</span><span class="p">,</span>
+            <span class="s2">"remote_device"</span><span class="p">:</span> <span class="s2">"fceos5"</span><span class="p">,</span>
+            <span class="s2">"remote_interface"</span><span class="p">:</span> <span class="s2">"eth101"</span><span class="p">,</span>
+            <span class="s2">"tenant"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">"tags"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"custom_fields"</span><span class="p">:</span> <span class="p">{},</span>
         <span class="p">},</span>
     <span class="p">},</span>
 <span class="p">}</span>
@@ -7306,30 +7306,30 @@
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
 <span class="c1"># get circuits for devices</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_circuits&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"get_circuits"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fceos4&quot;</span><span class="p">,</span> <span class="s2">&quot;fceos5&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="s2">&quot;planned-change&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"fceos4"</span><span class="p">,</span> <span class="s2">"fceos5"</span><span class="p">],</span>
+        <span class="s2">"branch"</span><span class="p">:</span> <span class="s2">"planned-change"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># filter by circuit IDs and add interface details</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_circuits&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"get_circuits"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fceos4&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;cid&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;CID1&quot;</span><span class="p">,</span> <span class="s2">&quot;CID2&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;add_interface_details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"fceos4"</span><span class="p">],</span>
+        <span class="s2">"cid"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"CID1"</span><span class="p">,</span> <span class="s2">"CID2"</span><span class="p">],</span>
+        <span class="s2">"add_interface_details"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
@@ -7347,13 +7347,13 @@ root
 <span class="w">        </span>└──<span class="w"> </span>circuits:<span class="w">    </span>Query<span class="w"> </span>Netbox<span class="w"> </span>circuits<span class="w"> </span>data<span class="w"> </span><span class="k">for</span><span class="w"> </span>devices
 <span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
 <span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>NetBox<span class="w"> </span>branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
-<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'any'</span>
 <span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
 <span class="w">            </span>├──<span class="w"> </span>device-list:<span class="w">    </span>Device<span class="w"> </span>names<span class="w"> </span>to<span class="w"> </span>query<span class="w"> </span>data<span class="w"> </span><span class="k">for</span>
 <span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Only<span class="w"> </span><span class="k">return</span><span class="w"> </span>query<span class="w"> </span>content,<span class="w"> </span><span class="k">do</span><span class="w"> </span>not<span class="w"> </span>run<span class="w"> </span>it
 <span class="w">            </span>├──<span class="w"> </span>cid:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>circuit<span class="w"> </span>identifiers<span class="w"> </span>to<span class="w"> </span>retrieve<span class="w"> </span>data<span class="w"> </span><span class="k">for</span>
 <span class="w">            </span>├──<span class="w"> </span>add-interface-details:<span class="w">    </span>Add<span class="w"> </span>interface<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>circuit<span class="w"> </span>results
-<span class="w">            </span>└──<span class="w"> </span>cache:<span class="w">    </span>How<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span>cache,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>└──<span class="w"> </span>cache:<span class="w">    </span>How<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span>cache,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
@@ -7544,23 +7544,23 @@ including interface subinterfaces - ip addresses, vrf, child interfaces with the
                 <p>dictionary keyed by device names with circuits data:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox get circuits device-list fceos5
 {
-    &quot;netbox-worker-1.1&quot;: {
-        &quot;fceos5&quot;: {
-            &quot;CID1&quot;: {
-                &quot;comments&quot;: &quot;&quot;,
-                &quot;commit_rate&quot;: null,
-                &quot;custom_fields&quot;: {},
-                &quot;description&quot;: &quot;&quot;,
-                &quot;interface&quot;: &quot;eth101&quot;,
-                &quot;is_active&quot;: true,
-                &quot;provider&quot;: &quot;Provider1&quot;,
-                &quot;provider_account&quot;: &quot;&quot;,
-                &quot;remote_device&quot;: &quot;fceos4&quot;,
-                &quot;remote_interface&quot;: &quot;eth101&quot;,
-                &quot;status&quot;: &quot;active&quot;,
-                &quot;tags&quot;: [],
-                &quot;tenant&quot;: null,
-                &quot;type&quot;: &quot;DarkFibre&quot;
+    "netbox-worker-1.1": {
+        "fceos5": {
+            "CID1": {
+                "comments": "",
+                "commit_rate": null,
+                "custom_fields": {},
+                "description": "",
+                "interface": "eth101",
+                "is_active": true,
+                "provider": "Provider1",
+                "provider_account": "",
+                "remote_device": "fceos4",
+                "remote_interface": "eth101",
+                "status": "active",
+                "tags": [],
+                "tenant": null,
+                "type": "DarkFibre"
             }
         }
     }
@@ -7574,32 +7574,32 @@ nf#
     </table>
         <p>If <code>add_interface_details</code> is True returns this extra information:</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;netbox-worker-1.1&quot;: {
-        &quot;fceos4&quot;: {
-            &quot;CID2&quot;: {
-                &quot;child_interfaces&quot;: [
+    "netbox-worker-1.1": {
+        "fceos4": {
+            "CID2": {
+                "child_interfaces": [
                     {
-                        &quot;ip_addresses&quot;: [
+                        "ip_addresses": [
                             {
-                                &quot;address&quot;: &quot;10.0.0.12/24&quot;,
+                                "address": "10.0.0.12/24",
                                 ...
                             }
                         ],
-                        &quot;name&quot;: &quot;eth11.123&quot;,
-                        &quot;vrf&quot;: {
-                            &quot;name&quot;: &quot;MGMT&quot;
+                        "name": "eth11.123",
+                        "vrf": {
+                            "name": "MGMT"
                         }
                     }
                 ],
-                &quot;interface&quot;: &quot;eth11&quot;,
-                &quot;ip_addresses&quot;: [
+                "interface": "eth11",
+                "ip_addresses": [
                     {
-                        &quot;address&quot;: &quot;10.0.0.14/24&quot;,
+                        "address": "10.0.0.14/24",
                         ...
                     }
                 ],
-                &quot;vrf&quot;: {
-                    &quot;name&quot;: &quot;OOB_CTRL&quot;
+                "vrf": {
+                    "name": "OOB_CTRL"
                 }
             }
         }
@@ -7931,14 +7931,14 @@ nf#
 <span class="normal">535</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetCircuitsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetCircuitsResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Circuits&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Circuits"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -7953,12 +7953,12 @@ nf#
     <span class="n">cache</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">add_interface_details</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve circuit information for specified devices from Netbox.</span>
 
 <span class="sd">    **How it works:**</span>
-<span class="sd">    1. User requests circuits for devices: `[&quot;device1&quot;, &quot;device2&quot;]`</span>
-<span class="sd">    2. Fetch device data → Extract their sites: `[&quot;site1&quot;, &quot;site2&quot;]`</span>
+<span class="sd">    1. User requests circuits for devices: `["device1", "device2"]`</span>
+<span class="sd">    2. Fetch device data → Extract their sites: `["site1", "site2"]`</span>
 <span class="sd">    3. Query circuits WHERE `terminations.site IN (site1, site2)` ← **Broad query!**</span>
 <span class="sd">    4. For each circuit, trace termination paths</span>
 <span class="sd">    5. Map terminations to specific requested devices</span>
@@ -7977,8 +7977,8 @@ nf#
 
 <span class="sd">            - True: Use data stored in cache if it is up to date, refresh it otherwise.</span>
 <span class="sd">            - False: Do not use cache and do not update cache.</span>
-<span class="sd">            - &quot;refresh&quot;: Ignore data in cache and replace it with data fetched from Netbox.</span>
-<span class="sd">            - &quot;force&quot;: Use data in cache without checking if it is up to date.</span>
+<span class="sd">            - "refresh": Ignore data in cache and replace it with data fetched from Netbox.</span>
+<span class="sd">            - "force": Use data in cache without checking if it is up to date.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: dictionary keyed by device names with circuits data:</span>
@@ -7986,23 +7986,23 @@ nf#
 <span class="sd">            ```</span>
 <span class="sd">            nf#netbox get circuits device-list fceos5</span>
 <span class="sd">            {</span>
-<span class="sd">                &quot;netbox-worker-1.1&quot;: {</span>
-<span class="sd">                    &quot;fceos5&quot;: {</span>
-<span class="sd">                        &quot;CID1&quot;: {</span>
-<span class="sd">                            &quot;comments&quot;: &quot;&quot;,</span>
-<span class="sd">                            &quot;commit_rate&quot;: null,</span>
-<span class="sd">                            &quot;custom_fields&quot;: {},</span>
-<span class="sd">                            &quot;description&quot;: &quot;&quot;,</span>
-<span class="sd">                            &quot;interface&quot;: &quot;eth101&quot;,</span>
-<span class="sd">                            &quot;is_active&quot;: true,</span>
-<span class="sd">                            &quot;provider&quot;: &quot;Provider1&quot;,</span>
-<span class="sd">                            &quot;provider_account&quot;: &quot;&quot;,</span>
-<span class="sd">                            &quot;remote_device&quot;: &quot;fceos4&quot;,</span>
-<span class="sd">                            &quot;remote_interface&quot;: &quot;eth101&quot;,</span>
-<span class="sd">                            &quot;status&quot;: &quot;active&quot;,</span>
-<span class="sd">                            &quot;tags&quot;: [],</span>
-<span class="sd">                            &quot;tenant&quot;: null,</span>
-<span class="sd">                            &quot;type&quot;: &quot;DarkFibre&quot;</span>
+<span class="sd">                "netbox-worker-1.1": {</span>
+<span class="sd">                    "fceos5": {</span>
+<span class="sd">                        "CID1": {</span>
+<span class="sd">                            "comments": "",</span>
+<span class="sd">                            "commit_rate": null,</span>
+<span class="sd">                            "custom_fields": {},</span>
+<span class="sd">                            "description": "",</span>
+<span class="sd">                            "interface": "eth101",</span>
+<span class="sd">                            "is_active": true,</span>
+<span class="sd">                            "provider": "Provider1",</span>
+<span class="sd">                            "provider_account": "",</span>
+<span class="sd">                            "remote_device": "fceos4",</span>
+<span class="sd">                            "remote_interface": "eth101",</span>
+<span class="sd">                            "status": "active",</span>
+<span class="sd">                            "tags": [],</span>
+<span class="sd">                            "tenant": null,</span>
+<span class="sd">                            "type": "DarkFibre"</span>
 <span class="sd">                        }</span>
 <span class="sd">                    }</span>
 <span class="sd">                }</span>
@@ -8014,49 +8014,49 @@ nf#
 
 <span class="sd">    ```</span>
 <span class="sd">    {</span>
-<span class="sd">        &quot;netbox-worker-1.1&quot;: {</span>
-<span class="sd">            &quot;fceos4&quot;: {</span>
-<span class="sd">                &quot;CID2&quot;: {</span>
-<span class="sd">                    &quot;child_interfaces&quot;: [</span>
+<span class="sd">        "netbox-worker-1.1": {</span>
+<span class="sd">            "fceos4": {</span>
+<span class="sd">                "CID2": {</span>
+<span class="sd">                    "child_interfaces": [</span>
 <span class="sd">                        {</span>
-<span class="sd">                            &quot;ip_addresses&quot;: [</span>
+<span class="sd">                            "ip_addresses": [</span>
 <span class="sd">                                {</span>
-<span class="sd">                                    &quot;address&quot;: &quot;10.0.0.12/24&quot;,</span>
+<span class="sd">                                    "address": "10.0.0.12/24",</span>
 <span class="sd">                                    ...</span>
 <span class="sd">                                }</span>
 <span class="sd">                            ],</span>
-<span class="sd">                            &quot;name&quot;: &quot;eth11.123&quot;,</span>
-<span class="sd">                            &quot;vrf&quot;: {</span>
-<span class="sd">                                &quot;name&quot;: &quot;MGMT&quot;</span>
+<span class="sd">                            "name": "eth11.123",</span>
+<span class="sd">                            "vrf": {</span>
+<span class="sd">                                "name": "MGMT"</span>
 <span class="sd">                            }</span>
 <span class="sd">                        }</span>
 <span class="sd">                    ],</span>
-<span class="sd">                    &quot;interface&quot;: &quot;eth11&quot;,</span>
-<span class="sd">                    &quot;ip_addresses&quot;: [</span>
+<span class="sd">                    "interface": "eth11",</span>
+<span class="sd">                    "ip_addresses": [</span>
 <span class="sd">                        {</span>
-<span class="sd">                            &quot;address&quot;: &quot;10.0.0.14/24&quot;,</span>
+<span class="sd">                            "address": "10.0.0.14/24",</span>
 <span class="sd">                            ...</span>
 <span class="sd">                        }</span>
 <span class="sd">                    ],</span>
-<span class="sd">                    &quot;vrf&quot;: {</span>
-<span class="sd">                        &quot;name&quot;: &quot;OOB_CTRL&quot;</span>
+<span class="sd">                    "vrf": {</span>
+<span class="sd">                        "name": "OOB_CTRL"</span>
 <span class="sd">                    }</span>
 <span class="sd">                }</span>
 <span class="sd">            }</span>
 <span class="sd">        }</span>
 <span class="sd">    }</span>
 <span class="sd">    ```</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">cid</span> <span class="o">=</span> <span class="n">cid</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits - </span><span class="si">{</span><span class="n">instance</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span><span class="si">}</span><span class="s2"> Netbox, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;devices </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2">, cid </span><span class="si">{</span><span class="n">cid</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits - </span><span class="si">{</span><span class="n">instance</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span><span class="si">}</span><span class="s2"> Netbox, "</span>
+        <span class="sa">f</span><span class="s2">"devices </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2">, cid </span><span class="si">{</span><span class="n">cid</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
 
     <span class="c1"># form final result object</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">},</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
     <span class="p">)</span>
@@ -8065,7 +8065,7 @@ nf#
         <span class="n">cache</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">cid</span> <span class="o">=</span> <span class="n">cid</span> <span class="ow">or</span> <span class="p">[]</span>
 
-    <span class="c1"># form initial query variables based on devices&#39; sites and cid list</span>
+    <span class="c1"># form initial query variables based on devices' sites and cid list</span>
     <span class="n">device_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_devices</span><span class="p">(</span>
         <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
         <span class="n">devices</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
@@ -8073,22 +8073,22 @@ nf#
         <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
         <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">sites</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">][</span><span class="s2">&quot;slug&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">device_data</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span>
+    <span class="n">sites</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="s2">"site"</span><span class="p">][</span><span class="s2">"slug"</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">device_data</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">UnsupportedNetboxVersion</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Netbox version </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not supported, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;minimum required version is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">compatible_ge_v4</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Netbox version </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not supported, "</span>
+            <span class="sa">f</span><span class="s2">"minimum required version is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">compatible_ge_v4</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
-    <span class="n">query_variables</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;sites&quot;</span><span class="p">:</span> <span class="n">sites</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;cids&quot;</span><span class="p">:</span> <span class="n">cid</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">}</span>
+    <span class="n">query_variables</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"sites"</span><span class="p">:</span> <span class="n">sites</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"cids"</span><span class="p">:</span> <span class="n">cid</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">}</span>
     <span class="n">fetch_circuits</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits - constructed circuits query variables: &#39;</span><span class="si">{</span><span class="n">query_variables</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits - constructed circuits query variables: '</span><span class="si">{</span><span class="n">query_variables</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;force&quot;</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits - retrieving circuits data from cache&quot;</span><span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;retrieving circuits data from cache&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">"force"</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits - retrieving circuits data from cache"</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"retrieving circuits data from cache"</span><span class="p">)</span>
         <span class="n">cid_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1">#  new cid list for follow up query</span>
         <span class="c1"># retrieve last updated data from Netbox for circuits and their terminations</span>
         <span class="n">last_updated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_graphql</span><span class="p">(</span>
@@ -8099,22 +8099,22 @@ nf#
             <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
             <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">last_updated</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - get circuits query failed&quot;</span><span class="p">)</span>
+        <span class="n">last_updated</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - get circuits query failed"</span><span class="p">)</span>
 
         <span class="c1"># return dry run result</span>
         <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;dry-run requested, returning circuits cache freshness query&quot;</span><span class="p">)</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;get_circuits_dry_run&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">last_updated</span><span class="o">.</span><span class="n">result</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"dry-run requested, returning circuits cache freshness query"</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"get_circuits_dry_run"</span><span class="p">]</span> <span class="o">=</span> <span class="n">last_updated</span><span class="o">.</span><span class="n">result</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span> <span class="n">ret</span>
 
         <span class="c1"># retrieve circuits data from cache</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">expire</span><span class="p">()</span>  <span class="c1"># remove expired items from cache</span>
         <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">circuit</span> <span class="ow">in</span> <span class="n">last_updated</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;circuits&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-                <span class="n">circuit_cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;get_circuits::</span><span class="si">{</span><span class="n">circuit</span><span class="p">[</span><span class="s1">&#39;cid&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">for</span> <span class="n">circuit</span> <span class="ow">in</span> <span class="n">last_updated</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"circuits"</span><span class="p">,</span> <span class="p">[]):</span>
+                <span class="n">circuit_cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"get_circuits::</span><span class="si">{</span><span class="n">circuit</span><span class="p">[</span><span class="s1">'cid'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits - searching cache for key </span><span class="si">{</span><span class="n">circuit_cache_key</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits - searching cache for key </span><span class="si">{</span><span class="n">circuit_cache_key</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
                 <span class="c1"># check if cache is up to date and use it if so</span>
                 <span class="k">if</span> <span class="n">circuit_cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
@@ -8123,43 +8123,43 @@ nf#
                     <span class="k">if</span> <span class="n">device</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cache_ckt</span><span class="p">:</span>
                         <span class="k">continue</span>
                     <span class="c1"># use cache forcefully</span>
-                    <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;force&quot;</span><span class="p">:</span>
-                        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="n">circuit</span><span class="p">[</span><span class="s2">&quot;cid&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">cache_ckt</span><span class="p">[</span><span class="n">device</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">"force"</span><span class="p">:</span>
+                        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="n">circuit</span><span class="p">[</span><span class="s2">"cid"</span><span class="p">]]</span> <span class="o">=</span> <span class="n">cache_ckt</span><span class="p">[</span><span class="n">device</span><span class="p">]</span>
                     <span class="c1"># check circuit cache is up to date</span>
-                    <span class="k">if</span> <span class="n">cache_ckt</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;last_updated&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">&quot;last_updated&quot;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">cache_ckt</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"last_updated"</span><span class="p">]</span> <span class="o">!=</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">"last_updated"</span><span class="p">]:</span>
                         <span class="k">continue</span>
                     <span class="k">if</span> <span class="p">(</span>
-                        <span class="n">cache_ckt</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;termination_a&quot;</span><span class="p">]</span>
-                        <span class="ow">and</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">&quot;termination_a&quot;</span><span class="p">]</span>
-                        <span class="ow">and</span> <span class="n">cache_ckt</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;termination_a&quot;</span><span class="p">][</span><span class="s2">&quot;last_updated&quot;</span><span class="p">]</span>
-                        <span class="o">!=</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">&quot;termination_a&quot;</span><span class="p">][</span><span class="s2">&quot;last_updated&quot;</span><span class="p">]</span>
+                        <span class="n">cache_ckt</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"termination_a"</span><span class="p">]</span>
+                        <span class="ow">and</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">"termination_a"</span><span class="p">]</span>
+                        <span class="ow">and</span> <span class="n">cache_ckt</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"termination_a"</span><span class="p">][</span><span class="s2">"last_updated"</span><span class="p">]</span>
+                        <span class="o">!=</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">"termination_a"</span><span class="p">][</span><span class="s2">"last_updated"</span><span class="p">]</span>
                     <span class="p">):</span>
                         <span class="k">continue</span>
                     <span class="k">if</span> <span class="p">(</span>
-                        <span class="n">cache_ckt</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;termination_z&quot;</span><span class="p">]</span>
-                        <span class="ow">and</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">&quot;termination_z&quot;</span><span class="p">]</span>
-                        <span class="ow">and</span> <span class="n">cache_ckt</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;termination_z&quot;</span><span class="p">][</span><span class="s2">&quot;last_updated&quot;</span><span class="p">]</span>
-                        <span class="o">!=</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">&quot;termination_z&quot;</span><span class="p">][</span><span class="s2">&quot;last_updated&quot;</span><span class="p">]</span>
+                        <span class="n">cache_ckt</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"termination_z"</span><span class="p">]</span>
+                        <span class="ow">and</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">"termination_z"</span><span class="p">]</span>
+                        <span class="ow">and</span> <span class="n">cache_ckt</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"termination_z"</span><span class="p">][</span><span class="s2">"last_updated"</span><span class="p">]</span>
+                        <span class="o">!=</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">"termination_z"</span><span class="p">][</span><span class="s2">"last_updated"</span><span class="p">]</span>
                     <span class="p">):</span>
                         <span class="k">continue</span>
-                    <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="n">circuit</span><span class="p">[</span><span class="s2">&quot;cid&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">cache_ckt</span><span class="p">[</span><span class="n">device</span><span class="p">]</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="n">circuit</span><span class="p">[</span><span class="s2">"cid"</span><span class="p">]]</span> <span class="o">=</span> <span class="n">cache_ckt</span><span class="p">[</span><span class="n">device</span><span class="p">]</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits - </span><span class="si">{</span><span class="n">circuit</span><span class="p">[</span><span class="s1">&#39;cid&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> retrieved data from cache&quot;</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits - </span><span class="si">{</span><span class="n">circuit</span><span class="p">[</span><span class="s1">'cid'</span><span class="p">]</span><span class="si">}</span><span class="s2"> retrieved data from cache"</span>
                     <span class="p">)</span>
-                <span class="k">elif</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">&quot;cid&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cid_list</span><span class="p">:</span>
-                    <span class="n">cid_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">circuit</span><span class="p">[</span><span class="s2">&quot;cid&quot;</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">"cid"</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cid_list</span><span class="p">:</span>
+                    <span class="n">cid_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">circuit</span><span class="p">[</span><span class="s2">"cid"</span><span class="p">])</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits - </span><span class="si">{</span><span class="n">circuit</span><span class="p">[</span><span class="s1">&#39;cid&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> no cache data found, fetching from Netbox&quot;</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits - </span><span class="si">{</span><span class="n">circuit</span><span class="p">[</span><span class="s1">'cid'</span><span class="p">]</span><span class="si">}</span><span class="s2"> no cache data found, fetching from Netbox"</span>
                     <span class="p">)</span>
         <span class="c1"># fetch remaining circuits by CID without applying the site filter</span>
-        <span class="n">query_variables</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;sites&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;cids&quot;</span><span class="p">:</span> <span class="n">cid_list</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">}</span>
+        <span class="n">query_variables</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"sites"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"cids"</span><span class="p">:</span> <span class="n">cid_list</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">}</span>
         <span class="n">fetch_circuits</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">cid_list</span><span class="p">)</span>
     <span class="c1"># ignore cache data, fetch circuits from netbox</span>
-    <span class="k">elif</span> <span class="n">cache</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;refresh&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">cache</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">"refresh"</span><span class="p">:</span>
         <span class="k">pass</span>
 
     <span class="k">if</span> <span class="n">fetch_circuits</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;fetching circuits data from Netbox&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"fetching circuits data from Netbox"</span><span class="p">)</span>
         <span class="n">query_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_graphql</span><span class="p">(</span>
             <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
             <span class="n">query</span><span class="o">=</span><span class="n">CIRCUITS_QUERY</span><span class="p">,</span>
@@ -8168,20 +8168,20 @@ nf#
             <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
             <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">query_result</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - get circuits query failed&quot;</span><span class="p">)</span>
+        <span class="n">query_result</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - get circuits query failed"</span><span class="p">)</span>
 
         <span class="c1"># return dry run result</span>
         <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;dry-run requested, returning circuits query result&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"dry-run requested, returning circuits query result"</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span> <span class="n">query_result</span>
 
-        <span class="n">all_circuits</span> <span class="o">=</span> <span class="n">query_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;circuits&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">all_circuits</span> <span class="o">=</span> <span class="n">query_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"circuits"</span><span class="p">,</span> <span class="p">[])</span>
 
         <span class="c1"># iterate over circuits and map them to devices</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;retrieved data for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_circuits</span><span class="p">)</span><span class="si">}</span><span class="s2"> &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;circuits from Netbox, mapping circuits to devices&quot;</span>
+            <span class="sa">f</span><span class="s2">"retrieved data for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_circuits</span><span class="p">)</span><span class="si">}</span><span class="s2"> "</span>
+            <span class="sa">f</span><span class="s2">"circuits from Netbox, mapping circuits to devices"</span>
         <span class="p">)</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
@@ -8203,16 +8203,16 @@ nf#
                 <span class="k">continue</span>
 
     <span class="k">if</span> <span class="n">add_interface_details</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;fetching circuits interface details&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"fetching circuits interface details"</span><span class="p">)</span>
         <span class="c1"># collect devices and interfaces to get details for</span>
         <span class="n">fetch_interfaces</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="n">fetch_devices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">circuits</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">ckt_data</span> <span class="ow">in</span> <span class="n">circuits</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-                <span class="n">fetch_interfaces</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ckt_data</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">])</span>
-                <span class="k">if</span> <span class="n">ckt_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;remote_device&quot;</span><span class="p">):</span>
-                    <span class="n">fetch_devices</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ckt_data</span><span class="p">[</span><span class="s2">&quot;remote_device&quot;</span><span class="p">])</span>
-                    <span class="n">fetch_interfaces</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ckt_data</span><span class="p">[</span><span class="s2">&quot;remote_interface&quot;</span><span class="p">])</span>
+                <span class="n">fetch_interfaces</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ckt_data</span><span class="p">[</span><span class="s2">"interface"</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">ckt_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"remote_device"</span><span class="p">):</span>
+                    <span class="n">fetch_devices</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ckt_data</span><span class="p">[</span><span class="s2">"remote_device"</span><span class="p">])</span>
+                    <span class="n">fetch_interfaces</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ckt_data</span><span class="p">[</span><span class="s2">"remote_interface"</span><span class="p">])</span>
         <span class="c1"># fetch interfaces data with IP addresses</span>
         <span class="n">interfaces_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_interfaces</span><span class="p">(</span>
             <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
@@ -8222,29 +8222,29 @@ nf#
             <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
             <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
         <span class="p">)</span><span class="o">.</span><span class="n">result</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieved interface details for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">fetch_devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"retrieved interface details for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">fetch_devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)"</span><span class="p">)</span>
         <span class="c1"># map interfaces details to circuits</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">circuits</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">circuit_id</span><span class="p">,</span> <span class="n">ckt_data</span> <span class="ow">in</span> <span class="n">circuits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">interface_name</span> <span class="o">=</span> <span class="n">ckt_data</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span>
+                <span class="n">interface_name</span> <span class="o">=</span> <span class="n">ckt_data</span><span class="p">[</span><span class="s2">"interface"</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">interface_name</span> <span class="ow">in</span> <span class="n">interfaces_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="p">{}):</span>
                     <span class="n">interface_data</span> <span class="o">=</span> <span class="n">interfaces_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">interface_name</span><span class="p">]</span>
-                    <span class="n">ckt_data</span><span class="p">[</span><span class="s2">&quot;child_interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                        <span class="s2">&quot;child_interfaces&quot;</span><span class="p">,</span> <span class="p">[]</span>
+                    <span class="n">ckt_data</span><span class="p">[</span><span class="s2">"child_interfaces"</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                        <span class="s2">"child_interfaces"</span><span class="p">,</span> <span class="p">[]</span>
                     <span class="p">)</span>
-                    <span class="n">ckt_data</span><span class="p">[</span><span class="s2">&quot;ip_addresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                        <span class="s2">&quot;ip_addresses&quot;</span><span class="p">,</span> <span class="p">[]</span>
+                    <span class="n">ckt_data</span><span class="p">[</span><span class="s2">"ip_addresses"</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                        <span class="s2">"ip_addresses"</span><span class="p">,</span> <span class="p">[]</span>
                     <span class="p">)</span>
-                    <span class="n">ckt_data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vrf&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                    <span class="n">ckt_data</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"vrf"</span><span class="p">,</span> <span class="p">{})</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">circuit_id</span><span class="si">}</span><span class="s2"> Failed to find &#39;</span><span class="si">{</span><span class="n">interface_name</span><span class="si">}</span><span class="s2">&#39; interface details&quot;</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">circuit_id</span><span class="si">}</span><span class="s2"> Failed to find '</span><span class="si">{</span><span class="n">interface_name</span><span class="si">}</span><span class="s2">' interface details"</span>
                     <span class="p">)</span>
 
     <span class="n">circuit_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">circuits</span><span class="p">)</span> <span class="k">for</span> <span class="n">circuits</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;retrieved circuits for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s), &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">circuit_count</span><span class="si">}</span><span class="s2"> circuit attachment(s)&quot;</span>
+        <span class="sa">f</span><span class="s2">"retrieved circuits for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s), "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">circuit_count</span><span class="si">}</span><span class="s2"> circuit attachment(s)"</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>

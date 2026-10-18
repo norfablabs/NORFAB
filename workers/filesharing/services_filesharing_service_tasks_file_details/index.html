@@ -7188,30 +7188,30 @@
 <p>Context manager:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;filesharing&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;file_details&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://filesharing/test_file_1.txt&quot;</span><span class="p">},</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"filesharing"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"file_details"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"url"</span><span class="p">:</span> <span class="s2">"nf://filesharing/test_file_1.txt"</span><span class="p">},</span>
     <span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div>
 <p>Direct lifecycle:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;filesharing&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;file_details&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://templates/base.j2&quot;</span><span class="p">},</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"filesharing"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"file_details"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"url"</span><span class="p">:</span> <span class="s2">"nf://templates/base.j2"</span><span class="p">},</span>
     <span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 <span class="k">finally</span><span class="p">:</span>
@@ -7226,7 +7226,7 @@
 root
 └──<span class="w"> </span>file:<span class="w">    </span>File<span class="w"> </span>sharing<span class="w"> </span>service
 <span class="w">    </span>└──<span class="w"> </span>details:<span class="w">    </span>Show<span class="w"> </span>file<span class="w"> </span>details
-<span class="w">        </span>└──<span class="w"> </span>url:<span class="w">    </span>File<span class="w"> </span>location,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;nf://&#39;</span>
+<span class="w">        </span>└──<span class="w"> </span>url:<span class="w">    </span>File<span class="w"> </span>location,<span class="w"> </span>default<span class="w"> </span><span class="s1">'nf://'</span>
 
 nf#
 </code></pre></div>
@@ -7362,20 +7362,20 @@ nf#
 <span class="normal">139</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">FileDetailsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">FileDetailsResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
-    <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
+    <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">"enabled"</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get File Details&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get File Details"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">file_details</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return integrity and size details for one published file.</span>
+<span class="w">    </span><span class="sd">"""Return integrity and size details for one published file.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        url: File URL beginning with ``nf://``.</span>
@@ -7383,8 +7383,8 @@ nf#
 <span class="sd">    Returns:</span>
 <span class="sd">        A result containing ``md5hash``, ``size_bytes``, and ``exists``.</span>
 <span class="sd">        Missing files and unsafe URLs produce failed results.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;md5hash&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;size_bytes&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;exists&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
+<span class="sd">    """</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s2">"md5hash"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"size_bytes"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"exists"</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">full_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_path</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
@@ -7394,20 +7394,20 @@ nf#
     <span class="n">exists</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">exists</span><span class="p">:</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
             <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
             <span class="n">chunk</span> <span class="o">=</span> <span class="n">file_obj</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">8192</span><span class="p">)</span>
             <span class="k">while</span> <span class="n">chunk</span><span class="p">:</span>
                 <span class="n">file_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
                 <span class="n">chunk</span> <span class="o">=</span> <span class="n">file_obj</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">8192</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;md5hash&quot;</span><span class="p">:</span> <span class="n">file_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span>
-            <span class="s2">&quot;size_bytes&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">full_path</span><span class="p">),</span>
-            <span class="s2">&quot;exists&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"md5hash"</span><span class="p">:</span> <span class="n">file_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span>
+            <span class="s2">"size_bytes"</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">full_path</span><span class="p">),</span>
+            <span class="s2">"exists"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&#39; file not found&quot;</span><span class="p">]</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">' file not found"</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>

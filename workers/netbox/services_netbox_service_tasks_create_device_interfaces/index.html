@@ -7441,32 +7441,32 @@
 <p>The task supports powerful range expansion patterns for creating multiple interfaces:</p>
 <h3 id="numeric-ranges">Numeric Ranges<a class="headerlink" href="#numeric-ranges" title="Permanent link">¤</a></h3>
 <p>Use <code>[start-end]</code> syntax to expand numeric ranges:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">interface_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Ethernet[1-5]&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nt">interface_name</span><span class="p">:</span><span class="w"> </span><span class="s">"Ethernet[1-5]"</span>
 <span class="c1"># Expands to: Ethernet1, Ethernet2, Ethernet3, Ethernet4, Ethernet5</span>
 
-<span class="nt">interface_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Loopback[10-12]&quot;</span>
+<span class="nt">interface_name</span><span class="p">:</span><span class="w"> </span><span class="s">"Loopback[10-12]"</span>
 <span class="c1"># Expands to: Loopback10, Loopback11, Loopback12</span>
 </code></pre></div>
 <h3 id="comma-separated-lists">Comma-Separated Lists<a class="headerlink" href="#comma-separated-lists" title="Permanent link">¤</a></h3>
 <p>Use <code>[option1,option2,...]</code> syntax to expand lists:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">interface_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;[ge,xe,fe]-0/0/0&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nt">interface_name</span><span class="p">:</span><span class="w"> </span><span class="s">"[ge,xe,fe]-0/0/0"</span>
 <span class="c1"># Expands to: ge-0/0/0, xe-0/0/0, fe-0/0/0</span>
 
-<span class="nt">interface_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Port-[A,B,C]&quot;</span>
+<span class="nt">interface_name</span><span class="p">:</span><span class="w"> </span><span class="s">"Port-[A,B,C]"</span>
 <span class="c1"># Expands to: Port-A, Port-B, Port-C</span>
 </code></pre></div>
 <h3 id="multiple-range-patterns">Multiple Range Patterns<a class="headerlink" href="#multiple-range-patterns" title="Permanent link">¤</a></h3>
 <p>Combine multiple range patterns in a single interface name:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">interface_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;[ge,xe]-0/0/[0-3]&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nt">interface_name</span><span class="p">:</span><span class="w"> </span><span class="s">"[ge,xe]-0/0/[0-3]"</span>
 <span class="c1"># Expands to: ge-0/0/0, ge-0/0/1, ge-0/0/2, ge-0/0/3,</span>
 <span class="c1">#             xe-0/0/0, xe-0/0/1, xe-0/0/2, xe-0/0/3</span>
 </code></pre></div>
 <h3 id="multiple-interface-names">Multiple Interface Names<a class="headerlink" href="#multiple-interface-names" title="Permanent link">¤</a></h3>
 <p>Pass a list of interface names (with or without ranges):</p>
 <div class="highlight"><pre><span></span><code><span class="nt">interface_name</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;Loopback[1-3]&quot;</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;Management1&quot;</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;[ge,xe]-0/1/0&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"Loopback[1-3]"</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"Management1"</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"[ge,xe]-0/1/0"</span>
 <span class="c1"># Expands to: Loopback1, Loopback2, Loopback3, Management1, ge-0/1/0, xe-0/1/0</span>
 </code></pre></div>
 <h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
@@ -7477,51 +7477,51 @@
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Create loopback interfaces on two devices:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>device-interfaces<span class="w"> </span>devices<span class="w"> </span>switch-01<span class="w"> </span>switch-02<span class="w"> </span>interface_name<span class="w"> </span><span class="s2">&quot;Loopback[0-5]&quot;</span><span class="w"> </span>interface-type<span class="w"> </span>virtual<span class="w"> </span>description<span class="w"> </span><span class="s2">&quot;Test interfaces&quot;</span>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>device-interfaces<span class="w"> </span>devices<span class="w"> </span>switch-01<span class="w"> </span>switch-02<span class="w"> </span>interface_name<span class="w"> </span><span class="s2">"Loopback[0-5]"</span><span class="w"> </span>interface-type<span class="w"> </span>virtual<span class="w"> </span>description<span class="w"> </span><span class="s2">"Test interfaces"</span>
 </code></pre></div>
 <p>Preview interface creation:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>device-interfaces<span class="w"> </span>devices<span class="w"> </span>switch-01<span class="w"> </span>interface_name<span class="w"> </span><span class="s2">&quot;Ethernet[1-4]&quot;</span><span class="w"> </span>interface-type<span class="w"> </span>1000base-t<span class="w"> </span>dry-run
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>device-interfaces<span class="w"> </span>devices<span class="w"> </span>switch-01<span class="w"> </span>interface_name<span class="w"> </span><span class="s2">"Ethernet[1-4]"</span><span class="w"> </span>interface-type<span class="w"> </span>1000base-t<span class="w"> </span>dry-run
 </code></pre></div>
 <p>Create interfaces in a NetBox branch:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>device-interfaces<span class="w"> </span>devices<span class="w"> </span>switch-01<span class="w"> </span>interface_name<span class="w"> </span><span class="s2">&quot;Ethernet[1-4]&quot;</span><span class="w"> </span>branch<span class="w"> </span>my-branch
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>device-interfaces<span class="w"> </span>devices<span class="w"> </span>switch-01<span class="w"> </span>interface_name<span class="w"> </span><span class="s2">"Ethernet[1-4]"</span><span class="w"> </span>branch<span class="w"> </span>my-branch
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <p>Context manager:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;create_device_interfaces&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"create_device_interfaces"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;switch-01&quot;</span><span class="p">,</span> <span class="s2">&quot;switch-02&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;interface_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Loopback[0-5]&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;interface_type&quot;</span><span class="p">:</span> <span class="s2">&quot;virtual&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Test interfaces&quot;</span><span class="p">,</span>
+            <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"switch-01"</span><span class="p">,</span> <span class="s2">"switch-02"</span><span class="p">],</span>
+            <span class="s2">"interface_name"</span><span class="p">:</span> <span class="s2">"Loopback[0-5]"</span><span class="p">,</span>
+            <span class="s2">"interface_type"</span><span class="p">:</span> <span class="s2">"virtual"</span><span class="p">,</span>
+            <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Test interfaces"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 </code></pre></div>
 <p>Direct lifecycle:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;create_device_interfaces&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"create_device_interfaces"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;switch-01&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;interfaces_data&quot;</span><span class="p">:</span> <span class="p">[</span>
-                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet1&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;1000base-t&quot;</span><span class="p">,</span> <span class="s2">&quot;mtu&quot;</span><span class="p">:</span> <span class="mi">1500</span><span class="p">},</span>
-                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Port-Channel1&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;lag&quot;</span><span class="p">},</span>
+            <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"switch-01"</span><span class="p">],</span>
+            <span class="s2">"interfaces_data"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Ethernet1"</span><span class="p">,</span> <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"1000base-t"</span><span class="p">,</span> <span class="s2">"mtu"</span><span class="p">:</span> <span class="mi">1500</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Port-Channel1"</span><span class="p">,</span> <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"lag"</span><span class="p">},</span>
             <span class="p">],</span>
         <span class="p">},</span>
     <span class="p">)</span>
@@ -7573,14 +7573,14 @@ root
 <span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>Branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
 <span class="w">            </span>├──<span class="w"> </span>*devices:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>device<span class="w"> </span>names<span class="w"> </span>or<span class="w"> </span>device<span class="w"> </span>objects<span class="w"> </span>to<span class="w"> </span>create<span class="w"> </span>interfaces<span class="w"> </span><span class="k">for</span>
 <span class="w">            </span>├──<span class="w"> </span>*interface_name:<span class="w">    </span>Name<span class="o">(</span>s<span class="o">)</span><span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>interface<span class="o">(</span>s<span class="o">)</span><span class="w"> </span>to<span class="w"> </span>create
-<span class="w">            </span>├──<span class="w"> </span>interface-type:<span class="w">    </span>Interface<span class="w"> </span><span class="nb">type</span><span class="w"> </span>value,<span class="w"> </span><span class="k">for</span><span class="w"> </span>example<span class="w"> </span><span class="s1">&#39;other&#39;</span>,<span class="w"> </span><span class="s1">&#39;virtual&#39;</span>,<span class="w"> </span><span class="s1">&#39;lag&#39;</span>,<span class="w"> </span>or<span class="w"> </span><span class="s1">&#39;1000base-t&#39;</span>,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;other&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>interface-type:<span class="w">    </span>Interface<span class="w"> </span><span class="nb">type</span><span class="w"> </span>value,<span class="w"> </span><span class="k">for</span><span class="w"> </span>example<span class="w"> </span><span class="s1">'other'</span>,<span class="w"> </span><span class="s1">'virtual'</span>,<span class="w"> </span><span class="s1">'lag'</span>,<span class="w"> </span>or<span class="w"> </span><span class="s1">'1000base-t'</span>,<span class="w"> </span>default<span class="w"> </span><span class="s1">'other'</span>
 <span class="w">            </span>├──<span class="w"> </span>description:<span class="w">    </span>Interface<span class="w"> </span>description
 <span class="w">            </span>├──<span class="w"> </span>speed:<span class="w">    </span>Interface<span class="w"> </span>speed<span class="w"> </span><span class="k">in</span><span class="w"> </span>Kbps
 <span class="w">            </span>├──<span class="w"> </span>mtu:<span class="w">    </span>Maximum<span class="w"> </span>transmission<span class="w"> </span>unit<span class="w"> </span>size<span class="w"> </span><span class="k">in</span><span class="w"> </span>bytes
 <span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
-<span class="w">            </span>└──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'any'</span>
+<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
+<span class="w">            </span>└──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
@@ -7945,16 +7945,16 @@ The result dictionary contains status and details of interface creation operatio
 <span class="normal">566</span>
 <span class="normal">567</span>
 <span class="normal">568</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateDeviceInterfacesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateDeviceInterfacesResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Create Device Interfaces&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Create Device Interfaces"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -7964,13 +7964,13 @@ The result dictionary contains status and details of interface creation operatio
     <span class="n">devices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
     <span class="n">interface_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">interfaces_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">interface_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;other&quot;</span><span class="p">,</span>
+    <span class="n">interface_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"other"</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Create interfaces for one or more devices in NetBox. This task creates interfaces in bulk and only</span>
 <span class="sd">    if interfaces does not exist in Netbox.</span>
 
@@ -7984,8 +7984,8 @@ The result dictionary contains status and details of interface creation operatio
 <span class="sd">            - Ethernet[1-3] -&gt; Ethernet1, Ethernet2, Ethernet3</span>
 <span class="sd">            - [ge,xe]-0/0/[0-9] -&gt; ge-0/0/0, ..., xe-0/0/0 etc.</span>
 
-<span class="sd">        interface_type (str, optional): Type of interface (e.g., &quot;other&quot;, &quot;virtual&quot;, &quot;lag&quot;,</span>
-<span class="sd">            &quot;1000base-t&quot;). Defaults to &quot;other&quot;.</span>
+<span class="sd">        interface_type (str, optional): Type of interface (e.g., "other", "virtual", "lag",</span>
+<span class="sd">            "1000base-t"). Defaults to "other".</span>
 <span class="sd">        instance (Union[None, str], optional): NetBox instance identifier to use. If None,</span>
 <span class="sd">            uses the default instance. Defaults to None.</span>
 <span class="sd">        dry_run (bool, optional): If True, simulates the operation without making actual changes.</span>
@@ -8000,27 +8000,27 @@ The result dictionary contains status and details of interface creation operatio
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: Result object containing the task name, execution results, and affected resources.</span>
 <span class="sd">            The result dictionary contains status and details of interface creation operations.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_device_interfaces&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_device_interfaces"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="n">result</span><span class="p">,</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Create device interfaces: Creating interfaces for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Create device interfaces: Creating interfaces for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
 
     <span class="n">payloads_by_name</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">interfaces_data</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">interfaces_data</span><span class="p">:</span>
-            <span class="n">payloads_by_name</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="n">payloads_by_name</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">"name"</span><span class="p">])]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
         <span class="n">all_interface_names</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">payloads_by_name</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;received </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_interface_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface create payload(s)&quot;</span>
+            <span class="sa">f</span><span class="s2">"received </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_interface_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface create payload(s)"</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Normalize interface_name to a list and expand patterns</span>
@@ -8033,22 +8033,22 @@ The result dictionary contains status and details of interface creation operatio
         <span class="k">for</span> <span class="n">name_pattern</span> <span class="ow">in</span> <span class="n">interface_names</span><span class="p">:</span>
             <span class="n">all_interface_names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">expand_alphanumeric_range</span><span class="p">(</span><span class="n">name_pattern</span><span class="p">))</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;expanded interface names to </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_interface_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s)&quot;</span>
+            <span class="sa">f</span><span class="s2">"expanded interface names to </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_interface_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s)"</span>
         <span class="p">)</span>
 
     <span class="c1"># Process each device</span>
     <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
         <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">&quot;skipped&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"created"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"skipped"</span><span class="p">:</span> <span class="p">[],</span>
         <span class="p">}</span>
 
         <span class="n">nb_device</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">device_name</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_device</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;device &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; not found in NetBox&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"device '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">' not found in NetBox"</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="k">continue</span>
 
         <span class="n">existing_interface_names</span> <span class="o">=</span> <span class="p">{</span>
@@ -8059,40 +8059,40 @@ The result dictionary contains status and details of interface creation operatio
 
         <span class="k">for</span> <span class="n">intf_name</span> <span class="ow">in</span> <span class="n">all_interface_names</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">intf_name</span> <span class="ow">in</span> <span class="n">existing_interface_names</span><span class="p">:</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;skipped&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">intf_name</span><span class="p">)</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"skipped"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">intf_name</span><span class="p">)</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;skipping &#39;</span><span class="si">{</span><span class="n">intf_name</span><span class="si">}</span><span class="s2">&#39; on &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; - already exists&quot;</span>
+                    <span class="sa">f</span><span class="s2">"skipping '</span><span class="si">{</span><span class="n">intf_name</span><span class="si">}</span><span class="s2">' on '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">' - already exists"</span>
                 <span class="p">)</span>
                 <span class="k">continue</span>
             <span class="k">if</span> <span class="n">payloads_by_name</span><span class="p">:</span>
-                <span class="n">intf_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">nb_device</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="o">**</span><span class="n">payloads_by_name</span><span class="p">[</span><span class="n">intf_name</span><span class="p">]}</span>
-                <span class="n">intf_data</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="n">interface_type</span><span class="p">)</span>
+                <span class="n">intf_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"device"</span><span class="p">:</span> <span class="n">nb_device</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="o">**</span><span class="n">payloads_by_name</span><span class="p">[</span><span class="n">intf_name</span><span class="p">]}</span>
+                <span class="n">intf_data</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"type"</span><span class="p">,</span> <span class="n">interface_type</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">intf_data</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">nb_device</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">intf_name</span><span class="p">,</span>
-                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">interface_type</span><span class="p">,</span>
+                    <span class="s2">"device"</span><span class="p">:</span> <span class="n">nb_device</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                    <span class="s2">"name"</span><span class="p">:</span> <span class="n">intf_name</span><span class="p">,</span>
+                    <span class="s2">"type"</span><span class="p">:</span> <span class="n">interface_type</span><span class="p">,</span>
                     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                 <span class="p">}</span>
             <span class="n">interfaces_to_create</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">intf_data</span><span class="p">)</span>
-            <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">intf_name</span><span class="p">)</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"created"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">intf_name</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">interfaces_to_create</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;dry-run, would create </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">interfaces_to_create</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s) on &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                    <span class="sa">f</span><span class="s2">"dry-run, would create </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">interfaces_to_create</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s) on '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">'"</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">interfaces_to_create</span><span class="p">)</span>
-                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">interfaces_to_create</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s) on &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">interfaces_to_create</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s) on '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">'"</span>
                     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to create interfaces on &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"failed to create interfaces on '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">': </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span>
                     <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>

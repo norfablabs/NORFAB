@@ -7187,7 +7187,7 @@ using the existing File Sharing transfer flow.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>Successful resolution returns an <code>nf://</code> URL using the remote's configured
 mount:</p>
-<div class="highlight"><pre><span></span><code><span class="s2">&quot;nf://repositories/network-assets/templates/base.j2&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="s2">"nf://repositories/network-assets/templates/base.j2"</span>
 </code></pre></div>
 <p>Invalid URLs, unknown remotes, paths outside the selected mount, missing files,
 and Git synchronization failures return a failed result.</p>
@@ -7203,26 +7203,26 @@ and Git synchronization failures return a failed result.</p>
 <p>Direct task invocation:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;filesharing&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;resolve_git_url&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;filesharing-worker-1&quot;</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;git://network-assets/templates/base.j2&quot;</span><span class="p">},</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"filesharing"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"resolve_git_url"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"filesharing-worker-1"</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"url"</span><span class="p">:</span> <span class="s2">"git://network-assets/templates/base.j2"</span><span class="p">},</span>
     <span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div>
 <p>Normal file retrieval:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span>
-        <span class="s2">&quot;git://network-assets/templates/base.j2&quot;</span><span class="p">,</span>
+        <span class="s2">"git://network-assets/templates/base.j2"</span><span class="p">,</span>
         <span class="n">read</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">"content"</span><span class="p">])</span>
 </code></pre></div>
 </div>
 </div>
@@ -7395,20 +7395,20 @@ and Git synchronization failures return a failed result.</p>
 <span class="normal">523</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">ResolveGitUrlInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">ResolveGitUrlResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
-    <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
+    <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">"enabled"</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Resolve Git URL&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Resolve Git URL"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">resolve_git_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Synchronize a Git remote and resolve its file URL to an nf:// URL.</span>
+<span class="w">    </span><span class="sd">"""Synchronize a Git remote and resolve its file URL to an nf:// URL.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        job: Active worker job used by the Git synchronization task.</span>
@@ -7418,31 +7418,31 @@ and Git synchronization failures return a failed result.</p>
 <span class="sd">        A result containing the published ``nf://`` file URL. Invalid URLs,</span>
 <span class="sd">        unknown remotes, unsafe paths, and synchronization failures produce</span>
 <span class="sd">        failed results.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">remote_path</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="s2">&quot;git://&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">)</span>
-    <span class="n">name</span><span class="p">,</span> <span class="n">separator</span><span class="p">,</span> <span class="n">file_path</span> <span class="o">=</span> <span class="n">remote_path</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">url</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;git://&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">name</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">separator</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">file_path</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&#39; - invalid Git URL format&quot;</span><span class="p">])</span>
+<span class="sd">    """</span>
+    <span class="n">remote_path</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="s2">"git://"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"</span><span class="se">\\</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"/"</span><span class="p">)</span>
+    <span class="n">name</span><span class="p">,</span> <span class="n">separator</span><span class="p">,</span> <span class="n">file_path</span> <span class="o">=</span> <span class="n">remote_path</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">url</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"git://"</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">name</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">separator</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">file_path</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">' - invalid Git URL format"</span><span class="p">])</span>
 
     <span class="n">remote</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remotes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">remote</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Remote &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; is not configured&quot;</span><span class="p">])</span>
-    <span class="k">if</span> <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;git&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Remote &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; is not a git remote&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">"Remote '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' is not configured"</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">remote</span><span class="p">[</span><span class="s2">"type"</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"git"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">"Remote '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' is not a git remote"</span><span class="p">])</span>
 
-    <span class="n">mount_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_path</span><span class="p">(</span><span class="n">remote</span><span class="p">[</span><span class="s2">&quot;mount&quot;</span><span class="p">])</span>
-    <span class="n">resolved_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mount_path</span><span class="p">,</span> <span class="o">*</span><span class="n">file_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)))</span>
+    <span class="n">mount_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_path</span><span class="p">(</span><span class="n">remote</span><span class="p">[</span><span class="s2">"mount"</span><span class="p">])</span>
+    <span class="n">resolved_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mount_path</span><span class="p">,</span> <span class="o">*</span><span class="n">file_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)))</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonpath</span><span class="p">([</span><span class="n">mount_path</span><span class="p">,</span> <span class="n">resolved_path</span><span class="p">])</span> <span class="o">!=</span> <span class="n">mount_path</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&#39; - invalid Git URL path&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">' - invalid Git URL path"</span><span class="p">])</span>
 
     <span class="n">sync_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">git_clone</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">sync_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="n">sync_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">resolved_path</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&#39; file not found&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">' file not found"</span><span class="p">])</span>
 
-    <span class="n">published_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">resolved_path</span><span class="p">,</span> <span class="n">mount_path</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">)</span>
-    <span class="n">resolved_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">remote</span><span class="p">[</span><span class="s1">&#39;mount&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">published_path</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">published_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">resolved_path</span><span class="p">,</span> <span class="n">mount_path</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="s2">"/"</span><span class="p">)</span>
+    <span class="n">resolved_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">remote</span><span class="p">[</span><span class="s1">'mount'</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">published_path</span><span class="si">}</span><span class="s2">"</span>
     <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="n">resolved_url</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>

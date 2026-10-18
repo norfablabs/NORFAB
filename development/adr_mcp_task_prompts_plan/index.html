@@ -8386,10 +8386,10 @@ the existing <code>mcp</code> dictionary:</p>
     <span class="n">output</span><span class="o">=</span><span class="n">SomeResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
         <span class="c1"># Existing keys continue to describe the MCP Tool.</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
 
         <span class="c1"># NorFab extension consumed by FastMCP prompt publication.</span>
-        <span class="s2">&quot;prompts&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"prompts"</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span><span class="o">...</span><span class="p">},</span>
         <span class="p">],</span>
     <span class="p">},</span>
@@ -8437,14 +8437,14 @@ associates prompts directly with the task and tool they explain.</p>
 <p><code>mcp["prompts"]</code> is a NorFab metadata extension. It is not a field accepted by
 the MCP SDK <code>Tool</code> model. The FastMCP worker must split the dictionary before
 constructing protocol objects:</p>
-<div class="highlight"><pre><span></span><code><span class="n">mcp_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;mcp&quot;</span><span class="p">])</span>
-<span class="n">prompts_metadata</span> <span class="o">=</span> <span class="n">mcp_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;prompts&quot;</span><span class="p">,</span> <span class="p">[])</span>
+<div class="highlight"><pre><span></span><code><span class="n">mcp_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">task</span><span class="p">[</span><span class="s2">"mcp"</span><span class="p">])</span>
+<span class="n">prompts_metadata</span> <span class="o">=</span> <span class="n">mcp_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"prompts"</span><span class="p">,</span> <span class="p">[])</span>
 
 <span class="n">tool</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="n">derived_tool_name</span><span class="p">,</span>
-    <span class="n">description</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
-    <span class="n">inputSchema</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;inputSchema&quot;</span><span class="p">],</span>
-    <span class="n">outputSchema</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;outputSchema&quot;</span><span class="p">],</span>
+    <span class="n">description</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">"description"</span><span class="p">],</span>
+    <span class="n">inputSchema</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">"inputSchema"</span><span class="p">],</span>
+    <span class="n">outputSchema</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">"outputSchema"</span><span class="p">],</span>
     <span class="o">**</span><span class="n">mcp_metadata</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -8628,74 +8628,74 @@ extend.</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CliInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CliResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Run CLI Commands&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Run CLI Commands"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s2">&quot;prompts&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"prompts"</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;collect_operational_data&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Collect Operational Data&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Plan and run operational CLI commands on selected devices.&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;arguments&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"collect_operational_data"</span><span class="p">,</span>
+                <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Collect Operational Data"</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Plan and run operational CLI commands on selected devices."</span><span class="p">,</span>
+                <span class="s2">"arguments"</span><span class="p">:</span> <span class="p">[</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;request&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Operational question or data collection objective.&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"request"</span><span class="p">,</span>
+                        <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Operational question or data collection objective."</span><span class="p">,</span>
+                        <span class="s2">"required"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
                     <span class="p">},</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;targets&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Optional device names, groups, platforms, or filter intent.&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"targets"</span><span class="p">,</span>
+                        <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Optional device names, groups, platforms, or filter intent."</span><span class="p">,</span>
+                        <span class="s2">"required"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
                     <span class="p">},</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Optional commands already selected by the user.&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"commands"</span><span class="p">,</span>
+                        <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Optional commands already selected by the user."</span><span class="p">,</span>
+                        <span class="s2">"required"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
                     <span class="p">},</span>
                 <span class="p">],</span>
-                <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">"messages"</span><span class="p">:</span> <span class="p">[</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="p">{</span>
-                            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;... data collection prompt template ...&quot;</span><span class="p">,</span>
+                        <span class="s2">"role"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span>
+                        <span class="s2">"content"</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"text"</span><span class="p">,</span>
+                            <span class="s2">"text"</span><span class="p">:</span> <span class="s2">"... data collection prompt template ..."</span><span class="p">,</span>
                         <span class="p">},</span>
                     <span class="p">},</span>
                 <span class="p">],</span>
             <span class="p">},</span>
             <span class="p">{</span>
-                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;troubleshoot&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Troubleshoot Network Devices&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Investigate a symptom using targeted operational CLI commands.&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;arguments&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"troubleshoot"</span><span class="p">,</span>
+                <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Troubleshoot Network Devices"</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Investigate a symptom using targeted operational CLI commands."</span><span class="p">,</span>
+                <span class="s2">"arguments"</span><span class="p">:</span> <span class="p">[</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;symptom&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Observed fault or behavior to investigate.&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"symptom"</span><span class="p">,</span>
+                        <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Observed fault or behavior to investigate."</span><span class="p">,</span>
+                        <span class="s2">"required"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
                     <span class="p">},</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;targets&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Optional devices or targeting constraints.&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"targets"</span><span class="p">,</span>
+                        <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Optional devices or targeting constraints."</span><span class="p">,</span>
+                        <span class="s2">"required"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
                     <span class="p">},</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;context&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Optional topology, recent changes, or prior observations.&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"context"</span><span class="p">,</span>
+                        <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Optional topology, recent changes, or prior observations."</span><span class="p">,</span>
+                        <span class="s2">"required"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
                     <span class="p">},</span>
                 <span class="p">],</span>
-                <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">"messages"</span><span class="p">:</span> <span class="p">[</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="p">{</span>
-                            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;... troubleshooting prompt template ...&quot;</span><span class="p">,</span>
+                        <span class="s2">"role"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span>
+                        <span class="s2">"content"</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"text"</span><span class="p">,</span>
+                            <span class="s2">"text"</span><span class="p">:</span> <span class="s2">"... troubleshooting prompt template ..."</span><span class="p">,</span>
                         <span class="p">},</span>
                     <span class="p">},</span>
                 <span class="p">],</span>
@@ -8793,14 +8793,14 @@ user data and cannot override the surrounding workflow and safety guidance.</p>
 <p>Example outcome:</p>
 <p>A user-selected prompt with:</p>
 <div class="highlight"><pre><span></span><code>request: Check software versions on the spine switches.
-targets: devices whose names contain &quot;spine&quot;
+targets: devices whose names contain "spine"
 commands: show version
 </code></pre></div>
 <p>should guide the model toward a tool call equivalent to:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;commands&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;show version&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;FC&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;plugin&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;netmiko&quot;</span>
+<span class="w">  </span><span class="nt">"commands"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"show version"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"FC"</span><span class="p">:</span><span class="w"> </span><span class="s2">"spine"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"plugin"</span><span class="p">:</span><span class="w"> </span><span class="s2">"netmiko"</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>The prompt retrieval itself returns instructions and user context only. The MCP
@@ -8873,8 +8873,8 @@ behavior. They should not be created merely to provide alternate wording.</p>
 the same discovered service/task identity.</p>
 <h3 id="metadata-split">Metadata Split<a class="headerlink" href="#metadata-split" title="Permanent link">¤</a></h3>
 <p>Split the metadata inline in the discovery loop:</p>
-<div class="highlight"><pre><span></span><code><span class="n">tool_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;mcp&quot;</span><span class="p">])</span>
-<span class="n">prompts_metadata</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;prompts&quot;</span><span class="p">,</span> <span class="p">[])</span>
+<div class="highlight"><pre><span></span><code><span class="n">tool_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">task</span><span class="p">[</span><span class="s2">"mcp"</span><span class="p">])</span>
+<span class="n">prompts_metadata</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"prompts"</span><span class="p">,</span> <span class="p">[])</span>
 </code></pre></div>
 <p>The helper treats an absent <code>mcp["prompts"]</code> key as an empty list and returns a
 fresh tool dictionary so discovery never changes worker-provided data. Prompt
@@ -8885,22 +8885,22 @@ only <code>prompts_metadata</code>. This is the compatibility bridge between Nor
 extended decorator contract and the MCP SDK's strict <code>types.Tool</code> model.</p>
 <p>Applied to the current discovery loop, the existing direct expansion:</p>
 <div class="highlight"><pre><span></span><code><span class="n">task_tool</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;inputSchema&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;inputSchema&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;outputSchema&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;outputSchema&quot;</span><span class="p">],</span>
-    <span class="o">**</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;mcp&quot;</span><span class="p">],</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span>
+    <span class="s2">"description"</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="s2">"description"</span><span class="p">],</span>
+    <span class="s2">"inputSchema"</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="s2">"inputSchema"</span><span class="p">],</span>
+    <span class="s2">"outputSchema"</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="s2">"outputSchema"</span><span class="p">],</span>
+    <span class="o">**</span><span class="n">task</span><span class="p">[</span><span class="s2">"mcp"</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>becomes conceptually:</p>
-<div class="highlight"><pre><span></span><code><span class="n">tool_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;mcp&quot;</span><span class="p">])</span>
-<span class="n">prompts_metadata</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;prompts&quot;</span><span class="p">,</span> <span class="p">[])</span>
+<div class="highlight"><pre><span></span><code><span class="n">tool_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">task</span><span class="p">[</span><span class="s2">"mcp"</span><span class="p">])</span>
+<span class="n">prompts_metadata</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"prompts"</span><span class="p">,</span> <span class="p">[])</span>
 
 <span class="n">task_tool</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;inputSchema&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;inputSchema&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;outputSchema&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;outputSchema&quot;</span><span class="p">],</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span>
+    <span class="s2">"description"</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="s2">"description"</span><span class="p">],</span>
+    <span class="s2">"inputSchema"</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="s2">"inputSchema"</span><span class="p">],</span>
+    <span class="s2">"outputSchema"</span><span class="p">:</span> <span class="n">task</span><span class="p">[</span><span class="s2">"outputSchema"</span><span class="p">],</span>
     <span class="o">**</span><span class="n">tool_metadata</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -8922,10 +8922,10 @@ registry stores:</p>
 </ul>
 <p>An internal prompt entry can follow the existing tool registry pattern:</p>
 <div class="highlight"><pre><span></span><code><span class="n">worker</span><span class="o">.</span><span class="n">norfab_services_prompts</span><span class="p">[</span><span class="n">service</span><span class="p">][</span><span class="n">published_prompt_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;prompt&quot;</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Prompt</span><span class="p">(</span><span class="o">...</span><span class="p">),</span>
-    <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">prompt_metadata</span><span class="p">,</span>
-    <span class="s2">&quot;arguments_model&quot;</span><span class="p">:</span> <span class="n">PromptArgumentsModel</span><span class="p">,</span>
-    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span>
+    <span class="s2">"prompt"</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Prompt</span><span class="p">(</span><span class="o">...</span><span class="p">),</span>
+    <span class="s2">"metadata"</span><span class="p">:</span> <span class="n">prompt_metadata</span><span class="p">,</span>
+    <span class="s2">"arguments_model"</span><span class="p">:</span> <span class="n">PromptArgumentsModel</span><span class="p">,</span>
+    <span class="s2">"task"</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>The MCP protocol object and argument model are prepared once during discovery.
@@ -9062,9 +9062,9 @@ plugins that currently pass tool fields directly under <code>mcp</code>.</p>
 backwards-compatible migration path.</p>
 <h3 id="use-a-dictionary-keyed-by-prompt-name">Use A Dictionary Keyed By Prompt Name<a class="headerlink" href="#use-a-dictionary-keyed-by-prompt-name" title="Permanent link">¤</a></h3>
 <p>Considered:</p>
-<div class="highlight"><pre><span></span><code><span class="s2">&quot;prompts&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;collect_operational_data&quot;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
-    <span class="s2">&quot;troubleshoot&quot;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
+<div class="highlight"><pre><span></span><code><span class="s2">"prompts"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">"collect_operational_data"</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
+    <span class="s2">"troubleshoot"</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>A dictionary naturally enforces unique keys and offers direct lookup. The list

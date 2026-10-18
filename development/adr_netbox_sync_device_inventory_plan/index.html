@@ -7891,7 +7891,7 @@ nested modular hardware.</p>
 <h2 id="proposed-task-interface">Proposed Task Interface<a class="headerlink" href="#proposed-task-interface" title="Permanent link">¤</a></h2>
 <p>Proposed task signature:</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;response_model&quot;</span><span class="p">:</span> <span class="n">SyncDeviceInventoryResult</span><span class="p">},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"PATCH"</span><span class="p">],</span> <span class="s2">"response_model"</span><span class="p">:</span> <span class="n">SyncDeviceInventoryResult</span><span class="p">},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceInventoryInput</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">sync_device_inventory</span><span class="p">(</span>
@@ -7969,14 +7969,14 @@ inventory is normalized, because the required models come from live inventory.</
 makes the diff small and keeps NetBox object IDs out of the DeepDiff input.</p>
 <h2 id="live-data-collection">Live Data Collection<a class="headerlink" href="#live-data-collection" title="Permanent link">¤</a></h2>
 <p>Live data should come from the Nornir service:</p>
-<div class="highlight"><pre><span></span><code><span class="n">nornir_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">:</span> <span class="s2">&quot;inventory&quot;</span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span class="n">nornir_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="s2">"get"</span><span class="p">:</span> <span class="s2">"inventory"</span><span class="p">}</span>
 <span class="k">if</span> <span class="n">devices</span><span class="p">:</span>
-    <span class="n">nornir_kwargs</span><span class="p">[</span><span class="s2">&quot;FL&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">devices</span>
+    <span class="n">nornir_kwargs</span><span class="p">[</span><span class="s2">"FL"</span><span class="p">]</span> <span class="o">=</span> <span class="n">devices</span>
 
 <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;parse_ttp&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="s2">"nornir"</span><span class="p">,</span>
+    <span class="s2">"parse_ttp"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
     <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="n">nornir_kwargs</span><span class="p">,</span>
 <span class="p">)</span>
@@ -7993,31 +7993,31 @@ makes the diff small and keeps NetBox object IDs out of the DeepDiff input.</p>
 <p>The TTP <code>inventory</code> getter returns data keyed by Nornir worker name, then by
 host name. Each host value is a list of inventory records:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;nornir-worker-6&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;vmx-1&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="s2">"nornir-worker-6"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"vmx-1"</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;VMX&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;VMX&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;serial&quot;</span><span class="p">:</span> <span class="s2">&quot;VM6A249F9D10&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;slot&quot;</span><span class="p">:</span> <span class="s2">&quot;Chassis&quot;</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"VMX"</span><span class="p">,</span>
+                <span class="s2">"module"</span><span class="p">:</span> <span class="s2">"VMX"</span><span class="p">,</span>
+                <span class="s2">"serial"</span><span class="p">:</span> <span class="s2">"VM6A249F9D10"</span><span class="p">,</span>
+                <span class="s2">"slot"</span><span class="p">:</span> <span class="s2">"Chassis"</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="p">{</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Virtual FPC&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;Virtual FPC&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;serial&quot;</span><span class="p">:</span> <span class="s2">&quot;BUILTIN&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;slot&quot;</span><span class="p">:</span> <span class="s2">&quot;FPC 0&quot;</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Virtual FPC"</span><span class="p">,</span>
+                <span class="s2">"module"</span><span class="p">:</span> <span class="s2">"Virtual FPC"</span><span class="p">,</span>
+                <span class="s2">"serial"</span><span class="p">:</span> <span class="s2">"BUILTIN"</span><span class="p">,</span>
+                <span class="s2">"slot"</span><span class="p">:</span> <span class="s2">"FPC 0"</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="p">{</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Virtual&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;Virtual&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;serial&quot;</span><span class="p">:</span> <span class="s2">&quot;BUILTIN&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;slot&quot;</span><span class="p">:</span> <span class="s2">&quot;PIC 0&quot;</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Virtual"</span><span class="p">,</span>
+                <span class="s2">"module"</span><span class="p">:</span> <span class="s2">"Virtual"</span><span class="p">,</span>
+                <span class="s2">"serial"</span><span class="p">:</span> <span class="s2">"BUILTIN"</span><span class="p">,</span>
+                <span class="s2">"slot"</span><span class="p">:</span> <span class="s2">"PIC 0"</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="p">{</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;RIOT-LITE&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;serial&quot;</span><span class="p">:</span> <span class="s2">&quot;BUILTIN&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;slot&quot;</span><span class="p">:</span> <span class="s2">&quot;CPU&quot;</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+                <span class="s2">"module"</span><span class="p">:</span> <span class="s2">"RIOT-LITE"</span><span class="p">,</span>
+                <span class="s2">"serial"</span><span class="p">:</span> <span class="s2">"BUILTIN"</span><span class="p">,</span>
+                <span class="s2">"slot"</span><span class="p">:</span> <span class="s2">"CPU"</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">]</span>
     <span class="p">}</span>
@@ -8025,42 +8025,42 @@ host name. Each host value is a list of inventory records:</p>
 </code></pre></div>
 <p>Another expected parser shape is a direct list of records for IOS-XR style
 inventory:</p>
-<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ASR9K</span><span class="nv"> </span><span class="s">Route</span><span class="nv"> </span><span class="s">Switch</span><span class="nv"> </span><span class="s">Processor</span><span class="nv"> </span><span class="s">with</span><span class="nv"> </span><span class="s">440G/slot</span><span class="nv"> </span><span class="s">Fabric</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">6GB&quot;</span>
-<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;module</span><span class="nv"> </span><span class="s">0/RSP0/CPU0&quot;</span>
-<span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;A9K-RSP440-TR&quot;</span>
-<span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;M9YXCZV9QF&quot;</span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ASR-9006</span><span class="nv"> </span><span class="s">Fan</span><span class="nv"> </span><span class="s">Tray</span><span class="nv"> </span><span class="s">V2&quot;</span>
-<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;fantray</span><span class="nv"> </span><span class="s">0/FT0/SP&quot;</span>
-<span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ASR-9006-FAN-V2&quot;</span>
-<span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;PDANV9GYV8H&quot;</span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ASR9K</span><span class="nv"> </span><span class="s">Generic</span><span class="nv"> </span><span class="s">Fan&quot;</span>
-<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;fan0</span><span class="nv"> </span><span class="s">0/FT0/SP&quot;</span>
-<span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;N/A&quot;</span>
-<span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;160G</span><span class="nv"> </span><span class="s">Modular</span><span class="nv"> </span><span class="s">Linecard,</span><span class="nv"> </span><span class="s">Packet</span><span class="nv"> </span><span class="s">Transport</span><span class="nv"> </span><span class="s">Optimized&quot;</span>
-<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;module</span><span class="nv"> </span><span class="s">0/1/CPU0&quot;</span>
-<span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;A9K-MOD160-TR&quot;</span>
-<span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;94TU4CACM47Y&quot;</span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ASR</span><span class="nv"> </span><span class="s">9000</span><span class="nv"> </span><span class="s">8-port</span><span class="nv"> </span><span class="s">10GE</span><span class="nv"> </span><span class="s">Modular</span><span class="nv"> </span><span class="s">Port</span><span class="nv"> </span><span class="s">Adapter&quot;</span>
-<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;module</span><span class="nv"> </span><span class="s">0/1/0&quot;</span>
-<span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;A9K-MPA-8X10GE&quot;</span>
-<span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2ZZQVPHZCJ5&quot;</span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;10GBASE-LR</span><span class="nv"> </span><span class="s">SFP+</span><span class="nv"> </span><span class="s">Module</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">SMF&quot;</span>
-<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;module</span><span class="nv"> </span><span class="s">mau</span><span class="nv"> </span><span class="s">0/1/0/0&quot;</span>
-<span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;SFP-10G-LR&quot;</span>
-<span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;QMXQLS9GKS&quot;</span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;10GBASE-LR</span><span class="nv"> </span><span class="s">SFP+</span><span class="nv"> </span><span class="s">Module</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">SMF&quot;</span>
-<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;module</span><span class="nv"> </span><span class="s">mau</span><span class="nv"> </span><span class="s">TenGigE0/2/CPU0/0&quot;</span>
-<span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;SFP-10G-LR&quot;</span>
-<span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;CB7HHMVC&quot;</span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3kW</span><span class="nv"> </span><span class="s">AC</span><span class="nv"> </span><span class="s">V2</span><span class="nv"> </span><span class="s">Power</span><span class="nv"> </span><span class="s">Module&quot;</span>
-<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;power-module</span><span class="nv"> </span><span class="s">0/PS0/M0/SP&quot;</span>
-<span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;PWR-3KW-AC-V2&quot;</span>
-<span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ZP7K5XBV9KE&quot;</span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ASR</span><span class="nv"> </span><span class="s">9006</span><span class="nv"> </span><span class="s">4</span><span class="nv"> </span><span class="s">Line</span><span class="nv"> </span><span class="s">Card</span><span class="nv"> </span><span class="s">Slot</span><span class="nv"> </span><span class="s">Chassis</span><span class="nv"> </span><span class="s">with</span><span class="nv"> </span><span class="s">V2</span><span class="nv"> </span><span class="s">AC</span><span class="nv"> </span><span class="s">PEM&quot;</span>
-<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;chassis</span><span class="nv"> </span><span class="s">ASR-9006&quot;</span>
-<span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ASR-9006&quot;</span>
-<span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;JCY98XR393D&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"ASR9K</span><span class="nv"> </span><span class="s">Route</span><span class="nv"> </span><span class="s">Switch</span><span class="nv"> </span><span class="s">Processor</span><span class="nv"> </span><span class="s">with</span><span class="nv"> </span><span class="s">440G/slot</span><span class="nv"> </span><span class="s">Fabric</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">6GB"</span>
+<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">"module</span><span class="nv"> </span><span class="s">0/RSP0/CPU0"</span>
+<span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">"A9K-RSP440-TR"</span>
+<span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">"M9YXCZV9QF"</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"ASR-9006</span><span class="nv"> </span><span class="s">Fan</span><span class="nv"> </span><span class="s">Tray</span><span class="nv"> </span><span class="s">V2"</span>
+<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">"fantray</span><span class="nv"> </span><span class="s">0/FT0/SP"</span>
+<span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">"ASR-9006-FAN-V2"</span>
+<span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">"PDANV9GYV8H"</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"ASR9K</span><span class="nv"> </span><span class="s">Generic</span><span class="nv"> </span><span class="s">Fan"</span>
+<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">"fan0</span><span class="nv"> </span><span class="s">0/FT0/SP"</span>
+<span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">"N/A"</span>
+<span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">""</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"160G</span><span class="nv"> </span><span class="s">Modular</span><span class="nv"> </span><span class="s">Linecard,</span><span class="nv"> </span><span class="s">Packet</span><span class="nv"> </span><span class="s">Transport</span><span class="nv"> </span><span class="s">Optimized"</span>
+<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">"module</span><span class="nv"> </span><span class="s">0/1/CPU0"</span>
+<span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">"A9K-MOD160-TR"</span>
+<span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">"94TU4CACM47Y"</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"ASR</span><span class="nv"> </span><span class="s">9000</span><span class="nv"> </span><span class="s">8-port</span><span class="nv"> </span><span class="s">10GE</span><span class="nv"> </span><span class="s">Modular</span><span class="nv"> </span><span class="s">Port</span><span class="nv"> </span><span class="s">Adapter"</span>
+<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">"module</span><span class="nv"> </span><span class="s">0/1/0"</span>
+<span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">"A9K-MPA-8X10GE"</span>
+<span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">"2ZZQVPHZCJ5"</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"10GBASE-LR</span><span class="nv"> </span><span class="s">SFP+</span><span class="nv"> </span><span class="s">Module</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">SMF"</span>
+<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">"module</span><span class="nv"> </span><span class="s">mau</span><span class="nv"> </span><span class="s">0/1/0/0"</span>
+<span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">"SFP-10G-LR"</span>
+<span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">"QMXQLS9GKS"</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"10GBASE-LR</span><span class="nv"> </span><span class="s">SFP+</span><span class="nv"> </span><span class="s">Module</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">SMF"</span>
+<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">"module</span><span class="nv"> </span><span class="s">mau</span><span class="nv"> </span><span class="s">TenGigE0/2/CPU0/0"</span>
+<span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">"SFP-10G-LR"</span>
+<span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">"CB7HHMVC"</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"3kW</span><span class="nv"> </span><span class="s">AC</span><span class="nv"> </span><span class="s">V2</span><span class="nv"> </span><span class="s">Power</span><span class="nv"> </span><span class="s">Module"</span>
+<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">"power-module</span><span class="nv"> </span><span class="s">0/PS0/M0/SP"</span>
+<span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">"PWR-3KW-AC-V2"</span>
+<span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">"ZP7K5XBV9KE"</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"ASR</span><span class="nv"> </span><span class="s">9006</span><span class="nv"> </span><span class="s">4</span><span class="nv"> </span><span class="s">Line</span><span class="nv"> </span><span class="s">Card</span><span class="nv"> </span><span class="s">Slot</span><span class="nv"> </span><span class="s">Chassis</span><span class="nv"> </span><span class="s">with</span><span class="nv"> </span><span class="s">V2</span><span class="nv"> </span><span class="s">AC</span><span class="nv"> </span><span class="s">PEM"</span>
+<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">"chassis</span><span class="nv"> </span><span class="s">ASR-9006"</span>
+<span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">"ASR-9006"</span>
+<span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">"JCY98XR393D"</span>
 </code></pre></div>
 <p>The task should flatten the worker-level result into a device-keyed structure
 before normalization. For each inventory record:</p>
@@ -8084,62 +8084,62 @@ slots, but it is not a NetBox module bay and should never create, update, or
 delete a NetBox module. It only drives <code>dcim.device.serial</code> updates.</p>
 <p>Example live state:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;asr9k-1&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;chassis&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;slot&quot;</span><span class="p">:</span> <span class="s2">&quot;chassis&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;inventory_type&quot;</span><span class="p">:</span> <span class="s2">&quot;chassis&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;serial&quot;</span><span class="p">:</span> <span class="s2">&quot;JCY98XR393D&quot;</span><span class="p">,</span>
+    <span class="s2">"asr9k-1"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"chassis"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"slot"</span><span class="p">:</span> <span class="s2">"chassis"</span><span class="p">,</span>
+            <span class="s2">"inventory_type"</span><span class="p">:</span> <span class="s2">"chassis"</span><span class="p">,</span>
+            <span class="s2">"serial"</span><span class="p">:</span> <span class="s2">"JCY98XR393D"</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s2">&quot;module 0/RSP0/CPU0&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;slot&quot;</span><span class="p">:</span> <span class="s2">&quot;module 0/RSP0/CPU0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;inventory_type&quot;</span><span class="p">:</span> <span class="s2">&quot;module&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;manufacturer&quot;</span><span class="p">:</span> <span class="s2">&quot;Cisco&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;module_type&quot;</span><span class="p">:</span> <span class="s2">&quot;A9K-RSP440-TR&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;part_number&quot;</span><span class="p">:</span> <span class="s2">&quot;A9K-RSP440-TR&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;serial&quot;</span><span class="p">:</span> <span class="s2">&quot;M9YXCZV9QF&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;ASR9K Route Switch Processor with 440G/slot Fabric and 6GB&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+        <span class="s2">"module 0/RSP0/CPU0"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"slot"</span><span class="p">:</span> <span class="s2">"module 0/RSP0/CPU0"</span><span class="p">,</span>
+            <span class="s2">"inventory_type"</span><span class="p">:</span> <span class="s2">"module"</span><span class="p">,</span>
+            <span class="s2">"manufacturer"</span><span class="p">:</span> <span class="s2">"Cisco"</span><span class="p">,</span>
+            <span class="s2">"module_type"</span><span class="p">:</span> <span class="s2">"A9K-RSP440-TR"</span><span class="p">,</span>
+            <span class="s2">"part_number"</span><span class="p">:</span> <span class="s2">"A9K-RSP440-TR"</span><span class="p">,</span>
+            <span class="s2">"serial"</span><span class="p">:</span> <span class="s2">"M9YXCZV9QF"</span><span class="p">,</span>
+            <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"ASR9K Route Switch Processor with 440G/slot Fabric and 6GB"</span><span class="p">,</span>
+            <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"active"</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s2">&quot;module 0/1/0&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;slot&quot;</span><span class="p">:</span> <span class="s2">&quot;module 0/1/0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;inventory_type&quot;</span><span class="p">:</span> <span class="s2">&quot;module&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;manufacturer&quot;</span><span class="p">:</span> <span class="s2">&quot;Cisco&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;module_type&quot;</span><span class="p">:</span> <span class="s2">&quot;A9K-MPA-8X10GE&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;part_number&quot;</span><span class="p">:</span> <span class="s2">&quot;A9K-MPA-8X10GE&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;serial&quot;</span><span class="p">:</span> <span class="s2">&quot;2ZZQVPHZCJ5&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;ASR 9000 8-port 10GE Modular Port Adapter&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+        <span class="s2">"module 0/1/0"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"slot"</span><span class="p">:</span> <span class="s2">"module 0/1/0"</span><span class="p">,</span>
+            <span class="s2">"inventory_type"</span><span class="p">:</span> <span class="s2">"module"</span><span class="p">,</span>
+            <span class="s2">"manufacturer"</span><span class="p">:</span> <span class="s2">"Cisco"</span><span class="p">,</span>
+            <span class="s2">"module_type"</span><span class="p">:</span> <span class="s2">"A9K-MPA-8X10GE"</span><span class="p">,</span>
+            <span class="s2">"part_number"</span><span class="p">:</span> <span class="s2">"A9K-MPA-8X10GE"</span><span class="p">,</span>
+            <span class="s2">"serial"</span><span class="p">:</span> <span class="s2">"2ZZQVPHZCJ5"</span><span class="p">,</span>
+            <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"ASR 9000 8-port 10GE Modular Port Adapter"</span><span class="p">,</span>
+            <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"active"</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s2">&quot;module mau 0/1/0/0&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;slot&quot;</span><span class="p">:</span> <span class="s2">&quot;module mau 0/1/0/0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;inventory_type&quot;</span><span class="p">:</span> <span class="s2">&quot;module&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;manufacturer&quot;</span><span class="p">:</span> <span class="s2">&quot;Cisco&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;module_type&quot;</span><span class="p">:</span> <span class="s2">&quot;SFP-10G-LR&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;part_number&quot;</span><span class="p">:</span> <span class="s2">&quot;SFP-10G-LR&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;serial&quot;</span><span class="p">:</span> <span class="s2">&quot;QMXQLS9GKS&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;10GBASE-LR SFP+ Module for SMF&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+        <span class="s2">"module mau 0/1/0/0"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"slot"</span><span class="p">:</span> <span class="s2">"module mau 0/1/0/0"</span><span class="p">,</span>
+            <span class="s2">"inventory_type"</span><span class="p">:</span> <span class="s2">"module"</span><span class="p">,</span>
+            <span class="s2">"manufacturer"</span><span class="p">:</span> <span class="s2">"Cisco"</span><span class="p">,</span>
+            <span class="s2">"module_type"</span><span class="p">:</span> <span class="s2">"SFP-10G-LR"</span><span class="p">,</span>
+            <span class="s2">"part_number"</span><span class="p">:</span> <span class="s2">"SFP-10G-LR"</span><span class="p">,</span>
+            <span class="s2">"serial"</span><span class="p">:</span> <span class="s2">"QMXQLS9GKS"</span><span class="p">,</span>
+            <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"10GBASE-LR SFP+ Module for SMF"</span><span class="p">,</span>
+            <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"active"</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Example NetBox state:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;asr9k-1&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;chassis&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;slot&quot;</span><span class="p">:</span> <span class="s2">&quot;chassis&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;inventory_type&quot;</span><span class="p">:</span> <span class="s2">&quot;chassis&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;serial&quot;</span><span class="p">:</span> <span class="s2">&quot;OLD123&quot;</span><span class="p">,</span>
+    <span class="s2">"asr9k-1"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"chassis"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"slot"</span><span class="p">:</span> <span class="s2">"chassis"</span><span class="p">,</span>
+            <span class="s2">"inventory_type"</span><span class="p">:</span> <span class="s2">"chassis"</span><span class="p">,</span>
+            <span class="s2">"serial"</span><span class="p">:</span> <span class="s2">"OLD123"</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s2">&quot;module 0/RSP0/CPU0&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;slot&quot;</span><span class="p">:</span> <span class="s2">&quot;module 0/RSP0/CPU0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;inventory_type&quot;</span><span class="p">:</span> <span class="s2">&quot;module&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;manufacturer&quot;</span><span class="p">:</span> <span class="s2">&quot;Cisco&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;module_type&quot;</span><span class="p">:</span> <span class="s2">&quot;A9K-RSP440-TR&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;part_number&quot;</span><span class="p">:</span> <span class="s2">&quot;A9K-RSP440-TR&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;serial&quot;</span><span class="p">:</span> <span class="s2">&quot;OLDMOD123&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;ASR9K Route Switch Processor with 440G/slot Fabric and 6GB&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+        <span class="s2">"module 0/RSP0/CPU0"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"slot"</span><span class="p">:</span> <span class="s2">"module 0/RSP0/CPU0"</span><span class="p">,</span>
+            <span class="s2">"inventory_type"</span><span class="p">:</span> <span class="s2">"module"</span><span class="p">,</span>
+            <span class="s2">"manufacturer"</span><span class="p">:</span> <span class="s2">"Cisco"</span><span class="p">,</span>
+            <span class="s2">"module_type"</span><span class="p">:</span> <span class="s2">"A9K-RSP440-TR"</span><span class="p">,</span>
+            <span class="s2">"part_number"</span><span class="p">:</span> <span class="s2">"A9K-RSP440-TR"</span><span class="p">,</span>
+            <span class="s2">"serial"</span><span class="p">:</span> <span class="s2">"OLDMOD123"</span><span class="p">,</span>
+            <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"ASR9K Route Switch Processor with 440G/slot Fabric and 6GB"</span><span class="p">,</span>
+            <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"active"</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">}</span>
 <span class="p">}</span>
@@ -8231,7 +8231,7 @@ diff calculation.</p>
 <span class="w">    </span><span class="nt">&lt;netbox_module_type_name&gt;</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">glob</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;glob pattern matching live module name&gt;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;regex pattern matching live module name&gt;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">eval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;Python expression with a &quot;value&quot; variable&gt;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">eval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;Python expression with a "value" variable&gt;</span>
 
 <span class="nt">module_bays</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">&lt;manufacturer&gt;</span><span class="p">:</span>
@@ -8239,31 +8239,31 @@ diff calculation.</p>
 <span class="w">      </span><span class="nt">&lt;netbox_module_bay_name&gt;</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">glob</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;glob pattern matching live slot name&gt;</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;regex pattern matching live slot name&gt;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">eval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;Python expression with a &quot;value&quot; variable&gt;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">eval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;Python expression with a "value" variable&gt;</span>
 </code></pre></div>
 <p>This is the value supplied to the task's <code>inventory_map</code> argument. It must not
 contain another nested <code>inventory_map</code> key.</p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">module_types</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">Cisco</span><span class="p">:</span>
-<span class="w">    </span><span class="s">&quot;ASR</span><span class="nv"> </span><span class="s">9000</span><span class="nv"> </span><span class="s">RSP440&quot;</span><span class="p p-Indicator">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">glob</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;A9K-RSP440-*&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^A9K-RSP440-(TR|SE)$&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">eval</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value.upper()</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">&#39;A9K-RSP440-TR&#39;&quot;</span>
-<span class="w">    </span><span class="s">&quot;10GBASE-LR</span><span class="nv"> </span><span class="s">SFP+&quot;</span><span class="p p-Indicator">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">glob</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;SFP-10G-LR*&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^SFP-10G-LR(=)?$&quot;</span>
+<span class="w">    </span><span class="s">"ASR</span><span class="nv"> </span><span class="s">9000</span><span class="nv"> </span><span class="s">RSP440"</span><span class="p p-Indicator">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">glob</span><span class="p">:</span><span class="w"> </span><span class="s">"A9K-RSP440-*"</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="s">"^A9K-RSP440-(TR|SE)$"</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">eval</span><span class="p">:</span><span class="w"> </span><span class="s">"value.upper()</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">'A9K-RSP440-TR'"</span>
+<span class="w">    </span><span class="s">"10GBASE-LR</span><span class="nv"> </span><span class="s">SFP+"</span><span class="p p-Indicator">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">glob</span><span class="p">:</span><span class="w"> </span><span class="s">"SFP-10G-LR*"</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="s">"^SFP-10G-LR(=)?$"</span>
 
 <span class="nt">module_bays</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">Cisco</span><span class="p">:</span>
-<span class="w">    </span><span class="s">&quot;ASR-9006&quot;</span><span class="p p-Indicator">:</span>
-<span class="w">      </span><span class="s">&quot;0/RSP0&quot;</span><span class="p p-Indicator">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">glob</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;module</span><span class="nv"> </span><span class="s">0/RSP0/*&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^module</span><span class="nv"> </span><span class="s">0/RSP0(/CPU0)?$&quot;</span>
-<span class="w">      </span><span class="s">&quot;0/1&quot;</span><span class="p p-Indicator">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">glob</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;module</span><span class="nv"> </span><span class="s">0/1/CPU*&quot;</span>
-<span class="w">      </span><span class="s">&quot;TenGigE0/2/CPU0/0&quot;</span><span class="p p-Indicator">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">eval</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">&#39;module</span><span class="nv"> </span><span class="s">mau</span><span class="nv"> </span><span class="s">TenGigE0/2/CPU0/0&#39;&quot;</span>
+<span class="w">    </span><span class="s">"ASR-9006"</span><span class="p p-Indicator">:</span>
+<span class="w">      </span><span class="s">"0/RSP0"</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">glob</span><span class="p">:</span><span class="w"> </span><span class="s">"module</span><span class="nv"> </span><span class="s">0/RSP0/*"</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="s">"^module</span><span class="nv"> </span><span class="s">0/RSP0(/CPU0)?$"</span>
+<span class="w">      </span><span class="s">"0/1"</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">glob</span><span class="p">:</span><span class="w"> </span><span class="s">"module</span><span class="nv"> </span><span class="s">0/1/CPU*"</span>
+<span class="w">      </span><span class="s">"TenGigE0/2/CPU0/0"</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">eval</span><span class="p">:</span><span class="w"> </span><span class="s">"value</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">'module</span><span class="nv"> </span><span class="s">mau</span><span class="nv"> </span><span class="s">TenGigE0/2/CPU0/0'"</span>
 </code></pre></div>
 <p>Scoping rules:</p>
 <ul>
@@ -8327,17 +8327,17 @@ contain another nested <code>inventory_map</code> key.</p>
 <code>norfab/workers/netbox_worker/netbox_models.py</code>. The task input should use the
 model directly:</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">InventoryPatternCondition</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">,</span> <span class="n">populate_by_name</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">"forbid"</span><span class="p">,</span> <span class="n">populate_by_name</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">glob</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">regex</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">eval_expression</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;eval&quot;</span><span class="p">)</span>
+    <span class="n">eval_expression</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s2">"eval"</span><span class="p">)</span>
 
-    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;after&quot;</span><span class="p">)</span>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">validate_condition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">conditions</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">glob</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">regex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_expression</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">conditions</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;exactly one of glob, regex, or eval is required&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"exactly one of glob, regex, or eval is required"</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
 
@@ -8348,7 +8348,7 @@ model directly:</p>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">InventoryPatternMap</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">)</span>
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">"forbid"</span><span class="p">)</span>
 
     <span class="n">module_types</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span>
         <span class="n">StrictStr</span><span class="p">,</span>  <span class="c1"># NetBox manufacturer name</span>
@@ -8385,8 +8385,8 @@ form is:</p>
 <div class="highlight"><pre><span></span><code><span class="n">matched</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span>
     <span class="nb">eval</span><span class="p">(</span>
         <span class="n">compiled_expression</span><span class="p">,</span>
-        <span class="p">{</span><span class="s2">&quot;__builtins__&quot;</span><span class="p">:</span> <span class="p">{}},</span>
-        <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">"__builtins__"</span><span class="p">:</span> <span class="p">{}},</span>
+        <span class="p">{</span><span class="s2">"value"</span><span class="p">:</span> <span class="n">value</span><span class="p">},</span>
     <span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -8426,21 +8426,21 @@ should not be exposed to untrusted API users.</p>
 worker downloads the file from the NorFab File Service and executes a function
 named <code>transform</code>.</p>
 <p>Example task input:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">inventory_transform</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;nf://netbox/inventory_transformers/iosxr.py&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nt">inventory_transform</span><span class="p">:</span><span class="w"> </span><span class="s">"nf://netbox/inventory_transformers/iosxr.py"</span>
 </code></pre></div>
 <p>Required function contract:</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="n">parsed_data</span><span class="p">,</span> <span class="n">worker</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return normalized parsed inventory data for one device.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return normalized parsed inventory data for one device."""</span>
     <span class="n">transformed_data</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">parsed_data</span><span class="p">:</span>
         <span class="n">item</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;slot&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;module mau &quot;</span><span class="p">):</span>
-            <span class="n">item</span><span class="p">[</span><span class="s2">&quot;slot&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;slot&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;module mau &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s2">"slot"</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"module mau "</span><span class="p">):</span>
+            <span class="n">item</span><span class="p">[</span><span class="s2">"slot"</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">"slot"</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"module mau "</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;A9K-RSP440-TR&quot;</span><span class="p">:</span>
-            <span class="n">item</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ASR 9000 RSP440&quot;</span>
+        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s2">"module"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"A9K-RSP440-TR"</span><span class="p">:</span>
+            <span class="n">item</span><span class="p">[</span><span class="s2">"module"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"ASR 9000 RSP440"</span>
 
         <span class="n">transformed_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
@@ -8469,21 +8469,21 @@ temporary module, <code>importlib</code> flow, compile wrapper, or sandbox.</p>
 </ol>
 <p>The inventory transformer should use the same code pattern, changing only the
 argument name, error description, and exported function name:</p>
-<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="n">inventory_transform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;nf://&quot;</span><span class="p">):</span>
+<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="n">inventory_transform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"nf://"</span><span class="p">):</span>
     <span class="n">function_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">inventory_transform</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">function_text</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - &#39;</span><span class="si">{</span><span class="n">inventory_transform</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-            <span class="s2">&quot;inventory transformer download failed&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - '</span><span class="si">{</span><span class="n">inventory_transform</span><span class="si">}</span><span class="s2">' "</span>
+            <span class="s2">"inventory transformer download failed"</span>
         <span class="p">)</span>
 
     <span class="n">globals_dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">exec</span><span class="p">(</span><span class="n">function_text</span><span class="p">,</span> <span class="n">globals_dict</span><span class="p">,</span> <span class="n">globals_dict</span><span class="p">)</span>
-    <span class="n">transform_function</span> <span class="o">=</span> <span class="n">globals_dict</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">]</span>
+    <span class="n">transform_function</span> <span class="o">=</span> <span class="n">globals_dict</span><span class="p">[</span><span class="s2">"transform"</span><span class="p">]</span>
 <span class="k">else</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - &#39;</span><span class="si">{</span><span class="n">inventory_transform</span><span class="si">}</span><span class="s2">&#39; inventory transformer &quot;</span>
-        <span class="s2">&quot;should be an nf:// file reference&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - '</span><span class="si">{</span><span class="n">inventory_transform</span><span class="si">}</span><span class="s2">' inventory transformer "</span>
+        <span class="s2">"should be an nf:// file reference"</span>
     <span class="p">)</span>
 </code></pre></div>
 <p>Load <code>transform_function</code> once per task, then call it once for each device after
@@ -8619,43 +8619,43 @@ data to sync safely.</p>
 <h2 id="action-planning-model">Action Planning Model<a class="headerlink" href="#action-planning-model" title="Permanent link">¤</a></h2>
 <p>Dry-run result shape should be easy to inspect:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;asr9k-1&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;inventory&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;module 0/1/0&quot;</span><span class="p">,</span> <span class="s2">&quot;module mau 0/1/0/0&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;chassis&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;serial&quot;</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">&quot;old_value&quot;</span><span class="p">:</span> <span class="s2">&quot;OLD123&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;new_value&quot;</span><span class="p">:</span> <span class="s2">&quot;JCY98XR393D&quot;</span><span class="p">,</span>
+    <span class="s2">"asr9k-1"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"inventory"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"create"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"module 0/1/0"</span><span class="p">,</span> <span class="s2">"module mau 0/1/0/0"</span><span class="p">],</span>
+            <span class="s2">"update"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"chassis"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">"serial"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">"old_value"</span><span class="p">:</span> <span class="s2">"OLD123"</span><span class="p">,</span>
+                        <span class="s2">"new_value"</span><span class="p">:</span> <span class="s2">"JCY98XR393D"</span><span class="p">,</span>
                     <span class="p">}</span>
                 <span class="p">},</span>
-                <span class="s2">&quot;module 0/RSP0/CPU0&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;serial&quot;</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">&quot;old_value&quot;</span><span class="p">:</span> <span class="s2">&quot;OLDMOD123&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;new_value&quot;</span><span class="p">:</span> <span class="s2">&quot;M9YXCZV9QF&quot;</span><span class="p">,</span>
+                <span class="s2">"module 0/RSP0/CPU0"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">"serial"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">"old_value"</span><span class="p">:</span> <span class="s2">"OLDMOD123"</span><span class="p">,</span>
+                        <span class="s2">"new_value"</span><span class="p">:</span> <span class="s2">"M9YXCZV9QF"</span><span class="p">,</span>
                     <span class="p">},</span>
                 <span class="p">}</span>
             <span class="p">},</span>
-            <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fantray 0/FT0/SP&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"fantray 0/FT0/SP"</span><span class="p">],</span>
+            <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[],</span>
         <span class="p">},</span>
-        <span class="s2">&quot;missing_module_bays&quot;</span><span class="p">:</span> <span class="p">[],</span>
-        <span class="s2">&quot;ignored&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">"missing_module_bays"</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">"ignored"</span><span class="p">:</span> <span class="p">[],</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Live-run result shape should report applied actions:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;asr9k-1&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;inventory&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;module 0/1/0&quot;</span><span class="p">,</span> <span class="s2">&quot;module mau 0/1/0/0&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;chassis&quot;</span><span class="p">,</span> <span class="s2">&quot;module 0/RSP0/CPU0&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;deleted&quot;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">&quot;delete_skipped&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fantray 0/FT0/SP&quot;</span><span class="p">],</span>
+    <span class="s2">"asr9k-1"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"inventory"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"created"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"module 0/1/0"</span><span class="p">,</span> <span class="s2">"module mau 0/1/0/0"</span><span class="p">],</span>
+            <span class="s2">"updated"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"chassis"</span><span class="p">,</span> <span class="s2">"module 0/RSP0/CPU0"</span><span class="p">],</span>
+            <span class="s2">"deleted"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"delete_skipped"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"fantray 0/FT0/SP"</span><span class="p">],</span>
         <span class="p">},</span>
-        <span class="s2">&quot;missing_module_bays&quot;</span><span class="p">:</span> <span class="p">[],</span>
-        <span class="s2">&quot;ignored&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">"missing_module_bays"</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">"ignored"</span><span class="p">:</span> <span class="p">[],</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>

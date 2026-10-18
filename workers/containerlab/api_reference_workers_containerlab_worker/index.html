@@ -7547,7 +7547,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">exit_event</span> <span class="o">=</span> <span class="n">exit_event</span>
 
     <span class="c1"># create directory to store lab topologies</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">topologies_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">&quot;topologies&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">topologies_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">"topologies"</span><span class="p">)</span>
     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topologies_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># merge local inventory with inventory from broker</span>
@@ -7598,12 +7598,12 @@ sends a SIGTERM signal to terminate the process using <code>os.kill()</code>.</p
 <span class="normal">120</span>
 <span class="normal">121</span>
 <span class="normal">122</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">worker_exit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Terminates the current process by sending a SIGTERM signal to itself.</span>
 
 <span class="sd">    This method retrieves the current process ID using `os.getpid()` and then</span>
 <span class="sd">    sends a SIGTERM signal to terminate the process using `os.kill()`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">os</span><span class="o">.</span><span class="n">kill</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">(),</span> <span class="n">signal</span><span class="o">.</span><span class="n">SIGTERM</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7697,19 +7697,19 @@ and returns them in a dictionary.</p>
 <span class="normal">165</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetVersionInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetVersionResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Version&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Version"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Produce a report of the versions of various Python packages.</span>
 
 <span class="sd">    This method collects the versions of several specified Python packages</span>
@@ -7718,15 +7718,15 @@ and returns them in a dictionary.</p>
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: An object containing the task name and a dictionary with</span>
 <span class="sd">                the package names as keys and their respective versions as values.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">libs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;norfab&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;pydantic&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;python&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
-        <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
-        <span class="s2">&quot;containerlab&quot;</span><span class="p">:</span> <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clab_version</span><span class="p">]),</span>
+        <span class="s2">"norfab"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"pydantic"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"python"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">" "</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s2">"platform"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
+        <span class="s2">"containerlab"</span><span class="p">:</span> <span class="s2">"."</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clab_version</span><span class="p">]),</span>
     <span class="p">}</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_version&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="n">libs</span><span class="p">)</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_version"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="n">libs</span><span class="p">)</span>
 
     <span class="c1"># get version of packages installed</span>
     <span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="n">libs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -7808,27 +7808,27 @@ and returns them in a dictionary.</p>
 <span class="normal">191</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetInventoryResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Inventory&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Inventory"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve the inventory of the Containerlab worker.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Dict: A dictionary containing the combined inventory of Containerlab.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
         <span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_inventory&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_inventory"</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7903,28 +7903,28 @@ and returns them in a dictionary.</p>
 <span class="normal">218</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetContainerlabStatusInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetContainerlabStatusResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Containerlab Status&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Containerlab Status"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_containerlab_status</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve the status of the Containerlab worker.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: A result object containing the status of the Containerlab worker.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;OS NOT SUPPORTED&quot;</span> <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;win&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;READY&quot;</span>
+<span class="sd">    """</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="s2">"OS NOT SUPPORTED"</span> <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"win"</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"READY"</span>
     <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_containerlab_status&quot;</span><span class="p">,</span>
-        <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">status</span><span class="p">},</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_containerlab_status"</span><span class="p">,</span>
+        <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s2">"status"</span><span class="p">:</span> <span class="n">status</span><span class="p">},</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8075,19 +8075,19 @@ operation. Defaults to None.</p>
 <span class="normal">260</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetRunningLabsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetRunningLabsResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Running Labs&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Running Labs"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_running_labs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve a list of running containerlab lab names.</span>
 
 <span class="sd">    This method inspects the current state of containerlab and returns</span>
@@ -8102,9 +8102,9 @@ operation. Defaults to None.</p>
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: A Result object containing the task name and a list of running</span>
 <span class="sd">        lab names.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="ow">or</span> <span class="mi">600</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_running_labs&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">[])</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_running_labs"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">[])</span>
     <span class="n">inspect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inspect</span><span class="p">(</span><span class="n">job</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
 
     <span class="c1"># form topologies list if any of them are running</span>
@@ -8443,14 +8443,14 @@ operation. Defaults to None.</p>
 <span class="normal">384</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">RunContainerlabCommandInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">RunContainerlabCommandResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Run Containerlab Command&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Run Containerlab Command"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -8464,21 +8464,21 @@ operation. Defaults to None.</p>
     <span class="n">env</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">expect_output</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Executes a containerlab command using subprocess and processes its output.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        args (list): The list of command-line arguments to execute.</span>
 <span class="sd">        cwd (str, optional): The working directory to execute the command in. Defaults to None.</span>
 <span class="sd">        timeout (int, optional): The timeout for the command execution in seconds. Defaults to None.</span>
-<span class="sd">        ret (Result, optional): An optional Norfab result object to populate with the command&#39;s output. Defaults to None.</span>
+<span class="sd">        ret (Result, optional): An optional Norfab result object to populate with the command's output. Defaults to None.</span>
 <span class="sd">        env (dict, Optional): OS Environment variables to use when running the process</span>
 <span class="sd">        expect_output (bool, Optional): whether to expect any output from command</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Tuple: If `ret` is None, returns a tuple containing:</span>
 <span class="sd">            - output (str): The standard output of the command.</span>
-<span class="sd">            - logs (list): A list of log messages from the command&#39;s standard error.</span>
+<span class="sd">            - logs (list): A list of log messages from the command's standard error.</span>
 <span class="sd">            - proc (subprocess.Popen): The subprocess object for the executed command.</span>
 <span class="sd">        Result: If `ret` is provided, returns the populated `Result` object with the following attributes:</span>
 <span class="sd">            - result: The parsed JSON output or raw output of the command.</span>
@@ -8490,12 +8490,12 @@ operation. Defaults to None.</p>
 <span class="sd">        Exception: If the output cannot be parsed as JSON when `ret` is provided.</span>
 
 <span class="sd">    Notes:</span>
-<span class="sd">        - The method reads the command&#39;s standard error line by line and processes messages containing &quot;msg=&quot;.</span>
+<span class="sd">        - The method reads the command's standard error line by line and processes messages containing "msg=".</span>
 <span class="sd">        - If the command fails (non-zero return code), the `ret.failed` attribute is set to True, and errors are populated.</span>
 <span class="sd">        - If the command succeeds, the `ret.messages` attribute is populated with log messages.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="ow">or</span> <span class="mi">600</span>
-    <span class="n">output</span><span class="p">,</span> <span class="n">logs</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="p">[]</span>
+    <span class="n">output</span><span class="p">,</span> <span class="n">logs</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span> <span class="p">[]</span>
     <span class="n">begin</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="ow">or</span> <span class="mi">600</span>
     <span class="n">env</span> <span class="o">=</span> <span class="n">env</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">)</span>
@@ -8511,12 +8511,12 @@ operation. Defaults to None.</p>
         <span class="k">while</span> <span class="n">proc</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">begin</span> <span class="o">&gt;</span> <span class="n">timeout</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Containerlab output collection </span><span class="si">{</span><span class="n">timeout</span><span class="si">}</span><span class="s2">s timeout expired.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Containerlab output collection </span><span class="si">{</span><span class="n">timeout</span><span class="si">}</span><span class="s2">s timeout expired."</span>
                 <span class="p">)</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">msg</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">job</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;msg=&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">))</span>
+                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"msg="</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'</span><span class="se">\\</span><span class="s1">"'</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">'"'</span><span class="p">))</span>
                 <span class="n">logs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
         <span class="c1"># read remaining messages</span>
@@ -8524,7 +8524,7 @@ operation. Defaults to None.</p>
             <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">msg</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">job</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;msg=&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">))</span>
+                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"msg="</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'</span><span class="se">\\</span><span class="s1">"'</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">'"'</span><span class="p">))</span>
                 <span class="n">logs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
         <span class="c1"># read process output</span>
@@ -8535,13 +8535,13 @@ operation. Defaults to None.</p>
         <span class="c1"># check if command failed</span>
         <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">logs</span><span class="p">)]</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">logs</span><span class="p">)]</span>
         <span class="c1"># check if got no output</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="n">output</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">and</span> <span class="n">expect_output</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">logs</span><span class="p">)]</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">logs</span><span class="p">)]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">logs</span><span class="p">)]</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">logs</span><span class="p">)]</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
@@ -8550,13 +8550,13 @@ operation. Defaults to None.</p>
                     <span class="n">line_split</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
                     <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">line_split</span><span class="p">):</span>
                         <span class="c1"># find first json output line</span>
-                        <span class="k">if</span> <span class="s2">&quot;{&quot;</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">or</span> <span class="s2">&quot;[&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
-                            <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line_split</span><span class="p">[</span><span class="n">index</span><span class="p">:]))</span>
+                        <span class="k">if</span> <span class="s2">"{"</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">or</span> <span class="s2">"["</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                            <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line_split</span><span class="p">[</span><span class="n">index</span><span class="p">:]))</span>
                             <span class="k">break</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">output</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - failed to load containerlab results into JSON, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">, result: &#39;</span><span class="si">{</span><span class="n">output</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - failed to load containerlab results into JSON, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">, result: '</span><span class="si">{</span><span class="n">output</span><span class="si">}</span><span class="s2">'"</span>
                     <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ret</span>
@@ -8798,14 +8798,14 @@ Defaults to None (no timeout).</p>
 <span class="normal">466</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">DeployInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">DeployResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Deploy Lab&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Deploy Lab"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -8817,7 +8817,7 @@ Defaults to None (no timeout).</p>
     <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">node_filter</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Deploys a containerlab topology.</span>
 
 <span class="sd">    This method handles the deployment of a containerlab topology by downloading</span>
@@ -8837,10 +8837,10 @@ Defaults to None (no timeout).</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        Exception: If the topology file cannot be fetched.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="ow">or</span> <span class="mi">600</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:deploy&quot;</span><span class="p">)</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Deploy: Deploying topology &#39;</span><span class="si">{</span><span class="n">topology</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:deploy"</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Deploy: Deploying topology '</span><span class="si">{</span><span class="n">topology</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
 
     <span class="c1"># create folder to store topology</span>
     <span class="n">topology_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">topology</span><span class="p">)[</span><span class="mi">0</span><span class="p">])[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -8858,19 +8858,19 @@ Defaults to None (no timeout).</p>
         <span class="p">)</span>  <span class="c1"># move topology file under desired folder</span>
 
     <span class="c1"># form command arguments</span>
-    <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span> <span class="s2">&quot;deploy&quot;</span><span class="p">,</span> <span class="s2">&quot;-f&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="s2">&quot;-t&quot;</span><span class="p">,</span> <span class="n">topology_file</span><span class="p">]</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"containerlab"</span><span class="p">,</span> <span class="s2">"deploy"</span><span class="p">,</span> <span class="s2">"-f"</span><span class="p">,</span> <span class="s2">"json"</span><span class="p">,</span> <span class="s2">"-t"</span><span class="p">,</span> <span class="n">topology_file</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">reconfigure</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;--reconfigure&quot;</span><span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;re-deploying lab </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">topology_file</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"--reconfigure"</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"re-deploying lab </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">topology_file</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;deploying lab </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">topology_file</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"deploying lab </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">topology_file</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">node_filter</span><span class="p">:</span>
-        <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;--node-filter&quot;</span><span class="p">)</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"--node-filter"</span><span class="p">)</span>
         <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node_filter</span><span class="p">)</span>
 
     <span class="c1"># add needed env variables</span>
     <span class="n">env</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">)</span>
-    <span class="n">env</span><span class="p">[</span><span class="s2">&quot;CLAB_VERSION_CHECK&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;disable&quot;</span>
+    <span class="n">env</span><span class="p">[</span><span class="s2">"CLAB_VERSION_CHECK"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"disable"</span>
 
     <span class="c1"># run containerlab command</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_containerlab_command</span><span class="p">(</span>
@@ -9055,19 +9055,19 @@ Defaults to None (no timeout).</p>
 <span class="normal">540</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">DestroyLabInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">LabActionResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;DELETE&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"DELETE"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Destroy Lab&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Destroy Lab"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">destroy_lab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lab_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Destroys a specified lab.</span>
 
 <span class="sd">    Args:</span>
@@ -9084,11 +9084,11 @@ Defaults to None (no timeout).</p>
 <span class="sd">        - If the lab is found, retrieves the topology file and its folder.</span>
 <span class="sd">        - Executes the `containerlab destroy` command using the topology file.</span>
 <span class="sd">        - Updates the result to indicate success or failure of the destruction process.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="ow">or</span> <span class="mi">600</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:destroy_lab&quot;</span><span class="p">)</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Destroy lab: Destroying &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39; lab&quot;</span><span class="p">)</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;destroying lab &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:destroy_lab"</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Destroy lab: Destroying '</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">' lab"</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"destroying lab '</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
 
     <span class="c1"># get lab details</span>
     <span class="n">inspect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inspect</span><span class="p">(</span>
@@ -9104,14 +9104,14 @@ Defaults to None (no timeout).</p>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39; lab not found&quot;</span><span class="p">]</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">' lab not found"</span><span class="p">]</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="n">lab_name</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">topology_file</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">lab_name</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;Labels&quot;</span><span class="p">][</span><span class="s2">&quot;clab-topo-file&quot;</span><span class="p">]</span>
+        <span class="n">topology_file</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">lab_name</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">"Labels"</span><span class="p">][</span><span class="s2">"clab-topo-file"</span><span class="p">]</span>
         <span class="n">topology_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">topology_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># run destroy command</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span> <span class="s2">&quot;destroy&quot;</span><span class="p">,</span> <span class="s2">&quot;-t&quot;</span><span class="p">,</span> <span class="n">topology_file</span><span class="p">]</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"containerlab"</span><span class="p">,</span> <span class="s2">"destroy"</span><span class="p">,</span> <span class="s2">"-t"</span><span class="p">,</span> <span class="n">topology_file</span><span class="p">]</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_containerlab_command</span><span class="p">(</span>
             <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
             <span class="n">cwd</span><span class="o">=</span><span class="n">topology_folder</span><span class="p">,</span>
@@ -9311,14 +9311,14 @@ the inspection output. Defaults to False.</p>
 <span class="normal">612</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">InspectInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">InspectResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Inspect Lab&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Inspect Lab"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -9329,7 +9329,7 @@ the inspection output. Defaults to False.</p>
     <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">details</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Inspect the container lab containers configuration and status.</span>
 
 <span class="sd">    This method retrieves information about a specific container lab or all</span>
@@ -9345,24 +9345,24 @@ the inspection output. Defaults to False.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: An object containing the result of the inspection task.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="ow">or</span> <span class="mi">600</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:inspect&quot;</span><span class="p">)</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:inspect"</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Inspect: Inspecting </span><span class="si">{</span><span class="s1">&#39;all labs&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">lab_name</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="kc">None</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">lab_name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39; lab&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Inspect: Inspecting </span><span class="si">{</span><span class="s1">'all labs'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">lab_name</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="kc">None</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">lab_name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">' lab'</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">job</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">lab_name</span><span class="p">:</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;inspecting lab &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"inspecting lab '</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;inspecting all labs&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"inspecting all labs"</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">lab_name</span><span class="p">:</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span> <span class="s2">&quot;inspect&quot;</span><span class="p">,</span> <span class="s2">&quot;-f&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="s2">&quot;--name&quot;</span><span class="p">,</span> <span class="n">lab_name</span><span class="p">]</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"containerlab"</span><span class="p">,</span> <span class="s2">"inspect"</span><span class="p">,</span> <span class="s2">"-f"</span><span class="p">,</span> <span class="s2">"json"</span><span class="p">,</span> <span class="s2">"--name"</span><span class="p">,</span> <span class="n">lab_name</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span> <span class="s2">&quot;inspect&quot;</span><span class="p">,</span> <span class="s2">&quot;-f&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="s2">&quot;--all&quot;</span><span class="p">]</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"containerlab"</span><span class="p">,</span> <span class="s2">"inspect"</span><span class="p">,</span> <span class="s2">"-f"</span><span class="p">,</span> <span class="s2">"json"</span><span class="p">,</span> <span class="s2">"--all"</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">details</span><span class="p">:</span>
-        <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;--details&quot;</span><span class="p">)</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"--details"</span><span class="p">)</span>
 
     <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_containerlab_command</span><span class="p">(</span>
         <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span> <span class="n">ret</span><span class="o">=</span><span class="n">ret</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span>
@@ -9374,7 +9374,7 @@ the inspection output. Defaults to False.</p>
     <span class="c1"># check if lab name given and it is not in output</span>
     <span class="k">if</span> <span class="n">lab_name</span> <span class="ow">and</span> <span class="n">lab_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="ow">or</span> <span class="p">{}):</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39; lab not found&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">' lab not found"</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
@@ -9539,19 +9539,19 @@ will contain a list of error messages.</p>
 <span class="normal">675</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SaveInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">LabActionResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Save Lab&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Save Lab"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">lab_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Saves the config of a specified lab devices by invoking the `containerlab save` command.</span>
 
 <span class="sd">    Args:</span>
@@ -9564,11 +9564,11 @@ will contain a list of error messages.</p>
 <span class="sd">            `result` will contain a dictionary with the lab name as the key and `True`</span>
 <span class="sd">            as the value. If unsuccessful, `failed` will be set to True, and `errors`</span>
 <span class="sd">            will contain a list of error messages.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="ow">or</span> <span class="mi">600</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:save&quot;</span><span class="p">)</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Save: Saving running config for &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39; lab&quot;</span><span class="p">)</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;saving running config for lab &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:save"</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Save: Saving running config for '</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">' lab"</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"saving running config for lab '</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
 
     <span class="c1"># get lab details</span>
     <span class="n">inspect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inspect</span><span class="p">(</span>
@@ -9577,14 +9577,14 @@ will contain a list of error messages.</p>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39; lab not found&quot;</span><span class="p">]</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">' lab not found"</span><span class="p">]</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="n">lab_name</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">topology_file</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">lab_name</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;Labels&quot;</span><span class="p">][</span><span class="s2">&quot;clab-topo-file&quot;</span><span class="p">]</span>
+        <span class="n">topology_file</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">lab_name</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">"Labels"</span><span class="p">][</span><span class="s2">"clab-topo-file"</span><span class="p">]</span>
         <span class="n">topology_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">topology_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># run save command</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span> <span class="s2">&quot;save&quot;</span><span class="p">,</span> <span class="s2">&quot;-t&quot;</span><span class="p">,</span> <span class="n">topology_file</span><span class="p">]</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"containerlab"</span><span class="p">,</span> <span class="s2">"save"</span><span class="p">,</span> <span class="s2">"-t"</span><span class="p">,</span> <span class="n">topology_file</span><span class="p">]</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_containerlab_command</span><span class="p">(</span>
             <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
             <span class="n">cwd</span><span class="o">=</span><span class="n">topology_folder</span><span class="p">,</span>
@@ -9769,19 +9769,19 @@ using the provided topology file.</p>
 <span class="normal">750</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">RestartLabInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">LabActionResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Restart Lab&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Restart Lab"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">restart_lab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">lab_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Restart a specified Containerlab lab.</span>
 
 <span class="sd">    This method retrieves the lab details, destroys the existing lab, and redeploys it</span>
@@ -9794,11 +9794,11 @@ using the provided topology file.</p>
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: An object containing the status of the operation, any errors encountered,</span>
 <span class="sd">                and the result indicating whether the lab was successfully restarted.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="ow">or</span> <span class="mi">600</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:restart_lab&quot;</span><span class="p">)</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Restart lab: Restarting &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39; lab&quot;</span><span class="p">)</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;restarting lab &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:restart_lab"</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Restart lab: Restarting '</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">' lab"</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"restarting lab '</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
 
     <span class="c1"># get lab details</span>
     <span class="n">inspect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inspect</span><span class="p">(</span>
@@ -9807,25 +9807,25 @@ using the provided topology file.</p>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39; lab not found&quot;</span><span class="p">]</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">' lab not found"</span><span class="p">]</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="n">lab_name</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">topology_file</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">lab_name</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;Labels&quot;</span><span class="p">][</span><span class="s2">&quot;clab-topo-file&quot;</span><span class="p">]</span>
+        <span class="n">topology_file</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">lab_name</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">"Labels"</span><span class="p">][</span><span class="s2">"clab-topo-file"</span><span class="p">]</span>
         <span class="n">topology_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">topology_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># add needed env variables</span>
         <span class="n">env</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">)</span>
-        <span class="n">env</span><span class="p">[</span><span class="s2">&quot;CLAB_VERSION_CHECK&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;disable&quot;</span>
+        <span class="n">env</span><span class="p">[</span><span class="s2">"CLAB_VERSION_CHECK"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"disable"</span>
 
         <span class="c1"># run destroy command</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s2">&quot;containerlab&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;deploy&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;-f&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;json&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;-t&quot;</span><span class="p">,</span>
+            <span class="s2">"containerlab"</span><span class="p">,</span>
+            <span class="s2">"deploy"</span><span class="p">,</span>
+            <span class="s2">"-f"</span><span class="p">,</span>
+            <span class="s2">"json"</span><span class="p">,</span>
+            <span class="s2">"-t"</span><span class="p">,</span>
             <span class="n">topology_file</span><span class="p">,</span>
-            <span class="s2">&quot;--reconfigure&quot;</span><span class="p">,</span>
+            <span class="s2">"--reconfigure"</span><span class="p">,</span>
         <span class="p">]</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_containerlab_command</span><span class="p">(</span>
             <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
@@ -10164,14 +10164,14 @@ to Netmiko SSH platform types and extracts relevant connection details.</p>
 <span class="normal">903</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetNornirInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetNornirInventoryResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Nornir Inventory&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Nornir Inventory"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -10183,11 +10183,11 @@ to Netmiko SSH platform types and extracts relevant connection details.</p>
     <span class="n">groups</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_default_credentials</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieves the Nornir inventory for a specified lab.</span>
 
 <span class="sd">    This method inspects the container lab environment and generates a Nornir-compatible</span>
-<span class="sd">    inventory of hosts based on the lab&#39;s configuration. It maps containerlab node kinds</span>
+<span class="sd">    inventory of hosts based on the lab's configuration. It maps containerlab node kinds</span>
 <span class="sd">    to Netmiko SSH platform types and extracts relevant connection details.</span>
 
 <span class="sd">    Args:</span>
@@ -10204,27 +10204,27 @@ to Netmiko SSH platform types and extracts relevant connection details.</p>
 <span class="sd">    Notes:</span>
 <span class="sd">        - The method uses a predefined mapping (`norfab.utils.platform_map`) to translate containerlab</span>
 <span class="sd">          node kinds to Netmiko platform types.</span>
-<span class="sd">        - If a container&#39;s SSH port cannot be determined, it is skipped, and an error is logged.</span>
+<span class="sd">        - If a container's SSH port cannot be determined, it is skipped, and an error is logged.</span>
 <span class="sd">        - The primary host IP address is determined dynamically using a UDP socket connection or</span>
-<span class="sd">          by checking the host IP address in the container&#39;s port configuration.</span>
+<span class="sd">          by checking the host IP address in the container's port configuration.</span>
 
 <span class="sd">    Example of returned inventory structure:</span>
 <span class="sd">        {</span>
-<span class="sd">            &quot;hosts&quot;: {</span>
-<span class="sd">                &quot;host_name&quot;: {</span>
-<span class="sd">                    &quot;hostname&quot;: &quot;host_ip&quot;,</span>
-<span class="sd">                    &quot;platform&quot;: &quot;netmiko_platform&quot;,</span>
-<span class="sd">                    &quot;groups&quot;: [&quot;group1&quot;, &quot;group2&quot;],</span>
+<span class="sd">            "hosts": {</span>
+<span class="sd">                "host_name": {</span>
+<span class="sd">                    "hostname": "host_ip",</span>
+<span class="sd">                    "platform": "netmiko_platform",</span>
+<span class="sd">                    "groups": ["group1", "group2"],</span>
 <span class="sd">                },</span>
 <span class="sd">                ...</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="ow">or</span> <span class="mi">600</span>
     <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span> <span class="ow">or</span> <span class="p">[]</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_nornir_inventory&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;hosts&quot;</span><span class="p">:</span> <span class="p">{}})</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_nornir_inventory"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s2">"hosts"</span><span class="p">:</span> <span class="p">{}})</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get Nornir inventory: Building inventory for &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;all&#39;</span><span class="si">}</span><span class="s2">&#39; lab(s)&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get Nornir inventory: Building inventory for '</span><span class="si">{</span><span class="n">lab_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'all'</span><span class="si">}</span><span class="s2">' lab(s)"</span>
     <span class="p">)</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;building nornir inventory for &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;all&#39;</span><span class="si">}</span><span class="s2">&#39; lab(s)&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"building nornir inventory for '</span><span class="si">{</span><span class="n">lab_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'all'</span><span class="si">}</span><span class="s2">' lab(s)"</span><span class="p">)</span>
 
     <span class="c1"># get lab details</span>
     <span class="n">inspect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inspect</span><span class="p">(</span>
@@ -10234,16 +10234,16 @@ to Netmiko SSH platform types and extracts relevant connection details.</p>
     <span class="c1"># return empty result if lab not found</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39; lab not found&quot;</span><span class="p">]</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">' lab not found"</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># get host primary IP address</span>
     <span class="n">s</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_DGRAM</span><span class="p">)</span>
     <span class="n">s</span><span class="o">.</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SO_BROADCAST</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">s</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="s2">&quot;1.2.3.4&quot;</span><span class="p">,</span> <span class="mi">12345</span><span class="p">))</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="s2">"1.2.3.4"</span><span class="p">,</span> <span class="mi">12345</span><span class="p">))</span>
     <span class="n">primary_host_ip</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">getsockname</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - determined Containerlab host primary IP - &#39;</span><span class="si">{</span><span class="n">primary_host_ip</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - determined Containerlab host primary IP - '</span><span class="si">{</span><span class="n">primary_host_ip</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
 
     <span class="c1"># form hosts inventory</span>
@@ -10251,65 +10251,65 @@ to Netmiko SSH platform types and extracts relevant connection details.</p>
         <span class="k">if</span> <span class="n">lab_name</span> <span class="ow">and</span> <span class="n">lname</span> <span class="o">!=</span> <span class="n">lab_name</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="k">for</span> <span class="n">container</span> <span class="ow">in</span> <span class="n">containers</span><span class="p">:</span>
-            <span class="n">host_name</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Labels&quot;</span><span class="p">][</span><span class="s2">&quot;clab-node-name&quot;</span><span class="p">]</span>
+            <span class="n">host_name</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">"Labels"</span><span class="p">][</span><span class="s2">"clab-node-name"</span><span class="p">]</span>
             <span class="n">host_port</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">host_ip</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="c1"># get ssh port</span>
-            <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Ports&quot;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">container</span><span class="p">[</span><span class="s2">"Ports"</span><span class="p">]:</span>
                 <span class="n">host_ip</span> <span class="o">=</span> <span class="n">primary_host_ip</span>
-                <span class="k">if</span> <span class="n">port</span><span class="p">[</span><span class="s2">&quot;port&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">22</span> <span class="ow">and</span> <span class="n">port</span><span class="p">[</span><span class="s2">&quot;protocol&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;tcp&quot;</span><span class="p">:</span>
-                    <span class="n">host_port</span> <span class="o">=</span> <span class="n">port</span><span class="p">[</span><span class="s2">&quot;host_port&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">port</span><span class="p">[</span><span class="s2">"port"</span><span class="p">]</span> <span class="o">==</span> <span class="mi">22</span> <span class="ow">and</span> <span class="n">port</span><span class="p">[</span><span class="s2">"protocol"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"tcp"</span><span class="p">:</span>
+                    <span class="n">host_port</span> <span class="o">=</span> <span class="n">port</span><span class="p">[</span><span class="s2">"host_port"</span><span class="p">]</span>
                     <span class="c1"># get host ip address</span>
-                    <span class="k">if</span> <span class="n">port</span><span class="p">[</span><span class="s2">&quot;host_ip&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
-                        <span class="s2">&quot;0.0.0.0&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;::&quot;</span><span class="p">,</span>
+                    <span class="k">if</span> <span class="n">port</span><span class="p">[</span><span class="s2">"host_ip"</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
+                        <span class="s2">"0.0.0.0"</span><span class="p">,</span>
+                        <span class="s2">"127.0.0.1"</span><span class="p">,</span>
+                        <span class="s2">"localhost"</span><span class="p">,</span>
+                        <span class="s2">"::"</span><span class="p">,</span>
                     <span class="p">]:</span>
-                        <span class="n">host_ip</span> <span class="o">=</span> <span class="n">port</span><span class="p">[</span><span class="s2">&quot;host_ip&quot;</span><span class="p">]</span>
+                        <span class="n">host_ip</span> <span class="o">=</span> <span class="n">port</span><span class="p">[</span><span class="s2">"host_ip"</span><span class="p">]</span>
                     <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">host_name</span><span class="si">}</span><span class="s2"> Failed to map SSH port.&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">host_name</span><span class="si">}</span><span class="s2"> Failed to map SSH port."</span><span class="p">)</span>
                 <span class="k">continue</span>
 
             <span class="c1"># add host to Nornir inventory</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;hosts&quot;</span><span class="p">][</span><span class="n">host_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;hostname&quot;</span><span class="p">:</span> <span class="n">host_ip</span><span class="p">,</span>
-                <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="n">host_port</span><span class="p">,</span>
-                <span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="n">groups</span><span class="p">,</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"hosts"</span><span class="p">][</span><span class="n">host_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">"hostname"</span><span class="p">:</span> <span class="n">host_ip</span><span class="p">,</span>
+                <span class="s2">"port"</span><span class="p">:</span> <span class="n">host_port</span><span class="p">,</span>
+                <span class="s2">"groups"</span><span class="p">:</span> <span class="n">groups</span><span class="p">,</span>
             <span class="p">}</span>
 
             <span class="c1"># get netmiko platform</span>
-            <span class="n">clab_platform_name</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Labels&quot;</span><span class="p">][</span><span class="s2">&quot;clab-node-kind&quot;</span><span class="p">]</span>
+            <span class="n">clab_platform_name</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">"Labels"</span><span class="p">][</span><span class="s2">"clab-node-kind"</span><span class="p">]</span>
             <span class="n">netmiko_platform</span> <span class="o">=</span> <span class="n">PlatformMap</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span>
-                <span class="s2">&quot;containerlab&quot;</span><span class="p">,</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span> <span class="n">clab_platform_name</span>
+                <span class="s2">"containerlab"</span><span class="p">,</span> <span class="s2">"netmiko"</span><span class="p">,</span> <span class="n">clab_platform_name</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">netmiko_platform</span><span class="p">:</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;hosts&quot;</span><span class="p">][</span><span class="n">host_name</span><span class="p">][</span><span class="s2">&quot;platform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">netmiko_platform</span><span class="p">[</span>
-                    <span class="s2">&quot;platform&quot;</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"hosts"</span><span class="p">][</span><span class="n">host_name</span><span class="p">][</span><span class="s2">"platform"</span><span class="p">]</span> <span class="o">=</span> <span class="n">netmiko_platform</span><span class="p">[</span>
+                    <span class="s2">"platform"</span>
                 <span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">host_name</span><span class="si">}</span><span class="s2"> Clab-node-kind &#39;</span><span class="si">{</span><span class="n">clab_platform_name</span><span class="si">}</span><span class="s2">&#39; not mapped to Netmiko platform.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">host_name</span><span class="si">}</span><span class="s2"> Clab-node-kind '</span><span class="si">{</span><span class="n">clab_platform_name</span><span class="si">}</span><span class="s2">' not mapped to Netmiko platform."</span>
                 <span class="p">)</span>
                 <span class="k">continue</span>
 
             <span class="c1"># get default credentials</span>
             <span class="k">if</span> <span class="n">use_default_credentials</span><span class="p">:</span>
-                <span class="n">clab_platform</span> <span class="o">=</span> <span class="n">PlatformMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span> <span class="n">clab_platform_name</span><span class="p">)</span>
+                <span class="n">clab_platform</span> <span class="o">=</span> <span class="n">PlatformMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"containerlab"</span><span class="p">,</span> <span class="n">clab_platform_name</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">clab_platform</span><span class="p">:</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">host_name</span><span class="si">}</span><span class="s2"> Clab-node-kind &#39;</span><span class="si">{</span><span class="n">clab_platform_name</span><span class="si">}</span><span class="s2">&#39; not found.&quot;</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">host_name</span><span class="si">}</span><span class="s2"> Clab-node-kind '</span><span class="si">{</span><span class="n">clab_platform_name</span><span class="si">}</span><span class="s2">' not found."</span>
                     <span class="p">)</span>
                     <span class="k">continue</span>
-                <span class="k">if</span> <span class="n">clab_platform</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">):</span>
-                    <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;hosts&quot;</span><span class="p">][</span><span class="n">host_name</span><span class="p">][</span><span class="s2">&quot;username&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clab_platform</span><span class="p">[</span>
-                        <span class="s2">&quot;username&quot;</span>
+                <span class="k">if</span> <span class="n">clab_platform</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">):</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"hosts"</span><span class="p">][</span><span class="n">host_name</span><span class="p">][</span><span class="s2">"username"</span><span class="p">]</span> <span class="o">=</span> <span class="n">clab_platform</span><span class="p">[</span>
+                        <span class="s2">"username"</span>
                     <span class="p">]</span>
-                <span class="k">if</span> <span class="n">clab_platform</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;password&quot;</span><span class="p">):</span>
-                    <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;hosts&quot;</span><span class="p">][</span><span class="n">host_name</span><span class="p">][</span><span class="s2">&quot;password&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clab_platform</span><span class="p">[</span>
-                        <span class="s2">&quot;password&quot;</span>
+                <span class="k">if</span> <span class="n">clab_platform</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"password"</span><span class="p">):</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"hosts"</span><span class="p">][</span><span class="n">host_name</span><span class="p">][</span><span class="s2">"password"</span><span class="p">]</span> <span class="o">=</span> <span class="n">clab_platform</span><span class="p">[</span>
+                        <span class="s2">"password"</span>
                     <span class="p">]</span>
 
     <span class="k">return</span> <span class="n">ret</span>
@@ -10323,7 +10323,7 @@ to Netmiko SSH platform types and extracts relevant connection details.</p>
 
 
 <h3 id="norfab.workers.containerlab_worker.containerlab_worker.ContainerlabWorker.deploy_netbox" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">deploy_netbox</span><span class="p">(</span><span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">lab_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">tenant</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">filters</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ipv4_subnet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;172.100.100.0/24&#39;</span><span class="p">,</span> <span class="n">ports</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12000</span><span class="p">,</span> <span class="mi">15000</span><span class="p">),</span> <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">reconfigure</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span> <span class="n">node_filter</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span></code>
+            <code class="highlight language-python"><span class="n">deploy_netbox</span><span class="p">(</span><span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">lab_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">tenant</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">filters</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ipv4_subnet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'172.100.100.0/24'</span><span class="p">,</span> <span class="n">ports</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12000</span><span class="p">,</span> <span class="mi">15000</span><span class="p">),</span> <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">reconfigure</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span> <span class="n">node_filter</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span></code>
 
 <a href="#norfab.workers.containerlab_worker.containerlab_worker.ContainerlabWorker.deploy_netbox" class="headerlink" title="Permanent link">¤</a></h3>
 
@@ -10856,14 +10856,14 @@ inventory without deploying.</p>
 <span class="normal">1118</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">DeployNetboxInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">DeployNetboxResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Deploy NetBox Lab&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Deploy NetBox Lab"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -10877,7 +10877,7 @@ inventory without deploying.</p>
     <span class="n">instance</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">image</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">ipv4_subnet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;172.100.100.0/24&quot;</span><span class="p">,</span>
+    <span class="n">ipv4_subnet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"172.100.100.0/24"</span><span class="p">,</span>
     <span class="n">ports</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12000</span><span class="p">,</span> <span class="mi">15000</span><span class="p">),</span>
     <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">reconfigure</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -10885,7 +10885,7 @@ inventory without deploying.</p>
     <span class="n">node_filter</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Deploys a containerlab topology using device data from the Netbox database.</span>
 
 <span class="sd">    This method orchestrates the deployment of a containerlab topology by:</span>
@@ -10930,11 +10930,11 @@ inventory without deploying.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        Exception: If the topology file cannot be fetched.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="ow">or</span> <span class="mi">600</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:deploy_netbox&quot;</span><span class="p">)</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:deploy_netbox"</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Deploy Netbox: Preparing topology for lab &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">tenant</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;auto&#39;</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Deploy Netbox: Preparing topology for lab '</span><span class="si">{</span><span class="n">lab_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">tenant</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'auto'</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
     <span class="n">subnets_in_use</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">ports_in_use</span> <span class="o">=</span> <span class="p">{}</span>
@@ -10944,106 +10944,106 @@ inventory without deploying.</p>
         <span class="n">lab_name</span> <span class="o">=</span> <span class="n">tenant</span>
 
     <span class="c1"># inspect existing containers</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;checking existing containers&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"checking existing containers"</span><span class="p">)</span>
     <span class="n">get_containers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inspect</span><span class="p">(</span><span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">get_containers</span><span class="o">.</span><span class="n">failed</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">get_containers</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:deploy_netbox&quot;</span>
+        <span class="n">get_containers</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:deploy_netbox"</span>
         <span class="k">return</span> <span class="n">get_containers</span>
 
     <span class="c1"># collect TCP/UDP ports and subnets in use</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;existing containers found, retrieving details&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"existing containers found, retrieving details"</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">lname</span><span class="p">,</span> <span class="n">containers</span> <span class="ow">in</span> <span class="n">get_containers</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">container</span> <span class="ow">in</span> <span class="n">containers</span><span class="p">:</span>
-            <span class="n">clab_name</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Labels&quot;</span><span class="p">][</span><span class="s2">&quot;containerlab&quot;</span><span class="p">]</span>
-            <span class="n">clab_topo</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Labels&quot;</span><span class="p">][</span><span class="s2">&quot;clab-topo-file&quot;</span><span class="p">]</span>
-            <span class="n">node_name</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Labels&quot;</span><span class="p">][</span><span class="s2">&quot;clab-node-name&quot;</span><span class="p">]</span>
+            <span class="n">clab_name</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">"Labels"</span><span class="p">][</span><span class="s2">"containerlab"</span><span class="p">]</span>
+            <span class="n">clab_topo</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">"Labels"</span><span class="p">][</span><span class="s2">"clab-topo-file"</span><span class="p">]</span>
+            <span class="n">node_name</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">"Labels"</span><span class="p">][</span><span class="s2">"clab-node-name"</span><span class="p">]</span>
             <span class="c1"># reuse port mappings only from the target lab</span>
             <span class="k">if</span> <span class="n">clab_name</span> <span class="o">==</span> <span class="n">lab_name</span><span class="p">:</span>
                 <span class="n">ports_in_use</span><span class="p">[</span><span class="n">node_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
                     <span class="nb">set</span><span class="p">(</span>
                         <span class="p">[</span>
-                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;host_port&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;port&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;protocol&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-                            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Ports&quot;</span><span class="p">]</span>
-                            <span class="k">if</span> <span class="s2">&quot;host_port&quot;</span> <span class="ow">in</span> <span class="n">p</span> <span class="ow">and</span> <span class="s2">&quot;port&quot;</span> <span class="ow">in</span> <span class="n">p</span> <span class="ow">and</span> <span class="s2">&quot;protocol&quot;</span> <span class="ow">in</span> <span class="n">p</span>
+                            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">'host_port'</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">'port'</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">'protocol'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+                            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">container</span><span class="p">[</span><span class="s2">"Ports"</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="s2">"host_port"</span> <span class="ow">in</span> <span class="n">p</span> <span class="ow">and</span> <span class="s2">"port"</span> <span class="ow">in</span> <span class="n">p</span> <span class="ow">and</span> <span class="s2">"protocol"</span> <span class="ow">in</span> <span class="n">p</span>
                         <span class="p">]</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="c1"># check existing subnets</span>
             <span class="k">if</span> <span class="p">(</span>
-                <span class="n">container</span><span class="p">[</span><span class="s2">&quot;NetworkSettings&quot;</span><span class="p">][</span><span class="s2">&quot;IPv4addr&quot;</span><span class="p">]</span>
-                <span class="ow">and</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;NetworkSettings&quot;</span><span class="p">][</span><span class="s2">&quot;IPv4pLen&quot;</span><span class="p">]</span>
+                <span class="n">container</span><span class="p">[</span><span class="s2">"NetworkSettings"</span><span class="p">][</span><span class="s2">"IPv4addr"</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">container</span><span class="p">[</span><span class="s2">"NetworkSettings"</span><span class="p">][</span><span class="s2">"IPv4pLen"</span><span class="p">]</span>
             <span class="p">):</span>
                 <span class="n">ip</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">container</span><span class="p">[</span><span class="s1">&#39;NetworkSettings&#39;</span><span class="p">][</span><span class="s1">&#39;IPv4addr&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">container</span><span class="p">[</span><span class="s1">&#39;NetworkSettings&#39;</span><span class="p">][</span><span class="s1">&#39;IPv4pLen&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">container</span><span class="p">[</span><span class="s1">'NetworkSettings'</span><span class="p">][</span><span class="s1">'IPv4addr'</span><span class="p">]</span><span class="si">}</span><span class="s2">/"</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">container</span><span class="p">[</span><span class="s1">'NetworkSettings'</span><span class="p">][</span><span class="s1">'IPv4pLen'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
                 <span class="n">subnet</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">with_prefixlen</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">clab_topo</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">clab_topo</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                     <span class="n">clab_topo_data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
-                    <span class="k">if</span> <span class="n">clab_topo_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mgmt&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ipv4-subnet&quot;</span><span class="p">):</span>
-                        <span class="n">subnet</span> <span class="o">=</span> <span class="n">clab_topo_data</span><span class="p">[</span><span class="s2">&quot;mgmt&quot;</span><span class="p">][</span><span class="s2">&quot;ipv4-subnet&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">clab_topo_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"mgmt"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ipv4-subnet"</span><span class="p">):</span>
+                        <span class="n">subnet</span> <span class="o">=</span> <span class="n">clab_topo_data</span><span class="p">[</span><span class="s2">"mgmt"</span><span class="p">][</span><span class="s2">"ipv4-subnet"</span><span class="p">]</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">clab_name</span><span class="si">}</span><span class="s2"> lab </span><span class="si">{</span><span class="n">node_name</span><span class="si">}</span><span class="s2"> node failed to determine mgmt subnet&quot;</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">clab_name</span><span class="si">}</span><span class="s2"> lab </span><span class="si">{</span><span class="n">node_name</span><span class="si">}</span><span class="s2"> node failed to determine mgmt subnet"</span>
                         <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span><span class="p">)</span>
                         <span class="k">continue</span>
             <span class="n">subnets_in_use</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">subnet</span><span class="p">)</span>
             <span class="c1"># reuse existing lab subnet</span>
             <span class="k">if</span> <span class="n">clab_name</span> <span class="o">==</span> <span class="n">lab_name</span><span class="p">:</span>
                 <span class="n">ipv4_subnet</span> <span class="o">=</span> <span class="n">subnet</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ipv4_subnet</span><span class="si">}</span><span class="s2"> not in use by existing containers, using it&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ipv4_subnet</span><span class="si">}</span><span class="s2"> not in use by existing containers, using it"</span>
                 <span class="p">)</span>
             <span class="c1"># allocate new subnet if its in use by other lab</span>
             <span class="k">elif</span> <span class="n">clab_name</span> <span class="o">!=</span> <span class="n">lab_name</span> <span class="ow">and</span> <span class="n">ipv4_subnet</span> <span class="o">==</span> <span class="n">subnet</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ipv4_subnet</span><span class="si">}</span><span class="s2"> already in use, allocating new subnet&quot;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ipv4_subnet</span><span class="si">}</span><span class="s2"> already in use, allocating new subnet"</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">ipv4_subnet</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;collected TCP/UDP ports used by existing containers&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"collected TCP/UDP ports used by existing containers"</span><span class="p">)</span>
 
     <span class="c1"># allocate new subnet</span>
     <span class="k">if</span> <span class="n">ipv4_subnet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">pool</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;172.100.</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.0/24&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="sa">f</span><span class="s2">"172.100.</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.0/24"</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
         <span class="n">ipv4_subnet</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">subnets_in_use</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2"> allocated new subnet </span><span class="si">{</span><span class="n">ipv4_subnet</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2"> allocated new subnet </span><span class="si">{</span><span class="n">ipv4_subnet</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2"> fetching lab topology data from Netbox&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2"> fetching lab topology data from Netbox"</span><span class="p">)</span>
 
     <span class="c1"># download inventory data from Netbox</span>
     <span class="n">netbox_reply</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;get_containerlab_inventory&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"get_containerlab_inventory"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="n">lab_name</span><span class="p">,</span>
-            <span class="s2">&quot;tenant&quot;</span><span class="p">:</span> <span class="n">tenant</span><span class="p">,</span>
-            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
-            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">,</span>
-            <span class="s2">&quot;instance&quot;</span><span class="p">:</span> <span class="n">instance</span><span class="p">,</span>
-            <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="n">branch</span><span class="p">,</span>
-            <span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="n">image</span><span class="p">,</span>
-            <span class="s2">&quot;ipv4_subnet&quot;</span><span class="p">:</span> <span class="n">ipv4_subnet</span><span class="p">,</span>
-            <span class="s2">&quot;ports&quot;</span><span class="p">:</span> <span class="n">ports</span><span class="p">,</span>
-            <span class="s2">&quot;ports_map&quot;</span><span class="p">:</span> <span class="n">ports_in_use</span><span class="p">,</span>
-            <span class="s2">&quot;progress&quot;</span><span class="p">:</span> <span class="n">progress</span><span class="p">,</span>
+            <span class="s2">"lab_name"</span><span class="p">:</span> <span class="n">lab_name</span><span class="p">,</span>
+            <span class="s2">"tenant"</span><span class="p">:</span> <span class="n">tenant</span><span class="p">,</span>
+            <span class="s2">"filters"</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
+            <span class="s2">"devices"</span><span class="p">:</span> <span class="n">devices</span><span class="p">,</span>
+            <span class="s2">"instance"</span><span class="p">:</span> <span class="n">instance</span><span class="p">,</span>
+            <span class="s2">"branch"</span><span class="p">:</span> <span class="n">branch</span><span class="p">,</span>
+            <span class="s2">"image"</span><span class="p">:</span> <span class="n">image</span><span class="p">,</span>
+            <span class="s2">"ipv4_subnet"</span><span class="p">:</span> <span class="n">ipv4_subnet</span><span class="p">,</span>
+            <span class="s2">"ports"</span><span class="p">:</span> <span class="n">ports</span><span class="p">,</span>
+            <span class="s2">"ports_map"</span><span class="p">:</span> <span class="n">ports_in_use</span><span class="p">,</span>
+            <span class="s2">"progress"</span><span class="p">:</span> <span class="n">progress</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
     <span class="c1"># use inventory from first worker that returned hosts data</span>
     <span class="k">for</span> <span class="n">wname</span><span class="p">,</span> <span class="n">wdata</span> <span class="ow">in</span> <span class="n">netbox_reply</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]:</span>
-            <span class="n">topology_inventory</span> <span class="o">=</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">"result"</span><span class="p">]:</span>
+            <span class="n">topology_inventory</span> <span class="o">=</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">"result"</span><span class="p">]</span>
             <span class="k">break</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Netbox returned no data for &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39; lab&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Netbox returned no data for '</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">' lab"</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2"> topology data retrieved from Netbox&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2"> topology data retrieved from Netbox"</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">topology_inventory</span>
@@ -11054,18 +11054,18 @@ inventory without deploying.</p>
     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">topology_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># create topology file</span>
-    <span class="n">topology_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">topology_folder</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">.yaml&quot;</span><span class="p">)</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">topology_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tf</span><span class="p">:</span>
+    <span class="n">topology_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">topology_folder</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">.yaml"</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">topology_file</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">tf</span><span class="p">:</span>
         <span class="n">tf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">topology_inventory</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2"> topology data saved to &#39;</span><span class="si">{</span><span class="n">topology_file</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2"> topology data saved to '</span><span class="si">{</span><span class="n">topology_file</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deploy</span><span class="p">(</span>
         <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
         <span class="n">topology</span><span class="o">=</span><span class="n">topology_file</span><span class="p">,</span>
         <span class="n">reconfigure</span><span class="o">=</span><span class="n">reconfigure</span><span class="p">,</span>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-        <span class="n">node_filter</span><span class="o">=</span><span class="n">node_filter</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">node_filter</span><span class="o">=</span><span class="n">node_filter</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>

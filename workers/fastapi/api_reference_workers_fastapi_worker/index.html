@@ -7582,18 +7582,18 @@ It handles initialization, starting the server, and managing bearer tokens.</p>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">inventory</span><span class="p">,</span> <span class="n">broker</span><span class="p">,</span> <span class="n">SERVICE</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">exit_event</span><span class="p">,</span> <span class="n">log_level</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">init_done_event</span> <span class="o">=</span> <span class="n">init_done_event</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">exit_event</span> <span class="o">=</span> <span class="n">exit_event</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">api_prefix</span> <span class="o">=</span> <span class="s2">&quot;/api&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">api_prefix</span> <span class="o">=</span> <span class="s2">"/api"</span>
 
     <span class="c1"># get inventory from broker</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">fastapi_inventory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_inventory</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">uvicorn_inventory</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0.0.0&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="mi">8000</span><span class="p">,</span>
-        <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">fastapi_inventory</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;uvicorn&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+        <span class="s2">"host"</span><span class="p">:</span> <span class="s2">"0.0.0.0"</span><span class="p">,</span>
+        <span class="s2">"port"</span><span class="p">:</span> <span class="mi">8000</span><span class="p">,</span>
+        <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">fastapi_inventory</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"uvicorn"</span><span class="p">,</span> <span class="p">{}),</span>
     <span class="p">}</span>
 
     <span class="c1"># instantiate cache</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">cache_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">&quot;cache&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cache_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">"cache"</span><span class="p">)</span>
     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_diskcache</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">expire</span><span class="p">()</span>
@@ -7763,12 +7763,12 @@ for the server to be fully started before logging the server's URL.</p>
 <span class="normal">381</span>
 <span class="normal">382</span>
 <span class="normal">383</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fastapi_start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Starts the FastAPI server.</span>
 
 <span class="sd">    This method initializes the FastAPI application using the provided</span>
 <span class="sd">    configuration, starts the Uvicorn server in a separate thread, and waits</span>
-<span class="sd">    for the server to be fully started before logging the server&#39;s URL.</span>
+<span class="sd">    for the server to be fully started before logging the server's URL.</span>
 
 <span class="sd">    Steps:</span>
 
@@ -7776,7 +7776,7 @@ for the server to be fully started before logging the server's URL.</p>
 <span class="sd">    2. Configure the Uvicorn server with the application and settings.</span>
 <span class="sd">    3. Start the Uvicorn server in a new thread.</span>
 <span class="sd">    4. Wait for the server to start.</span>
-<span class="sd">    5. Log the server&#39;s URL.&#39;</span>
+<span class="sd">    5. Log the server's URL.'</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        self.app (FastAPI): The FastAPI application instance.</span>
@@ -7785,9 +7785,9 @@ for the server to be fully started before logging the server's URL.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        Exception: If the server fails to start.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">make_fast_api_app</span><span class="p">(</span>
-        <span class="n">worker</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fastapi_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fastapi&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">worker</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fastapi_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"fastapi"</span><span class="p">,</span> <span class="p">{})</span>
     <span class="p">)</span>
 
     <span class="c1"># start uvicorn server in a thread</span>
@@ -7802,8 +7802,8 @@ for the server to be fully started before logging the server's URL.</p>
         <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
 
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Uvicorn server started, serving FastAPI app at &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;http://</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">uvicorn_inventory</span><span class="p">[</span><span class="s1">&#39;host&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">uvicorn_inventory</span><span class="p">[</span><span class="s1">&#39;port&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Uvicorn server started, serving FastAPI app at "</span>
+        <span class="sa">f</span><span class="s2">"http://</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">uvicorn_inventory</span><span class="p">[</span><span class="s1">'host'</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">uvicorn_inventory</span><span class="p">[</span><span class="s1">'port'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7837,12 +7837,12 @@ sends a SIGTERM signal to terminate the process using <code>os.kill()</code>.</p
 <span class="normal">390</span>
 <span class="normal">391</span>
 <span class="normal">392</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">worker_exit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Terminates the current process by sending a SIGTERM signal to itself.</span>
 
 <span class="sd">    This method retrieves the current process ID using `os.getpid()` and then</span>
 <span class="sd">    sends a SIGTERM signal to terminate the process using `os.kill()`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">os</span><span class="o">.</span><span class="n">kill</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">(),</span> <span class="n">signal</span><span class="o">.</span><span class="n">SIGTERM</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7936,19 +7936,19 @@ and returns them in a dictionary.</p>
 <span class="normal">435</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetVersionInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetVersionResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Version&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Version"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Produce a report of the versions of various Python packages.</span>
 
 <span class="sd">    This method collects the versions of several specified Python packages</span>
@@ -7957,15 +7957,15 @@ and returns them in a dictionary.</p>
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: An object containing the task name and a dictionary with</span>
 <span class="sd">                the package names as keys and their respective versions as values.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">libs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;norfab&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;fastapi&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;uvicorn&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;pydantic&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;python-multipart&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;python&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
-        <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
+        <span class="s2">"norfab"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"fastapi"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"uvicorn"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"pydantic"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"python-multipart"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"python"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">" "</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s2">"platform"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="c1"># get version of packages installed</span>
     <span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="n">libs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -7974,7 +7974,7 @@ and returns them in a dictionary.</p>
         <span class="k">except</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">PackageNotFoundError</span><span class="p">:</span>
             <span class="k">pass</span>
 
-    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_version&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="n">libs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_version"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="n">libs</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -8047,27 +8047,27 @@ and returns them in a dictionary.</p>
 <span class="normal">461</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetInventoryResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Inventory&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Inventory"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve the inventory of the FastAPI worker.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Dict: A dictionary containing the combined inventory of FastAPI and Uvicorn.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">fastapi_inventory</span><span class="p">,</span> <span class="s2">&quot;uvicorn&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">uvicorn_inventory</span><span class="p">},</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_inventory&quot;</span><span class="p">,</span>
+        <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">fastapi_inventory</span><span class="p">,</span> <span class="s2">"uvicorn"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">uvicorn_inventory</span><span class="p">},</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_inventory"</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8184,19 +8184,19 @@ If False, returns the full OpenAPI schema. Defaults to False.</p>
 <span class="normal">498</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetOpenapiSchemaInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetOpenapiSchemaResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get OpenAPI Schema&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get OpenAPI Schema"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_openapi_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Generates and returns the OpenAPI schema for the FastAPI application.</span>
 
 <span class="sd">    Args:</span>
@@ -8205,17 +8205,17 @@ If False, returns the full OpenAPI schema. Defaults to False.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: An object containing either the list of endpoint paths or the full OpenAPI schema</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">schema</span> <span class="o">=</span> <span class="n">make_openapi_schema</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">paths</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
-            <span class="n">result</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s2">&quot;paths&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
-            <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_openapi_schema&quot;</span><span class="p">,</span>
+            <span class="n">result</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="s2">"paths"</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+            <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_openapi_schema"</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
             <span class="n">result</span><span class="o">=</span><span class="n">schema</span><span class="p">,</span>
-            <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_openapi_schema&quot;</span><span class="p">,</span>
+            <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_openapi_schema"</span><span class="p">,</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8367,7 +8367,7 @@ from the FastAPI inventory configuration.</p>
 <span class="k">def</span><span class="w"> </span><span class="nf">bearer_token_store</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">expire</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Method to store a bearer token in the database.</span>
 
 <span class="sd">    This method stores a bearer token associated with a username in the cache.</span>
@@ -8382,23 +8382,23 @@ from the FastAPI inventory configuration.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        bool - Returns True if the token is successfully stored.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">expire</span> <span class="o">=</span> <span class="n">expire</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">fastapi_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;auth_bearer&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-        <span class="s2">&quot;token_ttl&quot;</span><span class="p">,</span> <span class="n">expire</span>
+<span class="sd">    """</span>
+    <span class="n">expire</span> <span class="o">=</span> <span class="n">expire</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">fastapi_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"auth_bearer"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="s2">"token_ttl"</span><span class="p">,</span> <span class="n">expire</span>
     <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">expire</span><span class="p">()</span>
-    <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;bearer_token::</span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"bearer_token::</span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">"</span>
     <span class="k">if</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
         <span class="n">user_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">user_token</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="n">token</span><span class="p">,</span>
-            <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span>
-            <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()),</span>
+            <span class="s2">"token"</span><span class="p">:</span> <span class="n">token</span><span class="p">,</span>
+            <span class="s2">"username"</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span>
+            <span class="s2">"created"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()),</span>
         <span class="p">}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">user_token</span><span class="p">,</span> <span class="n">expire</span><span class="o">=</span><span class="n">expire</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">username</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:bearer_token_store&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:bearer_token_store"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -8575,7 +8575,7 @@ from the cache.</p>
 <span class="k">def</span><span class="w"> </span><span class="nf">bearer_token_delete</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Deletes a bearer token from the cache.</span>
 <span class="sd">    This method removes a bearer token from the cache based on either</span>
 <span class="sd">    the token itself or the associated username.</span>
@@ -8594,26 +8594,26 @@ from the cache.</p>
 <span class="sd">    Raises:</span>
 <span class="sd">        RuntimeError: If the token removal from the cache fails.</span>
 <span class="sd">        Exception: If neither username nor token is provided.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">expire</span><span class="p">()</span>
     <span class="n">token_removed_count</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">if</span> <span class="n">token</span><span class="p">:</span>
-        <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;bearer_token::</span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"bearer_token::</span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">"</span>
         <span class="k">if</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">retry</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
                 <span class="n">token_removed_count</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to remove </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2"> token from cache&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed to remove </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2"> token from cache"</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">username</span><span class="p">:</span>
         <span class="n">token_removed_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">evict</span><span class="p">(</span><span class="n">tag</span><span class="o">=</span><span class="n">username</span><span class="p">,</span> <span class="n">retry</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot delete, either username or token must be provided&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">"Cannot delete, either username or token must be provided"</span><span class="p">)</span>
 
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> removed </span><span class="si">{</span><span class="n">token_removed_count</span><span class="si">}</span><span class="s2"> token(s) for user </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> removed </span><span class="si">{</span><span class="n">token_removed_count</span><span class="si">}</span><span class="s2"> token(s) for user </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:bearer_token_delete&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:bearer_token_delete"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -8767,7 +8767,7 @@ empty strings for all fields is returned.</p>
     <span class="n">mcp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">bearer_token_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieves a list of bearer tokens from the cache, optionally filtered by username.</span>
 
 <span class="sd">    Args:</span>
@@ -8776,18 +8776,18 @@ empty strings for all fields is returned.</p>
 <span class="sd">    Returns:</span>
 <span class="sd">        list: A list of dictionaries containing token information. Each dictionary contains:</span>
 
-<span class="sd">            - &quot;username&quot; (str): The username associated with the token.</span>
-<span class="sd">            - &quot;token&quot; (str): The bearer token.</span>
-<span class="sd">            - &quot;age&quot; (str): The age of the token.</span>
-<span class="sd">            - &quot;creation&quot; (str): The creation time of the token.</span>
-<span class="sd">            - &quot;expires&quot; (str): The expiration time of the token, if available.</span>
+<span class="sd">            - "username" (str): The username associated with the token.</span>
+<span class="sd">            - "token" (str): The bearer token.</span>
+<span class="sd">            - "age" (str): The age of the token.</span>
+<span class="sd">            - "creation" (str): The creation time of the token.</span>
+<span class="sd">            - "expires" (str): The expiration time of the token, if available.</span>
 
 <span class="sd">    If no tokens are found, a list with a single dictionary containing</span>
 <span class="sd">    empty strings for all fields is returned.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">expire</span><span class="p">()</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:bearer_token_list&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">[])</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:bearer_token_list"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">[])</span>
 
     <span class="k">for</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
         <span class="n">token_data</span><span class="p">,</span> <span class="n">expires</span><span class="p">,</span> <span class="n">tag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
@@ -8797,15 +8797,15 @@ empty strings for all fields is returned.</p>
             <span class="k">continue</span>
         <span class="k">if</span> <span class="n">expires</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">expires</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">expires</span><span class="p">)</span>
-        <span class="n">creation</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">token_data</span><span class="p">[</span><span class="s2">&quot;created&quot;</span><span class="p">])</span>
+        <span class="n">creation</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">token_data</span><span class="p">[</span><span class="s2">"created"</span><span class="p">])</span>
         <span class="n">age</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">creation</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="p">{</span>
-                <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">token_data</span><span class="p">[</span><span class="s2">&quot;username&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="n">token_data</span><span class="p">[</span><span class="s2">&quot;token&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">age</span><span class="p">),</span>
-                <span class="s2">&quot;creation&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">creation</span><span class="p">),</span>
-                <span class="s2">&quot;expires&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">expires</span><span class="p">),</span>
+                <span class="s2">"username"</span><span class="p">:</span> <span class="n">token_data</span><span class="p">[</span><span class="s2">"username"</span><span class="p">],</span>
+                <span class="s2">"token"</span><span class="p">:</span> <span class="n">token_data</span><span class="p">[</span><span class="s2">"token"</span><span class="p">],</span>
+                <span class="s2">"age"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">age</span><span class="p">),</span>
+                <span class="s2">"creation"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">creation</span><span class="p">),</span>
+                <span class="s2">"expires"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">expires</span><span class="p">),</span>
             <span class="p">}</span>
         <span class="p">)</span>
 
@@ -8813,11 +8813,11 @@ empty strings for all fields is returned.</p>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;creation&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;expires&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="s2">"username"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+                <span class="s2">"token"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+                <span class="s2">"age"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+                <span class="s2">"creation"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+                <span class="s2">"expires"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
             <span class="p">}</span>
         <span class="p">]</span>
 
@@ -8915,7 +8915,7 @@ empty strings for all fields is returned.</p>
 <span class="normal">658</span>
 <span class="normal">659</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="n">BearerTokenCheckInput</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="n">BoolResult</span><span class="p">,</span> <span class="n">fastapi</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mcp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">bearer_token_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Checks if the provided bearer token is present in the cache and still active.</span>
 
 <span class="sd">    Args:</span>
@@ -8923,11 +8923,11 @@ empty strings for all fields is returned.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        bool: True if the token is found in the cache, False otherwise.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">expire</span><span class="p">()</span>
-    <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;bearer_token::</span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"bearer_token::</span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">"</span>
     <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:bearer_token_check&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:bearer_token_check"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8939,7 +8939,7 @@ empty strings for all fields is returned.</p>
 
 
 <h3 id="norfab.workers.fastapi_worker.fastapi_worker.FastAPIWorker.discover" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">discover</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span></code>
+            <code class="highlight language-python"><span class="n">discover</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'all'</span><span class="p">,</span> <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span></code>
 
 <a href="#norfab.workers.fastapi_worker.fastapi_worker.FastAPIWorker.discover" class="headerlink" title="Permanent link">¤</a></h3>
 
@@ -9038,29 +9038,29 @@ empty strings for all fields is returned.</p>
 <span class="normal">691</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">DiscoverInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">DiscoverResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Discover FastAPI Tasks&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Discover FastAPI Tasks"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">discover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">discover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"all"</span><span class="p">,</span> <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Discovers available services tasks and auto-generate API endpoints for them.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        service (str, optional): The name of the service to discover. Defaults to &quot;all&quot;.</span>
+<span class="sd">        service (str, optional): The name of the service to discover. Defaults to "all".</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: An object containing the discovery results for the specified service.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;discovering NorFab services tasks&quot;</span><span class="p">)</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:discover&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"discovering NorFab services tasks"</span><span class="p">)</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:discover"</span><span class="p">)</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">service_tasks_api_discovery</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">cycles</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">discover_service</span><span class="o">=</span><span class="n">service</span>
     <span class="p">)</span>
@@ -9265,7 +9265,7 @@ Timeout defaults to 600 seconds.</p>
 <span class="normal">104</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_api_endpoint</span><span class="p">(</span>
     <span class="n">service</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">task_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">worker</span><span class="p">:</span> <span class="nb">object</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">callable</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Creates an asynchronous FastAPI endpoint function for a given service task.</span>
 
 <span class="sd">    Args:</span>
@@ -9281,10 +9281,10 @@ Timeout defaults to 600 seconds.</p>
 <span class="sd">    the job and returns the result of the job execution. The ``workers`` and</span>
 <span class="sd">    ``timeout`` fields are job options and are removed from task arguments.</span>
 <span class="sd">    Timeout defaults to 600 seconds.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># We will handle a missing token ourselves</span>
     <span class="n">get_bearer_token</span> <span class="o">=</span> <span class="n">HTTPBearer</span><span class="p">(</span><span class="n">auto_error</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">default_workers</span> <span class="o">=</span> <span class="n">schema</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;workers&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">)</span>
+    <span class="n">default_workers</span> <span class="o">=</span> <span class="n">schema</span><span class="p">[</span><span class="s2">"properties"</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"workers"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"default"</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_token</span><span class="p">(</span>
         <span class="n">auth</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HTTPAuthorizationCredentials</span><span class="p">]</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_bearer_token</span><span class="p">),</span>
@@ -9303,13 +9303,13 @@ Timeout defaults to 600 seconds.</p>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">endpoint</span><span class="p">(</span>
         <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span>
         <span class="n">token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_token</span><span class="p">),</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Worker Name&quot;</span><span class="p">)],</span> <span class="n">Result</span><span class="p">]:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"Worker Name"</span><span class="p">)],</span> <span class="n">Result</span><span class="p">]:</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-        <span class="n">workers</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;workers&quot;</span><span class="p">,</span> <span class="n">default_workers</span><span class="p">)</span>
-        <span class="n">timeout</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;timeout&quot;</span><span class="p">,</span> <span class="mi">600</span><span class="p">)</span>
+        <span class="n">workers</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"workers"</span><span class="p">,</span> <span class="n">default_workers</span><span class="p">)</span>
+        <span class="n">timeout</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"timeout"</span><span class="p">,</span> <span class="mi">600</span><span class="p">)</span>
 
         <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;FastAPI running &#39;</span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">task_name</span><span class="si">}</span><span class="s2">&#39; task, on &#39;</span><span class="si">{</span><span class="n">workers</span><span class="si">}</span><span class="s2">&#39; workers, job data: &#39;</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="sa">f</span><span class="s2">"FastAPI running '</span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">task_name</span><span class="si">}</span><span class="s2">' task, on '</span><span class="si">{</span><span class="n">workers</span><span class="si">}</span><span class="s2">' workers, job data: '</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">'"</span>
         <span class="p">)</span>
 
         <span class="n">res</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
@@ -9461,29 +9461,29 @@ the schema under the "$defs" key.</p>
 <span class="normal">134</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_openapi_schema</span><span class="p">(</span>
     <span class="n">app</span><span class="p">,</span> <span class="n">regenerate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">json_refs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Generates and returns the OpenAPI schema for a FastAPI application.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        app (FastAPI): The FastAPI application instance.</span>
 <span class="sd">        regenerate (bool, optional): If True, forces regeneration of the OpenAPI schema.</span>
 <span class="sd">        json_refs (dict, optional): A dictionary of JSON references to include in</span>
-<span class="sd">            the schema under the &quot;$defs&quot; key.</span>
+<span class="sd">            the schema under the "$defs" key.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: The generated OpenAPI schema as a dictionary.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Invalidate the cached schema. Routes added with add_api_route are already</span>
     <span class="c1"># present in app.routes, so calling FastAPI.setup() again is unnecessary and</span>
     <span class="c1"># would append duplicate documentation routes.</span>
     <span class="k">if</span> <span class="n">regenerate</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="n">openapi_schema</span> <span class="o">=</span> <span class="n">get_openapi</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">API_TITLE</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">routes</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">routes</span><span class="p">)</span>
+    <span class="n">openapi_schema</span> <span class="o">=</span> <span class="n">get_openapi</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">API_TITLE</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">"1"</span><span class="p">,</span> <span class="n">routes</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">routes</span><span class="p">)</span>
 
     <span class="c1"># add json references</span>
     <span class="k">if</span> <span class="n">json_refs</span><span class="p">:</span>
-        <span class="n">openapi_schema</span><span class="p">[</span><span class="s2">&quot;$defs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json_refs</span>
+        <span class="n">openapi_schema</span><span class="p">[</span><span class="s2">"$defs"</span><span class="p">]</span> <span class="o">=</span> <span class="n">json_refs</span>
 
     <span class="k">return</span> <span class="n">openapi_schema</span>
 </code></pre></div></td></tr></table></div>
@@ -9496,7 +9496,7 @@ the schema under the "$defs" key.</p>
 
 
 <h2 id="norfab.workers.fastapi_worker.fastapi_worker.service_tasks_api_discovery" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">service_tasks_api_discovery</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="n">cycles</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="n">discover_service</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span></code>
+            <code class="highlight language-python"><span class="n">service_tasks_api_discovery</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="n">cycles</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="n">discover_service</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'all'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span></code>
 
 <a href="#norfab.workers.fastapi_worker.fastapi_worker.service_tasks_api_discovery" class="headerlink" title="Permanent link">¤</a></h2>
 
@@ -9650,25 +9650,25 @@ exit event is set, with a 10-second delay between cycles.</p>
 <span class="normal">263</span>
 <span class="normal">264</span>
 <span class="normal">265</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">service_tasks_api_discovery</span><span class="p">(</span>
-    <span class="n">worker</span><span class="p">,</span> <span class="n">cycles</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="n">discover_service</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span>
+    <span class="n">worker</span><span class="p">,</span> <span class="n">cycles</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="n">discover_service</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"all"</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Periodically discovers available service tasks and dynamically registers</span>
 <span class="sd">    FastAPI endpoints for them.</span>
 
 <span class="sd">    This function performs the following steps in a loop:</span>
 
-<span class="sd">    1. Retrieves a list of available services from the worker&#39;s client.</span>
+<span class="sd">    1. Retrieves a list of available services from the worker's client.</span>
 <span class="sd">    2. For each service, fetches its available tasks.</span>
 <span class="sd">    3. For each task, checks if it should be exposed via FastAPI (i.e.,</span>
-<span class="sd">        `task[&quot;fastapi&quot;]` is not False).</span>
+<span class="sd">        `task["fastapi"]` is not False).</span>
 <span class="sd">    4. If the corresponding API endpoint does not already exist, registers a new</span>
 <span class="sd">        FastAPI route for the task, using its input schema and metadata.</span>
 <span class="sd">    5. Forces regeneration of the OpenAPI schema after new endpoints are added.</span>
 
-<span class="sd">    The loop runs on fastapi service startup up to 30 cycles or until the worker&#39;s</span>
+<span class="sd">    The loop runs on fastapi service startup up to 30 cycles or until the worker's</span>
 <span class="sd">    exit event is set, with a 10-second delay between cycles.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">json_refs</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># dictionary to store JSON references</span>
     <span class="k">while</span> <span class="ow">not</span> <span class="n">worker</span><span class="o">.</span><span class="n">exit_event</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span> <span class="ow">and</span> <span class="n">cycles</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -9677,11 +9677,11 @@ exit event is set, with a 10-second delay between cycles.</p>
         <span class="n">routes_changed</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># get a list of workers and construct a list of services</span>
-            <span class="n">services</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">mmi</span><span class="p">(</span><span class="s2">&quot;mmi.service.broker&quot;</span><span class="p">,</span> <span class="s2">&quot;show_workers&quot;</span><span class="p">)</span>
+            <span class="n">services</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">mmi</span><span class="p">(</span><span class="s2">"mmi.service.broker"</span><span class="p">,</span> <span class="s2">"show_workers"</span><span class="p">)</span>
             <span class="n">services</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">s</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">services</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">discover_service</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span> <span class="ow">or</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">discover_service</span>
+                <span class="n">s</span><span class="p">[</span><span class="s2">"service"</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">services</span><span class="p">[</span><span class="s2">"results"</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">discover_service</span> <span class="o">==</span> <span class="s2">"all"</span> <span class="ow">or</span> <span class="n">s</span><span class="p">[</span><span class="s2">"service"</span><span class="p">]</span> <span class="o">==</span> <span class="n">discover_service</span>
             <span class="p">]</span>
 
             <span class="c1"># retrieve NorFab services and their tasks</span>
@@ -9691,54 +9691,54 @@ exit event is set, with a 10-second delay between cycles.</p>
                     <span class="k">continue</span>
                 <span class="n">service_tasks</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
                     <span class="n">service</span><span class="o">=</span><span class="n">service</span><span class="p">,</span>
-                    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;list_tasks&quot;</span><span class="p">,</span>
-                    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+                    <span class="n">task</span><span class="o">=</span><span class="s2">"list_tasks"</span><span class="p">,</span>
+                    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
                     <span class="n">timeout</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="c1"># skip if client request timed out</span>
                 <span class="k">if</span> <span class="n">service_tasks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">continue</span>
                 <span class="k">for</span> <span class="n">wres</span> <span class="ow">in</span> <span class="n">service_tasks</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-                    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">wres</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]:</span>
-                        <span class="n">t</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">service</span>
-                    <span class="n">tasks</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">wres</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">])</span>
+                    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">wres</span><span class="p">[</span><span class="s2">"result"</span><span class="p">]:</span>
+                        <span class="n">t</span><span class="p">[</span><span class="s2">"service"</span><span class="p">]</span> <span class="o">=</span> <span class="n">service</span>
+                    <span class="n">tasks</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">wres</span><span class="p">[</span><span class="s2">"result"</span><span class="p">])</span>
 
             <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">:</span>
                 <span class="c1"># skip task endpoint creation if set to false</span>
-                <span class="k">if</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;fastapi&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">task</span><span class="p">[</span><span class="s2">"fastapi"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                     <span class="k">continue</span>
                 <span class="c1"># save service to results</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">],</span> <span class="p">[])</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">task</span><span class="p">[</span><span class="s2">"service"</span><span class="p">],</span> <span class="p">[])</span>
                 <span class="c1"># continue with creating API endpoint for task</span>
-                <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">worker</span><span class="o">.</span><span class="n">api_prefix</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">task</span><span class="p">[</span><span class="s1">&#39;service&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">task</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/&quot;</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">worker</span><span class="o">.</span><span class="n">api_prefix</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">task</span><span class="p">[</span><span class="s1">'service'</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">task</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2">/"</span>
                 <span class="k">for</span> <span class="n">route</span> <span class="ow">in</span> <span class="n">worker</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">routes</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="n">Route</span><span class="p">)</span> <span class="ow">and</span> <span class="n">route</span><span class="o">.</span><span class="n">path</span> <span class="o">==</span> <span class="n">path</span><span class="p">:</span>
                         <span class="k">break</span>  <span class="c1"># do no re-create existing endpoints</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># form OpenAPI schema for API endpoint</span>
-                    <span class="n">schema</span> <span class="o">=</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;inputSchema&quot;</span><span class="p">]</span>
-                    <span class="n">fastapi_schema</span> <span class="o">=</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;fastapi&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;schema&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{}})</span>
-                    <span class="n">schema</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                        <span class="o">**</span><span class="n">fastapi_schema</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">],</span>
-                        <span class="o">**</span><span class="n">schema</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">],</span>
+                    <span class="n">schema</span> <span class="o">=</span> <span class="n">task</span><span class="p">[</span><span class="s2">"inputSchema"</span><span class="p">]</span>
+                    <span class="n">fastapi_schema</span> <span class="o">=</span> <span class="n">task</span><span class="p">[</span><span class="s2">"fastapi"</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"schema"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"properties"</span><span class="p">:</span> <span class="p">{}})</span>
+                    <span class="n">schema</span><span class="p">[</span><span class="s2">"properties"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="o">**</span><span class="n">fastapi_schema</span><span class="p">[</span><span class="s2">"properties"</span><span class="p">],</span>
+                        <span class="o">**</span><span class="n">schema</span><span class="p">[</span><span class="s2">"properties"</span><span class="p">],</span>
                     <span class="p">}</span>
-                    <span class="n">_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;job&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="n">_</span> <span class="o">=</span> <span class="n">schema</span><span class="p">[</span><span class="s2">"properties"</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"job"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                     <span class="c1"># extract json references</span>
-                    <span class="k">if</span> <span class="s2">&quot;$defs&quot;</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">:</span>
-                        <span class="n">json_refs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;$defs&quot;</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="s2">"$defs"</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">:</span>
+                        <span class="n">json_refs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"$defs"</span><span class="p">))</span>
                     <span class="c1"># form add_api_route arguments</span>
-                    <span class="n">task</span><span class="p">[</span><span class="s2">&quot;fastapi&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;methods&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">])</span>
-                    <span class="n">task</span><span class="p">[</span><span class="s2">&quot;fastapi&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
-                    <span class="n">task</span><span class="p">[</span><span class="s2">&quot;fastapi&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">])</span>
-                    <span class="n">task</span><span class="p">[</span><span class="s2">&quot;fastapi&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
+                    <span class="n">task</span><span class="p">[</span><span class="s2">"fastapi"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"methods"</span><span class="p">,</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">])</span>
+                    <span class="n">task</span><span class="p">[</span><span class="s2">"fastapi"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"path"</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+                    <span class="n">task</span><span class="p">[</span><span class="s2">"fastapi"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"description"</span><span class="p">,</span> <span class="n">task</span><span class="p">[</span><span class="s2">"description"</span><span class="p">])</span>
+                    <span class="n">task</span><span class="p">[</span><span class="s2">"fastapi"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="n">task</span><span class="p">[</span><span class="s2">"name"</span><span class="p">])</span>
                     <span class="c1"># register API endpoint</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Registering API endpoint </span><span class="si">{</span><span class="n">task</span><span class="p">[</span><span class="s1">&#39;fastapi&#39;</span><span class="p">][</span><span class="s1">&#39;path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, schema: </span><span class="si">{</span><span class="n">schema</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="sa">f</span><span class="s2">"Registering API endpoint </span><span class="si">{</span><span class="n">task</span><span class="p">[</span><span class="s1">'fastapi'</span><span class="p">][</span><span class="s1">'path'</span><span class="p">]</span><span class="si">}</span><span class="s2">, schema: </span><span class="si">{</span><span class="n">schema</span><span class="si">}</span><span class="s2">"</span>
                     <span class="p">)</span>
                     <span class="n">worker</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">add_api_route</span><span class="p">(</span>
                         <span class="n">endpoint</span><span class="o">=</span><span class="n">create_api_endpoint</span><span class="p">(</span>
-                            <span class="n">service</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">],</span>
-                            <span class="n">task_name</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+                            <span class="n">service</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">"service"</span><span class="p">],</span>
+                            <span class="n">task_name</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span>
                             <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">,</span>
                             <span class="n">worker</span><span class="o">=</span><span class="n">worker</span><span class="p">,</span>
                         <span class="p">),</span>
@@ -9748,20 +9748,20 @@ exit event is set, with a 10-second delay between cycles.</p>
                             <span class="p">)</span>
                         <span class="p">},</span>
                         <span class="n">openapi_extra</span><span class="o">=</span><span class="p">{</span>
-                            <span class="s2">&quot;requestBody&quot;</span><span class="p">:</span> <span class="p">{</span>
-                                <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                                <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;application/json&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">schema</span><span class="p">}},</span>
+                            <span class="s2">"requestBody"</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">"required"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                                <span class="s2">"content"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"application/json"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"schema"</span><span class="p">:</span> <span class="n">schema</span><span class="p">}},</span>
                             <span class="p">}</span>
                         <span class="p">},</span>
-                        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;NORFAB </span><span class="si">{</span><span class="n">task</span><span class="p">[</span><span class="s1">&#39;service&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">],</span>
-                        <span class="o">**</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;fastapi&quot;</span><span class="p">],</span>
+                        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">"NORFAB </span><span class="si">{</span><span class="n">task</span><span class="p">[</span><span class="s1">'service'</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">],</span>
+                        <span class="o">**</span><span class="n">task</span><span class="p">[</span><span class="s2">"fastapi"</span><span class="p">],</span>
                     <span class="p">)</span>
                     <span class="n">routes_changed</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="c1"># save discovered task to results</span>
-                    <span class="n">result</span><span class="p">[</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;fastapi&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">task</span><span class="p">[</span><span class="s2">"service"</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">task</span><span class="p">[</span><span class="s2">"fastapi"</span><span class="p">][</span><span class="s2">"name"</span><span class="p">])</span>
 
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to discover services tasks, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed to discover services tasks, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="c1"># Building OpenAPI traverses every registered route. Rebuild once after</span>
         <span class="c1"># the complete discovery batch, including routes added before a later</span>
@@ -9772,7 +9772,7 @@ exit event is set, with a 10-second delay between cycles.</p>
                     <span class="n">app</span><span class="o">=</span><span class="n">worker</span><span class="o">.</span><span class="n">app</span><span class="p">,</span> <span class="n">regenerate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">json_refs</span><span class="o">=</span><span class="n">json_refs</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to rebuild OpenAPI schema, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed to rebuild OpenAPI schema, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="n">cycles</span> <span class="o">-=</span> <span class="mi">1</span>
         <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
@@ -9795,13 +9795,9 @@ exit event is set, with a 10-second delay between cycles.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Create a FastAPI application with endpoints for posting, getting, and running jobs.</p>
-<p>This function sets up a FastAPI application with three endpoints:</p>
-<ul>
-<li>POST /job: To post a job to the NorFab service.</li>
-<li>GET /job: To get job results from the NorFab service.</li>
-<li>POST /job/run: To run a job and return job results synchronously.</li>
-</ul>
+        <p>Create a FastAPI application with a synchronous job execution endpoint.</p>
+<p>POST /job/run executes a job and returns its results synchronously.
+Service-task endpoints are added separately during discovery.</p>
 <p>Each endpoint requires a bearer token for authentication, which is validated
 against the worker's token database.</p>
 
@@ -9982,122 +9978,15 @@ against the worker's token database.</p>
 <span class="normal">800</span>
 <span class="normal">801</span>
 <span class="normal">802</span>
-<span class="normal">803</span>
-<span class="normal">804</span>
-<span class="normal">805</span>
-<span class="normal">806</span>
-<span class="normal">807</span>
-<span class="normal">808</span>
-<span class="normal">809</span>
-<span class="normal">810</span>
-<span class="normal">811</span>
-<span class="normal">812</span>
-<span class="normal">813</span>
-<span class="normal">814</span>
-<span class="normal">815</span>
-<span class="normal">816</span>
-<span class="normal">817</span>
-<span class="normal">818</span>
-<span class="normal">819</span>
-<span class="normal">820</span>
-<span class="normal">821</span>
-<span class="normal">822</span>
-<span class="normal">823</span>
-<span class="normal">824</span>
-<span class="normal">825</span>
-<span class="normal">826</span>
-<span class="normal">827</span>
-<span class="normal">828</span>
-<span class="normal">829</span>
-<span class="normal">830</span>
-<span class="normal">831</span>
-<span class="normal">832</span>
-<span class="normal">833</span>
-<span class="normal">834</span>
-<span class="normal">835</span>
-<span class="normal">836</span>
-<span class="normal">837</span>
-<span class="normal">838</span>
-<span class="normal">839</span>
-<span class="normal">840</span>
-<span class="normal">841</span>
-<span class="normal">842</span>
-<span class="normal">843</span>
-<span class="normal">844</span>
-<span class="normal">845</span>
-<span class="normal">846</span>
-<span class="normal">847</span>
-<span class="normal">848</span>
-<span class="normal">849</span>
-<span class="normal">850</span>
-<span class="normal">851</span>
-<span class="normal">852</span>
-<span class="normal">853</span>
-<span class="normal">854</span>
-<span class="normal">855</span>
-<span class="normal">856</span>
-<span class="normal">857</span>
-<span class="normal">858</span>
-<span class="normal">859</span>
-<span class="normal">860</span>
-<span class="normal">861</span>
-<span class="normal">862</span>
-<span class="normal">863</span>
-<span class="normal">864</span>
-<span class="normal">865</span>
-<span class="normal">866</span>
-<span class="normal">867</span>
-<span class="normal">868</span>
-<span class="normal">869</span>
-<span class="normal">870</span>
-<span class="normal">871</span>
-<span class="normal">872</span>
-<span class="normal">873</span>
-<span class="normal">874</span>
-<span class="normal">875</span>
-<span class="normal">876</span>
-<span class="normal">877</span>
-<span class="normal">878</span>
-<span class="normal">879</span>
-<span class="normal">880</span>
-<span class="normal">881</span>
-<span class="normal">882</span>
-<span class="normal">883</span>
-<span class="normal">884</span>
-<span class="normal">885</span>
-<span class="normal">886</span>
-<span class="normal">887</span>
-<span class="normal">888</span>
-<span class="normal">889</span>
-<span class="normal">890</span>
-<span class="normal">891</span>
-<span class="normal">892</span>
-<span class="normal">893</span>
-<span class="normal">894</span>
-<span class="normal">895</span>
-<span class="normal">896</span>
-<span class="normal">897</span>
-<span class="normal">898</span>
-<span class="normal">899</span>
-<span class="normal">900</span>
-<span class="normal">901</span>
-<span class="normal">902</span>
-<span class="normal">903</span>
-<span class="normal">904</span>
-<span class="normal">905</span>
-<span class="normal">906</span>
-<span class="normal">907</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_fast_api_app</span><span class="p">(</span><span class="n">worker</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FastAPI</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create a FastAPI application with endpoints for posting, getting, and running jobs.</span>
+<span class="normal">803</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_fast_api_app</span><span class="p">(</span><span class="n">worker</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FastAPI</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Create a FastAPI application with a synchronous job execution endpoint.</span>
 
-<span class="sd">    This function sets up a FastAPI application with three endpoints:</span>
-
-<span class="sd">    - POST /job: To post a job to the NorFab service.</span>
-<span class="sd">    - GET /job: To get job results from the NorFab service.</span>
-<span class="sd">    - POST /job/run: To run a job and return job results synchronously.</span>
+<span class="sd">    POST /job/run executes a job and returns its results synchronously.</span>
+<span class="sd">    Service-task endpoints are added separately during discovery.</span>
 
 <span class="sd">    Each endpoint requires a bearer token for authentication, which is validated</span>
-<span class="sd">    against the worker&#39;s token database.</span>
+<span class="sd">    against the worker's token database.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        worker (object): An object representing the worker that will handle the job requests.</span>
@@ -10105,10 +9994,10 @@ against the worker's token database.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        FastAPI: A FastAPI application instance.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">API_TITLE</span><span class="p">,</span>
-        <span class="s2">&quot;summary&quot;</span><span class="p">:</span> <span class="s2">&quot;NorFab Services Tasks FastAPI application with endpoints for posting, getting, and running jobs&quot;</span><span class="p">,</span>
+        <span class="s2">"title"</span><span class="p">:</span> <span class="n">API_TITLE</span><span class="p">,</span>
+        <span class="s2">"summary"</span><span class="p">:</span> <span class="s2">"NorFab REST API for service tasks and synchronous job execution"</span><span class="p">,</span>
         <span class="o">**</span><span class="n">config</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
@@ -10130,138 +10019,37 @@ against the worker's token database.</p>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">auth</span><span class="o">.</span><span class="n">credentials</span>
 
-    <span class="c1"># @app.post(</span>
-    <span class="c1">#     f&quot;{worker.api_prefix}/job&quot;,</span>
-    <span class="c1">#     responses={status.HTTP_401_UNAUTHORIZED: dict(model=UnauthorizedMessage)},</span>
-    <span class="c1">#     tags=[&quot;NORFAB&quot;],</span>
-    <span class="c1"># )</span>
-    <span class="c1"># def post_job(</span>
-    <span class="c1">#     service: Annotated[</span>
-    <span class="c1">#         str, Body(description=&quot;The name of the service to post the job to&quot;)</span>
-    <span class="c1">#     ],</span>
-    <span class="c1">#     task: Annotated[</span>
-    <span class="c1">#         str, Body(description=&quot;The task to be executed by the service&quot;)</span>
-    <span class="c1">#     ],</span>
-    <span class="c1">#     args: Annotated[</span>
-    <span class="c1">#         List[Any], Body(description=&quot;A list of positional arguments for the task&quot;)</span>
-    <span class="c1">#     ] = None,</span>
-    <span class="c1">#     kwargs: Annotated[</span>
-    <span class="c1">#         Dict[str, Any],</span>
-    <span class="c1">#         Body(description=&quot;A dictionary of keyword arguments for the task&quot;),</span>
-    <span class="c1">#     ] = None,</span>
-    <span class="c1">#     workers: Annotated[</span>
-    <span class="c1">#         Union[str, List[str]], Body(description=&quot;The workers to dispatch the task&quot;)</span>
-    <span class="c1">#     ] = &quot;all&quot;,</span>
-    <span class="c1">#     uuid: Annotated[</span>
-    <span class="c1">#         str, Body(description=&quot;Optional a unique identifier to use for the job&quot;)</span>
-    <span class="c1">#     ] = None,</span>
-    <span class="c1">#     timeout: Annotated[</span>
-    <span class="c1">#         int, Body(description=&quot;The timeout for the job in seconds&quot;)</span>
-    <span class="c1">#     ] = 600,</span>
-    <span class="c1">#     token: str = Depends(get_token),</span>
-    <span class="c1"># ) -&gt; ClientPostJobResponse:</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     Method to post the job to NorFab.</span>
-    <span class="c1">#</span>
-    <span class="c1">#     Args:</span>
-    <span class="c1">#         service: The name of the service to post the job to.</span>
-    <span class="c1">#         task: The task to be executed by the service.</span>
-    <span class="c1">#         args: A list of positional arguments for the task. Defaults to None.</span>
-    <span class="c1">#         kwargs: A dictionary of keyword arguments for the task. Defaults to None.</span>
-    <span class="c1">#         workers: The workers to dispatch the task. Defaults to &quot;all&quot;.</span>
-    <span class="c1">#         uuid: Optional a unique identifier to use for the job. Defaults to None.</span>
-    <span class="c1">#         timeout: The timeout for the job in seconds. Defaults to 600.</span>
-    <span class="c1">#</span>
-    <span class="c1">#     Returns:</span>
-    <span class="c1">#         The response from the NorFab service.</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     log.debug(</span>
-    <span class="c1">#         f&quot;{worker.name} - received job post request, service {service}, task {task}, args {args}, kwargs {kwargs}&quot;</span>
-    <span class="c1">#     )</span>
-    <span class="c1">#     res = worker.client.post(</span>
-    <span class="c1">#         service=service,</span>
-    <span class="c1">#         task=task,</span>
-    <span class="c1">#         args=args,</span>
-    <span class="c1">#         kwargs=kwargs,</span>
-    <span class="c1">#         workers=workers,</span>
-    <span class="c1">#         timeout=timeout,</span>
-    <span class="c1">#         uuid=uuid,</span>
-    <span class="c1">#     )</span>
-    <span class="c1">#     return res</span>
-
-    <span class="c1"># @app.get(</span>
-    <span class="c1">#     f&quot;{worker.api_prefix}/job&quot;,</span>
-    <span class="c1">#     responses={status.HTTP_401_UNAUTHORIZED: dict(model=UnauthorizedMessage)},</span>
-    <span class="c1">#     tags=[&quot;NORFAB&quot;],</span>
-    <span class="c1"># )</span>
-    <span class="c1"># def get_job(</span>
-    <span class="c1">#     service: Annotated[</span>
-    <span class="c1">#         str, Body(description=&quot;The name of the service to get the job from&quot;)</span>
-    <span class="c1">#     ],</span>
-    <span class="c1">#     uuid: Annotated[str, Body(description=&quot;A unique identifier for the job&quot;)],</span>
-    <span class="c1">#     workers: Annotated[</span>
-    <span class="c1">#         Union[str, List[str]],</span>
-    <span class="c1">#         Body(description=&quot;The workers to dispatch the get request to&quot;),</span>
-    <span class="c1">#     ] = &quot;all&quot;,</span>
-    <span class="c1">#     timeout: Annotated[</span>
-    <span class="c1">#         int, Body(description=&quot;The timeout for the job in seconds&quot;)</span>
-    <span class="c1">#     ] = 600,</span>
-    <span class="c1">#     token: str = Depends(get_token),</span>
-    <span class="c1"># ) -&gt; ClientGetJobResponse:</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     Method to get job results from NorFab.</span>
-    <span class="c1">#</span>
-    <span class="c1">#     Args:</span>
-    <span class="c1">#         service: The name of the service to get the job from.</span>
-    <span class="c1">#         workers: The workers to dispatch the get request to. Defaults to &quot;all&quot;.</span>
-    <span class="c1">#         uuid: A unique identifier for the job.</span>
-    <span class="c1">#         timeout: The timeout for the job get requests in seconds. Defaults to 600.</span>
-    <span class="c1">#</span>
-    <span class="c1">#     Returns:</span>
-    <span class="c1">#         The response from the NorFab service.</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     log.debug(</span>
-    <span class="c1">#         f&quot;{worker.name} - received job get request, service {service}, uuid {uuid}&quot;</span>
-    <span class="c1">#     )</span>
-    <span class="c1">#     res = worker.client.mmi(</span>
-    <span class="c1">#         service=service,</span>
-    <span class="c1">#         uuid=uuid,</span>
-    <span class="c1">#         workers=workers,</span>
-    <span class="c1">#         timeout=timeout,</span>
-    <span class="c1">#     )</span>
-    <span class="c1">#     return res</span>
-
     <span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">worker</span><span class="o">.</span><span class="n">api_prefix</span><span class="si">}</span><span class="s2">/job/run&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">worker</span><span class="o">.</span><span class="n">api_prefix</span><span class="si">}</span><span class="s2">/job/run"</span><span class="p">,</span>
         <span class="n">responses</span><span class="o">=</span><span class="p">{</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">UnauthorizedMessage</span><span class="p">)},</span>
-        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;NORFAB&quot;</span><span class="p">],</span>
+        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"NORFAB"</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">run_job</span><span class="p">(</span>
         <span class="n">service</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-            <span class="nb">str</span><span class="p">,</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;The name of the service to post the job to&quot;</span><span class="p">)</span>
+            <span class="nb">str</span><span class="p">,</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"The name of the service to post the job to"</span><span class="p">)</span>
         <span class="p">],</span>
         <span class="n">task</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-            <span class="nb">str</span><span class="p">,</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;The task to be executed by the service&quot;</span><span class="p">)</span>
+            <span class="nb">str</span><span class="p">,</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"The task to be executed by the service"</span><span class="p">)</span>
         <span class="p">],</span>
         <span class="n">args</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-            <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;A list of positional arguments for the task&quot;</span><span class="p">)</span>
+            <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"A list of positional arguments for the task"</span><span class="p">)</span>
         <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
             <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
-            <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;A dictionary of keyword arguments for the task&quot;</span><span class="p">),</span>
+            <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"A dictionary of keyword arguments for the task"</span><span class="p">),</span>
         <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">workers</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-            <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;The workers to dispatch the task&quot;</span><span class="p">)</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
+            <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"The workers to dispatch the task"</span><span class="p">)</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="s2">"all"</span><span class="p">,</span>
         <span class="n">uuid</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-            <span class="nb">str</span><span class="p">,</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Optional a unique identifier to use for the job&quot;</span><span class="p">)</span>
+            <span class="nb">str</span><span class="p">,</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"Optional a unique identifier to use for the job"</span><span class="p">)</span>
         <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">timeout</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-            <span class="nb">int</span><span class="p">,</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;The timeout for the job in seconds&quot;</span><span class="p">)</span>
+            <span class="nb">int</span><span class="p">,</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"The timeout for the job in seconds"</span><span class="p">)</span>
         <span class="p">]</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
         <span class="n">token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_token</span><span class="p">),</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Result</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Method to run job and return job results synchronously. This function</span>
 <span class="sd">        is blocking, internally it uses post/get methods to submit job request</span>
 <span class="sd">        and waits for job results to come through for all workers request was</span>
@@ -10273,15 +10061,15 @@ against the worker's token database.</p>
 <span class="sd">            task: The task to be executed by the service.</span>
 <span class="sd">            args: A list of positional arguments for the task. Defaults to None.</span>
 <span class="sd">            kwargs: A dictionary of keyword arguments for the task. Defaults to None.</span>
-<span class="sd">            workers: The workers to dispatch the task. Defaults to &quot;all&quot;.</span>
+<span class="sd">            workers: The workers to dispatch the task. Defaults to "all".</span>
 <span class="sd">            uuid: A unique identifier for the job. Defaults to None.</span>
 <span class="sd">            timeout: The timeout for the job in seconds. Defaults to 600.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            The response from the NorFab service.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - received run job request, service </span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">, task </span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">, args </span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">, kwargs </span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - received run job request, service </span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">, task </span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">, args </span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">, kwargs </span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
         <span class="n">res</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
             <span class="n">service</span><span class="o">=</span><span class="n">service</span><span class="p">,</span>

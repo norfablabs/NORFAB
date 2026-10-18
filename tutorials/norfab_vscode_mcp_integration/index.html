@@ -7262,10 +7262,10 @@ nf#show<span class="w"> </span>fastmcp<span class="w"> </span>prompts<span class
 <h2 id="2-configure-the-mcp-server-in-vs-code">2) Configure the MCP server in VS Code<a class="headerlink" href="#2-configure-the-mcp-server-in-vs-code" title="Permanent link">¤</a></h2>
 <p>Follow online VScode instruction how to add MCP servers, but at the time of writing this tutorial need to create or update <code>.vscode/mcp.json</code> in your workspace:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;norfab&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://127.0.0.1:8001/mcp&quot;</span>
+<span class="w">  </span><span class="nt">"servers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"norfab"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://127.0.0.1:8001/mcp"</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
@@ -7277,16 +7277,16 @@ nf#show<span class="w"> </span>fastmcp<span class="w"> </span>prompts<span class
 <h2 id="3-create-a-small-custom-agent">3) Create a small custom agent<a class="headerlink" href="#3-create-a-small-custom-agent" title="Permanent link">¤</a></h2>
 <p>Follow VScode documentation guidelines on how to add custom agents. At the time of writing this tutorial need to in VS Code need open Copilot Chat and use <strong>Configure Custom Agents</strong> → <strong>Create New Agent</strong>. Create a file named <code>norfab.agent.md</code> (in the folder VS Code suggests) with the content below.</p>
 <div class="highlight"><span class="filename">norfab.agent.md</span><pre><span></span><code>---
-description: &#39;Run read-only network commands via NORFAB&#39;
+description: 'Run read-only network commands via NORFAB'
 tools:
-<span class="w">  </span><span class="k">-</span><span class="w"> </span>&#39;norfab/service_nornir__task_get_nornir_hosts&#39;
-<span class="gu">  - &#39;norfab/service_nornir__task_cli&#39;</span>
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>'norfab/service_nornir__task_get_nornir_hosts'
+<span class="gu">  - 'norfab/service_nornir__task_cli'</span>
 <span class="gu">---</span>
 
-Your name is &#39;NorFab Agent&#39;. You help users query network devices through NORFAB.
+Your name is 'NorFab Agent'. You help users query network devices through NORFAB.
 
-Use &#39;norfab/service_nornir__task_get_nornir_hosts&#39; to discover available devices.
-Use &#39;norfab/service_nornir__task_cli&#39; to run show commands.
+Use 'norfab/service_nornir__task_get_nornir_hosts' to discover available devices.
+Use 'norfab/service_nornir__task_cli' to run show commands.
 
 When passing tool arguments, replace hyphens with underscores (example: add-details -&gt; add_details).
 </code></pre></div>
@@ -7305,8 +7305,8 @@ Code and GitHub Copilot versions installed.</p>
 <h2 id="5-use-the-agent">5) Use the agent<a class="headerlink" href="#5-use-the-agent" title="Permanent link">¤</a></h2>
 <p>Open Copilot Chat, select your agent, then try prompts like:</p>
 <div class="highlight"><pre><span></span><code>List available devices.
-Run &quot;show version&quot; on router1.
-Run &quot;show interfaces&quot; on router1.
+Run "show version" on router1.
+Run "show interfaces" on router1.
 </code></pre></div>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¤</a></h2>
 <p>If VS Code cannot connect, confirm the FastMCP worker is running (nfcli <code>show norfab broker workers</code>, <code>show fastmcp status</code>) and that <code>.vscode/mcp.json</code> points at the correct URL.</p>

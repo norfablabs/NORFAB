@@ -7202,7 +7202,7 @@
 
 
 <h2 id="norfab.workers.agent_worker.agent_worker.AgentWorker" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">AgentWorker</span><span class="p">(</span><span class="n">inventory</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">broker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exit_event</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">init_done_event</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;WARNING&#39;</span><span class="p">)</span></code>
+              <code class="highlight language-python"><span class="n">AgentWorker</span><span class="p">(</span><span class="n">inventory</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">broker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exit_event</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">init_done_event</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'WARNING'</span><span class="p">)</span></code>
 
 <a href="#norfab.workers.agent_worker.agent_worker.AgentWorker" class="headerlink" title="Permanent link">¤</a></h2>
 
@@ -7501,7 +7501,7 @@ and producing version reports of Python packages.</p>
     <span class="n">worker_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">exit_event</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">init_done_event</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;WARNING&quot;</span><span class="p">,</span>
+    <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"WARNING"</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">inventory</span><span class="p">,</span> <span class="n">broker</span><span class="p">,</span> <span class="n">SERVICE</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">exit_event</span><span class="p">,</span> <span class="n">log_level</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">init_done_event</span> <span class="o">=</span> <span class="n">init_done_event</span>
@@ -7511,7 +7511,7 @@ and producing version reports of Python packages.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">llms</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">init_done_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Started&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Started"</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -7663,32 +7663,32 @@ and producing version reports of Python packages.</p>
 <span class="normal">115</span>
 <span class="normal">116</span>
 <span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_llm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">provider</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve or create an LLM instance.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        model (str | None): Name of the model to obtain.</span>
-<span class="sd">        provider (str): Model provider name, e.g. &quot;ollama&quot;.</span>
+<span class="sd">        provider (str): Model provider name, e.g. "ollama".</span>
 <span class="sd">        kwargs (dict): Any additional model parameters supported by LangChain.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        object | None: The LLM instance (e.g. ChatOllama)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">model_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">}</span>
+<span class="sd">    """</span>
+    <span class="n">model_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"model"</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">}</span>
 
     <span class="c1"># instantiate llm object</span>
     <span class="k">if</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">llms</span><span class="p">:</span>
         <span class="n">llm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">llms</span><span class="p">[</span><span class="n">model</span><span class="p">]</span>
-    <span class="k">elif</span> <span class="n">provider</span> <span class="o">==</span> <span class="s2">&quot;ollama&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">provider</span> <span class="o">==</span> <span class="s2">"ollama"</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">langchain_ollama</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChatOllama</span>
 
         <span class="n">llm</span> <span class="o">=</span> <span class="n">ChatOllama</span><span class="p">(</span><span class="o">**</span><span class="n">model_data</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">provider</span> <span class="o">==</span> <span class="s2">&quot;groq&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">provider</span> <span class="o">==</span> <span class="s2">"groq"</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">langchain_groq</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChatGroq</span>
 
         <span class="n">llm</span> <span class="o">=</span> <span class="n">ChatGroq</span><span class="p">(</span><span class="o">**</span><span class="n">model_data</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported LLM provider &#39;</span><span class="si">{</span><span class="n">provider</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unsupported LLM provider '</span><span class="si">{</span><span class="n">provider</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="c1"># store LLM for future references</span>
@@ -7789,19 +7789,19 @@ including the Python version, platform, and a specified language model.</p>
 <span class="normal">261</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetVersionInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetVersionResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Version&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Version"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Generate a report of the versions of specific Python packages and system information.</span>
 <span class="sd">    This method collects the version information of several Python packages and system details,</span>
 <span class="sd">    including the Python version, platform, and a specified language model.</span>
@@ -7810,16 +7810,16 @@ including the Python version, platform, and a specified language model.</p>
 <span class="sd">        Result: An object containing a dictionary with the package names as keys and their</span>
 <span class="sd">                respective version numbers as values. If a package is not found, its version</span>
 <span class="sd">                will be an empty string.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">libs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;norfab&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;langchain&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;langchain-community&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;langchain-core&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;langchain-ollama&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ollama&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;python&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
-        <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
+        <span class="s2">"norfab"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"langchain"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"langchain-community"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"langchain-core"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"langchain-ollama"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"ollama"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"python"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">" "</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s2">"platform"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="c1"># get version of packages installed</span>
     <span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="n">libs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -7898,24 +7898,24 @@ including the Python version, platform, and a specified language model.</p>
 <span class="normal">284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetInventoryResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Inventory&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Inventory"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    NorFab task to retrieve the agent&#39;s inventory.</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    NorFab task to retrieve the agent's inventory.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Result: An instance of the Result class containing the agent&#39;s inventory.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        Result: An instance of the Result class containing the agent's inventory.</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_inventory</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7986,25 +7986,25 @@ including the Python version, platform, and a specified language model.</p>
 <span class="normal">307</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetStatusInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetStatusResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Status&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Status"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_status</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    NorFab Task that retrieves the status of the agent worker.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Result: An object containing the status result with a value of &quot;OK&quot;.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="s2">&quot;OK&quot;</span><span class="p">)</span>
+<span class="sd">        Result: An object containing the status result with a value of "OK".</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="s2">"OK"</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -8015,7 +8015,7 @@ including the Python version, platform, and a specified language model.</p>
 
 
 <h3 id="norfab.workers.agent_worker.agent_worker.AgentWorker.invoke" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">invoke</span><span class="p">(</span><span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">instructions</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;NorFab&#39;</span><span class="p">,</span> <span class="n">verbose_result</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span></code>
+            <code class="highlight language-python"><span class="n">invoke</span><span class="p">(</span><span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">instructions</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'NorFab'</span><span class="p">,</span> <span class="n">verbose_result</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span></code>
 
 <a href="#norfab.workers.agent_worker.agent_worker.AgentWorker.invoke" class="headerlink" title="Permanent link">¤</a></h3>
 
@@ -8244,14 +8244,14 @@ Each invocation starts a fresh conversation without stored history.</p>
 <span class="normal">373</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">InvokeInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">InvokeResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Invoke Agent&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Invoke Agent"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -8259,10 +8259,10 @@ Each invocation starts a fresh conversation without stored history.</p>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">instructions</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NorFab&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"NorFab"</span><span class="p">,</span>
     <span class="n">verbose_result</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run instructions with the built-in agent or a custom YAML definition.</span>
+<span class="w">    </span><span class="sd">"""Run instructions with the built-in agent or a custom YAML definition.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        job (Job): Job context used to report execution progress.</span>
@@ -8282,28 +8282,28 @@ Each invocation starts a fresh conversation without stored history.</p>
 <span class="sd">        RuntimeError: The built-in agent has no configured ``default_llm``.</span>
 <span class="sd">        FileNotFoundError: The custom definition cannot be fetched.</span>
 <span class="sd">        KeyError: A required definition or fallback model setting is missing.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">()</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Invoke: Processing instructions with &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; agent&quot;</span><span class="p">)</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;getting </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> agent ready&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Invoke: Processing instructions with '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' agent"</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"getting </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> agent ready"</span><span class="p">)</span>
 
     <span class="n">agent_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_agent</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
     <span class="n">agent_instance</span> <span class="o">=</span> <span class="n">create_agent</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="n">agent_data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
-        <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_llm</span><span class="p">(</span><span class="o">**</span><span class="n">agent_data</span><span class="p">[</span><span class="s2">&quot;llm&quot;</span><span class="p">]),</span>
-        <span class="n">system_prompt</span><span class="o">=</span><span class="n">agent_data</span><span class="p">[</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">],</span>
-        <span class="n">tools</span><span class="o">=</span><span class="n">agent_data</span><span class="p">[</span><span class="s2">&quot;tools&quot;</span><span class="p">],</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">agent_data</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span>
+        <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_llm</span><span class="p">(</span><span class="o">**</span><span class="n">agent_data</span><span class="p">[</span><span class="s2">"llm"</span><span class="p">]),</span>
+        <span class="n">system_prompt</span><span class="o">=</span><span class="n">agent_data</span><span class="p">[</span><span class="s2">"system_prompt"</span><span class="p">],</span>
+        <span class="n">tools</span><span class="o">=</span><span class="n">agent_data</span><span class="p">[</span><span class="s2">"tools"</span><span class="p">],</span>
     <span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> agent thinking&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> agent thinking"</span><span class="p">)</span>
 
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">agent_instance</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span>
-        <span class="p">{</span><span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">instructions</span><span class="p">}]}</span>
+        <span class="p">{</span><span class="s2">"messages"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="n">instructions</span><span class="p">}]}</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">verbose_result</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;messages&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">content</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"messages"</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">content</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>

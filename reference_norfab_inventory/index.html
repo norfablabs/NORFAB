@@ -7253,7 +7253,7 @@
 <p>NorFab comes with Simple Inventory Datastore (SID) hosted by broker, allowing workers to source inventory data from broker.</p>
 <p>NorFab inventory separated in sections, each responsible for configuring different aspects of the system.</p>
 <div class="highlight"><span class="filename">inventory.yaml</span><pre><span></span><code><span class="nt">broker</span><span class="p">:</span><span class="w"> </span><span class="c1"># (1)!</span>
-<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tcp://127.0.0.1:5555&quot;</span><span class="w"> </span><span class="c1"># (2)!</span>
+<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"tcp://127.0.0.1:5555"</span><span class="w"> </span><span class="c1"># (2)!</span>
 
 <span class="nt">workers</span><span class="p">:</span><span class="w"> </span><span class="c1"># (3)!</span>
 <span class="w">  </span><span class="nt">nornir-*</span><span class="p">:</span><span class="w"> </span><span class="c1"># (4)!</span>
@@ -7291,12 +7291,12 @@
 <p>Broker inventory <strong>must</strong> have broker <code>endpoint</code> parameter defined for workers and clients to identify how connect with broker, and for broker itself to identify where to listen for connections.</p>
 <div class="highlight"><span class="filename">inventory.yaml</span><pre><span></span><code><span class="c1"># broker settings</span>
 <span class="nt">broker</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tcp://127.0.0.1:5555&quot;</span>
-<span class="w">  </span><span class="nt">shared_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5z1:yW}]n?UXhGmz+5CeHN1&gt;:S9k!eCh6JyIhJqO&quot;</span>
+<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"tcp://127.0.0.1:5555"</span>
+<span class="w">  </span><span class="nt">shared_key</span><span class="p">:</span><span class="w"> </span><span class="s">"5z1:yW}]n?UXhGmz+5CeHN1&gt;:S9k!eCh6JyIhJqO"</span>
 <span class="w">  </span><span class="nt">zmq_auth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">  </span><span class="nt">ip_allowlist</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;192.0.2.10&quot;</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;192.0.2.11&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"192.0.2.10"</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"192.0.2.11"</span>
 </code></pre></div>
 <p>In addition these parameters are supported</p>
 <ol>
@@ -7396,22 +7396,22 @@ preserved as user-managed Python logging handlers.</p>
 <p>Sample hooks definition:</p>
 <div class="highlight"><span class="filename">inventory.yaml</span><pre><span></span><code><span class="nt">hooks</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">attachpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">startup</span>
-<span class="w">    </span><span class="nt">function</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;hooks.functions.do_on_startup&quot;</span>
+<span class="w">    </span><span class="nt">function</span><span class="p">:</span><span class="w"> </span><span class="s">"hooks.functions.do_on_startup"</span>
 <span class="w">    </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
 <span class="w">    </span><span class="nt">kwargs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Function</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">run</span><span class="nv"> </span><span class="s">on</span><span class="nv"> </span><span class="s">startup&quot;</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"Function</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">run</span><span class="nv"> </span><span class="s">on</span><span class="nv"> </span><span class="s">startup"</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">attachpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exit</span>
-<span class="w">    </span><span class="nt">function</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;hooks.functions.do_on_exit&quot;</span>
+<span class="w">    </span><span class="nt">function</span><span class="p">:</span><span class="w"> </span><span class="s">"hooks.functions.do_on_exit"</span>
 <span class="w">    </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
 <span class="w">    </span><span class="nt">kwargs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Function</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">run</span><span class="nv"> </span><span class="s">on</span><span class="nv"> </span><span class="s">startup&quot;</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"Function</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">run</span><span class="nv"> </span><span class="s">on</span><span class="nv"> </span><span class="s">startup"</span>
 </code></pre></div>
 <p>Where hook functions are:</p>
 <div class="highlight"><span class="filename">hooks/functions.py</span><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">do_on_startup</span><span class="p">(</span><span class="n">norfab</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Startup hook executed&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Startup hook executed"</span><span class="p">)</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">do_on_exit</span><span class="p">(</span><span class="n">norfab</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exit hook executed&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Exit hook executed"</span><span class="p">)</span>
 </code></pre></div>
 <p>Function import path is a dot separated path used to import module file that contains hook functions, where individual function name is a last item in dot separated path definition. For example <code>hooks.functions.do_on_startup</code> path is equivalent of running Python import <code>from hooks.functions import do_on_startup</code>.</p>
 <h2 id="jinja2-support">Jinja2 Support<a class="headerlink" href="#jinja2-support" title="Permanent link">¤</a></h2>
@@ -7423,7 +7423,7 @@ are overridden by <code>.env</code> values by default. Pass <code>load_env_overr
 inventories, detection uses <code>base_dir</code>, or the current directory when
 <code>base_dir</code> is omitted.</p>
 <div class="highlight"><span class="filename">.env</span><pre><span></span><code><span class="nv">TERMINAL_LOGGING_LEVEL</span><span class="o">=</span>INFO
-<span class="nv">FILE_LOGGING_LEVEL</span><span class="o">=</span><span class="s2">&quot;DEBUG&quot;</span>
+<span class="nv">FILE_LOGGING_LEVEL</span><span class="o">=</span><span class="s2">"DEBUG"</span>
 </code></pre></div>
 <p>The <code>python-dotenv</code> loader accepts Bash-like assignments, comments, quoted and
 multiline values, the optional <code>export</code> directive, and <code>${VAR}</code> expansion. See the
@@ -7432,68 +7432,68 @@ for details.</p>
 <div class="highlight"><span class="filename">inventory.yaml</span><pre><span></span><code><span class="nt">logging</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">handlers</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">terminal</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">env.get(&quot;TERMINAL_LOGGING_LEVEL&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;WARNING&quot;</span><span class="nv">)</span><span class="w"> </span><span class="p p-Indicator">}}</span>
+<span class="w">      </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">env.get("TERMINAL_LOGGING_LEVEL"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"WARNING"</span><span class="nv">)</span><span class="w"> </span><span class="p p-Indicator">}}</span>
 <span class="w">    </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span>
-<span class="w">      </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">env.get(&quot;FILE_LOGGING_LEVEL&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;INFO&quot;</span><span class="nv">)</span><span class="w"> </span><span class="p p-Indicator">}}</span>
+<span class="w">      </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">env.get("FILE_LOGGING_LEVEL"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"INFO"</span><span class="nv">)</span><span class="w"> </span><span class="p p-Indicator">}}</span>
 </code></pre></div>
 <p>Above example demonstrates how terminal and file logging level can be sourced from environment using Jinja2 syntax. </p>
 <p>All workers inventory files also passed through Jinja2 renderer with access to <code>env</code> dictionary variable:</p>
 <div class="highlight"><span class="filename">nornir/common.yaml</span><pre><span></span><code><span class="nt">defaults</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">env.get(&quot;NORNIR_USERNAME&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;nornir&quot;</span><span class="nv">)</span><span class="w"> </span><span class="p p-Indicator">}}</span>
-<span class="w">  </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">env.get(&quot;NORNIR_PASSWORD&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;password&quot;</span><span class="w"> </span><span class="nv">)</span><span class="w"> </span><span class="p p-Indicator">}}</span>
+<span class="w">  </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">env.get("NORNIR_USERNAME"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"nornir"</span><span class="nv">)</span><span class="w"> </span><span class="p p-Indicator">}}</span>
+<span class="w">  </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">env.get("NORNIR_PASSWORD"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"password"</span><span class="w"> </span><span class="nv">)</span><span class="w"> </span><span class="p p-Indicator">}}</span>
 </code></pre></div>
 <p><code>env</code> variable passed onto Jinja2 context as a <strong>dictionary</strong> that contains environment variables keys and values supporting all Jinja2 dictionary access operations:</p>
 <div class="highlight"><span class="filename">nornir/common.yaml</span><pre><span></span><code><span class="nt">defaults</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">env</span><span class="p p-Indicator">[</span><span class="s">&quot;NORNIR_USERNAME&quot;</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="p p-Indicator">}}</span>
+<span class="w">  </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">env</span><span class="p p-Indicator">[</span><span class="s">"NORNIR_USERNAME"</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="p p-Indicator">}}</span>
 <span class="w">  </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">env.NORNIR_PASSWORD</span><span class="w"> </span><span class="p p-Indicator">}}</span>
-<span class="w">  </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">env.get(&quot;NORNIR_PORT&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">22)</span><span class="w"> </span><span class="p p-Indicator">}}</span>
+<span class="w">  </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">env.get("NORNIR_PORT"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">22)</span><span class="w"> </span><span class="p p-Indicator">}}</span>
 </code></pre></div>
 <h2 id="loading-inventory-from-dictionary">Loading Inventory from Dictionary<a class="headerlink" href="#loading-inventory-from-dictionary" title="Permanent link">¤</a></h2>
 <p>By default NorFab supports loading inventory from <code>inventory.yaml</code> file together with <code>workers</code> section items referring to a list of OS paths to YAML files with workers inventory data. As an alternative it is possible to load full NorFab and its workers inventory from dictionary, this can be useful when working with NorFab Python API directly:</p>
 <div class="highlight"><span class="filename">Instantiate NorFab out of Dictionary Inventory</span><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
 <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;broker&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;endpoint&quot;</span><span class="p">:</span> <span class="s2">&quot;tcp://127.0.0.1:5555&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;shared_key&quot;</span><span class="p">:</span> <span class="s2">&quot;5z1:yW}]n?UXhGmz+5CeHN1&gt;:S9k!eCh6JyIhJqO&quot;</span><span class="p">,</span>
+    <span class="s2">"broker"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"endpoint"</span><span class="p">:</span> <span class="s2">"tcp://127.0.0.1:5555"</span><span class="p">,</span>
+        <span class="s2">"shared_key"</span><span class="p">:</span> <span class="s2">"5z1:yW}]n?UXhGmz+5CeHN1&gt;:S9k!eCh6JyIhJqO"</span><span class="p">,</span>
     <span class="p">},</span>
-    <span class="s2">&quot;workers&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;nornir-*&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="s2">"workers"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"nornir-*"</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="s2">&quot;service&quot;</span><span class="p">:</span> <span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;watchdog_interval&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
-                <span class="s2">&quot;failed_hosts_recovery_timeout&quot;</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span>
-                <span class="s2">&quot;reset_failed_hosts_before_task&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s2">&quot;runner&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;RetryRunner&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">&quot;num_workers&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
-                        <span class="s2">&quot;num_connectors&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                <span class="s2">"service"</span><span class="p">:</span> <span class="s2">"nornir"</span><span class="p">,</span>
+                <span class="s2">"watchdog_interval"</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+                <span class="s2">"failed_hosts_recovery_timeout"</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span>
+                <span class="s2">"reset_failed_hosts_before_task"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">"runner"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">"plugin"</span><span class="p">:</span> <span class="s2">"RetryRunner"</span><span class="p">,</span>
+                    <span class="s2">"options"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">"num_workers"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                        <span class="s2">"num_connectors"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
                     <span class="p">}</span>
                 <span class="p">}</span>
             <span class="p">}</span>
         <span class="p">],</span>
-        <span class="s2">&quot;nornir-worker-1*&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;nornir/nornir-worker-1.yaml&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;nornir-worker-2&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="s2">&quot;nornir/nornir-worker-2.yaml&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;nornir/nornir-worker-2-extra.yaml&quot;</span><span class="p">,</span>
+        <span class="s2">"nornir-worker-1*"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"nornir/nornir-worker-1.yaml"</span><span class="p">],</span>
+        <span class="s2">"nornir-worker-2"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">"nornir/nornir-worker-2.yaml"</span><span class="p">,</span>
+            <span class="s2">"nornir/nornir-worker-2-extra.yaml"</span><span class="p">,</span>
         <span class="p">],</span>
     <span class="p">},</span>
-    <span class="s2">&quot;topology&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;broker&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s2">&quot;workers&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;nornir-worker-2&quot;</span><span class="p">,</span>
+    <span class="s2">"topology"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"broker"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"workers"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">"nornir-worker-1"</span><span class="p">,</span>
+            <span class="s2">"nornir-worker-2"</span><span class="p">,</span>
         <span class="p">],</span>
     <span class="p">},</span>
 <span class="p">}</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory_data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="s2">&quot;./norfab/&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory_data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="s2">"./norfab/"</span><span class="p">)</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-    <span class="n">job_result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span> <span class="s2">&quot;get_nornir_hosts&quot;</span><span class="p">)</span>
+    <span class="n">job_result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span><span class="s2">"nornir"</span><span class="p">,</span> <span class="s2">"get_nornir_hosts"</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">job_result</span><span class="p">)</span>
 
     <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>

@@ -7391,33 +7391,33 @@ side of the connection was queried first.</p>
 <p>Returns topology data with <code>nodes</code> and <code>links</code>.</p>
 <p>When <code>branch</code> is supplied, both device REST reads and connection GraphQL reads use that branch.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;nodes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"nodes"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;spine-1&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;spine-1&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arista_eos&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;ip&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10.0.0.1/32&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;active&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;site&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dc-nyc&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;tags&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;core&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;manufacturer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Arista&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;device_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DCS-7050CX3-32S&quot;</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"spine-1"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"spine-1"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"arista_eos"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"ip"</span><span class="p">:</span><span class="w"> </span><span class="s2">"10.0.0.1/32"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"active"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"spine"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"site"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dc-nyc"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"core"</span><span class="p">,</span><span class="w"> </span><span class="s2">"production"</span><span class="p">],</span>
+<span class="w">      </span><span class="nt">"manufacturer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Arista"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"device_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"DCS-7050CX3-32S"</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;links&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"links"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;spine-1&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;target&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;leaf-1&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;src_iface&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ethernet1&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;dst_iface&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ethernet49&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1000base-t&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;speed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000000</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;mtu&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">9214</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;tags&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">      </span><span class="nt">&quot;cable_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;smf&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;cable_status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;connected&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;cable_label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">      </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"spine-1"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"target"</span><span class="p">:</span><span class="w"> </span><span class="s2">"leaf-1"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"src_iface"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Ethernet1"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"dst_iface"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Ethernet49"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1000base-t"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"speed"</span><span class="p">:</span><span class="w"> </span><span class="mi">1000000</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"mtu"</span><span class="p">:</span><span class="w"> </span><span class="mi">9214</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">      </span><span class="nt">"cable_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"smf"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"cable_status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"connected"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"cable_label"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
@@ -7443,38 +7443,38 @@ side of the connection was queried first.</p>
 <p>Context manager:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;get_topology&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;leaf-2&quot;</span><span class="p">]},</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"get_topology"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"spine-1"</span><span class="p">,</span> <span class="s2">"leaf-1"</span><span class="p">,</span> <span class="s2">"leaf-2"</span><span class="p">]},</span>
     <span class="p">)</span>
 </code></pre></div>
 <p>Direct lifecycle:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;get_topology&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"get_topology"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;spine&quot;</span><span class="p">,</span> <span class="s2">&quot;leaf&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;active&quot;</span><span class="p">],</span>
+            <span class="s2">"role"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"spine"</span><span class="p">,</span> <span class="s2">"leaf"</span><span class="p">],</span>
+            <span class="s2">"status"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"active"</span><span class="p">],</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
     <span class="k">for</span> <span class="n">worker</span><span class="p">,</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">nodes</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">][</span><span class="s2">&quot;nodes&quot;</span><span class="p">]</span>
-        <span class="n">links</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">][</span><span class="s2">&quot;links&quot;</span><span class="p">]</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Nodes: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span><span class="si">}</span><span class="s2">, Links: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">"result"</span><span class="p">][</span><span class="s2">"nodes"</span><span class="p">]</span>
+        <span class="n">links</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">"result"</span><span class="p">][</span><span class="s2">"links"</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Nodes: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span><span class="si">}</span><span class="s2">, Links: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="k">finally</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
@@ -7529,22 +7529,22 @@ interface connections are queried.</p>
 </table>
 <p>Filters can be combined freely. For example, to get all active spine devices made by Arista:</p>
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_topology&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"get_topology"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;spine&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;manufacturers&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;arista&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;active&quot;</span><span class="p">],</span>
+        <span class="s2">"role"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"spine"</span><span class="p">],</span>
+        <span class="s2">"manufacturers"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"arista"</span><span class="p">],</span>
+        <span class="s2">"status"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"active"</span><span class="p">],</span>
     <span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Or filter by a name pattern:</p>
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_topology&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;device_contains&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">},</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"get_topology"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"device_contains"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>
 <h2 id="adjacent-nodes">Adjacent Nodes<a class="headerlink" href="#adjacent-nodes" title="Permanent link">¤</a></h2>
@@ -7559,10 +7559,10 @@ query, so the overhead is minimal regardless of how many extra devices are disco
 <p>Pass <code>dry_run=True</code> to inspect the REST filter parameters and GraphQL query that would
 be sent to NetBox without executing any network calls:</p>
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_topology&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;leaf-1&quot;</span><span class="p">],</span> <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"get_topology"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"spine-1"</span><span class="p">,</span> <span class="s2">"leaf-1"</span><span class="p">],</span> <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>
 <h2 id="norfab-netbox-get-topology-command-shell-reference">NORFAB Netbox Get Topology Command Shell Reference<a class="headerlink" href="#norfab-netbox-get-topology-command-shell-reference" title="Permanent link">¤</a></h2>
@@ -7573,9 +7573,9 @@ root
 <span class="w">    </span>└──<span class="w"> </span>get:<span class="w">    </span>Query<span class="w"> </span>data<span class="w"> </span>from<span class="w"> </span>Netbox
 <span class="w">        </span>└──<span class="w"> </span>topology:<span class="w">    </span>Query<span class="w"> </span>Netbox<span class="w"> </span>topology<span class="w"> </span>data<span class="w"> </span><span class="k">for</span><span class="w"> </span>devices
 <span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'any'</span>
+<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
+<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
 <span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>Branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
 <span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span>commit<span class="w"> </span>to<span class="w"> </span>database
@@ -8405,16 +8405,16 @@ inventory. Resolved hosts are merged with the <code>devices</code> list.</p>
 <span class="normal">402</span>
 <span class="normal">403</span>
 <span class="normal">404</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetTopologyInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetTopologyResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Topology&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Topology"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -8435,7 +8435,7 @@ inventory. Resolved hosts are merged with the <code>devices</code> list.</p>
     <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve network topology from NetBox as a list of nodes and links.</span>
 
 <span class="sd">    Fetches device data and physical interface connections to build a topology</span>
@@ -8453,19 +8453,19 @@ inventory. Resolved hosts are merged with the <code>devices</code> list.</p>
 <span class="sd">            in the list is automatically fetched and added as an adjacent node so</span>
 <span class="sd">            every link endpoint always has a corresponding node entry.</span>
 <span class="sd">        device_contains (str, optional): Case-insensitive substring to filter</span>
-<span class="sd">            device names by (e.g. ``&quot;spine&quot;`` matches ``spine-1``, ``dc1-spine``).</span>
+<span class="sd">            device names by (e.g. ``"spine"`` matches ``spine-1``, ``dc1-spine``).</span>
 <span class="sd">        device_regex (str, optional): Regex pattern to filter device names by</span>
-<span class="sd">            (e.g. ``&quot;spine-[0-9]+&quot;``).</span>
+<span class="sd">            (e.g. ``"spine-[0-9]+"``).</span>
 <span class="sd">        role (list, optional): List of device role slugs to filter by</span>
-<span class="sd">            (e.g. ``[&quot;spine&quot;, &quot;leaf&quot;]``).</span>
+<span class="sd">            (e.g. ``["spine", "leaf"]``).</span>
 <span class="sd">        platform (list, optional): List of platform slugs to filter by</span>
-<span class="sd">            (e.g. ``[&quot;arista-eos&quot;, &quot;cisco-ios&quot;]``).</span>
+<span class="sd">            (e.g. ``["arista-eos", "cisco-ios"]``).</span>
 <span class="sd">        manufacturers (list, optional): List of manufacturer slugs to filter by</span>
-<span class="sd">            (e.g. ``[&quot;arista&quot;, &quot;cisco&quot;]``).</span>
+<span class="sd">            (e.g. ``["arista", "cisco"]``).</span>
 <span class="sd">        status (list, optional): List of device status values to filter by</span>
-<span class="sd">            (e.g. ``[&quot;active&quot;, &quot;planned&quot;]``).</span>
+<span class="sd">            (e.g. ``["active", "planned"]``).</span>
 <span class="sd">        sites (list, optional): List of site slugs to filter by</span>
-<span class="sd">            (e.g. ``[&quot;dc-1&quot;, &quot;dc-2&quot;]``).</span>
+<span class="sd">            (e.g. ``["dc-1", "dc-2"]``).</span>
 <span class="sd">        dry_run (bool, optional): When True returns GraphQL query parameters</span>
 <span class="sd">            for both the device and interface queries without executing them.</span>
 <span class="sd">            Defaults to False.</span>
@@ -8483,54 +8483,54 @@ inventory. Resolved hosts are merged with the <code>devices</code> list.</p>
 <span class="sd">        **nodes** — one entry per device::</span>
 
 <span class="sd">            {</span>
-<span class="sd">                &quot;id&quot;:           &quot;spine-1&quot;,</span>
-<span class="sd">                &quot;name&quot;:         &quot;spine-1&quot;,</span>
-<span class="sd">                &quot;type&quot;:         &quot;arista_eos&quot;,</span>
-<span class="sd">                &quot;ip&quot;:           &quot;10.0.0.1/32&quot;,</span>
-<span class="sd">                &quot;status&quot;:       &quot;active&quot;,</span>
-<span class="sd">                &quot;role&quot;:         &quot;spine&quot;,</span>
-<span class="sd">                &quot;site&quot;:         &quot;dc-1&quot;,</span>
-<span class="sd">                &quot;tags&quot;:         [&quot;core&quot;],</span>
-<span class="sd">                &quot;manufacturer&quot;: &quot;Arista&quot;,</span>
-<span class="sd">                &quot;device_type&quot;:  &quot;DCS-7050CX3-32S&quot;,</span>
-<span class="sd">                &quot;color&quot;:        &quot;aa1409&quot;</span>
+<span class="sd">                "id":           "spine-1",</span>
+<span class="sd">                "name":         "spine-1",</span>
+<span class="sd">                "type":         "arista_eos",</span>
+<span class="sd">                "ip":           "10.0.0.1/32",</span>
+<span class="sd">                "status":       "active",</span>
+<span class="sd">                "role":         "spine",</span>
+<span class="sd">                "site":         "dc-1",</span>
+<span class="sd">                "tags":         ["core"],</span>
+<span class="sd">                "manufacturer": "Arista",</span>
+<span class="sd">                "device_type":  "DCS-7050CX3-32S",</span>
+<span class="sd">                "color":        "aa1409"</span>
 <span class="sd">            }</span>
 
 <span class="sd">        **links** — one entry per physical cable::</span>
 
 <span class="sd">            {</span>
-<span class="sd">                &quot;source&quot;:        &quot;spine-1&quot;,</span>
-<span class="sd">                &quot;target&quot;:        &quot;leaf-1&quot;,</span>
-<span class="sd">                &quot;src_iface&quot;:     &quot;Ethernet1&quot;,</span>
-<span class="sd">                &quot;dst_iface&quot;:     &quot;Ethernet49&quot;,</span>
-<span class="sd">                &quot;type&quot;:          &quot;1000base-t&quot;,</span>
-<span class="sd">                &quot;speed&quot;:         1000000,</span>
-<span class="sd">                &quot;mtu&quot;:           9214,</span>
-<span class="sd">                &quot;tags&quot;:          [],</span>
-<span class="sd">                &quot;cable_type&quot;:    &quot;smf&quot;,</span>
-<span class="sd">                &quot;cable_status&quot;:  &quot;connected&quot;,</span>
-<span class="sd">                &quot;cable_label&quot;:   &quot;&quot;</span>
+<span class="sd">                "source":        "spine-1",</span>
+<span class="sd">                "target":        "leaf-1",</span>
+<span class="sd">                "src_iface":     "Ethernet1",</span>
+<span class="sd">                "dst_iface":     "Ethernet49",</span>
+<span class="sd">                "type":          "1000base-t",</span>
+<span class="sd">                "speed":         1000000,</span>
+<span class="sd">                "mtu":           9214,</span>
+<span class="sd">                "tags":          [],</span>
+<span class="sd">                "cable_type":    "smf",</span>
+<span class="sd">                "cable_status":  "connected",</span>
+<span class="sd">                "cable_label":   ""</span>
 <span class="sd">            }</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        UnsupportedNetboxVersion: If the NetBox instance version is below 4.4.0.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get topology: Fetching topology for &quot;</span>
-        <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span> <span class="k">if</span> <span class="n">devices</span> <span class="k">else</span> <span class="s2">&quot;all devices&quot;</span><span class="p">)</span>
-        <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot; from &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get topology: Fetching topology for "</span>
+        <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)"</span> <span class="k">if</span> <span class="n">devices</span> <span class="k">else</span> <span class="s2">"all devices"</span><span class="p">)</span>
+        <span class="o">+</span> <span class="sa">f</span><span class="s2">" from '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">GetTopologyResult</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_topology&quot;</span><span class="p">,</span>
-        <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;nodes&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;links&quot;</span><span class="p">:</span> <span class="p">[]},</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_topology"</span><span class="p">,</span>
+        <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s2">"nodes"</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">"links"</span><span class="p">:</span> <span class="p">[]},</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">UnsupportedNetboxVersion</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - NetBox version </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not supported, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;minimum required version is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">compatible_ge_v4</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - NetBox version </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not supported, "</span>
+            <span class="sa">f</span><span class="s2">"minimum required version is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">compatible_ge_v4</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
 
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
@@ -8545,36 +8545,36 @@ inventory. Resolved hosts are merged with the <code>devices</code> list.</p>
     <span class="c1"># build pynetbox REST filter params</span>
     <span class="n">device_filter_params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">devices</span><span class="p">:</span>
-        <span class="n">device_filter_params</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">devices</span>
+        <span class="n">device_filter_params</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="o">=</span> <span class="n">devices</span>
     <span class="k">if</span> <span class="n">device_contains</span><span class="p">:</span>
-        <span class="n">device_filter_params</span><span class="p">[</span><span class="s2">&quot;name__ic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_contains</span>
+        <span class="n">device_filter_params</span><span class="p">[</span><span class="s2">"name__ic"</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_contains</span>
     <span class="k">if</span> <span class="n">device_regex</span><span class="p">:</span>
-        <span class="n">device_filter_params</span><span class="p">[</span><span class="s2">&quot;name__re&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_regex</span>
+        <span class="n">device_filter_params</span><span class="p">[</span><span class="s2">"name__regex"</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_regex</span>
     <span class="k">if</span> <span class="n">role</span><span class="p">:</span>
-        <span class="n">device_filter_params</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">role</span>
+        <span class="n">device_filter_params</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span> <span class="o">=</span> <span class="n">role</span>
     <span class="k">if</span> <span class="n">platform</span><span class="p">:</span>
-        <span class="n">device_filter_params</span><span class="p">[</span><span class="s2">&quot;platform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">platform</span>
+        <span class="n">device_filter_params</span><span class="p">[</span><span class="s2">"platform"</span><span class="p">]</span> <span class="o">=</span> <span class="n">platform</span>
     <span class="k">if</span> <span class="n">manufacturers</span><span class="p">:</span>
-        <span class="n">device_filter_params</span><span class="p">[</span><span class="s2">&quot;manufacturer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">manufacturers</span>
+        <span class="n">device_filter_params</span><span class="p">[</span><span class="s2">"manufacturer"</span><span class="p">]</span> <span class="o">=</span> <span class="n">manufacturers</span>
     <span class="k">if</span> <span class="n">status</span><span class="p">:</span>
-        <span class="n">device_filter_params</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">status</span>
+        <span class="n">device_filter_params</span><span class="p">[</span><span class="s2">"status"</span><span class="p">]</span> <span class="o">=</span> <span class="n">status</span>
     <span class="k">if</span> <span class="n">sites</span><span class="p">:</span>
-        <span class="n">device_filter_params</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sites</span>
+        <span class="n">device_filter_params</span><span class="p">[</span><span class="s2">"site"</span><span class="p">]</span> <span class="o">=</span> <span class="n">sites</span>
 
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;dry-run requested, returning topology query parameters&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"dry-run requested, returning topology query parameters"</span><span class="p">)</span>
         <span class="n">intf_dry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_graphql</span><span class="p">(</span>
             <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
             <span class="n">query</span><span class="o">=</span><span class="n">TOPOLOGY_INTERFACES_QUERY</span><span class="p">,</span>
-            <span class="n">variables</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">],</span> <span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">},</span>
+            <span class="n">variables</span><span class="o">=</span><span class="p">{</span><span class="s2">"devices"</span><span class="p">:</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[</span><span class="s2">"*"</span><span class="p">],</span> <span class="s2">"offset"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"limit"</span><span class="p">:</span> <span class="mi">50</span><span class="p">},</span>
             <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
             <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
             <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;device_filter&quot;</span><span class="p">:</span> <span class="n">device_filter_params</span><span class="p">,</span>
-            <span class="s2">&quot;graphql&quot;</span><span class="p">:</span> <span class="n">intf_dry</span><span class="o">.</span><span class="n">result</span><span class="p">,</span>
+            <span class="s2">"device_filter"</span><span class="p">:</span> <span class="n">device_filter_params</span><span class="p">,</span>
+            <span class="s2">"graphql"</span><span class="p">:</span> <span class="n">intf_dry</span><span class="o">.</span><span class="n">result</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">ret</span>
 
@@ -8582,17 +8582,17 @@ inventory. Resolved hosts are merged with the <code>devices</code> list.</p>
 
     <span class="c1"># --- step 1: fetch device data for nodes via pynetbox REST ---</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="s2">&quot;fetching device data from &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+        <span class="s2">"fetching device data from '</span><span class="si">{}</span><span class="s2">'"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
         <span class="o">+</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot; using </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">device_filter_params</span><span class="p">)</span><span class="si">}</span><span class="s2"> filter(s)&quot;</span>
+            <span class="sa">f</span><span class="s2">" using </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">device_filter_params</span><span class="p">)</span><span class="si">}</span><span class="s2"> filter(s)"</span>
             <span class="k">if</span> <span class="n">device_filter_params</span>
-            <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">else</span> <span class="s2">""</span>
         <span class="p">)</span>
     <span class="p">)</span>
     <span class="n">all_nb_devices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
         <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span>
         <span class="o">**</span><span class="n">device_filter_params</span><span class="p">,</span>
-        <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;name,platform,primary_ip4,status,role,site,tags,device_type&quot;</span><span class="p">,</span>
+        <span class="n">fields</span><span class="o">=</span><span class="s2">"name,platform,primary_ip4,status,role,site,tags,device_type"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">device_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">role_slugs</span><span class="p">:</span> <span class="nb">set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -8604,7 +8604,7 @@ inventory. Resolved hosts are merged with the <code>devices</code> list.</p>
     <span class="c1"># fetch role colors</span>
     <span class="n">role_colors</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">role_slugs</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;fetching role colors for </span><span class="si">{}</span><span class="s2"> role(s)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">role_slugs</span><span class="p">)))</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"fetching role colors for </span><span class="si">{}</span><span class="s2"> role(s)"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">role_slugs</span><span class="p">)))</span>
         <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">device_roles</span><span class="p">,</span> <span class="n">slug</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">role_slugs</span><span class="p">)):</span>
             <span class="n">role_colors</span><span class="p">[</span><span class="n">role</span><span class="o">.</span><span class="n">slug</span><span class="p">]</span> <span class="o">=</span> <span class="n">role</span><span class="o">.</span><span class="n">color</span>
 
@@ -8614,17 +8614,17 @@ inventory. Resolved hosts are merged with the <code>devices</code> list.</p>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">device_names</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get topology: No devices found, returning empty topology&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get topology: No devices found, returning empty topology"</span>
         <span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no devices found for topology&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no devices found for topology"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># --- step 2: fetch interface connections for links ---</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching interface connections for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">device_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"fetching interface connections for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">device_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)"</span><span class="p">)</span>
     <span class="n">variables</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">device_names</span><span class="p">),</span>
-        <span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">device_names</span><span class="p">),</span>
+        <span class="s2">"offset"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">"limit"</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="n">query_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_graphql</span><span class="p">(</span>
         <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
@@ -8637,28 +8637,28 @@ inventory. Resolved hosts are merged with the <code>devices</code> list.</p>
 
     <span class="k">if</span> <span class="n">query_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="s2">&quot;failed to fetch topology interface connections&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
+            <span class="s2">"failed to fetch topology interface connections"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">query_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="n">all_interfaces</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">query_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;interface&quot;</span><span class="p">,</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">query_result</span><span class="o">.</span><span class="n">result</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="n">query_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"interface"</span><span class="p">,</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">query_result</span><span class="o">.</span><span class="n">result</span> <span class="k">else</span> <span class="p">[]</span>
     <span class="p">)</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> topology interface object(s)&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> topology interface object(s)"</span><span class="p">)</span>
 
     <span class="c1"># --- step 3: build deduplicated links ---</span>
     <span class="n">seen_links</span><span class="p">:</span> <span class="nb">set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">intf</span> <span class="ow">in</span> <span class="n">all_interfaces</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">endpoint</span> <span class="ow">in</span> <span class="n">intf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;connected_endpoints&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]:</span>
-            <span class="k">if</span> <span class="n">endpoint</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;__typename&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;InterfaceType&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">endpoint</span> <span class="ow">in</span> <span class="n">intf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"connected_endpoints"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]:</span>
+            <span class="k">if</span> <span class="n">endpoint</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"__typename"</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"InterfaceType"</span><span class="p">:</span>
                 <span class="k">continue</span>
 
-            <span class="n">source</span> <span class="o">=</span> <span class="n">intf</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
-            <span class="n">target</span> <span class="o">=</span> <span class="n">endpoint</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
-            <span class="n">src_iface</span> <span class="o">=</span> <span class="n">intf</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
-            <span class="n">dst_iface</span> <span class="o">=</span> <span class="n">endpoint</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+            <span class="n">source</span> <span class="o">=</span> <span class="n">intf</span><span class="p">[</span><span class="s2">"device"</span><span class="p">][</span><span class="s2">"name"</span><span class="p">]</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">endpoint</span><span class="p">[</span><span class="s2">"device"</span><span class="p">][</span><span class="s2">"name"</span><span class="p">]</span>
+            <span class="n">src_iface</span> <span class="o">=</span> <span class="n">intf</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span>
+            <span class="n">dst_iface</span> <span class="o">=</span> <span class="n">endpoint</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span>
 
             <span class="c1"># canonical key ensures (A:eth1-&gt;B:eth2) == (B:eth2-&gt;A:eth1)</span>
             <span class="n">link_key</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">([(</span><span class="n">source</span><span class="p">,</span> <span class="n">src_iface</span><span class="p">),</span> <span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">dst_iface</span><span class="p">)]))</span>
@@ -8666,37 +8666,37 @@ inventory. Resolved hosts are merged with the <code>devices</code> list.</p>
                 <span class="k">continue</span>
             <span class="n">seen_links</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">link_key</span><span class="p">)</span>
 
-            <span class="n">cable</span> <span class="o">=</span> <span class="n">intf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cable&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
-            <span class="n">intf_type</span> <span class="o">=</span> <span class="n">intf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+            <span class="n">cable</span> <span class="o">=</span> <span class="n">intf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"cable"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+            <span class="n">intf_type</span> <span class="o">=</span> <span class="n">intf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"type"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
             <span class="n">link</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">source</span><span class="p">,</span>
-                <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="n">target</span><span class="p">,</span>
-                <span class="s2">&quot;src_iface&quot;</span><span class="p">:</span> <span class="n">src_iface</span><span class="p">,</span>
-                <span class="s2">&quot;dst_iface&quot;</span><span class="p">:</span> <span class="n">dst_iface</span><span class="p">,</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">intf_type</span><span class="p">,</span>
-                <span class="s2">&quot;speed&quot;</span><span class="p">:</span> <span class="n">intf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;speed&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;mtu&quot;</span><span class="p">:</span> <span class="n">intf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mtu&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">(</span><span class="n">intf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])],</span>
-                <span class="s2">&quot;cable_type&quot;</span><span class="p">:</span> <span class="n">cable</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;cable_status&quot;</span><span class="p">:</span> <span class="n">cable</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;cable_label&quot;</span><span class="p">:</span> <span class="n">cable</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">),</span>
+                <span class="s2">"source"</span><span class="p">:</span> <span class="n">source</span><span class="p">,</span>
+                <span class="s2">"target"</span><span class="p">:</span> <span class="n">target</span><span class="p">,</span>
+                <span class="s2">"src_iface"</span><span class="p">:</span> <span class="n">src_iface</span><span class="p">,</span>
+                <span class="s2">"dst_iface"</span><span class="p">:</span> <span class="n">dst_iface</span><span class="p">,</span>
+                <span class="s2">"type"</span><span class="p">:</span> <span class="n">intf_type</span><span class="p">,</span>
+                <span class="s2">"speed"</span><span class="p">:</span> <span class="n">intf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"speed"</span><span class="p">),</span>
+                <span class="s2">"mtu"</span><span class="p">:</span> <span class="n">intf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"mtu"</span><span class="p">),</span>
+                <span class="s2">"tags"</span><span class="p">:</span> <span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">(</span><span class="n">intf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"tags"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])],</span>
+                <span class="s2">"cable_type"</span><span class="p">:</span> <span class="n">cable</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"type"</span><span class="p">),</span>
+                <span class="s2">"cable_status"</span><span class="p">:</span> <span class="n">cable</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"status"</span><span class="p">),</span>
+                <span class="s2">"cable_label"</span><span class="p">:</span> <span class="n">cable</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"label"</span><span class="p">),</span>
             <span class="p">}</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
 
     <span class="c1"># --- step 4: add nodes for connected devices not yet in the nodes list ---</span>
     <span class="n">linked_device_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">links</span><span class="p">:</span>
-        <span class="n">linked_device_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">link</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">])</span>
-        <span class="n">linked_device_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">link</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">])</span>
+        <span class="n">linked_device_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">link</span><span class="p">[</span><span class="s2">"source"</span><span class="p">])</span>
+        <span class="n">linked_device_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">link</span><span class="p">[</span><span class="s2">"target"</span><span class="p">])</span>
     <span class="n">missing_device_names</span> <span class="o">=</span> <span class="n">linked_device_names</span> <span class="o">-</span> <span class="n">device_names</span>
     <span class="k">if</span> <span class="n">missing_device_names</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;fetching data for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">missing_device_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> additional connected device(s)&quot;</span>
+            <span class="sa">f</span><span class="s2">"fetching data for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">missing_device_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> additional connected device(s)"</span>
         <span class="p">)</span>
         <span class="n">extra_nb_devices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">missing_device_names</span><span class="p">),</span>
-            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;name,platform,primary_ip4,status,role,site,tags,device_type&quot;</span><span class="p">,</span>
+            <span class="n">fields</span><span class="o">=</span><span class="s2">"name,platform,primary_ip4,status,role,site,tags,device_type"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">extra_role_slugs</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">dev</span><span class="o">.</span><span class="n">role</span><span class="o">.</span><span class="n">slug</span>
@@ -8714,12 +8714,12 @@ inventory. Resolved hosts are merged with the <code>devices</code> list.</p>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_build_node</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">))</span>
 
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get topology: Built topology with &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span><span class="si">}</span><span class="s2"> nodes and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">links</span><span class="p">)</span><span class="si">}</span><span class="s2"> links&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get topology: Built topology with "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span><span class="si">}</span><span class="s2"> nodes and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">links</span><span class="p">)</span><span class="si">}</span><span class="s2"> links"</span>
     <span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;topology build complete: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span><span class="si">}</span><span class="s2"> node(s), &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">links</span><span class="p">)</span><span class="si">}</span><span class="s2"> link(s)&quot;</span>
+        <span class="sa">f</span><span class="s2">"topology build complete: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span><span class="si">}</span><span class="s2"> node(s), "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">links</span><span class="p">)</span><span class="si">}</span><span class="s2"> link(s)"</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>

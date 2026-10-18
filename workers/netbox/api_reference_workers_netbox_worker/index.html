@@ -7703,62 +7703,62 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_inventory</span><span class="p">()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Broker </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">broker</span><span class="si">}</span><span class="s2"> returned no inventory for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, killing myself...&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Broker </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">broker</span><span class="si">}</span><span class="s2"> returned no inventory for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, killing myself..."</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
 
     <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-        <span class="s2">&quot;instances&quot;</span>
-    <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - inventory has no Netbox instances&quot;</span>
+        <span class="s2">"instances"</span>
+    <span class="p">),</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - inventory has no Netbox instances"</span>
 
     <span class="c1"># extract parameters from inventory</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">netbox_connect_timeout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-        <span class="s2">&quot;netbox_connect_timeout&quot;</span><span class="p">,</span> <span class="mi">10</span>
+        <span class="s2">"netbox_connect_timeout"</span><span class="p">,</span> <span class="mi">10</span>
     <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">netbox_read_timeout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;netbox_read_timeout&quot;</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">netbox_read_timeout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"netbox_read_timeout"</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">netbox_retry</span> <span class="o">=</span> <span class="n">Retry</span><span class="p">(</span>
-        <span class="n">total</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;netbox_retries&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
-        <span class="n">connect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;netbox_retries&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
-        <span class="n">read</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;netbox_retries&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
-        <span class="n">status</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;netbox_retries&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
-        <span class="n">backoff_factor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;netbox_retry_backoff&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>
+        <span class="n">total</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"netbox_retries"</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="n">connect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"netbox_retries"</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="n">read</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"netbox_retries"</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="n">status</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"netbox_retries"</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="n">backoff_factor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"netbox_retry_backoff"</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>
         <span class="n">status_forcelist</span><span class="o">=</span><span class="p">(</span><span class="mi">429</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">502</span><span class="p">,</span> <span class="mi">503</span><span class="p">,</span> <span class="mi">504</span><span class="p">),</span>
         <span class="n">allowed_methods</span><span class="o">=</span><span class="n">RETRYABLE_HTTP_METHODS</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">netbox_http_session</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">netbox_http_session</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span>
-        <span class="s2">&quot;http://&quot;</span><span class="p">,</span> <span class="n">HTTPAdapter</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_retry</span><span class="p">)</span>
+        <span class="s2">"http://"</span><span class="p">,</span> <span class="n">HTTPAdapter</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_retry</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">netbox_http_session</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span>
-        <span class="s2">&quot;https://&quot;</span><span class="p">,</span> <span class="n">HTTPAdapter</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_retry</span><span class="p">)</span>
+        <span class="s2">"https://"</span><span class="p">,</span> <span class="n">HTTPAdapter</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_retry</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">cache_use</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cache_use&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">cache_ttl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cache_ttl&quot;</span><span class="p">,</span> <span class="mi">31557600</span><span class="p">)</span>  <span class="c1"># 1 Year</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cache_use</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"cache_use"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cache_ttl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"cache_ttl"</span><span class="p">,</span> <span class="mi">31557600</span><span class="p">)</span>  <span class="c1"># 1 Year</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">branch_create_timeout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-        <span class="s2">&quot;branch_create_timeout&quot;</span><span class="p">,</span> <span class="mi">120</span>
+        <span class="s2">"branch_create_timeout"</span><span class="p">,</span> <span class="mi">120</span>
     <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">grapqhl_max_workers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;grapqhl_max_workers&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">grapqhl_max_workers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"grapqhl_max_workers"</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
 
     <span class="c1"># find default instance</span>
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">params</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="p">[</span><span class="s2">&quot;instances&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;default&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">params</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="p">[</span><span class="s2">"instances"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"default"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span> <span class="o">=</span> <span class="n">name</span>
             <span class="k">break</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span> <span class="o">=</span> <span class="n">name</span>
 
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Default Netbox instance: &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Default Netbox instance: '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
 
     <span class="c1"># check Netbox compatibility</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_verify_compatibility</span><span class="p">()</span>
 
     <span class="c1"># instantiate cache</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">cache_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">&quot;cache&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cache_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">"cache"</span><span class="p">)</span>
     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_diskcache</span><span class="p">()</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">init_done_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Started&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Started"</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -7806,16 +7806,16 @@ associated with it.</p>
 <span class="normal">205</span>
 <span class="normal">206</span>
 <span class="normal">207</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">worker_exit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Worker exist sanity checks. Closes the cache if it exists.</span>
 
 <span class="sd">    This method checks if the cache attribute is present and not None.</span>
 <span class="sd">    If the cache exists, it closes the cache to release any resources</span>
 <span class="sd">    associated with it.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;netbox_http_session&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"netbox_http_session"</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">netbox_http_session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7888,26 +7888,26 @@ associated with it.</p>
 <span class="normal">236</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetInventoryResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Inventory&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Inventory"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    NorFab Task to return running inventory for NetBox worker.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: A dictionary containing the NetBox inventory.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_inventory&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="p">)</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_inventory"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="p">)</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7995,33 +7995,33 @@ associated with it.</p>
 <span class="normal">276</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetVersionInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetVersionResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Version&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Version"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieves the version information of Netbox instances.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: A dictionary containing the version information of the Netbox</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">libs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;norfab&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;pynetbox&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;requests&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;python&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
-        <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
-        <span class="s2">&quot;diskcache&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;deepdiff&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;netbox_version&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">,</span>
+        <span class="s2">"norfab"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"pynetbox"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"requests"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"python"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">" "</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s2">"platform"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
+        <span class="s2">"diskcache"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"deepdiff"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"netbox_version"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="c1"># get version of packages installed</span>
     <span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="n">libs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -8030,7 +8030,7 @@ associated with it.</p>
         <span class="k">except</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">PackageNotFoundError</span><span class="p">:</span>
             <span class="k">pass</span>
 
-    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_version&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="n">libs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_version"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="n">libs</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -8165,21 +8165,21 @@ queries the status of all instances in the NetBox inventory.</p>
 <span class="normal">329</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetNetboxStatusInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetNetboxStatusResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get NetBox Status&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get NetBox Status"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_netbox_status</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Job</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve the status of NetBox instances.</span>
 
 <span class="sd">    This method queries the status of a specific NetBox instance if the</span>
@@ -8192,26 +8192,26 @@ queries the status of all instances in the NetBox inventory.</p>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: A dictionary containing the status of the requested NetBox</span>
 <span class="sd">              instance(s).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="p">{},</span> <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_netbox_status&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="p">{},</span> <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_netbox_status"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">instance</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">job</span><span class="p">:</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;checking NetBox status for &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - fetching &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; Netbox status&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"checking NetBox status for '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - fetching '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">' Netbox status"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_netbox_status</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">job</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;checking NetBox status for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="p">[</span><span class="s1">&#39;instances&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> instance(s)&quot;</span>
+                <span class="sa">f</span><span class="s2">"checking NetBox status for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="p">[</span><span class="s1">'instances'</span><span class="p">])</span><span class="si">}</span><span class="s2"> instance(s)"</span>
             <span class="p">)</span>
-        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="p">[</span><span class="s2">&quot;instances&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - fetching &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; Netbox status&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_inventory</span><span class="p">[</span><span class="s2">"instances"</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - fetching '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' Netbox status"</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_netbox_status</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Netbox instance(s) status retrieval completed&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Netbox instance(s) status retrieval completed"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">job</span><span class="p">:</span>
-        <span class="n">reachable</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">status</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">))</span>
+        <span class="n">reachable</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">status</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"status"</span><span class="p">))</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;NetBox status check complete: </span><span class="si">{</span><span class="n">reachable</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> instance(s) reachable&quot;</span>
+            <span class="sa">f</span><span class="s2">"NetBox status check complete: </span><span class="si">{</span><span class="n">reachable</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> instance(s) reachable"</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
@@ -8365,19 +8365,19 @@ instance is not reachable.</p>
 <span class="normal">398</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetCompatibilityInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetCompatibilityResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get NetBox Compatibility&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get NetBox Compatibility"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_compatibility</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Checks the compatibility of Netbox instances based on their version.</span>
 
 <span class="sd">    This method retrieves the status and version of Netbox instances and determines</span>
@@ -8391,40 +8391,40 @@ instance is not reachable.</p>
 <span class="sd">        dict: A dictionary where the keys are the instance names and the values are</span>
 <span class="sd">              booleans indicating compatibility (True/False) or None if the instance</span>
 <span class="sd">              is not reachable.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_compatibility&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{})</span>
+<span class="sd">    """</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_compatibility"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{})</span>
     <span class="n">netbox_status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_netbox_status</span><span class="p">(</span><span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">instance</span><span class="p">,</span> <span class="n">params</span> <span class="ow">in</span> <span class="n">netbox_status</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2"> Netbox instance not reachable&quot;</span><span class="p">)</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;instance &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; is not reachable&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">"status"</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2"> Netbox instance not reachable"</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"instance '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">' is not reachable"</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s2">&quot;-docker-&quot;</span> <span class="ow">in</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;netbox-version&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s2">"-docker-"</span> <span class="ow">in</span> <span class="n">params</span><span class="p">[</span><span class="s2">"netbox-version"</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
                     <span class="p">[</span>
                         <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;netbox-version&quot;</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">params</span><span class="p">[</span><span class="s2">"netbox-version"</span><span class="p">]</span>
                         <span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-                        <span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-docker-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                        <span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+                        <span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"-docker-"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
                     <span class="p">]</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-                    <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;netbox-version&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)]</span>
+                    <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">params</span><span class="p">[</span><span class="s2">"netbox-version"</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)]</span>
                 <span class="p">)</span>
             <span class="c1"># check Netbox 4.4+ compatibility</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compatible_ge_v4</span><span class="p">:</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;instance &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; version </span><span class="si">{</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">])</span><span class="si">}</span><span class="s2"> is compatible&quot;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"instance '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">' version </span><span class="si">{</span><span class="s1">'.'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">])</span><span class="si">}</span><span class="s2"> is compatible"</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2"> Netbox version </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not supported, &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;minimum required version is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">compatible_ge_v4</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2"> Netbox version </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not supported, "</span>
+                    <span class="sa">f</span><span class="s2">"minimum required version is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">compatible_ge_v4</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
@@ -8560,7 +8560,7 @@ instance is not reachable.</p>
 <span class="normal">440</span>
 <span class="normal">441</span>
 <span class="normal">442</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">has_plugin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugin_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Check if a specified plugin is installed in a given NetBox instance.</span>
 
 <span class="sd">    Args:</span>
@@ -8570,14 +8570,14 @@ instance is not reachable.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        bool: True if the plugin is installed, False otherwise.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">nb_status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_netbox_status</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">plugin_name</span> <span class="ow">in</span> <span class="n">nb_status</span><span class="p">[</span><span class="s2">&quot;plugins&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">plugin_name</span> <span class="ow">in</span> <span class="n">nb_status</span><span class="p">[</span><span class="s2">"plugins"</span><span class="p">]:</span>
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">elif</span> <span class="n">strict</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; Netbox instance has no &#39;</span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s2">&#39; plugin installed&quot;</span>
+            <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">' Netbox instance has no '</span><span class="si">{</span><span class="n">plugin_name</span><span class="si">}</span><span class="s2">' plugin installed"</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="kc">False</span>
@@ -8604,8 +8604,8 @@ each entity as <code>create</code>, <code>delete</code>, <code>update</code>, or
 device name and the inner key is a unique entity identifier (name, slug, or any
 hashable value). The inner value is a flat dict of comparable fields:</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;&lt;device_name&gt;&quot;: {
-        &quot;&lt;entity_id&gt;&quot;: {&lt;field&gt;: &lt;value&gt;, ...},
+    "&lt;device_name&gt;": {
+        "&lt;entity_id&gt;": {&lt;field&gt;: &lt;value&gt;, ...},
     }
 }
 </code></pre></div>
@@ -8915,7 +8915,7 @@ both datasets.</li>
     <span class="n">source_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="n">target_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute an actionable diff between two nested dictionaries and classify</span>
 <span class="sd">    each entity as ``create``, ``delete``, ``update``, or ``in_sync``.</span>
 
@@ -8925,8 +8925,8 @@ both datasets.</li>
 
 <span class="sd">    ```</span>
 <span class="sd">    {</span>
-<span class="sd">        &quot;&lt;device_name&gt;&quot;: {</span>
-<span class="sd">            &quot;&lt;entity_id&gt;&quot;: {&lt;field&gt;: &lt;value&gt;, ...},</span>
+<span class="sd">        "&lt;device_name&gt;": {</span>
+<span class="sd">            "&lt;entity_id&gt;": {&lt;field&gt;: &lt;value&gt;, ...},</span>
 <span class="sd">        }</span>
 <span class="sd">    }</span>
 <span class="sd">    ```</span>
@@ -8957,118 +8957,118 @@ both datasets.</li>
 
 <span class="sd">              ```</span>
 <span class="sd">              {</span>
-<span class="sd">                  &quot;&lt;entity_id&gt;&quot;: {</span>
-<span class="sd">                      &quot;&lt;field&gt;&quot;: {&quot;old_value&quot;: &lt;current&gt;, &quot;new_value&quot;: &lt;desired&gt;}</span>
+<span class="sd">                  "&lt;entity_id&gt;": {</span>
+<span class="sd">                      "&lt;field&gt;": {"old_value": &lt;current&gt;, "new_value": &lt;desired&gt;}</span>
 <span class="sd">                  }</span>
 <span class="sd">              }</span>
 <span class="sd">            ```</span>
 
 <span class="sd">        - ``in_sync`` (list[str]): Entity identifiers that are identical in</span>
 <span class="sd">            both datasets.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">diff</span> <span class="o">=</span> <span class="n">DeepDiff</span><span class="p">(</span>
         <span class="n">target_data</span><span class="p">,</span>
         <span class="n">source_data</span><span class="p">,</span>
         <span class="n">ignore_order</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">view</span><span class="o">=</span><span class="s2">&quot;tree&quot;</span><span class="p">,</span>
+        <span class="n">view</span><span class="o">=</span><span class="s2">"tree"</span><span class="p">,</span>
         <span class="n">threshold_to_diff_deeper</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">all_devices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">source_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">target_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
     <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">all_devices</span><span class="p">:</span>
         <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">{},</span>
-            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"create"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"update"</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[],</span>
         <span class="p">}</span>
 
-    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dictionary_item_added&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">output_format</span><span class="o">=</span><span class="s2">&quot;list&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"dictionary_item_added"</span><span class="p">,</span> <span class="p">[]):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">output_format</span><span class="o">=</span><span class="s2">"list"</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1"># Entire device is new in source — all its sessions are missing in target</span>
             <span class="n">device_name</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;create&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">source_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"create"</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">source_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="c1"># Individual session is new within an existing device</span>
             <span class="n">device_name</span><span class="p">,</span> <span class="n">sname</span> <span class="o">=</span> <span class="n">path</span>
-            <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;create&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"create"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dictionary_item_removed&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">output_format</span><span class="o">=</span><span class="s2">&quot;list&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"dictionary_item_removed"</span><span class="p">,</span> <span class="p">[]):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">output_format</span><span class="o">=</span><span class="s2">"list"</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1"># Entire device is absent in source — all its sessions are missing in source</span>
             <span class="n">device_name</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;delete&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">target_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"delete"</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">target_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="c1"># Individual session removed within an existing device</span>
             <span class="n">device_name</span><span class="p">,</span> <span class="n">sname</span> <span class="o">=</span> <span class="n">path</span>
-            <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;delete&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"delete"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;values_changed&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">output_format</span><span class="o">=</span><span class="s2">&quot;list&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"values_changed"</span><span class="p">,</span> <span class="p">[]):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">output_format</span><span class="o">=</span><span class="s2">"list"</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="n">device_name</span><span class="p">,</span> <span class="n">sname</span><span class="p">,</span> <span class="n">field</span> <span class="o">=</span> <span class="n">path</span>
-            <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">sname</span><span class="p">,</span> <span class="p">{})[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;old_value&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">t1</span><span class="p">,</span>
-                <span class="s2">&quot;new_value&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">t2</span><span class="p">,</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"update"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">sname</span><span class="p">,</span> <span class="p">{})[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">"old_value"</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">t1</span><span class="p">,</span>
+                <span class="s2">"new_value"</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">t2</span><span class="p">,</span>
             <span class="p">}</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
             <span class="n">device_name</span><span class="p">,</span> <span class="n">sname</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">path</span>
-            <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">sname</span><span class="p">,</span> <span class="p">{})[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;old_value&quot;</span><span class="p">:</span> <span class="n">target_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">field</span><span class="p">],</span>
-                <span class="s2">&quot;new_value&quot;</span><span class="p">:</span> <span class="n">source_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">field</span><span class="p">],</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"update"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">sname</span><span class="p">,</span> <span class="p">{})[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">"old_value"</span><span class="p">:</span> <span class="n">target_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">field</span><span class="p">],</span>
+                <span class="s2">"new_value"</span><span class="p">:</span> <span class="n">source_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">field</span><span class="p">],</span>
             <span class="p">}</span>
 
-    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type_changes&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">output_format</span><span class="o">=</span><span class="s2">&quot;list&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"type_changes"</span><span class="p">,</span> <span class="p">[]):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">output_format</span><span class="o">=</span><span class="s2">"list"</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="n">device_name</span><span class="p">,</span> <span class="n">sname</span><span class="p">,</span> <span class="n">field</span> <span class="o">=</span> <span class="n">path</span>
-            <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">sname</span><span class="p">,</span> <span class="p">{})[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;old_value&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">t1</span><span class="p">,</span>
-                <span class="s2">&quot;new_value&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">t2</span><span class="p">,</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"update"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">sname</span><span class="p">,</span> <span class="p">{})[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">"old_value"</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">t1</span><span class="p">,</span>
+                <span class="s2">"new_value"</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">t2</span><span class="p">,</span>
             <span class="p">}</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
             <span class="n">device_name</span><span class="p">,</span> <span class="n">sname</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">path</span>
-            <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">sname</span><span class="p">,</span> <span class="p">{})[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;old_value&quot;</span><span class="p">:</span> <span class="n">target_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">field</span><span class="p">],</span>
-                <span class="s2">&quot;new_value&quot;</span><span class="p">:</span> <span class="n">source_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">field</span><span class="p">],</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"update"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">sname</span><span class="p">,</span> <span class="p">{})[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">"old_value"</span><span class="p">:</span> <span class="n">target_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">field</span><span class="p">],</span>
+                <span class="s2">"new_value"</span><span class="p">:</span> <span class="n">source_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">field</span><span class="p">],</span>
             <span class="p">}</span>
 
-    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;iterable_item_added&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">output_format</span><span class="o">=</span><span class="s2">&quot;list&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"iterable_item_added"</span><span class="p">,</span> <span class="p">[]):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">output_format</span><span class="o">=</span><span class="s2">"list"</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
             <span class="c1"># Item added to a list field within an existing entity</span>
             <span class="n">device_name</span><span class="p">,</span> <span class="n">sname</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">path</span>
-            <span class="n">entity_updates</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">sname</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">entity_updates</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"update"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">sname</span><span class="p">,</span> <span class="p">{})</span>
             <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">entity_updates</span><span class="p">:</span>
                 <span class="n">entity_updates</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;old_value&quot;</span><span class="p">:</span> <span class="n">target_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">field</span><span class="p">],</span>
-                    <span class="s2">&quot;new_value&quot;</span><span class="p">:</span> <span class="n">source_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">field</span><span class="p">],</span>
+                    <span class="s2">"old_value"</span><span class="p">:</span> <span class="n">target_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">field</span><span class="p">],</span>
+                    <span class="s2">"new_value"</span><span class="p">:</span> <span class="n">source_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">field</span><span class="p">],</span>
                 <span class="p">}</span>
 
-    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;iterable_item_removed&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">output_format</span><span class="o">=</span><span class="s2">&quot;list&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"iterable_item_removed"</span><span class="p">,</span> <span class="p">[]):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">path</span><span class="p">(</span><span class="n">output_format</span><span class="o">=</span><span class="s2">"list"</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
             <span class="n">device_name</span><span class="p">,</span> <span class="n">sname</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">path</span>
-            <span class="n">entity_updates</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">sname</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">entity_updates</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"update"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">sname</span><span class="p">,</span> <span class="p">{})</span>
             <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">entity_updates</span><span class="p">:</span>
                 <span class="n">entity_updates</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;old_value&quot;</span><span class="p">:</span> <span class="n">target_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">field</span><span class="p">],</span>
-                    <span class="s2">&quot;new_value&quot;</span><span class="p">:</span> <span class="n">source_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">field</span><span class="p">],</span>
+                    <span class="s2">"old_value"</span><span class="p">:</span> <span class="n">target_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">field</span><span class="p">],</span>
+                    <span class="s2">"new_value"</span><span class="p">:</span> <span class="n">source_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">field</span><span class="p">],</span>
                 <span class="p">}</span>
 
     <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">all_devices</span><span class="p">:</span>
-        <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;create&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;create&quot;</span><span class="p">])</span>
-        <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;delete&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;delete&quot;</span><span class="p">])</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"create"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"create"</span><span class="p">])</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"delete"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"delete"</span><span class="p">])</span>
 
         <span class="c1"># calculate in sync entities</span>
         <span class="n">src_entities_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">source_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="n">tgt_entities_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">target_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="n">common</span> <span class="o">=</span> <span class="n">src_entities_keys</span> <span class="o">&amp;</span> <span class="n">tgt_entities_keys</span>
-        <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
-            <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">common</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;update&quot;</span><span class="p">]</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"in_sync"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">common</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">"update"</span><span class="p">]</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">result</span>
@@ -9453,7 +9453,7 @@ Defaults to 4000 bytes/characters.</p>
     <span class="n">q</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Chunk pynetbox filter requests to avoid hitting URI length limits.</span>
 
 <span class="sd">    Netbox REST API list filters are encoded as URI query parameters. This helper</span>
@@ -9477,16 +9477,16 @@ Defaults to 4000 bytes/characters.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        list: All collected pynetbox objects across all chunked requests.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">endpoint_url</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="s2">&quot;url&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="n">endpoint_url</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="s2">"url"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
     <span class="n">request_options</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;fields&quot;</span><span class="p">:</span> <span class="n">fields</span><span class="p">,</span>
-        <span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="n">limit</span><span class="p">,</span>
-        <span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="n">offset</span><span class="p">,</span>
-        <span class="s2">&quot;ordering&quot;</span><span class="p">:</span> <span class="n">ordering</span><span class="p">,</span>
-        <span class="s2">&quot;brief&quot;</span><span class="p">:</span> <span class="n">brief</span><span class="p">,</span>
-        <span class="s2">&quot;exclude&quot;</span><span class="p">:</span> <span class="n">exclude</span><span class="p">,</span>
-        <span class="s2">&quot;q&quot;</span><span class="p">:</span> <span class="n">q</span><span class="p">,</span>
+        <span class="s2">"fields"</span><span class="p">:</span> <span class="n">fields</span><span class="p">,</span>
+        <span class="s2">"limit"</span><span class="p">:</span> <span class="n">limit</span><span class="p">,</span>
+        <span class="s2">"offset"</span><span class="p">:</span> <span class="n">offset</span><span class="p">,</span>
+        <span class="s2">"ordering"</span><span class="p">:</span> <span class="n">ordering</span><span class="p">,</span>
+        <span class="s2">"brief"</span><span class="p">:</span> <span class="n">brief</span><span class="p">,</span>
+        <span class="s2">"exclude"</span><span class="p">:</span> <span class="n">exclude</span><span class="p">,</span>
+        <span class="s2">"q"</span><span class="p">:</span> <span class="n">q</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="n">request_option_kwargs</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">request_options</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -9494,10 +9494,10 @@ Defaults to 4000 bytes/characters.</p>
     <span class="n">request_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">request_option_kwargs</span><span class="p">}</span>
 
     <span class="c1"># Match pynetbox filter encoding closely enough to predict request length:</span>
-    <span class="c1"># None becomes &quot;null&quot;, and list-like values become repeated query params.</span>
+    <span class="c1"># None becomes "null", and list-like values become repeated query params.</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">uri_len</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="n">encoded_params</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;null&quot;</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"null"</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="nb">len</span><span class="p">(</span><span class="n">endpoint_url</span><span class="p">)</span>
@@ -9510,7 +9510,7 @@ Defaults to 4000 bytes/characters.</p>
     <span class="k">if</span> <span class="n">uri_length</span> <span class="o">&lt;=</span> <span class="n">chunk_size</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">endpoint</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">request_kwargs</span><span class="p">))</span>
 
-    <span class="c1"># Prefer the caller&#39;s explicit chunk key. If it is omitted or cannot be</span>
+    <span class="c1"># Prefer the caller's explicit chunk key. If it is omitted or cannot be</span>
     <span class="c1"># split, choose the list-like filter contributing the most encoded bytes.</span>
     <span class="c1"># Request options such as fields/limit/ordering are never chunk candidates.</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">chunk_by</span><span class="p">:</span>
@@ -9521,9 +9521,9 @@ Defaults to 4000 bytes/characters.</p>
         <span class="p">}</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">list_args</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Unable to bulk filter &#39;</span><span class="si">{</span><span class="n">endpoint_url</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">endpoint</span><span class="si">}</span><span class="s2">&#39;: &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;encoded URI length </span><span class="si">{</span><span class="n">uri_length</span><span class="si">}</span><span class="s2"> exceeds chunk_size </span><span class="si">{</span><span class="n">chunk_size</span><span class="si">}</span><span class="s2"> &quot;</span>
-                <span class="s2">&quot;and no list filter can be chunked&quot;</span>
+                <span class="sa">f</span><span class="s2">"Unable to bulk filter '</span><span class="si">{</span><span class="n">endpoint_url</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">endpoint</span><span class="si">}</span><span class="s2">': "</span>
+                <span class="sa">f</span><span class="s2">"encoded URI length </span><span class="si">{</span><span class="n">uri_length</span><span class="si">}</span><span class="s2"> exceeds chunk_size </span><span class="si">{</span><span class="n">chunk_size</span><span class="si">}</span><span class="s2"> "</span>
+                <span class="s2">"and no list filter can be chunked"</span>
             <span class="p">)</span>
         <span class="n">chunk_by</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">list_args</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">list_args</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>
 
@@ -9554,9 +9554,9 @@ Defaults to 4000 bytes/characters.</p>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">single_value_length</span> <span class="o">&gt;</span> <span class="n">chunk_size</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Unable to bulk filter &#39;</span><span class="si">{</span><span class="n">endpoint_url</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">endpoint</span><span class="si">}</span><span class="s2">&#39;: &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;single &#39;</span><span class="si">{</span><span class="n">chunk_by</span><span class="si">}</span><span class="s2">&#39; value URI length </span><span class="si">{</span><span class="n">candidate_length</span><span class="si">}</span><span class="s2"> &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;exceeds chunk_size </span><span class="si">{</span><span class="n">chunk_size</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Unable to bulk filter '</span><span class="si">{</span><span class="n">endpoint_url</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">endpoint</span><span class="si">}</span><span class="s2">': "</span>
+                    <span class="sa">f</span><span class="s2">"single '</span><span class="si">{</span><span class="n">chunk_by</span><span class="si">}</span><span class="s2">' value URI length </span><span class="si">{</span><span class="n">candidate_length</span><span class="si">}</span><span class="s2"> "</span>
+                    <span class="sa">f</span><span class="s2">"exceeds chunk_size </span><span class="si">{</span><span class="n">chunk_size</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">current_chunk</span><span class="p">:</span>
@@ -9576,7 +9576,7 @@ Defaults to 4000 bytes/characters.</p>
 
 
 <h3 id="norfab.workers.netbox_worker.netbox_worker.NetboxWorker.cache_list" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">cache_list</span><span class="p">(</span><span class="n">keys</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">details</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span></code>
+            <code class="highlight language-python"><span class="n">cache_list</span><span class="p">(</span><span class="n">keys</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'*'</span><span class="p">,</span> <span class="n">details</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span></code>
 
 <a href="#norfab.workers.netbox_worker.netbox_worker.NetboxWorker.cache_list" class="headerlink" title="Permanent link">¤</a></h3>
 
@@ -9705,30 +9705,30 @@ Defaults to 4000 bytes/characters.</p>
 <span class="normal">957</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CacheListInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CacheListResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;List NetBox Cache&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"List NetBox Cache"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">cache_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="n">details</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cache_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"*"</span><span class="p">,</span> <span class="n">details</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve a list of cache keys, optionally with details about each key.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        keys (str): A pattern to match cache keys against. Defaults to &quot;*&quot;.</span>
+<span class="sd">        keys (str): A pattern to match cache keys against. Defaults to "*".</span>
 <span class="sd">        details (bool): If True, include detailed information about each cache key. Defaults to False.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        list: A list of cache keys or a list of dictionaries with detailed information if `details` is True.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">expire</span><span class="p">()</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:cache_list&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">[])</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:cache_list"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">[])</span>
     <span class="k">for</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">fnmatchcase</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">details</span><span class="p">:</span>
@@ -9738,10 +9738,10 @@ Defaults to 4000 bytes/characters.</p>
                 <span class="n">age</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">creation</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="n">cache_key</span><span class="p">,</span>
-                        <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">age</span><span class="p">),</span>
-                        <span class="s2">&quot;creation&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">creation</span><span class="p">),</span>
-                        <span class="s2">&quot;expires&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">expires</span><span class="p">),</span>
+                        <span class="s2">"key"</span><span class="p">:</span> <span class="n">cache_key</span><span class="p">,</span>
+                        <span class="s2">"age"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">age</span><span class="p">),</span>
+                        <span class="s2">"creation"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">creation</span><span class="p">),</span>
+                        <span class="s2">"expires"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">expires</span><span class="p">),</span>
                     <span class="p">}</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -9957,21 +9957,21 @@ Defaults to 4000 bytes/characters.</p>
     <span class="nb">input</span><span class="o">=</span><span class="n">CacheClearInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CacheClearResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;DELETE&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">(),</span>
+        <span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"DELETE"</span><span class="p">],</span>
+        <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">(),</span>
     <span class="p">},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Clear NetBox Cache&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Clear NetBox Cache"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">cache_clear</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Clears specified keys from the cache.</span>
 
 <span class="sd">    Args:</span>
@@ -9990,37 +9990,37 @@ Defaults to 4000 bytes/characters.</p>
 <span class="sd">    - If neither `key` nor `keys` is provided, the function will return a message indicating that there is nothing to clear.</span>
 <span class="sd">    - If `key` is provided, it will attempt to remove that specific key from the cache.</span>
 <span class="sd">    - If `keys` is provided, it will attempt to remove all keys matching the glob pattern from the cache.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:cache_clear&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">[])</span>
+<span class="sd">    """</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:cache_clear"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">[])</span>
     <span class="c1"># check if has keys to clear</span>
     <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">keys</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="s2">&quot;Nothing to clear, specify key or keys&quot;</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no cache key pattern provided, nothing to clear&quot;</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="s2">"Nothing to clear, specify key or keys"</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no cache key pattern provided, nothing to clear"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="c1"># remove specific key from cache</span>
     <span class="k">if</span> <span class="n">key</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">retry</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Removed cache key &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;removed cache key &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Removed cache key '</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"removed cache key '</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to remove </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> from cache&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed to remove </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> from cache"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Cache key &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; not found&quot;</span><span class="p">)</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Key </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> not in cache.&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Cache key '</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">' not found"</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Key </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> not in cache."</span><span class="p">)</span>
     <span class="c1"># remove all keys matching glob pattern</span>
     <span class="k">if</span> <span class="n">keys</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Clearing cache keys matching pattern &#39;</span><span class="si">{</span><span class="n">keys</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Clearing cache keys matching pattern '</span><span class="si">{</span><span class="n">keys</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">fnmatchcase</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">retry</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
                     <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
-                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Removed cache key &#39;</span><span class="si">{</span><span class="n">cache_key</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Removed cache key '</span><span class="si">{</span><span class="n">cache_key</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to remove </span><span class="si">{</span><span class="n">cache_key</span><span class="si">}</span><span class="s2"> from cache&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed to remove </span><span class="si">{</span><span class="n">cache_key</span><span class="si">}</span><span class="s2"> from cache"</span><span class="p">)</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;removed </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> cache key(s) matching pattern &#39;</span><span class="si">{</span><span class="n">keys</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="sa">f</span><span class="s2">"removed </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> cache key(s) matching pattern '</span><span class="si">{</span><span class="n">keys</span><span class="si">}</span><span class="s2">'"</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
@@ -10226,21 +10226,21 @@ the cache keys and the values are the corresponding cache values.</p>
 <span class="normal">1081</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CacheGetInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CacheGetResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get NetBox Cache&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get NetBox Cache"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">cache_get</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">raise_missing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve values from the cache based on a specific key or a pattern of keys.</span>
 
 <span class="sd">    Args:</span>
@@ -10256,24 +10256,24 @@ the cache keys and the values are the corresponding cache values.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        KeyError: If raise_missing is True and the specific key is not found in the cache.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:cache_clear&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{})</span>
+<span class="sd">    """</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:cache_clear"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{})</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;retrieving cache entries by &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;key&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;pattern&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">keys</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;empty selector&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"retrieving cache entries by "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'key'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'pattern'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">keys</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'empty selector'</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
     <span class="c1"># get specific key from cache</span>
     <span class="k">if</span> <span class="n">key</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="k">elif</span> <span class="n">raise_missing</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Key </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> not in cache.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Key </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> not in cache."</span><span class="p">)</span>
     <span class="c1"># get all keys matching glob pattern</span>
     <span class="k">if</span> <span class="n">keys</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">fnmatchcase</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">cache_key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">cache_key</span><span class="p">]</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> cache entry(s)&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> cache entry(s)"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -10285,7 +10285,7 @@ the cache keys and the values are the corresponding cache values.</p>
 
 
 <h3 id="norfab.workers.netbox_worker.netbox_worker.NetboxWorker.rest" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">rest</span><span class="p">(</span><span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;get&#39;</span><span class="p">,</span> <span class="n">api</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span></code>
+            <code class="highlight language-python"><span class="n">rest</span><span class="p">(</span><span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'get'</span><span class="p">,</span> <span class="n">api</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">''</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span></code>
 
 <a href="#norfab.workers.netbox_worker.netbox_worker.NetboxWorker.rest" class="headerlink" title="Permanent link">¤</a></h3>
 
@@ -10521,14 +10521,14 @@ the cache keys and the values are the corresponding cache values.</p>
 <span class="normal">1163</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">RestInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">RestResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Call NetBox REST API&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Call NetBox REST API"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -10537,18 +10537,18 @@ the cache keys and the values are the corresponding cache values.</p>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span>
-    <span class="n">api</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"get"</span><span class="p">,</span>
+    <span class="n">api</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Sends a request to the Netbox REST API.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        instance (str, optional): The Netbox instance name to get parameters for.</span>
 <span class="sd">        branch (str, optional): NetBox branching plugin branch name to use.</span>
-<span class="sd">        method (str, optional): The HTTP method to use for the request (e.g., &#39;get&#39;, &#39;post&#39;). Defaults to &quot;get&quot;.</span>
-<span class="sd">        api (str, optional): The API endpoint to send the request to. Defaults to &quot;&quot;.</span>
+<span class="sd">        method (str, optional): The HTTP method to use for the request (e.g., 'get', 'post'). Defaults to "get".</span>
+<span class="sd">        api (str, optional): The API endpoint to send the request to. Defaults to "".</span>
 <span class="sd">        **kwargs: Additional arguments to pass to the request (e.g., params, data, json).</span>
 
 <span class="sd">    Returns:</span>
@@ -10556,30 +10556,30 @@ the cache keys and the values are the corresponding cache values.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        requests.exceptions.HTTPError: If the HTTP request returned an unsuccessful status code.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:rest&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{})</span>
+<span class="sd">    """</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:rest"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{})</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">nb_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_instance_params</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
-    <span class="n">api</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+    <span class="n">api</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
 
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - REST </span><span class="si">{</span><span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> &#39;</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/api/</span><span class="si">{</span><span class="n">api</span><span class="si">}</span><span class="s2">/&#39;&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - REST </span><span class="si">{</span><span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> '</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">'url'</span><span class="p">]</span><span class="si">}</span><span class="s2">/api/</span><span class="si">{</span><span class="n">api</span><span class="si">}</span><span class="s2">/'"</span><span class="p">)</span>
     <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
-        <span class="s2">&quot;timeout&quot;</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_connect_timeout</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_read_timeout</span><span class="p">)</span>
+        <span class="s2">"timeout"</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_connect_timeout</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_read_timeout</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Accept&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Token </span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">&#39;token&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s2">"Content-Type"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">,</span>
+        <span class="s2">"Accept"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">,</span>
+        <span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Token </span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">'token'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
-        <span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-NetBox-Branch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">http_session</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-NetBox-Branch&quot;</span><span class="p">]</span>
+        <span class="n">headers</span><span class="p">[</span><span class="s2">"X-NetBox-Branch"</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">http_session</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">"X-NetBox-Branch"</span><span class="p">]</span>
 
     <span class="c1"># send request to Netbox REST API</span>
     <span class="n">response</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_http_session</span><span class="p">,</span> <span class="n">method</span><span class="p">)(</span>
-        <span class="n">url</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/api/</span><span class="si">{</span><span class="n">api</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">,</span>
+        <span class="n">url</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">'url'</span><span class="p">]</span><span class="si">}</span><span class="s2">/api/</span><span class="si">{</span><span class="n">api</span><span class="si">}</span><span class="s2">/"</span><span class="p">,</span>
         <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
-        <span class="n">verify</span><span class="o">=</span><span class="n">nb_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ssl_verify&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="n">verify</span><span class="o">=</span><span class="n">nb_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ssl_verify"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -10587,7 +10587,7 @@ the cache keys and the values are the corresponding cache values.</p>
         <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - REST </span><span class="si">{</span><span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> &#39;</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/api/</span><span class="si">{</span><span class="n">api</span><span class="si">}</span><span class="s2">/&#39; failed, status </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - REST </span><span class="si">{</span><span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> '</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">'url'</span><span class="p">]</span><span class="si">}</span><span class="s2">/api/</span><span class="si">{</span><span class="n">api</span><span class="si">}</span><span class="s2">/' failed, status </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span>
         <span class="k">return</span> <span class="n">ret</span>
@@ -10595,7 +10595,7 @@ the cache keys and the values are the corresponding cache values.</p>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to decode json, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed to decode json, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span> <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span> <span class="k">else</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span>
 
     <span class="k">return</span> <span class="n">ret</span>
@@ -10826,7 +10826,7 @@ updates</p>
     <span class="n">ignore_if_not_empty</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">diff</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compare desired state with current NetBox object state and return fields that need updating.</span>
 
 <span class="sd">    Args:</span>
@@ -10834,24 +10834,24 @@ updates</p>
 <span class="sd">        current_state (dict): Dictionary with current NetBox object field values.</span>
 <span class="sd">        ignore_fields (list, optional): List of field names to ignore completely.</span>
 <span class="sd">        ignore_if_not_empty (list, optional): List of field names to ignore if they have</span>
-<span class="sd">            non-empty values in current_state (won&#39;t overwrite existing data).</span>
+<span class="sd">            non-empty values in current_state (won't overwrite existing data).</span>
 <span class="sd">        diff (dict, optional): Dictionary to accumulate field differences. If not provided,</span>
 <span class="sd">            a new dictionary will be created.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        tuple: A tuple containing:</span>
 <span class="sd">            - updates (dict): Dictionary containing only fields that need to be updated with their new values.</span>
-<span class="sd">            - diff (dict): Dictionary containing the differences with &#39;+&#39; (new value) and &#39;-&#39; (old value) keys.</span>
+<span class="sd">            - diff (dict): Dictionary containing the differences with '+' (new value) and '-' (old value) keys.</span>
 
 <span class="sd">    Example:</span>
-<span class="sd">        &gt;&gt;&gt; desired = {&quot;serial&quot;: &quot;ABC123&quot;, &quot;asset_tag&quot;: &quot;TAG001&quot;, &quot;comments&quot;: &quot;New comment&quot;}</span>
-<span class="sd">        &gt;&gt;&gt; current = {&quot;serial&quot;: &quot;OLD123&quot;, &quot;asset_tag&quot;: &quot;&quot;, &quot;comments&quot;: &quot;Existing&quot;}</span>
+<span class="sd">        &gt;&gt;&gt; desired = {"serial": "ABC123", "asset_tag": "TAG001", "comments": "New comment"}</span>
+<span class="sd">        &gt;&gt;&gt; current = {"serial": "OLD123", "asset_tag": "", "comments": "Existing"}</span>
 <span class="sd">        &gt;&gt;&gt; ignore_fields = []</span>
-<span class="sd">        &gt;&gt;&gt; ignore_if_not_empty = [&quot;comments&quot;]</span>
+<span class="sd">        &gt;&gt;&gt; ignore_if_not_empty = ["comments"]</span>
 <span class="sd">        &gt;&gt;&gt; updates, diff = compare_netbox_object_state(desired, current, ignore_fields, ignore_if_not_empty)</span>
 <span class="sd">        &gt;&gt;&gt; updates</span>
-<span class="sd">        {&quot;serial&quot;: &quot;ABC123&quot;, &quot;asset_tag&quot;: &quot;TAG001&quot;}</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        {"serial": "ABC123", "asset_tag": "TAG001"}</span>
+<span class="sd">    """</span>
     <span class="n">ignore_fields</span> <span class="o">=</span> <span class="n">ignore_fields</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">ignore_if_not_empty</span> <span class="o">=</span> <span class="n">ignore_if_not_empty</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">updates</span> <span class="o">=</span> <span class="p">{}</span>
@@ -10862,7 +10862,7 @@ updates</p>
         <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">ignore_fields</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="c1"># Get current value, default to None if field doesn&#39;t exist</span>
+        <span class="c1"># Get current value, default to None if field doesn't exist</span>
         <span class="n">current_value</span> <span class="o">=</span> <span class="n">current_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
 
         <span class="c1"># Skip if field is in ignore_if_not_empty and current value is not empty</span>
@@ -10873,8 +10873,8 @@ updates</p>
         <span class="k">if</span> <span class="n">current_value</span> <span class="o">!=</span> <span class="n">desired_value</span><span class="p">:</span>
             <span class="n">updates</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">desired_value</span>
             <span class="n">diff</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="n">current_value</span><span class="p">,</span>
-                <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">desired_value</span><span class="p">,</span>
+                <span class="s2">"-"</span><span class="p">:</span> <span class="n">current_value</span><span class="p">,</span>
+                <span class="s2">"+"</span><span class="p">:</span> <span class="n">desired_value</span><span class="p">,</span>
             <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">updates</span><span class="p">,</span> <span class="n">diff</span>
@@ -11017,43 +11017,43 @@ updates</p>
 <span class="normal">1262</span>
 <span class="normal">1263</span>
 <span class="normal">1264</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_nornir_hosts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieves a list of unique Nornir hosts from Nornir service based on provided filter criteria.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        kwargs (dict): Dictionary of keyword arguments, where keys starting with &#39;F&#39; are used as filters.</span>
+<span class="sd">        kwargs (dict): Dictionary of keyword arguments, where keys starting with 'F' are used as filters.</span>
 <span class="sd">        timeout (int): Timeout value (in seconds) for the job execution.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        list: Sorted list of unique Nornir host names that match the filter criteria.</span>
 
 <span class="sd">    Notes:</span>
-<span class="sd">        - Only filters with keys starting with &#39;F&#39; are considered.</span>
+<span class="sd">        - Only filters with keys starting with 'F' are considered.</span>
 <span class="sd">        - Hosts are collected from all workers where the job did not fail.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">filters</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;F&quot;</span><span class="p">)}</span>
+    <span class="n">filters</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"F"</span><span class="p">)}</span>
     <span class="k">if</span> <span class="n">filters</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - get_nornir_hosts querying Nornir service with filters: </span><span class="si">{</span><span class="n">filters</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - get_nornir_hosts querying Nornir service with filters: </span><span class="si">{</span><span class="n">filters</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
         <span class="n">nornir_hosts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-            <span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;get_nornir_hosts&quot;</span><span class="p">,</span>
+            <span class="s2">"nornir"</span><span class="p">,</span>
+            <span class="s2">"get_nornir_hosts"</span><span class="p">,</span>
             <span class="n">kwargs</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
-            <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+            <span class="n">workers</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
             <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">nornir_hosts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">])</span>
-            <span class="k">elif</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"result"</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"result"</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">r</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]:</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get nornir hosts worker &#39;</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">&#39; failed: </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;errors&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get nornir hosts worker '</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">' failed: </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'errors'</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
 
     <span class="n">unique_hosts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="p">)))</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - get_nornir_hosts resolved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> host(s)&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - get_nornir_hosts resolved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> host(s)"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">unique_hosts</span>
 </code></pre></div></td></tr></table></div>
             </details>

@@ -7145,25 +7145,25 @@ Each call starts a fresh conversation; there is no conversation thread setting.<
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Ask the default agent a question:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>agent<span class="w"> </span>invoke<span class="w"> </span>instructions<span class="w"> </span><span class="s2">&quot;Summarize the current NorFab inventory&quot;</span>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>agent<span class="w"> </span>invoke<span class="w"> </span>instructions<span class="w"> </span><span class="s2">"Summarize the current NorFab inventory"</span>
 </code></pre></div>
 <p>Invoke a custom agent:</p>
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>agent<span class="w"> </span>invoke<span class="w"> </span>name<span class="w"> </span>nf://agents/interface_check.yaml<span class="w"> </span>instructions<span class="w"> </span><span class="s2">&quot;Check interfaces on r1&quot;</span>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>agent<span class="w"> </span>invoke<span class="w"> </span>name<span class="w"> </span>nf://agents/interface_check.yaml<span class="w"> </span>instructions<span class="w"> </span><span class="s2">"Check interfaces on r1"</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <p>Context manager:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;agent&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;invoke&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"agent"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"invoke"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;instructions&quot;</span><span class="p">:</span> <span class="s2">&quot;Summarize the current NorFab inventory&quot;</span><span class="p">,</span>
+            <span class="s2">"instructions"</span><span class="p">:</span> <span class="s2">"Summarize the current NorFab inventory"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
@@ -7171,19 +7171,19 @@ Each call starts a fresh conversation; there is no conversation thread setting.<
 <p>Direct lifecycle with a named agent:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;agent&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;invoke&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"agent"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"invoke"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;NorFab&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;instructions&quot;</span><span class="p">:</span> <span class="s2">&quot;Check whether any workers are unhealthy&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;verbose_result&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"NorFab"</span><span class="p">,</span>
+            <span class="s2">"instructions"</span><span class="p">:</span> <span class="s2">"Check whether any workers are unhealthy"</span><span class="p">,</span>
+            <span class="s2">"verbose_result"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
@@ -7199,7 +7199,7 @@ Each call starts a fresh conversation; there is no conversation thread setting.<
 root
 └──<span class="w"> </span>agent:<span class="w">    </span>AI<span class="w"> </span>Agent<span class="w"> </span>service
 <span class="w">    </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">    </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">    </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
 <span class="w">    </span>├──<span class="w"> </span>show:<span class="w">    </span>Show<span class="w"> </span>Agent<span class="w"> </span>service<span class="w"> </span>parameters
 <span class="w">    </span>│<span class="w">   </span>├──<span class="w"> </span>inventory:<span class="w">    </span>show<span class="w"> </span>agent<span class="w"> </span>inventory<span class="w"> </span>data
 <span class="w">    </span>│<span class="w">   </span>├──<span class="w"> </span>version:<span class="w">    </span>show<span class="w"> </span>agent<span class="w"> </span>service<span class="w"> </span>version<span class="w"> </span>report
@@ -7207,8 +7207,8 @@ root
 <span class="w">    </span>├──<span class="w"> </span>invoke:<span class="w">    </span>Invoke<span class="w"> </span>an<span class="w"> </span>agent<span class="w"> </span>to<span class="w"> </span>chat<span class="w"> </span>or<span class="w"> </span>run<span class="w"> </span>a<span class="w"> </span>task
 <span class="w">    </span>│<span class="w">   </span>├──<span class="w"> </span>instructions:<span class="w">    </span>Provide<span class="w"> </span>instructions
 <span class="w">    </span>│<span class="w">   </span>├──<span class="w"> </span>name:<span class="w">    </span>Agent<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>interact<span class="w"> </span>with
-<span class="w">    </span>│<span class="w">   </span>└──<span class="w"> </span>progress:<span class="w">    </span>Emit<span class="w"> </span>execution<span class="w"> </span>progress,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
-<span class="w">    </span>└──<span class="w"> </span>progress:<span class="w">    </span>Emit<span class="w"> </span>execution<span class="w"> </span>progress,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">    </span>│<span class="w">   </span>└──<span class="w"> </span>progress:<span class="w">    </span>Emit<span class="w"> </span>execution<span class="w"> </span>progress,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
+<span class="w">    </span>└──<span class="w"> </span>progress:<span class="w">    </span>Emit<span class="w"> </span>execution<span class="w"> </span>progress,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
@@ -7443,14 +7443,14 @@ Each invocation starts a fresh conversation without stored history.</p>
 <span class="normal">373</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">InvokeInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">InvokeResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Invoke Agent&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Invoke Agent"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -7458,10 +7458,10 @@ Each invocation starts a fresh conversation without stored history.</p>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">instructions</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NorFab&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"NorFab"</span><span class="p">,</span>
     <span class="n">verbose_result</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run instructions with the built-in agent or a custom YAML definition.</span>
+<span class="w">    </span><span class="sd">"""Run instructions with the built-in agent or a custom YAML definition.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        job (Job): Job context used to report execution progress.</span>
@@ -7481,28 +7481,28 @@ Each invocation starts a fresh conversation without stored history.</p>
 <span class="sd">        RuntimeError: The built-in agent has no configured ``default_llm``.</span>
 <span class="sd">        FileNotFoundError: The custom definition cannot be fetched.</span>
 <span class="sd">        KeyError: A required definition or fallback model setting is missing.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">()</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Invoke: Processing instructions with &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; agent&quot;</span><span class="p">)</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;getting </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> agent ready&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Invoke: Processing instructions with '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' agent"</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"getting </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> agent ready"</span><span class="p">)</span>
 
     <span class="n">agent_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_agent</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
     <span class="n">agent_instance</span> <span class="o">=</span> <span class="n">create_agent</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="n">agent_data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
-        <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_llm</span><span class="p">(</span><span class="o">**</span><span class="n">agent_data</span><span class="p">[</span><span class="s2">&quot;llm&quot;</span><span class="p">]),</span>
-        <span class="n">system_prompt</span><span class="o">=</span><span class="n">agent_data</span><span class="p">[</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">],</span>
-        <span class="n">tools</span><span class="o">=</span><span class="n">agent_data</span><span class="p">[</span><span class="s2">&quot;tools&quot;</span><span class="p">],</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">agent_data</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span>
+        <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_llm</span><span class="p">(</span><span class="o">**</span><span class="n">agent_data</span><span class="p">[</span><span class="s2">"llm"</span><span class="p">]),</span>
+        <span class="n">system_prompt</span><span class="o">=</span><span class="n">agent_data</span><span class="p">[</span><span class="s2">"system_prompt"</span><span class="p">],</span>
+        <span class="n">tools</span><span class="o">=</span><span class="n">agent_data</span><span class="p">[</span><span class="s2">"tools"</span><span class="p">],</span>
     <span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> agent thinking&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> agent thinking"</span><span class="p">)</span>
 
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">agent_instance</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span>
-        <span class="p">{</span><span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">instructions</span><span class="p">}]}</span>
+        <span class="p">{</span><span class="s2">"messages"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="n">instructions</span><span class="p">}]}</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">verbose_result</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;messages&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">content</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"messages"</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">content</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>

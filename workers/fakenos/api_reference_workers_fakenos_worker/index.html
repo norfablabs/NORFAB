@@ -7334,7 +7334,7 @@
 
 
 <h2 id="norfab.workers.fakenos_worker.fakenos_worker.FakeNOSWorker" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">FakeNOSWorker</span><span class="p">(</span><span class="n">inventory</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">broker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exit_event</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">init_done_event</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;WARNING&#39;</span><span class="p">)</span></code>
+              <code class="highlight language-python"><span class="n">FakeNOSWorker</span><span class="p">(</span><span class="n">inventory</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">broker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exit_event</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">init_done_event</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'WARNING'</span><span class="p">)</span></code>
 
 <a href="#norfab.workers.fakenos_worker.fakenos_worker.FakeNOSWorker" class="headerlink" title="Permanent link">¤</a></h2>
 
@@ -7517,9 +7517,9 @@ signalling the parent that the worker is ready.</p>
     <span class="n">worker_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">exit_event</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">init_done_event</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;WARNING&quot;</span><span class="p">,</span>
+    <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"WARNING"</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Initialise the FakeNOS worker.</span>
 
 <span class="sd">    Args:</span>
@@ -7531,9 +7531,9 @@ signalling the parent that the worker is ready.</p>
 <span class="sd">            that signals the worker to shut down.</span>
 <span class="sd">        init_done_event: Event set when initialisation is complete,</span>
 <span class="sd">            signalling the parent that the worker is ready.</span>
-<span class="sd">        log_level: Logging level string (e.g. ``&quot;DEBUG&quot;``,</span>
-<span class="sd">            ``&quot;WARNING&quot;``).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        log_level: Logging level string (e.g. ``"DEBUG"``,</span>
+<span class="sd">            ``"WARNING"``).</span>
+<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">inventory</span><span class="p">,</span> <span class="n">broker</span><span class="p">,</span> <span class="n">SERVICE</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">exit_event</span><span class="p">,</span> <span class="n">log_level</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">networks</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">init_done_event</span> <span class="o">=</span> <span class="n">init_done_event</span>
@@ -7541,7 +7541,7 @@ signalling the parent that the worker is ready.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">nos_plugins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_nos_plugins</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">auto_start_networks</span><span class="p">()</span>
 
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Initialization completed&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Initialization completed"</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">init_done_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
                   </details>
@@ -7581,9 +7581,9 @@ signalling the parent that the worker is ready.</p>
 <span class="normal">163</span>
 <span class="normal">164</span>
 <span class="normal">165</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">worker_exit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Gracefully stop all running FakeNOS networks on worker shutdown.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">job</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
@@ -7757,10 +7757,10 @@ result queue.</p>
 <span class="normal">192</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">call_network</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Send a method call to a running FakeNOS process and return the result.</span>
 
-<span class="sd">    Places a ``(method, args, kwargs)`` request on the network&#39;s command</span>
+<span class="sd">    Places a ``(method, args, kwargs)`` request on the network's command</span>
 <span class="sd">    queue and blocks until the child process posts a response on the</span>
 <span class="sd">    result queue.</span>
 
@@ -7773,10 +7773,10 @@ result queue.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The value returned by the child process.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">[</span><span class="n">network</span><span class="p">]</span>
-    <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;cmd_queue&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">method</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">))</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;result_queue&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+    <span class="n">entry</span><span class="p">[</span><span class="s2">"cmd_queue"</span><span class="p">]</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">method</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">))</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"result_queue"</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">result</span>
     <span class="k">return</span> <span class="n">result</span>
@@ -7857,7 +7857,7 @@ plugin dictionaries ready to be passed to :class:<code>FakeNOS</code>.</p>
 <span class="normal">210</span>
 <span class="normal">211</span>
 <span class="normal">212</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_nos_plugins</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Load NOS plugin definitions declared in the worker inventory.</span>
 
 <span class="sd">    Fetches each plugin file listed under the ``nos_plugins`` key of the</span>
@@ -7867,13 +7867,13 @@ plugin dictionaries ready to be passed to :class:<code>FakeNOS</code>.</p>
 <span class="sd">    Returns:</span>
 <span class="sd">        List of parsed NOS plugin dictionaries.  Empty if no plugins are</span>
 <span class="sd">        configured or all plugins fail to load.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fakenos_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nos_plugins&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fakenos_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"nos_plugins"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Plugin load failed, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Plugin load failed, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7905,13 +7905,13 @@ plugin dictionaries ready to be passed to :class:<code>FakeNOS</code>.</p>
 <span class="normal">219</span>
 <span class="normal">220</span>
 <span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">auto_start_networks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Start inventory-defined FakeNOS networks with ``auto_start`` enabled.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">network</span><span class="p">,</span> <span class="n">params</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fakenos_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;networks&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="sd">    """</span>
+    <span class="k">for</span> <span class="n">network</span><span class="p">,</span> <span class="n">params</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fakenos_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"networks"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">params</span> <span class="o">=</span> <span class="n">params</span> <span class="ow">or</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;auto_start&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">job</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">inventory</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;inventory&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"auto_start"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">job</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">inventory</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"inventory"</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -8017,32 +8017,32 @@ plugin dictionaries ready to be passed to :class:<code>FakeNOS</code>.</p>
 <span class="normal">260</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetVersionInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetVersionResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Version&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Version"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Return version information for key packages and the Python runtime.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        :class:`Result` whose ``result`` field is a dict mapping package</span>
 <span class="sd">        names (``norfab``, ``fakenos``, ``paramiko``, ``python``,</span>
 <span class="sd">        ``platform``) to their installed version strings.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">libs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;norfab&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;fakenos&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;paramiko&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;python&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
-        <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
+        <span class="s2">"norfab"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"fakenos"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"paramiko"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"python"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">" "</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s2">"platform"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="c1"># get version of packages installed</span>
     <span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="n">libs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -8121,24 +8121,24 @@ plugin dictionaries ready to be passed to :class:<code>FakeNOS</code>.</p>
 <span class="normal">283</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetInventoryResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Inventory&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Inventory"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Return the raw FakeNOS inventory loaded by this worker.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        :class:`Result` whose ``result`` field is the full inventory dict.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fakenos_inventory</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8260,19 +8260,19 @@ all currently running networks are stopped.</p>
 <span class="normal">329</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">FakeNOSStopInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">FakeNOSNetworkActionResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Stop FakeNOS Network&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Stop FakeNOS Network"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Stop one or all running FakeNOS networks.</span>
 
 <span class="sd">    Signals the target child process(es) to exit via their stop event,</span>
@@ -8283,23 +8283,23 @@ all currently running networks are stopped.</p>
 <span class="sd">        job: NorFab job context injected by the ``@Task`` decorator.</span>
 <span class="sd">        network: Name of the network to stop.  If ``None`` (default),</span>
 <span class="sd">            all currently running networks are stopped.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="p">{})</span>
     <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">network</span><span class="p">]</span> <span class="k">if</span> <span class="n">network</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stopping &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; FakeNOS network&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Stopping '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' FakeNOS network"</span><span class="p">)</span>
         <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">entry</span><span class="p">:</span>
-            <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;stop_event&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
-            <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;process&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;process&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> Did not stop in 1 second - killing process&quot;</span><span class="p">)</span>
-                <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;process&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
-                <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;process&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+            <span class="n">entry</span><span class="p">[</span><span class="s2">"stop_event"</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+            <span class="n">entry</span><span class="p">[</span><span class="s2">"process"</span><span class="p">]</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"process"</span><span class="p">]</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> Did not stop in 1 second - killing process"</span><span class="p">)</span>
+                <span class="n">entry</span><span class="p">[</span><span class="s2">"process"</span><span class="p">]</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+                <span class="n">entry</span><span class="p">[</span><span class="s2">"process"</span><span class="p">]</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;stopped&quot;</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stopped &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; FakeNOS network&quot;</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"stopped"</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Stopped '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' FakeNOS network"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
@@ -8535,21 +8535,21 @@ Used to emit progress events visible to callers.</p>
 <span class="normal">416</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">FakeNOSStartInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">FakeNOSNetworkActionResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Start FakeNOS Network&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Start FakeNOS Network"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inventory</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Start a new FakeNOS network in a dedicated child process.</span>
 
 <span class="sd">    If *inventory* is a URL or file path, it is fetched and parsed before</span>
@@ -8576,22 +8576,22 @@ Used to emit progress events visible to callers.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: If a network with the same name is already tracked.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">network</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;FakeNOS network &#39;</span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2">&#39; already exists; use restart&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"FakeNOS network '</span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2">' already exists; use restart"</span><span class="p">)</span>
 
     <span class="c1"># fetch inventory</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">inventory</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">job</span><span class="p">:</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2"> fetching inventory&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2"> fetching inventory"</span><span class="p">)</span>
         <span class="n">inventory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">inventory</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">inventory</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">inventory</span><span class="p">)</span>
 
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Start: Starting &#39;</span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2">&#39; FakeNOS network&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Start: Starting '</span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2">' FakeNOS network"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">job</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2"> starting network&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2"> starting network"</span><span class="p">)</span>
 
     <span class="n">stop_event</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
     <span class="n">cmd_queue</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
@@ -8600,17 +8600,17 @@ Used to emit progress events visible to callers.</p>
         <span class="n">target</span><span class="o">=</span><span class="n">fakenos_network_process</span><span class="p">,</span>
         <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">inventory</span><span class="p">,</span> <span class="n">stop_event</span><span class="p">,</span> <span class="n">cmd_queue</span><span class="p">,</span> <span class="n">result_queue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nos_plugins</span><span class="p">),</span>
         <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;fakenos-</span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"fakenos-</span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">process</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">[</span><span class="n">network</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;process&quot;</span><span class="p">:</span> <span class="n">process</span><span class="p">,</span>
-        <span class="s2">&quot;stop_event&quot;</span><span class="p">:</span> <span class="n">stop_event</span><span class="p">,</span>
-        <span class="s2">&quot;cmd_queue&quot;</span><span class="p">:</span> <span class="n">cmd_queue</span><span class="p">,</span>
-        <span class="s2">&quot;result_queue&quot;</span><span class="p">:</span> <span class="n">result_queue</span><span class="p">,</span>
-        <span class="s2">&quot;inventory&quot;</span><span class="p">:</span> <span class="n">inventory</span><span class="p">,</span>
-        <span class="s2">&quot;start_time&quot;</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span>
+        <span class="s2">"process"</span><span class="p">:</span> <span class="n">process</span><span class="p">,</span>
+        <span class="s2">"stop_event"</span><span class="p">:</span> <span class="n">stop_event</span><span class="p">,</span>
+        <span class="s2">"cmd_queue"</span><span class="p">:</span> <span class="n">cmd_queue</span><span class="p">,</span>
+        <span class="s2">"result_queue"</span><span class="p">:</span> <span class="n">result_queue</span><span class="p">,</span>
+        <span class="s2">"inventory"</span><span class="p">:</span> <span class="n">inventory</span><span class="p">,</span>
+        <span class="s2">"start_time"</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span>
     <span class="p">}</span>
 
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inspect_networks</span><span class="p">(</span>
@@ -8729,19 +8729,19 @@ exist in <code>self.networks</code>.</p>
 <span class="normal">453</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">FakeNOSRestartInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">FakeNOSNetworkActionResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Restart FakeNOS Network&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Restart FakeNOS Network"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">restart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Stop and restart an existing FakeNOS network.</span>
 
 <span class="sd">    Retrieves the previously resolved inventory from ``self.networks``,</span>
@@ -8752,10 +8752,10 @@ exist in <code>self.networks</code>.</p>
 <span class="sd">        job: NorFab job context injected by the ``@Task`` decorator.</span>
 <span class="sd">        network: Name of the FakeNOS network to restart.  Must already</span>
 <span class="sd">            exist in ``self.networks``.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">()</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Restart: Restarting &#39;</span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2">&#39; FakeNOS network&quot;</span><span class="p">)</span>
-    <span class="n">inventory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">[</span><span class="n">network</span><span class="p">][</span><span class="s2">&quot;inventory&quot;</span><span class="p">]</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Restart: Restarting '</span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2">' FakeNOS network"</span><span class="p">)</span>
+    <span class="n">inventory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">[</span><span class="n">network</span><span class="p">][</span><span class="s2">"inventory"</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">network</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">inventory</span><span class="p">)</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inspect_networks</span><span class="p">(</span>
@@ -8928,21 +8928,21 @@ its host list and return extended per-network dicts.  When
 <span class="normal">526</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">FakeNOSListNetworksInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">FakeNOSInspectNetworksResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Inspect FakeNOS Networks&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Inspect FakeNOS Networks"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">inspect_networks</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">details</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Return status information for one or all FakeNOS networks.</span>
 
 <span class="sd">    When *details* is ``True`` each network entry includes the child</span>
@@ -8957,7 +8957,7 @@ its host list and return extended per-network dicts.  When
 <span class="sd">        details: When ``True`` (default) query each network process for</span>
 <span class="sd">            its host list and return extended per-network dicts.  When</span>
 <span class="sd">            ``False`` return only the list of network names.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">()</span>
 
     <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">network</span><span class="p">]</span> <span class="k">if</span> <span class="n">network</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">)</span>
@@ -8966,32 +8966,32 @@ its host list and return extended per-network dicts.  When
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">net_name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
             <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">[</span><span class="n">net_name</span><span class="p">]</span>
-            <span class="n">process</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;process&quot;</span><span class="p">]</span>
-            <span class="n">hosts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">call_network</span><span class="p">(</span><span class="n">net_name</span><span class="p">,</span> <span class="s2">&quot;_get_hosts_as_list&quot;</span><span class="p">)</span>
+            <span class="n">process</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"process"</span><span class="p">]</span>
+            <span class="n">hosts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">call_network</span><span class="p">(</span><span class="n">net_name</span><span class="p">,</span> <span class="s2">"_get_hosts_as_list"</span><span class="p">)</span>
             <span class="n">proc_info</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;pid&quot;</span><span class="p">:</span> <span class="n">process</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span>
-                <span class="s2">&quot;alive&quot;</span><span class="p">:</span> <span class="n">process</span><span class="o">.</span><span class="n">is_alive</span><span class="p">(),</span>
-                <span class="s2">&quot;hosts&quot;</span><span class="p">:</span> <span class="n">hosts</span><span class="p">,</span>
-                <span class="s2">&quot;hosts_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">hosts</span><span class="p">),</span>
+                <span class="s2">"pid"</span><span class="p">:</span> <span class="n">process</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span>
+                <span class="s2">"alive"</span><span class="p">:</span> <span class="n">process</span><span class="o">.</span><span class="n">is_alive</span><span class="p">(),</span>
+                <span class="s2">"hosts"</span><span class="p">:</span> <span class="n">hosts</span><span class="p">,</span>
+                <span class="s2">"hosts_count"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">hosts</span><span class="p">),</span>
             <span class="p">}</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">ps</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
                 <span class="n">mem</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">memory_info</span><span class="p">()</span>
                 <span class="n">uptime</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span>
-                    <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;start_time&quot;</span><span class="p">,</span> <span class="n">ps</span><span class="o">.</span><span class="n">create_time</span><span class="p">())</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"start_time"</span><span class="p">,</span> <span class="n">ps</span><span class="o">.</span><span class="n">create_time</span><span class="p">())</span>
                 <span class="p">)</span>
                 <span class="n">proc_info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">ps</span><span class="o">.</span><span class="n">status</span><span class="p">(),</span>
-                        <span class="s2">&quot;uptime_seconds&quot;</span><span class="p">:</span> <span class="n">uptime</span><span class="p">,</span>
-                        <span class="s2">&quot;cpu_percent&quot;</span><span class="p">:</span> <span class="n">ps</span><span class="o">.</span><span class="n">cpu_percent</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="mf">0.1</span><span class="p">),</span>
-                        <span class="s2">&quot;memory_rss_mb&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">mem</span><span class="o">.</span><span class="n">rss</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-                        <span class="s2">&quot;memory_vms_mb&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">mem</span><span class="o">.</span><span class="n">vms</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-                        <span class="s2">&quot;num_threads&quot;</span><span class="p">:</span> <span class="n">ps</span><span class="o">.</span><span class="n">num_threads</span><span class="p">(),</span>
+                        <span class="s2">"status"</span><span class="p">:</span> <span class="n">ps</span><span class="o">.</span><span class="n">status</span><span class="p">(),</span>
+                        <span class="s2">"uptime_seconds"</span><span class="p">:</span> <span class="n">uptime</span><span class="p">,</span>
+                        <span class="s2">"cpu_percent"</span><span class="p">:</span> <span class="n">ps</span><span class="o">.</span><span class="n">cpu_percent</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="mf">0.1</span><span class="p">),</span>
+                        <span class="s2">"memory_rss_mb"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">mem</span><span class="o">.</span><span class="n">rss</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                        <span class="s2">"memory_vms_mb"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">mem</span><span class="o">.</span><span class="n">vms</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                        <span class="s2">"num_threads"</span><span class="p">:</span> <span class="n">ps</span><span class="o">.</span><span class="n">num_threads</span><span class="p">(),</span>
                     <span class="p">}</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="p">(</span><span class="n">psutil</span><span class="o">.</span><span class="n">NoSuchProcess</span><span class="p">,</span> <span class="n">psutil</span><span class="o">.</span><span class="n">AccessDenied</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">net_name</span><span class="si">}</span><span class="s2"> - Psutil metrics unavailable: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">net_name</span><span class="si">}</span><span class="s2"> - Psutil metrics unavailable: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">net_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">proc_info</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">names</span>
@@ -9206,7 +9206,7 @@ FakeNOS.</p>
     <span class="n">result_queue</span><span class="p">:</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Queue</span><span class="p">,</span>
     <span class="n">nos_plugins</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Target function executed in a dedicated process for each FakeNOS network.</span>
 
 <span class="sd">    Runs a :class:`FakeNOS` instance and services method-call requests from the</span>
@@ -9217,7 +9217,7 @@ FakeNOS.</p>
 
 <span class="sd">    Supported *method_name* values:</span>
 
-<span class="sd">    * ``&quot;_get_hosts_as_list&quot;`` – returns a list of host-info dicts with the</span>
+<span class="sd">    * ``"_get_hosts_as_list"`` – returns a list of host-info dicts with the</span>
 <span class="sd">      keys ``name``, ``platform``, ``port``, ``username``, ``password``.</span>
 
 <span class="sd">    The loop exits when *stop_event* is set, after which the FakeNOS network</span>
@@ -9232,7 +9232,7 @@ FakeNOS.</p>
 <span class="sd">        result_queue: Outgoing results delivered back to the parent process.</span>
 <span class="sd">        nos_plugins: Optional list of NOS plugin definitions to register with</span>
 <span class="sd">            FakeNOS.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">nos_plugins</span> <span class="o">=</span> <span class="n">nos_plugins</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">net</span> <span class="o">=</span> <span class="n">FakeNOS</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="n">inventory</span><span class="p">,</span> <span class="n">plugins</span><span class="o">=</span><span class="n">nos_plugins</span><span class="p">)</span>
     <span class="n">net</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
@@ -9240,21 +9240,21 @@ FakeNOS.</p>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">method</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="n">cmd_queue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">NFP</span><span class="o">.</span><span class="n">WORK_QUEUE_TIMEOUT</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;_get_hosts_as_list&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">"_get_hosts_as_list"</span><span class="p">:</span>
                     <span class="n">result</span> <span class="o">=</span> <span class="p">[</span>
                         <span class="p">{</span>
-                            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">h</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                            <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">h</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
-                            <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="n">h</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
-                            <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">h</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
-                            <span class="s2">&quot;password&quot;</span><span class="p">:</span> <span class="n">h</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+                            <span class="s2">"name"</span><span class="p">:</span> <span class="n">h</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                            <span class="s2">"platform"</span><span class="p">:</span> <span class="n">h</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
+                            <span class="s2">"port"</span><span class="p">:</span> <span class="n">h</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+                            <span class="s2">"username"</span><span class="p">:</span> <span class="n">h</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
+                            <span class="s2">"password"</span><span class="p">:</span> <span class="n">h</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
                         <span class="p">}</span>
                         <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">net</span><span class="o">.</span><span class="n">_get_hosts_as_list</span><span class="p">()</span>
                     <span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Method not supported&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Method not supported"</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Method </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2"> failed, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Method </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2"> failed, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">msg</span>
             <span class="n">result_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>

@@ -7296,10 +7296,10 @@
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>Normal mode returns the GraphQL response payload from NetBox. Dry-run mode returns the HTTP payload that would be sent:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://netbox.example/graphql/&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;{</span><span class="se">\&quot;</span><span class="s2">query</span><span class="se">\&quot;</span><span class="s2">: </span><span class="se">\&quot;</span><span class="s2">query {...}</span><span class="se">\&quot;</span><span class="s2">}&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;headers&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="s2">&quot;Token ...123456&quot;</span><span class="p">},</span>
-    <span class="s2">&quot;verify&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">"url"</span><span class="p">:</span> <span class="s2">"https://netbox.example/graphql/"</span><span class="p">,</span>
+    <span class="s2">"data"</span><span class="p">:</span> <span class="s2">"{</span><span class="se">\"</span><span class="s2">query</span><span class="se">\"</span><span class="s2">: </span><span class="se">\"</span><span class="s2">query {...}</span><span class="se">\"</span><span class="s2">}"</span><span class="p">,</span>
+    <span class="s2">"headers"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"Authorization"</span><span class="p">:</span> <span class="s2">"Token ...123456"</span><span class="p">},</span>
+    <span class="s2">"verify"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">}</span>
 </code></pre></div>
 <h2 id="notes-gotchas">Notes / Gotchas<a class="headerlink" href="#notes-gotchas" title="Permanent link">¤</a></h2>
@@ -7313,59 +7313,59 @@
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Query devices by generated object, filter, and fields:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>graphql<span class="w"> </span>obj<span class="w"> </span>devices<span class="w"> </span>filters<span class="w"> </span><span class="s1">&#39;{&quot;name&quot;: {&quot;exact&quot;: &quot;ceos-leaf-1&quot;}}&#39;</span><span class="w"> </span>fields<span class="w"> </span>name,status,platform
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>graphql<span class="w"> </span>obj<span class="w"> </span>devices<span class="w"> </span>filters<span class="w"> </span><span class="s1">'{"name": {"exact": "ceos-leaf-1"}}'</span><span class="w"> </span>fields<span class="w"> </span>name,status,platform
 </code></pre></div>
 <p>Preview the generated GraphQL payload:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>graphql<span class="w"> </span>obj<span class="w"> </span>devices<span class="w"> </span>filters<span class="w"> </span><span class="s1">&#39;{&quot;name&quot;: {&quot;exact&quot;: &quot;ceos-leaf-1&quot;}}&#39;</span><span class="w"> </span>fields<span class="w"> </span>name,status<span class="w"> </span>dry-run
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>graphql<span class="w"> </span>obj<span class="w"> </span>devices<span class="w"> </span>filters<span class="w"> </span><span class="s1">'{"name": {"exact": "ceos-leaf-1"}}'</span><span class="w"> </span>fields<span class="w"> </span>name,status<span class="w"> </span>dry-run
 </code></pre></div>
 <p>Run multiple aliased queries:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>graphql<span class="w"> </span>queries<span class="w"> </span><span class="s1">&#39;{&quot;leafs&quot;: {&quot;obj&quot;: &quot;devices&quot;, &quot;filters&quot;: {&quot;role&quot;: {&quot;exact&quot;: &quot;leaf&quot;}}, &quot;fields&quot;: [&quot;name&quot;, &quot;status&quot;]}}&#39;</span>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>graphql<span class="w"> </span>queries<span class="w"> </span><span class="s1">'{"leafs": {"obj": "devices", "filters": {"role": {"exact": "leaf"}}, "fields": ["name", "status"]}}'</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <p>Context manager:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;graphql&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"graphql"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="s2">&quot;devices&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;exact&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">}},</span>
-            <span class="s2">&quot;fields&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="s2">&quot;platform&quot;</span><span class="p">],</span>
+            <span class="s2">"obj"</span><span class="p">:</span> <span class="s2">"devices"</span><span class="p">,</span>
+            <span class="s2">"filters"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"exact"</span><span class="p">:</span> <span class="s2">"ceos-leaf-1"</span><span class="p">}},</span>
+            <span class="s2">"fields"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"name"</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">,</span> <span class="s2">"platform"</span><span class="p">],</span>
         <span class="p">},</span>
     <span class="p">)</span>
 </code></pre></div>
 <p>Direct lifecycle:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">preview</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;graphql&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"graphql"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="s2">&quot;devices&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;exact&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">}},</span>
-            <span class="s2">&quot;fields&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"obj"</span><span class="p">:</span> <span class="s2">"devices"</span><span class="p">,</span>
+            <span class="s2">"filters"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"exact"</span><span class="p">:</span> <span class="s2">"ceos-leaf-1"</span><span class="p">}},</span>
+            <span class="s2">"fields"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"name"</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">],</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;graphql&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"graphql"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;query_string&quot;</span><span class="p">:</span> <span class="s2">&quot;query { devices { name status } }&quot;</span><span class="p">,</span>
+            <span class="s2">"query_string"</span><span class="p">:</span> <span class="s2">"query { devices { name status } }"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 <span class="k">finally</span><span class="p">:</span>
@@ -7381,9 +7381,9 @@ root
 └──<span class="w"> </span>netbox:<span class="w">    </span>Netbox<span class="w"> </span>service
 <span class="w">    </span>└──<span class="w"> </span>graphql:<span class="w">    </span>Query<span class="w"> </span>Netbox<span class="w"> </span>GraphQL<span class="w"> </span>API
 <span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
-<span class="w">        </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
-<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'any'</span>
+<span class="w">        </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
+<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">        </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
 <span class="w">        </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Return<span class="w"> </span>query<span class="w"> </span>payload<span class="w"> </span>without<span class="w"> </span>executing<span class="w"> </span>it
 <span class="w">        </span>├──<span class="w"> </span>obj:<span class="w">    </span>NetBox<span class="w"> </span>GraphQL<span class="w"> </span>object<span class="w"> </span>name<span class="w"> </span>or<span class="w"> </span>query<span class="w"> </span>object
@@ -7396,20 +7396,20 @@ nf#
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
 <p>Use <code>branch</code> with <code>netbox_graphql</code> to query proposed state:</p>
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;netbox_graphql&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"netbox_graphql"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;instance&quot;</span><span class="p">:</span> <span class="s2">&quot;prod&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="s2">&quot;planned-change&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+        <span class="s2">"instance"</span><span class="p">:</span> <span class="s2">"prod"</span><span class="p">,</span>
+        <span class="s2">"branch"</span><span class="p">:</span> <span class="s2">"planned-change"</span><span class="p">,</span>
+        <span class="s2">"query"</span><span class="p">:</span> <span class="s2">"""</span>
 <span class="s2">            query Devices($offset: Int!, $limit: Int!) {</span>
 <span class="s2">                devices: device_list(</span>
 <span class="s2">                    pagination: {offset: $offset, limit: $limit}</span>
 <span class="s2">                ) { name }</span>
 <span class="s2">            }</span>
-<span class="s2">        &quot;&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;variables&quot;</span><span class="p">:</span> <span class="p">{},</span>
+<span class="s2">        """</span><span class="p">,</span>
+        <span class="s2">"variables"</span><span class="p">:</span> <span class="p">{},</span>
     <span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -7775,14 +7775,14 @@ and will be phased out in future releases.</p>
 <span class="normal">449</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GraphqlInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GraphqlResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Query GraphQL&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Query GraphQL"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -7797,7 +7797,7 @@ and will be phased out in future releases.</p>
     <span class="n">queries</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">query_string</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    DEPRECIATION Warning: `graphql` task is deprecated in favour of `netbox_graphql` task</span>
 <span class="sd">    and will be phased out in future releases.</span>
 
@@ -7819,57 +7819,57 @@ and will be phased out in future releases.</p>
 <span class="sd">    Raises:</span>
 <span class="sd">        RuntimeError: If required arguments are not provided</span>
 <span class="sd">        Exception: If GraphQL query fails</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">nb_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_instance_params</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:graphql&quot;</span><span class="p">,</span> <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">])</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:graphql"</span><span class="p">,</span> <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">])</span>
 
     <span class="c1"># form graphql query(ies) payload</span>
     <span class="k">if</span> <span class="n">queries</span><span class="p">:</span>
         <span class="n">queries_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">alias</span><span class="p">,</span> <span class="n">query_data</span> <span class="ow">in</span> <span class="n">queries</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">query_data</span><span class="p">[</span><span class="s2">&quot;alias&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">alias</span>
+            <span class="n">query_data</span><span class="p">[</span><span class="s2">"alias"</span><span class="p">]</span> <span class="o">=</span> <span class="n">alias</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="n">queries_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_form_query_v4</span><span class="p">(</span><span class="o">**</span><span class="n">query_data</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">UnsupportedNetboxVersion</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Netbox version </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not supported, &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;minimum required version is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">compatible_ge_v4</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Netbox version </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not supported, "</span>
+                    <span class="sa">f</span><span class="s2">"minimum required version is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">compatible_ge_v4</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
-        <span class="n">queries_strings</span> <span class="o">=</span> <span class="s2">&quot;    &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">queries_list</span><span class="p">)</span>
-        <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;query </span><span class="se">{{</span><span class="si">{</span><span class="n">queries_strings</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span>
+        <span class="n">queries_strings</span> <span class="o">=</span> <span class="s2">"    "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">queries_list</span><span class="p">)</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"query </span><span class="se">{{</span><span class="si">{</span><span class="n">queries_strings</span><span class="si">}</span><span class="se">}}</span><span class="s2">"</span>
     <span class="k">elif</span> <span class="n">obj</span> <span class="ow">and</span> <span class="n">filters</span> <span class="ow">and</span> <span class="n">fields</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
             <span class="n">query</span> <span class="o">=</span> <span class="n">_form_query_v4</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">fields</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">UnsupportedNetboxVersion</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Netbox version </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not supported, &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;minimum required version is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">compatible_ge_v4</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Netbox version </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not supported, "</span>
+                <span class="sa">f</span><span class="s2">"minimum required version is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">compatible_ge_v4</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
-        <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;query </span><span class="se">{{</span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"query </span><span class="se">{{</span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="se">}}</span><span class="s2">"</span>
     <span class="k">elif</span> <span class="n">query_string</span><span class="p">:</span>
         <span class="n">query</span> <span class="o">=</span> <span class="n">query_string</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - graphql method expects queries argument or obj, filters, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;fields arguments or query_string argument provided&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - graphql method expects queries argument or obj, filters, "</span>
+            <span class="sa">f</span><span class="s2">"fields arguments or query_string argument provided"</span>
         <span class="p">)</span>
-    <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">query</span><span class="p">})</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">"query"</span><span class="p">:</span> <span class="n">query</span><span class="p">})</span>
 
     <span class="c1"># form and return dry run response</span>
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - GraphQL dry run, returning query payload without executing&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - GraphQL dry run, returning query payload without executing"</span>
         <span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;dry-run requested, returning GraphQL query payload&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"dry-run requested, returning GraphQL query payload"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/graphql/&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">payload</span><span class="p">,</span>
-            <span class="s2">&quot;verify&quot;</span><span class="p">:</span> <span class="n">nb_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ssl_verify&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
-            <span class="s2">&quot;headers&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;Accept&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Token ...</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">&#39;token&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">6</span><span class="p">:]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">"url"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">'url'</span><span class="p">]</span><span class="si">}</span><span class="s2">/graphql/"</span><span class="p">,</span>
+            <span class="s2">"data"</span><span class="p">:</span> <span class="n">payload</span><span class="p">,</span>
+            <span class="s2">"verify"</span><span class="p">:</span> <span class="n">nb_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ssl_verify"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+            <span class="s2">"headers"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"Content-Type"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">,</span>
+                <span class="s2">"Accept"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">,</span>
+                <span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Token ...</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">'token'</span><span class="p">][</span><span class="o">-</span><span class="mi">6</span><span class="p">:]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">}</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
@@ -7877,44 +7877,44 @@ and will be phased out in future releases.</p>
 
     <span class="c1"># send request to Netbox GraphQL API</span>
     <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - sending GraphQL query &#39;</span><span class="si">{</span><span class="n">payload</span><span class="si">}</span><span class="s2">&#39; to URL &#39;</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/graphql/&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - sending GraphQL query '</span><span class="si">{</span><span class="n">payload</span><span class="si">}</span><span class="s2">' to URL '</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">'url'</span><span class="p">]</span><span class="si">}</span><span class="s2">/graphql/'"</span>
     <span class="p">)</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;executing GraphQL query against &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"executing GraphQL query against '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
     <span class="n">req</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_http_session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
-        <span class="n">url</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/graphql/&quot;</span><span class="p">,</span>
+        <span class="n">url</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">'url'</span><span class="p">]</span><span class="si">}</span><span class="s2">/graphql/"</span><span class="p">,</span>
         <span class="n">headers</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;Accept&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Token </span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">&#39;token&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">"Content-Type"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">,</span>
+            <span class="s2">"Accept"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">,</span>
+            <span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Token </span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">'token'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="p">},</span>
         <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
-        <span class="n">verify</span><span class="o">=</span><span class="n">nb_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ssl_verify&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="n">verify</span><span class="o">=</span><span class="n">nb_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ssl_verify"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
         <span class="n">timeout</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">netbox_connect_timeout</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_read_timeout</span><span class="p">),</span>
     <span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">req</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
     <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> -  Netbox GraphQL query failed, query &#39;</span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;URL &#39;</span><span class="si">{</span><span class="n">req</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s2">&#39;, status-code &#39;</span><span class="si">{</span><span class="n">req</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">&#39;, reason &#39;</span><span class="si">{</span><span class="n">req</span><span class="o">.</span><span class="n">reason</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;response content &#39;</span><span class="si">{</span><span class="n">req</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> -  Netbox GraphQL query failed, query '</span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="s2">', "</span>
+            <span class="sa">f</span><span class="s2">"URL '</span><span class="si">{</span><span class="n">req</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s2">', status-code '</span><span class="si">{</span><span class="n">req</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">', reason '</span><span class="si">{</span><span class="n">req</span><span class="o">.</span><span class="n">reason</span><span class="si">}</span><span class="s2">', "</span>
+            <span class="sa">f</span><span class="s2">"response content '</span><span class="si">{</span><span class="n">req</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">'"</span>
         <span class="p">)</span>
 
     <span class="c1"># return results</span>
     <span class="n">reply</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">reply</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;errors&quot;</span><span class="p">):</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - GrapQL query error &#39;</span><span class="si">{</span><span class="n">reply</span><span class="p">[</span><span class="s1">&#39;errors&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;, query &#39;</span><span class="si">{</span><span class="n">payload</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+    <span class="k">if</span> <span class="n">reply</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"errors"</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - GrapQL query error '</span><span class="si">{</span><span class="n">reply</span><span class="p">[</span><span class="s1">'errors'</span><span class="p">]</span><span class="si">}</span><span class="s2">', query '</span><span class="si">{</span><span class="n">payload</span><span class="si">}</span><span class="s2">'"</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">reply</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">):</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">reply</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>  <span class="c1"># at least return some data</span>
+        <span class="k">if</span> <span class="n">reply</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"data"</span><span class="p">):</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">reply</span><span class="p">[</span><span class="s2">"data"</span><span class="p">]</span>  <span class="c1"># at least return some data</span>
     <span class="k">elif</span> <span class="n">queries</span> <span class="ow">or</span> <span class="n">query_string</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">reply</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">reply</span><span class="p">[</span><span class="s2">"data"</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">reply</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">obj</span><span class="p">]</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">reply</span><span class="p">[</span><span class="s2">"data"</span><span class="p">][</span><span class="n">obj</span><span class="p">]</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;GraphQL query complete&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"GraphQL query complete"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8278,14 +8278,14 @@ variables to support automatic pagination.</p>
 <span class="normal">304</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">NetboxGraphqlInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">NetboxGraphqlResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Query NetBox GraphQL&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Query NetBox GraphQL"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -8300,7 +8300,7 @@ variables to support automatic pagination.</p>
     <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Execute a paginated GraphQL query against a NetBox instance, fetching all pages in parallel.</span>
 
 <span class="sd">    Pages are fetched in parallel batches of up to ``grapqhl_max_workers`` concurrent requests.</span>
@@ -8321,27 +8321,27 @@ variables to support automatic pagination.</p>
 <span class="sd">    Returns:</span>
 <span class="sd">        :class:`Result` whose ``result`` field holds the merged GraphQL ``data`` dict.</span>
 <span class="sd">        On failure ``failed`` is ``True`` and ``errors`` lists the exception messages.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">nb_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_instance_params</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:graphql&quot;</span><span class="p">,</span> <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span> <span class="n">result</span><span class="o">=</span><span class="p">{})</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:graphql"</span><span class="p">,</span> <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span> <span class="n">result</span><span class="o">=</span><span class="p">{})</span>
     <span class="n">branch_schema_id</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
-        <span class="n">branch_schema_id</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">http_session</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-NetBox-Branch&quot;</span><span class="p">]</span>
+        <span class="n">branch_schema_id</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">http_session</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">"X-NetBox-Branch"</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;dry-run requested, returning GraphQL request payload&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"dry-run requested, returning GraphQL request payload"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/graphql/&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">query</span><span class="p">,</span> <span class="s2">&quot;variables&quot;</span><span class="p">:</span> <span class="n">variables</span> <span class="ow">or</span> <span class="p">{}}),</span>
-            <span class="s2">&quot;verify&quot;</span><span class="p">:</span> <span class="n">nb_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ssl_verify&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
-            <span class="s2">&quot;headers&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;Accept&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Token ...</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">&#39;token&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">6</span><span class="p">:]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">"url"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">'url'</span><span class="p">]</span><span class="si">}</span><span class="s2">/graphql/"</span><span class="p">,</span>
+            <span class="s2">"data"</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">"query"</span><span class="p">:</span> <span class="n">query</span><span class="p">,</span> <span class="s2">"variables"</span><span class="p">:</span> <span class="n">variables</span> <span class="ow">or</span> <span class="p">{}}),</span>
+            <span class="s2">"verify"</span><span class="p">:</span> <span class="n">nb_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ssl_verify"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+            <span class="s2">"headers"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"Content-Type"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">,</span>
+                <span class="s2">"Accept"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">,</span>
+                <span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Token ...</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">'token'</span><span class="p">][</span><span class="o">-</span><span class="mi">6</span><span class="p">:]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
                 <span class="o">**</span><span class="p">(</span>
-                    <span class="p">{</span><span class="s2">&quot;X-NetBox-Branch&quot;</span><span class="p">:</span> <span class="n">branch_schema_id</span><span class="p">}</span>
+                    <span class="p">{</span><span class="s2">"X-NetBox-Branch"</span><span class="p">:</span> <span class="n">branch_schema_id</span><span class="p">}</span>
                     <span class="k">if</span> <span class="n">branch_schema_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                     <span class="k">else</span> <span class="p">{}</span>
                 <span class="p">),</span>
@@ -8350,11 +8350,11 @@ variables to support automatic pagination.</p>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="n">aggregated_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">ssl_verify</span> <span class="o">=</span> <span class="n">nb_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ssl_verify&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-    <span class="n">nb_url</span> <span class="o">=</span> <span class="n">nb_params</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span>
+    <span class="n">ssl_verify</span> <span class="o">=</span> <span class="n">nb_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ssl_verify"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">nb_url</span> <span class="o">=</span> <span class="n">nb_params</span><span class="p">[</span><span class="s2">"url"</span><span class="p">]</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;executing paginated GraphQL query against &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;with page size </span><span class="si">{</span><span class="n">limit</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"executing paginated GraphQL query against '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">' "</span>
+        <span class="sa">f</span><span class="s2">"with page size </span><span class="si">{</span><span class="n">limit</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
 
     <span class="c1"># paginate through all results, fetching grapqhl_max_workers pages per iteration</span>
@@ -8370,11 +8370,11 @@ variables to support automatic pagination.</p>
             <span class="n">futures</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">Future</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="n">pool</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
                     <span class="n">graphql_fetch_page</span><span class="p">,</span>
-                    <span class="n">nb_params</span><span class="p">[</span><span class="s2">&quot;token&quot;</span><span class="p">],</span>
+                    <span class="n">nb_params</span><span class="p">[</span><span class="s2">"token"</span><span class="p">],</span>
                     <span class="n">nb_url</span><span class="p">,</span>
                     <span class="n">ssl_verify</span><span class="p">,</span>
                     <span class="n">query</span><span class="p">,</span>
-                    <span class="p">{</span><span class="o">**</span><span class="n">variables</span><span class="p">,</span> <span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="n">page_offset</span><span class="p">,</span> <span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="n">limit</span><span class="p">},</span>
+                    <span class="p">{</span><span class="o">**</span><span class="n">variables</span><span class="p">,</span> <span class="s2">"offset"</span><span class="p">:</span> <span class="n">page_offset</span><span class="p">,</span> <span class="s2">"limit"</span><span class="p">:</span> <span class="n">limit</span><span class="p">},</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">netbox_connect_timeout</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">netbox_read_timeout</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
@@ -8388,16 +8388,16 @@ variables to support automatic pagination.</p>
                     <span class="n">pages</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">page_offset</span><span class="p">,</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()))</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
                     <span class="n">error_msg</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Failed to fetch page at offset </span><span class="si">{</span><span class="n">page_offset</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="sa">f</span><span class="s2">"Failed to fetch page at offset </span><span class="si">{</span><span class="n">page_offset</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
                     <span class="p">)</span>
-                    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">error_msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">error_msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                     <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
                     <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="c1"># stop immediately if any page fetch failed — results would be incomplete</span>
         <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="s2">&quot;GraphQL pagination stopped due to fetch errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
+                <span class="s2">"GraphQL pagination stopped due to fetch errors"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span>
             <span class="p">)</span>
             <span class="k">break</span>
 
@@ -8433,7 +8433,7 @@ variables to support automatic pagination.</p>
             <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">aggregated_data</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GraphQL query complete: </span><span class="si">{</span><span class="n">total_items</span><span class="si">}</span><span class="s2"> list item(s) retrieved&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"GraphQL query complete: </span><span class="si">{</span><span class="n">total_items</span><span class="si">}</span><span class="s2"> list item(s) retrieved"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>

@@ -7278,16 +7278,16 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;get_nornir_inventory&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"containerlab"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"get_nornir_inventory"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;three-routers-lab&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;lab&quot;</span><span class="p">,</span> <span class="s2">&quot;containerlab&quot;</span><span class="p">],</span>
+            <span class="s2">"lab_name"</span><span class="p">:</span> <span class="s2">"three-routers-lab"</span><span class="p">,</span>
+            <span class="s2">"groups"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"lab"</span><span class="p">,</span> <span class="s2">"containerlab"</span><span class="p">],</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7298,17 +7298,17 @@ nf#
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;get_nornir_inventory&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"containerlab"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"get_nornir_inventory"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;three-routers-lab&quot;</span><span class="p">,</span>
+            <span class="s2">"lab_name"</span><span class="p">:</span> <span class="s2">"three-routers-lab"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7327,11 +7327,11 @@ root
 └──<span class="w"> </span>containerlab:<span class="w">    </span>Containerlab<span class="w"> </span>service
 <span class="w">    </span>└──<span class="w"> </span>get-nornir-inventory:<span class="w">    </span>Get<span class="w"> </span>nornir<span class="w"> </span>inventory<span class="w"> </span><span class="k">for</span><span class="w"> </span>a<span class="w"> </span>given<span class="w"> </span>lab
 <span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
-<span class="w">        </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
+<span class="w">        </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">        </span>├──<span class="w"> </span>lab-name:<span class="w">    </span>Lab<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>get<span class="w"> </span>Nornir<span class="w"> </span>inventory<span class="w"> </span><span class="k">for</span>
-<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
-<span class="w">        </span>└──<span class="w"> </span>groups:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>groups<span class="w"> </span>to<span class="w"> </span>include<span class="w"> </span><span class="k">in</span><span class="w"> </span>host<span class="err">&#39;</span>s<span class="w"> </span>inventory
+<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
+<span class="w">        </span>└──<span class="w"> </span>groups:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>groups<span class="w"> </span>to<span class="w"> </span>include<span class="w"> </span><span class="k">in</span><span class="w"> </span>host<span class="err">'</span>s<span class="w"> </span>inventory
 nf#
 </code></pre></div>
 <p><code>*</code> - mandatory/required command argument</p>
@@ -7652,14 +7652,14 @@ to Netmiko SSH platform types and extracts relevant connection details.</p>
 <span class="normal">903</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetNornirInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetNornirInventoryResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Nornir Inventory&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Nornir Inventory"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -7671,11 +7671,11 @@ to Netmiko SSH platform types and extracts relevant connection details.</p>
     <span class="n">groups</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_default_credentials</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieves the Nornir inventory for a specified lab.</span>
 
 <span class="sd">    This method inspects the container lab environment and generates a Nornir-compatible</span>
-<span class="sd">    inventory of hosts based on the lab&#39;s configuration. It maps containerlab node kinds</span>
+<span class="sd">    inventory of hosts based on the lab's configuration. It maps containerlab node kinds</span>
 <span class="sd">    to Netmiko SSH platform types and extracts relevant connection details.</span>
 
 <span class="sd">    Args:</span>
@@ -7692,27 +7692,27 @@ to Netmiko SSH platform types and extracts relevant connection details.</p>
 <span class="sd">    Notes:</span>
 <span class="sd">        - The method uses a predefined mapping (`norfab.utils.platform_map`) to translate containerlab</span>
 <span class="sd">          node kinds to Netmiko platform types.</span>
-<span class="sd">        - If a container&#39;s SSH port cannot be determined, it is skipped, and an error is logged.</span>
+<span class="sd">        - If a container's SSH port cannot be determined, it is skipped, and an error is logged.</span>
 <span class="sd">        - The primary host IP address is determined dynamically using a UDP socket connection or</span>
-<span class="sd">          by checking the host IP address in the container&#39;s port configuration.</span>
+<span class="sd">          by checking the host IP address in the container's port configuration.</span>
 
 <span class="sd">    Example of returned inventory structure:</span>
 <span class="sd">        {</span>
-<span class="sd">            &quot;hosts&quot;: {</span>
-<span class="sd">                &quot;host_name&quot;: {</span>
-<span class="sd">                    &quot;hostname&quot;: &quot;host_ip&quot;,</span>
-<span class="sd">                    &quot;platform&quot;: &quot;netmiko_platform&quot;,</span>
-<span class="sd">                    &quot;groups&quot;: [&quot;group1&quot;, &quot;group2&quot;],</span>
+<span class="sd">            "hosts": {</span>
+<span class="sd">                "host_name": {</span>
+<span class="sd">                    "hostname": "host_ip",</span>
+<span class="sd">                    "platform": "netmiko_platform",</span>
+<span class="sd">                    "groups": ["group1", "group2"],</span>
 <span class="sd">                },</span>
 <span class="sd">                ...</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="ow">or</span> <span class="mi">600</span>
     <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span> <span class="ow">or</span> <span class="p">[]</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_nornir_inventory&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;hosts&quot;</span><span class="p">:</span> <span class="p">{}})</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_nornir_inventory"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s2">"hosts"</span><span class="p">:</span> <span class="p">{}})</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get Nornir inventory: Building inventory for &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;all&#39;</span><span class="si">}</span><span class="s2">&#39; lab(s)&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get Nornir inventory: Building inventory for '</span><span class="si">{</span><span class="n">lab_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'all'</span><span class="si">}</span><span class="s2">' lab(s)"</span>
     <span class="p">)</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;building nornir inventory for &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;all&#39;</span><span class="si">}</span><span class="s2">&#39; lab(s)&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"building nornir inventory for '</span><span class="si">{</span><span class="n">lab_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'all'</span><span class="si">}</span><span class="s2">' lab(s)"</span><span class="p">)</span>
 
     <span class="c1"># get lab details</span>
     <span class="n">inspect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inspect</span><span class="p">(</span>
@@ -7722,16 +7722,16 @@ to Netmiko SSH platform types and extracts relevant connection details.</p>
     <span class="c1"># return empty result if lab not found</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39; lab not found&quot;</span><span class="p">]</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">' lab not found"</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># get host primary IP address</span>
     <span class="n">s</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_DGRAM</span><span class="p">)</span>
     <span class="n">s</span><span class="o">.</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SO_BROADCAST</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">s</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="s2">&quot;1.2.3.4&quot;</span><span class="p">,</span> <span class="mi">12345</span><span class="p">))</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="s2">"1.2.3.4"</span><span class="p">,</span> <span class="mi">12345</span><span class="p">))</span>
     <span class="n">primary_host_ip</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">getsockname</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - determined Containerlab host primary IP - &#39;</span><span class="si">{</span><span class="n">primary_host_ip</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - determined Containerlab host primary IP - '</span><span class="si">{</span><span class="n">primary_host_ip</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
 
     <span class="c1"># form hosts inventory</span>
@@ -7739,65 +7739,65 @@ to Netmiko SSH platform types and extracts relevant connection details.</p>
         <span class="k">if</span> <span class="n">lab_name</span> <span class="ow">and</span> <span class="n">lname</span> <span class="o">!=</span> <span class="n">lab_name</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="k">for</span> <span class="n">container</span> <span class="ow">in</span> <span class="n">containers</span><span class="p">:</span>
-            <span class="n">host_name</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Labels&quot;</span><span class="p">][</span><span class="s2">&quot;clab-node-name&quot;</span><span class="p">]</span>
+            <span class="n">host_name</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">"Labels"</span><span class="p">][</span><span class="s2">"clab-node-name"</span><span class="p">]</span>
             <span class="n">host_port</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">host_ip</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="c1"># get ssh port</span>
-            <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Ports&quot;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">container</span><span class="p">[</span><span class="s2">"Ports"</span><span class="p">]:</span>
                 <span class="n">host_ip</span> <span class="o">=</span> <span class="n">primary_host_ip</span>
-                <span class="k">if</span> <span class="n">port</span><span class="p">[</span><span class="s2">&quot;port&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">22</span> <span class="ow">and</span> <span class="n">port</span><span class="p">[</span><span class="s2">&quot;protocol&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;tcp&quot;</span><span class="p">:</span>
-                    <span class="n">host_port</span> <span class="o">=</span> <span class="n">port</span><span class="p">[</span><span class="s2">&quot;host_port&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">port</span><span class="p">[</span><span class="s2">"port"</span><span class="p">]</span> <span class="o">==</span> <span class="mi">22</span> <span class="ow">and</span> <span class="n">port</span><span class="p">[</span><span class="s2">"protocol"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"tcp"</span><span class="p">:</span>
+                    <span class="n">host_port</span> <span class="o">=</span> <span class="n">port</span><span class="p">[</span><span class="s2">"host_port"</span><span class="p">]</span>
                     <span class="c1"># get host ip address</span>
-                    <span class="k">if</span> <span class="n">port</span><span class="p">[</span><span class="s2">&quot;host_ip&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
-                        <span class="s2">&quot;0.0.0.0&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;::&quot;</span><span class="p">,</span>
+                    <span class="k">if</span> <span class="n">port</span><span class="p">[</span><span class="s2">"host_ip"</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
+                        <span class="s2">"0.0.0.0"</span><span class="p">,</span>
+                        <span class="s2">"127.0.0.1"</span><span class="p">,</span>
+                        <span class="s2">"localhost"</span><span class="p">,</span>
+                        <span class="s2">"::"</span><span class="p">,</span>
                     <span class="p">]:</span>
-                        <span class="n">host_ip</span> <span class="o">=</span> <span class="n">port</span><span class="p">[</span><span class="s2">&quot;host_ip&quot;</span><span class="p">]</span>
+                        <span class="n">host_ip</span> <span class="o">=</span> <span class="n">port</span><span class="p">[</span><span class="s2">"host_ip"</span><span class="p">]</span>
                     <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">host_name</span><span class="si">}</span><span class="s2"> Failed to map SSH port.&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">host_name</span><span class="si">}</span><span class="s2"> Failed to map SSH port."</span><span class="p">)</span>
                 <span class="k">continue</span>
 
             <span class="c1"># add host to Nornir inventory</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;hosts&quot;</span><span class="p">][</span><span class="n">host_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;hostname&quot;</span><span class="p">:</span> <span class="n">host_ip</span><span class="p">,</span>
-                <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="n">host_port</span><span class="p">,</span>
-                <span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="n">groups</span><span class="p">,</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"hosts"</span><span class="p">][</span><span class="n">host_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">"hostname"</span><span class="p">:</span> <span class="n">host_ip</span><span class="p">,</span>
+                <span class="s2">"port"</span><span class="p">:</span> <span class="n">host_port</span><span class="p">,</span>
+                <span class="s2">"groups"</span><span class="p">:</span> <span class="n">groups</span><span class="p">,</span>
             <span class="p">}</span>
 
             <span class="c1"># get netmiko platform</span>
-            <span class="n">clab_platform_name</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Labels&quot;</span><span class="p">][</span><span class="s2">&quot;clab-node-kind&quot;</span><span class="p">]</span>
+            <span class="n">clab_platform_name</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">"Labels"</span><span class="p">][</span><span class="s2">"clab-node-kind"</span><span class="p">]</span>
             <span class="n">netmiko_platform</span> <span class="o">=</span> <span class="n">PlatformMap</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span>
-                <span class="s2">&quot;containerlab&quot;</span><span class="p">,</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span> <span class="n">clab_platform_name</span>
+                <span class="s2">"containerlab"</span><span class="p">,</span> <span class="s2">"netmiko"</span><span class="p">,</span> <span class="n">clab_platform_name</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">netmiko_platform</span><span class="p">:</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;hosts&quot;</span><span class="p">][</span><span class="n">host_name</span><span class="p">][</span><span class="s2">&quot;platform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">netmiko_platform</span><span class="p">[</span>
-                    <span class="s2">&quot;platform&quot;</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"hosts"</span><span class="p">][</span><span class="n">host_name</span><span class="p">][</span><span class="s2">"platform"</span><span class="p">]</span> <span class="o">=</span> <span class="n">netmiko_platform</span><span class="p">[</span>
+                    <span class="s2">"platform"</span>
                 <span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">host_name</span><span class="si">}</span><span class="s2"> Clab-node-kind &#39;</span><span class="si">{</span><span class="n">clab_platform_name</span><span class="si">}</span><span class="s2">&#39; not mapped to Netmiko platform.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">host_name</span><span class="si">}</span><span class="s2"> Clab-node-kind '</span><span class="si">{</span><span class="n">clab_platform_name</span><span class="si">}</span><span class="s2">' not mapped to Netmiko platform."</span>
                 <span class="p">)</span>
                 <span class="k">continue</span>
 
             <span class="c1"># get default credentials</span>
             <span class="k">if</span> <span class="n">use_default_credentials</span><span class="p">:</span>
-                <span class="n">clab_platform</span> <span class="o">=</span> <span class="n">PlatformMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span> <span class="n">clab_platform_name</span><span class="p">)</span>
+                <span class="n">clab_platform</span> <span class="o">=</span> <span class="n">PlatformMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"containerlab"</span><span class="p">,</span> <span class="n">clab_platform_name</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">clab_platform</span><span class="p">:</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">host_name</span><span class="si">}</span><span class="s2"> Clab-node-kind &#39;</span><span class="si">{</span><span class="n">clab_platform_name</span><span class="si">}</span><span class="s2">&#39; not found.&quot;</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">host_name</span><span class="si">}</span><span class="s2"> Clab-node-kind '</span><span class="si">{</span><span class="n">clab_platform_name</span><span class="si">}</span><span class="s2">' not found."</span>
                     <span class="p">)</span>
                     <span class="k">continue</span>
-                <span class="k">if</span> <span class="n">clab_platform</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">):</span>
-                    <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;hosts&quot;</span><span class="p">][</span><span class="n">host_name</span><span class="p">][</span><span class="s2">&quot;username&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clab_platform</span><span class="p">[</span>
-                        <span class="s2">&quot;username&quot;</span>
+                <span class="k">if</span> <span class="n">clab_platform</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">):</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"hosts"</span><span class="p">][</span><span class="n">host_name</span><span class="p">][</span><span class="s2">"username"</span><span class="p">]</span> <span class="o">=</span> <span class="n">clab_platform</span><span class="p">[</span>
+                        <span class="s2">"username"</span>
                     <span class="p">]</span>
-                <span class="k">if</span> <span class="n">clab_platform</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;password&quot;</span><span class="p">):</span>
-                    <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;hosts&quot;</span><span class="p">][</span><span class="n">host_name</span><span class="p">][</span><span class="s2">&quot;password&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clab_platform</span><span class="p">[</span>
-                        <span class="s2">&quot;password&quot;</span>
+                <span class="k">if</span> <span class="n">clab_platform</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"password"</span><span class="p">):</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"hosts"</span><span class="p">][</span><span class="n">host_name</span><span class="p">][</span><span class="s2">"password"</span><span class="p">]</span> <span class="o">=</span> <span class="n">clab_platform</span><span class="p">[</span>
+                        <span class="s2">"password"</span>
                     <span class="p">]</span>
 
     <span class="k">return</span> <span class="n">ret</span>

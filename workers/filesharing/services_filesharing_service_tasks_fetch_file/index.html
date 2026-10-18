@@ -7217,52 +7217,52 @@ file management, and on-demand Git remote synchronization.</p>
 <p>Context manager - helper method:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;nf://filesharing/test_file_1.txt&quot;</span><span class="p">)</span>
-    <span class="n">local_path</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">"nf://filesharing/test_file_1.txt"</span><span class="p">)</span>
+    <span class="n">local_path</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">"content"</span><span class="p">]</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">local_path</span><span class="p">)</span>
 </code></pre></div>
 <p>Context manager - read content as text:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span>
-        <span class="n">url</span><span class="o">=</span><span class="s2">&quot;nf://filesharing/test_file_1.txt&quot;</span><span class="p">,</span>
+        <span class="n">url</span><span class="o">=</span><span class="s2">"nf://filesharing/test_file_1.txt"</span><span class="p">,</span>
         <span class="n">read</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">"content"</span><span class="p">])</span>
 </code></pre></div>
 <p>Context manager - synchronize and read a Git-backed file:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span>
-        <span class="n">url</span><span class="o">=</span><span class="s2">&quot;git://network-assets/templates/base.j2&quot;</span><span class="p">,</span>
+        <span class="n">url</span><span class="o">=</span><span class="s2">"git://network-assets/templates/base.j2"</span><span class="p">,</span>
         <span class="n">read</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">"content"</span><span class="p">])</span>
 </code></pre></div>
 <p>Direct lifecycle - direct task invocation:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;filesharing&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;fetch_file&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"filesharing"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"fetch_file"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://filesharing/test_file_1.txt&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;chunk_size&quot;</span><span class="p">:</span> <span class="mi">256000</span><span class="p">,</span>
-            <span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">"url"</span><span class="p">:</span> <span class="s2">"nf://filesharing/test_file_1.txt"</span><span class="p">,</span>
+            <span class="s2">"chunk_size"</span><span class="p">:</span> <span class="mi">256000</span><span class="p">,</span>
+            <span class="s2">"offset"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
@@ -7281,9 +7281,9 @@ invoking the streaming task against the matching worker.</p>
 root
 └──<span class="w"> </span>file:<span class="w">    </span>File<span class="w"> </span>sharing<span class="w"> </span>service
 <span class="w">    </span>└──<span class="w"> </span>copy:<span class="w">    </span>Copy<span class="w"> </span>files
-<span class="w">        </span>├──<span class="w"> </span>url:<span class="w">    </span>File<span class="w"> </span>location,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;nf://&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>url:<span class="w">    </span>File<span class="w"> </span>location,<span class="w"> </span>default<span class="w"> </span><span class="s1">'nf://'</span>
 <span class="w">        </span>├──<span class="w"> </span>destination:<span class="w">    </span>File<span class="w"> </span>location<span class="w"> </span>to<span class="w"> </span>save<span class="w"> </span>downloaded<span class="w"> </span>content
-<span class="w">        </span>└──<span class="w"> </span>read:<span class="w">    </span>Print<span class="w"> </span>file<span class="w"> </span>content,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>└──<span class="w"> </span>read:<span class="w">    </span>Print<span class="w"> </span>file<span class="w"> </span>content,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 
 nf#
 </code></pre></div>
@@ -7412,24 +7412,7 @@ nf#
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1907</span>
-<span class="normal">1908</span>
-<span class="normal">1909</span>
-<span class="normal">1910</span>
-<span class="normal">1911</span>
-<span class="normal">1912</span>
-<span class="normal">1913</span>
-<span class="normal">1914</span>
-<span class="normal">1915</span>
-<span class="normal">1916</span>
-<span class="normal">1917</span>
-<span class="normal">1918</span>
-<span class="normal">1919</span>
-<span class="normal">1920</span>
-<span class="normal">1921</span>
-<span class="normal">1922</span>
-<span class="normal">1923</span>
-<span class="normal">1924</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1924</span>
 <span class="normal">1925</span>
 <span class="normal">1926</span>
 <span class="normal">1927</span>
@@ -7444,10 +7427,27 @@ nf#
 <span class="normal">1936</span>
 <span class="normal">1937</span>
 <span class="normal">1938</span>
-<span class="normal">1939</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_file</span><span class="p">(</span>
+<span class="normal">1939</span>
+<span class="normal">1940</span>
+<span class="normal">1941</span>
+<span class="normal">1942</span>
+<span class="normal">1943</span>
+<span class="normal">1944</span>
+<span class="normal">1945</span>
+<span class="normal">1946</span>
+<span class="normal">1947</span>
+<span class="normal">1948</span>
+<span class="normal">1949</span>
+<span class="normal">1950</span>
+<span class="normal">1951</span>
+<span class="normal">1952</span>
+<span class="normal">1953</span>
+<span class="normal">1954</span>
+<span class="normal">1955</span>
+<span class="normal">1956</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_file</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">read</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Function to download file from broker File Sharing Service</span>
 
 <span class="sd">    Args:</span>
@@ -7461,16 +7461,16 @@ nf#
 
 <span class="sd">    Raises:</span>
 <span class="sd">        FileNotFoundError: If raise_on_fail is True and the download fails.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid URL format: </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Invalid URL format: </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="n">read</span><span class="p">)</span>
-    <span class="n">status</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span>
-    <span class="n">file_content</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - worker &#39;</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&#39; fetch file failed with status &#39;</span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">"status"</span><span class="p">]</span>
+    <span class="n">file_content</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">"content"</span><span class="p">]</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - worker '</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">' fetch file failed with status '</span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">'"</span>
 
-    <span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;200&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="s2">"200"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">file_content</span>
     <span class="k">elif</span> <span class="n">raise_on_fail</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>

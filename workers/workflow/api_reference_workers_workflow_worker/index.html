@@ -7224,7 +7224,7 @@
 
 
 <h2 id="norfab.workers.workflow_worker.workflow_worker.WorkflowWorker" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">WorkflowWorker</span><span class="p">(</span><span class="n">inventory</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">broker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exit_event</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">init_done_event</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;WARNING&#39;</span><span class="p">)</span></code>
+              <code class="highlight language-python"><span class="n">WorkflowWorker</span><span class="p">(</span><span class="n">inventory</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">broker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exit_event</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">init_done_event</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'WARNING'</span><span class="p">)</span></code>
 
 <a href="#norfab.workers.workflow_worker.workflow_worker.WorkflowWorker" class="headerlink" title="Permanent link">¤</a></h2>
 
@@ -7418,7 +7418,7 @@ retrieve version information, manage workflow results, and execute workflows.</p
     <span class="n">worker_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">exit_event</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">init_done_event</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;WARNING&quot;</span><span class="p">,</span>
+    <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"WARNING"</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">inventory</span><span class="p">,</span> <span class="n">broker</span><span class="p">,</span> <span class="n">SERVICE</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">exit_event</span><span class="p">,</span> <span class="n">log_level</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">init_done_event</span> <span class="o">=</span> <span class="n">init_done_event</span>
@@ -7427,7 +7427,7 @@ retrieve version information, manage workflow results, and execute workflows.</p
     <span class="bp">self</span><span class="o">.</span><span class="n">workflow_worker_inventory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_inventory</span><span class="p">()</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">init_done_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Started&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Started"</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -7528,19 +7528,19 @@ including the Python version, platform, and a specified language model.</p>
 <span class="normal">110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetVersionInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetVersionResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Version&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Version"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Generate a report of the versions of specific Python packages and system information.</span>
 
 <span class="sd">    This method collects the version information of several Python packages and system details,</span>
@@ -7550,11 +7550,11 @@ including the Python version, platform, and a specified language model.</p>
 <span class="sd">        Result: An object containing a dictionary with the package names as keys and their</span>
 <span class="sd">                respective version numbers as values. If a package is not found, its version</span>
 <span class="sd">                will be an empty string.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">libs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;norfab&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;python&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
-        <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
+        <span class="s2">"norfab"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"python"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">" "</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s2">"platform"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="c1"># get version of packages installed</span>
     <span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="n">libs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -7633,24 +7633,24 @@ including the Python version, platform, and a specified language model.</p>
 <span class="normal">133</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetInventoryResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Inventory&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Inventory"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    NorFab task to retrieve the workflow&#39;s worker inventory.</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    NorFab task to retrieve the workflow's worker inventory.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Result: An instance of the Result class containing the workflow&#39;s worker inventory.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        Result: An instance of the Result class containing the workflow's worker inventory.</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">workflow_worker_inventory</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7752,7 +7752,7 @@ have any resources matched by given task.</p>
 <span class="normal">155</span>
 <span class="normal">156</span>
 <span class="normal">157</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_no_match_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Remove results from the workflow results for workers that did not</span>
 <span class="sd">    have any resources matched by given task.</span>
 
@@ -7761,14 +7761,14 @@ have any resources matched by given task.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Dict: The workflow results with empty results removed.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">task_results</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">ret</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">worker_result</span> <span class="ow">in</span> <span class="n">task_results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># check results for tasks that did not fail</span>
-            <span class="k">if</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;no_match&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">"status"</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"no_match"</span><span class="p">:</span>
                     <span class="n">ret</span><span class="p">[</span><span class="n">step</span><span class="p">][</span><span class="n">worker_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">worker_result</span>
             <span class="c1"># add failed tasks regardless of status content</span>
             <span class="k">else</span><span class="p">:</span>
@@ -7997,7 +7997,7 @@ have any resources matched by given task.</p>
 <span class="normal">265</span>
 <span class="normal">266</span>
 <span class="normal">267</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">skip_step_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Determines whether a step should be skipped based on the provided conditions.</span>
 
 <span class="sd">    Args:</span>
@@ -8005,100 +8005,100 @@ have any resources matched by given task.</p>
 <span class="sd">        step (str): The name of the current step.</span>
 <span class="sd">        data (dict): A dictionary containing conditions for skipping the step. Possible keys are:</span>
 
-<span class="sd">            - &quot;run_if_fail_any&quot;: List of step names. Skip if any of the workers have failed these steps.</span>
-<span class="sd">            - &quot;run_if_pass_any&quot;: List of step names. Skip if any of the workers have passed these steps.</span>
-<span class="sd">            - &quot;run_if_fail_all&quot;: List of step names. Skip if all of the workers have failed these steps.</span>
-<span class="sd">            - &quot;run_if_pass_all&quot;: List of step names. Skip if all of the workers have passed these steps.</span>
+<span class="sd">            - "run_if_fail_any": List of step names. Skip if any of the workers have failed these steps.</span>
+<span class="sd">            - "run_if_pass_any": List of step names. Skip if any of the workers have passed these steps.</span>
+<span class="sd">            - "run_if_fail_all": List of step names. Skip if all of the workers have failed these steps.</span>
+<span class="sd">            - "run_if_pass_all": List of step names. Skip if all of the workers have passed these steps.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        tuple: tuple of boolean status and message, if status is true step should be skipped.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;run_if_fail_any&quot;</span><span class="p">):</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"run_if_fail_any"</span><span class="p">):</span>
         <span class="c1"># check if have results for all needed steps</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;run_if_fail_any&quot;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"run_if_fail_any"</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
                 <span class="k">return</span> <span class="p">(</span>
-                    <span class="s2">&quot;error&quot;</span><span class="p">,</span>
-                    <span class="sa">f</span><span class="s2">&quot;run_if_fail_any check failed for &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39;, &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; results not found&quot;</span><span class="p">,</span>
+                    <span class="s2">"error"</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">"run_if_fail_any check failed for '</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">', '</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">' results not found"</span><span class="p">,</span>
                 <span class="p">)</span>
         <span class="c1"># check if any of the steps failed</span>
-        <span class="k">for</span> <span class="n">step_name</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;run_if_fail_any&quot;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">step_name</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"run_if_fail_any"</span><span class="p">]:</span>
             <span class="k">for</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">worker_result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="n">step_name</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span>
-                    <span class="ow">and</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;no_match&quot;</span>
+                    <span class="n">worker_result</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span>
+                    <span class="ow">and</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">"status"</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"no_match"</span>
                 <span class="p">):</span>
                     <span class="c1"># do not skip this step since one of the steps failed</span>
                     <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span>
                 <span class="kc">True</span><span class="p">,</span>  <span class="c1"># skip this step since none of the steps failed</span>
-                <span class="sa">f</span><span class="s2">&quot;Skipping </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">, no workers failed any of run_if_fail_any steps: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;run_if_fail_any&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"Skipping </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">, no workers failed any of run_if_fail_any steps: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'run_if_fail_any'</span><span class="p">])</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="p">)</span>
-    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;run_if_pass_any&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"run_if_pass_any"</span><span class="p">):</span>
         <span class="c1"># check if have results for all needed steps</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;run_if_pass_any&quot;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"run_if_pass_any"</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
                 <span class="k">return</span> <span class="p">(</span>
-                    <span class="s2">&quot;error&quot;</span><span class="p">,</span>
-                    <span class="sa">f</span><span class="s2">&quot;run_if_pass_any check failed for &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39;, &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; results not found&quot;</span><span class="p">,</span>
+                    <span class="s2">"error"</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">"run_if_pass_any check failed for '</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">', '</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">' results not found"</span><span class="p">,</span>
                 <span class="p">)</span>
         <span class="c1"># check if any of the steps passed</span>
-        <span class="k">for</span> <span class="n">step_name</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;run_if_pass_any&quot;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">step_name</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"run_if_pass_any"</span><span class="p">]:</span>
             <span class="k">for</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">worker_result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="n">step_name</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span>
-                    <span class="ow">and</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;no_match&quot;</span>
+                    <span class="n">worker_result</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span>
+                    <span class="ow">and</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">"status"</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"no_match"</span>
                 <span class="p">):</span>
                     <span class="c1"># do not skip this step since one of the steps passed</span>
                     <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span>
                 <span class="kc">True</span><span class="p">,</span>  <span class="c1"># skip this step since none of the steps passed</span>
-                <span class="sa">f</span><span class="s2">&quot;Skipping </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">, no workers passed any of run_if_pass_any steps: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;run_if_pass_any&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"Skipping </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">, no workers passed any of run_if_pass_any steps: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'run_if_pass_any'</span><span class="p">])</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="p">)</span>
-    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;run_if_fail_all&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"run_if_fail_all"</span><span class="p">):</span>
         <span class="c1"># check if have results for all needed steps</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;run_if_fail_all&quot;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"run_if_fail_all"</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
                 <span class="k">return</span> <span class="p">(</span>
-                    <span class="s2">&quot;error&quot;</span><span class="p">,</span>
-                    <span class="sa">f</span><span class="s2">&quot;run_if_fail_all check failed for &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39;, &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; results not found&quot;</span><span class="p">,</span>
+                    <span class="s2">"error"</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">"run_if_fail_all check failed for '</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">', '</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">' results not found"</span><span class="p">,</span>
                 <span class="p">)</span>
         <span class="c1"># check if all workers failed the step(s)</span>
-        <span class="k">for</span> <span class="n">step_name</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;run_if_fail_all&quot;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">step_name</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"run_if_fail_all"</span><span class="p">]:</span>
             <span class="k">for</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">worker_result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="n">step_name</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span>
-                    <span class="ow">and</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;no_match&quot;</span>
+                    <span class="n">worker_result</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span>
+                    <span class="ow">and</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">"status"</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"no_match"</span>
                 <span class="p">):</span>
                     <span class="c1"># skip this step since one of the workers passed this step</span>
                     <span class="k">return</span> <span class="p">(</span>
                         <span class="kc">True</span><span class="p">,</span>
-                        <span class="sa">f</span><span class="s2">&quot;Skipping </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">, worker </span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2"> not failed one of run_if_fail_all steps: </span><span class="si">{</span><span class="n">step_name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">"Skipping </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">, worker </span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2"> not failed one of run_if_fail_all steps: </span><span class="si">{</span><span class="n">step_name</span><span class="si">}</span><span class="s2">."</span><span class="p">,</span>
                     <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># do not skip this step since all steps failed</span>
             <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;run_if_pass_all&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"run_if_pass_all"</span><span class="p">):</span>
         <span class="c1"># check if have results for all needed steps</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;run_if_pass_all&quot;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"run_if_pass_all"</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
                 <span class="k">return</span> <span class="p">(</span>
-                    <span class="s2">&quot;error&quot;</span><span class="p">,</span>
-                    <span class="sa">f</span><span class="s2">&quot;run_if_pass_all check failed for &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39;, &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; results not found&quot;</span><span class="p">,</span>
+                    <span class="s2">"error"</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">"run_if_pass_all check failed for '</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">', '</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">' results not found"</span><span class="p">,</span>
                 <span class="p">)</span>
         <span class="c1"># check if all workers passed the step(s)</span>
-        <span class="k">for</span> <span class="n">step_name</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;run_if_pass_all&quot;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">step_name</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"run_if_pass_all"</span><span class="p">]:</span>
             <span class="k">for</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">worker_result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="n">step_name</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span>
-                    <span class="ow">and</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;no_match&quot;</span>
+                    <span class="n">worker_result</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span>
+                    <span class="ow">and</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">"status"</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"no_match"</span>
                 <span class="p">):</span>
                     <span class="c1"># skip this step since one of the workers failed this step</span>
                     <span class="k">return</span> <span class="p">(</span>
                         <span class="kc">True</span><span class="p">,</span>
-                        <span class="sa">f</span><span class="s2">&quot;Skipping </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">, worker </span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2"> not passed one of run_if_pass_all steps: </span><span class="si">{</span><span class="n">step_name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">"Skipping </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">, worker </span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2"> not passed one of run_if_pass_all steps: </span><span class="si">{</span><span class="n">step_name</span><span class="si">}</span><span class="s2">."</span><span class="p">,</span>
                     <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># do not skip this step since all steps passed</span>
@@ -8236,7 +8236,7 @@ the specified step and the stop_on_failure flag is set; otherwise, False.</p>
 <span class="normal">286</span>
 <span class="normal">287</span>
 <span class="normal">288</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">stop_workflow_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Determines whether to stop the workflow based on the result of</span>
 <span class="sd">    a specific step and provided data.</span>
 
@@ -8249,10 +8249,10 @@ the specified step and the stop_on_failure flag is set; otherwise, False.</p>
 <span class="sd">    Returns:</span>
 <span class="sd">        bool: True if the workflow should be stopped due to a failure in</span>
 <span class="sd">            the specified step and the stop_on_failure flag is set; otherwise, False.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stop_on_failure&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"stop_on_failure"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">worker_result</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># stop the workflow since a failure occurred</span>
     <span class="k">return</span> <span class="kc">False</span>
 </code></pre></div></td></tr></table></div>
@@ -8490,19 +8490,19 @@ the specified step and the stop_on_failure flag is set; otherwise, False.</p>
 <span class="normal">407</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">RunInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">RunResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Run Workflow&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Run Workflow"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">workflow</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Executes a workflow defined by a dictionary.</span>
 
 <span class="sd">    Args:</span>
@@ -8514,24 +8514,24 @@ the specified step and the stop_on_failure flag is set; otherwise, False.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: If the workflow is not a valid URL or dictionary.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:run&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{})</span>
+<span class="sd">    """</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:run"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{})</span>
 
     <span class="c1"># load workflow from URL</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">workflow</span><span class="p">):</span>
         <span class="n">workflow_name</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">workflow</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.yml&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">workflow</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">".yaml"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">".yml"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">workflow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span>
         <span class="n">workflow</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span>
 
     <span class="c1"># extract workflow parameters</span>
-    <span class="n">workflow_name</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;workflow&quot;</span><span class="p">)</span>
-    <span class="n">workflow_description</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="n">remove_no_match_results</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;remove_no_match_results&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">workflow_name</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="s2">"workflow"</span><span class="p">)</span>
+    <span class="n">workflow_description</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"description"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="n">remove_no_match_results</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"remove_no_match_results"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;starting workflow &#39;</span><span class="si">{</span><span class="n">workflow_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting workflow &#39;</span><span class="si">{</span><span class="n">workflow_name</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">workflow_description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"starting workflow '</span><span class="si">{</span><span class="n">workflow_name</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Starting workflow '</span><span class="si">{</span><span class="n">workflow_name</span><span class="si">}</span><span class="s2">': </span><span class="si">{</span><span class="n">workflow_description</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -8543,46 +8543,46 @@ the specified step and the stop_on_failure flag is set; otherwise, False.</p>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">skip_status</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">][</span><span class="n">step</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;all-workers&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;failed&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                    <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;skipped&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;task&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[],</span>
-                    <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">message</span><span class="p">],</span>
-                    <span class="s2">&quot;juuid&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s2">"all-workers"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">"failed"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">"result"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"skipped"</span><span class="p">,</span>
+                    <span class="s2">"task"</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">"task"</span><span class="p">],</span>
+                    <span class="s2">"errors"</span><span class="p">:</span> <span class="p">[],</span>
+                    <span class="s2">"messages"</span><span class="p">:</span> <span class="p">[</span><span class="n">message</span><span class="p">],</span>
+                    <span class="s2">"juuid"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="p">}</span>
             <span class="p">}</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;skipping workflow step &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39;, one of run_if_x conditions not satisfied&quot;</span>
+                <span class="sa">f</span><span class="s2">"skipping workflow step '</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">', one of run_if_x conditions not satisfied"</span>
             <span class="p">)</span>
             <span class="k">continue</span>
         <span class="c1"># stop workflow execution on error</span>
-        <span class="k">elif</span> <span class="n">skip_status</span> <span class="o">==</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">skip_status</span> <span class="o">==</span> <span class="s2">"error"</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">][</span><span class="n">step</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;all-workers&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;failed&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                    <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;task&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">message</span><span class="p">],</span>
-                    <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[],</span>
-                    <span class="s2">&quot;juuid&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s2">"all-workers"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">"failed"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">"result"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"error"</span><span class="p">,</span>
+                    <span class="s2">"task"</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">"task"</span><span class="p">],</span>
+                    <span class="s2">"errors"</span><span class="p">:</span> <span class="p">[</span><span class="n">message</span><span class="p">],</span>
+                    <span class="s2">"messages"</span><span class="p">:</span> <span class="p">[],</span>
+                    <span class="s2">"juuid"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="p">}</span>
             <span class="p">}</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
             <span class="k">break</span>
 
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;doing workflow step &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"doing workflow step '</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
 
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">][</span><span class="n">step</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-            <span class="n">service</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">],</span>
-            <span class="n">task</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;task&quot;</span><span class="p">],</span>
-            <span class="n">workers</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;workers&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">),</span>
-            <span class="n">kwargs</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;kwargs&quot;</span><span class="p">,</span> <span class="p">{}),</span>
-            <span class="n">args</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;args&quot;</span><span class="p">,</span> <span class="p">[]),</span>
-            <span class="n">timeout</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timeout&quot;</span><span class="p">,</span> <span class="mi">600</span><span class="p">),</span>
+            <span class="n">service</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">"service"</span><span class="p">],</span>
+            <span class="n">task</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">"task"</span><span class="p">],</span>
+            <span class="n">workers</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"workers"</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">),</span>
+            <span class="n">kwargs</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kwargs"</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="n">args</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"args"</span><span class="p">,</span> <span class="p">[]),</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"timeout"</span><span class="p">,</span> <span class="mi">600</span><span class="p">),</span>
         <span class="p">)</span>
 
         <span class="c1"># check if need to stop workflow based on stop_if_fail flag</span>
@@ -8591,7 +8591,7 @@ the specified step and the stop_on_failure flag is set; otherwise, False.</p>
             <span class="ow">is</span> <span class="kc">True</span>
         <span class="p">):</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;stopping workflow, step &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39; failed and has stop_if_fail flag&quot;</span>
+                <span class="sa">f</span><span class="s2">"stopping workflow, step '</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">' failed and has stop_if_fail flag"</span>
             <span class="p">)</span>
             <span class="k">break</span>
 
@@ -8601,7 +8601,7 @@ the specified step and the stop_on_failure flag is set; otherwise, False.</p>
         <span class="p">)</span>
 
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Completed workflow &#39;</span><span class="si">{</span><span class="n">workflow_name</span><span class="si">}</span><span class="s2">&#39; with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">])</span><span class="si">}</span><span class="s2"> step result(s)&quot;</span>
+        <span class="sa">f</span><span class="s2">"Completed workflow '</span><span class="si">{</span><span class="n">workflow_name</span><span class="si">}</span><span class="s2">' with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">])</span><span class="si">}</span><span class="s2"> step result(s)"</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>

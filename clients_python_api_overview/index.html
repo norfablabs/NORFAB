@@ -7198,7 +7198,7 @@
 <p>NorFab Python API can be used to interact with automations fabric. To start working with Python API need to import <code>NorFab</code> object and instantiate it.</p>
 <div class="highlight"><pre><span></span><code>from norfab.core.nfapi import NorFab
 
-nf = NorFab(inventory=&quot;./inventory.yaml&quot;)
+nf = NorFab(inventory="./inventory.yaml")
 nf.start()
 nf.destroy()
 </code></pre></div>
@@ -7212,12 +7212,12 @@ inventory with expressions such as <code>{{ env.get("NORFAB_BROKER_URL") }}</cod
 manually exporting each variable.</p>
 <p><code>list_environment_variables()</code> returns a copy of the variables visible to
 NFAPI:</p>
-<div class="highlight"><pre><span></span><code><span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">nf</span><span class="o">.</span><span class="n">list_environment_variables</span><span class="p">()[</span><span class="s2">&quot;LAB_USERNAME&quot;</span><span class="p">])</span>
+<div class="highlight"><pre><span></span><code><span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">nf</span><span class="o">.</span><span class="n">list_environment_variables</span><span class="p">()[</span><span class="s2">"LAB_USERNAME"</span><span class="p">])</span>
 </code></pre></div>
 <p>Pass <code>load_env_override=False</code> when existing shell or CI variables should take
 precedence over <code>.env</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">,</span> <span class="n">load_env_override</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">,</span> <span class="n">load_env_override</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <p>See the <a href="../api_reference_core_norfab_nfapi/#environment-file-loading">NFAPI reference</a>
 for supported <code>.env</code> syntax and path resolution.</p>
@@ -7232,15 +7232,15 @@ run job and destroy NorFab instance.</p>
 <div class="highlight"><pre><span></span><code>import pprint
 from norfab.core.nfapi import NorFab
 
-nf = NorFab(inventory=&quot;./inventory.yaml&quot;)
+nf = NorFab(inventory="./inventory.yaml")
 nf.start()
 
 client = nf.make_client()
 
 result = nf.client.run_job(
-    service=&quot;nornir&quot;,
-    task=&quot;cli&quot;,
-    kwargs={&quot;commands&quot;: [&quot;show version&quot;, &quot;show clock&quot;]}
+    service="nornir",
+    task="cli",
+    kwargs={"commands": ["show version", "show clock"]}
 )
 
 pprint.pprint(result)
@@ -7253,11 +7253,11 @@ nf.destroy()
 <div class="highlight"><pre><span></span><code>import pprint
 from norfab.core.nfapi import NorFab
 
-with NorFab(inventory=&quot;./inventory.yaml&quot;) as nf:
+with NorFab(inventory="./inventory.yaml") as nf:
     result = nf.client.run_job(
-        service=&quot;nornir&quot;,
-        task=&quot;cli&quot;,
-        kwargs={&quot;commands&quot;: [&quot;show version&quot;, &quot;show clock&quot;]}
+        service="nornir",
+        task="cli",
+        kwargs={"commands": ["show version", "show clock"]}
     )
 
 pprint.pprint(result)
@@ -7281,12 +7281,12 @@ while avoiding collisions between projects that run scripts with the same file
 name. If Python cannot determine the entry script name, the default uses
 <code>&lt;folder-hash&gt;_NFPClient</code>.</p>
 <p>You can also provide an explicit name:</p>
-<div class="highlight"><pre><span></span><code>client = nf.make_client(name=&quot;lab_client_1&quot;)
+<div class="highlight"><pre><span></span><code>client = nf.make_client(name="lab_client_1")
 </code></pre></div>
 <p>Use explicit names when running multiple clients from the same script, shell,
 notebook, test runner, or application directory:</p>
-<div class="highlight"><pre><span></span><code>client_1 = nf.make_client(name=&quot;lab_client_1&quot;)
-client_2 = nf.make_client(name=&quot;lab_client_2&quot;)
+<div class="highlight"><pre><span></span><code>client_1 = nf.make_client(name="lab_client_1")
+client_2 = nf.make_client(name="lab_client_2")
 </code></pre></div>
 <p>Unique client names prevent clients from sharing the same broker identity and
 local job database. This helps avoid cases where replies or events for one
@@ -7308,25 +7308,25 @@ same time, give them different names.
 <h3 id="synchronous-jobs">Synchronous Jobs<a class="headerlink" href="#synchronous-jobs" title="Permanent link">¤</a></h3>
 <p>Use <code>run_job()</code> for normal blocking execution:</p>
 <div class="highlight"><pre><span></span><code>result = nf.client.run_job(
-    service=&quot;nornir&quot;,
-    task=&quot;cli&quot;,
-    workers=&quot;all&quot;,
-    kwargs={&quot;commands&quot;: [&quot;show version&quot;]},
+    service="nornir",
+    task="cli",
+    workers="all",
+    kwargs={"commands": ["show version"]},
     timeout=600,
 )
 </code></pre></div>
 <h3 id="future-based-jobs">Future Based Jobs<a class="headerlink" href="#future-based-jobs" title="Permanent link">¤</a></h3>
 <p>Use <code>submit_job()</code> to get a job future object:</p>
 <div class="highlight"><pre><span></span><code>future = nf.client.submit_job(
-    service=&quot;nornir&quot;,
-    task=&quot;cli&quot;,
-    workers=&quot;all&quot;,
-    kwargs={&quot;commands&quot;: [&quot;show version&quot;]},
+    service="nornir",
+    task="cli",
+    workers="all",
+    kwargs={"commands": ["show version"]},
     timeout=600,
 )
 
 for event in future.events():
-    print(event[&quot;event_type&quot;], event[&quot;message&quot;])
+    print(event["event_type"], event["message"])
 
 result = future.result(timeout=600)
 </code></pre></div>
@@ -7345,58 +7345,58 @@ result = future.result(timeout=600)
 <h3 id="event-shape">Event Shape<a class="headerlink" href="#event-shape" title="Permanent link">¤</a></h3>
 <p>Events yielded by <code>future.events()</code> are dictionaries. Common event fields are:</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;event_type&quot;: &quot;progress&quot;,
-    &quot;message&quot;: &quot;starting&quot;,
-    &quot;service&quot;: &quot;nornir&quot;,
-    &quot;worker&quot;: &quot;nornir-worker-1&quot;,
-    &quot;task&quot;: &quot;cli&quot;,
-    &quot;uuid&quot;: &quot;job-uuid&quot;,
-    &quot;timestamp&quot;: &quot;07-Jun-2026 10:30:00.123&quot;,
-    &quot;severity&quot;: &quot;INFO&quot;,
-    &quot;status&quot;: &quot;running&quot;,
-    &quot;resource&quot;: [],
-    &quot;extras&quot;: {},
+    "event_type": "progress",
+    "message": "starting",
+    "service": "nornir",
+    "worker": "nornir-worker-1",
+    "task": "cli",
+    "uuid": "job-uuid",
+    "timestamp": "07-Jun-2026 10:30:00.123",
+    "severity": "INFO",
+    "status": "running",
+    "resource": [],
+    "extras": {},
 }
 </code></pre></div>
 <p><code>event_type</code> is always present. Other fields depend on the worker task and event type.</p>
 <p>Input request details are stored under <code>event["extras"]["input_request"]</code>:</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;event_type&quot;: &quot;input_request&quot;,
-    &quot;message&quot;: &quot;approve dummy task?&quot;,
-    &quot;service&quot;: &quot;DummyService&quot;,
-    &quot;worker&quot;: &quot;dummy-worker-1&quot;,
-    &quot;task&quot;: &quot;input_request_task&quot;,
-    &quot;uuid&quot;: &quot;job-uuid&quot;,
-    &quot;severity&quot;: &quot;INFO&quot;,
-    &quot;status&quot;: &quot;waiting_client_input&quot;,
-    &quot;timeout&quot;: 120,
-    &quot;extras&quot;: {
-        &quot;input_request&quot;: {
-            &quot;id&quot;: &quot;input-request-id&quot;,
-            &quot;question&quot;: &quot;approve dummy task?&quot;,
-            &quot;default&quot;: &quot;no&quot;,
-            &quot;metadata&quot;: {&quot;task&quot;: &quot;input_request_task&quot;},
+    "event_type": "input_request",
+    "message": "approve dummy task?",
+    "service": "DummyService",
+    "worker": "dummy-worker-1",
+    "task": "input_request_task",
+    "uuid": "job-uuid",
+    "severity": "INFO",
+    "status": "waiting_client_input",
+    "timeout": 120,
+    "extras": {
+        "input_request": {
+            "id": "input-request-id",
+            "question": "approve dummy task?",
+            "default": "no",
+            "metadata": {"task": "input_request_task"},
         }
     },
 }
 </code></pre></div>
 <p>The response sent by <code>future.send_response()</code> has this shape:</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;input_id&quot;: &quot;input-request-id&quot;,
-    &quot;value&quot;: &quot;yes&quot;,
-    &quot;cancel&quot;: False,
-    &quot;metadata&quot;: {},
+    "input_id": "input-request-id",
+    "value": "yes",
+    "cancel": False,
+    "metadata": {},
 }
 </code></pre></div>
 <p>After the worker receives, cancels or times out waiting for input, it emits an <code>input_response</code> event. Response details are stored under <code>event["extras"]["input_response"]</code>:</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;event_type&quot;: &quot;input_response&quot;,
-    &quot;message&quot;: &quot;approve dummy task?&quot;,
-    &quot;status&quot;: &quot;received&quot;,
-    &quot;extras&quot;: {
-        &quot;input_response&quot;: {
-            &quot;input_id&quot;: &quot;input-request-id&quot;,
-            &quot;metadata&quot;: {},
+    "event_type": "input_response",
+    "message": "approve dummy task?",
+    "status": "received",
+    "extras": {
+        "input_response": {
+            "input_id": "input-request-id",
+            "metadata": {},
         }
     },
 }
@@ -7405,32 +7405,32 @@ result = future.result(timeout=600)
 <h3 id="interactive-jobs">Interactive Jobs<a class="headerlink" href="#interactive-jobs" title="Permanent link">¤</a></h3>
 <p>Worker tasks can pause and ask the client for input. Client code should listen for <code>input_request</code> events and reply using <code>send_response()</code>:</p>
 <div class="highlight"><pre><span></span><code>future = nf.client.submit_job(
-    service=&quot;DummyService&quot;,
-    task=&quot;input_request_task&quot;,
-    workers=&quot;dummy-worker-1&quot;,
+    service="DummyService",
+    task="input_request_task",
+    workers="dummy-worker-1",
     timeout=600,
 )
 
 for event in future.events():
-    if event[&quot;event_type&quot;] != &quot;input_request&quot;:
-        print(event[&quot;message&quot;])
+    if event["event_type"] != "input_request":
+        print(event["message"])
         continue
 
-    input_request = event[&quot;extras&quot;][&quot;input_request&quot;]
-    answer = input(input_request[&quot;question&quot;] + &quot; &quot;)
+    input_request = event["extras"]["input_request"]
+    answer = input(input_request["question"] + " ")
     future.send_response(
-        input_id=input_request[&quot;id&quot;],
+        input_id=input_request["id"],
         value=answer,
-        worker=event[&quot;worker&quot;],
+        worker=event["worker"],
     )
 
 result = future.result(timeout=600)
 </code></pre></div>
 <p>To cancel a pending input request:</p>
 <div class="highlight"><pre><span></span><code>future.send_response(
-    input_id=input_request[&quot;id&quot;],
+    input_id=input_request["id"],
     value=None,
-    worker=event[&quot;worker&quot;],
+    worker=event["worker"],
     cancel=True,
 )
 </code></pre></div>

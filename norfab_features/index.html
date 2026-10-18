@@ -10436,7 +10436,8 @@ Status reports component identity, endpoints, runtime directories, and CurveZMQ
 configuration for environment troubleshooting. Versioned statistics report
 process CPU, memory, threads, TCP sockets, open file descriptors on supported
 platforms, message activity, queues, jobs, connections, and service-specific
-metrics for performance analysis and dashboards. NFCLI exposes these through
+metrics for performance analysis and dashboards. Worker statistics include total
+retained jobs and counts by status across restarts. NFCLI exposes these through
 <code>show norfab &lt;component&gt; status</code> and <code>show norfab &lt;component&gt; statistics</code>.
 <strong>Limitations:</strong> status output contains local filesystem paths and should only be
 shared with trusted operators; neither interface returns private key contents.</p>
@@ -11482,7 +11483,8 @@ can be rediscovered at runtime; each discovery batch rebuilds OpenAPI once after
 all new routes are registered. <strong>Interfaces:</strong> REST is the delivered interface;
 NFCLI and Python API administer the service. <strong>Use cases:</strong> portals, OSS/BSS,
 ITSM, webhooks, CI pipelines, and non-Python consumers. <strong>Limitations:</strong> only
-tasks declaring REST exposure are published.</p>
+tasks declaring REST exposure are published. The authenticated <code>/api/job/run</code>
+endpoint also supports synchronous job execution; <code>/api/job</code> routes are not available.</p>
 <h3 id="openapi-documentation-and-validation">OpenAPI documentation and validation<a class="headerlink" href="#openapi-documentation-and-validation" title="Permanent link">¤</a></h3>
 <p>Publishes OpenAPI JSON plus Swagger UI and ReDoc, with Pydantic request
 validation; its OpenAPI schema is also retrievable as a NORFAB task.

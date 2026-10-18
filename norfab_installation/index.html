@@ -7144,7 +7144,7 @@ will be noted in service deployment details.</p>
 <div class="highlight"><pre><span></span><code>pip install git+https://github.com/norfablabs/NORFAB.git@master
 </code></pre></div>
 <p>With extras:</p>
-<div class="highlight"><pre><span></span><code>pip install &quot;norfab[nfcli,nornirservice] @ git+https://github.com/norfablabs/NORFAB.git@master&quot;
+<div class="highlight"><pre><span></span><code>pip install "norfab[nfcli,nornirservice] @ git+https://github.com/norfablabs/NORFAB.git@master"
 </code></pre></div>
 <p><strong>Upgrade</strong> (re-installs the latest commit):</p>
 <div class="highlight"><pre><span></span><code>pip install --upgrade git+https://github.com/norfablabs/NORFAB.git@master
@@ -7168,13 +7168,13 @@ Download from <a href="https://www.python.org/downloads/">python.org</a>.</p>
 <p>To install manually, run these commands in PowerShell:</p>
 <div class="highlight"><pre><span></span><code><span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">norfab</span>
 <span class="c"># Or include the CLI, TUI, and selected services:</span>
-<span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="s2">&quot;norfab[nfcli,tui,nornirservice,netboxservice]&quot;</span>
+<span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="s2">"norfab[nfcli,tui,nornirservice,netboxservice]"</span>
 </code></pre></div>
 <p>Using a virtual environment (recommended):</p>
 <div class="highlight"><pre><span></span><code><span class="n">python</span> <span class="n">-m</span> <span class="n">venv</span> <span class="n">norfab-env</span>
 <span class="nb">Set-ExecutionPolicy</span> <span class="n">-Scope</span> <span class="k">Process</span> <span class="n">-ExecutionPolicy</span> <span class="n">Bypass</span>
 <span class="p">.\</span><span class="n">norfab-env</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">Activate</span><span class="p">.</span><span class="n">ps1</span>
-<span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="s2">&quot;norfab[nfcli,tui,nornirservice,netboxservice]&quot;</span>
+<span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="s2">"norfab[nfcli,tui,nornirservice,netboxservice]"</span>
 </code></pre></div>
 <p>Choose extras from the table in the <strong>pip</strong> tab to match the services you
 need. With the <code>nfcli</code> extra installed, create a new inventory folder:</p>
@@ -7197,7 +7197,7 @@ from the folder containing <code>norfab-env</code>, or use your environment's ac
 </div>
 <div class="tabbed-block">
 <p>Download and run the interactive Bash installer:</p>
-<div class="highlight"><pre><span></span><code>bash<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_linux.sh<span class="k">)</span><span class="s2">&quot;</span>
+<div class="highlight"><pre><span></span><code>bash<span class="w"> </span>-c<span class="w"> </span><span class="s2">"</span><span class="k">$(</span>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_linux.sh<span class="k">)</span><span class="s2">"</span>
 </code></pre></div>
 <p>Run this command from an interactive terminal with Bash and curl installed.
 It downloads and runs the installer while keeping terminal input available

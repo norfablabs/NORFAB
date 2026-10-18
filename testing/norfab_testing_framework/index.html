@@ -7234,7 +7234,7 @@ poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> 
 <span class="c1"># Run one NetBox test class.</span>
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox/test_interfaces.py::TestGetInterfaces
 <span class="c1"># Run only NetBox get_interfaces tests.</span>
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;netbox and netbox_get_interfaces&quot;</span>
+poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span><span class="s2">"netbox and netbox_get_interfaces"</span>
 <span class="c1"># Run NFCLI tests with printed output and individual test names.</span>
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>nfcli<span class="w"> </span>-s<span class="w"> </span>-v
 </code></pre></div>
@@ -7729,7 +7729,7 @@ poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </s
 <span class="c1"># Run one Nornir test file in the suite container.</span>
 poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-nornir<span class="w"> </span>--selector<span class="o">=</span>tests/services/nornir/test_worker.py
 <span class="c1"># Run only NetBox get_devices tests.</span>
-poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-netbox<span class="w"> </span>--marker<span class="o">=</span><span class="s2">&quot;netbox and netbox_get_devices&quot;</span>
+poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-netbox<span class="w"> </span>--marker<span class="o">=</span><span class="s2">"netbox and netbox_get_devices"</span>
 
 <span class="c1"># Run the NetBox CRUD file in a dedicated container.</span>
 poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-netbox-crud
@@ -7743,7 +7743,7 @@ poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </s
 <span class="nb">cd</span><span class="w"> </span>docker/norfab-docker-tests
 <span class="c1"># Build the Nornir test image with Compose.</span>
 docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>nornir-service-tests
-<span class="c1"># Run the Nornir service&#39;s default pytest command.</span>
+<span class="c1"># Run the Nornir service's default pytest command.</span>
 docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>nornir-service-tests
 <span class="c1"># Override that command to run one file with the Nornir marker.</span>
 docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>nornir-service-tests<span class="w"> </span>-m<span class="w"> </span>nornir<span class="w"> </span>tests/services/nornir/test_worker.py

@@ -7168,14 +7168,14 @@ expired tokens are rejected by the MCP SDK bearer auth middleware.</p>
 <h2 id="inventory">Inventory<a class="headerlink" href="#inventory" title="Permanent link">¤</a></h2>
 <p>Authentication is optional and controlled by a top-level FastMCP inventory flag:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fastmcp</span>
-<span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1&quot;</span>
+<span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="s">"127.0.0.1"</span>
 <span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8001</span>
 
 <span class="nt">authentication_enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="nt">auth_bearer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">token_ttl</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">86400</span>
-<span class="w">  </span><span class="nt">issuer_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://127.0.0.1:8001&quot;</span>
-<span class="w">  </span><span class="nt">resource_server_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://127.0.0.1:8001&quot;</span>
+<span class="w">  </span><span class="nt">issuer_url</span><span class="p">:</span><span class="w"> </span><span class="s">"http://127.0.0.1:8001"</span>
+<span class="w">  </span><span class="nt">resource_server_url</span><span class="p">:</span><span class="w"> </span><span class="s">"http://127.0.0.1:8001"</span>
 <span class="w">  </span><span class="nt">required_scopes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
 </code></pre></div>
 <p><code>issuer_url</code> and <code>resource_server_url</code> default to the worker URL. If the bind
@@ -7186,9 +7186,9 @@ assigned the same scopes unless <code>auth_bearer.token_scopes</code> is set exp
 <h2 id="token-lifecycle">Token Lifecycle<a class="headerlink" href="#token-lifecycle" title="Permanent link">¤</a></h2>
 <p>Store a token before enabling or using authentication:</p>
 <div class="highlight"><pre><span></span><code><span class="n">nfclient</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;fastmcp&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;bearer_token_store&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;automation&quot;</span><span class="p">,</span> <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="s2">&quot;secret-token&quot;</span><span class="p">,</span> <span class="s2">&quot;expire&quot;</span><span class="p">:</span> <span class="mi">86400</span><span class="p">},</span>
+    <span class="s2">"fastmcp"</span><span class="p">,</span>
+    <span class="s2">"bearer_token_store"</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"username"</span><span class="p">:</span> <span class="s2">"automation"</span><span class="p">,</span> <span class="s2">"token"</span><span class="p">:</span> <span class="s2">"secret-token"</span><span class="p">,</span> <span class="s2">"expire"</span><span class="p">:</span> <span class="mi">86400</span><span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Connect MCP clients with the bearer header:</p>

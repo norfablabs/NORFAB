@@ -7500,8 +7500,8 @@ per-connection session keys.</p>
 <p>The resolved inventory should keep the endpoint and its CURVE public key
 together:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">broker</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tcp://10.20.0.10:5555&quot;</span>
-<span class="w">  </span><span class="nt">curve_public_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;40-character-Z85-public-key&gt;&quot;</span>
+<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"tcp://10.20.0.10:5555"</span>
+<span class="w">  </span><span class="nt">curve_public_key</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;40-character-Z85-public-key&gt;"</span>
 <span class="w">  </span><span class="nt">zmq_auth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
 <p>The public key may be present in source-controlled inventory where that is
@@ -7542,7 +7542,7 @@ shared client secret is introduced.</p>
 <p>The broker configures one ZAP domain, for example <code>norfab</code>, and wires
 <code>NorFabClientAuthProvider</code> to:</p>
 <div class="highlight"><pre><span></span><code><span class="n">auth</span><span class="o">.</span><span class="n">configure_curve_callback</span><span class="p">(</span>
-    <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;norfab&quot;</span><span class="p">,</span>
+    <span class="n">domain</span><span class="o">=</span><span class="s2">"norfab"</span><span class="p">,</span>
     <span class="n">credentials_provider</span><span class="o">=</span><span class="n">provider</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -7579,13 +7579,13 @@ mode should be used when peers can submit tasks or when names/roles matter.</p>
 <h3 id="5-optional-source-ip-policy-remains-independent">5. Optional source-IP policy remains independent<a class="headerlink" href="#5-optional-source-ip-policy-remains-independent" title="Permanent link">¤</a></h3>
 <p>Inventory can define either exact allowed IPs or exact denied IPs:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">broker</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tcp://10.20.0.10:5555&quot;</span>
-<span class="w">  </span><span class="nt">curve_public_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;broker-public-key&gt;&quot;</span>
+<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"tcp://10.20.0.10:5555"</span>
+<span class="w">  </span><span class="nt">curve_public_key</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;broker-public-key&gt;"</span>
 <span class="w">  </span><span class="nt">admission</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">managed</span>
 <span class="w">    </span><span class="nt">allow_ips</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;10.20.0.21&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;10.20.0.22&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"10.20.0.21"</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"10.20.0.22"</span>
 </code></pre></div>
 <p>Semantics:</p>
 <ul>

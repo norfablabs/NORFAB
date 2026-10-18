@@ -7207,9 +7207,9 @@ checked-out files available to NorFab workers at the configured <code>nf://</cod
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>The result contains the name, synchronization status, and UTC attempt time:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;automation-assets&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cloned&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;last_sync_attempt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-08-29T10:30:00+00:00&quot;</span>
+<span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"automation-assets"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cloned"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"last_sync_attempt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-08-29T10:30:00+00:00"</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Status is <code>cloned</code> when content is made available and <code>unchanged</code> when the fetched
@@ -7225,15 +7225,15 @@ commit matches the previous local HEAD and the mount exists. Failures return
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;filesharing&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;git_clone&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;filesharing-worker-1&quot;</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;automation-assets&quot;</span><span class="p">},</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"filesharing"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"git_clone"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"filesharing-worker-1"</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"automation-assets"</span><span class="p">},</span>
     <span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 <span class="k">finally</span><span class="p">:</span>
@@ -7260,9 +7260,9 @@ root
 <span class="w">    </span>└──<span class="w"> </span>git:<span class="w">    </span>Manage<span class="w"> </span>Git<span class="w"> </span>remotes
 <span class="w">        </span>└──<span class="w"> </span>clone-remote:<span class="w">    </span>Synchronize<span class="w"> </span>a<span class="w"> </span>Git<span class="w"> </span>remote<span class="w"> </span>and<span class="w"> </span>make<span class="w"> </span>it<span class="w"> </span>available
 <span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>nowait:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>job<span class="w"> </span>to<span class="w"> </span>complete,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
+<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
+<span class="w">            </span>├──<span class="w"> </span>nowait:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>job<span class="w"> </span>to<span class="w"> </span>complete,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">            </span>└──<span class="w"> </span>name<span class="w"> </span><span class="o">(</span>R<span class="o">)</span>:<span class="w">    </span>Configured<span class="w"> </span>remote<span class="w"> </span>name
 nf#
 </code></pre></div>
@@ -7571,20 +7571,20 @@ operation when another task holds the remote lock.</p>
 <span class="normal">470</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">RemoteNameInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GitCloneResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
-    <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
+    <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">"enabled"</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Clone Git Remote&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Clone Git Remote"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">git_clone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Synchronize content from an initialized Git remote and make it available.</span>
+<span class="w">    </span><span class="sd">"""Synchronize content from an initialized Git remote and make it available.</span>
 
 <span class="sd">    The task shallow-fetches the configured branch, checks out the fetched</span>
 <span class="sd">    commit, and compares it with the current local Git HEAD. Changed</span>
@@ -7602,28 +7602,28 @@ operation when another task holds the remote lock.</p>
 <span class="sd">        A result containing the updated synchronization state. Successful</span>
 <span class="sd">        results use ``cloned`` when a snapshot is made available and</span>
 <span class="sd">        ``unchanged`` when Git reports the same commit and the mount exists.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - synchronizing Git remote &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+<span class="sd">    """</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - synchronizing Git remote '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">'"</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">job</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">remotes</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - remote &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; is not configured&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - remote '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' is not configured"</span>
         <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">job</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Remote &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; is not configured&quot;</span><span class="p">])</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">"Remote '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' is not configured"</span><span class="p">])</span>
 
     <span class="n">remote</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remotes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;git&quot;</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - remote &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; is not a git remote&quot;</span>
+    <span class="k">if</span> <span class="n">remote</span><span class="p">[</span><span class="s2">"type"</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"git"</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - remote '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' is not a git remote"</span>
         <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">job</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Remote &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; is not a git remote&quot;</span><span class="p">])</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">"Remote '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' is not a git remote"</span><span class="p">])</span>
 
-    <span class="n">lock</span> <span class="o">=</span> <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;lock&quot;</span><span class="p">]</span>
+    <span class="n">lock</span> <span class="o">=</span> <span class="n">remote</span><span class="p">[</span><span class="s2">"lock"</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">job</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">acquired</span> <span class="o">=</span> <span class="n">lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">(</span><span class="n">blocking</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -7631,49 +7631,49 @@ operation when another task holds the remote lock.</p>
             <span class="n">timeout</span><span class="o">=</span><span class="n">job</span><span class="o">.</span><span class="n">timeout</span> <span class="k">if</span> <span class="n">job</span><span class="o">.</span><span class="n">timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
         <span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">acquired</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - remote &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; is busy&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - remote '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' is busy"</span>
         <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">job</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Remote &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; is busy&quot;</span><span class="p">])</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">"Remote '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' is busy"</span><span class="p">])</span>
 
-    <span class="n">remote_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">remote</span><span class="p">[</span><span class="s2">&quot;repository&quot;</span><span class="p">])</span>
-    <span class="n">mount_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_path</span><span class="p">(</span><span class="n">remote</span><span class="p">[</span><span class="s2">&quot;mount&quot;</span><span class="p">])</span>
-    <span class="n">staging_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">remote_dir</span><span class="p">,</span> <span class="s2">&quot;staging&quot;</span><span class="p">)</span>
-    <span class="n">snapshot_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">staging_dir</span><span class="p">,</span> <span class="s2">&quot;snapshot&quot;</span><span class="p">)</span>
-    <span class="n">error</span> <span class="o">=</span> <span class="s2">&quot;Remote synchronization failed&quot;</span>
+    <span class="n">remote_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">remote</span><span class="p">[</span><span class="s2">"repository"</span><span class="p">])</span>
+    <span class="n">mount_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_path</span><span class="p">(</span><span class="n">remote</span><span class="p">[</span><span class="s2">"mount"</span><span class="p">])</span>
+    <span class="n">staging_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">remote_dir</span><span class="p">,</span> <span class="s2">"staging"</span><span class="p">)</span>
+    <span class="n">snapshot_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">staging_dir</span><span class="p">,</span> <span class="s2">"snapshot"</span><span class="p">)</span>
+    <span class="n">error</span> <span class="o">=</span> <span class="s2">"Remote synchronization failed"</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Staging is recreated for each sync so an incomplete snapshot is</span>
         <span class="c1"># never visible from the configured mount.</span>
         <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">staging_dir</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">remote</span><span class="p">[</span><span class="s2">&quot;repository&quot;</span><span class="p">],</span> <span class="s2">&quot;.git&quot;</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Local Git repository is not initialized&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">remote</span><span class="p">[</span><span class="s2">"repository"</span><span class="p">],</span> <span class="s2">".git"</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Local Git repository is not initialized"</span><span class="p">)</span>
 
         <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - fetching branch &#39;</span><span class="si">{</span><span class="n">remote</span><span class="p">[</span><span class="s1">&#39;branch&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; for remote &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - fetching branch '</span><span class="si">{</span><span class="n">remote</span><span class="p">[</span><span class="s1">'branch'</span><span class="p">]</span><span class="si">}</span><span class="s2">' for remote "</span>
+            <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">'"</span>
         <span class="p">)</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">job</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="k">with</span> <span class="n">Repo</span><span class="p">(</span><span class="n">remote</span><span class="p">[</span><span class="s2">&quot;repository&quot;</span><span class="p">])</span> <span class="k">as</span> <span class="n">repository</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">Repo</span><span class="p">(</span><span class="n">remote</span><span class="p">[</span><span class="s2">"repository"</span><span class="p">])</span> <span class="k">as</span> <span class="n">repository</span><span class="p">:</span>
             <span class="n">previous_sha</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">repository</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">commit</span><span class="o">.</span><span class="n">hexsha</span>
                 <span class="k">if</span> <span class="n">repository</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span>
                 <span class="k">else</span> <span class="kc">None</span>
             <span class="p">)</span>
             <span class="n">fetched</span> <span class="o">=</span> <span class="n">repository</span><span class="o">.</span><span class="n">remotes</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span>
-                <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;branch&quot;</span><span class="p">],</span>
+                <span class="n">remote</span><span class="p">[</span><span class="s2">"branch"</span><span class="p">],</span>
                 <span class="n">depth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                 <span class="n">env</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_git_fetch_environment</span><span class="p">(</span><span class="n">remote</span><span class="p">),</span>
             <span class="p">)</span>
             <span class="n">sha</span> <span class="o">=</span> <span class="n">fetched</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="o">.</span><span class="n">hexsha</span>
-            <span class="n">repository</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">checkout</span><span class="p">(</span><span class="s2">&quot;-B&quot;</span><span class="p">,</span> <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;branch&quot;</span><span class="p">],</span> <span class="n">sha</span><span class="p">)</span>
+            <span class="n">repository</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">checkout</span><span class="p">(</span><span class="s2">"-B"</span><span class="p">,</span> <span class="n">remote</span><span class="p">[</span><span class="s2">"branch"</span><span class="p">],</span> <span class="n">sha</span><span class="p">)</span>
 
         <span class="n">changed</span> <span class="o">=</span> <span class="n">previous_sha</span> <span class="o">!=</span> <span class="n">sha</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">mount_dir</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">changed</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - making Git remote &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; available at </span><span class="si">{</span><span class="n">remote</span><span class="p">[</span><span class="s1">&#39;mount&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - making Git remote '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' available at </span><span class="si">{</span><span class="n">remote</span><span class="p">[</span><span class="s1">'mount'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">job</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
@@ -7682,37 +7682,37 @@ operation when another task holds the remote lock.</p>
             <span class="c1"># symbolic links must not enter the shared namespace.</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">snapshot_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">directories</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span>
-                <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;repository&quot;</span><span class="p">],</span> <span class="n">topdown</span><span class="o">=</span><span class="kc">True</span>
+                <span class="n">remote</span><span class="p">[</span><span class="s2">"repository"</span><span class="p">],</span> <span class="n">topdown</span><span class="o">=</span><span class="kc">True</span>
             <span class="p">):</span>
-                <span class="n">relative_root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;repository&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span>
+                <span class="n">relative_root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">remote</span><span class="p">[</span><span class="s2">"repository"</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="s2">"/"</span>
                 <span class="p">)</span>
-                <span class="k">if</span> <span class="n">relative_root</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span><span class="p">:</span>
-                    <span class="n">relative_root</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="k">if</span> <span class="n">relative_root</span> <span class="o">==</span> <span class="s2">"."</span><span class="p">:</span>
+                    <span class="n">relative_root</span> <span class="o">=</span> <span class="s2">""</span>
 
                 <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">directories</span><span class="p">[:]:</span>
                     <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">directory</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Git repository contains a symbolic link&quot;</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">directory</span> <span class="o">==</span> <span class="s2">&quot;.git&quot;</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Git repository contains a symbolic link"</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">directory</span> <span class="o">==</span> <span class="s2">".git"</span><span class="p">:</span>
                         <span class="n">directories</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
 
                 <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-                    <span class="n">relative_path</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="n">relative_path</span> <span class="o">=</span> <span class="s2">"/"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                         <span class="n">part</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="p">[</span><span class="n">relative_root</span><span class="p">,</span> <span class="n">filename</span><span class="p">]</span> <span class="k">if</span> <span class="n">part</span>
                     <span class="p">)</span>
                     <span class="n">source</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="n">source</span><span class="p">):</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Git repository contains a symbolic link&quot;</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Git repository contains a symbolic link"</span><span class="p">)</span>
                     <span class="n">destination</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                        <span class="n">snapshot_dir</span><span class="p">,</span> <span class="o">*</span><span class="n">relative_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+                        <span class="n">snapshot_dir</span><span class="p">,</span> <span class="o">*</span><span class="n">relative_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
                     <span class="p">)</span>
                     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">destination</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                     <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
 
             <span class="c1"># Swap complete directories so readers see either the old or</span>
             <span class="c1"># the new snapshot, never a partially copied one.</span>
-            <span class="n">previous_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">staging_dir</span><span class="p">,</span> <span class="s2">&quot;previous&quot;</span><span class="p">)</span>
+            <span class="n">previous_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">staging_dir</span><span class="p">,</span> <span class="s2">"previous"</span><span class="p">)</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">mount_dir</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">mount_dir</span><span class="p">):</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">mount_dir</span><span class="p">,</span> <span class="n">previous_dir</span><span class="p">)</span>
@@ -7723,37 +7723,37 @@ operation when another task holds the remote lock.</p>
                     <span class="n">os</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">previous_dir</span><span class="p">,</span> <span class="n">mount_dir</span><span class="p">)</span>
                 <span class="k">raise</span>
 
-        <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;cloned&quot;</span> <span class="k">if</span> <span class="n">changed</span> <span class="k">else</span> <span class="s2">&quot;unchanged&quot;</span>
+        <span class="n">remote</span><span class="p">[</span><span class="s2">"status"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"cloned"</span> <span class="k">if</span> <span class="n">changed</span> <span class="k">else</span> <span class="s2">"unchanged"</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-        <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;failed&quot;</span>
-        <span class="n">error</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: remote synchronization failed&quot;</span>
+        <span class="n">remote</span><span class="p">[</span><span class="s2">"status"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"failed"</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: remote synchronization failed"</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Git remote &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; synchronization failed with &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Git remote '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' synchronization failed with "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">job</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
     <span class="k">finally</span><span class="p">:</span>
-        <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;last_sync_attempt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
-        <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;last_sync_timer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
+        <span class="n">remote</span><span class="p">[</span><span class="s2">"last_sync_attempt"</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+        <span class="n">remote</span><span class="p">[</span><span class="s2">"last_sync_timer"</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
         <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">staging_dir</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;last_sync_attempt&quot;</span><span class="p">:</span> <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;last_sync_attempt&quot;</span><span class="p">],</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="n">remote</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span>
+        <span class="s2">"status"</span><span class="p">:</span> <span class="n">remote</span><span class="p">[</span><span class="s2">"status"</span><span class="p">],</span>
+        <span class="s2">"last_sync_attempt"</span><span class="p">:</span> <span class="n">remote</span><span class="p">[</span><span class="s2">"last_sync_attempt"</span><span class="p">],</span>
     <span class="p">}</span>
-    <span class="k">if</span> <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;failed&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">remote</span><span class="p">[</span><span class="s2">"status"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"failed"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
             <span class="n">result</span><span class="o">=</span><span class="n">result</span><span class="p">,</span>
             <span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">errors</span><span class="o">=</span><span class="p">[</span><span class="n">error</span><span class="p">],</span>
         <span class="p">)</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Git remote &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; synchronization completed with status &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">remote</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Git remote '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' synchronization completed with status "</span>
+        <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">remote</span><span class="p">[</span><span class="s1">'status'</span><span class="p">]</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">job</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

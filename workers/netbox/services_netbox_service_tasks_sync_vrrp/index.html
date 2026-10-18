@@ -7202,13 +7202,13 @@
 task and its <code>vrrp</code> getter, then reconciles NetBox FHRP groups, device-interface
 assignments, priorities, authentication types, and virtual IP addresses.</p>
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;sync_vrrp&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"sync_vrrp"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;router-1&quot;</span><span class="p">,</span> <span class="s2">&quot;router-2&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;name_template&quot;</span><span class="p">:</span> <span class="s2">&quot;{{ device.name }}_{{ interface }}_VRRP{{ group_id }}&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"router-1"</span><span class="p">,</span> <span class="s2">"router-2"</span><span class="p">],</span>
+        <span class="s2">"name_template"</span><span class="p">:</span> <span class="s2">"{{ device.name }}_{{ interface }}_VRRP{{ group_id }}"</span><span class="p">,</span>
+        <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -7336,10 +7336,10 @@ not group selection. A missing required VRF is reported and that VIP is skipped.
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;sync_vrrp&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;router-1&quot;</span><span class="p">],</span> <span class="s2">&quot;vip_use_vrf&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"sync_vrrp"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"router-1"</span><span class="p">],</span> <span class="s2">"vip_use_vrf"</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>
 </div>
@@ -7403,13 +7403,13 @@ The task passes these variables directly to the Jinja2 environment:
 
 `device` is a pynetbox record, so templates can access nested NetBox fields:
 
-<div class="highlight"><pre><span></span><code>{{ device.site.name }}_{{ device.role.name }}_{{ device.name }}_{{ interface | replace(&#39;/&#39;, &#39;_&#39;) }}_VRRP{{ group_id }}
+<div class="highlight"><pre><span></span><code>{{ device.site.name }}_{{ device.role.name }}_{{ device.name }}_{{ interface | replace('/', '_') }}_VRRP{{ group_id }}
 </code></pre></div>
 
 Related fields such as `platform` can be empty in NetBox. Use a Jinja2
 conditional when a field is optional:
 
-<div class="highlight"><pre><span></span><code>{{ device.platform.name if device.platform else &#39;no-platform&#39; }}_{{ device.name }}_VRRP{{ group_id }}
+<div class="highlight"><pre><span></span><code>{{ device.platform.name if device.platform else 'no-platform' }}_{{ device.name }}_VRRP{{ group_id }}
 </code></pre></div>
 
 The environment uses strict undefined-variable handling. A missing variable or
@@ -7428,18 +7428,18 @@ select all peers together to rename a shared group.
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">CLI</label><label for="__tabbed_2_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>netbox<span class="w"> </span>sync<span class="w"> </span>vrrp<span class="w"> </span>devices<span class="w"> </span>router-1<span class="w"> </span>name-template<span class="w"> </span><span class="s2">&quot;{{ device.site.name }}_{{ device.role.name }}_VRRP{{ group_id }}&quot;</span><span class="w"> </span>dry-run
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>netbox<span class="w"> </span>sync<span class="w"> </span>vrrp<span class="w"> </span>devices<span class="w"> </span>router-1<span class="w"> </span>name-template<span class="w"> </span><span class="s2">"{{ device.site.name }}_{{ device.role.name }}_VRRP{{ group_id }}"</span><span class="w"> </span>dry-run
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;sync_vrrp&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"sync_vrrp"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;router-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;name_template&quot;</span><span class="p">:</span> <span class="s2">&quot;{{ device.site.name }}_{{ device.role.name }}_VRRP{{ group_id }}&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"router-1"</span><span class="p">],</span>
+        <span class="s2">"name_template"</span><span class="p">:</span> <span class="s2">"{{ device.site.name }}_{{ device.role.name }}_VRRP{{ group_id }}"</span><span class="p">,</span>
+        <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -7449,7 +7449,7 @@ select all peers together to rename a shared group.
 <h3 id="load-a-template-using-nf">Load a template using <code>nf://</code><a class="headerlink" href="#load-a-template-using-nf" title="Permanent link">¤</a></h3>
 <p>Store only the Jinja2 expression in a file available to the File Sharing
 service, for example <code>netbox/vrrp_group_name.j2</code>:</p>
-<div class="highlight"><pre><span></span><code>{{ device.name }}-{{ interface | replace(&#39;/&#39;, &#39;-&#39;) }}-vrrp{{ group_id }}
+<div class="highlight"><pre><span></span><code>{{ device.name }}-{{ interface | replace('/', '-') }}-vrrp{{ group_id }}
 </code></pre></div>
 <p>Then pass its <code>nf://</code> URL to the task:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">CLI</label><label for="__tabbed_3_2">Python</label></div>
@@ -7460,13 +7460,13 @@ service, for example <code>netbox/vrrp_group_name.j2</code>:</p>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;sync_vrrp&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"sync_vrrp"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;router-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;name_template&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://netbox/vrrp_group_name.j2&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"router-1"</span><span class="p">],</span>
+        <span class="s2">"name_template"</span><span class="p">:</span> <span class="s2">"nf://netbox/vrrp_group_name.j2"</span><span class="p">,</span>
+        <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -8406,16 +8406,16 @@ VRFs regardless of this setting.</p>
 <span class="normal">684</span>
 <span class="normal">685</span>
 <span class="normal">686</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncVrrpInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncVrrpResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Sync VRRP&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Sync VRRP"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -8432,7 +8432,7 @@ VRFs regardless of this setting.</p>
     <span class="n">vip_use_vrf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update NetBox VRRP groups and virtual IPs from live device data.</span>
+<span class="w">    </span><span class="sd">"""Update NetBox VRRP groups and virtual IPs from live device data.</span>
 
 <span class="sd">    Create missing records and update group names, authentication, VIP roles,</span>
 <span class="sd">    and interface priorities. Support the same VIP in different VRFs.</span>
@@ -8441,7 +8441,7 @@ VRFs regardless of this setting.</p>
 
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab job object.</span>
-<span class="sd">        instance: NetBox instance. Defaults to the worker&#39;s default instance.</span>
+<span class="sd">        instance: NetBox instance. Defaults to the worker's default instance.</span>
 <span class="sd">        dry_run: Preview changes without applying them.</span>
 <span class="sd">        with_approval: Ask for approval before applying changes.</span>
 <span class="sd">        timeout: Seconds allowed for device lookup and live data collection.</span>
@@ -8462,23 +8462,23 @@ VRFs regardless of this setting.</p>
 <span class="sd">        instead. The ``diff`` field always contains the preview.</span>
 <span class="sd">        Errors describe collection failures, missing objects, IP ownership</span>
 <span class="sd">        conflicts, or ambiguous group matches.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_vrrp&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_vrrp"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="p">{},</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
         <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
         <span class="n">diff</span><span class="o">=</span><span class="p">{},</span>
     <span class="p">)</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;starting VRRP sync using NetBox instance &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"starting VRRP sync using NetBox instance '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
         <span class="nb">set</span><span class="p">(</span><span class="n">devices</span> <span class="ow">or</span> <span class="p">[])</span>
         <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_nornir_hosts</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span> <span class="k">if</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="p">[])</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;no devices specified&quot;</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"no devices specified"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
 
@@ -8489,7 +8489,7 @@ VRFs regardless of this setting.</p>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">template</span> <span class="o">=</span> <span class="n">VRRP_NAME_TEMPLATE_ENV</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">name_template</span><span class="p">)</span>
     <span class="k">except</span> <span class="n">TemplateError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;invalid VRRP group name template: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"invalid VRRP group name template: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="n">nb_devices</span> <span class="o">=</span> <span class="p">{</span>
@@ -8497,12 +8497,12 @@ VRFs regardless of this setting.</p>
         <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span>
-            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,platform,role,device_type,site&quot;</span><span class="p">,</span>
+            <span class="n">fields</span><span class="o">=</span><span class="s2">"id,name,platform,role,device_type,site"</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="p">}</span>
     <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">device</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_devices</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;device &#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">&#39; not found in NetBox&quot;</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"device '</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">' not found in NetBox"</span><span class="p">)</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="p">[</span><span class="n">device</span> <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span> <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">nb_devices</span><span class="p">]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
@@ -8512,7 +8512,7 @@ VRFs regardless of this setting.</p>
         <span class="k">for</span> <span class="n">interface</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="p">,</span>
             <span class="n">device_id</span><span class="o">=</span><span class="p">[</span><span class="n">nb_devices</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">],</span>
-            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,device,vrf&quot;</span><span class="p">,</span>
+            <span class="n">fields</span><span class="o">=</span><span class="s2">"id,name,device,vrf"</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="p">}</span>
     <span class="n">interface_ids</span> <span class="o">=</span> <span class="p">{</span>
@@ -8522,47 +8522,47 @@ VRFs regardless of this setting.</p>
 
     <span class="c1"># The getter validates record types and supplies defaults. Only translate</span>
     <span class="c1"># device values to NetBox values and resolve the actual NetBox interface.</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;collecting live VRRP data&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"collecting live VRRP data"</span><span class="p">)</span>
     <span class="n">parsed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;parse_ttp&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;get&quot;</span><span class="p">:</span> <span class="s2">&quot;vrrp&quot;</span><span class="p">,</span> <span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">},</span>
+        <span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="s2">"parse_ttp"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"all"</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"get"</span><span class="p">:</span> <span class="s2">"vrrp"</span><span class="p">,</span> <span class="s2">"FL"</span><span class="p">:</span> <span class="n">devices</span><span class="p">},</span>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">live</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">worker</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">parsed</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">failed</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;resources_failed&quot;</span><span class="p">]</span>
+        <span class="n">failed</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"resources_failed"</span><span class="p">]</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">failed</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">failed</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s2"> failed to fetch VRRP data from </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">failed</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s2"> failed to fetch VRRP data from </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">failed</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;worker &#39;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s2">&#39; failed to collect live VRRP data&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s2">"failed"</span><span class="p">]:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"worker '</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s2">' failed to collect live VRRP data"</span><span class="p">)</span>
             <span class="k">continue</span>
-        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">records</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">records</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"result"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">device</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
-                <span class="n">interface</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span>
+                <span class="n">interface</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">"interface"</span><span class="p">]</span>
                 <span class="n">interface_id</span> <span class="o">=</span> <span class="n">interface_ids</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">device</span><span class="p">,</span> <span class="n">interface</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">interface_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;interface &#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">&#39; not found in NetBox&quot;</span>
+                        <span class="sa">f</span><span class="s2">"interface '</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">' not found in NetBox"</span>
                     <span class="p">)</span>
                     <span class="k">continue</span>
-                <span class="n">group_id</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;group&quot;</span><span class="p">]</span>
-                <span class="n">protocol</span> <span class="o">=</span> <span class="n">VRRP_PROTOCOLS</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;protocol&quot;</span><span class="p">]]</span>
+                <span class="n">group_id</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">"group"</span><span class="p">]</span>
+                <span class="n">protocol</span> <span class="o">=</span> <span class="n">VRRP_PROTOCOLS</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">"protocol"</span><span class="p">]]</span>
                 <span class="n">vrrp_vip_identity</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
-                    <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;virtual_address&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">ip</span>
+                    <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">"virtual_address"</span><span class="p">])</span><span class="o">.</span><span class="n">ip</span>
                 <span class="p">)</span>
-                <span class="n">auth</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;authentication_type&quot;</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">auth</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;simple&quot;</span><span class="p">,</span> <span class="s2">&quot;plain&quot;</span><span class="p">,</span> <span class="s2">&quot;cleartext&quot;</span><span class="p">):</span>
-                    <span class="n">auth</span> <span class="o">=</span> <span class="s2">&quot;plaintext&quot;</span>
-                <span class="n">vrrp_interface_identity</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">protocol</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">group_id</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">auth</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">"authentication_type"</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">auth</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"text"</span><span class="p">,</span> <span class="s2">"simple"</span><span class="p">,</span> <span class="s2">"plain"</span><span class="p">,</span> <span class="s2">"cleartext"</span><span class="p">):</span>
+                    <span class="n">auth</span> <span class="o">=</span> <span class="s2">"plaintext"</span>
+                <span class="n">vrrp_interface_identity</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">protocol</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">group_id</span><span class="si">}</span><span class="s2">"</span>
                 <span class="n">live</span><span class="p">[(</span><span class="n">device</span><span class="p">,</span> <span class="n">vrrp_interface_identity</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
                     <span class="n">record</span><span class="p">,</span>
                     <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>
@@ -8571,32 +8571,32 @@ VRFs regardless of this setting.</p>
                     <span class="n">interface_id</span><span class="o">=</span><span class="n">interface_id</span><span class="p">,</span>
                 <span class="p">)</span>
     <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span> <span class="o">-</span> <span class="n">seen</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">):</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;device &#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">&#39; is missing a live VRRP result&quot;</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"device '</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">' is missing a live VRRP result"</span><span class="p">)</span>
     <span class="n">peers</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="c1"># Sort peers so a shared group&#39;s name always uses the same first peer.</span>
+    <span class="c1"># Sort peers so a shared group's name always uses the same first peer.</span>
     <span class="k">for</span> <span class="n">member</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">live</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
         <span class="n">vrrp_peer_identity</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;protocol&quot;</span><span class="p">],</span>
-            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;group&quot;</span><span class="p">],</span>
-            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;virtual_address&quot;</span><span class="p">],</span>
-            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">],</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">"protocol"</span><span class="p">],</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">"group"</span><span class="p">],</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">"virtual_address"</span><span class="p">],</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">],</span>
         <span class="p">)</span>
         <span class="n">peers</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">vrrp_peer_identity</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">member</span><span class="p">)</span>
 
     <span class="c1"># Load selected memberships and all matching VIP owners. These two</span>
     <span class="c1"># sources discover relevant groups, including unselected peer devices.</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;loading NetBox VRRP groups, VIPs, and memberships&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"loading NetBox VRRP groups, VIPs, and memberships"</span><span class="p">)</span>
     <span class="n">selected_assignments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
         <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">fhrp_group_assignments</span><span class="p">,</span>
         <span class="n">device</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span>
-        <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,group,interface_type,interface_id,priority&quot;</span><span class="p">,</span>
+        <span class="n">fields</span><span class="o">=</span><span class="s2">"id,group,interface_type,interface_id,priority"</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">addresses</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">({</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;virtual_address&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">live</span><span class="o">.</span><span class="n">values</span><span class="p">()})</span>
+    <span class="n">addresses</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">({</span><span class="n">data</span><span class="p">[</span><span class="s2">"virtual_address"</span><span class="p">]</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">live</span><span class="o">.</span><span class="n">values</span><span class="p">()})</span>
     <span class="n">matching_ips</span> <span class="o">=</span> <span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">addresses</span><span class="p">,</span>
-            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,address,role,vrf,assigned_object_type,assigned_object_id&quot;</span><span class="p">,</span>
+            <span class="n">fields</span><span class="o">=</span><span class="s2">"id,address,role,vrf,assigned_object_type,assigned_object_id"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">addresses</span>
         <span class="k">else</span> <span class="p">[]</span>
@@ -8605,7 +8605,7 @@ VRFs regardless of this setting.</p>
     <span class="n">group_ids</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
         <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_id</span>
         <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="n">matching_ips</span>
-        <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">==</span> <span class="s2">&quot;ipam.fhrpgroup&quot;</span>
+        <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">==</span> <span class="s2">"ipam.fhrpgroup"</span>
         <span class="ow">and</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
     <span class="p">)</span>
     <span class="n">groups</span> <span class="o">=</span> <span class="p">{}</span>
@@ -8613,11 +8613,11 @@ VRFs regardless of this setting.</p>
         <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">fhrp_groups</span><span class="p">,</span>
             <span class="nb">id</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="n">group_ids</span><span class="p">),</span>
-            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,protocol,group_id,auth_type&quot;</span><span class="p">,</span>
+            <span class="n">fields</span><span class="o">=</span><span class="s2">"id,name,protocol,group_id,auth_type"</span><span class="p">,</span>
         <span class="p">):</span>
             <span class="k">if</span> <span class="n">group</span><span class="o">.</span><span class="n">protocol</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">VRRP_PROTOCOLS</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="k">continue</span>
-            <span class="n">groups</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;group:</span><span class="si">{</span><span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">groups</span><span class="p">[</span><span class="sa">f</span><span class="s2">"group:</span><span class="si">{</span><span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
                 <span class="nb">id</span><span class="o">=</span><span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
                 <span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">group</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
@@ -8632,9 +8632,9 @@ VRFs regardless of this setting.</p>
     <span class="n">owned_ips</span> <span class="o">=</span> <span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="p">,</span>
-            <span class="n">assigned_object_type</span><span class="o">=</span><span class="s2">&quot;ipam.fhrpgroup&quot;</span><span class="p">,</span>
-            <span class="n">assigned_object_id</span><span class="o">=</span><span class="p">[</span><span class="n">group</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span>
-            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,address,role,vrf,assigned_object_type,assigned_object_id&quot;</span><span class="p">,</span>
+            <span class="n">assigned_object_type</span><span class="o">=</span><span class="s2">"ipam.fhrpgroup"</span><span class="p">,</span>
+            <span class="n">assigned_object_id</span><span class="o">=</span><span class="p">[</span><span class="n">group</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span>
+            <span class="n">fields</span><span class="o">=</span><span class="s2">"id,address,role,vrf,assigned_object_type,assigned_object_id"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">groups</span>
         <span class="k">else</span> <span class="p">[]</span>
@@ -8642,8 +8642,8 @@ VRFs regardless of this setting.</p>
     <span class="n">memberships</span> <span class="o">=</span> <span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">fhrp_group_assignments</span><span class="p">,</span>
-            <span class="n">group_id</span><span class="o">=</span><span class="p">[</span><span class="n">group</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span>
-            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,group,interface_type,interface_id&quot;</span><span class="p">,</span>
+            <span class="n">group_id</span><span class="o">=</span><span class="p">[</span><span class="n">group</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span>
+            <span class="n">fields</span><span class="o">=</span><span class="s2">"id,group,interface_type,interface_id"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">groups</span>
         <span class="k">else</span> <span class="p">[]</span>
@@ -8651,22 +8651,22 @@ VRFs regardless of this setting.</p>
     <span class="c1"># Keep API fields ready for comparison, with the update ID alongside.</span>
     <span class="n">assignments</span> <span class="o">=</span> <span class="p">{</span><span class="n">device</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">}</span>
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">selected_assignments</span><span class="p">:</span>
-        <span class="n">vrrp_group_identity</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;group:</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">vrrp_group_identity</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"group:</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span>
         <span class="k">if</span> <span class="p">(</span>
-            <span class="n">item</span><span class="o">.</span><span class="n">interface_type</span> <span class="o">!=</span> <span class="s2">&quot;dcim.interface&quot;</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">interface_type</span> <span class="o">!=</span> <span class="s2">"dcim.interface"</span>
             <span class="ow">or</span> <span class="n">vrrp_group_identity</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">groups</span>
         <span class="p">):</span>
             <span class="k">continue</span>
         <span class="n">interface</span> <span class="o">=</span> <span class="n">interfaces</span><span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">interface_id</span><span class="p">]</span>
-        <span class="n">fields</span> <span class="o">=</span> <span class="n">groups</span><span class="p">[</span><span class="n">vrrp_group_identity</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="n">groups</span><span class="p">[</span><span class="n">vrrp_group_identity</span><span class="p">][</span><span class="s2">"data"</span><span class="p">]</span>
         <span class="n">vrrp_interface_identity</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">interface</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;protocol&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;group_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">interface</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">fields</span><span class="p">[</span><span class="s1">'protocol'</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">fields</span><span class="p">[</span><span class="s1">'group_id'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
         <span class="n">assignments</span><span class="p">[</span><span class="n">interface</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="n">vrrp_interface_identity</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="nb">id</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
                 <span class="n">group</span><span class="o">=</span><span class="n">vrrp_group_identity</span><span class="p">,</span>
-                <span class="n">interface_type</span><span class="o">=</span><span class="s2">&quot;dcim.interface&quot;</span><span class="p">,</span>
+                <span class="n">interface_type</span><span class="o">=</span><span class="s2">"dcim.interface"</span><span class="p">,</span>
                 <span class="n">interface_id</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">interface_id</span><span class="p">,</span>
                 <span class="n">priority</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span>
             <span class="p">),</span>
@@ -8678,8 +8678,8 @@ VRFs regardless of this setting.</p>
     <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="p">{</span><span class="n">ip</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="n">ip</span> <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="p">[</span><span class="o">*</span><span class="n">matching_ips</span><span class="p">,</span> <span class="o">*</span><span class="n">owned_ips</span><span class="p">]}</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="n">vrrp_vip_identity</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">address</span><span class="p">))</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
         <span class="n">owner</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;group:</span><span class="si">{</span><span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_id</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">==</span> <span class="s2">&quot;ipam.fhrpgroup&quot;</span>
+            <span class="sa">f</span><span class="s2">"group:</span><span class="si">{</span><span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_id</span><span class="si">}</span><span class="s2">"</span>
+            <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">==</span> <span class="s2">"ipam.fhrpgroup"</span>
             <span class="k">else</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_id</span>
         <span class="p">)</span>
         <span class="n">ip_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
@@ -8696,31 +8696,31 @@ VRFs regardless of this setting.</p>
         <span class="n">ips</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">vrrp_vip_identity</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ip_data</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">owner</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
             <span class="n">group</span> <span class="o">=</span> <span class="n">groups</span><span class="p">[</span><span class="n">owner</span><span class="p">]</span>
-            <span class="n">group</span><span class="p">[</span><span class="s2">&quot;vips&quot;</span><span class="p">][</span><span class="n">vrrp_vip_identity</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_data</span>
-            <span class="k">if</span> <span class="n">ip_data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">group</span><span class="p">[</span><span class="s2">&quot;vrfs&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ip_data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">])</span>
-            <span class="n">fields</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+            <span class="n">group</span><span class="p">[</span><span class="s2">"vips"</span><span class="p">][</span><span class="n">vrrp_vip_identity</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_data</span>
+            <span class="k">if</span> <span class="n">ip_data</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">group</span><span class="p">[</span><span class="s2">"vrfs"</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ip_data</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">])</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">"data"</span><span class="p">]</span>
             <span class="n">candidates</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
-                <span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="s2">&quot;protocol&quot;</span><span class="p">],</span> <span class="n">fields</span><span class="p">[</span><span class="s2">&quot;group_id&quot;</span><span class="p">],</span> <span class="n">vrrp_vip_identity</span><span class="p">),</span> <span class="nb">set</span><span class="p">()</span>
+                <span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="s2">"protocol"</span><span class="p">],</span> <span class="n">fields</span><span class="p">[</span><span class="s2">"group_id"</span><span class="p">],</span> <span class="n">vrrp_vip_identity</span><span class="p">),</span> <span class="nb">set</span><span class="p">()</span>
             <span class="p">)</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">owner</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">matches</span> <span class="ow">in</span> <span class="n">ips</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="n">matches</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
-            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">ip</span><span class="p">:</span> <span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;vip&quot;</span><span class="p">,</span> <span class="s2">&quot;vrrp&quot;</span><span class="p">),</span> <span class="n">ip</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">ip</span><span class="p">:</span> <span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="s2">"data"</span><span class="p">][</span><span class="s2">"role"</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"vip"</span><span class="p">,</span> <span class="s2">"vrrp"</span><span class="p">),</span> <span class="n">ip</span><span class="p">[</span><span class="s2">"id"</span><span class="p">])</span>
         <span class="p">)</span>
 
     <span class="c1"># Named VIP VRFs define group context. Otherwise infer it from every</span>
     <span class="c1"># assigned interface, including peers outside the selected devices.</span>
     <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-        <span class="n">group</span><span class="p">[</span><span class="s2">&quot;infer_vrf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;vrfs&quot;</span><span class="p">]</span>
+        <span class="n">group</span><span class="p">[</span><span class="s2">"infer_vrf"</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">group</span><span class="p">[</span><span class="s2">"vrfs"</span><span class="p">]</span>
     <span class="n">external_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">memberships</span><span class="p">:</span>
-        <span class="n">group</span> <span class="o">=</span> <span class="n">groups</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;group:</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="n">groups</span><span class="p">[</span><span class="sa">f</span><span class="s2">"group:</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
         <span class="k">if</span> <span class="p">(</span>
-            <span class="n">item</span><span class="o">.</span><span class="n">interface_type</span> <span class="o">!=</span> <span class="s2">&quot;dcim.interface&quot;</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">interface_type</span> <span class="o">!=</span> <span class="s2">"dcim.interface"</span>
             <span class="ow">or</span> <span class="n">item</span><span class="o">.</span><span class="n">interface_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">interfaces</span>
         <span class="p">):</span>
-            <span class="n">group</span><span class="p">[</span><span class="s2">&quot;shared&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">interface_type</span> <span class="o">==</span> <span class="s2">&quot;dcim.interface&quot;</span> <span class="ow">and</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;infer_vrf&quot;</span><span class="p">]:</span>
+            <span class="n">group</span><span class="p">[</span><span class="s2">"shared"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">interface_type</span> <span class="o">==</span> <span class="s2">"dcim.interface"</span> <span class="ow">and</span> <span class="n">group</span><span class="p">[</span><span class="s2">"infer_vrf"</span><span class="p">]:</span>
                 <span class="n">external_ids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">interface_id</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">external_ids</span><span class="p">:</span>
         <span class="n">interfaces</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
@@ -8729,22 +8729,22 @@ VRFs regardless of this setting.</p>
                 <span class="k">for</span> <span class="n">interface</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
                     <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="p">,</span>
                     <span class="nb">id</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="n">external_ids</span><span class="p">),</span>
-                    <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,device,vrf&quot;</span><span class="p">,</span>
+                    <span class="n">fields</span><span class="o">=</span><span class="s2">"id,name,device,vrf"</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">}</span>
         <span class="p">)</span>
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">memberships</span><span class="p">:</span>
-        <span class="n">group</span> <span class="o">=</span> <span class="n">groups</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;group:</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">interface_type</span> <span class="o">==</span> <span class="s2">&quot;dcim.interface&quot;</span> <span class="ow">and</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;infer_vrf&quot;</span><span class="p">]:</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="n">groups</span><span class="p">[</span><span class="sa">f</span><span class="s2">"group:</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">interface_type</span> <span class="o">==</span> <span class="s2">"dcim.interface"</span> <span class="ow">and</span> <span class="n">group</span><span class="p">[</span><span class="s2">"infer_vrf"</span><span class="p">]:</span>
             <span class="n">interface</span> <span class="o">=</span> <span class="n">interfaces</span><span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">interface_id</span><span class="p">]</span>
-            <span class="n">group</span><span class="p">[</span><span class="s2">&quot;vrfs&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">interface</span><span class="o">.</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">interface</span><span class="o">.</span><span class="n">vrf</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">group</span><span class="p">[</span><span class="s2">"vrfs"</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">interface</span><span class="o">.</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">interface</span><span class="o">.</span><span class="n">vrf</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
     <span class="n">vrf_names</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
-        <span class="p">{</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">live</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+        <span class="p">{</span><span class="n">data</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">]</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">live</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
     <span class="p">)</span>
     <span class="n">existing_vrfs</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">{</span>
             <span class="n">vrf</span><span class="o">.</span><span class="n">name</span>
-            <span class="k">for</span> <span class="n">vrf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vrfs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">vrf_names</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">vrf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vrfs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">vrf_names</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">"name"</span><span class="p">)</span>
         <span class="p">}</span>
         <span class="k">if</span> <span class="n">vip_use_vrf</span> <span class="ow">and</span> <span class="n">vrf_names</span>
         <span class="k">else</span> <span class="nb">set</span><span class="p">()</span>
@@ -8759,72 +8759,72 @@ VRFs regardless of this setting.</p>
         <span class="n">protocol</span><span class="p">,</span> <span class="n">group_id</span><span class="p">,</span> <span class="n">vrrp_vip_identity</span><span class="p">,</span> <span class="n">vrf</span> <span class="o">=</span> <span class="n">vrrp_peer_identity</span>
         <span class="n">desired</span> <span class="o">=</span> <span class="n">live</span><span class="p">[</span><span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
         <span class="n">anchors</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">assignments</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="n">vrrp_interface_identity</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;group&quot;</span><span class="p">]</span>
+            <span class="n">assignments</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="n">vrrp_interface_identity</span><span class="p">][</span><span class="s2">"data"</span><span class="p">][</span><span class="s2">"group"</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">vrrp_interface_identity</span> <span class="ow">in</span> <span class="n">members</span>
             <span class="k">if</span> <span class="n">vrrp_interface_identity</span> <span class="ow">in</span> <span class="n">assignments</span><span class="p">[</span><span class="n">device</span><span class="p">]</span>
         <span class="p">}</span>
         <span class="n">possible</span> <span class="o">=</span> <span class="n">candidates</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">protocol</span><span class="p">,</span> <span class="n">group_id</span><span class="p">,</span> <span class="n">vrrp_vip_identity</span><span class="p">),</span> <span class="nb">set</span><span class="p">())</span>
         <span class="n">mixed</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">identity</span> <span class="k">for</span> <span class="n">identity</span> <span class="ow">in</span> <span class="n">possible</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="n">identity</span><span class="p">][</span><span class="s2">&quot;vrfs&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">1</span>
+            <span class="n">identity</span> <span class="k">for</span> <span class="n">identity</span> <span class="ow">in</span> <span class="n">possible</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="n">identity</span><span class="p">][</span><span class="s2">"vrfs"</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">1</span>
         <span class="p">}</span>
         <span class="n">matches</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">identity</span> <span class="k">for</span> <span class="n">identity</span> <span class="ow">in</span> <span class="n">possible</span> <span class="k">if</span> <span class="n">groups</span><span class="p">[</span><span class="n">identity</span><span class="p">][</span><span class="s2">&quot;vrfs&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="p">{</span><span class="n">vrf</span><span class="p">}</span>
+            <span class="n">identity</span> <span class="k">for</span> <span class="n">identity</span> <span class="ow">in</span> <span class="n">possible</span> <span class="k">if</span> <span class="n">groups</span><span class="p">[</span><span class="n">identity</span><span class="p">][</span><span class="s2">"vrfs"</span><span class="p">]</span> <span class="o">==</span> <span class="p">{</span><span class="n">vrf</span><span class="p">}</span>
         <span class="p">}</span>
         <span class="n">found</span> <span class="o">=</span> <span class="n">anchors</span> <span class="o">|</span> <span class="n">matches</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">mixed</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;ambiguous NetBox VRRP groups for </span><span class="si">{</span><span class="n">members</span><span class="si">!r}</span><span class="s2">; &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;matching group IDs </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="n">identity</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">identity</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">found</span><span class="p">)</span><span class="si">}</span><span class="s2">, &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;groups with mixed interface VRFs </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="n">identity</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">identity</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">mixed</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"ambiguous NetBox VRRP groups for </span><span class="si">{</span><span class="n">members</span><span class="si">!r}</span><span class="s2">; "</span>
+                <span class="sa">f</span><span class="s2">"matching group IDs </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="n">identity</span><span class="p">][</span><span class="s1">'id'</span><span class="p">]</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">identity</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">found</span><span class="p">)</span><span class="si">}</span><span class="s2">, "</span>
+                <span class="sa">f</span><span class="s2">"groups with mixed interface VRFs </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="n">identity</span><span class="p">][</span><span class="s1">'id'</span><span class="p">]</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">identity</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">mixed</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span> <span class="n">ret</span>
         <span class="n">vrrp_group_identity</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
-            <span class="nb">iter</span><span class="p">(</span><span class="n">found</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;new:</span><span class="si">{</span><span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="nb">iter</span><span class="p">(</span><span class="n">found</span><span class="p">),</span> <span class="sa">f</span><span class="s2">"new:</span><span class="si">{</span><span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
         <span class="n">group</span> <span class="o">=</span> <span class="n">groups</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vrrp_group_identity</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;vrfs&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="p">{</span><span class="n">vrf</span><span class="p">}:</span>
+        <span class="k">if</span> <span class="n">group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">group</span><span class="p">[</span><span class="s2">"vrfs"</span><span class="p">]</span> <span class="o">!=</span> <span class="p">{</span><span class="n">vrf</span><span class="p">}:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;existing VRRP assignment &#39;</span><span class="si">{</span><span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;has NetBox group interface/VIP VRFs </span><span class="si">{</span><span class="n">group</span><span class="p">[</span><span class="s1">&#39;vrfs&#39;</span><span class="p">]</span><span class="si">!r}</span><span class="s2">, different from live VRF </span><span class="si">{</span><span class="n">vrf</span><span class="si">!r}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"existing VRRP assignment '</span><span class="si">{</span><span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">' "</span>
+                <span class="sa">f</span><span class="s2">"has NetBox group interface/VIP VRFs </span><span class="si">{</span><span class="n">group</span><span class="p">[</span><span class="s1">'vrfs'</span><span class="p">]</span><span class="si">!r}</span><span class="s2">, different from live VRF </span><span class="si">{</span><span class="n">vrf</span><span class="si">!r}</span><span class="s2">"</span>
             <span class="p">)</span>
             <span class="k">continue</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
-            <span class="n">live</span><span class="p">[</span><span class="n">member</span><span class="p">][</span><span class="s2">&quot;authentication_type&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;authentication_type&quot;</span><span class="p">]</span>
+            <span class="n">live</span><span class="p">[</span><span class="n">member</span><span class="p">][</span><span class="s2">"authentication_type"</span><span class="p">]</span> <span class="o">!=</span> <span class="n">desired</span><span class="p">[</span><span class="s2">"authentication_type"</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">members</span>
         <span class="p">):</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;inconsistent live VRRP authentication for </span><span class="si">{</span><span class="n">members</span><span class="si">!r}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"inconsistent live VRRP authentication for </span><span class="si">{</span><span class="n">members</span><span class="si">!r}</span><span class="s2">"</span>
             <span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span> <span class="n">ret</span>
-        <span class="n">ip_record</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;vips&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vrrp_vip_identity</span><span class="p">)</span> <span class="k">if</span> <span class="n">group</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">ip_record</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">"vips"</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vrrp_vip_identity</span><span class="p">)</span> <span class="k">if</span> <span class="n">group</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">conflict</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">ip_record</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="n">ips</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vrrp_vip_identity</span><span class="p">,</span> <span class="p">[]):</span>
-                <span class="k">if</span> <span class="n">ip</span><span class="p">[</span><span class="s2">&quot;reserved&quot;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">ip</span><span class="p">[</span><span class="s2">"reserved"</span><span class="p">]:</span>
                     <span class="k">continue</span>
-                <span class="n">owner</span> <span class="o">=</span> <span class="n">ip</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span>
+                <span class="n">owner</span> <span class="o">=</span> <span class="n">ip</span><span class="p">[</span><span class="s2">"data"</span><span class="p">][</span><span class="s2">"assigned_object_id"</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">owner</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">ip</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">ip</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">vrf</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">ip</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">ip</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">]</span> <span class="o">==</span> <span class="n">vrf</span><span class="p">:</span>
                         <span class="n">ip_record</span> <span class="o">=</span> <span class="n">ip</span>
                         <span class="k">break</span>
                     <span class="k">continue</span>
                 <span class="k">if</span> <span class="p">(</span>
                     <span class="n">owner</span> <span class="ow">in</span> <span class="n">groups</span>
-                    <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="n">owner</span><span class="p">][</span><span class="s2">&quot;vrfs&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span>
-                    <span class="ow">and</span> <span class="n">groups</span><span class="p">[</span><span class="n">owner</span><span class="p">][</span><span class="s2">&quot;vrfs&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="p">{</span><span class="n">vrf</span><span class="p">}</span>
+                    <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="n">owner</span><span class="p">][</span><span class="s2">"vrfs"</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span>
+                    <span class="ow">and</span> <span class="n">groups</span><span class="p">[</span><span class="n">owner</span><span class="p">][</span><span class="s2">"vrfs"</span><span class="p">]</span> <span class="o">!=</span> <span class="p">{</span><span class="n">vrf</span><span class="p">}</span>
                 <span class="p">):</span>
                     <span class="k">continue</span>
                 <span class="n">conflict</span> <span class="o">=</span> <span class="n">ip</span>
             <span class="k">if</span> <span class="n">ip_record</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">conflict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">owner</span> <span class="o">=</span> <span class="n">conflict</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">conflict</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;assigned_object_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ipam.fhrpgroup&quot;</span><span class="p">:</span>
-                    <span class="n">owner</span> <span class="o">=</span> <span class="n">owner</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="s2">&quot;group:&quot;</span><span class="p">)</span>
+                <span class="n">owner</span> <span class="o">=</span> <span class="n">conflict</span><span class="p">[</span><span class="s2">"data"</span><span class="p">][</span><span class="s2">"assigned_object_id"</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">conflict</span><span class="p">[</span><span class="s2">"data"</span><span class="p">][</span><span class="s2">"assigned_object_type"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"ipam.fhrpgroup"</span><span class="p">:</span>
+                    <span class="n">owner</span> <span class="o">=</span> <span class="n">owner</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="s2">"group:"</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;matching NetBox IP &#39;</span><span class="si">{</span><span class="n">conflict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;address&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; is already assigned to &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">conflict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;assigned_object_type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">; &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;cannot use it for VRRP assignment &#39;</span><span class="si">{</span><span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                    <span class="sa">f</span><span class="s2">"matching NetBox IP '</span><span class="si">{</span><span class="n">conflict</span><span class="p">[</span><span class="s1">'data'</span><span class="p">][</span><span class="s1">'address'</span><span class="p">]</span><span class="si">}</span><span class="s2">' is already assigned to "</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">conflict</span><span class="p">[</span><span class="s1">'data'</span><span class="p">][</span><span class="s1">'assigned_object_type'</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">owner</span><span class="si">}</span><span class="s2">; "</span>
+                    <span class="sa">f</span><span class="s2">"cannot use it for VRRP assignment '</span><span class="si">{</span><span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">'"</span>
                 <span class="p">)</span>
                 <span class="k">continue</span>
         <span class="k">if</span> <span class="p">(</span>
@@ -8834,42 +8834,42 @@ VRFs regardless of this setting.</p>
             <span class="ow">and</span> <span class="n">vrf</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_vrfs</span>
         <span class="p">):</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;vrf &#39;</span><span class="si">{</span><span class="n">vrf</span><span class="si">}</span><span class="s2">&#39; not found in NetBox; cannot create VIP for &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;VRRP assignment &#39;</span><span class="si">{</span><span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                <span class="sa">f</span><span class="s2">"vrf '</span><span class="si">{</span><span class="n">vrf</span><span class="si">}</span><span class="s2">' not found in NetBox; cannot create VIP for "</span>
+                <span class="sa">f</span><span class="s2">"VRRP assignment '</span><span class="si">{</span><span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">'"</span>
             <span class="p">)</span>
             <span class="k">continue</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">name</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">group</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;shared&quot;</span><span class="p">]</span>
+                <span class="n">group</span><span class="p">[</span><span class="s2">"data"</span><span class="p">][</span><span class="s2">"name"</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">group</span><span class="p">[</span><span class="s2">"shared"</span><span class="p">]</span>
                 <span class="k">else</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span>
                     <span class="n">device</span><span class="o">=</span><span class="n">nb_devices</span><span class="p">[</span><span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]],</span>
-                    <span class="n">interface</span><span class="o">=</span><span class="n">desired</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">],</span>
+                    <span class="n">interface</span><span class="o">=</span><span class="n">desired</span><span class="p">[</span><span class="s2">"interface"</span><span class="p">],</span>
                     <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>
                     <span class="n">group_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">,</span>
                     <span class="n">virtual_address</span><span class="o">=</span><span class="n">vrrp_vip_identity</span><span class="p">,</span>
                 <span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">group</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;shared&quot;</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">group</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">group</span><span class="p">[</span><span class="s2">"shared"</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span>
                 <span class="ow">not</span> <span class="n">name</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">100</span>
             <span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;group name must contain 1 to 100 characters&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"group name must contain 1 to 100 characters"</span><span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="n">TemplateError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;failed to render VRRP group name: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"failed to render VRRP group name: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span> <span class="n">ret</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>
             <span class="n">group_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-            <span class="n">auth_type</span><span class="o">=</span><span class="n">desired</span><span class="p">[</span><span class="s2">&quot;authentication_type&quot;</span><span class="p">],</span>
+            <span class="n">auth_type</span><span class="o">=</span><span class="n">desired</span><span class="p">[</span><span class="s2">"authentication_type"</span><span class="p">],</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="n">vrrp_group_identity</span> <span class="ow">in</span> <span class="n">group_live</span>
             <span class="ow">and</span> <span class="n">group_live</span><span class="p">[</span><span class="n">vrrp_group_identity</span><span class="p">]</span> <span class="o">!=</span> <span class="n">fields</span>
         <span class="p">):</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;inconsistent live VRRP state for group &#39;</span><span class="si">{</span><span class="n">vrrp_group_identity</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                <span class="sa">f</span><span class="s2">"inconsistent live VRRP state for group '</span><span class="si">{</span><span class="n">vrrp_group_identity</span><span class="si">}</span><span class="s2">'"</span>
             <span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span> <span class="n">ret</span>
@@ -8880,58 +8880,58 @@ VRFs regardless of this setting.</p>
             <span class="p">)</span>
         <span class="n">vip</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="n">address</span><span class="o">=</span><span class="n">vrrp_vip_identity</span><span class="p">,</span>
-            <span class="n">role</span><span class="o">=</span><span class="s2">&quot;vrrp&quot;</span><span class="p">,</span>
-            <span class="n">assigned_object_type</span><span class="o">=</span><span class="s2">&quot;ipam.fhrpgroup&quot;</span><span class="p">,</span>
+            <span class="n">role</span><span class="o">=</span><span class="s2">"vrrp"</span><span class="p">,</span>
+            <span class="n">assigned_object_type</span><span class="o">=</span><span class="s2">"ipam.fhrpgroup"</span><span class="p">,</span>
             <span class="n">assigned_object_id</span><span class="o">=</span><span class="n">vrrp_group_identity</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">ip_record</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">new_vips</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">vrrp_vip_identity</span><span class="p">),</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">vip</span>
             <span class="p">)</span>
-            <span class="n">vip</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;active&quot;</span>
+            <span class="n">vip</span><span class="p">[</span><span class="s2">"status"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"active"</span>
             <span class="k">if</span> <span class="n">vip_use_vrf</span><span class="p">:</span>
-                <span class="n">vip</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span> <span class="k">if</span> <span class="n">vrf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">vip</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span> <span class="k">if</span> <span class="n">vrf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">ip_record</span><span class="p">[</span><span class="s2">&quot;reserved&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">vip</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_record</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;address&quot;</span><span class="p">]</span>
-            <span class="n">group</span><span class="p">[</span><span class="s2">&quot;vips&quot;</span><span class="p">][</span><span class="n">vrrp_vip_identity</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_record</span>
+            <span class="n">ip_record</span><span class="p">[</span><span class="s2">"reserved"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">vip</span><span class="p">[</span><span class="s2">"address"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_record</span><span class="p">[</span><span class="s2">"data"</span><span class="p">][</span><span class="s2">"address"</span><span class="p">]</span>
+            <span class="n">group</span><span class="p">[</span><span class="s2">"vips"</span><span class="p">][</span><span class="n">vrrp_vip_identity</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_record</span>
         <span class="n">vip_live</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">vrrp_group_identity</span><span class="p">,</span> <span class="p">{})[</span><span class="n">vrrp_vip_identity</span><span class="p">]</span> <span class="o">=</span> <span class="n">vip</span>
         <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">vrrp_interface_identity</span> <span class="ow">in</span> <span class="n">members</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">live</span><span class="p">[(</span><span class="n">device</span><span class="p">,</span> <span class="n">vrrp_interface_identity</span><span class="p">)]</span>
             <span class="n">assignment_live</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="n">vrrp_interface_identity</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
                 <span class="n">group</span><span class="o">=</span><span class="n">vrrp_group_identity</span><span class="p">,</span>
-                <span class="n">interface_type</span><span class="o">=</span><span class="s2">&quot;dcim.interface&quot;</span><span class="p">,</span>
-                <span class="n">interface_id</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;interface_id&quot;</span><span class="p">],</span>
-                <span class="n">priority</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;priority&quot;</span><span class="p">],</span>
+                <span class="n">interface_type</span><span class="o">=</span><span class="s2">"dcim.interface"</span><span class="p">,</span>
+                <span class="n">interface_id</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">"interface_id"</span><span class="p">],</span>
+                <span class="n">priority</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">"priority"</span><span class="p">],</span>
             <span class="p">)</span>
 
     <span class="c1"># Comparable fields are already prepared. Extra current records become</span>
     <span class="c1"># deletion candidates, which this additive sync never applies.</span>
     <span class="n">assignment_current</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">device</span><span class="p">:</span> <span class="p">{</span><span class="n">identity</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">identity</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">records</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">device</span><span class="p">:</span> <span class="p">{</span><span class="n">identity</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">"data"</span><span class="p">]</span> <span class="k">for</span> <span class="n">identity</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">records</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">records</span> <span class="ow">in</span> <span class="n">assignments</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
     <span class="p">}</span>
     <span class="n">group_current</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">identity</span><span class="p">:</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+        <span class="n">identity</span><span class="p">:</span> <span class="n">group</span><span class="p">[</span><span class="s2">"data"</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">identity</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">group</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
     <span class="p">}</span>
     <span class="n">vip_current</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">identity</span><span class="p">:</span> <span class="p">{</span><span class="n">address</span><span class="p">:</span> <span class="n">ip</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">address</span><span class="p">,</span> <span class="n">ip</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;vips&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">identity</span><span class="p">:</span> <span class="p">{</span><span class="n">address</span><span class="p">:</span> <span class="n">ip</span><span class="p">[</span><span class="s2">"data"</span><span class="p">]</span> <span class="k">for</span> <span class="n">address</span><span class="p">,</span> <span class="n">ip</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s2">"vips"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="k">for</span> <span class="n">identity</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
     <span class="p">}</span>
 
     <span class="c1"># Resolve masks once per new address and share them across VRF groups.</span>
     <span class="k">if</span> <span class="n">new_vips</span><span class="p">:</span>
         <span class="n">ancestors</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="nb">str</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_network</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_network</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">new_vips</span>
             <span class="k">for</span> <span class="n">length</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">max_prefixlen</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
         <span class="p">}</span>
         <span class="n">networks</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_network</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">prefix</span><span class="o">.</span><span class="n">prefix</span><span class="p">),</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
-                <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="n">ancestors</span><span class="p">),</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,prefix&quot;</span>
+                <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="n">ancestors</span><span class="p">),</span> <span class="n">fields</span><span class="o">=</span><span class="s2">"id,prefix"</span>
             <span class="p">)</span>
         <span class="p">]</span>
         <span class="k">for</span> <span class="n">host</span><span class="p">,</span> <span class="n">vips</span> <span class="ow">in</span> <span class="n">new_vips</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -8940,133 +8940,133 @@ VRFs regardless of this setting.</p>
                 <span class="n">default</span><span class="o">=</span><span class="n">host</span><span class="o">.</span><span class="n">max_prefixlen</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">vip</span> <span class="ow">in</span> <span class="n">vips</span><span class="p">:</span>
-                <span class="n">vip</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">vip</span><span class="p">[</span><span class="s2">"address"</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2">"</span>
 
     <span class="c1"># Three comparisons, each shaped like the API objects it controls.</span>
     <span class="c1"># Local group references connect all three plans before new IDs exist.</span>
-    <span class="n">group_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_diff</span><span class="p">({</span><span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="n">group_live</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="n">group_current</span><span class="p">})[</span>
-        <span class="s2">&quot;groups&quot;</span>
+    <span class="n">group_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_diff</span><span class="p">({</span><span class="s2">"groups"</span><span class="p">:</span> <span class="n">group_live</span><span class="p">},</span> <span class="p">{</span><span class="s2">"groups"</span><span class="p">:</span> <span class="n">group_current</span><span class="p">})[</span>
+        <span class="s2">"groups"</span>
     <span class="p">]</span>
     <span class="n">vip_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_diff</span><span class="p">(</span><span class="n">vip_live</span><span class="p">,</span> <span class="n">vip_current</span><span class="p">)</span>
     <span class="n">assignment_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_diff</span><span class="p">(</span><span class="n">assignment_live</span><span class="p">,</span> <span class="n">assignment_current</span><span class="p">)</span>
-    <span class="c1"># Add group/VIP changes to each affected membership&#39;s public preview.</span>
+    <span class="c1"># Add group/VIP changes to each affected membership's public preview.</span>
     <span class="c1"># Copy the assignment diff so the original still drives only its own writes.</span>
     <span class="n">preview</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">assignment_diff</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">preview</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">vrrp_interface_identity</span><span class="p">,</span> <span class="n">assignment</span> <span class="ow">in</span> <span class="n">assignment_live</span><span class="p">[</span><span class="n">device</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">vrrp_interface_identity</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">vrrp_interface_identity</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">"create"</span><span class="p">]:</span>
                 <span class="k">continue</span>
-            <span class="n">vrrp_group_identity</span> <span class="o">=</span> <span class="n">assignment</span><span class="p">[</span><span class="s2">&quot;group&quot;</span><span class="p">]</span>
-            <span class="n">address</span> <span class="o">=</span> <span class="n">live</span><span class="p">[(</span><span class="n">device</span><span class="p">,</span> <span class="n">vrrp_interface_identity</span><span class="p">)][</span><span class="s2">&quot;virtual_address&quot;</span><span class="p">]</span>
-            <span class="n">changes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">group_diff</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vrrp_group_identity</span><span class="p">,</span> <span class="p">{}))</span>
-            <span class="k">if</span> <span class="s2">&quot;auth_type&quot;</span> <span class="ow">in</span> <span class="n">changes</span><span class="p">:</span>
-                <span class="n">changes</span><span class="p">[</span><span class="s2">&quot;authentication_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">changes</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;auth_type&quot;</span><span class="p">)</span>
-            <span class="n">vip_changes</span> <span class="o">=</span> <span class="n">vip_diff</span><span class="p">[</span><span class="n">vrrp_group_identity</span><span class="p">][</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">vrrp_group_identity</span> <span class="o">=</span> <span class="n">assignment</span><span class="p">[</span><span class="s2">"group"</span><span class="p">]</span>
+            <span class="n">address</span> <span class="o">=</span> <span class="n">live</span><span class="p">[(</span><span class="n">device</span><span class="p">,</span> <span class="n">vrrp_interface_identity</span><span class="p">)][</span><span class="s2">"virtual_address"</span><span class="p">]</span>
+            <span class="n">changes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">group_diff</span><span class="p">[</span><span class="s2">"update"</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vrrp_group_identity</span><span class="p">,</span> <span class="p">{}))</span>
+            <span class="k">if</span> <span class="s2">"auth_type"</span> <span class="ow">in</span> <span class="n">changes</span><span class="p">:</span>
+                <span class="n">changes</span><span class="p">[</span><span class="s2">"authentication_type"</span><span class="p">]</span> <span class="o">=</span> <span class="n">changes</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"auth_type"</span><span class="p">)</span>
+            <span class="n">vip_changes</span> <span class="o">=</span> <span class="n">vip_diff</span><span class="p">[</span><span class="n">vrrp_group_identity</span><span class="p">][</span><span class="s2">"update"</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="p">{})</span>
             <span class="k">if</span> <span class="p">(</span>
-                <span class="n">address</span> <span class="ow">in</span> <span class="n">vip_diff</span><span class="p">[</span><span class="n">vrrp_group_identity</span><span class="p">][</span><span class="s2">&quot;create&quot;</span><span class="p">]</span>
-                <span class="ow">or</span> <span class="s2">&quot;assigned_object_id&quot;</span> <span class="ow">in</span> <span class="n">vip_changes</span>
+                <span class="n">address</span> <span class="ow">in</span> <span class="n">vip_diff</span><span class="p">[</span><span class="n">vrrp_group_identity</span><span class="p">][</span><span class="s2">"create"</span><span class="p">]</span>
+                <span class="ow">or</span> <span class="s2">"assigned_object_id"</span> <span class="ow">in</span> <span class="n">vip_changes</span>
             <span class="p">):</span>
                 <span class="n">old_addresses</span> <span class="o">=</span> <span class="p">[</span>
                     <span class="n">address</span>
                     <span class="k">for</span> <span class="n">address</span><span class="p">,</span> <span class="n">ip</span> <span class="ow">in</span> <span class="n">vip_current</span><span class="p">[</span><span class="n">vrrp_group_identity</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="n">ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">vrrp_group_identity</span>
+                    <span class="k">if</span> <span class="n">ip</span><span class="p">[</span><span class="s2">"assigned_object_id"</span><span class="p">]</span> <span class="o">==</span> <span class="n">vrrp_group_identity</span>
                 <span class="p">]</span>
-                <span class="n">changes</span><span class="p">[</span><span class="s2">&quot;virtual_address&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;old_value&quot;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">changes</span><span class="p">[</span><span class="s2">"virtual_address"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">"old_value"</span><span class="p">:</span> <span class="p">(</span>
                         <span class="n">old_addresses</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_addresses</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
                     <span class="p">),</span>
-                    <span class="s2">&quot;new_value&quot;</span><span class="p">:</span> <span class="n">address</span><span class="p">,</span>
+                    <span class="s2">"new_value"</span><span class="p">:</span> <span class="n">address</span><span class="p">,</span>
                 <span class="p">}</span>
-            <span class="k">if</span> <span class="s2">&quot;role&quot;</span> <span class="ow">in</span> <span class="n">vip_changes</span><span class="p">:</span>
-                <span class="n">changes</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vip_changes</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">"role"</span> <span class="ow">in</span> <span class="n">vip_changes</span><span class="p">:</span>
+                <span class="n">changes</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span> <span class="o">=</span> <span class="n">vip_changes</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">changes</span><span class="p">:</span>
-                <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">vrrp_interface_identity</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="n">actions</span><span class="p">[</span><span class="s2">"update"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">vrrp_interface_identity</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
                     <span class="n">changes</span>
                 <span class="p">)</span>
-                <span class="k">if</span> <span class="n">vrrp_interface_identity</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]:</span>
-                    <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">vrrp_interface_identity</span><span class="p">)</span>
-        <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+                <span class="k">if</span> <span class="n">vrrp_interface_identity</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">"in_sync"</span><span class="p">]:</span>
+                    <span class="n">actions</span><span class="p">[</span><span class="s2">"in_sync"</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">vrrp_interface_identity</span><span class="p">)</span>
+        <span class="n">actions</span><span class="p">[</span><span class="s2">"update"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">"update"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="n">preview</span>
     <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">preview</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">device</span><span class="p">:</span> <span class="n">SyncActionSummary</span><span class="p">(</span>
-            <span class="n">created</span><span class="o">=</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">],</span>
-            <span class="n">updated</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]),</span>
-            <span class="n">in_sync</span><span class="o">=</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">],</span>
+            <span class="n">created</span><span class="o">=</span><span class="n">actions</span><span class="p">[</span><span class="s2">"create"</span><span class="p">],</span>
+            <span class="n">updated</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">"update"</span><span class="p">]),</span>
+            <span class="n">in_sync</span><span class="o">=</span><span class="n">actions</span><span class="p">[</span><span class="s2">"in_sync"</span><span class="p">],</span>
         <span class="p">)</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">preview</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
     <span class="p">}</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span><span class="n">preview</span><span class="p">,</span> <span class="n">ignore_deletions</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no VRRP changes required; deletion candidates are retained&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no VRRP changes required; deletion candidates are retained"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
-    <span class="k">if</span> <span class="n">with_approval</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="s2">&quot;VRRP sync&quot;</span><span class="p">,</span> <span class="n">preview</span><span class="p">):</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
+    <span class="k">if</span> <span class="n">with_approval</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="s2">"VRRP sync"</span><span class="p">,</span> <span class="n">preview</span><span class="p">):</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"skipped"</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">preview</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;review declined; changes were not applied&quot;</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"review declined; changes were not applied"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># Apply in dependency order. Generic object relations require IDs;</span>
     <span class="c1"># ordinary VRF relations use the name already supplied by the getter.</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;applying VRRP group changes&quot;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">vrrp_group_identity</span> <span class="ow">in</span> <span class="n">group_diff</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">]:</span>
-        <span class="n">groups</span><span class="p">[</span><span class="n">vrrp_group_identity</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">fhrp_groups</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"applying VRRP group changes"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">vrrp_group_identity</span> <span class="ow">in</span> <span class="n">group_diff</span><span class="p">[</span><span class="s2">"create"</span><span class="p">]:</span>
+        <span class="n">groups</span><span class="p">[</span><span class="n">vrrp_group_identity</span><span class="p">][</span><span class="s2">"id"</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">fhrp_groups</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
             <span class="o">**</span><span class="n">group_live</span><span class="p">[</span><span class="n">vrrp_group_identity</span><span class="p">]</span>
         <span class="p">)</span><span class="o">.</span><span class="n">id</span>
     <span class="n">updates</span> <span class="o">=</span> <span class="p">[</span>
         <span class="nb">dict</span><span class="p">(</span>
-            <span class="nb">id</span><span class="o">=</span><span class="n">groups</span><span class="p">[</span><span class="n">vrrp_group_identity</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
-            <span class="o">**</span><span class="p">{</span><span class="n">field</span><span class="p">:</span> <span class="n">change</span><span class="p">[</span><span class="s2">&quot;new_value&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">change</span> <span class="ow">in</span> <span class="n">changes</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
+            <span class="nb">id</span><span class="o">=</span><span class="n">groups</span><span class="p">[</span><span class="n">vrrp_group_identity</span><span class="p">][</span><span class="s2">"id"</span><span class="p">],</span>
+            <span class="o">**</span><span class="p">{</span><span class="n">field</span><span class="p">:</span> <span class="n">change</span><span class="p">[</span><span class="s2">"new_value"</span><span class="p">]</span> <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">change</span> <span class="ow">in</span> <span class="n">changes</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">vrrp_group_identity</span><span class="p">,</span> <span class="n">changes</span> <span class="ow">in</span> <span class="n">group_diff</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">vrrp_group_identity</span><span class="p">,</span> <span class="n">changes</span> <span class="ow">in</span> <span class="n">group_diff</span><span class="p">[</span><span class="s2">"update"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
     <span class="p">]</span>
     <span class="k">if</span> <span class="n">updates</span><span class="p">:</span>
         <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">fhrp_groups</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">updates</span><span class="p">)</span>
     <span class="c1"># VIPs and memberships have the same create/update workflow. Only their</span>
     <span class="c1"># endpoint, grouping, and group-relation field differ.</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;applying VRRP VIP and interface assignment changes&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"applying VRRP VIP and interface assignment changes"</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">endpoint</span><span class="p">,</span> <span class="n">desired</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="n">records</span><span class="p">,</span> <span class="n">relation</span> <span class="ow">in</span> <span class="p">(</span>
         <span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="p">,</span>
             <span class="n">vip_live</span><span class="p">,</span>
             <span class="n">vip_diff</span><span class="p">,</span>
-            <span class="p">{</span><span class="n">identity</span><span class="p">:</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;vips&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">identity</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
-            <span class="s2">&quot;assigned_object_id&quot;</span><span class="p">,</span>
+            <span class="p">{</span><span class="n">identity</span><span class="p">:</span> <span class="n">group</span><span class="p">[</span><span class="s2">"vips"</span><span class="p">]</span> <span class="k">for</span> <span class="n">identity</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
+            <span class="s2">"assigned_object_id"</span><span class="p">,</span>
         <span class="p">),</span>
         <span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">fhrp_group_assignments</span><span class="p">,</span>
             <span class="n">assignment_live</span><span class="p">,</span>
             <span class="n">assignment_diff</span><span class="p">,</span>
             <span class="n">assignments</span><span class="p">,</span>
-            <span class="s2">&quot;group&quot;</span><span class="p">,</span>
+            <span class="s2">"group"</span><span class="p">,</span>
         <span class="p">),</span>
     <span class="p">):</span>
         <span class="n">creates</span><span class="p">,</span> <span class="n">updates</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">scope</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">creates</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                <span class="nb">dict</span><span class="p">(</span><span class="n">desired</span><span class="p">[</span><span class="n">scope</span><span class="p">][</span><span class="n">identity</span><span class="p">])</span> <span class="k">for</span> <span class="n">identity</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">]</span>
+                <span class="nb">dict</span><span class="p">(</span><span class="n">desired</span><span class="p">[</span><span class="n">scope</span><span class="p">][</span><span class="n">identity</span><span class="p">])</span> <span class="k">for</span> <span class="n">identity</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">"create"</span><span class="p">]</span>
             <span class="p">)</span>
             <span class="n">updates</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                 <span class="nb">dict</span><span class="p">(</span>
-                    <span class="nb">id</span><span class="o">=</span><span class="n">records</span><span class="p">[</span><span class="n">scope</span><span class="p">][</span><span class="n">identity</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                    <span class="nb">id</span><span class="o">=</span><span class="n">records</span><span class="p">[</span><span class="n">scope</span><span class="p">][</span><span class="n">identity</span><span class="p">][</span><span class="s2">"id"</span><span class="p">],</span>
                     <span class="o">**</span><span class="p">{</span>
-                        <span class="n">field</span><span class="p">:</span> <span class="n">change</span><span class="p">[</span><span class="s2">&quot;new_value&quot;</span><span class="p">]</span>
+                        <span class="n">field</span><span class="p">:</span> <span class="n">change</span><span class="p">[</span><span class="s2">"new_value"</span><span class="p">]</span>
                         <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">change</span> <span class="ow">in</span> <span class="n">changes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                     <span class="p">},</span>
                 <span class="p">)</span>
-                <span class="k">for</span> <span class="n">identity</span><span class="p">,</span> <span class="n">changes</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">identity</span><span class="p">,</span> <span class="n">changes</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">"update"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="p">)</span>
         <span class="k">for</span> <span class="n">fields</span> <span class="ow">in</span> <span class="p">[</span><span class="o">*</span><span class="n">creates</span><span class="p">,</span> <span class="o">*</span><span class="n">updates</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">relation</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
-                <span class="n">fields</span><span class="p">[</span><span class="n">relation</span><span class="p">]</span> <span class="o">=</span> <span class="n">groups</span><span class="p">[</span><span class="n">fields</span><span class="p">[</span><span class="n">relation</span><span class="p">]][</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+                <span class="n">fields</span><span class="p">[</span><span class="n">relation</span><span class="p">]</span> <span class="o">=</span> <span class="n">groups</span><span class="p">[</span><span class="n">fields</span><span class="p">[</span><span class="n">relation</span><span class="p">]][</span><span class="s2">"id"</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">creates</span><span class="p">:</span>
             <span class="n">endpoint</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">creates</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">updates</span><span class="p">:</span>
             <span class="n">endpoint</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">updates</span><span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;vrrp sync complete; deletion candidates are retained&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"vrrp sync complete; deletion candidates are retained"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>

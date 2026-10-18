@@ -7271,11 +7271,11 @@ related object names or IDs. Scalar custom fields replace their current values.<
 <h2 id="dry-run-mode">Dry Run Mode<a class="headerlink" href="#dry-run-mode" title="Permanent link">¤</a></h2>
 <p><code>dry_run=True</code> returns the diff without any NetBox writes:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;session_name&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;diff&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}},</span>
+    <span class="s2">"update"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"&lt;session_name&gt;"</span><span class="p">,</span> <span class="s2">"diff"</span><span class="p">:</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}},</span>
         <span class="o">...</span>
     <span class="p">],</span>
-    <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;session_name&gt;&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"&lt;session_name&gt;"</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Sessions with no effective changes appear in <code>in_sync</code> regardless of dry-run mode.
@@ -7288,13 +7288,13 @@ configured as type <strong>Object</strong> in NetBox pointing to the VRF content
 <code>vrf_custom_field="vrf"</code> means the VRF object reference is read from and written to
 <code>custom_fields["vrf"]</code>.  This must match the value used when the session was created.</p>
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;update_bgp_peering&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"update_bgp_peering"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1_10.0.0.1_10.0.0.2&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="s2">&quot;NEW_VRF&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;vrf_custom_field&quot;</span><span class="p">:</span> <span class="s2">&quot;tenant_vrf&quot;</span><span class="p">,</span>  <span class="c1"># Object-type custom field -&gt; VRF</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"ceos-spine-1_10.0.0.1_10.0.0.2"</span><span class="p">,</span>
+        <span class="s2">"vrf"</span><span class="p">:</span> <span class="s2">"NEW_VRF"</span><span class="p">,</span>
+        <span class="s2">"vrf_custom_field"</span><span class="p">:</span> <span class="s2">"tenant_vrf"</span><span class="p">,</span>  <span class="c1"># Object-type custom field -&gt; VRF</span>
     <span class="p">},</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -7303,73 +7303,73 @@ configured as type <strong>Object</strong> in NetBox pointing to the VRF content
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Update a single BGP session description:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox update bgp-peering name ceos-spine-1_10.0.0.1_10.0.0.2 description &quot;updated description&quot;
+<div class="highlight"><pre><span></span><code>nf#netbox update bgp-peering name ceos-spine-1_10.0.0.1_10.0.0.2 description "updated description"
 </code></pre></div>
 <p>Update status:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox update bgp-peering name ceos-spine-1_10.0.0.1_10.0.0.2 status planned
 </code></pre></div>
 <p>Dry run - preview diff without writing:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox update bgp-peering name ceos-spine-1_10.0.0.1_10.0.0.2 description &quot;new desc&quot; dry-run
+<div class="highlight"><pre><span></span><code>nf#netbox update bgp-peering name ceos-spine-1_10.0.0.1_10.0.0.2 description "new desc" dry-run
 </code></pre></div>
 <p>Update session in a NetBox branch:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox update bgp-peering name ceos-spine-1_10.0.0.1_10.0.0.2 description &quot;branch update&quot; branch my-bgp-branch
+<div class="highlight"><pre><span></span><code>nf#netbox update bgp-peering name ceos-spine-1_10.0.0.1_10.0.0.2 description "branch update" branch my-bgp-branch
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <p>Context manager:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;update_bgp_peering&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"update_bgp_peering"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1_10.0.0.1_10.0.0.2&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;updated description&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"ceos-spine-1_10.0.0.1_10.0.0.2"</span><span class="p">,</span>
+            <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"updated description"</span><span class="p">,</span>
+            <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"active"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 </code></pre></div>
 <p>Direct lifecycle:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">preview</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;update_bgp_peering&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"update_bgp_peering"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1_10.0.0.1_10.0.0.2&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;new description&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"ceos-spine-1_10.0.0.1_10.0.0.2"</span><span class="p">,</span>
+            <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"new description"</span><span class="p">,</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;update_bgp_peering&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"update_bgp_peering"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;bulk_update&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">"bulk_update"</span><span class="p">:</span> <span class="p">[</span>
                 <span class="p">{</span>
-                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1_10.0.0.1_10.0.0.2&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;spine-1 session&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+                    <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"ceos-spine-1_10.0.0.1_10.0.0.2"</span><span class="p">,</span>
+                    <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"spine-1 session"</span><span class="p">,</span>
+                    <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"active"</span><span class="p">,</span>
                 <span class="p">},</span>
                 <span class="p">{</span>
-                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-2_10.0.0.3_10.0.0.4&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;spine-2 session&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;import_policies&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;IMPORT_FROM_LEAF&quot;</span><span class="p">],</span>
+                    <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"ceos-spine-2_10.0.0.3_10.0.0.4"</span><span class="p">,</span>
+                    <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"spine-2 session"</span><span class="p">,</span>
+                    <span class="s2">"import_policies"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"IMPORT_FROM_LEAF"</span><span class="p">],</span>
                 <span class="p">},</span>
             <span class="p">],</span>
-            <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="s2">&quot;my-bgp-branch&quot;</span><span class="p">,</span>
+            <span class="s2">"branch"</span><span class="p">:</span> <span class="s2">"my-bgp-branch"</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 <span class="k">finally</span><span class="p">:</span>
@@ -7386,9 +7386,9 @@ root
 <span class="w">    </span>└──<span class="w"> </span>update:<span class="w">    </span>Update<span class="w"> </span>Netbox<span class="w"> </span>objects
 <span class="w">        </span>└──<span class="w"> </span>bgp-peering:<span class="w">    </span>Update<span class="w"> </span>BGP<span class="w"> </span>peering<span class="w"> </span>session<span class="o">(</span>s<span class="o">)</span>
 <span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'any'</span>
+<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
+<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
 <span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>Branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
 <span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Return<span class="w"> </span>diff<span class="w"> </span>without<span class="w"> </span>writing<span class="w"> </span>to<span class="w"> </span>NetBox
@@ -7407,7 +7407,7 @@ root
 <span class="w">            </span>├──<span class="w"> </span>prefix-list-out:<span class="w">    </span>New<span class="w"> </span>outbound<span class="w"> </span>prefix<span class="w"> </span>list<span class="w"> </span>name
 <span class="w">            </span>├──<span class="w"> </span>bulk-update:<span class="w">    </span>JSON<span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>session<span class="w"> </span>update<span class="w"> </span>dicts<span class="w"> </span><span class="k">for</span><span class="w"> </span>bulk<span class="w"> </span>mode
 <span class="w">            </span>├──<span class="w"> </span>rir:<span class="w">    </span>RIR<span class="w"> </span>name<span class="w"> </span><span class="k">for</span><span class="w"> </span>ASN<span class="w"> </span>creation
-<span class="w">            </span>├──<span class="w"> </span>vrf-custom-field:<span class="w">    </span>BGP<span class="w"> </span>session<span class="w"> </span>field<span class="w"> </span><span class="k">for</span><span class="w"> </span>VRF<span class="w"> </span>reference,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;vrf&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>vrf-custom-field:<span class="w">    </span>BGP<span class="w"> </span>session<span class="w"> </span>field<span class="w"> </span><span class="k">for</span><span class="w"> </span>VRF<span class="w"> </span>reference,<span class="w"> </span>default<span class="w"> </span><span class="s1">'vrf'</span>
 <span class="w">            </span>└──<span class="w"> </span>message:<span class="w">    </span>Changelog<span class="w"> </span>message<span class="w"> </span><span class="k">for</span><span class="w"> </span>NetBox<span class="w"> </span>write<span class="w"> </span>operations
 nf#
 </code></pre></div>
@@ -8230,16 +8230,16 @@ VRF object reference read from and written into
 <span class="normal">2134</span>
 <span class="normal">2135</span>
 <span class="normal">2136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"PATCH"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">UpdateBgpPeeringInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">UpdateBgpPeeringResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Update BGP Peering&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Update BGP Peering"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -8271,10 +8271,10 @@ VRF object reference read from and written into
     <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">vrf_custom_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;vrf&quot;</span><span class="p">,</span>
+    <span class="n">vrf_custom_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"vrf"</span><span class="p">,</span>
     <span class="n">lookup_cache</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Update one or many existing BGP sessions in NetBox.</span>
 
 <span class="sd">    Supports single-session mode (``name`` plus field kwargs) and bulk mode</span>
@@ -8312,33 +8312,33 @@ VRF object reference read from and written into
 <span class="sd">            the VRF object reference.  The custom field must be of type Object in</span>
 <span class="sd">            NetBox pointing to the VRF content-type.  The value is always a single</span>
 <span class="sd">            VRF object reference read from and written into</span>
-<span class="sd">            ``custom_fields[vrf_custom_field]``.  Default ``&#39;vrf&#39;`` means</span>
-<span class="sd">            ``custom_fields[&#39;vrf&#39;]``.</span>
+<span class="sd">            ``custom_fields[vrf_custom_field]``.  Default ``'vrf'`` means</span>
+<span class="sd">            ``custom_fields['vrf']``.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Normal run::</span>
 
-<span class="sd">            {&quot;updated&quot;: [&quot;name1&quot;, ...], &quot;in_sync&quot;: [&quot;name2&quot;, ...]}</span>
+<span class="sd">            {"updated": ["name1", ...], "in_sync": ["name2", ...]}</span>
 
 <span class="sd">        Dry run::</span>
 
 <span class="sd">            {</span>
-<span class="sd">                &quot;update&quot;: [{&quot;name&quot;: &quot;name1&quot;, &quot;diff&quot;: {...}}, ...],</span>
-<span class="sd">                &quot;in_sync&quot;: [&quot;name2&quot;, ...],</span>
+<span class="sd">                "update": [{"name": "name1", "diff": {...}}, ...],</span>
+<span class="sd">                "in_sync": ["name2", ...],</span>
 <span class="sd">            }</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:update_bgp_peering&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:update_bgp_peering"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="p">{},</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
     <span class="p">)</span>
 
     <span class="c1"># Validate BGP plugin</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;validating NetBox BGP plugin for &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_plugin</span><span class="p">(</span><span class="s2">&quot;netbox_bgp&quot;</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; NetBox instance has no BGP plugin installed&quot;</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"validating NetBox BGP plugin for '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_plugin</span><span class="p">(</span><span class="s2">"netbox_bgp"</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">' NetBox instance has no BGP plugin installed"</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
@@ -8346,13 +8346,13 @@ VRF object reference read from and written into
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">message</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;setting NetBox changelog message for BGP session update&quot;</span><span class="p">)</span>
-        <span class="n">nb</span><span class="o">.</span><span class="n">http_session</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-Changelog-Message&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">message</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"setting NetBox changelog message for BGP session update"</span><span class="p">)</span>
+        <span class="n">nb</span><span class="o">.</span><span class="n">http_session</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">"X-Changelog-Message"</span><span class="p">]</span> <span class="o">=</span> <span class="n">message</span>
 
     <span class="n">lookup_cache</span> <span class="o">=</span> <span class="n">lookup_cache</span> <span class="k">if</span> <span class="n">lookup_cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
 
     <span class="c1"># Validate VRF custom field and RIR</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;validating BGP session VRF custom field and RIR&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"validating BGP session VRF custom field and RIR"</span><span class="p">)</span>
     <span class="n">vrf_custom_field</span> <span class="o">=</span> <span class="n">_resolve_vrf_custom_field</span><span class="p">(</span>
         <span class="n">vrf_custom_field</span><span class="p">,</span> <span class="n">nb</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
     <span class="p">)</span>
@@ -8363,46 +8363,46 @@ VRF object reference read from and written into
         <span class="n">bgp_sessions</span> <span class="o">=</span> <span class="n">bulk_update</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">_single_fields</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot;description&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;status&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;local_address&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;remote_address&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;local_as&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;remote_as&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;vrf&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;peer_group&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;import_policies&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;export_policies&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;prefix_list_in&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;prefix_list_out&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;tags&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;custom_fields&quot;</span><span class="p">,</span>
+            <span class="s2">"description"</span><span class="p">,</span>
+            <span class="s2">"status"</span><span class="p">,</span>
+            <span class="s2">"local_address"</span><span class="p">,</span>
+            <span class="s2">"remote_address"</span><span class="p">,</span>
+            <span class="s2">"local_as"</span><span class="p">,</span>
+            <span class="s2">"remote_as"</span><span class="p">,</span>
+            <span class="s2">"vrf"</span><span class="p">,</span>
+            <span class="s2">"peer_group"</span><span class="p">,</span>
+            <span class="s2">"import_policies"</span><span class="p">,</span>
+            <span class="s2">"export_policies"</span><span class="p">,</span>
+            <span class="s2">"prefix_list_in"</span><span class="p">,</span>
+            <span class="s2">"prefix_list_out"</span><span class="p">,</span>
+            <span class="s2">"tags"</span><span class="p">,</span>
+            <span class="s2">"custom_fields"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">bgp_session</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_single_fields</span> <span class="ow">and</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="p">}</span>
-        <span class="n">bgp_sessions</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">bgp_session</span><span class="p">}]</span>
+        <span class="n">bgp_sessions</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">bgp_session</span><span class="p">}]</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;preparing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bgp_sessions</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session update request(s), dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"preparing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bgp_sessions</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session update request(s), dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
 
-    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"updated"</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[]}</span>
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"update"</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[]}</span>
 
     <span class="c1"># Fetch sessions by ID when available, otherwise by name.</span>
     <span class="n">session_ids</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">session_names</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">bgp_sessions</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">session_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"id"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">session_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session</span><span class="p">[</span><span class="s2">"id"</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">session_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bgp_sessions</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session(s) from NetBox&quot;</span><span class="p">)</span>
-    <span class="n">session_fields</span> <span class="o">=</span> <span class="s2">&quot;id,name,description,status,local_address,remote_address,local_as,remote_as,custom_fields,tags,peer_group,import_policies,export_policies,prefix_list_in,prefix_list_out&quot;</span>
+            <span class="n">session_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session</span><span class="p">[</span><span class="s2">"name"</span><span class="p">])</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"fetching </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bgp_sessions</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session(s) from NetBox"</span><span class="p">)</span>
+    <span class="n">session_fields</span> <span class="o">=</span> <span class="s2">"id,name,description,status,local_address,remote_address,local_as,remote_as,custom_fields,tags,peer_group,import_policies,export_policies,prefix_list_in,prefix_list_out"</span>
     <span class="n">nb_sessions_raw</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">session_ids</span><span class="p">:</span>
         <span class="n">nb_sessions_raw</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
@@ -8424,132 +8424,132 @@ VRF object reference read from and written into
     <span class="n">ids_by_name</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">session</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">nb_sessions_raw</span> <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">name</span>
     <span class="p">}</span>
-    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">bgp_sessions</span><span class="p">):</span>
-        <span class="n">lookup_cache</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">,</span> <span class="p">{})</span>
-        <span class="k">if</span> <span class="s2">&quot;netbox_bgp.bgpsession&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lookup_cache</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"custom_fields"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">bgp_sessions</span><span class="p">):</span>
+        <span class="n">lookup_cache</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"custom_fields"</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">if</span> <span class="s2">"netbox_bgp.bgpsession"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lookup_cache</span><span class="p">[</span><span class="s2">"custom_fields"</span><span class="p">]:</span>
             <span class="c1"># Direct task calls fetch definitions; designs supply them in the cache.</span>
-            <span class="n">lookup_cache</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">][</span><span class="s2">&quot;netbox_bgp.bgpsession&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;object&quot;</span><span class="p">:</span> <span class="p">[],</span>
-                <span class="s2">&quot;multiobject&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="n">lookup_cache</span><span class="p">[</span><span class="s2">"custom_fields"</span><span class="p">][</span><span class="s2">"netbox_bgp.bgpsession"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">"object"</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">"multiobject"</span><span class="p">:</span> <span class="p">[],</span>
             <span class="p">}</span>
             <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">,</span>
-                <span class="n">object_type</span><span class="o">=</span><span class="s2">&quot;netbox_bgp.bgpsession&quot;</span><span class="p">,</span>
-                <span class="nb">type</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;multiobject&quot;</span><span class="p">],</span>
+                <span class="n">object_type</span><span class="o">=</span><span class="s2">"netbox_bgp.bgpsession"</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="p">[</span><span class="s2">"object"</span><span class="p">,</span> <span class="s2">"multiobject"</span><span class="p">],</span>
             <span class="p">):</span>
-                <span class="n">lookup_cache</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">][</span><span class="s2">&quot;netbox_bgp.bgpsession&quot;</span><span class="p">][</span>
+                <span class="n">lookup_cache</span><span class="p">[</span><span class="s2">"custom_fields"</span><span class="p">][</span><span class="s2">"netbox_bgp.bgpsession"</span><span class="p">][</span>
                     <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span>
                 <span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">normalised_nb</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session(s) from NetBox&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">normalised_nb</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session(s) from NetBox"</span><span class="p">)</span>
 
     <span class="c1"># Build updates dictionary by NetBox ID</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;normalising BGP session update data&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"normalising BGP session update data"</span><span class="p">)</span>
     <span class="n">normalised_updates</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">selected_by_id</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">session_ids</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">bgp_session</span> <span class="ow">in</span> <span class="n">bgp_sessions</span><span class="p">:</span>
-        <span class="n">session_id</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ids_by_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-            <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
+        <span class="n">session_id</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"id"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ids_by_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">label</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">session_id</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">session_id</span>
         <span class="c1"># Report sessions not found in NetBox</span>
         <span class="k">if</span> <span class="n">session_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">normalised_nb</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;BGP session &#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">&#39; not found in NetBox, skipping update&quot;</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"BGP session '</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">' not found in NetBox, skipping update"</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Normalise policies to list</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;import_policies&quot;</span><span class="p">),</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">bgp_session</span><span class="p">[</span><span class="s2">&quot;import_policies&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">bgp_session</span><span class="p">[</span><span class="s2">&quot;import_policies&quot;</span><span class="p">]]</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;export_policies&quot;</span><span class="p">),</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">bgp_session</span><span class="p">[</span><span class="s2">&quot;export_policies&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">bgp_session</span><span class="p">[</span><span class="s2">&quot;export_policies&quot;</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"import_policies"</span><span class="p">),</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">bgp_session</span><span class="p">[</span><span class="s2">"import_policies"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">bgp_session</span><span class="p">[</span><span class="s2">"import_policies"</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"export_policies"</span><span class="p">),</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">bgp_session</span><span class="p">[</span><span class="s2">"export_policies"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">bgp_session</span><span class="p">[</span><span class="s2">"export_policies"</span><span class="p">]]</span>
             <span class="n">update</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;new_name&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">)</span>
+                <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"new_name"</span><span class="p">,</span> <span class="s2">"id"</span><span class="p">)</span>
             <span class="p">}</span>
-            <span class="n">update</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">bgp_session</span><span class="p">[</span><span class="s2">&quot;new_name&quot;</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;new_name&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="k">else</span> <span class="n">normalised_nb</span><span class="p">[</span><span class="n">session_id</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+            <span class="n">update</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">bgp_session</span><span class="p">[</span><span class="s2">"new_name"</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"new_name"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">else</span> <span class="n">normalised_nb</span><span class="p">[</span><span class="n">session_id</span><span class="p">][</span><span class="s2">"name"</span><span class="p">]</span>
             <span class="p">)</span>
             <span class="n">normalised_updates</span><span class="p">[</span><span class="n">session_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">update</span>
-            <span class="k">if</span> <span class="s2">&quot;import_policies&quot;</span> <span class="ow">in</span> <span class="n">update</span><span class="p">:</span>
-                <span class="n">update</span><span class="p">[</span><span class="s2">&quot;import_policies&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
-                    <span class="n">update</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;import_policies&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="s2">"import_policies"</span> <span class="ow">in</span> <span class="n">update</span><span class="p">:</span>
+                <span class="n">update</span><span class="p">[</span><span class="s2">"import_policies"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+                    <span class="n">update</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"import_policies"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
                 <span class="p">)</span>
-            <span class="k">if</span> <span class="s2">&quot;export_policies&quot;</span> <span class="ow">in</span> <span class="n">update</span><span class="p">:</span>
-                <span class="n">update</span><span class="p">[</span><span class="s2">&quot;export_policies&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
-                    <span class="n">update</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;export_policies&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="s2">"export_policies"</span> <span class="ow">in</span> <span class="n">update</span><span class="p">:</span>
+                <span class="n">update</span><span class="p">[</span><span class="s2">"export_policies"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+                    <span class="n">update</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"export_policies"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
                 <span class="p">)</span>
-            <span class="k">if</span> <span class="s2">&quot;tags&quot;</span> <span class="ow">in</span> <span class="n">update</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">"tags"</span> <span class="ow">in</span> <span class="n">update</span><span class="p">:</span>
                 <span class="c1"># Compare and write the complete additive tag list.</span>
-                <span class="n">normalised_nb</span><span class="p">[</span><span class="n">session_id</span><span class="p">][</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merge_array_values</span><span class="p">(</span>
-                    <span class="p">[],</span> <span class="n">nb_sessions_by_id</span><span class="p">[</span><span class="n">session_id</span><span class="p">]</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">&quot;name&quot;</span>
+                <span class="n">normalised_nb</span><span class="p">[</span><span class="n">session_id</span><span class="p">][</span><span class="s2">"tags"</span><span class="p">]</span> <span class="o">=</span> <span class="n">merge_array_values</span><span class="p">(</span>
+                    <span class="p">[],</span> <span class="n">nb_sessions_by_id</span><span class="p">[</span><span class="n">session_id</span><span class="p">]</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">"name"</span>
                 <span class="p">)</span>
-                <span class="n">update</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merge_array_values</span><span class="p">(</span>
+                <span class="n">update</span><span class="p">[</span><span class="s2">"tags"</span><span class="p">]</span> <span class="o">=</span> <span class="n">merge_array_values</span><span class="p">(</span>
                     <span class="n">nb_sessions_by_id</span><span class="p">[</span><span class="n">session_id</span><span class="p">]</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span>
-                    <span class="n">update</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">],</span>
-                    <span class="n">attribute</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
+                    <span class="n">update</span><span class="p">[</span><span class="s2">"tags"</span><span class="p">],</span>
+                    <span class="n">attribute</span><span class="o">=</span><span class="s2">"name"</span><span class="p">,</span>
                 <span class="p">)</span>
-            <span class="k">if</span> <span class="n">update</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">fields</span> <span class="o">=</span> <span class="n">lookup_cache</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">][</span><span class="s2">&quot;netbox_bgp.bgpsession&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">update</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"custom_fields"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">fields</span> <span class="o">=</span> <span class="n">lookup_cache</span><span class="p">[</span><span class="s2">"custom_fields"</span><span class="p">][</span><span class="s2">"netbox_bgp.bgpsession"</span><span class="p">]</span>
                 <span class="n">current</span><span class="p">,</span> <span class="n">merged</span> <span class="o">=</span> <span class="n">merge_resolved_custom_fields</span><span class="p">(</span>
                     <span class="bp">self</span><span class="p">,</span>
                     <span class="n">nb</span><span class="p">,</span>
                     <span class="n">nb_sessions_by_id</span><span class="p">[</span><span class="n">session_id</span><span class="p">],</span>
-                    <span class="n">update</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">],</span>
-                    <span class="n">fields</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">],</span>
-                    <span class="n">fields</span><span class="p">[</span><span class="s2">&quot;multiobject&quot;</span><span class="p">],</span>
+                    <span class="n">update</span><span class="p">[</span><span class="s2">"custom_fields"</span><span class="p">],</span>
+                    <span class="n">fields</span><span class="p">[</span><span class="s2">"object"</span><span class="p">],</span>
+                    <span class="n">fields</span><span class="p">[</span><span class="s2">"multiobject"</span><span class="p">],</span>
                 <span class="p">)</span>
-                <span class="n">normalised_nb</span><span class="p">[</span><span class="n">session_id</span><span class="p">][</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current</span>
-                <span class="n">update</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged</span>
+                <span class="n">normalised_nb</span><span class="p">[</span><span class="n">session_id</span><span class="p">][</span><span class="s2">"custom_fields"</span><span class="p">]</span> <span class="o">=</span> <span class="n">current</span>
+                <span class="n">update</span><span class="p">[</span><span class="s2">"custom_fields"</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged</span>
 
     <span class="c1"># Compare complete dictionaries using make_diff; classify in_sync vs changed</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;calculating BGP session update diff&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"calculating BGP session update diff"</span><span class="p">)</span>
     <span class="n">sessions_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_diff</span><span class="p">(</span>
-        <span class="p">{</span><span class="s2">&quot;_&quot;</span><span class="p">:</span> <span class="n">normalised_updates</span><span class="p">},</span>
-        <span class="p">{</span><span class="s2">&quot;_&quot;</span><span class="p">:</span> <span class="n">normalised_nb</span><span class="p">},</span>
-    <span class="p">)[</span><span class="s2">&quot;_&quot;</span><span class="p">]</span>
+        <span class="p">{</span><span class="s2">"_"</span><span class="p">:</span> <span class="n">normalised_updates</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">"_"</span><span class="p">:</span> <span class="n">normalised_nb</span><span class="p">},</span>
+    <span class="p">)[</span><span class="s2">"_"</span><span class="p">]</span>
 
-    <span class="n">result</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+    <span class="n">result</span><span class="p">[</span><span class="s2">"in_sync"</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
         <span class="p">(</span>
             <span class="n">session_id</span>
             <span class="k">if</span> <span class="n">session_id</span> <span class="ow">in</span> <span class="n">selected_by_id</span>
-            <span class="k">else</span> <span class="n">normalised_nb</span><span class="p">[</span><span class="n">session_id</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+            <span class="k">else</span> <span class="n">normalised_nb</span><span class="p">[</span><span class="n">session_id</span><span class="p">][</span><span class="s2">"name"</span><span class="p">]</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">session_id</span> <span class="ow">in</span> <span class="n">sessions_diff</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">session_id</span> <span class="ow">in</span> <span class="n">sessions_diff</span><span class="p">[</span><span class="s2">"in_sync"</span><span class="p">]</span>
     <span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;BGP session update diff complete: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions_diff</span><span class="p">[</span><span class="s1">&#39;update&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> update, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions_diff</span><span class="p">[</span><span class="s1">&#39;in_sync&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> in sync&quot;</span>
+        <span class="sa">f</span><span class="s2">"BGP session update diff complete: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions_diff</span><span class="p">[</span><span class="s1">'update'</span><span class="p">])</span><span class="si">}</span><span class="s2"> update, "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions_diff</span><span class="p">[</span><span class="s1">'in_sync'</span><span class="p">])</span><span class="si">}</span><span class="s2"> in sync"</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="s2">&quot;dry-run requested, returning BGP session update diff without changes&quot;</span>
+            <span class="s2">"dry-run requested, returning BGP session update diff without changes"</span>
         <span class="p">)</span>
-        <span class="n">result</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">result</span><span class="p">[</span><span class="s2">"update"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">normalised_nb</span><span class="p">[</span><span class="n">session_id</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
-                <span class="o">**</span><span class="p">({</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">session_id</span><span class="p">}</span> <span class="k">if</span> <span class="n">session_id</span> <span class="ow">in</span> <span class="n">selected_by_id</span> <span class="k">else</span> <span class="p">{}),</span>
-                <span class="s2">&quot;diff&quot;</span><span class="p">:</span> <span class="n">changes</span><span class="p">,</span>
+                <span class="s2">"name"</span><span class="p">:</span> <span class="n">normalised_nb</span><span class="p">[</span><span class="n">session_id</span><span class="p">][</span><span class="s2">"name"</span><span class="p">],</span>
+                <span class="o">**</span><span class="p">({</span><span class="s2">"id"</span><span class="p">:</span> <span class="n">session_id</span><span class="p">}</span> <span class="k">if</span> <span class="n">session_id</span> <span class="ow">in</span> <span class="n">selected_by_id</span> <span class="k">else</span> <span class="p">{}),</span>
+                <span class="s2">"diff"</span><span class="p">:</span> <span class="n">changes</span><span class="p">,</span>
             <span class="p">}</span>
-            <span class="k">for</span> <span class="n">session_id</span><span class="p">,</span> <span class="n">changes</span> <span class="ow">in</span> <span class="n">sessions_diff</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">session_id</span><span class="p">,</span> <span class="n">changes</span> <span class="ow">in</span> <span class="n">sessions_diff</span><span class="p">[</span><span class="s2">"update"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">]</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">result</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;BGP session update task complete&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"BGP session update task complete"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># Build update payloads — iterate over diff to get only changed fields per session</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;building BGP session update payloads&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"building BGP session update payloads"</span><span class="p">)</span>
     <span class="n">update_payloads</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">session_id</span><span class="p">,</span> <span class="n">field_changes</span> <span class="ow">in</span> <span class="n">sessions_diff</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">session_id</span><span class="p">,</span> <span class="n">field_changes</span> <span class="ow">in</span> <span class="n">sessions_diff</span><span class="p">[</span><span class="s2">"update"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">nb_session</span> <span class="o">=</span> <span class="n">normalised_nb</span><span class="p">[</span><span class="n">session_id</span><span class="p">]</span>
-        <span class="n">addr_family</span> <span class="o">=</span> <span class="n">get_addr_family</span><span class="p">(</span><span class="n">nb_session</span><span class="p">[</span><span class="s2">&quot;local_address&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;0.0.0.0&quot;</span><span class="p">)</span>
-        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">nb_session</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]}</span>
+        <span class="n">addr_family</span> <span class="o">=</span> <span class="n">get_addr_family</span><span class="p">(</span><span class="n">nb_session</span><span class="p">[</span><span class="s2">"local_address"</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">"0.0.0.0"</span><span class="p">)</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"id"</span><span class="p">:</span> <span class="n">nb_session</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]}</span>
         <span class="n">payload</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="n">resolve_bgp_session_payload_fields</span><span class="p">(</span>
-                <span class="p">{</span><span class="n">f</span><span class="p">:</span> <span class="n">c</span><span class="p">[</span><span class="s2">&quot;new_value&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">field_changes</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
+                <span class="p">{</span><span class="n">f</span><span class="p">:</span> <span class="n">c</span><span class="p">[</span><span class="s2">"new_value"</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">field_changes</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
                 <span class="n">nb</span><span class="p">,</span>
                 <span class="n">rir_id</span><span class="p">,</span>
                 <span class="n">job</span><span class="p">,</span>
@@ -8561,44 +8561,44 @@ VRF object reference read from and written into
             <span class="p">)</span>
         <span class="p">)</span>
         <span class="n">update_payloads</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">session_id</span><span class="p">,</span> <span class="n">payload</span><span class="p">))</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;prepared </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update_payloads</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session update payload(s)&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"prepared </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update_payloads</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session update payload(s)"</span><span class="p">)</span>
 
     <span class="c1"># Bulk update</span>
     <span class="k">if</span> <span class="n">update_payloads</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update_payloads</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session(s)&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"updating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update_payloads</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session(s)"</span><span class="p">)</span>
         <span class="n">total_batches</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">update_payloads</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">batch_size</span>
         <span class="k">for</span> <span class="n">batch_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">update_payloads</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
             <span class="n">batch</span> <span class="o">=</span> <span class="n">update_payloads</span><span class="p">[</span><span class="n">batch_start</span> <span class="p">:</span> <span class="n">batch_start</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
             <span class="n">batch_number</span> <span class="o">=</span> <span class="n">batch_start</span> <span class="o">//</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;updating BGP session batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> session(s))&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"updating BGP session batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> session(s))"</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">update</span><span class="p">([</span><span class="n">payload</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">payload</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">])</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to update BGP session batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"failed to update BGP session batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">result</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">ret</span>
-            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">"updated"</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                 <span class="p">(</span>
                     <span class="n">session_id</span>
                     <span class="k">if</span> <span class="n">session_id</span> <span class="ow">in</span> <span class="n">selected_by_id</span>
-                    <span class="k">else</span> <span class="n">normalised_nb</span><span class="p">[</span><span class="n">session_id</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+                    <span class="k">else</span> <span class="n">normalised_nb</span><span class="p">[</span><span class="n">session_id</span><span class="p">][</span><span class="s2">"name"</span><span class="p">]</span>
                 <span class="p">)</span>
                 <span class="k">for</span> <span class="n">session_id</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span>
             <span class="p">)</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;updated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update_payloads</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session(s)&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"updated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update_payloads</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session(s)"</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no BGP sessions to update&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no BGP sessions to update"</span><span class="p">)</span>
 
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">result</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;BGP session update task complete&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"BGP session update task complete"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>

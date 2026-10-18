@@ -7714,8 +7714,8 @@ types. The dispatcher queries only indexed <code>next_run_at</code>; it does not
 query inside the trigger JSON.</p>
 <p>For an interval trigger, validate a structure such as:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;seconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;mode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fixed_rate&quot;</span>
+<span class="w">  </span><span class="nt">"seconds"</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"mode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"fixed_rate"</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>The first implementation supports positive whole-second intervals. Cron can
@@ -7724,7 +7724,7 @@ saving behavior.</p>
 <h3 id="schedule-uuid-versus-job-uuid">Schedule UUID versus job UUID<a class="headerlink" href="#schedule-uuid-versus-job-uuid" title="Permanent link">¤</a></h3>
 <p>A schedule and a job are different records and therefore have different UUIDs.
 For example:</p>
-<div class="highlight"><pre><span></span><code>schedule UUID:  7ad2...       # &quot;run backup every hour&quot;
+<div class="highlight"><pre><span></span><code>schedule UUID:  7ad2...       # "run backup every hour"
 job UUID:       a103...       # 09:00 occurrence
 job UUID:       b49f...       # 10:00 occurrence
 job UUID:       f9c1...       # 11:00 occurrence
@@ -7735,10 +7735,10 @@ identifies one dispatch, result, and event stream.</p>
 <h3 id="delayed-execution">Delayed execution<a class="headerlink" href="#delayed-execution" title="Permanent link">¤</a></h3>
 <p>Keep <code>run_job()</code> immediate. Add an explicit non-blocking method:</p>
 <div class="highlight"><pre><span></span><code><span class="n">future</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">schedule_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">],</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show clock&quot;</span><span class="p">]},</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">"nornir-worker-1"</span><span class="p">],</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show clock"</span><span class="p">]},</span>
     <span class="n">scheduled_for</span><span class="o">=</span><span class="n">run_at</span><span class="p">,</span>
     <span class="n">misfire_grace_seconds</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
     <span class="n">timeout</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span>
@@ -7758,14 +7758,14 @@ after any delay; otherwise it sets <code>start_deadline</code>.</p>
 <h3 id="periodic-execution">Periodic execution<a class="headerlink" href="#periodic-execution" title="Permanent link">¤</a></h3>
 <p>Add a separate schedule API:</p>
 <div class="highlight"><pre><span></span><code><span class="n">schedule</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">create_job_schedule</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;collect-clock&quot;</span><span class="p">,</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">],</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;show clock&quot;</span><span class="p">]},</span>
-    <span class="n">trigger</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;interval&quot;</span><span class="p">,</span> <span class="s2">&quot;seconds&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">},</span>
-    <span class="n">coalesce</span><span class="o">=</span><span class="s2">&quot;latest&quot;</span><span class="p">,</span>
-    <span class="n">overlap_policy</span><span class="o">=</span><span class="s2">&quot;FORBID&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"collect-clock"</span><span class="p">,</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"cli"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="p">[</span><span class="s2">"nornir-worker-1"</span><span class="p">],</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"commands"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"show clock"</span><span class="p">]},</span>
+    <span class="n">trigger</span><span class="o">=</span><span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"interval"</span><span class="p">,</span> <span class="s2">"seconds"</span><span class="p">:</span> <span class="mi">300</span><span class="p">},</span>
+    <span class="n">coalesce</span><span class="o">=</span><span class="s2">"latest"</span><span class="p">,</span>
+    <span class="n">overlap_policy</span><span class="o">=</span><span class="s2">"FORBID"</span><span class="p">,</span>
     <span class="n">max_instances</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">misfire_grace_seconds</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
     <span class="n">timeout</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span>

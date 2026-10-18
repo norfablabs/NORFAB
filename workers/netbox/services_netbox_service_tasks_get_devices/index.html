@@ -7224,13 +7224,13 @@
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>Normal mode returns a dictionary keyed by device name:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Active&quot;</span><span class="p">},</span>
-        <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span> <span class="s2">&quot;...&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">},</span>
-        <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;eos&quot;</span><span class="p">},</span>
-        <span class="s2">&quot;primary_ip4&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="s2">&quot;192.0.2.11/32&quot;</span><span class="p">},</span>
-        <span class="s2">&quot;...&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">,</span>
+    <span class="s2">"ceos-leaf-1"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"ceos-leaf-1"</span><span class="p">,</span>
+        <span class="s2">"status"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"value"</span><span class="p">:</span> <span class="s2">"active"</span><span class="p">,</span> <span class="s2">"label"</span><span class="p">:</span> <span class="s2">"Active"</span><span class="p">},</span>
+        <span class="s2">"site"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"lab"</span><span class="p">,</span> <span class="s2">"..."</span><span class="p">:</span> <span class="s2">"..."</span><span class="p">},</span>
+        <span class="s2">"platform"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"eos"</span><span class="p">},</span>
+        <span class="s2">"primary_ip4"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"address"</span><span class="p">:</span> <span class="s2">"192.0.2.11/32"</span><span class="p">},</span>
+        <span class="s2">"..."</span><span class="p">:</span> <span class="s2">"..."</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -7249,7 +7249,7 @@
 <div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>ceos-leaf-2
 </code></pre></div>
 <p>Filter devices using a NetBox filter dictionary:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>devices<span class="w"> </span>filters<span class="w"> </span><span class="s1">&#39;[{&quot;site&quot;: &quot;lab&quot;, &quot;status&quot;: &quot;active&quot;}]&#39;</span>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>devices<span class="w"> </span>filters<span class="w"> </span><span class="s1">'[{"site": "lab", "status": "active"}]'</span>
 </code></pre></div>
 <p>Preview the merged filters without querying NetBox:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>dry-run
@@ -7262,42 +7262,42 @@
 <p>Context manager:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;get_devices&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"get_devices"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-leaf-2&quot;</span><span class="p">],</span>
+            <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">,</span> <span class="s2">"ceos-leaf-2"</span><span class="p">],</span>
         <span class="p">},</span>
     <span class="p">)</span>
 </code></pre></div>
 <p>Direct lifecycle:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;get_devices&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"get_devices"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">}],</span>
+            <span class="s2">"filters"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"site"</span><span class="p">:</span> <span class="s2">"lab"</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"active"</span><span class="p">}],</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
     <span class="n">preview</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;get_devices&quot;</span><span class="p">,</span>
-        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="s2">"netbox"</span><span class="p">,</span>
+        <span class="s2">"get_devices"</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ceos-leaf-1"</span><span class="p">],</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 <span class="k">finally</span><span class="p">:</span>
@@ -7315,12 +7315,12 @@ root
 <span class="w">        </span>└──<span class="w"> </span>devices:<span class="w">    </span>Query<span class="w"> </span>Netbox<span class="w"> </span>devices<span class="w"> </span>data
 <span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
 <span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>NetBox<span class="w"> </span>branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
-<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'any'</span>
 <span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">            </span>├──<span class="w"> </span>filters:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>device<span class="w"> </span>filters<span class="w"> </span>dictionaries<span class="w"> </span>as<span class="w"> </span>a<span class="w"> </span>JSON<span class="w"> </span>string,<span class="w"> </span>examples:<span class="w"> </span><span class="o">[{</span><span class="s2">&quot;q&quot;</span>:<span class="w"> </span><span class="s2">&quot;ceos1&quot;</span><span class="o">}]</span>
+<span class="w">            </span>├──<span class="w"> </span>filters:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>device<span class="w"> </span>filters<span class="w"> </span>dictionaries<span class="w"> </span>as<span class="w"> </span>a<span class="w"> </span>JSON<span class="w"> </span>string,<span class="w"> </span>examples:<span class="w"> </span><span class="o">[{</span><span class="s2">"q"</span>:<span class="w"> </span><span class="s2">"ceos1"</span><span class="o">}]</span>
 <span class="w">            </span>├──<span class="w"> </span>devices:<span class="w">    </span>Device<span class="w"> </span>names<span class="w"> </span>to<span class="w"> </span>query<span class="w"> </span>data<span class="w"> </span><span class="k">for</span>
 <span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Only<span class="w"> </span><span class="k">return</span><span class="w"> </span>query<span class="w"> </span>content,<span class="w"> </span><span class="k">do</span><span class="w"> </span>not<span class="w"> </span>run<span class="w"> </span>it
-<span class="w">            </span>└──<span class="w"> </span>cache:<span class="w">    </span>How<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span>cache,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>└──<span class="w"> </span>cache:<span class="w">    </span>How<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span>cache,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
@@ -7653,14 +7653,14 @@ nf#
 <span class="normal">324</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetDevicesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetDevicesResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Devices&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Devices"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -7674,26 +7674,26 @@ nf#
     <span class="n">cache</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve device data from Netbox REST API using Pynetbox.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab Job object</span>
-<span class="sd">        filters: list of filter dicts applied to ``dcim/devices/`` endpoint, e.g. ``[{&quot;site&quot;: &quot;NYC&quot;, &quot;status&quot;: &quot;active&quot;}]``</span>
+<span class="sd">        filters: list of filter dicts applied to ``dcim/devices/`` endpoint, e.g. ``[{"site": "NYC", "status": "active"}]``</span>
 <span class="sd">        instance: Netbox instance name, uses default if omitted</span>
 <span class="sd">        dry_run: if True returns filter params without making REST calls</span>
-<span class="sd">        devices: list of device names to fetch, merged into filters as ``{&quot;name&quot;: devices}``</span>
+<span class="sd">        devices: list of device names to fetch, merged into filters as ``{"name": devices}``</span>
 <span class="sd">        cache: ``True`` - use cache if up to date; ``False`` - skip cache;</span>
-<span class="sd">            ``&quot;refresh&quot;`` - fetch and overwrite cache; ``&quot;force&quot;`` - use cache without staleness check</span>
+<span class="sd">            ``"refresh"`` - fetch and overwrite cache; ``"force"`` - use cache without staleness check</span>
 <span class="sd">        branch: NetBox branching plugin branch name.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict keyed by device name with fields: last_updated, custom_field_data, tags, device_type,</span>
 <span class="sd">        role, config_context, tenant, platform, serial, asset_tag, site, location, rack, status,</span>
 <span class="sd">        primary_ip4, primary_ip6, airflow, position, id</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_devices&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{},</span> <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">])</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_devices"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{},</span> <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">])</span>
     <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_use</span> <span class="k">if</span> <span class="n">cache</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">cache</span>
     <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cache</span> <span class="o">=</span> <span class="kc">False</span>
@@ -7705,60 +7705,60 @@ nf#
 
     <span class="c1"># merge named devices into filters as a name filter</span>
     <span class="k">if</span> <span class="n">devices</span><span class="p">:</span>
-        <span class="n">filters</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">})</span>
+        <span class="n">filters</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">devices</span><span class="p">})</span>
 
     <span class="c1"># return dry run result</span>
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;get_devices_dry_run&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">}</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"get_devices_dry_run"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"filters"</span><span class="p">:</span> <span class="n">filters</span><span class="p">}</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;retrieving device data for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from instance &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"retrieving device data for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from instance '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">'"</span>
         <span class="k">if</span> <span class="n">devices</span>
-        <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;retrieving device data from instance &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; using </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span><span class="si">}</span><span class="s2"> filter(s)&quot;</span>
+        <span class="k">else</span> <span class="sa">f</span><span class="s2">"retrieving device data from instance '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">' using </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span><span class="si">}</span><span class="s2"> filter(s)"</span>
     <span class="p">)</span>
 
     <span class="n">filters_to_fetch</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;force&quot;</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;checking cache for up-to-date device data&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">"force"</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"checking cache for up-to-date device data"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">expire</span><span class="p">()</span>  <span class="c1"># remove expired items from cache</span>
         <span class="c1"># retrieve last_updated data from Netbox for all filters using REST</span>
         <span class="k">for</span> <span class="n">filter_item</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">filter_item</span><span class="p">,</span>
-                <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;name,last_updated&quot;</span><span class="p">,</span>
+                <span class="n">fields</span><span class="o">=</span><span class="s2">"name,last_updated"</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
                 <span class="n">device_name</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">name</span>
                 <span class="n">last_updated</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">last_updated</span>
                 <span class="c1"># try to retrieve device data from cache</span>
-                <span class="n">device_cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;get_devices::</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">device_cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"get_devices::</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">"</span>
                 <span class="c1"># check if cache is up to date and use it if so</span>
                 <span class="k">if</span> <span class="n">device_cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="ow">and</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">device_cache_key</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;last_updated&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">last_updated</span>
-                    <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;force&quot;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">device_cache_key</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"last_updated"</span><span class="p">)</span> <span class="o">==</span> <span class="n">last_updated</span>
+                    <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">"force"</span>
                 <span class="p">):</span>
                     <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">device_cache_key</span><span class="p">]</span>
-                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;serving &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; from cache&quot;</span><span class="p">)</span>
+                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"serving '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">' from cache"</span><span class="p">)</span>
                 <span class="c1"># cache old or no cache, fetch device data</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">devices_to_fetch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">device_name</span><span class="p">)</span>
                     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; cache miss or stale, fetching fresh data&quot;</span>
+                        <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">' cache miss or stale, fetching fresh data"</span>
                     <span class="p">)</span>
 
         <span class="c1"># only fetch devices missing from or stale in cache</span>
-        <span class="n">filters_to_fetch</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">devices_to_fetch</span><span class="p">}]</span> <span class="k">if</span> <span class="n">devices_to_fetch</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="n">filters_to_fetch</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">devices_to_fetch</span><span class="p">}]</span> <span class="k">if</span> <span class="n">devices_to_fetch</span> <span class="k">else</span> <span class="p">[]</span>
     <span class="c1"># ignore cache, fetch data from Netbox</span>
-    <span class="k">elif</span> <span class="n">cache</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;refresh&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">cache</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">"refresh"</span><span class="p">:</span>
         <span class="k">pass</span>  <span class="c1"># filters_to_fetch already set to all filters above</span>
 
     <span class="c1"># fetch full device data from Netbox</span>
     <span class="k">if</span> <span class="n">filters_to_fetch</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching device data from NetBox instance &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"fetching device data from NetBox instance '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
         <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
         <span class="n">all_devices_raw</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -7766,7 +7766,7 @@ nf#
             <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span> <span class="o">**</span><span class="n">filter_item</span><span class="p">):</span>
                 <span class="n">all_devices_raw</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
 
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_devices_raw</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from NetBox&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_devices_raw</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from NetBox"</span><span class="p">)</span>
 
         <span class="c1"># process devices data</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">all_devices_raw</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -7776,20 +7776,20 @@ nf#
                     <span class="n">sites_data</span><span class="p">[</span><span class="n">device</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
                         <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">sites</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">device</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
                     <span class="p">)</span>
-                <span class="n">device_data</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sites_data</span><span class="p">[</span><span class="n">device</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+                <span class="n">device_data</span><span class="p">[</span><span class="s2">"site"</span><span class="p">]</span> <span class="o">=</span> <span class="n">sites_data</span><span class="p">[</span><span class="n">device</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
                 <span class="c1"># cache device data</span>
                 <span class="k">if</span> <span class="n">cache</span> <span class="o">!=</span> <span class="kc">False</span><span class="p">:</span>
-                    <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;get_devices::</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"get_devices::</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">"</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">device_data</span><span class="p">,</span> <span class="n">expire</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_ttl</span><span class="p">)</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Cached device data for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Cached device data for '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">'"</span>
                     <span class="p">)</span>
-                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cached device data for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"cached device data for '</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
                 <span class="c1"># add device data to return result</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_data</span>
 
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - get_devices returning </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetched </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - get_devices returning </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)"</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"fetched </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>

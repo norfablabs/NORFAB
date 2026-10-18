@@ -7269,14 +7269,14 @@
 <li><code>pfxlen</code> - boolean, default is True, if False skips prefix length for IP addresses </li>
 </ul>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code>{{ &#39;192.168.1.0/30&#39; | network_hosts }}
+<div class="highlight"><pre><span></span><code>{{ '192.168.1.0/30' | network_hosts }}
 
-{{ &#39;192.168.2.0/30&#39; | network_hosts(pfxlen=False) }}
+{{ '192.168.2.0/30' | network_hosts(pfxlen=False) }}
 </code></pre></div>
 <p>Returns:</p>
-<div class="highlight"><pre><span></span><code><span class="p">[</span><span class="s2">&quot;192.168.1.1/30&quot;</span><span class="p">,</span> <span class="s2">&quot;192.168.1.2/30&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><span class="p">[</span><span class="s2">"192.168.1.1/30"</span><span class="p">,</span> <span class="s2">"192.168.1.2/30"</span><span class="p">]</span>
 
-<span class="p">[</span><span class="s2">&quot;192.168.2.1&quot;</span><span class="p">,</span> <span class="s2">&quot;192.168.2.2&quot;</span><span class="p">]</span>
+<span class="p">[</span><span class="s2">"192.168.2.1"</span><span class="p">,</span> <span class="s2">"192.168.2.2"</span><span class="p">]</span>
 </code></pre></div>
 <h2 id="netboxfilter">netbox.filter<a class="headerlink" href="#netboxfilter" title="Permanent link">¤</a></h2>
 <p><code>netbox.filter</code> reads objects through the NetBox <code>crud_read</code> task and returns a
@@ -7286,8 +7286,8 @@ NetBox filter arguments as keyword arguments.</p>
 <p>This configuration template retrieves <code>Loopback0</code> for the current host and
 renders its NetBox description:</p>
 <div class="highlight"><pre><span></span><code>{% set interfaces = netbox.filter(
-    &quot;dcim.interfaces&quot;, fields=[&quot;name&quot;, &quot;description&quot;],
-    device=host.name, name=&quot;Loopback0&quot;
+    "dcim.interfaces", fields=["name", "description"],
+    device=host.name, name="Loopback0"
 ) -%}
 {% for interface in interfaces %}
 interface {{ interface.name }}
@@ -7297,20 +7297,20 @@ interface {{ interface.name }}
 <p>The helper can also generate a test suite dynamically. This example creates one
 test for every interface assigned to the current device:</p>
 <div class="highlight"><pre><span></span><code>{% set interfaces = netbox.filter(
-    &quot;dcim.interfaces&quot;, fields=[&quot;name&quot;], device=host.name
+    "dcim.interfaces", fields=["name"], device=host.name
 ) -%}
 {% for interface in interfaces %}
-- task: &quot;show interfaces {{ interface.name }}&quot;
+- task: "show interfaces {{ interface.name }}"
   test: contains
-  pattern: &quot;{{ interface.name }}&quot;
-  name: &quot;Check {{ interface.name }} status&quot;
+  pattern: "{{ interface.name }}"
+  name: "Check {{ interface.name }} status"
 {% endfor %}
 </code></pre></div>
 <p>NetBox plugin resources use the three-part
 <code>plugins.&lt;plugin&gt;.&lt;resource&gt;</code> form. For example, the following retrieves BGP
 sessions assigned to the current host:</p>
 <div class="highlight"><pre><span></span><code>{% set sessions = netbox.filter(
-    &quot;plugins.bgp.session&quot;, device=host.name
+    "plugins.bgp.session", device=host.name
 ) -%}
 {% for session in sessions %}
 router bgp
@@ -7323,13 +7323,13 @@ router bgp
 a prefix recorded in Netbox:</p>
 <div class="highlight"><pre><span></span><code>{% for interface in host.interfaces %}
 interface {{ interface }}
-  ip address {{ &quot;10.0.0.0/24&quot; | netbox.create_ip(host.name, interface) }}
+  ip address {{ "10.0.0.0/24" | netbox.create_ip(host.name, interface) }}
 !
 {% endfor %}
 </code></pre></div>
 <p>Alternatively, <code>netbox.create_ip</code> can be called within <code>set</code> block to assign result to a variable:</p>
 <div class="highlight"><pre><span></span><code>{% for interface in host.interfaces %}
-{% set ip = netbox.create_ip(&quot;10.0.0.0/24&quot;, host.name, interface, description=&quot;Primary interface ip&quot;) %}
+{% set ip = netbox.create_ip("10.0.0.0/24", host.name, interface, description="Primary interface ip") %}
 interface {{ interface }}
   ip address {{ ip }}
 !
@@ -8369,16 +8369,16 @@ result is marked failed and includes any subnet probe errors.</p>
 <span class="normal">895</span>
 <span class="normal">896</span>
 <span class="normal">897</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateIpInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateIpResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Create IP Address&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Create IP Address"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -8406,7 +8406,7 @@ result is marked failed and includes any subnet probe errors.</p>
     <span class="n">custom_fields</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">vrrp_group</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Allocate the next available or indexed usable IP address from a subnet.</span>
 
 <span class="sd">    .. warning::</span>
@@ -8428,7 +8428,7 @@ result is marked failed and includes any subnet probe errors.</p>
 <span class="sd">            - IPv6 prefix string e.g. 2001::/64</span>
 <span class="sd">            - Prefix description string to filter by</span>
 <span class="sd">            - Dictionary with prefix filters to feed `pynetbox` filter method</span>
-<span class="sd">                e.g. `{&quot;prefix&quot;: &quot;10.0.0.0/24&quot;, &quot;site&quot;: &quot;foo&quot;, &quot;role&quot;: &quot;bar&quot;}`,</span>
+<span class="sd">                e.g. `{"prefix": "10.0.0.0/24", "site": "foo", "role": "bar"}`,</span>
 <span class="sd">                `site` accepts a site name and `role` accepts a role name</span>
 <span class="sd">                resolved to `role_id`. An unknown role name raises</span>
 <span class="sd">                `NetboxAllocationError`.</span>
@@ -8445,7 +8445,7 @@ result is marked failed and includes any subnet probe errors.</p>
 <span class="sd">        device (str, optional): The device associated with the IP address.</span>
 <span class="sd">        interface (str, optional): The interface associated with the IP address.</span>
 <span class="sd">        is_primary (bool, optional): If True, set the allocated IPv4 or IPv6</span>
-<span class="sd">            address as the device&#39;s primary IP, including when already assigned.</span>
+<span class="sd">            address as the device's primary IP, including when already assigned.</span>
 <span class="sd">        vrrp_group (str, optional): Existing VRRP group name to assign the IP to.</span>
 <span class="sd">            Must uniquely identify a VRRPv2 or VRRPv3 group. Reuses an IP assigned</span>
 <span class="sd">            to that group within the selected prefix, optionally matching description.</span>
@@ -8489,12 +8489,12 @@ result is marked failed and includes any subnet probe errors.</p>
 <span class="sd">        reuses the sole candidate, including anycast and VIP addresses.</span>
 <span class="sd">        Ambiguous candidates fail; no candidates proceeds to allocation.</span>
 
-<span class="sd">    2. If prefix is a string, determines if it&#39;s an IP network or a description.</span>
+<span class="sd">    2. If prefix is a string, determines if it's an IP network or a description.</span>
 <span class="sd">        Builds a filter dictionary for NetBox queries, optionally including VRF.</span>
 
 <span class="sd">    3. Queries NetBox for the prefix using the constructed filter.</span>
 
-<span class="sd">    4. If dry_run is True, fetches the next available IP but doesn&#39;t create it.</span>
+<span class="sd">    4. If dry_run is True, fetches the next available IP but doesn't create it.</span>
 
 <span class="sd">    5. If not a dry run, creates the next available IP in the prefix.</span>
 
@@ -8503,12 +8503,12 @@ result is marked failed and includes any subnet probe errors.</p>
 <span class="sd">        can set the IP as primary for the device.</span>
 
 <span class="sd">    7. If changes were made and not a dry run, saves the IP and device updates to NetBox.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Create IP: Allocating IP from &#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&#39; for &#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">&#39; in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; Netbox&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Create IP: Allocating IP from '</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">' for '</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">' in '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">' Netbox"</span>
     <span class="p">)</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_ip&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{},</span> <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">])</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_ip"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{},</span> <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">])</span>
     <span class="n">tags</span> <span class="o">=</span> <span class="n">tags</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">nb_ip</span> <span class="o">=</span> <span class="kc">None</span>
@@ -8516,8 +8516,8 @@ result is marked failed and includes any subnet probe errors.</p>
     <span class="n">create_peer_ip_data</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;creating IP address in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; for &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">&#39; from prefix &#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&#39;, dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"creating IP address in '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">' for "</span>
+        <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">' from prefix '</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">', dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
 
     <span class="n">nb_vrrp_group</span> <span class="o">=</span> <span class="kc">None</span>
@@ -8525,16 +8525,16 @@ result is marked failed and includes any subnet probe errors.</p>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">nb_vrrp_group</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">fhrp_groups</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">vrrp_group</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_vrrp_group</span> <span class="ow">or</span> <span class="n">nb_vrrp_group</span><span class="o">.</span><span class="n">protocol</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>
-                <span class="s2">&quot;vrrp2&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;vrrp3&quot;</span><span class="p">,</span>
+                <span class="s2">"vrrp2"</span><span class="p">,</span>
+                <span class="s2">"vrrp3"</span><span class="p">,</span>
             <span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;expected an existing VRRPv2 or VRRPv3 group&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"expected an existing VRRPv2 or VRRPv3 group"</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Unable to resolve VRRP group &#39;</span><span class="si">{</span><span class="n">vrrp_group</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"Unable to resolve VRRP group '</span><span class="si">{</span><span class="n">vrrp_group</span><span class="si">}</span><span class="s2">': </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
         <span class="n">create_peer_ip</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">role</span> <span class="o">=</span> <span class="n">role</span> <span class="ow">or</span> <span class="s2">&quot;vrrp&quot;</span>
+        <span class="n">role</span> <span class="o">=</span> <span class="n">role</span> <span class="ow">or</span> <span class="s2">"vrrp"</span>
 
     <span class="c1"># source parent prefix from Netbox</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -8545,48 +8545,48 @@ result is marked failed and includes any subnet probe errors.</p>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="n">is_network</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">is_network</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">vrf</span><span class="p">:</span>
-            <span class="n">prefix</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;vrf__name&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"prefix"</span><span class="p">:</span> <span class="n">prefix</span><span class="p">,</span> <span class="s2">"vrf__name"</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">is_network</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">prefix</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">prefix</span><span class="p">}</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"prefix"</span><span class="p">:</span> <span class="n">prefix</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">is_network</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">vrf</span><span class="p">:</span>
-            <span class="n">prefix</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;vrf__name&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"description"</span><span class="p">:</span> <span class="n">prefix</span><span class="p">,</span> <span class="s2">"vrf__name"</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">is_network</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="n">prefix</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">prefix</span><span class="p">}</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"description"</span><span class="p">:</span> <span class="n">prefix</span><span class="p">}</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="n">prefix</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
-        <span class="n">prefix_site</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;site&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">prefix_site</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"site"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">prefix_site</span><span class="p">:</span>
             <span class="n">nb_site</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">sites</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">prefix_site</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_site</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Failed to get parent prefix site &#39;</span><span class="si">{</span><span class="n">prefix_site</span><span class="si">}</span><span class="s2">&#39; from NetBox&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Failed to get parent prefix site '</span><span class="si">{</span><span class="n">prefix_site</span><span class="si">}</span><span class="s2">' from NetBox"</span>
                 <span class="p">)</span>
-            <span class="n">prefix</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">scope_type</span><span class="o">=</span><span class="s2">&quot;dcim.site&quot;</span><span class="p">,</span> <span class="n">scope_id</span><span class="o">=</span><span class="n">nb_site</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="c1"># NetBox&#39;s prefix filter accepts role slugs or role_id, not role names.</span>
-        <span class="c1"># Resolve the task&#39;s role-name input to an ID before filtering prefixes.</span>
-        <span class="n">prefix_role</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">prefix</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">scope_type</span><span class="o">=</span><span class="s2">"dcim.site"</span><span class="p">,</span> <span class="n">scope_id</span><span class="o">=</span><span class="n">nb_site</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="c1"># NetBox's prefix filter accepts role slugs or role_id, not role names.</span>
+        <span class="c1"># Resolve the task's role-name input to an ID before filtering prefixes.</span>
+        <span class="n">prefix_role</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"role"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">prefix_role</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">nb_role</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">roles</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">prefix_role</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_role</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Failed to get parent prefix role &#39;</span><span class="si">{</span><span class="n">prefix_role</span><span class="si">}</span><span class="s2">&#39; from NetBox&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Failed to get parent prefix role '</span><span class="si">{</span><span class="n">prefix_role</span><span class="si">}</span><span class="s2">' from NetBox"</span>
                 <span class="p">)</span>
-            <span class="n">prefix</span><span class="p">[</span><span class="s2">&quot;role_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_role</span><span class="o">.</span><span class="n">id</span>
+            <span class="n">prefix</span><span class="p">[</span><span class="s2">"role_id"</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_role</span><span class="o">.</span><span class="n">id</span>
     <span class="n">nb_prefixes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="p">,</span> <span class="o">**</span><span class="n">prefix</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_prefixes</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Unable to source parent prefix from Netbox - </span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"Unable to source parent prefix from Netbox - </span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
     <span class="c1"># try to source existing IP from netbox</span>
     <span class="k">for</span> <span class="n">nb_prefix</span> <span class="ow">in</span> <span class="n">nb_prefixes</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">nb_vrrp_group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">filters</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;assigned_object_type&quot;</span><span class="p">:</span> <span class="s2">&quot;ipam.fhrpgroup&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;assigned_object_id&quot;</span><span class="p">:</span> <span class="n">nb_vrrp_group</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-                <span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">),</span>
+                <span class="s2">"assigned_object_type"</span><span class="p">:</span> <span class="s2">"ipam.fhrpgroup"</span><span class="p">,</span>
+                <span class="s2">"assigned_object_id"</span><span class="p">:</span> <span class="n">nb_vrrp_group</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="s2">"parent"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">),</span>
             <span class="p">}</span>
             <span class="k">if</span> <span class="n">description</span><span class="p">:</span>
-                <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">description</span>
+                <span class="n">filters</span><span class="p">[</span><span class="s2">"description"</span><span class="p">]</span> <span class="o">=</span> <span class="n">description</span>
             <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">filters</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">device</span> <span class="ow">and</span> <span class="n">interface</span><span class="p">:</span>
             <span class="n">candidates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
@@ -8602,8 +8602,8 @@ result is marked failed and includes any subnet probe errors.</p>
                     <span class="n">candidates</span> <span class="o">=</span> <span class="n">matching</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Multiple IP addresses match &#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;within prefix &#39;</span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">&#39; with description preference &#39;</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Multiple IP addresses match '</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">' "</span>
+                    <span class="sa">f</span><span class="s2">"within prefix '</span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">' with description preference '</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s2">'"</span>
                 <span class="p">)</span>
             <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">candidates</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">elif</span> <span class="n">description</span><span class="p">:</span>
@@ -8616,7 +8616,7 @@ result is marked failed and includes any subnet probe errors.</p>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">allocation_errors</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">nb_prefix</span> <span class="ow">in</span> <span class="n">nb_prefixes</span><span class="p">:</span>
-            <span class="n">parent_prefix_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">parent_prefix_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">ip_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">break</span>
             <span class="c1"># check if can create child subnet in prefix</span>
@@ -8630,10 +8630,10 @@ result is marked failed and includes any subnet probe errors.</p>
                         <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
                         <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                     <span class="p">)</span>
-                    <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">failed</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">candidate</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prefix&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">failed</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">candidate</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"prefix"</span><span class="p">):</span>
                         <span class="k">break</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;error checking available /</span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2"> subnet in &#39;</span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">&#39; - </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"error checking available /</span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2"> subnet in '</span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">' - </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                     <span class="n">allocation_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                     <span class="k">continue</span>
@@ -8642,7 +8642,7 @@ result is marked failed and includes any subnet probe errors.</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">allocation_errors</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;No subnets of </span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2"> length or IPs available in parent prefix - </span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"No subnets of </span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2"> length or IPs available in parent prefix - </span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span> <span class="n">ret</span>
@@ -8669,14 +8669,14 @@ result is marked failed and includes any subnet probe errors.</p>
             <span class="k">if</span> <span class="n">interface</span> <span class="ow">in</span> <span class="n">connection</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">]:</span>
                 <span class="n">peer</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="n">interface</span><span class="p">]</span>
                 <span class="c1"># do not process breakout cables</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">peer</span><span class="p">[</span><span class="s2">&quot;remote_interface&quot;</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
-                    <span class="n">peer</span><span class="p">[</span><span class="s2">&quot;remote_interface&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">peer</span><span class="p">[</span><span class="s2">"remote_interface"</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="n">peer</span><span class="p">[</span><span class="s2">"remote_interface"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="c1"># try to source peer ip subnet</span>
                 <span class="n">nb_peer_ip</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="k">if</span> <span class="n">peer</span><span class="p">[</span><span class="s2">&quot;remote_device&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">peer</span><span class="p">[</span><span class="s2">&quot;remote_interface&quot;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">peer</span><span class="p">[</span><span class="s2">"remote_device"</span><span class="p">]</span> <span class="ow">and</span> <span class="n">peer</span><span class="p">[</span><span class="s2">"remote_interface"</span><span class="p">]:</span>
                     <span class="n">nb_peer_ip</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                        <span class="n">device</span><span class="o">=</span><span class="n">peer</span><span class="p">[</span><span class="s2">&quot;remote_device&quot;</span><span class="p">],</span>
-                        <span class="n">interface</span><span class="o">=</span><span class="n">peer</span><span class="p">[</span><span class="s2">&quot;remote_interface&quot;</span><span class="p">],</span>
+                        <span class="n">device</span><span class="o">=</span><span class="n">peer</span><span class="p">[</span><span class="s2">"remote_device"</span><span class="p">],</span>
+                        <span class="n">interface</span><span class="o">=</span><span class="n">peer</span><span class="p">[</span><span class="s2">"remote_interface"</span><span class="p">],</span>
                         <span class="n">parent</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">),</span>
                     <span class="p">)</span>
                 <span class="c1"># try to source peer ip subnet</span>
@@ -8687,36 +8687,36 @@ result is marked failed and includes any subnet probe errors.</p>
                         <span class="n">prefix</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">peer_ip</span><span class="o">.</span><span class="n">network</span><span class="p">),</span>
                         <span class="n">vrf__name</span><span class="o">=</span><span class="n">vrf</span><span class="p">,</span>
                     <span class="p">)</span>
-                <span class="k">elif</span> <span class="n">create_peer_ip</span> <span class="ow">and</span> <span class="n">peer</span><span class="p">[</span><span class="s2">&quot;remote_interface&quot;</span><span class="p">]:</span>
+                <span class="k">elif</span> <span class="n">create_peer_ip</span> <span class="ow">and</span> <span class="n">peer</span><span class="p">[</span><span class="s2">"remote_interface"</span><span class="p">]:</span>
                     <span class="n">create_peer_ip_data</span> <span class="o">=</span> <span class="p">{</span>
-                        <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">peer</span><span class="p">[</span><span class="s2">&quot;remote_device&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">peer</span><span class="p">[</span><span class="s2">&quot;remote_interface&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">,</span>
-                        <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="n">branch</span><span class="p">,</span>
-                        <span class="s2">&quot;tenant&quot;</span><span class="p">:</span> <span class="n">tenant</span><span class="p">,</span>
-                        <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="n">dry_run</span><span class="p">,</span>
-                        <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="n">tags</span><span class="p">,</span>
-                        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">status</span><span class="p">,</span>
-                        <span class="s2">&quot;create_peer_ip&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                        <span class="s2">&quot;instance&quot;</span><span class="p">:</span> <span class="n">instance</span><span class="p">,</span>
-                        <span class="s2">&quot;mask_len&quot;</span><span class="p">:</span> <span class="n">mask_len</span><span class="p">,</span>
+                        <span class="s2">"device"</span><span class="p">:</span> <span class="n">peer</span><span class="p">[</span><span class="s2">"remote_device"</span><span class="p">],</span>
+                        <span class="s2">"interface"</span><span class="p">:</span> <span class="n">peer</span><span class="p">[</span><span class="s2">"remote_interface"</span><span class="p">],</span>
+                        <span class="s2">"vrf"</span><span class="p">:</span> <span class="n">vrf</span><span class="p">,</span>
+                        <span class="s2">"branch"</span><span class="p">:</span> <span class="n">branch</span><span class="p">,</span>
+                        <span class="s2">"tenant"</span><span class="p">:</span> <span class="n">tenant</span><span class="p">,</span>
+                        <span class="s2">"dry_run"</span><span class="p">:</span> <span class="n">dry_run</span><span class="p">,</span>
+                        <span class="s2">"tags"</span><span class="p">:</span> <span class="n">tags</span><span class="p">,</span>
+                        <span class="s2">"status"</span><span class="p">:</span> <span class="n">status</span><span class="p">,</span>
+                        <span class="s2">"create_peer_ip"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="s2">"instance"</span><span class="p">:</span> <span class="n">instance</span><span class="p">,</span>
+                        <span class="s2">"mask_len"</span><span class="p">:</span> <span class="n">mask_len</span><span class="p">,</span>
                     <span class="p">}</span>
                 <span class="c1"># use peer subnet to create IP address</span>
                 <span class="k">if</span> <span class="n">nb_peer_prefix</span><span class="p">:</span>
                     <span class="n">nb_prefix</span> <span class="o">=</span> <span class="n">nb_peer_prefix</span>
                     <span class="n">mask_len</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># cancel subnet creation</span>
                     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;using link peer &#39;</span><span class="si">{</span><span class="n">peer</span><span class="p">[</span><span class="s1">&#39;remote_device&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">peer</span><span class="p">[</span><span class="s1">&#39;remote_interface&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;prefix &#39;</span><span class="si">{</span><span class="n">nb_peer_prefix</span><span class="si">}</span><span class="s2">&#39; to create IP address&quot;</span>
+                        <span class="sa">f</span><span class="s2">"using link peer '</span><span class="si">{</span><span class="n">peer</span><span class="p">[</span><span class="s1">'remote_device'</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">peer</span><span class="p">[</span><span class="s1">'remote_interface'</span><span class="p">]</span><span class="si">}</span><span class="s2">' "</span>
+                        <span class="sa">f</span><span class="s2">"prefix '</span><span class="si">{</span><span class="n">nb_peer_prefix</span><span class="si">}</span><span class="s2">' to create IP address"</span>
                     <span class="p">)</span>
         <span class="c1"># if mask_len provided create new subnet</span>
         <span class="k">if</span> <span class="n">mask_len</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dry_run</span> <span class="ow">and</span> <span class="n">mask_len</span> <span class="o">!=</span> <span class="n">parent_prefix_len</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">mask_len</span> <span class="o">&lt;</span> <span class="n">parent_prefix_len</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Mask length &#39;</span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2">&#39; must be longer then &#39;</span><span class="si">{</span><span class="n">parent_prefix_len</span><span class="si">}</span><span class="s2">&#39; prefix length&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Mask length '</span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2">' must be longer then '</span><span class="si">{</span><span class="n">parent_prefix_len</span><span class="si">}</span><span class="s2">' prefix length"</span>
                 <span class="p">)</span>
             <span class="n">prefix_status</span> <span class="o">=</span> <span class="n">status</span>
-            <span class="k">if</span> <span class="n">prefix_status</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="s2">&quot;reserved&quot;</span><span class="p">,</span> <span class="s2">&quot;deprecated&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">prefix_status</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"active"</span><span class="p">,</span> <span class="s2">"reserved"</span><span class="p">,</span> <span class="s2">"deprecated"</span><span class="p">]:</span>
                 <span class="n">prefix_status</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="c1"># find next available subnet with available IPs</span>
             <span class="k">while</span> <span class="ow">not</span> <span class="n">job</span><span class="o">.</span><span class="n">is_timed_out</span><span class="p">():</span>
@@ -8733,29 +8733,29 @@ result is marked failed and includes any subnet probe errors.</p>
                 <span class="p">)</span>
                 <span class="k">if</span> <span class="n">child_subnet</span><span class="o">.</span><span class="n">failed</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Unable to create child subnet of mask length &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2">&#39; inside &#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&#39; parent prefix&quot;</span>
+                        <span class="sa">f</span><span class="s2">"Unable to create child subnet of mask length "</span>
+                        <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2">' inside '</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">' parent prefix"</span>
                     <span class="p">)</span>
 
-                <span class="n">child_prefix</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">child_subnet</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]}</span>
+                <span class="n">child_prefix</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"prefix"</span><span class="p">:</span> <span class="n">child_subnet</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"prefix"</span><span class="p">]}</span>
                 <span class="k">if</span> <span class="n">vrf</span><span class="p">:</span>
-                    <span class="n">child_prefix</span><span class="p">[</span><span class="s2">&quot;vrf__name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrf</span>
+                    <span class="n">child_prefix</span><span class="p">[</span><span class="s2">"vrf__name"</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrf</span>
                 <span class="n">nb_child_prefix</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">child_prefix</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_child_prefix</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Unable to source child prefix of mask length &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2">&#39; from &#39;</span><span class="si">{</span><span class="n">child_prefix</span><span class="si">}</span><span class="s2">&#39; parent prefix&quot;</span>
+                        <span class="sa">f</span><span class="s2">"Unable to source child prefix of mask length "</span>
+                        <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2">' from '</span><span class="si">{</span><span class="n">child_prefix</span><span class="si">}</span><span class="s2">' parent prefix"</span>
                     <span class="p">)</span>
 
                 <span class="c1"># check how many IPs available in child prefix</span>
                 <span class="n">available_ip_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nb_child_prefix</span><span class="o">.</span><span class="n">available_ips</span><span class="o">.</span><span class="n">list</span><span class="p">())</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">available_ip_count</span><span class="p">:</span>
-                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nb_child_prefix</span><span class="si">}</span><span class="s2"> - created child prefix but it has no available IPs, continue&quot;</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">nb_child_prefix</span><span class="si">}</span><span class="s2"> - created child prefix but it has no available IPs, continue"</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="k">elif</span> <span class="n">create_peer_ip</span> <span class="ow">and</span> <span class="n">available_ip_count</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nb_child_prefix</span><span class="si">}</span><span class="s2"> - created child prefix but it has less than 2 available IPs, create peer ip is True, need two IPs, continue&quot;</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">nb_child_prefix</span><span class="si">}</span><span class="s2"> - created child prefix but it has less than 2 available IPs, create peer ip is True, need two IPs, continue"</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -8763,8 +8763,8 @@ result is marked failed and includes any subnet probe errors.</p>
                     <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Unable to find a child subnet of mask length &#39;</span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;with sufficient available IPs inside &#39;</span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">&#39;, vrf &#39;</span><span class="si">{</span><span class="n">vrf</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Unable to find a child subnet of mask length '</span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2">' "</span>
+                    <span class="sa">f</span><span class="s2">"with sufficient available IPs inside '</span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">', vrf '</span><span class="si">{</span><span class="n">vrf</span><span class="si">}</span><span class="s2">'"</span>
                 <span class="p">)</span>
         <span class="k">if</span> <span class="n">ip_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">network</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_network</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">))</span>
@@ -8774,24 +8774,24 @@ result is marked failed and includes any subnet probe errors.</p>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">selected_ip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;ip_index </span><span class="si">{</span><span class="n">ip_index</span><span class="si">}</span><span class="s2"> exceeds the usable IPs in </span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"ip_index </span><span class="si">{</span><span class="n">ip_index</span><span class="si">}</span><span class="s2"> exceeds the usable IPs in </span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
-            <span class="n">address</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">selected_ip</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">network</span><span class="o">.</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">address</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">selected_ip</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">network</span><span class="o">.</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">"</span>
             <span class="n">existing_ip</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">):</span>
-                <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">vrf</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="n">vrf</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">vrf</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="n">vrf</span><span class="p">:</span>
                     <span class="n">existing_ip</span> <span class="o">=</span> <span class="n">ip</span>
                     <span class="k">break</span>
-            <span class="k">if</span> <span class="n">existing_ip</span> <span class="ow">and</span> <span class="n">role</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;anycast&quot;</span><span class="p">,</span> <span class="s2">&quot;vip&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">existing_ip</span> <span class="ow">and</span> <span class="n">role</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"anycast"</span><span class="p">,</span> <span class="s2">"vip"</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;cannot create IP address </span><span class="si">{</span><span class="n">address</span><span class="si">}</span><span class="s2">: it already exists&quot;</span>
+                    <span class="sa">f</span><span class="s2">"cannot create IP address </span><span class="si">{</span><span class="n">address</span><span class="si">}</span><span class="s2">: it already exists"</span>
                 <span class="p">)</span>
             <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
                 <span class="n">preview_address</span> <span class="o">=</span> <span class="n">address</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">existing_ip</span> <span class="ow">and</span> <span class="n">existing_ip</span><span class="o">.</span><span class="n">role</span> <span class="o">!=</span> <span class="n">role</span><span class="p">:</span>
                     <span class="c1"># NetBox requires the existing record to have a shared role.</span>
-                    <span class="n">existing_ip</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="n">role</span><span class="p">})</span>
+                    <span class="n">existing_ip</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">"role"</span><span class="p">:</span> <span class="n">role</span><span class="p">})</span>
                 <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
@@ -8800,70 +8800,70 @@ result is marked failed and includes any subnet probe errors.</p>
                 <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">available_ips</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;unchanged&quot;</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"unchanged"</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="n">preview_address</span><span class="p">,</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
-                <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">,</span>
-                <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span>
-                <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">interface</span><span class="p">,</span>
+                <span class="s2">"address"</span><span class="p">:</span> <span class="n">preview_address</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
+                <span class="s2">"vrf"</span><span class="p">:</span> <span class="n">vrf</span><span class="p">,</span>
+                <span class="s2">"device"</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span>
+                <span class="s2">"interface"</span><span class="p">:</span> <span class="n">interface</span><span class="p">,</span>
             <span class="p">}</span>
             <span class="k">if</span> <span class="n">vrrp_group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;vrrp_group&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrrp_group</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"vrrp_group"</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrrp_group</span>
             <span class="c1"># add branch to results</span>
             <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;branch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dry-run: would create IP address &#39;</span><span class="si">{</span><span class="n">preview_address</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"branch"</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"dry-run: would create IP address '</span><span class="si">{</span><span class="n">preview_address</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;created &#39;</span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2">&#39; IP address for &#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">&#39; within &#39;</span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">&#39; prefix&quot;</span>
+            <span class="sa">f</span><span class="s2">"created '</span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2">' IP address for '</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">' within '</span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">' prefix"</span>
         <span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;created&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"created"</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;using existing IP address </span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;updated&quot;</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"using existing IP address </span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"updated"</span>
 
     <span class="c1"># update IP address parameters</span>
     <span class="k">if</span> <span class="n">nb_vrrp_group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
-        <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">!=</span> <span class="s2">&quot;ipam.fhrpgroup&quot;</span>
+        <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">!=</span> <span class="s2">"ipam.fhrpgroup"</span>
         <span class="ow">or</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_id</span> <span class="o">!=</span> <span class="n">nb_vrrp_group</span><span class="o">.</span><span class="n">id</span>
     <span class="p">):</span>
-        <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">=</span> <span class="s2">&quot;ipam.fhrpgroup&quot;</span>
+        <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">=</span> <span class="s2">"ipam.fhrpgroup"</span>
         <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_id</span> <span class="o">=</span> <span class="n">nb_vrrp_group</span><span class="o">.</span><span class="n">id</span>
         <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">custom_fields</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">reference_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">,</span>
-            <span class="n">object_type</span><span class="o">=</span><span class="s2">&quot;ipam.ipaddress&quot;</span><span class="p">,</span>
-            <span class="nb">type</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;multiobject&quot;</span><span class="p">],</span>
+            <span class="n">object_type</span><span class="o">=</span><span class="s2">"ipam.ipaddress"</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="p">[</span><span class="s2">"object"</span><span class="p">,</span> <span class="s2">"multiobject"</span><span class="p">],</span>
         <span class="p">)</span>
-        <span class="c1"># The helper converts NetBox&#39;s reference objects to writeable IDs</span>
+        <span class="c1"># The helper converts NetBox's reference objects to writeable IDs</span>
         <span class="c1"># and adds new list values without duplicating existing ones.</span>
         <span class="n">current_fields</span><span class="p">,</span> <span class="n">merged_fields</span> <span class="o">=</span> <span class="n">merge_resolved_custom_fields</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">nb</span><span class="p">,</span>
             <span class="n">nb_ip</span><span class="p">,</span>
             <span class="n">custom_fields</span><span class="p">,</span>
-            <span class="p">[</span><span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">"object"</span><span class="p">],</span>
             <span class="p">[</span>
                 <span class="n">field</span>
                 <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span>
-                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;multiobject&quot;</span>
+                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">"multiobject"</span>
             <span class="p">],</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">merged_fields</span> <span class="o">!=</span> <span class="n">current_fields</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
-                <span class="n">nb_ip</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">:</span> <span class="n">merged_fields</span><span class="p">})</span>
+                <span class="n">nb_ip</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">"custom_fields"</span><span class="p">:</span> <span class="n">merged_fields</span><span class="p">})</span>
             <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">description</span> <span class="ow">and</span> <span class="n">description</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
         <span class="n">nb_ip</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
         <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">vrf</span> <span class="ow">and</span> <span class="n">vrf</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">vrf</span><span class="p">:</span>
-        <span class="n">nb_ip</span><span class="o">.</span><span class="n">vrf</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
+        <span class="n">nb_ip</span><span class="o">.</span><span class="n">vrf</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
         <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">if</span> <span class="n">tenant</span> <span class="ow">and</span> <span class="n">tenant</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">nb_ip</span><span class="o">.</span><span class="n">tenant</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="n">nb_ip</span><span class="o">.</span><span class="n">tenant</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tenant</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">tenant</span> <span class="ow">and</span> <span class="n">tenant</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">nb_ip</span><span class="o">.</span><span class="n">tenant</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">nb_ip</span><span class="o">.</span><span class="n">tenant</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">tenant</span><span class="p">}</span>
         <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">dns_name</span> <span class="ow">and</span> <span class="n">dns_name</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">dns_name</span><span class="p">:</span>
         <span class="n">nb_ip</span><span class="o">.</span><span class="n">dns_name</span> <span class="o">=</span> <span class="n">dns_name</span>
@@ -8871,31 +8871,31 @@ result is marked failed and includes any subnet probe errors.</p>
     <span class="k">if</span> <span class="n">comments</span> <span class="ow">and</span> <span class="n">comments</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">comments</span><span class="p">:</span>
         <span class="n">nb_ip</span><span class="o">.</span><span class="n">comments</span> <span class="o">=</span> <span class="n">comments</span>
         <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">if</span> <span class="n">role</span> <span class="ow">and</span> <span class="n">role</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">nb_ip</span><span class="o">.</span><span class="n">role</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">role</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">role</span> <span class="ow">and</span> <span class="n">role</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">nb_ip</span><span class="o">.</span><span class="n">role</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">,</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">role</span><span class="p">):</span>
         <span class="n">nb_ip</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="n">role</span>
         <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">if</span> <span class="n">status</span> <span class="ow">and</span> <span class="n">status</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">nb_ip</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">status</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">status</span> <span class="ow">and</span> <span class="n">status</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">nb_ip</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">,</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">status</span><span class="p">):</span>
         <span class="n">nb_ip</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">status</span>
         <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">tags</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">t</span> <span class="ow">in</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">tags</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">tags</span><span class="p">:</span>
-                <span class="n">nb_ip</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">t</span><span class="p">})</span>
+                <span class="n">nb_ip</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">t</span><span class="p">})</span>
                 <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">device</span> <span class="ow">and</span> <span class="n">interface</span><span class="p">:</span>
         <span class="n">nb_interface</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">interface</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_interface</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Unable to source &#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">&#39; interface from Netbox&quot;</span>
+                <span class="sa">f</span><span class="s2">"Unable to source '</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">' interface from Netbox"</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object</span> <span class="ow">or</span> <span class="p">(</span>
             <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="n">nb_interface</span><span class="o">.</span><span class="n">id</span>
         <span class="p">):</span>
             <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_id</span> <span class="o">=</span> <span class="n">nb_interface</span><span class="o">.</span><span class="n">id</span>
-            <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">=</span> <span class="s2">&quot;dcim.interface&quot;</span>
+            <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">=</span> <span class="s2">"dcim.interface"</span>
             <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">nb_interface</span><span class="si">}</span><span class="s2"> - association </span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2"> IP address with interface&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">nb_interface</span><span class="si">}</span><span class="s2"> - association </span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2"> IP address with interface"</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">is_primary</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">device_record</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
@@ -8912,42 +8912,42 @@ result is marked failed and includes any subnet probe errors.</p>
             <span class="p">):</span>
                 <span class="n">device_record</span><span class="o">.</span><span class="n">primary_ip6</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">id</span>
                 <span class="n">nb_device</span> <span class="o">=</span> <span class="n">device_record</span>
-    <span class="k">if</span> <span class="n">mask_len</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
-        <span class="n">address</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">nb_ip</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">address</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">if</span> <span class="n">mask_len</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">"/</span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2">"</span><span class="p">):</span>
+        <span class="n">address</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">nb_ip</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">address</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2">"</span>
         <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="c1"># save IP address into Netbox</span>
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;unchanged&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"unchanged"</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">elif</span> <span class="n">has_changes</span> <span class="ow">or</span> <span class="n">nb_device</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">has_changes</span><span class="p">:</span>
             <span class="n">nb_ip</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updated &#39;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39; IP address parameters&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"updated '</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">)</span><span class="si">}</span><span class="s2">' IP address parameters"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">nb_device</span><span class="p">:</span>
             <span class="n">nb_device</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="s2">&quot;created&quot;</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;unchanged&quot;</span>
+    <span class="k">elif</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="s2">"created"</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"unchanged"</span>
 
     <span class="c1"># form and return results</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">),</span>
-        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="o">.</span><span class="n">description</span><span class="p">),</span>
-        <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="o">.</span><span class="n">vrf</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">vrf</span> <span class="k">else</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">vrf</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span>
-        <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">interface</span><span class="p">,</span>
+        <span class="s2">"address"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">),</span>
+        <span class="s2">"description"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="o">.</span><span class="n">description</span><span class="p">),</span>
+        <span class="s2">"vrf"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="o">.</span><span class="n">vrf</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">vrf</span> <span class="k">else</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">vrf</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span>
+        <span class="s2">"device"</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span>
+        <span class="s2">"interface"</span><span class="p">:</span> <span class="n">interface</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="k">if</span> <span class="n">vrrp_group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;vrrp_group&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrrp_group</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"vrrp_group"</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrrp_group</span>
     <span class="c1"># add branch to results</span>
     <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;branch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"branch"</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch</span>
 
     <span class="c1"># create IP address for peer</span>
     <span class="k">if</span> <span class="n">create_peer_ip</span> <span class="ow">and</span> <span class="n">create_peer_ip_data</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;creating IP address for link peer &#39;</span><span class="si">{</span><span class="n">create_peer_ip_data</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">create_peer_ip_data</span><span class="p">[</span><span class="s1">&#39;interface&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="sa">f</span><span class="s2">"creating IP address for link peer '</span><span class="si">{</span><span class="n">create_peer_ip_data</span><span class="p">[</span><span class="s1">'device'</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">create_peer_ip_data</span><span class="p">[</span><span class="s1">'interface'</span><span class="p">]</span><span class="si">}</span><span class="s2">'"</span>
         <span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">peer_ip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_ip</span><span class="p">(</span>
@@ -8955,18 +8955,18 @@ result is marked failed and includes any subnet probe errors.</p>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;failed to allocate link peer IP: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">; local IP &#39;</span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2">&#39; may already be allocated&quot;</span>
+                <span class="sa">f</span><span class="s2">"failed to allocate link peer IP: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">; local IP '</span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2">' may already be allocated"</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">peer_ip</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;failed to allocate link peer IP; local IP &#39;</span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2">&#39; may already be allocated&quot;</span>
+                    <span class="sa">f</span><span class="s2">"failed to allocate link peer IP; local IP '</span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2">' may already be allocated"</span>
                 <span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">peer_ip</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;peer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peer_ip</span><span class="o">.</span><span class="n">result</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"peer"</span><span class="p">]</span> <span class="o">=</span> <span class="n">peer_ip</span><span class="o">.</span><span class="n">result</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;IP address task complete for &#39;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"IP address task complete for '</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">)</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8983,9 +8983,9 @@ a parent prefix recorded in Netbox:</p>
 <div class="highlight"><pre><span></span><code>{% set connections = netbox.get_connections(devices=[host.name]) -%}
 
 {% for interface, connection in connections.items() -%}
-{% set subnet_description = [host.name + &quot;:&quot; + interface, connection[&quot;remote_device&quot;] + &quot;:&quot; + connection[&quot;remote_interface&quot;]] | sort | join(&quot; - ptp - &quot;) -%}
+{% set subnet_description = [host.name + ":" + interface, connection["remote_device"] + ":" + connection["remote_interface"]] | sort | join(" - ptp - ") -%}
 interface {{ interface }}
-  ip address {{ &quot;10.1.0.0/24&quot; | netbox.create_prefix(subnet_description, 30) | netbox.create_ip(host.name, interface) }}
+  ip address {{ "10.1.0.0/24" | netbox.create_prefix(subnet_description, 30) | netbox.create_ip(host.name, interface) }}
 !
 {% endfor %}
 </code></pre></div>
@@ -8994,8 +8994,8 @@ interface {{ interface }}
 <div class="highlight"><pre><span></span><code>{% set connections = netbox.get_connections(devices=[host.name]) -%}
 
 {% for interface, connection in connections.items() -%}
-{% set subnet_description = [host.name + &quot;:&quot; + interface, connection[&quot;remote_device&quot;] + &quot;:&quot; + connection[&quot;remote_interface&quot;]] | sort | join(&quot; - ptp - &quot;) -%}
-{% set ip = netbox.create_prefix(&quot;10.1.0.0/24&quot;, subnet_description, 30) | netbox.create_ip(host.name, interface) %}
+{% set subnet_description = [host.name + ":" + interface, connection["remote_device"] + ":" + connection["remote_interface"]] | sort | join(" - ptp - ") -%}
+{% set ip = netbox.create_prefix("10.1.0.0/24", subnet_description, 30) | netbox.create_ip(host.name, interface) %}
 interface {{ interface }}
   ip address {{ ip }}
 !
@@ -9736,14 +9736,14 @@ a different length. VLAN lookup failures occur before allocation.</p>
 <span class="normal">391</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreatePrefixInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreatePrefixResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Create Prefix&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Create Prefix"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -9767,7 +9767,7 @@ a different length. VLAN lookup failures occur before allocation.</p>
     <span class="n">vlan</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">vlan_group</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Creates a new IP prefix in NetBox or updates an existing one.</span>
 
 <span class="sd">    Args:</span>
@@ -9778,7 +9778,7 @@ a different length. VLAN lookup failures occur before allocation.</p>
 <span class="sd">            - IPv6 prefix string e.g. 2001::/64</span>
 <span class="sd">            - Prefix description string to filter by</span>
 <span class="sd">            - Dictionary with prefix filters for `pynetbox` prefixes.get method</span>
-<span class="sd">                e.g. `{&quot;prefix&quot;: &quot;10.0.0.0/24&quot;, &quot;site&quot;: &quot;foo&quot;}`</span>
+<span class="sd">                e.g. `{"prefix": "10.0.0.0/24", "site": "foo"}`</span>
 
 <span class="sd">        custom_fields (dict, optional): Custom-field names and values to PATCH</span>
 <span class="sd">            on the allocated prefix. New list items are added to existing</span>
@@ -9809,21 +9809,21 @@ a different length. VLAN lookup failures occur before allocation.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: Prefix details, status, resources, and changed fields. VLAN</span>
-<span class="sd">            changes use old/new &quot;VID (ID)&quot; values in diff[&quot;vlan&quot;]. Dry runs</span>
+<span class="sd">            changes use old/new "VID (ID)" values in diff["vlan"]. Dry runs</span>
 <span class="sd">            report the planned association without writing it.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        NetboxAllocationError: The parent or requested VLAN/group cannot be</span>
 <span class="sd">            resolved uniquely, allocation fails, or an existing prefix has</span>
 <span class="sd">            a different length. VLAN lookup failures occur before allocation.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Create prefix: Creating /</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2"> prefix within &#39;</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">&#39; from &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; Netbox&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Create prefix: Creating /</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2"> prefix within '</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">' from '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">' Netbox"</span>
     <span class="p">)</span>
     <span class="n">changed</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_prefix&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_prefix"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="p">{},</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
         <span class="n">diff</span><span class="o">=</span><span class="n">changed</span><span class="p">,</span>
@@ -9836,17 +9836,17 @@ a different length. VLAN lookup failures occur before allocation.</p>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">group</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vlan_groups</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">vlan_group</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">group</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;VLAN group &#39;</span><span class="si">{</span><span class="n">vlan_group</span><span class="si">}</span><span class="s2">&#39; not found&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"VLAN group '</span><span class="si">{</span><span class="n">vlan_group</span><span class="si">}</span><span class="s2">' not found"</span><span class="p">)</span>
             <span class="n">nb_vlan</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vlans</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group_id</span><span class="o">=</span><span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">vid</span><span class="o">=</span><span class="n">vlan</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_vlan</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;VLAN </span><span class="si">{</span><span class="n">vlan</span><span class="si">}</span><span class="s2"> not found in group &#39;</span><span class="si">{</span><span class="n">vlan_group</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"VLAN </span><span class="si">{</span><span class="n">vlan</span><span class="si">}</span><span class="s2"> not found in group '</span><span class="si">{</span><span class="n">vlan_group</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Unable to resolve VLAN </span><span class="si">{</span><span class="n">vlan</span><span class="si">}</span><span class="s2"> in group &#39;</span><span class="si">{</span><span class="n">vlan_group</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"Unable to resolve VLAN </span><span class="si">{</span><span class="n">vlan</span><span class="si">}</span><span class="s2"> in group '</span><span class="si">{</span><span class="n">vlan_group</span><span class="si">}</span><span class="s2">': </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;processing prefix create request within &#39;</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">&#39; for &#39;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&#39; subnet&quot;</span>
+        <span class="sa">f</span><span class="s2">"processing prefix create request within '</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">' for '/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">' subnet"</span>
     <span class="p">)</span>
 
     <span class="c1"># source parent prefix from Netbox</span>
@@ -9858,46 +9858,46 @@ a different length. VLAN lookup failures occur before allocation.</p>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="n">is_network</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">is_network</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">vrf</span><span class="p">:</span>
-            <span class="n">parent_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">parent</span><span class="p">,</span> <span class="s2">&quot;vrf__name&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
+            <span class="n">parent_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"prefix"</span><span class="p">:</span> <span class="n">parent</span><span class="p">,</span> <span class="s2">"vrf__name"</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">is_network</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">parent_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">parent</span><span class="p">}</span>
+            <span class="n">parent_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"prefix"</span><span class="p">:</span> <span class="n">parent</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">is_network</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">vrf</span><span class="p">:</span>
-            <span class="n">parent_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">parent</span><span class="p">,</span> <span class="s2">&quot;vrf__name&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
+            <span class="n">parent_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"description"</span><span class="p">:</span> <span class="n">parent</span><span class="p">,</span> <span class="s2">"vrf__name"</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">is_network</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="n">parent_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">parent</span><span class="p">}</span>
+            <span class="n">parent_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"description"</span><span class="p">:</span> <span class="n">parent</span><span class="p">}</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="n">parent_filters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
-        <span class="n">parent_site</span> <span class="o">=</span> <span class="n">parent_filters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;site&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">parent_site</span> <span class="o">=</span> <span class="n">parent_filters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"site"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">parent_site</span><span class="p">:</span>
             <span class="n">nb_site</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">sites</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">parent_site</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_site</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Failed to get parent prefix site &#39;</span><span class="si">{</span><span class="n">parent_site</span><span class="si">}</span><span class="s2">&#39; from NetBox&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Failed to get parent prefix site '</span><span class="si">{</span><span class="n">parent_site</span><span class="si">}</span><span class="s2">' from NetBox"</span>
                 <span class="p">)</span>
-            <span class="n">parent_filters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">scope_type</span><span class="o">=</span><span class="s2">&quot;dcim.site&quot;</span><span class="p">,</span> <span class="n">scope_id</span><span class="o">=</span><span class="n">nb_site</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+            <span class="n">parent_filters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">scope_type</span><span class="o">=</span><span class="s2">"dcim.site"</span><span class="p">,</span> <span class="n">scope_id</span><span class="o">=</span><span class="n">nb_site</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
     <span class="n">nb_parent_prefix</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">parent_filters</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_parent_prefix</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;parent prefix not found in NetBox: </span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"parent prefix not found in NetBox: </span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
         <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Unable to source parent prefix from Netbox - </span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"Unable to source parent prefix from Netbox - </span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
 
     <span class="c1"># check that parent vrf and new prefix vrf are same</span>
     <span class="k">if</span> <span class="n">vrf</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="p">)</span> <span class="o">!=</span> <span class="n">vrf</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Parent prefix vrf &#39;</span><span class="si">{</span><span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="si">}</span><span class="s2">&#39; not same as requested child prefix vrf &#39;</span><span class="si">{</span><span class="n">vrf</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="sa">f</span><span class="s2">"Parent prefix vrf '</span><span class="si">{</span><span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="si">}</span><span class="s2">' not same as requested child prefix vrf '</span><span class="si">{</span><span class="n">vrf</span><span class="si">}</span><span class="s2">'"</span>
         <span class="p">)</span>
 
     <span class="c1"># try to source existing prefix from netbox</span>
     <span class="n">prefix_filters</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">vrf</span><span class="p">:</span>
-        <span class="n">prefix_filters</span><span class="p">[</span><span class="s2">&quot;vrf__name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrf</span>
+        <span class="n">prefix_filters</span><span class="p">[</span><span class="s2">"vrf__name"</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrf</span>
     <span class="k">if</span> <span class="n">site</span><span class="p">:</span>
-        <span class="n">prefix_filters</span><span class="p">[</span><span class="s2">&quot;site__name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site</span>
+        <span class="n">prefix_filters</span><span class="p">[</span><span class="s2">"site__name"</span><span class="p">]</span> <span class="o">=</span> <span class="n">site</span>
     <span class="k">if</span> <span class="n">role</span><span class="p">:</span>
-        <span class="n">prefix_filters</span><span class="p">[</span><span class="s2">&quot;role__name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">role</span>
+        <span class="n">prefix_filters</span><span class="p">[</span><span class="s2">"role__name"</span><span class="p">]</span> <span class="o">=</span> <span class="n">role</span>
     <span class="k">if</span> <span class="n">description</span><span class="p">:</span>
-        <span class="n">prefix_filters</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="n">prefix_filters</span><span class="p">[</span><span class="s2">"description"</span><span class="p">]</span> <span class="o">=</span> <span class="n">description</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">prefix_filters</span><span class="p">:</span>
             <span class="n">nb_prefix</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
@@ -9905,20 +9905,20 @@ a different length. VLAN lookup failures occur before allocation.</p>
             <span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Failed to source existing prefix from Netbox using filters &#39;</span><span class="si">{</span><span class="n">prefix_filters</span><span class="si">}</span><span class="s2">&#39;, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"Failed to source existing prefix from Netbox using filters '</span><span class="si">{</span><span class="n">prefix_filters</span><span class="si">}</span><span class="s2">', error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
 
     <span class="c1"># create new prefix</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_prefix</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;creating new &#39;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&#39; prefix within &#39;</span><span class="si">{</span><span class="n">nb_parent_prefix</span><span class="si">}</span><span class="s2">&#39; prefix&quot;</span>
+            <span class="sa">f</span><span class="s2">"creating new '/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">' prefix within '</span><span class="si">{</span><span class="n">nb_parent_prefix</span><span class="si">}</span><span class="s2">' prefix"</span>
         <span class="p">)</span>
         <span class="c1"># execute dry run on new prefix</span>
         <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">nb_prefixes</span> <span class="o">=</span> <span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">available_prefixes</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_prefixes</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Parent prefix &#39;</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">&#39; has no child prefixes available&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Parent prefix '</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">' has no child prefixes available"</span>
                 <span class="p">)</span>
             <span class="k">for</span> <span class="n">pfx</span> <span class="ow">in</span> <span class="n">nb_prefixes</span><span class="p">:</span>
                 <span class="c1"># Skip ranges too small for the requested child prefix, then</span>
@@ -9929,65 +9929,65 @@ a different length. VLAN lookup failures occur before allocation.</p>
                     <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Parent prefix &#39;</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">&#39; has no child prefixes available with &#39;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&#39; prefix length&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Parent prefix '</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">' has no child prefixes available with '/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">' prefix length"</span>
                 <span class="p">)</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;unchanged&quot;</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"unchanged"</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">if</span> <span class="n">nb_vlan</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;vlan&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nb_vlan</span><span class="o">.</span><span class="n">vid</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">nb_vlan</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">}</span>
+                <span class="n">changed</span><span class="p">[</span><span class="s2">"vlan"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"-"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"+"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">nb_vlan</span><span class="o">.</span><span class="n">vid</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">nb_vlan</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">)"</span><span class="p">}</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="n">changed</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">nb_prefix</span><span class="p">,</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
-                <span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
-                <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">,</span>
-                <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
+                <span class="s2">"prefix"</span><span class="p">:</span> <span class="n">nb_prefix</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
+                <span class="s2">"parent"</span><span class="p">:</span> <span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
+                <span class="s2">"vrf"</span><span class="p">:</span> <span class="n">vrf</span><span class="p">,</span>
+                <span class="s2">"site"</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
             <span class="p">}</span>
             <span class="c1"># add branch to results</span>
             <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;branch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dry-run: would create prefix &#39;</span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"branch"</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"dry-run: would create prefix '</span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
         <span class="c1"># create new prefix</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">nb_prefix</span> <span class="o">=</span> <span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">available_prefixes</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-                    <span class="p">{</span><span class="s2">&quot;prefix_length&quot;</span><span class="p">:</span> <span class="n">prefixlen</span><span class="p">}</span>
+                    <span class="p">{</span><span class="s2">"prefix_length"</span><span class="p">:</span> <span class="n">prefixlen</span><span class="p">}</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Failed creating child prefix of &#39;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&#39; prefix length &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;within parent prefix &#39;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_parent_prefix</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Failed creating child prefix of '/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">' prefix length "</span>
+                    <span class="sa">f</span><span class="s2">"within parent prefix '</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_parent_prefix</span><span class="p">)</span><span class="si">}</span><span class="s2">', error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;created new &#39;</span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">&#39; prefix within &#39;</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">&#39; prefix&quot;</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;created&quot;</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"created new '</span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">' prefix within '</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">' prefix"</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"created"</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># check existing prefix length matching requested length</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">"/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">"</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Found existing child prefix &#39;</span><span class="si">{</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&#39; with mismatch &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;requested prefix length &#39;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                <span class="sa">f</span><span class="s2">"Found existing child prefix '</span><span class="si">{</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="si">}</span><span class="s2">' with mismatch "</span>
+                <span class="sa">f</span><span class="s2">"requested prefix length '/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">'"</span>
             <span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;using existing prefix </span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"using existing prefix </span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="c1"># update prefix parameters</span>
     <span class="k">if</span> <span class="n">nb_vlan</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">current_vlan_id</span> <span class="o">=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">vlan</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">vlan</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">current_vlan_id</span> <span class="o">!=</span> <span class="n">nb_vlan</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
-            <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;vlan&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">vlan</span><span class="o">.</span><span class="n">vid</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">current_vlan_id</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="n">changed</span><span class="p">[</span><span class="s2">"vlan"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">"-"</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">vlan</span><span class="o">.</span><span class="n">vid</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">current_vlan_id</span><span class="si">}</span><span class="s2">)"</span>
                     <span class="k">if</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">vlan</span>
                     <span class="k">else</span> <span class="kc">None</span>
                 <span class="p">),</span>
-                <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nb_vlan</span><span class="o">.</span><span class="n">vid</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">nb_vlan</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+                <span class="s2">"+"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">nb_vlan</span><span class="o">.</span><span class="n">vid</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">nb_vlan</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
             <span class="p">}</span>
             <span class="n">nb_prefix</span><span class="o">.</span><span class="n">vlan</span> <span class="o">=</span> <span class="n">nb_vlan</span><span class="o">.</span><span class="n">id</span>
     <span class="k">if</span> <span class="n">custom_fields</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">reference_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">,</span>
-            <span class="n">object_type</span><span class="o">=</span><span class="s2">&quot;ipam.prefix&quot;</span><span class="p">,</span>
-            <span class="nb">type</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;multiobject&quot;</span><span class="p">],</span>
+            <span class="n">object_type</span><span class="o">=</span><span class="s2">"ipam.prefix"</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="p">[</span><span class="s2">"object"</span><span class="p">,</span> <span class="s2">"multiobject"</span><span class="p">],</span>
         <span class="p">)</span>
         <span class="c1"># Normalize existing references to IDs before comparing the merged</span>
         <span class="c1"># values, so a repeat call does not report a false change.</span>
@@ -9996,11 +9996,11 @@ a different length. VLAN lookup failures occur before allocation.</p>
             <span class="n">nb</span><span class="p">,</span>
             <span class="n">nb_prefix</span><span class="p">,</span>
             <span class="n">custom_fields</span><span class="p">,</span>
-            <span class="p">[</span><span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">"object"</span><span class="p">],</span>
             <span class="p">[</span>
                 <span class="n">field</span>
                 <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span>
-                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;multiobject&quot;</span>
+                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">"multiobject"</span>
             <span class="p">],</span>
         <span class="p">)</span>
         <span class="n">changed_fields</span> <span class="o">=</span> <span class="p">[</span>
@@ -10009,92 +10009,92 @@ a different length. VLAN lookup failures occur before allocation.</p>
             <span class="k">if</span> <span class="n">current_fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">!=</span> <span class="n">merged_fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="p">]</span>
         <span class="k">if</span> <span class="n">changed_fields</span><span class="p">:</span>
-            <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">changed_fields</span>
+            <span class="n">changed</span><span class="p">[</span><span class="s2">"custom_fields"</span><span class="p">]</span> <span class="o">=</span> <span class="n">changed_fields</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
-                <span class="n">nb_prefix</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">:</span> <span class="n">merged_fields</span><span class="p">})</span>
+                <span class="n">nb_prefix</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">"custom_fields"</span><span class="p">:</span> <span class="n">merged_fields</span><span class="p">})</span>
     <span class="k">if</span> <span class="n">description</span> <span class="ow">and</span> <span class="n">description</span> <span class="o">!=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
-        <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">description</span><span class="p">),</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">}</span>
+        <span class="n">changed</span><span class="p">[</span><span class="s2">"description"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"-"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">description</span><span class="p">),</span> <span class="s2">"+"</span><span class="p">:</span> <span class="n">description</span><span class="p">}</span>
         <span class="n">nb_prefix</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
     <span class="k">if</span> <span class="n">vrf</span> <span class="ow">and</span> <span class="n">vrf</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="p">):</span>
-        <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="p">),</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
-        <span class="n">nb_prefix</span><span class="o">.</span><span class="n">vrf</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
+        <span class="n">changed</span><span class="p">[</span><span class="s2">"vrf"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"-"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="p">),</span> <span class="s2">"+"</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
+        <span class="n">nb_prefix</span><span class="o">.</span><span class="n">vrf</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
     <span class="k">if</span> <span class="n">tenant</span> <span class="ow">and</span> <span class="n">tenant</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">tenant</span><span class="p">):</span>
-        <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;tenant&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">tenant</span><span class="p">)</span> <span class="k">if</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">tenant</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">tenant</span><span class="p">,</span>
+        <span class="n">changed</span><span class="p">[</span><span class="s2">"tenant"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"-"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">tenant</span><span class="p">)</span> <span class="k">if</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">tenant</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">"+"</span><span class="p">:</span> <span class="n">tenant</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="n">nb_prefix</span><span class="o">.</span><span class="n">tenant</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tenant</span><span class="p">}</span>
+        <span class="n">nb_prefix</span><span class="o">.</span><span class="n">tenant</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">tenant</span><span class="p">}</span>
     <span class="k">if</span> <span class="n">site</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope</span><span class="p">)</span> <span class="o">!=</span> <span class="n">site</span><span class="p">:</span>
         <span class="n">nb_site</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">sites</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">site</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_site</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to get &#39;</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&#39; site from Netbox&quot;</span><span class="p">)</span>
-        <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope</span><span class="p">)</span> <span class="k">if</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">nb_site</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed to get '</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">' site from Netbox"</span><span class="p">)</span>
+        <span class="n">changed</span><span class="p">[</span><span class="s2">"site"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"-"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope</span><span class="p">)</span> <span class="k">if</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">"+"</span><span class="p">:</span> <span class="n">nb_site</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope_type</span> <span class="o">=</span> <span class="s2">&quot;dcim.site&quot;</span>
+        <span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope_type</span> <span class="o">=</span> <span class="s2">"dcim.site"</span>
         <span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope_id</span> <span class="o">=</span> <span class="n">nb_site</span><span class="o">.</span><span class="n">id</span>
     <span class="k">if</span> <span class="n">status</span> <span class="ow">and</span> <span class="n">status</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">status</span><span class="p">:</span>
-        <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">status</span><span class="p">),</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">status</span><span class="o">.</span><span class="n">title</span><span class="p">()}</span>
+        <span class="n">changed</span><span class="p">[</span><span class="s2">"status"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"-"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">status</span><span class="p">),</span> <span class="s2">"+"</span><span class="p">:</span> <span class="n">status</span><span class="o">.</span><span class="n">title</span><span class="p">()}</span>
         <span class="n">nb_prefix</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">comments</span> <span class="ow">and</span> <span class="n">comments</span> <span class="o">!=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">comments</span><span class="p">:</span>
-        <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;comments&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">comments</span><span class="p">),</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">comments</span><span class="p">}</span>
+        <span class="n">changed</span><span class="p">[</span><span class="s2">"comments"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"-"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">comments</span><span class="p">),</span> <span class="s2">"+"</span><span class="p">:</span> <span class="n">comments</span><span class="p">}</span>
         <span class="n">nb_prefix</span><span class="o">.</span><span class="n">comments</span> <span class="o">=</span> <span class="n">comments</span>
     <span class="k">if</span> <span class="n">role</span> <span class="ow">and</span> <span class="n">role</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">role</span><span class="p">):</span>
-        <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">role</span><span class="p">),</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">role</span><span class="p">}</span>
-        <span class="n">nb_prefix</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">role</span><span class="p">}</span>
+        <span class="n">changed</span><span class="p">[</span><span class="s2">"role"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"-"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">role</span><span class="p">),</span> <span class="s2">"+"</span><span class="p">:</span> <span class="n">role</span><span class="p">}</span>
+        <span class="n">nb_prefix</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">role</span><span class="p">}</span>
     <span class="n">existing_tags</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">tags</span><span class="p">]</span>
-    <span class="n">merged_tags</span> <span class="o">=</span> <span class="n">merge_array_values</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
-    <span class="n">merged_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">merged_tags</span><span class="p">]</span>
+    <span class="n">merged_tags</span> <span class="o">=</span> <span class="n">merge_array_values</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">"name"</span><span class="p">)</span>
+    <span class="n">merged_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">merged_tags</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">merged_names</span> <span class="o">!=</span> <span class="n">existing_tags</span><span class="p">:</span>
-        <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="n">existing_tags</span><span class="p">,</span>
-            <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">merged_names</span><span class="p">,</span>
+        <span class="n">changed</span><span class="p">[</span><span class="s2">"tags"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"-"</span><span class="p">:</span> <span class="n">existing_tags</span><span class="p">,</span>
+            <span class="s2">"+"</span><span class="p">:</span> <span class="n">merged_names</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
             <span class="n">nb_prefix</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="n">merged_tags</span>
 
     <span class="c1"># save prefix into Netbox</span>
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;unchanged&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"unchanged"</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="n">changed</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;dry-run: prefix &#39;</span><span class="si">{</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&#39; has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">changed</span><span class="p">)</span><span class="si">}</span><span class="s2"> pending change(s)&quot;</span>
+            <span class="sa">f</span><span class="s2">"dry-run: prefix '</span><span class="si">{</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="si">}</span><span class="s2">' has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">changed</span><span class="p">)</span><span class="si">}</span><span class="s2"> pending change(s)"</span>
         <span class="p">)</span>
     <span class="k">elif</span> <span class="n">changed</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="n">changed</span>
         <span class="n">nb_prefix</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="s2">&quot;created&quot;</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;updated&quot;</span>
+        <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="s2">"created"</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"updated"</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;updated prefix &#39;</span><span class="si">{</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&#39; with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">changed</span><span class="p">)</span><span class="si">}</span><span class="s2"> change(s)&quot;</span>
+            <span class="sa">f</span><span class="s2">"updated prefix '</span><span class="si">{</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="si">}</span><span class="s2">' with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">changed</span><span class="p">)</span><span class="si">}</span><span class="s2"> change(s)"</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;unchanged&quot;</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;prefix &#39;</span><span class="si">{</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&#39; already in desired state&quot;</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"unchanged"</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"prefix '</span><span class="si">{</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="si">}</span><span class="s2">' already in desired state"</span><span class="p">)</span>
 
     <span class="c1"># source vrf name</span>
     <span class="n">vrf_name</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="n">vrf_name</span> <span class="o">=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+            <span class="n">vrf_name</span> <span class="o">=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">vrf_name</span> <span class="o">=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span>
 
     <span class="c1"># form and return results</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
-        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
-        <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">vrf_name</span><span class="p">,</span>
-        <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope</span><span class="p">)</span> <span class="k">if</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope</span> <span class="k">else</span> <span class="n">site</span><span class="p">,</span>
-        <span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
+        <span class="s2">"prefix"</span><span class="p">:</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
+        <span class="s2">"description"</span><span class="p">:</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+        <span class="s2">"vrf"</span><span class="p">:</span> <span class="n">vrf_name</span><span class="p">,</span>
+        <span class="s2">"site"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope</span><span class="p">)</span> <span class="k">if</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope</span> <span class="k">else</span> <span class="n">site</span><span class="p">,</span>
+        <span class="s2">"parent"</span><span class="p">:</span> <span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="c1"># add branch to results</span>
     <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;branch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"branch"</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;prefix task complete for &#39;</span><span class="si">{</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"prefix task complete for '</span><span class="si">{</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>

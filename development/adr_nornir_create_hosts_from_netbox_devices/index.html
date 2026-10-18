@@ -7389,12 +7389,12 @@
 <p>NetBox already exposes <code>get_nornir_inventory</code>, which accepts <code>devices</code> and
 returns a Nornir-compatible inventory:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;hosts&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;leaf-1&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;hostname&quot;</span><span class="p">:</span> <span class="s2">&quot;192.0.2.11&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="s2">&quot;eos&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;lab&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
+    <span class="s2">"hosts"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"leaf-1"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"hostname"</span><span class="p">:</span> <span class="s2">"192.0.2.11"</span><span class="p">,</span>
+            <span class="s2">"platform"</span><span class="p">:</span> <span class="s2">"eos"</span><span class="p">,</span>
+            <span class="s2">"groups"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"lab"</span><span class="p">],</span>
+            <span class="s2">"data"</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
         <span class="p">},</span>
     <span class="p">}</span>
 <span class="p">}</span>
@@ -7428,16 +7428,16 @@ startup and refresh behavior. The new task is for explicit on-demand device
 creation.</p>
 <h2 id="proposed-task-interface">Proposed Task Interface<a class="headerlink" href="#proposed-task-interface" title="Permanent link">¤</a></h2>
 <div class="highlight"><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateHostFromNetboxInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateHostFromNetboxResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Create Nornir Hosts from NetBox Devices&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Create Nornir Hosts from NetBox Devices"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -7647,19 +7647,19 @@ worker inventory <code>netbox</code> section:</p>
    nor the task arguments define a value:</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;instance&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="s2">&quot;netbox_workers&quot;</span><span class="p">:</span> <span class="s2">&quot;any&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;timeout&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
-    <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s2">&quot;connections&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s2">&quot;circuits&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s2">&quot;bgp_peerings&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s2">&quot;nbdata&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="s2">&quot;primary_ip&quot;</span><span class="p">:</span> <span class="s2">&quot;ip4&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;cache&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s2">&quot;progress&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">"instance"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">"netbox_workers"</span><span class="p">:</span> <span class="s2">"any"</span><span class="p">,</span>
+    <span class="s2">"timeout"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="s2">"interfaces"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">"connections"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">"circuits"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">"bgp_peerings"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">"nbdata"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">"primary_ip"</span><span class="p">:</span> <span class="s2">"ip4"</span><span class="p">,</span>
+    <span class="s2">"cache"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">"groups"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">"progress"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Do not maintain an allowlist of inherited <code>netbox</code> keys. Use the worker
@@ -7684,9 +7684,9 @@ explicit <code>False</code> argument overrides a <code>True</code> value from th
 <code>norfab/workers/nornir_worker/nornir_models.py</code>.</p>
 <p>Proposed result shape:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;leaf-1&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;leaf-2&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;missing&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;leaf-3&quot;</span><span class="p">],</span>
+    <span class="s2">"created"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"leaf-1"</span><span class="p">],</span>
+    <span class="s2">"updated"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"leaf-2"</span><span class="p">],</span>
+    <span class="s2">"missing"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"leaf-3"</span><span class="p">],</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Notes:</p>
@@ -7707,8 +7707,8 @@ explicit <code>False</code> argument overrides a <code>True</code> value from th
 <li>Call the NetBox service:</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="n">nb_inventory_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;get_nornir_inventory&quot;</span><span class="p">,</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">"get_nornir_inventory"</span><span class="p">,</span>
     <span class="n">workers</span><span class="o">=</span><span class="n">netbox_workers</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="n">netbox_kwargs</span><span class="p">,</span>
     <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
@@ -7730,8 +7730,8 @@ explicit <code>False</code> argument overrides a <code>True</code> value from th
    returned host:</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="n">inventory_actions</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">{</span><span class="s2">&quot;call&quot;</span><span class="p">:</span> <span class="s2">&quot;create_host&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;leaf-1&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">host_data</span><span class="p">},</span>
-    <span class="p">{</span><span class="s2">&quot;call&quot;</span><span class="p">:</span> <span class="s2">&quot;create_host&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;leaf-2&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">host_data</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">"call"</span><span class="p">:</span> <span class="s2">"create_host"</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"leaf-1"</span><span class="p">,</span> <span class="o">**</span><span class="n">host_data</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">"call"</span><span class="p">:</span> <span class="s2">"create_host"</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"leaf-2"</span><span class="p">,</span> <span class="o">**</span><span class="n">host_data</span><span class="p">},</span>
 <span class="p">]</span>
 </code></pre></div>
 <ol>
@@ -7739,7 +7739,7 @@ explicit <code>False</code> argument overrides a <code>True</code> value from th
 </ol>
 <div class="highlight"><pre><span></span><code><span class="n">inventory_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runtime_inventory</span><span class="p">(</span>
     <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
-    <span class="n">action</span><span class="o">=</span><span class="s2">&quot;load&quot;</span><span class="p">,</span>
+    <span class="n">action</span><span class="o">=</span><span class="s2">"load"</span><span class="p">,</span>
     <span class="n">data</span><span class="o">=</span><span class="n">inventory_actions</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>

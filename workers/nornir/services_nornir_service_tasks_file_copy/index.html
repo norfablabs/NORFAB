@@ -7220,22 +7220,22 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;file_copy&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"file_copy"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;source_file&quot;</span><span class="p">:</span> <span class="s2">&quot;./files/startup.cfg&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;netmiko&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;destination_file&quot;</span><span class="p">:</span> <span class="s2">&quot;startup.cfg&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;file_system&quot;</span><span class="p">:</span> <span class="s2">&quot;flash:&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;direction&quot;</span><span class="p">:</span> <span class="s2">&quot;put&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;overwrite_file&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                    <span class="s2">&quot;verify_file&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"source_file"</span><span class="p">:</span> <span class="s2">"./files/startup.cfg"</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"plugin"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"netmiko"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">"destination_file"</span><span class="p">:</span> <span class="s2">"startup.cfg"</span><span class="p">,</span>
+                    <span class="s2">"file_system"</span><span class="p">:</span> <span class="s2">"flash:"</span><span class="p">,</span>
+                    <span class="s2">"direction"</span><span class="p">:</span> <span class="s2">"put"</span><span class="p">,</span>
+                    <span class="s2">"overwrite_file"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">"verify_file"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
                 <span class="p">}</span>
             <span class="p">},</span>
         <span class="p">},</span>
@@ -7248,18 +7248,18 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"inventory.yaml"</span><span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;file_copy&quot;</span><span class="p">,</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">"nornir"</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">"file_copy"</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;source_file&quot;</span><span class="p">:</span> <span class="s2">&quot;./files/startup.cfg&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"source_file"</span><span class="p">:</span> <span class="s2">"./files/startup.cfg"</span><span class="p">,</span>
+            <span class="s2">"FC"</span><span class="p">:</span> <span class="s2">"spine"</span><span class="p">,</span>
+            <span class="s2">"dry_run"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7278,8 +7278,8 @@ root
 └──<span class="w"> </span>nornir:<span class="w">    </span>Nornir<span class="w"> </span>service
 <span class="w">    </span>└──<span class="w"> </span>file-copy:<span class="w">    </span>Copy<span class="w"> </span>files<span class="w"> </span>to/from<span class="w"> </span>devices
 <span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
-<span class="w">        </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'all'</span>
+<span class="w">        </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">        </span>├──<span class="w"> </span>num-workers:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>tasks<span class="w"> </span>execution
 <span class="w">        </span>├──<span class="w"> </span>num-connectors:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>device<span class="w"> </span>connections
 <span class="w">        </span>├──<span class="w"> </span>connect-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>attempts
@@ -7292,7 +7292,7 @@ root
 <span class="w">        </span>├──<span class="w"> </span>tf-skip-failed:<span class="w">    </span>Save<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>file<span class="w"> </span><span class="k">for</span><span class="w"> </span>failed<span class="w"> </span>tasks
 <span class="w">        </span>├──<span class="w"> </span>diff:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>the<span class="w"> </span>diff<span class="w"> </span><span class="k">for</span>
 <span class="w">        </span>├──<span class="w"> </span>diff-last:<span class="w">    </span>File<span class="w"> </span>version<span class="w"> </span>number<span class="w"> </span>to<span class="w"> </span>diff,<span class="w"> </span>default<span class="w"> </span>is<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="o">(</span>last<span class="o">)</span>
-<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">        </span>├──<span class="w"> </span>table:<span class="w">    </span>Table<span class="w"> </span>format<span class="w"> </span><span class="o">(</span>brief,<span class="w"> </span>terse,<span class="w"> </span>extend<span class="o">)</span><span class="w"> </span>or<span class="w"> </span>parameters<span class="w"> </span>or<span class="w"> </span>True
 <span class="w">        </span>├──<span class="w"> </span>headers:<span class="w">    </span>Table<span class="w"> </span>headers
 <span class="w">        </span>├──<span class="w"> </span>headers-exclude:<span class="w">    </span>Table<span class="w"> </span>headers<span class="w"> </span>to<span class="w"> </span>exclude
@@ -7314,12 +7314,12 @@ root
 <span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>netmiko:<span class="w">    </span>Use<span class="w"> </span>Netmiko<span class="w"> </span>plugin<span class="w"> </span>to<span class="w"> </span>copy<span class="w"> </span>files
 <span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>destination-file:<span class="w">    </span>Destination<span class="w"> </span>file<span class="w"> </span>to<span class="w"> </span>copy
 <span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>file-system:<span class="w">    </span>Destination<span class="w"> </span>file<span class="w"> </span>system
-<span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>direction:<span class="w">    </span>Direction<span class="w"> </span>of<span class="w"> </span>file<span class="w"> </span>copy,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;put&#39;</span>
-<span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>inline-transfer:<span class="w">    </span>Use<span class="w"> </span>inline<span class="w"> </span>transfer,<span class="w"> </span>supported<span class="w"> </span>by<span class="w"> </span>Cisco<span class="w"> </span>IOS,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
-<span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>overwrite-file:<span class="w">    </span>Overwrite<span class="w"> </span>destination<span class="w"> </span>file<span class="w"> </span><span class="k">if</span><span class="w"> </span>it<span class="w"> </span>exists,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
-<span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>socket-timeout:<span class="w">    </span>Socket<span class="w"> </span>timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;10.0&#39;</span>
-<span class="w">        </span>│<span class="w">       </span>└──<span class="w"> </span>verify-file:<span class="w">    </span>Verify<span class="w"> </span>destination<span class="w"> </span>file<span class="w"> </span><span class="nb">hash</span><span class="w"> </span>after<span class="w"> </span>copy,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
-<span class="w">        </span>└──<span class="w"> </span>dry-run:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span>copy<span class="w"> </span>files,<span class="w"> </span>just<span class="w"> </span>show<span class="w"> </span>what<span class="w"> </span>would<span class="w"> </span>be<span class="w"> </span><span class="k">done</span>,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>direction:<span class="w">    </span>Direction<span class="w"> </span>of<span class="w"> </span>file<span class="w"> </span>copy,<span class="w"> </span>default<span class="w"> </span><span class="s1">'put'</span>
+<span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>inline-transfer:<span class="w">    </span>Use<span class="w"> </span>inline<span class="w"> </span>transfer,<span class="w"> </span>supported<span class="w"> </span>by<span class="w"> </span>Cisco<span class="w"> </span>IOS,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
+<span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>overwrite-file:<span class="w">    </span>Overwrite<span class="w"> </span>destination<span class="w"> </span>file<span class="w"> </span><span class="k">if</span><span class="w"> </span>it<span class="w"> </span>exists,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
+<span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>socket-timeout:<span class="w">    </span>Socket<span class="w"> </span>timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds,<span class="w"> </span>default<span class="w"> </span><span class="s1">'10.0'</span>
+<span class="w">        </span>│<span class="w">       </span>└──<span class="w"> </span>verify-file:<span class="w">    </span>Verify<span class="w"> </span>destination<span class="w"> </span>file<span class="w"> </span><span class="nb">hash</span><span class="w"> </span>after<span class="w"> </span>copy,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
+<span class="w">        </span>└──<span class="w"> </span>dry-run:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span>copy<span class="w"> </span>files,<span class="w"> </span>just<span class="w"> </span>show<span class="w"> </span>what<span class="w"> </span>would<span class="w"> </span>be<span class="w"> </span><span class="k">done</span>,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 nf#
 </code></pre></div>
 <p><code>*</code> - mandatory/required command argument</p>
@@ -7604,16 +7604,16 @@ nf#
 <span class="normal">113</span>
 <span class="normal">114</span>
 <span class="normal">115</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">FileCopyInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">FileCopyResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Copy File to Devices&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Copy File to Devices"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -7621,13 +7621,13 @@ nf#
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">source_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
+    <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"netmiko"</span><span class="p">,</span>
     <span class="n">to_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">add_details</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Task to transfer files to and from hosts using SCP.</span>
 
 <span class="sd">    Args:</span>
@@ -7648,12 +7648,12 @@ nf#
 
 <span class="sd">    Raises:</span>
 <span class="sd">        UnsupportedPluginError: If the specified plugin is not supported.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">timeout</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">timeout</span> <span class="o">*</span> <span class="mf">0.9</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:file_copy&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{}</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="p">[])</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:file_copy"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{}</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="p">[])</span>
 
     <span class="n">filtered_nornir</span><span class="p">,</span> <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_hosts_and_validate</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;no_match&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">"no_match"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># download file from broker</span>
@@ -7663,22 +7663,22 @@ nf#
         <span class="p">)</span>
 
     <span class="c1"># decide on what send commands task plugin to use</span>
-    <span class="k">if</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">"netmiko"</span><span class="p">:</span>
         <span class="n">task_plugin</span> <span class="o">=</span> <span class="n">netmiko_file_transfer</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;source_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">source_file_local</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;socket_timeout&quot;</span><span class="p">,</span> <span class="n">timeout</span> <span class="o">/</span> <span class="mi">5</span><span class="p">)</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;dest_file&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">source_file_local</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">"source_file"</span><span class="p">]</span> <span class="o">=</span> <span class="n">source_file_local</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"socket_timeout"</span><span class="p">,</span> <span class="n">timeout</span> <span class="o">/</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"dest_file"</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">source_file_local</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">UnsupportedPluginError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plugin &#39;</span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2">&#39; not supported&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">UnsupportedPluginError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Plugin '</span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2">' not supported"</span><span class="p">)</span>
 
     <span class="n">nr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_processors</span><span class="p">(</span><span class="n">filtered_nornir</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">job</span><span class="p">)</span>  <span class="c1"># add processors</span>
 
     <span class="c1"># run task</span>
     <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - running file copy with arguments &#39;</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">&#39;, is dry run - &#39;</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - running file copy with arguments '</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">', is dry run - '</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">nr</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">nr_test</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;file_copy_dry_run&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">nr</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">nr_test</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"file_copy_dry_run"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_lock</span><span class="p">:</span>

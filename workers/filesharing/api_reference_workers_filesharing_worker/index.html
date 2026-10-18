@@ -7202,7 +7202,7 @@
 
 
 <h2 id="norfab.workers.filesharing_worker.filesharing_worker.FileSharingWorker" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">FileSharingWorker</span><span class="p">(</span><span class="n">inventory</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">broker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exit_event</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">init_done_event</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;WARNING&#39;</span><span class="p">)</span></code>
+              <code class="highlight language-python"><span class="n">FileSharingWorker</span><span class="p">(</span><span class="n">inventory</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">broker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exit_event</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">init_done_event</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'WARNING'</span><span class="p">)</span></code>
 
 <a href="#norfab.workers.filesharing_worker.filesharing_worker.FileSharingWorker" class="headerlink" title="Permanent link">¤</a></h2>
 
@@ -7257,7 +7257,7 @@ remote content via a safe filesystem interface.</p>
     <span class="n">worker_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">exit_event</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">init_done_event</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;WARNING&quot;</span><span class="p">,</span>
+    <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"WARNING"</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">inventory</span><span class="p">,</span> <span class="n">broker</span><span class="p">,</span> <span class="n">SERVICE</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">exit_event</span><span class="p">,</span> <span class="n">log_level</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">init_done_event</span> <span class="o">=</span> <span class="n">init_done_event</span>
@@ -7273,7 +7273,7 @@ remote content via a safe filesystem interface.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">setup_remotes</span><span class="p">(</span><span class="n">validated_inventory</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">init_done_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Started&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Started"</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -7394,9 +7394,9 @@ automatic synchronization thread if any remotes have auto_sync enabled.</p>
 <span class="normal">97</span>
 <span class="normal">98</span>
 <span class="normal">99</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">setup_remotes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">validated_inventory</span><span class="p">:</span> <span class="n">FileSharingInventory</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set up all configured remotes and start synchronization thread.</span>
+<span class="w">    </span><span class="sd">"""Set up all configured remotes and start synchronization thread.</span>
 
-<span class="sd">    Initializes remote locks, validates each remote&#39;s type, and starts the</span>
+<span class="sd">    Initializes remote locks, validates each remote's type, and starts the</span>
 <span class="sd">    automatic synchronization thread if any remotes have auto_sync enabled.</span>
 
 <span class="sd">    Args:</span>
@@ -7404,23 +7404,23 @@ automatic synchronization thread if any remotes have auto_sync enabled.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: If any remote has an unsupported type.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">remotes</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">remote_sync_stop</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">remote_sync_thread</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runtime_dir</span><span class="p">,</span> <span class="s2">&quot;remotes&quot;</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runtime_dir</span><span class="p">,</span> <span class="s2">"remotes"</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># Initialize each configured remote based on its type</span>
     <span class="k">for</span> <span class="n">remote</span> <span class="ow">in</span> <span class="n">validated_inventory</span><span class="o">.</span><span class="n">remotes</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">remote</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;git&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">remote</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">"git"</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_remote_git</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">remote</span><span class="o">.</span><span class="n">model_dump</span><span class="p">())</span>
             <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Failed to create remote &#39;</span><span class="si">{</span><span class="n">remote</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Failed to create remote '</span><span class="si">{</span><span class="n">remote</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Remote type &#39;</span><span class="si">{</span><span class="n">remote</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">&#39; is not supported. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Supported types: git&quot;</span>
+                <span class="sa">f</span><span class="s2">"Remote type '</span><span class="si">{</span><span class="n">remote</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">' is not supported. "</span>
+                <span class="sa">f</span><span class="s2">"Supported types: git"</span>
             <span class="p">)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_sync_thread</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -7517,29 +7517,29 @@ automatic synchronization thread if any remotes have auto_sync enabled.</p>
 <span class="normal">140</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetVersionInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetVersionResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
-    <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
+    <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">"enabled"</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Version&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Version"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return runtime versions reported by the File Sharing worker.</span>
+<span class="w">    </span><span class="sd">"""Return runtime versions reported by the File Sharing worker.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A result mapping runtime component names to version strings. Python</span>
 <span class="sd">        and platform information are always included.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">libs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;python&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
-        <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
-        <span class="s2">&quot;gitpython&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="s2">"python"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">" "</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s2">"platform"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
+        <span class="s2">"gitpython"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="c1"># get version of packages installed</span>
     <span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="n">libs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -7643,20 +7643,20 @@ inventory leaves the worker.</p>
 <span class="normal">175</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetInventoryResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
-    <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
+    <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">"enabled"</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Inventory&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Inventory"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the validated File Sharing worker inventory.</span>
+<span class="w">    </span><span class="sd">"""Return the validated File Sharing worker inventory.</span>
 
 <span class="sd">    Remote definitions are returned in their configured order. Every</span>
 <span class="sd">    non-empty password or access token is replaced with ``***`` before the</span>
@@ -7665,14 +7665,14 @@ inventory leaves the worker.</p>
 <span class="sd">    Returns:</span>
 <span class="sd">        A result containing the validated inventory with credentials</span>
 <span class="sd">        redacted.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">inventory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filesharing_inventory</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">inventory</span><span class="p">[</span><span class="s2">&quot;remotes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">configured_remote</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filesharing_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;remotes&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+    <span class="n">inventory</span><span class="p">[</span><span class="s2">"remotes"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">configured_remote</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filesharing_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"remotes"</span><span class="p">,</span> <span class="p">[]):</span>
         <span class="n">remote</span> <span class="o">=</span> <span class="n">configured_remote</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">remote</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;password&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;password&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;***&quot;</span>
-        <span class="n">inventory</span><span class="p">[</span><span class="s2">&quot;remotes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">remote</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">remote</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"password"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">remote</span><span class="p">[</span><span class="s2">"password"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"***"</span>
+        <span class="n">inventory</span><span class="p">[</span><span class="s2">"remotes"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">remote</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="n">inventory</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7810,20 +7810,20 @@ inventory leaves the worker.</p>
 <span class="normal">214</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetRemotesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetRemotesResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
-    <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
+    <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">"enabled"</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get File Sharing Remotes&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get File Sharing Remotes"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_remotes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return all runtime remotes or one remote selected by name.</span>
+<span class="w">    </span><span class="sd">"""Return all runtime remotes or one remote selected by name.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        name: Optional remote name used to filter the result.</span>
@@ -7832,17 +7832,17 @@ inventory leaves the worker.</p>
 <span class="sd">        A result containing remote inventory dictionaries. Passwords and</span>
 <span class="sd">        access tokens are replaced with ``***``; public remotes retain a</span>
 <span class="sd">        ``None`` password.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">remotes</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">configured_remote</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">remotes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">configured_remote</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">name</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">configured_remote</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="o">!=</span> <span class="n">name</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="n">remote</span> <span class="o">=</span> <span class="n">configured_remote</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">remote</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;lock&quot;</span><span class="p">)</span>
-        <span class="n">remote</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;last_sync_timer&quot;</span><span class="p">)</span>
-        <span class="n">remote</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;repository&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">remote</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;password&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;password&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;***&quot;</span>
+        <span class="n">remote</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"lock"</span><span class="p">)</span>
+        <span class="n">remote</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"last_sync_timer"</span><span class="p">)</span>
+        <span class="n">remote</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"repository"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">remote</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"password"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">remote</span><span class="p">[</span><span class="s2">"password"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"***"</span>
         <span class="n">remotes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">remote</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="n">remotes</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -7914,25 +7914,25 @@ inventory leaves the worker.</p>
 <span class="normal">237</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetStatusInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetStatusResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
-    <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">]},</span>
+    <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">"enabled"</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Status&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Status"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_status</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the File Sharing worker health status.</span>
+<span class="w">    </span><span class="sd">"""Return the File Sharing worker health status.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A result containing ``OK`` while the worker can process tasks.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="s2">&quot;OK&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="s2">"OK"</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

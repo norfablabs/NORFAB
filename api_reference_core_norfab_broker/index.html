@@ -7959,12 +7959,12 @@
 <span class="normal">115</span>
 <span class="normal">116</span>
 <span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Check if the worker is ready.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        bool: True if the worker has signaled readiness (W.READY) and the service is not None, otherwise False.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ready</span> <span class="ow">is</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8056,21 +8056,21 @@
 <span class="normal">146</span>
 <span class="normal">147</span>
 <span class="normal">148</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">disconnect</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Clean up routine for the worker.</span>
 
 <span class="sd">    This method performs the following actions:</span>
 
 <span class="sd">    1. Sets the exit event to signal termination.</span>
 <span class="sd">    2. Stops the keepaliver if it exists.</span>
-<span class="sd">    3. Removes the current worker from the service&#39;s worker list.</span>
+<span class="sd">    3. Removes the current worker from the service's worker list.</span>
 <span class="sd">    4. Optionally sends a disconnect message to the broker if `disconnect` is True.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        disconnect (bool): If True, sends a disconnect message to the broker.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">exit_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;keepaliver&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"keepaliver"</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">workers</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -8669,18 +8669,18 @@ Helper function to filter workers.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">build_message</span> <span class="o">=</span> <span class="n">NFP</span><span class="o">.</span><span class="n">MessageBuilder</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">monitoring</span> <span class="o">=</span> <span class="n">ProcessMonitor</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">exit_event</span> <span class="o">=</span> <span class="n">exit_event</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">zmq_auth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;zmq_auth&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ip_allowlist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ip_allowlist&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">zmq_auth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"zmq_auth"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ip_allowlist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ip_allowlist"</span><span class="p">,</span> <span class="p">[</span><span class="s2">"*"</span><span class="p">])</span>
     <span class="k">if</span> <span class="p">(</span>
         <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ip_allowlist</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
         <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip_allowlist</span>
         <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">for</span> <span class="n">address</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip_allowlist</span><span class="p">)</span>
     <span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;broker.ip_allowlist must be a non-empty list of strings&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"broker.ip_allowlist must be a non-empty list of strings"</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">base_dir</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">broker_base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">&quot;__norfab__&quot;</span><span class="p">,</span> <span class="s2">&quot;files&quot;</span><span class="p">,</span> <span class="s2">&quot;broker&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">"__norfab__"</span><span class="p">,</span> <span class="s2">"files"</span><span class="p">,</span> <span class="s2">"broker"</span>
     <span class="p">)</span>
     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">broker_base_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -8697,15 +8697,15 @@ Helper function to filter workers.</p>
     <span class="c1"># generate certificates, create directories and load certs</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">zmq_auth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
         <span class="n">generate_certificates</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">broker_base_dir</span><span class="p">,</span> <span class="n">cert_name</span><span class="o">=</span><span class="s2">&quot;broker&quot;</span><span class="p">,</span> <span class="n">inventory</span><span class="o">=</span><span class="n">inventory</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">broker_base_dir</span><span class="p">,</span> <span class="n">cert_name</span><span class="o">=</span><span class="s2">"broker"</span><span class="p">,</span> <span class="n">inventory</span><span class="o">=</span><span class="n">inventory</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">private_keys_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">broker_base_dir</span><span class="p">,</span> <span class="s2">&quot;private_keys&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">public_keys_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">broker_base_dir</span><span class="p">,</span> <span class="s2">&quot;public_keys&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">private_keys_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">broker_base_dir</span><span class="p">,</span> <span class="s2">"private_keys"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">public_keys_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">broker_base_dir</span><span class="p">,</span> <span class="s2">"public_keys"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">broker_private_key_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">private_keys_dir</span><span class="p">,</span> <span class="s2">&quot;broker.key_secret&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">private_keys_dir</span><span class="p">,</span> <span class="s2">"broker.key_secret"</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">broker_public_key_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">public_keys_dir</span><span class="p">,</span> <span class="s2">&quot;broker.key&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">public_keys_dir</span><span class="p">,</span> <span class="s2">"broker.key"</span>
         <span class="p">)</span>
         <span class="n">server_public</span><span class="p">,</span> <span class="n">server_secret</span> <span class="o">=</span> <span class="n">zmq</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">load_certificate</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">broker_private_key_file</span>
@@ -8714,7 +8714,7 @@ Helper function to filter workers.</p>
         <span class="c1"># Start an authenticator for this context.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auth</span> <span class="o">=</span> <span class="n">ThreadAuthenticator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-        <span class="k">if</span> <span class="s2">&quot;*&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip_allowlist</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">"*"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip_allowlist</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">allow</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">ip_allowlist</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">allow_any</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="c1"># Tell the authenticator how to handle CURVE requests</span>
@@ -8728,7 +8728,7 @@ Helper function to filter workers.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">endpoint</span><span class="p">)</span>
 
     <span class="n">init_done_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>  <span class="c1"># signal finished initializing broker</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NFPBroker - is ready and listening on </span><span class="si">{</span><span class="n">endpoint</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"NFPBroker - is ready and listening on </span><span class="si">{</span><span class="n">endpoint</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -8839,7 +8839,7 @@ as a per-process template and writes its default NorFab file sink to
 <span class="normal">316</span>
 <span class="normal">317</span>
 <span class="normal">318</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">setup_logging</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Configure logging for this broker process.</span>
 
 <span class="sd">    The broker uses the logging inventory it received during construction</span>
@@ -8851,11 +8851,11 @@ as a per-process template and writes its default NorFab file sink to
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Logging configuration applied to this process.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">setup_process_logging</span><span class="p">(</span>
         <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span>
-        <span class="n">role</span><span class="o">=</span><span class="s2">&quot;broker&quot;</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;NFPBroker&quot;</span><span class="p">,</span>
+        <span class="n">role</span><span class="o">=</span><span class="s2">"broker"</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"NFPBroker"</span><span class="p">,</span>
         <span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span>
         <span class="n">inventory_logging</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">logging</span><span class="p">,</span>
     <span class="p">)</span>
@@ -8908,23 +8908,23 @@ as a per-process template and writes its default NorFab file sink to
 <span class="normal">344</span>
 <span class="normal">345</span>
 <span class="normal">346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BrokerMonitoringStats</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the broker&#39;s validated in-memory monitoring snapshot.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return the broker's validated in-memory monitoring snapshot."""</span>
     <span class="n">workers</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">BrokerWorkerMonitoringStats</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">worker</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
-            <span class="n">service</span><span class="o">=</span><span class="n">worker</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
-            <span class="n">status</span><span class="o">=</span><span class="s2">&quot;alive&quot;</span> <span class="k">if</span> <span class="n">worker</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;dead&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">worker</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">),</span>
+            <span class="n">service</span><span class="o">=</span><span class="n">worker</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">),</span>
+            <span class="n">status</span><span class="o">=</span><span class="s2">"alive"</span> <span class="k">if</span> <span class="n">worker</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"dead"</span><span class="p">,</span>
             <span class="n">holdtime_seconds</span><span class="o">=</span><span class="n">worker</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">show_holdtime</span><span class="p">(),</span>
             <span class="n">uptime_seconds</span><span class="o">=</span><span class="n">worker</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">show_alive_for</span><span class="p">(),</span>
             <span class="n">keepalives_sent</span><span class="o">=</span><span class="n">worker</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">keepalives_send</span><span class="p">,</span>
             <span class="n">keepalives_received</span><span class="o">=</span><span class="n">worker</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">keepalives_received</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">worker</span><span class="o">.</span><span class="n">service</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="s2">&quot;keepaliver&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">worker</span><span class="o">.</span><span class="n">service</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="s2">"keepaliver"</span><span class="p">)</span>
     <span class="p">]</span>
     <span class="k">return</span> <span class="n">BrokerMonitoringStats</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;NFPBroker&quot;</span><span class="p">,</span>
-        <span class="n">status</span><span class="o">=</span><span class="s2">&quot;active&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit_event</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;stopping&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"NFPBroker"</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="s2">"active"</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit_event</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"stopping"</span><span class="p">,</span>
         <span class="n">process</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">monitoring</span><span class="o">.</span><span class="n">process_stats</span><span class="p">(),</span>
         <span class="n">messaging</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">monitoring</span><span class="o">.</span><span class="n">messaging_stats</span><span class="p">(),</span>
         <span class="n">endpoint</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">getsockopt_string</span><span class="p">(</span><span class="n">zmq</span><span class="o">.</span><span class="n">LAST_ENDPOINT</span><span class="p">),</span>
@@ -8976,23 +8976,23 @@ as a per-process template and writes its default NorFab file sink to
 <span class="normal">365</span>
 <span class="normal">366</span>
 <span class="normal">367</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_status</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return broker identity, runtime paths, and security configuration.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return broker identity, runtime paths, and security configuration."""</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;NFPBroker&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;broker&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit_event</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;stopping&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;endpoint&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">getsockopt_string</span><span class="p">(</span><span class="n">zmq</span><span class="o">.</span><span class="n">LAST_ENDPOINT</span><span class="p">),</span>
-        <span class="s2">&quot;directories&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;base_dir&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span>
-            <span class="s2">&quot;broker_base_dir&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker_base_dir</span><span class="p">,</span>
-            <span class="s2">&quot;private_keys_dir&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">private_keys_dir</span><span class="p">,</span>
-            <span class="s2">&quot;public_keys_dir&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">public_keys_dir</span><span class="p">,</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"NFPBroker"</span><span class="p">,</span>
+        <span class="s2">"role"</span><span class="p">:</span> <span class="s2">"broker"</span><span class="p">,</span>
+        <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"active"</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit_event</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"stopping"</span><span class="p">,</span>
+        <span class="s2">"endpoint"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">getsockopt_string</span><span class="p">(</span><span class="n">zmq</span><span class="o">.</span><span class="n">LAST_ENDPOINT</span><span class="p">),</span>
+        <span class="s2">"directories"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"base_dir"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span>
+            <span class="s2">"broker_base_dir"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker_base_dir</span><span class="p">,</span>
+            <span class="s2">"private_keys_dir"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">private_keys_dir</span><span class="p">,</span>
+            <span class="s2">"public_keys_dir"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">public_keys_dir</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s2">&quot;security&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;broker_private_key_file&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker_private_key_file</span><span class="p">,</span>
-            <span class="s2">&quot;broker_public_key_file&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker_public_key_file</span><span class="p">,</span>
-            <span class="s2">&quot;zmq_auth&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">zmq_auth</span><span class="p">,</span>
-            <span class="s2">&quot;ip_allowlist&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip_allowlist</span><span class="p">,</span>
+        <span class="s2">"security"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"broker_private_key_file"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker_private_key_file</span><span class="p">,</span>
+            <span class="s2">"broker_public_key_file"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker_public_key_file</span><span class="p">,</span>
+            <span class="s2">"zmq_auth"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">zmq_auth</span><span class="p">,</span>
+            <span class="s2">"ip_allowlist"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip_allowlist</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
@@ -9114,7 +9114,7 @@ exit event to gracefully shut down the broker.</p>
 <span class="normal">436</span>
 <span class="normal">437</span>
 <span class="normal">438</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mediate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Main broker work happens here.</span>
 
 <span class="sd">    This method continuously polls for incoming messages and processes them</span>
@@ -9124,7 +9124,7 @@ exit event to gracefully shut down the broker.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        KeyboardInterrupt: If the process is interrupted by a keyboard signal.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="kc">None</span>
@@ -9141,11 +9141,11 @@ exit event to gracefully shut down the broker.</p>
 
         <span class="k">if</span> <span class="n">msg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">monitoring</span><span class="o">.</span><span class="n">record_received</span><span class="p">()</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NFPBroker - received &#39;</span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"NFPBroker - received '</span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">monitoring</span><span class="o">.</span><span class="n">record_receive_failure</span><span class="p">()</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NFPBroker - received malformed message: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"NFPBroker - received malformed message: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                 <span class="k">continue</span>
 
             <span class="n">sender</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -9158,8 +9158,8 @@ exit event to gracefully shut down the broker.</p>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">monitoring</span><span class="o">.</span><span class="n">record_receive_failure</span><span class="p">()</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;NFPBroker - failed to process client message from &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">NFP</span><span class="o">.</span><span class="n">bytest_to_text</span><span class="p">(</span><span class="n">sender</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">"NFPBroker - failed to process client message from "</span>
+                        <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">NFP</span><span class="o">.</span><span class="n">bytest_to_text</span><span class="p">(</span><span class="n">sender</span><span class="p">)</span><span class="si">}</span><span class="s2">': </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
                         <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                     <span class="p">)</span>
             <span class="k">elif</span> <span class="n">header</span> <span class="o">==</span> <span class="n">NFP</span><span class="o">.</span><span class="n">WORKER</span><span class="p">:</span>
@@ -9168,13 +9168,13 @@ exit event to gracefully shut down the broker.</p>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">monitoring</span><span class="o">.</span><span class="n">record_receive_failure</span><span class="p">()</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;NFPBroker - failed to process worker message from &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">NFP</span><span class="o">.</span><span class="n">bytest_to_text</span><span class="p">(</span><span class="n">sender</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">"NFPBroker - failed to process worker message from "</span>
+                        <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">NFP</span><span class="o">.</span><span class="n">bytest_to_text</span><span class="p">(</span><span class="n">sender</span><span class="p">)</span><span class="si">}</span><span class="s2">': </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
                         <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                     <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;NFPBroker - message from &#39;</span><span class="si">{</span><span class="n">NFP</span><span class="o">.</span><span class="n">bytest_to_text</span><span class="p">(</span><span class="n">sender</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39; contains unsupported header &#39;</span><span class="si">{</span><span class="n">header</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                    <span class="sa">f</span><span class="s2">"NFPBroker - message from '</span><span class="si">{</span><span class="n">NFP</span><span class="o">.</span><span class="n">bytest_to_text</span><span class="p">(</span><span class="n">sender</span><span class="p">)</span><span class="si">}</span><span class="s2">' contains unsupported header '</span><span class="si">{</span><span class="n">header</span><span class="si">}</span><span class="s2">'"</span>
                 <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">purge_workers</span><span class="p">()</span>
@@ -9227,15 +9227,15 @@ exit event to gracefully shut down the broker.</p>
 <span class="normal">454</span>
 <span class="normal">455</span>
 <span class="normal">456</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Disconnect all workers and destroy the context.</span>
 
 <span class="sd">    This method performs the following actions:</span>
 
 <span class="sd">    1. Logs an interrupt message indicating that the broker is being killed.</span>
 <span class="sd">    2. Iterates through all</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;NFPBroker - interrupt received, killing broker&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"NFPBroker - interrupt received, killing broker"</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
         <span class="c1"># in case worker self destroyed while we iterating</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
@@ -9348,7 +9348,7 @@ exit event to gracefully shut down the broker.</p>
 <span class="normal">468</span>
 <span class="normal">469</span>
 <span class="normal">470</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">delete_worker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worker</span><span class="p">:</span> <span class="n">NFPWorker</span><span class="p">,</span> <span class="n">disconnect</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Deletes a worker from all data structures and destroys the worker.</span>
 
 <span class="sd">    Args:</span>
@@ -9357,7 +9357,7 @@ exit event to gracefully shut down the broker.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">worker</span><span class="o">.</span><span class="n">destroy</span><span class="p">(</span><span class="n">disconnect</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">worker</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -9426,13 +9426,13 @@ worker's address.</p>
 <span class="normal">496</span>
 <span class="normal">497</span>
 <span class="normal">498</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">purge_workers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Look for and delete expired workers.</span>
 
-<span class="sd">    This method iterates through the list of workers and checks if each worker&#39;s</span>
-<span class="sd">    keepalive state is still alive. If a worker&#39;s keepalive state is not alive,</span>
+<span class="sd">    This method iterates through the list of workers and checks if each worker's</span>
+<span class="sd">    keepalive state is still alive. If a worker's keepalive state is not alive,</span>
 <span class="sd">    the worker is considered expired and is deleted from the list of workers.</span>
-<span class="sd">    Additionally, a log message is generated indicating that the worker&#39;s keepalive</span>
+<span class="sd">    Additionally, a log message is generated indicating that the worker's keepalive</span>
 <span class="sd">    has expired.</span>
 
 <span class="sd">    Note:</span>
@@ -9440,9 +9440,9 @@ worker's address.</p>
 <span class="sd">        iterating through the list of workers.</span>
 
 <span class="sd">    Logging:</span>
-<span class="sd">        Logs an info message when a worker&#39;s keepalive has expired, including the</span>
-<span class="sd">        worker&#39;s address.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        Logs an info message when a worker's keepalive has expired, including the</span>
+<span class="sd">        worker's address.</span>
+<span class="sd">    """</span>
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
         <span class="c1"># in case worker self destroyed while we iterating</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
@@ -9450,7 +9450,7 @@ worker's address.</p>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">w</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">delete_worker</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;NFPBroker - </span><span class="si">{</span><span class="n">NFP</span><span class="o">.</span><span class="n">bytest_to_text</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">address</span><span class="p">)</span><span class="si">}</span><span class="s2"> worker keepalives expired&quot;</span>
+                    <span class="sa">f</span><span class="s2">"NFPBroker - </span><span class="si">{</span><span class="n">NFP</span><span class="o">.</span><span class="n">bytest_to_text</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">address</span><span class="p">)</span><span class="si">}</span><span class="s2"> worker keepalives expired"</span>
                 <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -9493,13 +9493,13 @@ worker's address.</p>
 <span class="normal">516</span>
 <span class="normal">517</span>
 <span class="normal">518</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">send_due_keepalives</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Send broker-to-worker keepalives from the broker socket owner loop.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="n">worker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="s2">&quot;keepaliver&quot;</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="s2">"keepaliver"</span><span class="p">)</span>
             <span class="ow">and</span> <span class="n">worker</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">due</span><span class="p">()</span>
         <span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
@@ -9508,8 +9508,8 @@ worker's address.</p>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">monitoring</span><span class="o">.</span><span class="n">record_send_failure</span><span class="p">()</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;NFPBroker - failed to send keepalive to &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">NFP</span><span class="o">.</span><span class="n">bytest_to_text</span><span class="p">(</span><span class="n">worker</span><span class="o">.</span><span class="n">address</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;, error &#39;</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                    <span class="sa">f</span><span class="s2">"NFPBroker - failed to send keepalive to "</span>
+                    <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">NFP</span><span class="o">.</span><span class="n">bytest_to_text</span><span class="p">(</span><span class="n">worker</span><span class="o">.</span><span class="n">address</span><span class="p">)</span><span class="si">}</span><span class="s2">', error '</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">'"</span>
                 <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -9682,20 +9682,20 @@ Logs a debug message when sending the message to the worker.</p>
 <span class="normal">565</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">send_to_worker</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">worker</span><span class="p">:</span> <span class="n">NFPWorker</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">sender</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Send a message to a worker. If a message is provided, sends that message.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        worker (NFPWorker): The worker to send the message to.</span>
 <span class="sd">        command (bytes): The command to send (e.g., NFP.POST or NFP.GET).</span>
-<span class="sd">        sender (bytes): The sender&#39;s identifier.</span>
+<span class="sd">        sender (bytes): The sender's identifier.</span>
 <span class="sd">        uuid (bytes): The unique identifier for the message.</span>
 <span class="sd">        data (bytes): The data to be sent with the message.</span>
 
 <span class="sd">    Logs:</span>
 <span class="sd">        Logs an error if the command is invalid.</span>
 <span class="sd">        Logs a debug message when sending the message to the worker.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Stack routing and protocol envelopes to start of message</span>
     <span class="k">if</span> <span class="n">command</span> <span class="o">==</span> <span class="n">NFP</span><span class="o">.</span><span class="n">POST</span><span class="p">:</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_message</span><span class="o">.</span><span class="n">broker_to_worker_post</span><span class="p">(</span>
@@ -9714,10 +9714,10 @@ Logs a debug message when sending the message to the worker.</p>
             <span class="n">worker_address</span><span class="o">=</span><span class="n">worker</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">sender</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NFPBroker - invalid worker command: </span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"NFPBroker - invalid worker command: </span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">return</span>
     <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;NFPBroker - sending command &#39;</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">&#39; to worker &#39;</span><span class="si">{</span><span class="n">worker</span><span class="o">.</span><span class="n">address</span><span class="si">}</span><span class="s2">&#39;, job &#39;</span><span class="si">{</span><span class="n">uuid</span><span class="si">}</span><span class="s2">&#39;, from client &#39;</span><span class="si">{</span><span class="n">sender</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"NFPBroker - sending command '</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">' to worker '</span><span class="si">{</span><span class="n">worker</span><span class="o">.</span><span class="n">address</span><span class="si">}</span><span class="s2">', job '</span><span class="si">{</span><span class="n">uuid</span><span class="si">}</span><span class="s2">', from client '</span><span class="si">{</span><span class="n">sender</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">send_multipart</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
@@ -9870,15 +9870,15 @@ Logs a debug message when sending the message to the worker.</p>
 <span class="normal">608</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">send_to_client</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">list</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Send a message to a specified client.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        client (str): The identifier of the client to send the message to.</span>
-<span class="sd">        command (str): The command type, either &#39;RESPONSE&#39; or &#39;EVENT&#39;.</span>
+<span class="sd">        command (str): The command type, either 'RESPONSE' or 'EVENT'.</span>
 <span class="sd">        service (str): The service associated with the message.</span>
 <span class="sd">        message (list): The message content to be sent.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Stack routing and protocol envelopes to start of message</span>
     <span class="k">if</span> <span class="n">command</span> <span class="o">==</span> <span class="n">NFP</span><span class="o">.</span><span class="n">RESPONSE</span><span class="p">:</span>
@@ -9898,10 +9898,10 @@ Logs a debug message when sending the message to the worker.</p>
             <span class="n">client</span><span class="o">=</span><span class="n">client</span><span class="p">,</span> <span class="n">service</span><span class="o">=</span><span class="n">service</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">message</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NFPBroker - invalid client command: </span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"NFPBroker - invalid client command: </span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">return</span>
     <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;NFPBroker - sending to client &#39;</span><span class="si">{</span><span class="n">client</span><span class="si">}</span><span class="s2">&#39;, command &#39;</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">&#39;, service &#39;</span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"NFPBroker - sending to client '</span><span class="si">{</span><span class="n">client</span><span class="si">}</span><span class="s2">', command '</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">', service '</span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">send_multipart</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
@@ -10077,7 +10077,7 @@ Logs a debug message when sending the message to the worker.</p>
 <span class="normal">663</span>
 <span class="normal">664</span>
 <span class="normal">665</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">process_worker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Process message received from worker.</span>
 
 <span class="sd">    Parameters:</span>
@@ -10098,11 +10098,11 @@ Logs a debug message when sending the message to the worker.</p>
 <span class="sd">    Raises:</span>
 <span class="sd">        AttributeError: If the worker does not have the required attributes for certain commands.</span>
 <span class="sd">        IndexError: If the message list does not contain the expected number of elements for certain commands.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">command</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">worker</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">require_worker</span><span class="p">(</span><span class="n">sender</span><span class="p">)</span>
 
-    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NFPBroker - processing &#39;</span><span class="si">{</span><span class="n">sender</span><span class="si">}</span><span class="s2">&#39; worker message: &#39;</span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"NFPBroker - processing '</span><span class="si">{</span><span class="n">sender</span><span class="si">}</span><span class="s2">' worker message: '</span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">NFP</span><span class="o">.</span><span class="n">READY</span> <span class="o">==</span> <span class="n">command</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">worker</span><span class="o">.</span><span class="n">is_ready</span><span class="p">():</span>
         <span class="n">service</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -10114,7 +10114,7 @@ Logs a debug message when sending the message to the worker.</p>
         <span class="n">client</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">empty</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">send_to_client</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">NFP</span><span class="o">.</span><span class="n">RESPONSE</span><span class="p">,</span> <span class="n">worker</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">NFP</span><span class="o">.</span><span class="n">KEEPALIVE</span> <span class="o">==</span> <span class="n">command</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="s2">&quot;keepaliver&quot;</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="n">NFP</span><span class="o">.</span><span class="n">KEEPALIVE</span> <span class="o">==</span> <span class="n">command</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="s2">"keepaliver"</span><span class="p">):</span>
         <span class="n">worker</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">received_heartbeat</span><span class="p">([</span><span class="n">worker</span><span class="o">.</span><span class="n">address</span><span class="p">]</span> <span class="o">+</span> <span class="n">msg</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">NFP</span><span class="o">.</span><span class="n">DISCONNECT</span> <span class="o">==</span> <span class="n">command</span> <span class="ow">and</span> <span class="n">worker</span><span class="o">.</span><span class="n">is_ready</span><span class="p">():</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">delete_worker</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
@@ -10130,7 +10130,7 @@ Logs a debug message when sending the message to the worker.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">delete_worker</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="n">disconnect</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;NFPBroker - invalid message: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">, command: </span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">, sender: </span><span class="si">{</span><span class="n">sender</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"NFPBroker - invalid message: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">, command: </span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">, sender: </span><span class="si">{</span><span class="n">sender</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -10229,7 +10229,7 @@ Logs a debug message when sending the message to the worker.</p>
 <span class="normal">685</span>
 <span class="normal">686</span>
 <span class="normal">687</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">require_worker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NFPWorker</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Finds the worker associated with the given address, creating a new worker if necessary.</span>
 
 <span class="sd">    Args:</span>
@@ -10237,7 +10237,7 @@ Logs a debug message when sending the message to the worker.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        NFPWorker: The worker associated with the given address.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">address</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="p">[</span><span class="n">address</span><span class="p">]</span> <span class="o">=</span> <span class="n">NFPWorker</span><span class="p">(</span>
             <span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span>
@@ -10246,7 +10246,7 @@ Logs a debug message when sending the message to the worker.</p>
             <span class="n">keepalive</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keepalive</span><span class="p">,</span>
             <span class="n">monitoring</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">monitoring</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NFPBroker - registered new worker </span><span class="si">{</span><span class="n">NFP</span><span class="o">.</span><span class="n">bytest_to_text</span><span class="p">(</span><span class="n">address</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"NFPBroker - registered new worker </span><span class="si">{</span><span class="n">NFP</span><span class="o">.</span><span class="n">bytest_to_text</span><span class="p">(</span><span class="n">address</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="p">[</span><span class="n">address</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
@@ -10341,7 +10341,7 @@ Logs a debug message when sending the message to the worker.</p>
 <span class="normal">702</span>
 <span class="normal">703</span>
 <span class="normal">704</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">require_service</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NFPService</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Locates the service by name, creating it if necessary.</span>
 
 <span class="sd">    Args:</span>
@@ -10349,11 +10349,11 @@ Logs a debug message when sending the message to the worker.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        NFPService: The located or newly created service instance.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">services</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
         <span class="n">service</span> <span class="o">=</span> <span class="n">NFPService</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">services</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">service</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NFPBroker - registered new service </span><span class="si">{</span><span class="n">NFP</span><span class="o">.</span><span class="n">bytest_to_text</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"NFPBroker - registered new service </span><span class="si">{</span><span class="n">NFP</span><span class="o">.</span><span class="n">bytest_to_text</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">services</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
@@ -10505,7 +10505,7 @@ Logs a debug message when sending the message to the worker.</p>
 <span class="normal">746</span>
 <span class="normal">747</span>
 <span class="normal">748</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">process_client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Process a request coming from a client.</span>
 
 <span class="sd">    Args:</span>
@@ -10524,7 +10524,7 @@ Logs a debug message when sending the message to the worker.</p>
 <span class="sd">        - Checking if the command is valid.</span>
 <span class="sd">        - Routing the request to the appropriate service handler based on the service specified.</span>
 <span class="sd">        - Sending an error message back to the client if the command is unsupported.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">command</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">service</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">target</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -10533,15 +10533,15 @@ Logs a debug message when sending the message to the worker.</p>
 
     <span class="c1"># check if valid command from client</span>
     <span class="k">if</span> <span class="n">command</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">NFP</span><span class="o">.</span><span class="n">client_commands</span><span class="p">:</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;NFPBroker - Unsupported client command &#39;</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"NFPBroker - Unsupported client command '</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">'"</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">send_to_client</span><span class="p">(</span>
-            <span class="n">sender</span><span class="p">,</span> <span class="n">NFP</span><span class="o">.</span><span class="n">RESPONSE</span><span class="p">,</span> <span class="n">service</span><span class="p">,</span> <span class="p">[</span><span class="n">message</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)]</span>
+            <span class="n">sender</span><span class="p">,</span> <span class="n">NFP</span><span class="o">.</span><span class="n">RESPONSE</span><span class="p">,</span> <span class="n">service</span><span class="p">,</span> <span class="p">[</span><span class="n">message</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">)]</span>
         <span class="p">)</span>
     <span class="c1"># Management Interface</span>
-    <span class="k">elif</span> <span class="n">service</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;mmi.service.broker&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">service</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">"mmi.service.broker"</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mmi_service</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">service</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;sid.service.broker&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">service</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">"sid.service.broker"</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inventory_service</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span>
@@ -10675,19 +10675,19 @@ Logs a debug message when sending the message to the worker.</p>
 <span class="normal">806</span>
 <span class="normal">807</span>
 <span class="normal">808</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_workers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="n">NFPService</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Helper function to filter workers</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        target: bytest string, workers target</span>
 <span class="sd">        service: NFPService object</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">if</span> <span class="n">service</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;all&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">target</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;all&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">service</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">"all"</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">target</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">"all"</span><span class="p">:</span>
             <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="n">target</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;any&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">target</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">"any"</span><span class="p">:</span>
             <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">s</span><span class="o">.</span><span class="n">workers</span><span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">workers</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
                 <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">services</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
@@ -10700,22 +10700,22 @@ Logs a debug message when sending the message to the worker.</p>
                 <span class="n">target</span> <span class="o">=</span> <span class="n">orjson</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
                     <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">target</span><span class="p">:</span>
-                        <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+                        <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="p">:</span>
                             <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="p">[</span><span class="n">w</span><span class="p">])</span>
                     <span class="n">ret</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="p">))</span>  <span class="c1"># dedup workers</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;NFPBroker - Failed to load target &#39;</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">&#39; with error &#39;</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                    <span class="sa">f</span><span class="s2">"NFPBroker - Failed to load target '</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">' with error '</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">'"</span>
                 <span class="p">)</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="n">service</span><span class="o">.</span><span class="n">workers</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;NFPBroker - &#39;</span><span class="si">{</span><span class="n">service</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; has no active workers registered, try later&quot;</span>
+            <span class="sa">f</span><span class="s2">"NFPBroker - '</span><span class="si">{</span><span class="n">service</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">' has no active workers registered, try later"</span>
         <span class="p">)</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">elif</span> <span class="n">target</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;any&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">target</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">"any"</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span><span class="n">service</span><span class="o">.</span><span class="n">workers</span><span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">service</span><span class="o">.</span><span class="n">workers</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]]</span>
-    <span class="k">elif</span> <span class="n">target</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;all&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">target</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">"all"</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">workers</span>
     <span class="k">elif</span> <span class="n">target</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="p">:</span>  <span class="c1"># single worker</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="p">[</span><span class="n">target</span><span class="p">]]</span>
@@ -10724,13 +10724,13 @@ Logs a debug message when sending the message to the worker.</p>
             <span class="n">target</span> <span class="o">=</span> <span class="n">orjson</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">target</span><span class="p">:</span>
-                    <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+                    <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="p">:</span>
                         <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="p">[</span><span class="n">w</span><span class="p">])</span>
                 <span class="n">ret</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="p">))</span>  <span class="c1"># dedup workers</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;NFPBroker - Failed to load target &#39;</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">&#39; with error &#39;</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                <span class="sa">f</span><span class="s2">"NFPBroker - Failed to load target '</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">' with error '</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">'"</span>
             <span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
@@ -10952,7 +10952,7 @@ Logs a debug message when sending the message to the worker.</p>
     <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">data</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Dispatch requests to waiting workers as possible</span>
 
 <span class="sd">    Args:</span>
@@ -10962,18 +10962,18 @@ Logs a debug message when sending the message to the worker.</p>
 <span class="sd">        target (str): A string indicating the addresses of the workers to dispatch to.</span>
 <span class="sd">        uuid (str): A unique identifier for the request.</span>
 <span class="sd">        data (object): The data to be sent to the workers.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;NFPBroker - dispatching request to workers or clients: sender &#39;</span><span class="si">{</span><span class="n">sender</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;command &#39;</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">&#39;, service &#39;</span><span class="si">{</span><span class="n">service</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;, target &#39;</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;data &#39;</span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="s2">&#39;, uuid &#39;</span><span class="si">{</span><span class="n">uuid</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"NFPBroker - dispatching request to workers or clients: sender '</span><span class="si">{</span><span class="n">sender</span><span class="si">}</span><span class="s2">', "</span>
+        <span class="sa">f</span><span class="s2">"command '</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">', service '</span><span class="si">{</span><span class="n">service</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">', target '</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">', "</span>
+        <span class="sa">f</span><span class="s2">"data '</span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="s2">', uuid '</span><span class="si">{</span><span class="n">uuid</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">purge_workers</span><span class="p">()</span>
     <span class="n">workers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_workers</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">service</span><span class="p">)</span>
 
     <span class="c1"># handle case when service has no workers registered</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">workers</span><span class="p">:</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;NFPBroker - </span><span class="si">{</span><span class="n">service</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> service failed to target workers &#39;</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"NFPBroker - </span><span class="si">{</span><span class="n">service</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> service failed to target workers '</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">'"</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">send_to_client</span><span class="p">(</span>
             <span class="n">sender</span><span class="p">,</span>
@@ -10981,15 +10981,15 @@ Logs a debug message when sending the message to the worker.</p>
             <span class="n">service</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="p">[</span>
                 <span class="n">uuid</span><span class="p">,</span>
-                <span class="sa">b</span><span class="s2">&quot;400&quot;</span><span class="p">,</span>
+                <span class="sa">b</span><span class="s2">"400"</span><span class="p">,</span>
                 <span class="n">orjson</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;workers&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
-                        <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="n">target</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
-                        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;FAILED&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;service&quot;</span><span class="p">:</span> <span class="n">service</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
-                        <span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">message</span><span class="p">],</span>
+                        <span class="s2">"workers"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="s2">"uuid"</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">),</span>
+                        <span class="s2">"target"</span><span class="p">:</span> <span class="n">target</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">),</span>
+                        <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"FAILED"</span><span class="p">,</span>
+                        <span class="s2">"service"</span><span class="p">:</span> <span class="n">service</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">),</span>
+                        <span class="s2">"errors"</span><span class="p">:</span> <span class="p">[</span><span class="n">message</span><span class="p">],</span>
                     <span class="p">}</span>
                 <span class="p">),</span>
             <span class="p">],</span>
@@ -10998,21 +10998,21 @@ Logs a debug message when sending the message to the worker.</p>
 
     <span class="c1"># inform client that JOB dispatched for POST / GET requests</span>
     <span class="k">if</span> <span class="n">command</span> <span class="ow">in</span> <span class="p">[</span><span class="n">NFP</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">NFP</span><span class="o">.</span><span class="n">GET</span><span class="p">]:</span>
-        <span class="n">w_addresses</span> <span class="o">=</span> <span class="p">[</span><span class="n">w</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">workers</span><span class="p">]</span>
+        <span class="n">w_addresses</span> <span class="o">=</span> <span class="p">[</span><span class="n">w</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">workers</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">send_to_client</span><span class="p">(</span>
             <span class="n">sender</span><span class="p">,</span>
             <span class="n">NFP</span><span class="o">.</span><span class="n">RESPONSE</span><span class="p">,</span>
             <span class="n">service</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="p">[</span>
                 <span class="n">uuid</span><span class="p">,</span>
-                <span class="sa">b</span><span class="s2">&quot;202&quot;</span><span class="p">,</span>
+                <span class="sa">b</span><span class="s2">"202"</span><span class="p">,</span>
                 <span class="n">orjson</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;workers&quot;</span><span class="p">:</span> <span class="n">w_addresses</span><span class="p">,</span>
-                        <span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
-                        <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="n">target</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
-                        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;DISPATCHED&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;service&quot;</span><span class="p">:</span> <span class="n">service</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
+                        <span class="s2">"workers"</span><span class="p">:</span> <span class="n">w_addresses</span><span class="p">,</span>
+                        <span class="s2">"uuid"</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">),</span>
+                        <span class="s2">"target"</span><span class="p">:</span> <span class="n">target</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">),</span>
+                        <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"DISPATCHED"</span><span class="p">,</span>
+                        <span class="s2">"service"</span><span class="p">:</span> <span class="n">service</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">),</span>
                     <span class="p">}</span>
                 <span class="p">),</span>
             <span class="p">],</span>
@@ -11250,7 +11250,7 @@ Logs a debug message when sending the message to the worker.</p>
 <span class="normal">988</span>
 <span class="normal">989</span>
 <span class="normal">990</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mmi_service</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Handle internal broker Management Interface (MMI) service tasks.</span>
 
 <span class="sd">    Parameters:</span>
@@ -11262,66 +11262,66 @@ Logs a debug message when sending the message to the worker.</p>
 
 <span class="sd">    Supported MMI Tasks:</span>
 
-<span class="sd">    - &quot;show_workers&quot;: Returns a list of workers with their details.</span>
-<span class="sd">    - &quot;get_stats&quot;: Returns validated broker process and messaging statistics.</span>
-<span class="sd">    - &quot;get_status&quot;: Returns broker identity, paths, and security configuration.</span>
-<span class="sd">    - &quot;show_broker_version&quot;: Returns the version of various packages and the platform.</span>
-<span class="sd">    - &quot;show_broker_inventory&quot;: Returns the broker&#39;s inventory.</span>
-<span class="sd">    - &quot;get_logs&quot;: Returns broker process JSONL log records.</span>
+<span class="sd">    - "show_workers": Returns a list of workers with their details.</span>
+<span class="sd">    - "get_stats": Returns validated broker process and messaging statistics.</span>
+<span class="sd">    - "get_status": Returns broker identity, paths, and security configuration.</span>
+<span class="sd">    - "show_broker_version": Returns the version of various packages and the platform.</span>
+<span class="sd">    - "show_broker_inventory": Returns the broker's inventory.</span>
+<span class="sd">    - "get_logs": Returns broker process JSONL log records.</span>
 
 <span class="sd">    The response is sent back to the client in a format of JSON formatted string.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;mmi.service.broker - processing request: sender &#39;</span><span class="si">{</span><span class="n">sender</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;command &#39;</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">&#39;, target &#39;</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;data &#39;</span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="s2">&#39;, uuid &#39;</span><span class="si">{</span><span class="n">uuid</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"mmi.service.broker - processing request: sender '</span><span class="si">{</span><span class="n">sender</span><span class="si">}</span><span class="s2">', "</span>
+        <span class="sa">f</span><span class="s2">"command '</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">', target '</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">', "</span>
+        <span class="sa">f</span><span class="s2">"data '</span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="s2">', uuid '</span><span class="si">{</span><span class="n">uuid</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">orjson</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-    <span class="n">task</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;task&quot;</span><span class="p">)</span>
-    <span class="n">kwargs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;kwargs&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"task"</span><span class="p">)</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kwargs"</span><span class="p">,</span> <span class="p">{})</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;MMI.service.broker - Processing task &#39;</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&#39; from sender &#39;</span><span class="si">{</span><span class="n">sender</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"MMI.service.broker - Processing task '</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">' from sender '</span><span class="si">{</span><span class="n">sender</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unsupported task &#39;</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
-    <span class="k">if</span> <span class="n">task</span> <span class="o">==</span> <span class="s2">&quot;show_workers&quot;</span><span class="p">:</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Unsupported task '</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">'"</span>
+    <span class="k">if</span> <span class="n">task</span> <span class="o">==</span> <span class="s2">"show_workers"</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="p">:</span>
             <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="p">{</span>
-                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">w</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;service&quot;</span><span class="p">:</span> <span class="n">w</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;alive&quot;</span> <span class="k">if</span> <span class="n">w</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;dead&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;holdtime&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">show_holdtime</span><span class="p">()),</span>
-                    <span class="s2">&quot;keepalives tx/rx&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">w</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">keepalives_send</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="n">w</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">keepalives_received</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;alive (s)&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">show_alive_for</span><span class="p">()),</span>
+                    <span class="s2">"name"</span><span class="p">:</span> <span class="n">w</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">),</span>
+                    <span class="s2">"service"</span><span class="p">:</span> <span class="n">w</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">),</span>
+                    <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"alive"</span> <span class="k">if</span> <span class="n">w</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"dead"</span><span class="p">,</span>
+                    <span class="s2">"holdtime"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">show_holdtime</span><span class="p">()),</span>
+                    <span class="s2">"keepalives tx/rx"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">w</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">keepalives_send</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="n">w</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">keepalives_received</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                    <span class="s2">"alive (s)"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">keepaliver</span><span class="o">.</span><span class="n">show_alive_for</span><span class="p">()),</span>
                 <span class="p">}</span>
                 <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="p">]</span>
             <span class="c1"># filter reply</span>
-            <span class="n">service</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;service&quot;</span><span class="p">)</span>
-            <span class="n">status</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">service</span> <span class="ow">and</span> <span class="n">service</span> <span class="o">!=</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
-                <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">ret</span> <span class="k">if</span> <span class="n">w</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">service</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">status</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;alive&quot;</span><span class="p">,</span> <span class="s2">&quot;dead&quot;</span><span class="p">]:</span>
-                <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">ret</span> <span class="k">if</span> <span class="n">w</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">status</span><span class="p">]</span>
+            <span class="n">service</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"service"</span><span class="p">)</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"status"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">service</span> <span class="ow">and</span> <span class="n">service</span> <span class="o">!=</span> <span class="s2">"all"</span><span class="p">:</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">ret</span> <span class="k">if</span> <span class="n">w</span><span class="p">[</span><span class="s2">"service"</span><span class="p">]</span> <span class="o">==</span> <span class="n">service</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">status</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"alive"</span><span class="p">,</span> <span class="s2">"dead"</span><span class="p">]:</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">ret</span> <span class="k">if</span> <span class="n">w</span><span class="p">[</span><span class="s2">"status"</span><span class="p">]</span> <span class="o">==</span> <span class="n">status</span><span class="p">]</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">ret</span><span class="p">:</span>
-                <span class="n">ret</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;service&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">}]</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">"service"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="s2">""</span><span class="p">}]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;service&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">}]</span>
-    <span class="k">elif</span> <span class="n">task</span> <span class="o">==</span> <span class="s2">&quot;get_stats&quot;</span><span class="p">:</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_stats</span><span class="p">()</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">task</span> <span class="o">==</span> <span class="s2">&quot;get_status&quot;</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">"service"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="s2">""</span><span class="p">}]</span>
+    <span class="k">elif</span> <span class="n">task</span> <span class="o">==</span> <span class="s2">"get_stats"</span><span class="p">:</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_stats</span><span class="p">()</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"json"</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">task</span> <span class="o">==</span> <span class="s2">"get_status"</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_status</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="n">task</span> <span class="o">==</span> <span class="s2">&quot;show_broker_version&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">task</span> <span class="o">==</span> <span class="s2">"show_broker_version"</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;norfab&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;pyyaml&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;pyzmq&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;psutil&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;pydantic&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;tornado&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;jinja2&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;python&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
-            <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
+            <span class="s2">"norfab"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+            <span class="s2">"pyyaml"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+            <span class="s2">"pyzmq"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+            <span class="s2">"psutil"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+            <span class="s2">"pydantic"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+            <span class="s2">"tornado"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+            <span class="s2">"jinja2"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+            <span class="s2">"python"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">" "</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s2">"platform"</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="c1"># get version of packages installed</span>
         <span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -11329,27 +11329,27 @@ Logs a debug message when sending the message to the worker.</p>
                 <span class="n">ret</span><span class="p">[</span><span class="n">pkg</span><span class="p">]</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="n">pkg</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">PackageNotFoundError</span><span class="p">:</span>
                 <span class="k">pass</span>
-    <span class="k">elif</span> <span class="n">task</span> <span class="o">==</span> <span class="s2">&quot;show_broker_inventory&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">task</span> <span class="o">==</span> <span class="s2">"show_broker_inventory"</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="n">task</span> <span class="o">==</span> <span class="s2">&quot;get_logs&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">task</span> <span class="o">==</span> <span class="s2">"get_logs"</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">read_jsonl_logs</span><span class="p">(</span>
-            <span class="n">logs_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">&quot;__norfab__&quot;</span><span class="p">,</span> <span class="s2">&quot;logs&quot;</span><span class="p">),</span>
-            <span class="n">log_files</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;broker-NFPBroker.jsonl&quot;</span><span class="p">],</span>
-            <span class="n">last</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;last&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
-            <span class="n">level</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;level&quot;</span><span class="p">),</span>
-            <span class="n">logger</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;logger&quot;</span><span class="p">),</span>
-            <span class="n">since</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;since&quot;</span><span class="p">),</span>
-            <span class="n">until</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;until&quot;</span><span class="p">),</span>
+            <span class="n">logs_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">"__norfab__"</span><span class="p">,</span> <span class="s2">"logs"</span><span class="p">),</span>
+            <span class="n">log_files</span><span class="o">=</span><span class="p">[</span><span class="s2">"broker-NFPBroker.jsonl"</span><span class="p">],</span>
+            <span class="n">last</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"last"</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+            <span class="n">level</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"level"</span><span class="p">),</span>
+            <span class="n">logger</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"logger"</span><span class="p">),</span>
+            <span class="n">since</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"since"</span><span class="p">),</span>
+            <span class="n">until</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"until"</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">ret</span><span class="p">:</span>
-            <span class="n">record</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">,</span> <span class="s2">&quot;broker&quot;</span><span class="p">)</span>
-            <span class="n">record</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;NFPBroker&quot;</span><span class="p">)</span>
+            <span class="n">record</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"role"</span><span class="p">,</span> <span class="s2">"broker"</span><span class="p">)</span>
+            <span class="n">record</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="s2">"NFPBroker"</span><span class="p">)</span>
     <span class="n">reply</span> <span class="o">=</span> <span class="n">orjson</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">send_to_client</span><span class="p">(</span>
-        <span class="n">sender</span><span class="p">,</span> <span class="n">NFP</span><span class="o">.</span><span class="n">RESPONSE</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;mmi.service.broker&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">uuid</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;200&quot;</span><span class="p">,</span> <span class="n">reply</span><span class="p">]</span>
+        <span class="n">sender</span><span class="p">,</span> <span class="n">NFP</span><span class="o">.</span><span class="n">RESPONSE</span><span class="p">,</span> <span class="sa">b</span><span class="s2">"mmi.service.broker"</span><span class="p">,</span> <span class="p">[</span><span class="n">uuid</span><span class="p">,</span> <span class="sa">b</span><span class="s2">"200"</span><span class="p">,</span> <span class="n">reply</span><span class="p">]</span>
     <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">send_to_client</span><span class="p">(</span>
-        <span class="n">sender</span><span class="p">,</span> <span class="n">NFP</span><span class="o">.</span><span class="n">MMI</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;mmi.service.broker&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">uuid</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;200&quot;</span><span class="p">,</span> <span class="n">reply</span><span class="p">]</span>
+        <span class="n">sender</span><span class="p">,</span> <span class="n">NFP</span><span class="o">.</span><span class="n">MMI</span><span class="p">,</span> <span class="sa">b</span><span class="s2">"mmi.service.broker"</span><span class="p">,</span> <span class="p">[</span><span class="n">uuid</span><span class="p">,</span> <span class="sa">b</span><span class="s2">"200"</span><span class="p">,</span> <span class="n">reply</span><span class="p">]</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>

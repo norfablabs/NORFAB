@@ -8882,7 +8882,7 @@ rotation, and an explicit acceptance of the larger blast radius.</p>
 <h2 id="identity-model">Identity model<a class="headerlink" href="#identity-model" title="Permanent link">¤</a></h2>
 <h3 id="human-principals">Human principals<a class="headerlink" href="#human-principals" title="Permanent link">¤</a></h3>
 <p>The stable principal identifier must be derived from the OIDC issuer and subject:</p>
-<div class="highlight"><pre><span></span><code>principal_id = &quot;oidc:&quot; + issuer + &quot;#&quot; + subject
+<div class="highlight"><pre><span></span><code>principal_id = "oidc:" + issuer + "#" + subject
 </code></pre></div>
 <p>For example:</p>
 <div class="highlight"><pre><span></span><code>oidc:https://example.okta.com/oauth2/default#00u123abc
@@ -8892,14 +8892,14 @@ rotation, and an explicit acceptance of the larger blast radius.</p>
 reassigned. They are useful accounting attributes but must not be policy keys.</p>
 <p>Suggested principal fields:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;principal_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oidc:https://id.example.com/realms/norfab#f4c2...&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;principal_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;human&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://id.example.com/realms/norfab&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;f4c2...&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;alice&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;display_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Alice Example&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;groups&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;network-operators&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="nt">"principal_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"oidc:https://id.example.com/realms/norfab#f4c2..."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"principal_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"human"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"issuer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://id.example.com/realms/norfab"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"subject"</span><span class="p">:</span><span class="w"> </span><span class="s2">"f4c2..."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alice"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"display_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Alice Example"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"groups"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"network-operators"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
 <span class="p">}</span>
 </code></pre></div>
 <h3 id="workload-principals">Workload principals<a class="headerlink" href="#workload-principals" title="Permanent link">¤</a></h3>
@@ -8943,39 +8943,39 @@ certificate issued by a public or enterprise CA trusted by clients.</p>
 </code></pre></div>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;fabric_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;brisbane-prod&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;brokers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"fabric_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"brisbane-prod"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"brokers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;broker_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;brisbane-prod-1&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tcp://broker-1.example.com:5555&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;curve_key&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;kid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;broker-1-curve-2026-06&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;public_key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Z85_ENCODED_KEY_1&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;not_before&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-01T00:00:00Z&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;not_after&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-09-01T00:00:00Z&quot;</span>
+<span class="w">      </span><span class="nt">"broker_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"brisbane-prod-1"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"endpoint"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tcp://broker-1.example.com:5555"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"curve_key"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"kid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"broker-1-curve-2026-06"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"public_key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Z85_ENCODED_KEY_1"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"not_before"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-06-01T00:00:00Z"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"not_after"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-09-01T00:00:00Z"</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;broker_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;brisbane-prod-2&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tcp://broker-2.example.com:5555&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;curve_key&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;kid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;broker-2-curve-2026-06&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;public_key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Z85_ENCODED_KEY_2&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;not_before&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-01T00:00:00Z&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;not_after&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-09-01T00:00:00Z&quot;</span>
+<span class="w">      </span><span class="nt">"broker_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"brisbane-prod-2"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"endpoint"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tcp://broker-2.example.com:5555"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"curve_key"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"kid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"broker-2-curve-2026-06"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"public_key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Z85_ENCODED_KEY_2"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"not_before"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-06-01T00:00:00Z"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"not_after"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-09-01T00:00:00Z"</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;oidc_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"oidc_issuers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.okta.com/oauth2/default&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;audience&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;api://norfab&quot;</span>
+<span class="w">      </span><span class="nt">"issuer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.okta.com/oauth2/default"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"audience"</span><span class="p">:</span><span class="w"> </span><span class="s2">"api://norfab"</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;aaa_api&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://aaa.example.com/api/v1&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;aaa_jwks_uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://aaa.example.com/.well-known/jwks.json&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;expires_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-14T12:00:00Z&quot;</span>
+<span class="w">  </span><span class="nt">"aaa_api"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://aaa.example.com/api/v1"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"aaa_jwks_uri"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://aaa.example.com/.well-known/jwks.json"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"expires_at"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-06-14T12:00:00Z"</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>The client validates HTTPS through its CA trust store, caches the signed
@@ -9028,24 +9028,24 @@ a short-lived signed Norfab access credential. The credential is audience
 restricted to the intended Norfab fabric and bound to the client's CURVE public
 key through a confirmation claim.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://aaa.example.com&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oidc:https://id.example.com#abc&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;norfab:brisbane-prod&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;01J...&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1781399025</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1781399925</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;principal_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oidc:https://id.example.com#abc&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;principal_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;human&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;alice&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;norfab:connect nornir:execute&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;roles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;network-operator&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;cnf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;norfab_curve_key_sha256&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;base64url...&quot;</span>
+<span class="w">  </span><span class="nt">"iss"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://aaa.example.com"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"sub"</span><span class="p">:</span><span class="w"> </span><span class="s2">"oidc:https://id.example.com#abc"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"aud"</span><span class="p">:</span><span class="w"> </span><span class="s2">"norfab:brisbane-prod"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"jti"</span><span class="p">:</span><span class="w"> </span><span class="s2">"01J..."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"iat"</span><span class="p">:</span><span class="w"> </span><span class="mi">1781399025</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"exp"</span><span class="p">:</span><span class="w"> </span><span class="mi">1781399925</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"principal_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"oidc:https://id.example.com#abc"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"principal_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"human"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alice"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"scope"</span><span class="p">:</span><span class="w"> </span><span class="s2">"norfab:connect nornir:execute"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"roles"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"network-operator"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"cnf"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"norfab_curve_key_sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"base64url..."</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;auth_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-14T01:23:45Z&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;acr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:example:aal2&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;amr&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;pwd&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;otp&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;policy_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256:...&quot;</span>
+<span class="w">  </span><span class="nt">"auth_time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-06-14T01:23:45Z"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"acr"</span><span class="p">:</span><span class="w"> </span><span class="s2">"urn:example:aal2"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"amr"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"pwd"</span><span class="p">,</span><span class="w"> </span><span class="s2">"otp"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"policy_version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sha256:..."</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>The exact confirmation-claim profile must be specified and tested. It should
@@ -9195,11 +9195,11 @@ logs and user interfaces.</p>
 </code></pre></div>
 <p><code>request_metadata</code> is a versioned JSON object:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;task&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cli&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;created_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-14T01:25:00Z&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;content_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;trace_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span>
+<span class="w">  </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"task"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cli"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"created_at"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-06-14T01:25:00Z"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"content_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"application/json"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"trace_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>The client presents the signed AAA credential but cannot add or override
@@ -9244,18 +9244,18 @@ soft state and is rebuilt after reconnect.</p>
 must still version and validate the frame explicitly.</p>
 <p>Example <code>principal_context</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;principal_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oidc:https://id.example.com#abc&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;principal_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;human&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;alice&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;access_jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;01J...&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;credential_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;curve-key-17&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;auth_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-14T01:23:45Z&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;acr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:example:aal2&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;amr&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;pwd&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;otp&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;decision_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;authz-01J...&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;policy_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256:...&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;trace_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span>
+<span class="w">  </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"principal_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"oidc:https://id.example.com#abc"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"principal_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"human"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alice"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"access_jti"</span><span class="p">:</span><span class="w"> </span><span class="s2">"01J..."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"credential_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"curve-key-17"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"auth_time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-06-14T01:23:45Z"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"acr"</span><span class="p">:</span><span class="w"> </span><span class="s2">"urn:example:aal2"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"amr"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"pwd"</span><span class="p">,</span><span class="w"> </span><span class="s2">"otp"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"decision_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"authz-01J..."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"policy_version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sha256:..."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"trace_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>The CURVE broker-to-worker connection authenticates and protects the context in
@@ -9298,39 +9298,39 @@ requested service, worker target, command, task, and routing decision.
 <h3 id="policy-input">Policy input<a class="headerlink" href="#policy-input" title="Permanent link">¤</a></h3>
 <p>The normalized authorization request should resemble:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oidc:https://id.example.com#abc&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;human&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;groups&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;network-operators&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;acr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;urn:example:aal2&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;auth_age_seconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span>
+<span class="w">  </span><span class="nt">"subject"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"oidc:https://id.example.com#abc"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"human"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"groups"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"network-operators"</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"acr"</span><span class="p">:</span><span class="w"> </span><span class="s2">"urn:example:aal2"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"auth_age_seconds"</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;POST&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;task&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cfg&quot;</span>
+<span class="w">  </span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"POST"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"service"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nornir"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"task"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cfg"</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;workers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;environment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span>
+<span class="w">  </span><span class="nt">"resource"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"workers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"nornir-worker-1"</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"environment"</span><span class="p">:</span><span class="w"> </span><span class="s2">"production"</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;source_ip&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;192.0.2.10&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-14T01:25:00Z&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;request_uuid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span>
+<span class="w">  </span><span class="nt">"context"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"source_ip"</span><span class="p">:</span><span class="w"> </span><span class="s2">"192.0.2.10"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-06-14T01:25:00Z"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"request_uuid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>The decision should include more than a Boolean:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;allow&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;decision_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;authz-01J...&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;matched_policy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;network-operator-config&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;policy_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256:...&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;allowed_workers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;obligations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;audit_payload_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;require_fresh_auth_seconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span>
+<span class="w">  </span><span class="nt">"allow"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"decision_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"authz-01J..."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"matched_policy"</span><span class="p">:</span><span class="w"> </span><span class="s2">"network-operator-config"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"policy_version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sha256:..."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"allowed_workers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"nornir-worker-1"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"obligations"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"audit_payload_hash"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"require_fresh_auth_seconds"</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -9391,9 +9391,9 @@ deployment explicitly enables that behavior.</p>
 <p>The existing <code>Task</code> metadata can later declare authorization requirements:</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">authorization</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;permission&quot;</span><span class="p">:</span> <span class="s2">&quot;nornir/cfg:execute&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;assurance&quot;</span><span class="p">:</span> <span class="s2">&quot;aal2&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;fresh_auth_seconds&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
+        <span class="s2">"permission"</span><span class="p">:</span> <span class="s2">"nornir/cfg:execute"</span><span class="p">,</span>
+        <span class="s2">"assurance"</span><span class="p">:</span> <span class="s2">"aal2"</span><span class="p">,</span>
+        <span class="s2">"fresh_auth_seconds"</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
     <span class="p">}</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">cfg</span><span class="p">(</span><span class="o">...</span><span class="p">):</span>

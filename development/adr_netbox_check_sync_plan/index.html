@@ -7288,18 +7288,18 @@ per-device report.</p>
 <h2 id="result-format">Result Format<a class="headerlink" href="#result-format" title="Permanent link">¤</a></h2>
 <p><code>Result.result</code> — per-device sync summary:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;&lt;device&gt;&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="kc">True</span> <span class="o">|</span> <span class="kc">False</span>
+    <span class="s2">"&lt;device&gt;"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"interfaces"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"in_sync"</span><span class="p">:</span> <span class="kc">True</span> <span class="o">|</span> <span class="kc">False</span>
         <span class="p">},</span>
-        <span class="s2">&quot;mac_addresses&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="kc">True</span> <span class="o">|</span> <span class="kc">False</span>
+        <span class="s2">"mac_addresses"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"in_sync"</span><span class="p">:</span> <span class="kc">True</span> <span class="o">|</span> <span class="kc">False</span>
         <span class="p">},</span>
-        <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="kc">True</span> <span class="o">|</span> <span class="kc">False</span>
+        <span class="s2">"ip_addresses"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"in_sync"</span><span class="p">:</span> <span class="kc">True</span> <span class="o">|</span> <span class="kc">False</span>
         <span class="p">},</span>
-        <span class="s2">&quot;bgp_peerings&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="kc">True</span> <span class="o">|</span> <span class="kc">False</span>
+        <span class="s2">"bgp_peerings"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"in_sync"</span><span class="p">:</span> <span class="kc">True</span> <span class="o">|</span> <span class="kc">False</span>
         <span class="p">},</span>
     <span class="p">}</span>
 <span class="p">}</span>
@@ -7315,10 +7315,10 @@ pattern of <code>SyncDeviceInterfacesInput</code> in <code>interfaces_tasks.py</
 <div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CheckDeviceSyncInput</span><span class="p">(</span><span class="n">NetboxCommonArgs</span><span class="p">,</span> <span class="n">use_enum_values</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">populate_by_name</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
     <span class="n">timeout</span><span class="p">:</span> <span class="n">StrictInt</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
-    <span class="n">check_interfaces</span><span class="p">:</span> <span class="n">StrictBool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;check-interfaces&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
-    <span class="n">check_mac_addresses</span><span class="p">:</span> <span class="n">StrictBool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;check-mac-addresses&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
-    <span class="n">check_ip_addresses</span><span class="p">:</span> <span class="n">StrictBool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;check-ip-addresses&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
-    <span class="n">check_bgp_peerings</span><span class="p">:</span> <span class="n">StrictBool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;check-bgp-peerings&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+    <span class="n">check_interfaces</span><span class="p">:</span> <span class="n">StrictBool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s2">"check-interfaces"</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+    <span class="n">check_mac_addresses</span><span class="p">:</span> <span class="n">StrictBool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s2">"check-mac-addresses"</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+    <span class="n">check_ip_addresses</span><span class="p">:</span> <span class="n">StrictBool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s2">"check-ip-addresses"</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+    <span class="n">check_bgp_peerings</span><span class="p">:</span> <span class="n">StrictBool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s2">"check-bgp-peerings"</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
 </code></pre></div>
 <hr />
 <h2 id="picle-shell">PICLE Shell<a class="headerlink" href="#picle-shell" title="Permanent link">¤</a></h2>

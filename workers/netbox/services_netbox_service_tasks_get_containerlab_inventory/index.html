@@ -7329,31 +7329,31 @@
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">"./inventory.yaml"</span><span class="p">)</span>
 <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
 <span class="c1"># build inventory for explicit devices</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_containerlab_inventory&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"get_containerlab_inventory"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fceos4&quot;</span><span class="p">,</span> <span class="s2">&quot;fceos5&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;lab-demo&quot;</span><span class="p">,</span>
+        <span class="s2">"devices"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"fceos4"</span><span class="p">,</span> <span class="s2">"fceos5"</span><span class="p">],</span>
+        <span class="s2">"lab_name"</span><span class="p">:</span> <span class="s2">"lab-demo"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
 <span class="c1"># build inventory from NetBox filters</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_containerlab_inventory&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="s2">"netbox"</span><span class="p">,</span>
+    <span class="s2">"get_containerlab_inventory"</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">"any"</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span> <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;leaf&quot;</span><span class="p">}],</span>
-        <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;lab-demo&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ipv4_subnet&quot;</span><span class="p">:</span> <span class="s2">&quot;172.20.20.0/24&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos:latest&quot;</span><span class="p">,</span>
+        <span class="s2">"filters"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"site"</span><span class="p">:</span> <span class="s2">"lab"</span><span class="p">,</span> <span class="s2">"role"</span><span class="p">:</span> <span class="s2">"leaf"</span><span class="p">}],</span>
+        <span class="s2">"lab_name"</span><span class="p">:</span> <span class="s2">"lab-demo"</span><span class="p">,</span>
+        <span class="s2">"ipv4_subnet"</span><span class="p">:</span> <span class="s2">"172.20.20.0/24"</span><span class="p">,</span>
+        <span class="s2">"image"</span><span class="p">:</span> <span class="s2">"ceos:latest"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
@@ -7370,8 +7370,8 @@ root
 <span class="w">    </span>└──<span class="w"> </span>get:<span class="w">    </span>Query<span class="w"> </span>data<span class="w"> </span>from<span class="w"> </span>Netbox
 <span class="w">        </span>└──<span class="w"> </span>containerlab-inventory:<span class="w">    </span>Query<span class="w"> </span>Netbox<span class="w"> </span>and<span class="w"> </span>construct<span class="w"> </span>Containerlab<span class="w"> </span>inventory
 <span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
-<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">'any'</span>
+<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">'False'</span>
 <span class="w">            </span>├──<span class="w"> </span>lab-name:<span class="w">    </span>Lab<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>generate<span class="w"> </span>lab<span class="w"> </span>inventory<span class="w"> </span><span class="k">for</span>
 <span class="w">            </span>├──<span class="w"> </span>tenant:<span class="w">    </span>Tenant<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>generate<span class="w"> </span>lab<span class="w"> </span>inventory<span class="w"> </span><span class="k">for</span>
 <span class="w">            </span>│<span class="w">   </span>├──<span class="w"> </span>tenant:<span class="w">    </span>Filter<span class="w"> </span>devices<span class="w"> </span>by<span class="w"> </span>tenants
@@ -7384,12 +7384,12 @@ root
 <span class="w">            </span>│<span class="w">   </span>├──<span class="w"> </span>status:<span class="w">    </span>Filter<span class="w"> </span>devices<span class="w"> </span>by<span class="w"> </span>statuses
 <span class="w">            </span>│<span class="w">   </span>└──<span class="w"> </span>tag:<span class="w">    </span>Filter<span class="w"> </span>devices<span class="w"> </span>by<span class="w"> </span>tags
 <span class="w">            </span>├──<span class="w"> </span>devices:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>devices<span class="w"> </span>to<span class="w"> </span>generate<span class="w"> </span>lab<span class="w"> </span>inventory<span class="w"> </span><span class="k">for</span>
-<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">            </span>├──<span class="w"> </span>netbox-instance:<span class="w">    </span>Name<span class="w"> </span>of<span class="w"> </span>Netbox<span class="w"> </span>instance<span class="w"> </span>to<span class="w"> </span>pull<span class="w"> </span>inventory<span class="w"> </span>from
 <span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>NetBox<span class="w"> </span>branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
-<span class="w">            </span>├──<span class="w"> </span>ipv4-subnet:<span class="w">    </span>IPv4<span class="w"> </span>management<span class="w"> </span>subnet<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="k">for</span><span class="w"> </span>lab,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;172.100.100.0/24&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>ipv4-subnet:<span class="w">    </span>IPv4<span class="w"> </span>management<span class="w"> </span>subnet<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="k">for</span><span class="w"> </span>lab,<span class="w"> </span>default<span class="w"> </span><span class="s1">'172.100.100.0/24'</span>
 <span class="w">            </span>├──<span class="w"> </span>image:<span class="w">    </span>Docker<span class="w"> </span>image<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="k">for</span><span class="w"> </span>all<span class="w"> </span>nodes
-<span class="w">            </span>└──<span class="w"> </span>ports:<span class="w">    </span>Range<span class="w"> </span>of<span class="w"> </span>TCP/UDP<span class="w"> </span>ports<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="k">for</span><span class="w"> </span>nodes,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;[12000, 13000]&#39;</span>
+<span class="w">            </span>└──<span class="w"> </span>ports:<span class="w">    </span>Range<span class="w"> </span>of<span class="w"> </span>TCP/UDP<span class="w"> </span>ports<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="k">for</span><span class="w"> </span>nodes,<span class="w"> </span>default<span class="w"> </span><span class="s1">'[12000, 13000]'</span>
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
@@ -7406,23 +7406,23 @@ nf#
 <p>Containerlab node details must be defined under device configuration
 context <code>norfab.containerlab</code> path, for example:</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;norfab&quot;: {
-        &quot;containerlab&quot;: {
-            &quot;kind&quot;: &quot;ceos&quot;,
-            &quot;image&quot;: &quot;ceos:latest&quot;,
-            &quot;mgmt-ipv4&quot;: &quot;172.100.100.10/24&quot;,
-            &quot;ports&quot;: [
+    "norfab": {
+        "containerlab": {
+            "kind": "ceos",
+            "image": "ceos:latest",
+            "mgmt-ipv4": "172.100.100.10/24",
+            "ports": [
                 {10000: 22},
                 {10001: 830}
             ],
 
             ... any other node parameters ...
 
-            &quot;interfaces_rename&quot;: [
+            "interfaces_rename": [
                 {
-                    &quot;find&quot;: &quot;eth&quot;,
-                    &quot;replace&quot;: &quot;Eth&quot;,
-                    &quot;use_regex&quot;: false
+                    "find": "eth",
+                    "replace": "Eth",
+                    "use_regex": false
                 }
             ]
         }
@@ -8126,14 +8126,14 @@ NetBox instance and branch.</p>
 <span class="normal">428</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetContainerlabInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetContainerlabInventoryResult</span><span class="p">,</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Containerlab Inventory&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Get Containerlab Inventory"</span><span class="p">,</span>
+            <span class="s2">"readOnlyHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"destructiveHint"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"idempotentHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"openWorldHint"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
 <span class="p">)</span>
@@ -8147,12 +8147,12 @@ NetBox instance and branch.</p>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">image</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">ipv4_subnet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;172.100.100.0/24&quot;</span><span class="p">,</span>
+    <span class="n">ipv4_subnet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"172.100.100.0/24"</span><span class="p">,</span>
     <span class="n">ports</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12000</span><span class="p">,</span> <span class="mi">15000</span><span class="p">),</span>
     <span class="n">ports_map</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">cache</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Retrieve and construct Containerlab inventory from NetBox data.</span>
 
 <span class="sd">    Containerlab node details must be defined under device configuration</span>
@@ -8160,23 +8160,23 @@ NetBox instance and branch.</p>
 
 <span class="sd">    ```</span>
 <span class="sd">    {</span>
-<span class="sd">        &quot;norfab&quot;: {</span>
-<span class="sd">            &quot;containerlab&quot;: {</span>
-<span class="sd">                &quot;kind&quot;: &quot;ceos&quot;,</span>
-<span class="sd">                &quot;image&quot;: &quot;ceos:latest&quot;,</span>
-<span class="sd">                &quot;mgmt-ipv4&quot;: &quot;172.100.100.10/24&quot;,</span>
-<span class="sd">                &quot;ports&quot;: [</span>
+<span class="sd">        "norfab": {</span>
+<span class="sd">            "containerlab": {</span>
+<span class="sd">                "kind": "ceos",</span>
+<span class="sd">                "image": "ceos:latest",</span>
+<span class="sd">                "mgmt-ipv4": "172.100.100.10/24",</span>
+<span class="sd">                "ports": [</span>
 <span class="sd">                    {10000: 22},</span>
 <span class="sd">                    {10001: 830}</span>
 <span class="sd">                ],</span>
 
 <span class="sd">                ... any other node parameters ...</span>
 
-<span class="sd">                &quot;interfaces_rename&quot;: [</span>
+<span class="sd">                "interfaces_rename": [</span>
 <span class="sd">                    {</span>
-<span class="sd">                        &quot;find&quot;: &quot;eth&quot;,</span>
-<span class="sd">                        &quot;replace&quot;: &quot;Eth&quot;,</span>
-<span class="sd">                        &quot;use_regex&quot;: false</span>
+<span class="sd">                        "find": "eth",</span>
+<span class="sd">                        "replace": "Eth",</span>
+<span class="sd">                        "use_regex": false</span>
 <span class="sd">                    }</span>
 <span class="sd">                ]</span>
 <span class="sd">            }</span>
@@ -8224,8 +8224,8 @@ NetBox instance and branch.</p>
 
 <span class="sd">            - True: Use data stored in cache if it is up to date, refresh it otherwise.</span>
 <span class="sd">            - False: Do not use cache and do not update cache.</span>
-<span class="sd">            - &quot;refresh&quot;: Ignore data in cache and replace it with data fetched from Netbox.</span>
-<span class="sd">            - &quot;force&quot;: Use data in cache without checking if it is up to date.</span>
+<span class="sd">            - "refresh": Ignore data in cache and replace it with data fetched from Netbox.</span>
+<span class="sd">            - "force": Use data in cache without checking if it is up to date.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Containerlab inventory dictionary containing lab topology data</span>
@@ -8233,7 +8233,7 @@ NetBox instance and branch.</p>
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: If the requested tenant does not exist in the selected</span>
 <span class="sd">            NetBox instance and branch.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">nodes</span><span class="p">,</span> <span class="n">links</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">[]</span>
@@ -8250,18 +8250,18 @@ NetBox instance and branch.</p>
     <span class="k">if</span> <span class="n">tenant</span><span class="p">:</span>
         <span class="n">nb_tenant</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">tenancy</span><span class="o">.</span><span class="n">tenants</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">tenant</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">nb_tenant</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NetBox tenant &#39;</span><span class="si">{</span><span class="n">tenant</span><span class="si">}</span><span class="s2">&#39; not found in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"NetBox tenant '</span><span class="si">{</span><span class="n">tenant</span><span class="si">}</span><span class="s2">' not found in '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
         <span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span> <span class="ow">or</span> <span class="p">[{}]</span>
-        <span class="n">filters</span> <span class="o">=</span> <span class="p">[{</span><span class="o">**</span><span class="n">item</span><span class="p">,</span> <span class="s2">&quot;tenant_id&quot;</span><span class="p">:</span> <span class="n">nb_tenant</span><span class="o">.</span><span class="n">id</span><span class="p">}</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">]</span>
+        <span class="n">filters</span> <span class="o">=</span> <span class="p">[{</span><span class="o">**</span><span class="n">item</span><span class="p">,</span> <span class="s2">"tenant_id"</span><span class="p">:</span> <span class="n">nb_tenant</span><span class="o">.</span><span class="n">id</span><span class="p">}</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">]</span>
 
     <span class="c1"># construct inventory</span>
     <span class="n">inventory</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">lab_name</span><span class="p">,</span>
-        <span class="s2">&quot;topology&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;nodes&quot;</span><span class="p">:</span> <span class="n">nodes</span><span class="p">,</span> <span class="s2">&quot;links&quot;</span><span class="p">:</span> <span class="n">links</span><span class="p">},</span>
-        <span class="s2">&quot;mgmt&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ipv4-subnet&quot;</span><span class="p">:</span> <span class="n">ipv4_subnet</span><span class="p">,</span> <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;br-</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">},</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="n">lab_name</span><span class="p">,</span>
+        <span class="s2">"topology"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"nodes"</span><span class="p">:</span> <span class="n">nodes</span><span class="p">,</span> <span class="s2">"links"</span><span class="p">:</span> <span class="n">links</span><span class="p">},</span>
+        <span class="s2">"mgmt"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"ipv4-subnet"</span><span class="p">:</span> <span class="n">ipv4_subnet</span><span class="p">,</span> <span class="s2">"network"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"br-</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">"</span><span class="p">},</span>
     <span class="p">}</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_containerlab_inventory&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_containerlab_inventory"</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="n">inventory</span><span class="p">,</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
     <span class="p">)</span>
@@ -8270,28 +8270,28 @@ NetBox instance and branch.</p>
 
     <span class="c1"># run checks</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">available_ips</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Need IPs to allocate, but &#39;</span><span class="si">{</span><span class="n">ipv4_subnet</span><span class="si">}</span><span class="s2">&#39; given&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Need IPs to allocate, but '</span><span class="si">{</span><span class="n">ipv4_subnet</span><span class="si">}</span><span class="s2">' given"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ports</span><span class="p">:</span>
         <span class="n">available_ports</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">ports</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ports</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Need ports to allocate, but &#39;</span><span class="si">{</span><span class="n">ports</span><span class="si">}</span><span class="s2">&#39; given&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Need ports to allocate, but '</span><span class="si">{</span><span class="n">ports</span><span class="si">}</span><span class="s2">' given"</span><span class="p">)</span>
 
     <span class="c1"># check Netbox status</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;checking NetBox status for &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"checking NetBox status for '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
     <span class="n">netbox_status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_netbox_status</span><span class="p">(</span><span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">netbox_status</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">instance</span><span class="p">][</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">netbox_status</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">instance</span><span class="p">][</span><span class="s2">"status"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;NetBox instance &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; status check failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
+            <span class="sa">f</span><span class="s2">"NetBox instance '</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">' status check failed"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Netbox status is no good: </span><span class="si">{</span><span class="n">netbox_status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"Netbox status is no good: </span><span class="si">{</span><span class="n">netbox_status</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># retrieve devices data</span>
     <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Fetching devices from </span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2"> Netbox instance, devices &#39;</span><span class="si">{</span><span class="n">devices</span><span class="si">}</span><span class="s2">&#39;, filters &#39;</span><span class="si">{</span><span class="n">filters</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">"Fetching devices from </span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2"> Netbox instance, devices '</span><span class="si">{</span><span class="n">devices</span><span class="si">}</span><span class="s2">', filters '</span><span class="si">{</span><span class="n">filters</span><span class="si">}</span><span class="s2">'"</span>
     <span class="p">)</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;fetching devices data from Netbox&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"fetching devices data from Netbox"</span><span class="p">)</span>
     <span class="n">nb_devices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_devices</span><span class="p">(</span>
         <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
         <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
@@ -8301,79 +8301,79 @@ NetBox instance and branch.</p>
         <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">nb_devices</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;failed to fetch devices data from NetBox&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"failed to fetch devices data from NetBox"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nb_devices</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nb_devices</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) for Containerlab inventory&quot;</span>
+        <span class="sa">f</span><span class="s2">"processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nb_devices</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) for Containerlab inventory"</span>
     <span class="p">)</span>
 
     <span class="c1"># form Containerlab nodes inventory</span>
     <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">nb_devices</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">node</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s2">&quot;config_context&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;norfab&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s2">"config_context"</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"norfab"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"containerlab"</span><span class="p">,</span> <span class="p">{})</span>
         <span class="c1"># populate node parameters</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;kind&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">device</span><span class="p">[</span><span class="s2">&quot;platform&quot;</span><span class="p">]:</span>
-                <span class="n">node</span><span class="p">[</span><span class="s2">&quot;kind&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s2">&quot;platform&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kind"</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">device</span><span class="p">[</span><span class="s2">"platform"</span><span class="p">]:</span>
+                <span class="n">node</span><span class="p">[</span><span class="s2">"kind"</span><span class="p">]</span> <span class="o">=</span> <span class="n">device</span><span class="p">[</span><span class="s2">"platform"</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2"> - has no &#39;kind&#39; of &#39;platform&#39; defined, skipping&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2"> - has no 'kind' of 'platform' defined, skipping"</span>
                 <span class="p">)</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span><span class="p">)</span>
                 <span class="k">continue</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"image"</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">image</span><span class="p">:</span>
-                <span class="n">node</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">image</span>
+                <span class="n">node</span><span class="p">[</span><span class="s2">"image"</span><span class="p">]</span> <span class="o">=</span> <span class="n">image</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">node</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;kind&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:latest&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mgmt-ipv4&quot;</span><span class="p">):</span>
+                <span class="n">node</span><span class="p">[</span><span class="s2">"image"</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">node</span><span class="p">[</span><span class="s1">'kind'</span><span class="p">]</span><span class="si">}</span><span class="s2">:latest"</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"mgmt-ipv4"</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">available_ips</span><span class="p">:</span>
-                <span class="n">node</span><span class="p">[</span><span class="s2">&quot;mgmt-ipv4&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">available_ips</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">node</span><span class="p">[</span><span class="s2">"mgmt-ipv4"</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">available_ips</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Run out of IP addresses to allocate&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ports&quot;</span><span class="p">):</span>
-            <span class="n">node</span><span class="p">[</span><span class="s2">&quot;ports&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"Run out of IP addresses to allocate"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ports"</span><span class="p">):</span>
+            <span class="n">node</span><span class="p">[</span><span class="s2">"ports"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="c1"># use ports map</span>
             <span class="k">if</span> <span class="n">ports_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_name</span><span class="p">):</span>
-                <span class="n">node</span><span class="p">[</span><span class="s2">&quot;ports&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ports_map</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span>
+                <span class="n">node</span><span class="p">[</span><span class="s2">"ports"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ports_map</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span>
             <span class="c1"># allocate next-available ports</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="p">[</span>
-                    <span class="s2">&quot;22/tcp&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;23/tcp&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;80/tcp&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;161/udp&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;443/tcp&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;830/tcp&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;8080/tcp&quot;</span><span class="p">,</span>
+                    <span class="s2">"22/tcp"</span><span class="p">,</span>
+                    <span class="s2">"23/tcp"</span><span class="p">,</span>
+                    <span class="s2">"80/tcp"</span><span class="p">,</span>
+                    <span class="s2">"161/udp"</span><span class="p">,</span>
+                    <span class="s2">"443/tcp"</span><span class="p">,</span>
+                    <span class="s2">"830/tcp"</span><span class="p">,</span>
+                    <span class="s2">"8080/tcp"</span><span class="p">,</span>
                 <span class="p">]:</span>
                     <span class="k">if</span> <span class="n">available_ports</span><span class="p">:</span>
-                        <span class="n">node</span><span class="p">[</span><span class="s2">&quot;ports&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">available_ports</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="n">node</span><span class="p">[</span><span class="s2">"ports"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">available_ports</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                            <span class="s2">&quot;Run out of TCP / UDP ports to allocate.&quot;</span>
+                            <span class="s2">"Run out of TCP / UDP ports to allocate."</span>
                         <span class="p">)</span>
 
         <span class="c1"># save node content</span>
         <span class="n">nodes</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;node added </span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"node added </span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="c1"># return if no nodes found for provided parameters</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">nodes</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - No devices found in Netbox&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - No devices found in Netbox"</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - No devices found in Netbox, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;devices - &#39;</span><span class="si">{</span><span class="n">devices</span><span class="si">}</span><span class="s2">&#39;, filters - &#39;</span><span class="si">{</span><span class="n">filters</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - No devices found in Netbox, "</span>
+            <span class="sa">f</span><span class="s2">"devices - '</span><span class="si">{</span><span class="n">devices</span><span class="si">}</span><span class="s2">', filters - '</span><span class="si">{</span><span class="n">filters</span><span class="si">}</span><span class="s2">'"</span>
         <span class="p">]</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="n">msg</span><span class="p">]</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no Containerlab nodes produced&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no Containerlab nodes produced"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;fetching connections data from Netbox&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"fetching connections data from Netbox"</span><span class="p">)</span>
 
     <span class="c1"># query interface connections data from netbox</span>
     <span class="n">nb_connections</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_connections</span><span class="p">(</span>
@@ -8384,55 +8384,55 @@ NetBox instance and branch.</p>
         <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">nb_connections</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;connection retrieval completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"connection retrieval completed with errors"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nb_connections</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
     <span class="c1"># save connections data to links inventory</span>
     <span class="k">while</span> <span class="n">nb_connections</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
         <span class="n">device</span><span class="p">,</span> <span class="n">device_connections</span> <span class="o">=</span> <span class="n">nb_connections</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">interface</span><span class="p">,</span> <span class="n">connection</span> <span class="ow">in</span> <span class="n">device_connections</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># skip non ethernet links</span>
-            <span class="k">if</span> <span class="n">connection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;termination_type&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;interface&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">connection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"termination_type"</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"interface"</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="c1"># skip orphaned links</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">connection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;remote_interface&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">connection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"remote_interface"</span><span class="p">):</span>
                 <span class="k">continue</span>
             <span class="c1"># skip connections to devices that are not part of lab</span>
-            <span class="k">if</span> <span class="n">connection</span><span class="p">[</span><span class="s2">&quot;remote_device&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">connection</span><span class="p">[</span><span class="s2">"remote_device"</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="n">endpoints</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">link</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;veth&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;endpoints&quot;</span><span class="p">:</span> <span class="n">endpoints</span><span class="p">,</span>
+                <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"veth"</span><span class="p">,</span>
+                <span class="s2">"endpoints"</span><span class="p">:</span> <span class="n">endpoints</span><span class="p">,</span>
             <span class="p">}</span>
             <span class="c1"># add A node</span>
             <span class="n">endpoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="p">{</span>
-                    <span class="s2">&quot;node&quot;</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span>
-                    <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">interface</span><span class="p">,</span>
+                    <span class="s2">"node"</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span>
+                    <span class="s2">"interface"</span><span class="p">:</span> <span class="n">interface</span><span class="p">,</span>
                 <span class="p">}</span>
             <span class="p">)</span>
             <span class="c1"># add B node</span>
-            <span class="n">endpoints</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;node&quot;</span><span class="p">:</span> <span class="n">connection</span><span class="p">[</span><span class="s2">&quot;remote_device&quot;</span><span class="p">]})</span>
-            <span class="k">if</span> <span class="n">connection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;breakout&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="n">endpoints</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">connection</span><span class="p">[</span><span class="s2">&quot;remote_interface&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">endpoints</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"node"</span><span class="p">:</span> <span class="n">connection</span><span class="p">[</span><span class="s2">"remote_device"</span><span class="p">]})</span>
+            <span class="k">if</span> <span class="n">connection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"breakout"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">endpoints</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">"interface"</span><span class="p">]</span> <span class="o">=</span> <span class="n">connection</span><span class="p">[</span><span class="s2">"remote_interface"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">endpoints</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">connection</span><span class="p">[</span><span class="s2">&quot;remote_interface&quot;</span><span class="p">]</span>
+                <span class="n">endpoints</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">"interface"</span><span class="p">]</span> <span class="o">=</span> <span class="n">connection</span><span class="p">[</span><span class="s2">"remote_interface"</span><span class="p">]</span>
             <span class="c1"># save the link</span>
             <span class="n">a_end</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">endpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;node&quot;</span><span class="p">],</span>
-                <span class="n">endpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;interface&quot;</span><span class="p">],</span>
+                <span class="n">endpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"node"</span><span class="p">],</span>
+                <span class="n">endpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"interface"</span><span class="p">],</span>
             <span class="p">)</span>
             <span class="n">b_end</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">endpoints</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;node&quot;</span><span class="p">],</span>
-                <span class="n">endpoints</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;interface&quot;</span><span class="p">],</span>
+                <span class="n">endpoints</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">"node"</span><span class="p">],</span>
+                <span class="n">endpoints</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">"interface"</span><span class="p">],</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">a_end</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">endpts_done</span> <span class="ow">and</span> <span class="n">b_end</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">endpts_done</span><span class="p">:</span>
                 <span class="n">endpts_done</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a_end</span><span class="p">)</span>
                 <span class="n">endpts_done</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">b_end</span><span class="p">)</span>
                 <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;link added </span><span class="si">{</span><span class="n">endpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;node&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">endpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;interface&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot; - </span><span class="si">{</span><span class="n">endpoints</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;node&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">endpoints</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;interface&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"link added </span><span class="si">{</span><span class="n">endpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">'node'</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">endpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">'interface'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+                    <span class="sa">f</span><span class="s2">" - </span><span class="si">{</span><span class="n">endpoints</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">'node'</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">endpoints</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">'interface'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
 
     <span class="c1"># query circuits connections data from netbox</span>
@@ -8444,92 +8444,92 @@ NetBox instance and branch.</p>
         <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">nb_circuits</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;circuit retrieval completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"circuit retrieval completed with errors"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nb_circuits</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-    <span class="c1"># save circuits data to hosts&#39; inventory</span>
+    <span class="c1"># save circuits data to hosts' inventory</span>
     <span class="k">while</span> <span class="n">nb_circuits</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
         <span class="n">device</span><span class="p">,</span> <span class="n">device_circuits</span> <span class="o">=</span> <span class="n">nb_circuits</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">cid</span><span class="p">,</span> <span class="n">circuit</span> <span class="ow">in</span> <span class="n">device_circuits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># skip circuits not connected to devices</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">circuit</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;remote_interface&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">circuit</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"remote_interface"</span><span class="p">):</span>
                 <span class="k">continue</span>
             <span class="c1"># skip circuits to devices that are not part of lab</span>
-            <span class="k">if</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">&quot;remote_device&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">"remote_device"</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="n">endpoints</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">link</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;veth&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;endpoints&quot;</span><span class="p">:</span> <span class="n">endpoints</span><span class="p">,</span>
+                <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"veth"</span><span class="p">,</span>
+                <span class="s2">"endpoints"</span><span class="p">:</span> <span class="n">endpoints</span><span class="p">,</span>
             <span class="p">}</span>
             <span class="c1"># add A node</span>
             <span class="n">endpoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="p">{</span>
-                    <span class="s2">&quot;node&quot;</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span>
-                    <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">],</span>
+                    <span class="s2">"node"</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span>
+                    <span class="s2">"interface"</span><span class="p">:</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">"interface"</span><span class="p">],</span>
                 <span class="p">}</span>
             <span class="p">)</span>
             <span class="c1"># add B node</span>
             <span class="n">endpoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="p">{</span>
-                    <span class="s2">&quot;node&quot;</span><span class="p">:</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">&quot;remote_device&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">&quot;remote_interface&quot;</span><span class="p">],</span>
+                    <span class="s2">"node"</span><span class="p">:</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">"remote_device"</span><span class="p">],</span>
+                    <span class="s2">"interface"</span><span class="p">:</span> <span class="n">circuit</span><span class="p">[</span><span class="s2">"remote_interface"</span><span class="p">],</span>
                 <span class="p">}</span>
             <span class="p">)</span>
             <span class="c1"># save the link</span>
             <span class="n">a_end</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">endpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;node&quot;</span><span class="p">],</span>
-                <span class="n">endpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;interface&quot;</span><span class="p">],</span>
+                <span class="n">endpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"node"</span><span class="p">],</span>
+                <span class="n">endpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"interface"</span><span class="p">],</span>
             <span class="p">)</span>
             <span class="n">b_end</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">endpoints</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;node&quot;</span><span class="p">],</span>
-                <span class="n">endpoints</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;interface&quot;</span><span class="p">],</span>
+                <span class="n">endpoints</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">"node"</span><span class="p">],</span>
+                <span class="n">endpoints</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">"interface"</span><span class="p">],</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">a_end</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">endpts_done</span> <span class="ow">and</span> <span class="n">b_end</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">endpts_done</span><span class="p">:</span>
                 <span class="n">endpts_done</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a_end</span><span class="p">)</span>
                 <span class="n">endpts_done</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">b_end</span><span class="p">)</span>
                 <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;link added </span><span class="si">{</span><span class="n">endpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;node&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">endpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;interface&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot; - </span><span class="si">{</span><span class="n">endpoints</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;node&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">endpoints</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;interface&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"link added </span><span class="si">{</span><span class="n">endpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">'node'</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">endpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">'interface'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+                    <span class="sa">f</span><span class="s2">" - </span><span class="si">{</span><span class="n">endpoints</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">'node'</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">endpoints</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">'interface'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
 
-    <span class="c1"># rename links&#39; interfaces</span>
+    <span class="c1"># rename links' interfaces</span>
     <span class="k">for</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">node_data</span> <span class="ow">in</span> <span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">interfaces_rename</span> <span class="o">=</span> <span class="n">node_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;interfaces_rename&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">interfaces_rename</span> <span class="o">=</span> <span class="n">node_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"interfaces_rename"</span><span class="p">,</span> <span class="p">[])</span>
         <span class="k">if</span> <span class="n">interfaces_rename</span><span class="p">:</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;renaming </span><span class="si">{</span><span class="n">node_name</span><span class="si">}</span><span class="s2"> interfaces&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"renaming </span><span class="si">{</span><span class="n">node_name</span><span class="si">}</span><span class="s2"> interfaces"</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">interfaces_rename</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;find&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;replace&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"find"</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"replace"</span><span class="p">):</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - interface rename need to have&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot; &#39;find&#39; and &#39;replace&#39; defined, skipping: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - interface rename need to have"</span>
+                    <span class="sa">f</span><span class="s2">" 'find' and 'replace' defined, skipping: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
                 <span class="k">continue</span>
-            <span class="n">pattern</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;find&quot;</span><span class="p">]</span>
-            <span class="n">replace</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;replace&quot;</span><span class="p">]</span>
-            <span class="n">use_regex</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_regex&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="n">pattern</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">"find"</span><span class="p">]</span>
+            <span class="n">replace</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">"replace"</span><span class="p">]</span>
+            <span class="n">use_regex</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"use_regex"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
             <span class="c1"># go over links one by one and rename interfaces</span>
             <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">links</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">endpoint</span> <span class="ow">in</span> <span class="n">link</span><span class="p">[</span><span class="s2">&quot;endpoints&quot;</span><span class="p">]:</span>
-                    <span class="k">if</span> <span class="n">endpoint</span><span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">node_name</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">endpoint</span> <span class="ow">in</span> <span class="n">link</span><span class="p">[</span><span class="s2">"endpoints"</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">endpoint</span><span class="p">[</span><span class="s2">"node"</span><span class="p">]</span> <span class="o">!=</span> <span class="n">node_name</span><span class="p">:</span>
                         <span class="k">continue</span>
                     <span class="k">if</span> <span class="n">use_regex</span><span class="p">:</span>
                         <span class="n">renamed</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
                             <span class="n">pattern</span><span class="p">,</span>
                             <span class="n">replace</span><span class="p">,</span>
-                            <span class="n">endpoint</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">],</span>
+                            <span class="n">endpoint</span><span class="p">[</span><span class="s2">"interface"</span><span class="p">],</span>
                         <span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">renamed</span> <span class="o">=</span> <span class="n">endpoint</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">replace</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">endpoint</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">renamed</span><span class="p">:</span>
-                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">node_name</span><span class="si">}</span><span class="s2"> interface </span><span class="si">{</span><span class="n">endpoint</span><span class="p">[</span><span class="s1">&#39;interface&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> renamed to </span><span class="si">{</span><span class="n">renamed</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="n">renamed</span> <span class="o">=</span> <span class="n">endpoint</span><span class="p">[</span><span class="s2">"interface"</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">replace</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">endpoint</span><span class="p">[</span><span class="s2">"interface"</span><span class="p">]</span> <span class="o">!=</span> <span class="n">renamed</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">node_name</span><span class="si">}</span><span class="s2"> interface </span><span class="si">{</span><span class="n">endpoint</span><span class="p">[</span><span class="s1">'interface'</span><span class="p">]</span><span class="si">}</span><span class="s2"> renamed to </span><span class="si">{</span><span class="n">renamed</span><span class="si">}</span><span class="s2">"</span>
                         <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                        <span class="n">endpoint</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">renamed</span>
+                        <span class="n">endpoint</span><span class="p">[</span><span class="s2">"interface"</span><span class="p">]</span> <span class="o">=</span> <span class="n">renamed</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Containerlab inventory build complete: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span><span class="si">}</span><span class="s2"> node(s), &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">)</span><span class="si">}</span><span class="s2"> link(s)&quot;</span>
+        <span class="sa">f</span><span class="s2">"Containerlab inventory build complete: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span><span class="si">}</span><span class="s2"> node(s), "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">)</span><span class="si">}</span><span class="s2"> link(s)"</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
