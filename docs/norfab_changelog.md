@@ -15,6 +15,37 @@
 1. Removed obsolete FastAPI `/api/job` handlers and unused job response models. Synchronous `/api/job/run` and generated service-task endpoints remain available.
 2. Netbox `sync_vrrp` supports shared VIP addresses across VRFs, normalizes VIP roles to `vrrp`, and adds `vip_use_vrf=False` to optionally assign new VIPs to an existing VRF. Bulk updates reduce API requests; dry-run previews retain the per-device action structure used by sync orchestration.
 
+3. Updated dependency pins:
+   - `pyzmq`: 27.1.0 -> 27.2.0.
+   - `tornado`: 6.5.7 -> 6.5.10.
+   - `pydantic`: 2.13.4 -> 2.14.1.
+   - `orjson`: 3.11.9 -> 3.13.0.
+   - `python-dotenv`: 1.2.2 -> 1.2.4.
+   - `gitpython`: 3.1.61 -> 3.2.1.
+   - `nornir`: 3.5.0 -> 3.6.0.
+   - `napalm`: 5.1.0 -> 5.2.0.
+   - `netmiko`: 4.7.0 -> 4.8.0.
+   - `nornir-napalm`: 0.5.0 -> 0.6.0.
+   - `nornir-scrapli`: 2025.1.30 -> 2026.10.13.
+   - `ntc-templates`: 9.2.0 -> 9.3.0.
+   - `lxml`: 6.1.1 -> 6.1.3.
+   - `mcp`: 1.28.1 -> 1.30.0.
+   - `robotframework`: 7.4.2 -> 7.5.
+   - `langchain`: 1.3.14 -> 1.4.6.
+   - `langchain-core`: 1.5.1 -> 1.6.12.
+   - `langchain-openai`: 1.4.1 -> 1.7.2.
+   - `langchain-anthropic`: 1.5.2 -> 1.7.6.
+   - `langchain-mcp-adapters`: 0.3.0 -> 0.3.2.
+   - `langgraph`: 1.2.9 -> 1.2.16.
+   - `ollama`: 0.6.2 -> 0.6.3.
+   - `fastembed`: 0.8.0 -> 0.9.0.
+   - `qdrant-client`: 1.18.0 -> 1.19.1.
+   - `datamodel-code-generator`: 0.71.0 -> 0.85.0.
+   - `langgraph-checkpoint-sqlite`: 3.1.0 -> 3.1.2.
+   - `fastapi`: 0.140.0 -> 0.143.3.
+   - `uvicorn`: 0.51.0 -> 0.54.0.
+   - `pygments`: 2.19.2 -> 2.21.0.
+
 ---
 
 # 0.24.13
