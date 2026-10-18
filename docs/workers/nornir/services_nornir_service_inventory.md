@@ -127,6 +127,25 @@ enabled.
 Nornir task results include hosts executed during the current job in
 `resources`, and hosts that failed during that job in `resources_failed`.
 
+## NETCONF Connection Inventory
+
+Configure the selected connection plugin on the host or inherited group:
+
+```yaml
+connection_options:
+  ncclient:
+    port: 830
+    extras:
+      hostkey_verify: true
+  scrapli_netconf:
+    port: 830
+    extras:
+      auth_strict_key: true
+      transport: paramiko
+```
+
+Credentials inherit from the Nornir host. Configure SSH host trust before use.
+
 ## Netbox Inventory Integration
 
 NorFab Nornir Worker supports tight integration with Netbox to fetch devices data such as device interfaces, ip addresses, circuits, configuration context. Netbox 3.7.x and 4.x.x supported. 

@@ -136,6 +136,10 @@ nav:
       - File Copy: workers/nornir/services_nornir_service_tasks_file_copy.md
       - Runtime Inventory: workers/nornir/services_nornir_service_tasks_runtime_inventory.md
       - Create Host from NetBox: workers/nornir/services_nornir_service_tasks_create_host_from_netbox.md
+      - NETCONF Edit Configuration: workers/nornir/services_nornir_service_tasks_netconf_edit_config.md
+      - NETCONF Get Capabilities: workers/nornir/services_nornir_service_tasks_netconf_get_capabilities.md
+      - NETCONF Get Schema: workers/nornir/services_nornir_service_tasks_netconf_get_schema.md
+      - NETCONF Get Configuration: workers/nornir/services_nornir_service_tasks_netconf_get_config.md
       - SNMP: workers/nornir/services_nornir_service_tasks_snmp.md
       - Errdisabled Hosts: workers/nornir/services_nornir_service_tasks_errdisabled_hosts.md
     - Jinja2 Filters: workers/nornir/services_nornir_service_jinja2_filters.md

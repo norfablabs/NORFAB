@@ -1,0 +1,1 @@
+<system xmlns="http://openconfig.net/yang/system"><config><hostname>{{ host.name }}</hostname></config></system>

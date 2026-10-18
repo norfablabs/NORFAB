@@ -1,12 +1,23 @@
+import logging
 from typing import Any
+from xml.etree.ElementTree import Element, SubElement, tostring
 
+from nornir_salt.plugins.functions import ResultSerializer
+from nornir_salt.plugins.tasks import ncclient_call, scrapli_netconf_call
+
+from norfab.core.exceptions import UnsupportedPluginError
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
 from .nornir_models import (
-    NetconfInput,
+    NetconfEditConfigInput,
+    NetconfGetCapabilitiesInput,
+    NetconfGetConfigInput,
+    NetconfGetSchemaInput,
     NetconfResult,
 )
+
+log = logging.getLogger(__name__)
 
 # --------------------------------------------------------------------------
 # NETCONF TASK MODELS
@@ -14,13 +25,202 @@ from .nornir_models import (
 
 
 class NetconfTask:
+    def _run_netconf(
+        self,
+        job: Job,
+        call: str,
+        plugin: str,
+        render: dict[str, str] = None,
+        job_data: Any = None,
+        **kwargs: Any,
+    ) -> Result:
+        """Run a NETCONF plugin with common filtering, processors and serialization.
+
+        Args:
+            job: NorFab job metadata.
+            call: Backend operation name.
+            plugin: ncclient or scrapli.
+            render: Backend argument names mapped to per-host templates.
+            job_data: Template context data or YAML URL.
+            **kwargs: Backend and common Nornir arguments.
+
+        Returns:
+            Result: Serialized per-host operation results.
+
+        Raises:
+            UnsupportedPluginError: If the plugin is unknown.
+        """
+        # Match each task callable to its connection name for watchdog tracking.
+        if plugin == "ncclient":
+            task_plugin, connection = ncclient_call, "ncclient"
+        elif plugin == "scrapli":
+            task_plugin, connection = scrapli_netconf_call, "scrapli_netconf"
+        else:
+            raise UnsupportedPluginError(f"plugin '{plugin}' not supported")
+        # Consume serialization options before forwarding backend arguments.
+        to_dict = kwargs.pop("to_dict", True)
+        add_details = kwargs.pop("add_details", False)
+        ret = Result(task=f"{self.name}:netconf_{call}", result={} if to_dict else [])
+        # Extract host filters and return without device I/O when nothing matches.
+        nr, _ = self.filter_hosts_and_validate(kwargs, ret)
+        if ret.status == "no_match":
+            log.debug("no hosts matched NETCONF %s using %s", call, plugin)
+            return ret
+        # Attach standard processors and consume their options from kwargs.
+        nr = self._add_processors(nr, kwargs, job)
+        # Reuse compiled file templates across hosts within this job.
+        template_cache = {}
+        try:
+            # Render operation payloads before acquiring the connection lock.
+            if render:
+                log.debug(
+                    "rendering NETCONF %s arguments %s for %s hosts using %s",
+                    call,
+                    ", ".join(render),
+                    len(nr.inventory.hosts),
+                    plugin,
+                )
+                context_data = self.load_job_data(job_data)
+                filters = self.add_jinja2_filters()
+                netbox = self.add_jinja2_netbox()
+                for host in nr.inventory.hosts.values():
+                    host.data["__task__"] = {
+                        argument: self.jinja2_render_templates(
+                            templates=[template],
+                            context={
+                                "host": host,
+                                "job_data": context_data,
+                                "norfab": self.client,
+                                "netbox": netbox,
+                            },
+                            filters=filters,
+                            template_cache=template_cache,
+                        )
+                        for argument, template in render.items()
+                    }
+            message = f"running NETCONF {call} using {plugin} on {len(nr.inventory.hosts)} hosts"
+            log.info(message)
+            job.event(message)
+            # Only device execution and connection tracking require the lock.
+            with self.connections_lock:
+                result = nr.run(task=task_plugin, call=call, **kwargs)
+                # Refresh connection activity before watchdog idle cleanup.
+                self.watchdog.connections_update(nr, connection)
+            # Preserve host failures and apply the requested public result format.
+            self.update_nornir_result(result, ret)
+            ret.failed = result.failed
+            ret.result = ResultSerializer(
+                result, to_dict=to_dict, add_details=add_details
+            )
+            message = (
+                f"completed NETCONF {call} using {plugin} on {len(nr.inventory.hosts)} hosts"
+                + (" with host failures" if ret.failed else "")
+            )
+            if ret.failed:
+                log.warning(message)
+                job.event(message, severity="WARNING")
+            else:
+                log.info(message)
+                job.event(message)
+            return ret
+        except Exception as exc:
+            # Report the failure type without exposing configuration or template data.
+            message = f"netconf {call} using {plugin} failed ({type(exc).__name__})"
+            log.error(message)
+            job.event(message, severity="ERROR")
+            raise
+        finally:
+            # Remove temporary payloads even if rendering or execution raises.
+            for host in nr.inventory.hosts.values():
+                host.data.pop("__task__", None)
+            self.watchdog.connections_clean()
+
     @Task(
         fastapi={"methods": ["POST"]},
-        input=NetconfInput,
+        input=NetconfGetConfigInput,
         output=NetconfResult,
         mcp={
             "annotations": {
-                "title": "Run NETCONF Operation",
+                "title": "NETCONF Get Configuration",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def netconf_get_config(
+        self,
+        job: Job,
+        source: str = "running",
+        plugin: str = "ncclient",
+        filter_subtree: str = None,
+        filter_xpath: str = None,
+        job_data: Any = None,
+        **kwargs: Any,
+    ) -> Result:
+        """Retrieve device configuration from a NETCONF datastore.
+
+        Args:
+            job: NorFab job metadata.
+            source: Datastore to read: running, candidate, or startup. The device
+                must support the selected datastore. Defaults to running.
+            plugin: NETCONF backend: ncclient (default) or scrapli.
+            filter_subtree: Optional XML subtree or NorFab template URL. Rendered
+                per host with host, job_data, norfab and netbox context variables.
+                Mutually exclusive with filter_xpath. Omit both filters to
+                retrieve the complete datastore.
+            filter_xpath: XPath expression or NorFab template URL, rendered with
+                the same context as filter_subtree. Requires the device XPath
+                capability. Explicit namespace mappings are not exposed. This
+                filters on the server; the common xpath processor instead
+                filters replies locally after retrieval.
+            job_data: Optional template context data or URL to a YAML data file.
+            **kwargs: Common Nornir host filters, processors, retry options,
+                to_dict and add_details serialization options.
+
+        Returns:
+            Result: XML replies under each host's get_config key, or serialized
+                records when to_dict is false. RPC and connection errors mark
+                host results as failed; unmatched hosts return status no_match.
+
+        Raises:
+            FileNotFoundError: If a referenced template cannot be fetched.
+
+        """
+        template = None
+        filter_type = None
+        if filter_subtree is not None:
+            template = filter_subtree
+            filter_type = "subtree"
+        if filter_xpath is not None:
+            template = filter_xpath
+            filter_type = "xpath"
+        render = None
+        if template is not None:
+            if plugin == "ncclient":
+                render = {"filter": template}
+                kwargs["ftype"] = filter_type
+            else:
+                render = {"filter_": template}
+                kwargs["filter_type"] = filter_type
+        return self._run_netconf(
+            job,
+            call="get_config",
+            plugin=plugin,
+            source=source,
+            render=render,
+            job_data=job_data,
+            **kwargs,
+        )
+
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NetconfEditConfigInput,
+        output=NetconfResult,
+        mcp={
+            "annotations": {
+                "title": "NETCONF Edit Configuration",
                 "readOnlyHint": False,
                 "destructiveHint": True,
                 "idempotentHint": False,
@@ -28,119 +228,161 @@ class NetconfTask:
             }
         },
     )
-    def netconf(
+    def netconf_edit_config(
         self,
         job: Job,
-        call: str,
+        config: str,
+        target: str = "running",
         plugin: str = "ncclient",
-        data: str = None,
+        job_data: Any = None,
         **kwargs: Any,
     ) -> Result:
-        """
-        Interact with devices using NETCONF protocol utilizing one of the supported plugins.
-
-        This method provides a unified interface to interact with network devices using
-        NETCONF protocol through different backend plugins.
+        """Edit a device NETCONF configuration datastore.
 
         Args:
-            job (Job): NorFab Job object containing relevant metadata.
-            call (str): The ncclient manager or scrapli netconf object method to call.
-            plugin (str, optional): Name of netconf plugin to use. Available plugins:
-
-                - ``ncclient`` (default): ``nornir-salt`` built-in plugin that uses ``ncclient``
-                  library to interact with devices. Uses `ncclient_call`_ task plugin.
-                - ``scrapli``: Uses ``scrapli_netconf`` connection plugin that is part of
-                  ``nornir_scrapli`` library. Uses `scrapli_netconf_call`_ task plugin.
-
-            data (str, optional): Path to file for ``rpc`` method call or rpc content.
-            **kwargs (Any): Additional arguments to pass to the underlying plugin.
-
-                - method_name (str): Name of method to provide docstring for, used only by ``help`` call.
+            job: NorFab job metadata.
+            config: XML configuration including the NETCONF config wrapper, or a
+                NorFab template URL. Rendered per host with host, job_data,
+                norfab and netbox context variables.
+            target: Datastore to edit: running (default) or candidate. Requires
+                device support. Running edits take effect immediately.
+            plugin: Backend name: ncclient (default) or scrapli.
+            job_data: Template context data or URL to a YAML data file.
+            **kwargs: Common Nornir host filters, processors, retry options,
+                to_dict and add_details serialization options.
 
         Returns:
-            Result: A Result object containing the NETCONF operation results.
+            Result: XML replies under each host's edit_config key, or serialized
+                records with to_dict=False. RPC and connection errors mark hosts
+                as failed; unmatched hosts return status no_match. No datastore
+                locking, validation, commit, or rollback is performed. Candidate
+                edits remain pending. Retries may repeat edits.
 
-        Note:
-            Special ``call`` arguments/methods available:
+        Raises:
+            FileNotFoundError: If a referenced template cannot be fetched.
 
-            - ``dir``: Returns methods supported by Ncclient connection manager object.
-            - ``help``: Returns ``method_name`` docstring.
-            - ``transaction``: Same as ``edit_config``, but runs a more reliable workflow:
-
-                1. Lock target configuration datastore
-                2. If server supports it - Discard previous changes if any
-                3. Perform configuration edit using RPC specified in ``edit_rpc`` argument
-                4. If server supports it - validate configuration if ``validate`` argument is True
-                5. If server supports it - do commit confirmed if ``confirmed`` argument is True
-                   using ``confirm_delay`` timer with ``commit_arg`` argument
-                6. If confirmed commit requested, wait for ``commit_final_delay`` timer before
-                   sending final commit, final commit does not use ``commit_arg`` arguments
-                7. If server supports it - do commit operation
-                8. Unlock target configuration datastore
-                9. If server supports it - discard all changes if any of steps 3, 4, 5 or 7 fail
-                10. Return results list of dictionaries keyed by step name
-
-        Warning:
-            Beware of differences in keywords required by different plugins, e.g. ``filter`` for
-            ``ncclient`` vs ``filter_``/``filters`` for ``scrapli_netconf``. Refer to modules' API
-            documentation for required arguments.
-
-        Examples:
-            Examples using ``ncclient`` plugin::
-
-                salt nrp1 nr.nc server_capabilities FB="*"
-                salt nrp1 nr.nc get_config filter='["subtree", "salt://rpc/get_config_data.xml"]' source="running"
-                salt nrp1 nr.nc edit_config target="running" config="salt://rpc/edit_config_data.xml" FB="ceos1"
-                salt nrp1 nr.nc transaction target="candidate" config="salt://rpc/edit_config_data.xml"
-                salt nrp1 nr.nc commit
-                salt nrp1 nr.nc rpc data="salt://rpc/iosxe_rpc_edit_interface.xml"
-                salt nrp1 nr.nc get_schema identifier="ietf-interfaces"
-                salt nrp1 nr.nc get filter='<system-time xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-shellutil-oper"/>'
-
-            Examples using ``scrapli_netconf`` plugin::
-
-                salt nrp1 nr.nc get filter_=salt://rpc/get_config_filter_ietf_interfaces.xml plugin=scrapli
-                salt nrp1 nr.nc get_config source=running plugin=scrapli
-                salt nrp1 nr.nc server_capabilities FB="*" plugin=scrapli
-                salt nrp1 nr.nc rpc filter_=salt://rpc/get_config_rpc_ietf_interfaces.xml plugin=scrapli
-                salt nrp1 nr.nc transaction target="candidate" config="salt://rpc/edit_config_ietf_interfaces.xml" plugin=scrapli
-
-            Python API usage from Salt-Master::
-
-                import salt.client
-                client = salt.client.LocalClient()
-
-                task_result = client.cmd(
-                    tgt="nrp1",
-                    fun="nr.nc",
-                    arg=["get_config"],
-                    kwarg={"source": "running", "plugin": "ncclient"},
-                )
-
-            Using special calls::
-
-                salt nrp1 nr.nc dir
-                salt nrp1 nr.nc help method_name=edit_config
-                salt nrp1 nr.nc transaction target="candidate" config="salt://path/to/config_file.xml" FB="*core-1"
-
-        .. _ncclient_call: https://nornir-salt.readthedocs.io/en/latest/Tasks/ncclient_call.html
-        .. _scrapli_netconf_call: https://nornir-salt.readthedocs.io/en/latest/Tasks/scrapli_netconf_call.html
         """
-        # TODO implement files download and rendering
-        # kwargs.setdefault(
-        #     "render", ["rpc", "config", "data", "filter", "filter_", "filters"]
-        # )
+        return self._run_netconf(
+            job,
+            call="edit_config",
+            plugin=plugin,
+            target=target,
+            render={"config": config},
+            job_data=job_data,
+            **kwargs,
+        )
 
-        # decide on plugin to use
-        if plugin.lower() == "ncclient":
-            task_fun = "nornir_salt.plugins.tasks.ncclient_call"
-            kwargs["connection_name"] = "ncclient"
-            # TODO implement filters handling
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NetconfGetSchemaInput,
+        output=NetconfResult,
+        mcp={
+            "annotations": {
+                "title": "NETCONF Get Schema",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def netconf_get_schema(
+        self,
+        job: Job,
+        identifier: str,
+        version: str = None,
+        format: str = "yang",
+        plugin: str = "ncclient",
+        **kwargs: Any,
+    ) -> Result:
+        """Retrieve a YANG module using NETCONF monitoring get-schema.
 
-        elif plugin.lower() == "scrapli":
-            task_fun = "nornir_salt.plugins.tasks.scrapli_netconf_call"
-            kwargs["connection_name"] = "scrapli_netconf"
-            # TODO implement filters handling
+        Args:
+            job: NorFab job metadata.
+            identifier: Module name from capabilities, YANG Library, or the
+                NETCONF monitoring schema list. Capabilities may be incomplete.
+            version: Optional module revision, normally YYYY-MM-DD. Omit to let
+                the server select a version.
+            format: Schema format: yang (default) or yin.
+            plugin: Backend name: ncclient (default) or scrapli.
+            **kwargs: Common host filters, retries, processors and serialization
+                options applicable to this task.
 
-        # run task
-        return self.task(job=job, plugin=task_fun, call=call, **kwargs)
+        Returns:
+            Result: XML replies containing schema text under get_schema for
+                ncclient or rpc for Scrapli. Missing modules and unsupported
+                schema retrieval mark hosts as failed. Unmatched hosts return
+                status no_match. Imports are not downloaded automatically.
+                Requires the device to implement NETCONF monitoring get-schema.
+        """
+        if plugin == "scrapli":
+            rpc = Element(
+                "get-schema",
+                xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring",
+            )
+            SubElement(rpc, "identifier").text = identifier
+            if version is not None:
+                SubElement(rpc, "version").text = version
+            SubElement(rpc, "format").text = format
+            return self._run_netconf(
+                job,
+                call="rpc",
+                plugin=plugin,
+                filter_=tostring(rpc, encoding="unicode"),
+                **kwargs,
+            )
+        return self._run_netconf(
+            job,
+            call="get_schema",
+            plugin=plugin,
+            identifier=identifier,
+            version=version,
+            format=format,
+            **kwargs,
+        )
+
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NetconfGetCapabilitiesInput,
+        output=NetconfResult,
+        mcp={
+            "annotations": {
+                "title": "NETCONF Get Capabilities",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def netconf_get_capabilities(
+        self,
+        job: Job,
+        plugin: str = "ncclient",
+        capab_filter: str = None,
+        **kwargs: Any,
+    ) -> Result:
+        """List NETCONF capabilities advertised by devices.
+
+        Args:
+            job: NorFab job metadata.
+            plugin: Backend name: ncclient (default) or scrapli.
+            capab_filter: Optional case-sensitive glob pattern to filter capability
+                URIs. Omit to return all capabilities advertised for the session.
+            **kwargs: Common host filters, retries and serialization options.
+
+        Returns:
+            Result: Capability URI lists under each host's server_capabilities
+                key, or serialized records with to_dict=False. An unmatched
+                capability filter returns an empty list. Unmatched host filters
+                return status no_match. Connection errors mark hosts as failed.
+                Capabilities describe the current session and do not necessarily
+                provide a complete inventory of available YANG modules.
+        """
+        return self._run_netconf(
+            job,
+            call="server_capabilities",
+            plugin=plugin,
+            capab_filter=capab_filter,
+            **kwargs,
+        )

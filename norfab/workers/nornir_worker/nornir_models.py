@@ -127,7 +127,7 @@ class NornirHostsFilters(BaseModel, extra="forbid", use_enum_values=True):
 class NornirCommonArgs(
     NornirHostsFilters, extra="allow", use_enum_values=True, populate_by_name=True
 ):
-    """Common Nornir task arguments accepted by task serializers and processors."""
+    """Common host filters, runner options and result handling arguments."""
 
     on_failed: StrictBool = Field(
         False,
@@ -212,72 +212,107 @@ class NornirCommonArgs(
         description="Previous saved file version to diff against",
         alias="diff-last",
     )
-    dp: Any = Field(
-        None,
-        description="Nornir-Salt DataProcessor pipeline definition",
-    )
-    xml_flake: Union[None, StrictStr] = Field(
-        None,
-        description="XML flake pattern for DataProcessor",
-        alias="xml-flake",
-    )
+
+
+class NornirTextProcessorArgs(BaseModel, use_enum_values=True, populate_by_name=True):
+    """Processors for text output."""
+
     match: Union[None, StrictStr] = Field(
         None,
         description="Pattern to match in task output",
     )
+
     before: StrictInt = Field(
         0,
         description="Number of lines before a match to include",
     )
+
+    iplkp: Union[None, StrictStr] = Field(
+        None,
+        description="IP lookup mode for DataProcessor",
+    )
+
+    ntfsm: Union[None, StrictBool] = Field(
+        None,
+        description="Parse output with NTC TextFSM templates",
+        json_schema_extra={"presence": True},
+    )
+
     run_ttp: Union[None, StrictStr] = Field(
         None,
         description="TTP template to run with DataProcessor",
         alias="run-ttp",
     )
+
     ttp_structure: StrictStr = Field(
         "flat_list",
         description="TTP result structure for DataProcessor",
         alias="ttp-structure",
     )
+
     remove_tasks: StrictBool = Field(
         True,
         description="Remove task output when processors produce final results",
         alias="remove-tasks",
         json_schema_extra={"presence": True},
     )
+
+
+class NornirXmlProcessorArgs(BaseModel, use_enum_values=True, populate_by_name=True):
+    """Processors for XML replies."""
+
+    xpath: Union[None, StrictStr] = Field(
+        None,
+        description="XPath expression to run with DataProcessor",
+    )
+
+    xml_flake: Union[None, StrictStr] = Field(
+        None,
+        description="XML flake pattern for DataProcessor",
+        alias="xml-flake",
+    )
+
+
+class NornirStructuredProcessorArgs(
+    BaseModel, use_enum_values=True, populate_by_name=True
+):
+    """Processors for structured results."""
+
+    jmespath: Union[None, StrictStr] = Field(
+        None,
+        description="JMESPath expression to run with DataProcessor",
+    )
+
+
+class NornirTestsProcessorArgs(BaseModel, use_enum_values=True, populate_by_name=True):
+    """Test execution and result options."""
+
     tests: Any = Field(
         None,
         description="Nornir-Salt TestsProcessor tests definition",
     )
+
     subset: Union[None, StrictStr, list[StrictStr]] = Field(
         None,
         description="Test subset name or glob pattern to execute",
     )
+
+    groups: Union[None, StrictStr, list[StrictStr]] = Field(
+        None,
+        description="Test group names to execute",
+    )
+
     failed_only: StrictBool = Field(
         False,
         description="Return failed test results only",
         alias="failed-only",
         json_schema_extra={"presence": True},
     )
-    groups: Union[None, StrictStr, list[StrictStr]] = Field(
-        None,
-        description="Test group names to execute",
-    )
-    xpath: Union[None, StrictStr] = Field(
-        None,
-        description="XPath expression to run with DataProcessor",
-    )
-    jmespath: Union[None, StrictStr] = Field(
-        None,
-        description="JMESPath expression to run with DataProcessor",
-    )
-    iplkp: Union[None, StrictStr] = Field(
-        None,
-        description="IP lookup mode for DataProcessor",
-    )
-    ntfsm: Union[None, StrictBool] = Field(
-        None,
-        description="Parse output with NTC TextFSM templates",
+
+    remove_tasks: StrictBool = Field(
+        True,
+        description="Remove task output when processors produce final results",
+        alias="remove-tasks",
         json_schema_extra={"presence": True},
     )
 
@@ -459,6 +494,7 @@ class NrCfgPluginNapalm(
 
 
 class CfgInput(
+    NornirTextProcessorArgs,
     NornirCommonArgs,
     NrCfgPluginNetmiko,
     NrCfgPluginScrapli,
@@ -703,6 +739,9 @@ class NrCliPluginNapalm(
 
 
 class CliInput(
+    NornirTextProcessorArgs,
+    NornirStructuredProcessorArgs,
+    NornirTestsProcessorArgs,
     NornirCommonArgs,
     NrCliPluginNetmiko,
     NrCliPluginScrapli,
@@ -724,11 +763,6 @@ class CliInput(
         description="Render commands without sending them to devices",
         alias="dry-run",
         json_schema_extra={"presence": True},
-    )
-    run_ttp: Union[None, StrictStr] = Field(
-        None,
-        description="TTP template string or path to parse collected output",
-        alias="run-ttp",
     )
     job_data: Union[None, StrictStr, dict[StrictStr, Any], list[Any]] = Field(
         None,
@@ -1185,57 +1219,93 @@ class NetconfPlugin(str, Enum):
 class NetconfConfigSource(str, Enum):
     running = "running"
     candidate = "candidate"
+    startup = "startup"
 
 
-class NetconfInput(
-    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
-):
-    call: StrictStr = Field(
-        ...,
-        description="NETCONF method or special call to execute",
-    )
-    plugin: NetconfPlugin = Field(
-        NetconfPlugin.ncclient,
-        description="NETCONF connection plugin to use",
-    )
-    data: Union[None, StrictStr] = Field(
-        None,
-        description="RPC content or path to RPC data",
-    )
+class NetconfConfigTarget(str, Enum):
+    running = "running"
+    candidate = "candidate"
 
 
 class NetconfGetConfigInput(
-    NetconfInput, extra="allow", use_enum_values=True, populate_by_name=True
+    NornirXmlProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
 ):
-    call: StrictStr = Field("get_config", description="NETCONF method to execute")
-    plugin: NetconfPlugin = Field(
-        NetconfPlugin.ncclient,
-        description="NETCONF plugin to use",
-    )
+    plugin: NetconfPlugin = Field(NetconfPlugin.ncclient, description="NETCONF backend")
     source: NetconfConfigSource = Field(
-        NetconfConfigSource.running,
-        description="Configuration source to retrieve",
+        NetconfConfigSource.running, description="Datastore to retrieve"
     )
     filter_subtree: Union[None, StrictStr] = Field(
         None,
-        description="XML subtree to retrieve portion of configuration",
+        min_length=1,
+        description="XML subtree filter or template URL",
         alias="filter-subtree",
+        examples=['<interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces"/>'],
+    )
+    filter_xpath: Union[None, StrictStr] = Field(
+        None,
+        min_length=1,
+        description="XPath filter or template URL",
+        alias="filter-xpath",
+        examples=["/*[local-name()='system']"],
+    )
+    job_data: Any = Field(
+        None,
+        description="Template data or YAML file URL",
+        alias="job-data",
     )
 
+    @model_validator(mode="after")
+    def validate_filters(self) -> "NetconfGetConfigInput":
+        """Require exactly one filter type when a filter is supplied."""
+        if self.filter_subtree is not None and self.filter_xpath is not None:
+            raise ValueError("filter_subtree and filter_xpath are mutually exclusive")
+        return self
 
-class NetconfCapabilitiesInput(
-    NetconfInput, extra="allow", use_enum_values=True, populate_by_name=True
+
+class NetconfEditConfigInput(
+    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
 ):
-    call: StrictStr = Field(
-        "server_capabilities", description="NETCONF method to execute"
+    plugin: NetconfPlugin = Field(NetconfPlugin.ncclient, description="NETCONF backend")
+    config: StrictStr = Field(
+        ..., min_length=1, description="XML config wrapper or NorFab template URL"
     )
-    plugin: NetconfPlugin = Field(
-        NetconfPlugin.ncclient,
-        description="NETCONF plugin to use",
+    target: NetconfConfigTarget = Field(
+        NetconfConfigTarget.running, description="Datastore to edit"
     )
+    job_data: Any = Field(
+        None, alias="job-data", description="Template data or YAML file URL"
+    )
+
+
+class NetconfGetCapabilitiesInput(
+    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
+):
+    plugin: NetconfPlugin = Field(NetconfPlugin.ncclient, description="NETCONF backend")
     capab_filter: Union[None, StrictStr] = Field(
-        None, description="Glob pattern to filter capabilities", alias="capab-filter"
+        None, alias="capab-filter", description="Capability glob filter"
     )
+
+
+class NetconfSchemaFormat(str, Enum):
+    yang = "yang"
+    yin = "yin"
+
+
+class NetconfGetSchemaInput(
+    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
+):
+    identifier: StrictStr = Field(..., min_length=1, description="YANG module name")
+    version: Union[None, StrictStr] = Field(
+        None, min_length=1, description="Module revision"
+    )
+    format: NetconfSchemaFormat = Field(
+        NetconfSchemaFormat.yang, description="Schema format"
+    )
+    plugin: NetconfPlugin = Field(NetconfPlugin.ncclient, description="NETCONF backend")
 
 
 class NetconfResult(NornirSerializedResult):
@@ -1256,7 +1326,11 @@ class NetworkFunction(str, Enum):
 
 
 class NetworkInput(
-    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
+    NornirStructuredProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     fun: Union[NetworkFunction, StrictStr] = Field(
         ...,
@@ -1453,7 +1527,11 @@ class TTPStructureEnum(str, Enum):
 
 
 class ParseNapalmInput(
-    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
+    NornirStructuredProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     getters: Union[
         NapalmGettersEnum, StrictStr, list[Union[NapalmGettersEnum, StrictStr]]
@@ -1471,7 +1549,11 @@ class ParseNapalmResult(NornirSerializedResult):
 
 
 class ParseTextfsmInput(
-    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
+    NornirStructuredProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     commands: Union[None, StrictStr, list[StrictStr]] = Field(
         None,
@@ -1491,7 +1573,11 @@ class ParseTextfsmResult(NornirSerializedResult):
 
 
 class ParseTTPInput(
-    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
+    NornirStructuredProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     template: Union[None, StrictStr] = Field(
         None,
@@ -1539,8 +1625,19 @@ class ParseTTPResult(Result):
 
 
 class TaskInput(
-    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
+    NornirTextProcessorArgs,
+    NornirXmlProcessorArgs,
+    NornirStructuredProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
 ):
+    dp: Any = Field(
+        None,
+        description="Nornir-Salt DataProcessor pipeline definition",
+    )
+
     plugin: StrictStr = Field(
         ...,
         description="Python import path or nf:// URL for a Nornir task plugin",
@@ -1560,7 +1657,11 @@ class TaskResult(NornirSerializedResult):
 
 
 class TestInput(
-    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
+    NornirTestsProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     suite: Union[StrictStr, list[dict[StrictStr, Any]], list[Any]] = Field(
         ...,
@@ -1615,7 +1716,11 @@ class SnmpErrors(str, Enum):
 
 
 class SnmpCommonArgs(
-    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
+    NornirStructuredProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     """Common arguments shared by all SNMP tasks."""
 

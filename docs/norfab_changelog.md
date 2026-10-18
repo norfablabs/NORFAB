@@ -1,3 +1,20 @@
+# 0.24.15 (draft)
+
+## ENHANCEMENTS
+
+1. Removed the generic Nornir `netconf` task in favor of dedicated NETCONF operation tasks.
+
+2. Scoped Nornir processor arguments by output type. Text, XML, structured-data, and test options now appear only on applicable task models. TTP processing remains supported.
+
+## FEATURES
+
+1. Added Nornir `netconf_get_config` to retrieve NETCONF datastore configuration using ncclient or Scrapli, with per-host rendered subtree or XPath filters and Python, NFCLI, FastAPI, and MCP support.
+2. Added Nornir `netconf_edit_config` with ncclient and Scrapli backends, per-host XML templates, and Python, NFCLI, FastAPI, and MCP support. NETCONF payload rendering now runs outside the connection lock.
+
+3. Added Nornir `netconf_get_schema` to retrieve YANG or YIN modules using ncclient or Scrapli, with NFCLI, FastAPI, and MCP support.
+
+4. Added Nornir `netconf_get_capabilities` and NFCLI `netconf get-capabilities` to list and glob-filter session capabilities using ncclient or Scrapli.
+
 # 0.24.14
 
 ## BUGS

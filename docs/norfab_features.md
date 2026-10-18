@@ -612,6 +612,36 @@ metadata, and give tasks a complete device context. **Limitations:** inventory
 quality and secret handling remain deployment responsibilities.
 [Inventory details](workers/nornir/services_nornir_service_inventory.md)
 
+### NETCONF configuration edits
+
+Apply XML to running or candidate datastores with `netconf_edit_config` through
+Python, NFCLI, FastAPI, and MCP using ncclient or Scrapli NETCONF. Supports
+per-host XML templates and common Nornir filters. Datastore support depends on
+the device; edits do not automatically lock, commit, or roll back changes.
+[Task details](workers/nornir/services_nornir_service_tasks_netconf_edit_config.md)
+
+### NETCONF capability discovery
+
+List and glob-filter session capabilities through Python, NFCLI, FastAPI, and MCP
+using ncclient or Scrapli. Helps identify supported NETCONF features and advertised
+modules. Capability lists may not include every available module.
+[Task details](workers/nornir/services_nornir_service_tasks_netconf_get_capabilities.md)
+
+### NETCONF schema retrieval
+
+Retrieve YANG or YIN modules by name and optional revision through Python, NFCLI,
+FastAPI, and MCP using ncclient or Scrapli. Requires device NETCONF monitoring
+get-schema support. Module discovery and recursive import downloads are not automatic.
+[Task details](workers/nornir/services_nornir_service_tasks_netconf_get_schema.md)
+
+### NETCONF configuration retrieval
+
+Read running, candidate, or startup configuration with `netconf_get_config` through
+Python, NFCLI, FastAPI, and MCP. Supports ncclient and Scrapli NETCONF, per-host
+rendered subtree or XPath filters, and XML result processors. Datastore and YANG model
+support depend on the device. Server XPath filtering requires the device XPath capability.
+[Task details](workers/nornir/services_nornir_service_tasks_netconf_get_config.md)
+
 ### SNMP operations
 
 Supports GET, GETNEXT, walks, bulk operations, tables, SET, and multi-variable

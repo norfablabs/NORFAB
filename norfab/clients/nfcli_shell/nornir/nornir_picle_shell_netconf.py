@@ -2,41 +2,14 @@ from picle.models import Outputters, PipeFunctionsModel
 from pydantic import BaseModel, Field
 
 from norfab.workers.nornir_worker.nornir_models import (
-    NetconfCapabilitiesInput,
+    NetconfEditConfigInput,
+    NetconfGetCapabilitiesInput,
     NetconfGetConfigInput,
+    NetconfGetSchemaInput,
 )
 
 from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 from .nornir_picle_shell_common import NorniHostsFilters
-
-
-class NrNetconfPluginNcclient(BaseModel):
-
-    @staticmethod
-    def run(*args: object, **kwargs: object):
-        kwargs["plugin"] = "ncclient"
-        return NornirNetconfShell.run(*args, **kwargs)
-
-    class PicleConfig:
-        outputter = Outputters.outputter_nested
-
-
-class NrNetconfPluginScrapli(BaseModel):
-
-    @staticmethod
-    def run(*args: object, **kwargs: object):
-        kwargs["plugin"] = "scrapli"
-        return NornirNetconfShell.run(*args, **kwargs)
-
-    class PicleConfig:
-        outputter = Outputters.outputter_nested
-
-
-class NrNetconfPlugins(BaseModel):
-    ncclient: NrNetconfPluginNcclient = Field(None, description="Use Ncclient plugin")
-    scrapli: NrNetconfPluginScrapli = Field(
-        None, description="Use Scrapli-Netconf plugin"
-    )
 
 
 class CallGetConfig(
@@ -47,33 +20,67 @@ class CallGetConfig(
     populate_by_name=True,
 ):
     @staticmethod
-    def run(*args: object, **kwargs: object):
-        kwargs["call"] = "get_config"
-        return NornirNetconfShell.run(*args, **kwargs)
+    def run(*args: object, **kwargs: object) -> object:
+        return NornirNetconfShell.run(*args, _task="netconf_get_config", **kwargs)
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
 
 
-class CallCapabilities(
-    NetconfCapabilitiesInput,
+class CallEditConfig(
+    NetconfEditConfigInput,
     NorniHostsFilters,
     ClientRunJobArgs,
     use_enum_values=True,
     populate_by_name=True,
 ):
     @staticmethod
-    def run(*args: object, **kwargs: object):
-        kwargs["call"] = "server_capabilities"
-        return NornirNetconfShell.run(*args, **kwargs)
+    def run(*args: object, **kwargs: object) -> object:
+        return NornirNetconfShell.run(*args, _task="netconf_edit_config", **kwargs)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+
+
+class CallGetSchema(
+    NetconfGetSchemaInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    @staticmethod
+    def run(*args: object, **kwargs: object) -> object:
+        return NornirNetconfShell.run(*args, _task="netconf_get_schema", **kwargs)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+
+
+class CallGetCapabilities(
+    NetconfGetCapabilitiesInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    @staticmethod
+    def run(*args: object, **kwargs: object) -> object:
+        return NornirNetconfShell.run(*args, _task="netconf_get_capabilities", **kwargs)
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
 
 
 class NornirNetconfShell(BaseModel):
-    capabilities: CallCapabilities = Field(
-        None, description="Display NETCONF capabilities supported by devices"
+    get_capabilities: CallGetCapabilities = Field(
+        None, alias="get-capabilities", description="List NETCONF capabilities"
+    )
+    get_schema: CallGetSchema = Field(
+        None, alias="get-schema", description="Retrieve a YANG module"
+    )
+    edit_config: CallEditConfig = Field(
+        None, alias="edit-config", description="Edit NETCONF configuration"
     )
     get_config: CallGetConfig = Field(
         None,
@@ -82,7 +89,8 @@ class NornirNetconfShell(BaseModel):
     )
 
     @staticmethod
-    def run(*args: object, **kwargs: object):
+    def run(*args: object, **kwargs: object) -> object:
+        task = kwargs.pop("_task")
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -90,7 +98,7 @@ class NornirNetconfShell(BaseModel):
 
         result = run_future_job(
             "nornir",
-            "netconf",
+            task,
             workers=workers,
             args=args,
             kwargs=kwargs,

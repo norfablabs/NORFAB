@@ -338,6 +338,7 @@ markers = [
     "nornir_network: Nornir network task tests",
     "nornir_parse: Nornir parse task tests",
     "nornir_runtime_inventory: Nornir runtime_inventory task tests",
+    "nornir_netconf: Nornir NETCONF task tests",
     "nornir_snmp: Nornir snmp task tests",
     "nornir_task: Nornir task task tests",
     "nornir_test: Nornir test task tests",
