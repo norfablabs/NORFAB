@@ -90,6 +90,16 @@
     ]
   },
   "tests": {
+    "test_connections.py::TestGetTopology::test_get_topology_device_regex": {
+      "mode": "main_readonly",
+      "devices": ["bulk-conn-01", "bulk-conn-02", "bulk-conn-03", "bulk-conn-06", "bulk-conn-07", "bulk-conn-08", "bulk-conn-09", "bulk-conn-10"],
+      "coverage": "Requires exactly the three regex-matched seed devices and their five directly connected neighbors, with 600 links. Rejects unrelated devices if the API ignores the regex filter. Does not mutate or clean up seed records."
+    },
+    "test_connections.py::TestGetTopology::test_get_topology_device_regex_no_match": {
+      "mode": "main_readonly",
+      "devices": [],
+      "coverage": "Queries ^bulk-conn-0[123]-no-match$ and requires empty nodes and links. No seeded device matches this pattern; catches an ignored regex filter without mutating records."
+    },
     "test_connections.py::TestGetConnections::test_get_connections_performance": {
       "mode": "main_readonly",
       "devices": ["bulk-conn-01", "bulk-conn-02", "bulk-conn-03"],

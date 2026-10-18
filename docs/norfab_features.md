@@ -1419,7 +1419,8 @@ can be rediscovered at runtime; each discovery batch rebuilds OpenAPI once after
 all new routes are registered. **Interfaces:** REST is the delivered interface;
 NFCLI and Python API administer the service. **Use cases:** portals, OSS/BSS,
 ITSM, webhooks, CI pipelines, and non-Python consumers. **Limitations:** only
-tasks declaring REST exposure are published.
+tasks declaring REST exposure are published. The authenticated `/api/job/run`
+endpoint also supports synchronous job execution; `/api/job` routes are not available.
 
 ### OpenAPI documentation and validation
 

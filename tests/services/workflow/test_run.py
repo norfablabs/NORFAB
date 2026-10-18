@@ -1,5 +1,9 @@
 import pprint
+from collections.abc import Generator
+
 import pytest
+
+from norfab.core.client import NFPClient
 
 pytestmark = [
     pytest.mark.workflow,
@@ -7,7 +11,31 @@ pytestmark = [
 ]
 
 
+def _assert_hosts_executed(ret: dict) -> None:
+    """Reject empty Nornir runs that would falsely satisfy branch assertions."""
+    for workflow in ret["workflow-worker-1"]["result"].values():
+        for step in workflow.values():
+            for worker, result in step.items():
+                if worker.startswith("nornir-worker-"):
+                    assert result["resources"], (worker, result)
+                    assert result["result"], (worker, result)
+
+
 class TestWorkflowRunTask:
+    @pytest.fixture(autouse=True)
+    def recover_hosts(self, nfclient: NFPClient) -> Generator[None, None, None]:
+        """Keep deliberately failed hosts from affecting independent workflows."""
+        workers = ["nornir-worker-1", "nornir-worker-2"]
+        ret = nfclient.run_job("nornir", "errdisabled_hosts_clear", workers=workers)
+        assert set(ret) == set(workers)
+        assert all(not data["failed"] for data in ret.values())
+        try:
+            yield
+        finally:
+            ret = nfclient.run_job("nornir", "errdisabled_hosts_clear", workers=workers)
+            assert set(ret) == set(workers)
+            assert all(not data["failed"] for data in ret.values())
+
     def test_workflow_1(self, nfclient):
         ret = nfclient.run_job(
             "workflow",
@@ -17,6 +45,7 @@ class TestWorkflowRunTask:
             },
         )
         pprint.pprint(ret)
+        _assert_hosts_executed(ret)
 
         assert (
             ret["workflow-worker-1"]["result"]["test_workflow_1"]["step1"][
@@ -91,6 +120,7 @@ class TestWorkflowRunTask:
             },
         )
         pprint.pprint(ret)
+        _assert_hosts_executed(ret)
 
         assert (
             ret["workflow-worker-1"]["result"]["test_workflow_run_if_fail_any"][
@@ -114,6 +144,7 @@ class TestWorkflowRunTask:
             },
         )
         pprint.pprint(ret)
+        _assert_hosts_executed(ret)
 
         assert (
             ret["workflow-worker-1"]["result"]["test_workflow_run_if_pass_any"][
@@ -137,6 +168,7 @@ class TestWorkflowRunTask:
             },
         )
         pprint.pprint(ret)
+        _assert_hosts_executed(ret)
 
         assert (
             ret["workflow-worker-1"]["result"]["test_workflow_run_if_fail_all"][
@@ -160,6 +192,7 @@ class TestWorkflowRunTask:
             },
         )
         pprint.pprint(ret)
+        _assert_hosts_executed(ret)
 
         assert (
             ret["workflow-worker-1"]["result"]["test_workflow_run_if_pass_all"][
@@ -183,6 +216,7 @@ class TestWorkflowRunTask:
             },
         )
         pprint.pprint(ret)
+        _assert_hosts_executed(ret)
 
         assert (
             ret["workflow-worker-1"]["result"]["test_workflow_stop_on_failure_test"][
@@ -212,6 +246,7 @@ class TestWorkflowRunTask:
             },
         )
         pprint.pprint(ret)
+        _assert_hosts_executed(ret)
 
         assert (
             ret["workflow-worker-1"]["result"]["test_workflow_run_if_error"][

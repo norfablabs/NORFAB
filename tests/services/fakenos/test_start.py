@@ -1,4 +1,5 @@
 import pprint
+
 import pytest
 
 try:
@@ -32,32 +33,39 @@ pytestmark = [
 class TestStartTask:
     def test_start_existing_network_keeps_original_process(self, nfclient):
         network = "duplicate-start-test"
+        baseline = nfclient.run_job("fakenos", "inspect_networks")
+        assert baseline
+        assert all(not data["failed"] for data in baseline.values())
+        assert all(network not in data["result"] for data in baseline.values())
         started = False
         try:
             first = _start_network(nfclient, network, NET1_INVENTORY)
             assert all(not data["failed"] for data in first.values())
             started = True
             pids = {
-                worker: data["result"][network]["pid"]
-                for worker, data in first.items()
+                worker: data["result"][network]["pid"] for worker, data in first.items()
             }
 
             second = _start_network(nfclient, network, NET1_INVENTORY)
             assert all(data["failed"] for data in second.values())
             assert all(
-                "already exists" in str(data["errors"])
-                for data in second.values()
+                "already exists" in str(data["errors"]) for data in second.values()
             )
 
             inspected = nfclient.run_job("fakenos", "inspect_networks")
+            assert set(inspected) == set(baseline)
             for worker, data in inspected.items():
-                assert set(data["result"]) == {network}
+                assert not data["failed"]
+                assert set(data["result"]) == set(baseline[worker]["result"]) | {
+                    network
+                }
+                for existing, original in baseline[worker]["result"].items():
+                    assert data["result"][existing]["pid"] == original["pid"]
+                    assert data["result"][existing]["alive"] == original["alive"]
                 assert data["result"][network]["pid"] == pids[worker]
                 assert data["result"][network]["alive"] is True
 
-            stopped = nfclient.run_job(
-                "fakenos", "stop", kwargs={"network": network}
-            )
+            stopped = nfclient.run_job("fakenos", "stop", kwargs={"network": network})
             assert all(
                 data["result"][network] == "stopped" for data in stopped.values()
             )

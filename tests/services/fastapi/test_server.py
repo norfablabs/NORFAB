@@ -1,7 +1,7 @@
 import json
 import pprint
-import pytest
 
+import pytest
 import requests
 
 try:
@@ -26,88 +26,12 @@ pytestmark = pytest.mark.fastapi
 
 
 class TestFastAPIServer:
-    def test_job_post(self, nfclient):
-        token = get_token(nfclient)
-        resp = requests.post(
-            url="http://127.0.0.1:8000/api/job",
-            headers={"Authorization": f"Bearer {token}"},
-            data=json.dumps(
-                {
-                    "service": "nornir",
-                    "task": "cli",
-                    "kwargs": {
-                        "commands": ["show clock", "show hostname"],
-                        "FC": "spine",
-                    },
-                }
-            ),
-        )
-        resp.raise_for_status()
-        res = resp.json()
-        pprint.pprint(res)
-
-        assert res["errors"] == [], f"Having errors: '{res['errors']}'"
-        assert res["status"] == "200", f"Unexpected status: '{res['status']}'"
-        assert res["uuid"], f"Unexpected uuid value '{res['uuid']}'"
-        assert len(res["workers"]) > 0, "No workers targeted"
-
-    def test_job_post_noargs_nokwargs(self, nfclient):
-        token = get_token(nfclient)
-        resp = requests.post(
-            url="http://127.0.0.1:8000/api/job",
-            data=json.dumps({"service": "nornir", "task": "get_version"}),
-            headers={"Authorization": f"Bearer {token}"},
-        )
-        resp.raise_for_status()
-        res = resp.json()
-        pprint.pprint(res)
-
-        assert res["errors"] == [], f"Having errors: '{res['errors']}'"
-        assert res["status"] == "200", f"Unexpected status: '{res['status']}'"
-        assert res["uuid"], f"Unexpected uuid value '{res['uuid']}'"
-        assert len(res["workers"]) > 0, "No workers targeted"
-
-    def test_job_get(self, nfclient):
-        # post the job first
-        token = get_token(nfclient)
-        post_resp = requests.post(
-            url="http://127.0.0.1:8000/api/job",
-            data=json.dumps({"service": "nornir", "task": "get_version"}),
-            headers={"Authorization": f"Bearer {token}"},
-        )
-        post_resp.raise_for_status()
-        post_res = post_resp.json()
-        pprint.pprint(post_res)
-
-        uuid = post_res["uuid"]
-
-        # get the job
-        get_resp = requests.get(
-            url="http://127.0.0.1:8000/api/job",
-            data=json.dumps({"service": "nornir", "uuid": uuid}),
-            headers={"Authorization": f"Bearer {token}"},
-        )
-        get_resp.raise_for_status()
-        get_res = get_resp.json()
-        pprint.pprint(get_res)
-
-        assert get_res["errors"] == []
-        assert get_res["status"] == "200"
-        assert get_res["workers"]["dispatched"] != []
-        assert get_res["workers"]["done"] != []
-        assert get_res["workers"]["pending"] == []
-
-        for wname, wres in get_res["results"].items():
-            assert wres["errors"] == [], f"{wname} having errors '{wres['errors']}'"
-            assert wres["failed"] == False, f"{wname} failed to run job"
-            assert wres["result"], f"{wname} no results provided"
-
     def test_job_run(self, nfclient):
         token = get_token(nfclient)
         resp = requests.post(
             url="http://127.0.0.1:8000/api/job/run",
             headers={"Authorization": f"Bearer {token}"},
-            data=json.dumps(
+            json=(
                 {
                     "service": "nornir",
                     "task": "cli",
@@ -132,7 +56,7 @@ class TestFastAPIServer:
         resp = requests.post(
             url="http://127.0.0.1:8000/api/job/run",
             headers={"Authorization": f"Bearer {token}"},
-            data=json.dumps(
+            json=(
                 {
                     "service": "nornir",
                     "task": "cli",
@@ -156,6 +80,7 @@ class TestFastAPIServer:
 
     def test_openapi_endpoint_discovery(self, nfclient):
         token = get_token(nfclient)
+        wait_for_endpoint(nfclient, "/api/nornir/", 30)
         resp = requests.get(
             url="http://127.0.0.1:8000/openapi.json",
             headers={"Authorization": f"Bearer {token}"},

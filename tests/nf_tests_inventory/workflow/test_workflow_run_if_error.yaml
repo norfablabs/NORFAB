@@ -5,6 +5,7 @@ step1_failed:
   service: nornir
   task: task
   kwargs:
+    on_failed: true # conditional steps intentionally retry failed hosts
     FC: spine,leaf
     plugin: nornir_salt.plugins.tasks.nr_test
     excpt: True # raise exception
@@ -14,6 +15,7 @@ step2:
   service: nornir
   task: cli
   kwargs:
+    on_failed: true # conditional steps intentionally retry failed hosts
     FC: leaf
     commands:
       - show hostname
@@ -27,6 +29,7 @@ step3:
   service: nornir
   task: cli
   kwargs:
+    on_failed: true # conditional steps intentionally retry failed hosts
     FC: spine
     commands:
       - show hostname

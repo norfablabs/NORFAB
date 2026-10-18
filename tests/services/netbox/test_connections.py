@@ -687,7 +687,7 @@ class TestGetTopology:
                 ), f"{worker} - link target '{link['target']}' has no node entry"
 
     def test_get_topology_device_regex(self, nfclient):
-        """device_regex filter must return only devices whose names match the pattern."""
+        """Return regex-matched devices and their directly connected neighbors."""
         ret = nfclient.run_job(
             "netbox",
             "get_topology",
@@ -705,6 +705,11 @@ class TestGetTopology:
             ), f"{worker} - expected at least 3 nodes, got {len(res['result']['nodes'])}"
             # the 3 explicitly matched devices must all be present
             node_ids = {n["id"] for n in res["result"]["nodes"]}
+            expected_nodes = set(self.devices) | {
+                f"bulk-conn-{number:02d}" for number in range(6, 11)
+            }
+            assert node_ids == expected_nodes, f"{worker} - unexpected regex topology"
+            assert len(res["result"]["links"]) == 600
             for device in self.devices:
                 assert device in node_ids, f"{worker} - {device} missing from nodes"
             # all link endpoints must have a node entry
@@ -715,6 +720,21 @@ class TestGetTopology:
                 assert (
                     link["target"] in node_ids
                 ), f"{worker} - link target '{link['target']}' has no node entry"
+
+    def test_get_topology_device_regex_no_match(self, nfclient):
+        """A regex matching no seeded device must return an empty topology."""
+        ret = nfclient.run_job(
+            "netbox",
+            "get_topology",
+            workers="any",
+            kwargs={"device_regex": "^bulk-conn-0[123]-no-match$"},
+        )
+        assert ret
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} - task failed"
+            assert not res["errors"], f"{worker} - received error"
+            assert res["result"]["nodes"] == []
+            assert res["result"]["links"] == []
 
     def test_get_topology_filter_role(self, nfclient):
         """role filter must return only devices with the given role slug."""

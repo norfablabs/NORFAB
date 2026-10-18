@@ -3,6 +3,7 @@
 ## BUGS
 
 1. Fixed Netbox `get_interfaces` raising `KeyError` with `cache="force"` when a requested interface was missing from the cached device data. Incomplete cache entries now trigger a fresh fetch.
+2. Fixed Netbox `get_topology` ignoring `device_regex` because it used an unsupported API filter. Device selection now uses `name__regex`, while directly connected neighbors remain included in the topology.
 
 ## FEATURES
 
@@ -11,7 +12,8 @@
 
 ## ENHANCEMENTS
 
-1. Netbox `sync_vrrp` supports shared VIP addresses across VRFs, normalizes VIP roles to `vrrp`, and adds `vip_use_vrf=False` to optionally assign new VIPs to an existing VRF. Bulk updates reduce API requests; dry-run previews retain the per-device action structure used by sync orchestration.
+1. Removed obsolete FastAPI `/api/job` handlers and unused job response models. Synchronous `/api/job/run` and generated service-task endpoints remain available.
+2. Netbox `sync_vrrp` supports shared VIP addresses across VRFs, normalizes VIP roles to `vrrp`, and adds `vip_use_vrf=False` to optionally assign new VIPs to an existing VRF. Bulk updates reduce API requests; dry-run previews retain the per-device action structure used by sync orchestration.
 
 ---
 

@@ -5,7 +5,7 @@ tags:
 
 # FastAPI REST API Service
 
-The FastAPI Service created to serve a set of REST API endpoints to interact with NorFab to start, run, list and retrieve jobs result.
+The FastAPI Service exposes dynamically discovered NorFab service tasks through REST API endpoints and returns task execution results in each response.
 
 NorFab FastAPI Service build using [FastAPI](https://fastapi.tiangolo.com/) library, as the name implies, a well adopted open-source library for building RESTful APIs.
 
@@ -45,10 +45,14 @@ To get started with the FastAPI Service, you need to define the necessary parame
 
 ### API Endpoints
 
-- `http://<IP Address or FQDN>/api/xyz` NorFab REST API endpoints
+- `http://<IP Address or FQDN>/api/<service>/<task>/` generated service-task endpoints
+- `http://<IP Address or FQDN>/api/job/run` synchronous job execution
 - `http://<IP Address or FQDN>/docs` url for [Swagger UI](https://github.com/swagger-api/swagger-ui) documentation
 - `http://<IP Address or FQDN>/redoc` url for [ReDoc UI](https://github.com/Rebilly/ReDoc) documentation
 - `http://<IP Address or FQDN>/openapi.json` NorFab REST API OpenAPI schema file
+
+Generic `/api/job` routes are not available. Use `/api/job/run` with service, task,
+and job options, or generated service-task endpoints with task arguments in the JSON body.
 
 ### Authentication
 

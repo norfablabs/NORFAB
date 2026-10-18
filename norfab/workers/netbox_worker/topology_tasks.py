@@ -229,7 +229,7 @@ class NetboxTopologyTasks:
         if device_contains:
             device_filter_params["name__ic"] = device_contains
         if device_regex:
-            device_filter_params["name__re"] = device_regex
+            device_filter_params["name__regex"] = device_regex
         if role:
             device_filter_params["role"] = role
         if platform:

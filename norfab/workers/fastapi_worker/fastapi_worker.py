@@ -698,13 +698,10 @@ class FastAPIWorker(NFPWorker):
 
 def make_fast_api_app(worker: object, config: dict) -> FastAPI:
     """
-    Create a FastAPI application with endpoints for posting, getting, and running jobs.
+    Create a FastAPI application with a synchronous job execution endpoint.
 
-    This function sets up a FastAPI application with three endpoints:
-
-    - POST /job: To post a job to the NorFab service.
-    - GET /job: To get job results from the NorFab service.
-    - POST /job/run: To run a job and return job results synchronously.
+    POST /job/run executes a job and returns its results synchronously.
+    Service-task endpoints are added separately during discovery.
 
     Each endpoint requires a bearer token for authentication, which is validated
     against the worker's token database.
@@ -718,7 +715,7 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
     """
     config = {
         "title": API_TITLE,
-        "summary": "NorFab Services Tasks FastAPI application with endpoints for posting, getting, and running jobs",
+        "summary": "NorFab REST API for service tasks and synchronous job execution",
         **config,
     }
     app = FastAPI(**config)
@@ -739,107 +736,6 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
                 detail=UnauthorizedMessage().detail,
             )
         return auth.credentials
-
-    # @app.post(
-    #     f"{worker.api_prefix}/job",
-    #     responses={status.HTTP_401_UNAUTHORIZED: dict(model=UnauthorizedMessage)},
-    #     tags=["NORFAB"],
-    # )
-    # def post_job(
-    #     service: Annotated[
-    #         str, Body(description="The name of the service to post the job to")
-    #     ],
-    #     task: Annotated[
-    #         str, Body(description="The task to be executed by the service")
-    #     ],
-    #     args: Annotated[
-    #         List[Any], Body(description="A list of positional arguments for the task")
-    #     ] = None,
-    #     kwargs: Annotated[
-    #         Dict[str, Any],
-    #         Body(description="A dictionary of keyword arguments for the task"),
-    #     ] = None,
-    #     workers: Annotated[
-    #         Union[str, List[str]], Body(description="The workers to dispatch the task")
-    #     ] = "all",
-    #     uuid: Annotated[
-    #         str, Body(description="Optional a unique identifier to use for the job")
-    #     ] = None,
-    #     timeout: Annotated[
-    #         int, Body(description="The timeout for the job in seconds")
-    #     ] = 600,
-    #     token: str = Depends(get_token),
-    # ) -> ClientPostJobResponse:
-    #     """
-    #     Method to post the job to NorFab.
-    #
-    #     Args:
-    #         service: The name of the service to post the job to.
-    #         task: The task to be executed by the service.
-    #         args: A list of positional arguments for the task. Defaults to None.
-    #         kwargs: A dictionary of keyword arguments for the task. Defaults to None.
-    #         workers: The workers to dispatch the task. Defaults to "all".
-    #         uuid: Optional a unique identifier to use for the job. Defaults to None.
-    #         timeout: The timeout for the job in seconds. Defaults to 600.
-    #
-    #     Returns:
-    #         The response from the NorFab service.
-    #     """
-    #     log.debug(
-    #         f"{worker.name} - received job post request, service {service}, task {task}, args {args}, kwargs {kwargs}"
-    #     )
-    #     res = worker.client.post(
-    #         service=service,
-    #         task=task,
-    #         args=args,
-    #         kwargs=kwargs,
-    #         workers=workers,
-    #         timeout=timeout,
-    #         uuid=uuid,
-    #     )
-    #     return res
-
-    # @app.get(
-    #     f"{worker.api_prefix}/job",
-    #     responses={status.HTTP_401_UNAUTHORIZED: dict(model=UnauthorizedMessage)},
-    #     tags=["NORFAB"],
-    # )
-    # def get_job(
-    #     service: Annotated[
-    #         str, Body(description="The name of the service to get the job from")
-    #     ],
-    #     uuid: Annotated[str, Body(description="A unique identifier for the job")],
-    #     workers: Annotated[
-    #         Union[str, List[str]],
-    #         Body(description="The workers to dispatch the get request to"),
-    #     ] = "all",
-    #     timeout: Annotated[
-    #         int, Body(description="The timeout for the job in seconds")
-    #     ] = 600,
-    #     token: str = Depends(get_token),
-    # ) -> ClientGetJobResponse:
-    #     """
-    #     Method to get job results from NorFab.
-    #
-    #     Args:
-    #         service: The name of the service to get the job from.
-    #         workers: The workers to dispatch the get request to. Defaults to "all".
-    #         uuid: A unique identifier for the job.
-    #         timeout: The timeout for the job get requests in seconds. Defaults to 600.
-    #
-    #     Returns:
-    #         The response from the NorFab service.
-    #     """
-    #     log.debug(
-    #         f"{worker.name} - received job get request, service {service}, uuid {uuid}"
-    #     )
-    #     res = worker.client.mmi(
-    #         service=service,
-    #         uuid=uuid,
-    #         workers=workers,
-    #         timeout=timeout,
-    #     )
-    #     return res
 
     @app.post(
         f"{worker.api_prefix}/job/run",
