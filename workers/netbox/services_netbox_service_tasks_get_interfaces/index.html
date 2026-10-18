@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2528,6 +2528,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_move_ip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Move IP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_netbox_service_tasks_create_ip/" class="md-nav__link">
         
   
@@ -4695,6 +4723,34 @@
     
   
     NFCLI Shell Client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../clients_agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Client Agent
   
 
     
@@ -7475,7 +7531,8 @@ nf#
             <td>
               <div class="doc-md-description">
                 <p><code>True</code> - use cache if up to date; <code>False</code> - skip cache;
-<code>"refresh"</code> - fetch and overwrite cache; <code>"force"</code> - use cache without staleness check</p>
+<code>"refresh"</code> - fetch and overwrite cache; <code>"force"</code> - use cache without staleness check.
+Missing requested interfaces trigger a fresh fetch.</p>
               </div>
             </td>
             <td>
@@ -7793,7 +7850,11 @@ results in  certain format.</p>
 <span class="normal">409</span>
 <span class="normal">410</span>
 <span class="normal">411</span>
-<span class="normal">412</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetInterfacesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetInterfacesResult</span><span class="p">,</span>
@@ -7835,7 +7896,8 @@ results in  certain format.</p>
 <span class="sd">        inventory_items (bool, optional): If True, retrieves interface inventory items. Defaults to False.</span>
 <span class="sd">        dry_run (bool, optional): If True, only return REST filter params, do not run. Defaults to False.</span>
 <span class="sd">        cache: ``True`` - use cache if up to date; ``False`` - skip cache;</span>
-<span class="sd">            ``&quot;refresh&quot;`` - fetch and overwrite cache; ``&quot;force&quot;`` - use cache without staleness check</span>
+<span class="sd">            ``&quot;refresh&quot;`` - fetch and overwrite cache; ``&quot;force&quot;`` - use cache without staleness check.</span>
+<span class="sd">            Missing requested interfaces trigger a fresh fetch.</span>
 <span class="sd">        brief (bool, optional): If True, return stripped-down interface data for MCP/LLM context</span>
 <span class="sd">            window optimization. Full data is still fetched; brief mode only affects what is returned.</span>
 <span class="sd">        raise_on_empty (bool, optional): Raise an error when no interfaces match.</span>
@@ -7915,7 +7977,10 @@ results in  certain format.</p>
         <span class="n">devices_to_fetch</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">intf_last_updated</span> <span class="ow">in</span> <span class="n">last_updated_by_device</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">device_cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;get_interfaces::</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="k">if</span> <span class="n">device_cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">device_cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span>
+                <span class="ow">and</span> <span class="n">intf_last_updated</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">device_cache_key</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
                 <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;force&quot;</span>
                 <span class="ow">or</span> <span class="nb">all</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">device_cache_key</span><span class="p">]</span>
@@ -8159,7 +8224,7 @@ results in  certain format.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

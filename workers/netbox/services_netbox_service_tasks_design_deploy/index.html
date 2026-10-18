@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2415,6 +2415,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_move_ip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Move IP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_netbox_service_tasks_create_ip/" class="md-nav__link">
         
   
@@ -2786,6 +2814,17 @@
     <span class="md-ellipsis">
       
         Create IP Next Available Allocation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#move-interface-ip-addresses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Move Interface IP Addresses
       
     </span>
   </a>
@@ -4910,6 +4949,34 @@
     
   
     NFCLI Shell Client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../clients_agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Client Agent
   
 
     
@@ -7358,6 +7425,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#move-interface-ip-addresses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Move Interface IP Addresses
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -8036,6 +8114,11 @@ used during deployment.</p>
 <td>Allocates a child prefix.</td>
 </tr>
 <tr>
+<td><code>move_ip</code></td>
+<td><code>ip_addresses</code>, including nested interface IPs</td>
+<td>Moves all source-interface addresses to the destination interface.</td>
+</tr>
+<tr>
 <td><code>create_ip</code></td>
 <td><code>ip_addresses</code>, including nested interface IPs</td>
 <td>Allocates an IP, optionally assigning it to an interface or FHRP group.</td>
@@ -8069,6 +8152,10 @@ Function return values are not automatically used as relationship references.</p
 <tr>
 <td><a href="../services_netbox_service_tasks_create_prefix/">create_prefix</a></td>
 <td>Allocates a child prefix of the requested length inside an existing parent prefix; supports VLAN association by VID and group name.</td>
+</tr>
+<tr>
+<td><a href="../services_netbox_service_tasks_move_ip/">move_ip</a></td>
+<td>Moves all addresses from a source interface and optionally sets destination primaries.</td>
 </tr>
 <tr>
 <td><a href="../services_netbox_service_tasks_create_ip/">create_ip</a></td>
@@ -8288,6 +8375,17 @@ report the same available ASN.</p>
 <p>To allocate a VIP, supply <code>vrrp_group</code> with a unique existing VRRPv2 or VRRPv3 group name. Groups defined in the same design are deployed before IP allocations. The task reuses an address assigned to that group within the selected prefix, optionally matching <code>description</code>, and defaults the IP role to <code>vrrp</code>. Missing, ambiguous, or non-VRRP group names fail before allocation.</p>
 <p>Put this wrapper in the <strong>top-level <code>ip_addresses</code> collection</strong>. Do not nest it under an interface: <code>vrrp_group</code> cannot accompany <code>device</code>, <code>interface</code>, or <code>is_primary: true</code>. Group allocation disables peer IP allocation automatically. See the <a href="#nested-vrrp-group-records">allocated VIP example</a> below.</p>
 <p>A dry run does not create the VLANs, groups, or prefixes proposed by the design. Allocation lookups therefore require those prerequisites to exist already. The <code>create_ip</code> dry-run limitation still applies: <code>mask_len</code> is ignored and no child subnet is created.</p>
+<h3 id="move-interface-ip-addresses">Move Interface IP Addresses<a class="headerlink" href="#move-interface-ip-addresses" title="Permanent link">¤</a></h3>
+<p><code>ip_addresses</code> accepts a <code>move_ip</code> wrapper containing <code>from_device</code>, <code>from_interface</code>, <code>device</code>, <code>interface</code>, and optional <code>is_primary</code> (default <code>false</code>). Nested wrappers inherit the destination device and interface. Moves run before explicit IP writes and allocations, after interfaces exist. Deployment controls <code>instance</code>, <code>branch</code>, and <code>dry_run</code> are inherited. Moved addresses appear in <code>updated</code> results.</p>
+<p>Primary-IP behavior is documented in the <a href="../services_netbox_service_tasks_move_ip/#primary-ip-behavior">Move IP task</a>. Dry runs do not simulate chained moves.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">ip_addresses</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">move_ip</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">from_device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">router-1</span>
+<span class="w">      </span><span class="nt">from_interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ethernet1</span>
+<span class="w">      </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">router-2</span>
+<span class="w">      </span><span class="nt">interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ethernet2</span>
+<span class="w">      </span><span class="nt">is_primary</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
 <h2 id="custom-fields">Custom fields<a class="headerlink" href="#custom-fields" title="Permanent link">¤</a></h2>
 <p>Put a <code>custom_fields</code> dictionary on an object record. Its keys are Netbox custom-field names, not labels. Definitions must already exist and be enabled for that object type. The design passes values through to Netbox, which validates their types and choices. Updates PATCH supplied values without clearing omitted custom fields. Use <code>null</code> to clear a nullable scalar field.</p>
 <p>When updating an ASN, a design adds new sites and tags without removing existing
@@ -10140,26 +10238,7 @@ functions still run.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\design_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">4026</span>
-<span class="normal">4027</span>
-<span class="normal">4028</span>
-<span class="normal">4029</span>
-<span class="normal">4030</span>
-<span class="normal">4031</span>
-<span class="normal">4032</span>
-<span class="normal">4033</span>
-<span class="normal">4034</span>
-<span class="normal">4035</span>
-<span class="normal">4036</span>
-<span class="normal">4037</span>
-<span class="normal">4038</span>
-<span class="normal">4039</span>
-<span class="normal">4040</span>
-<span class="normal">4041</span>
-<span class="normal">4042</span>
-<span class="normal">4043</span>
-<span class="normal">4044</span>
-<span class="normal">4045</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">4045</span>
 <span class="normal">4046</span>
 <span class="normal">4047</span>
 <span class="normal">4048</span>
@@ -10440,7 +10519,26 @@ functions still run.</p>
 <span class="normal">4323</span>
 <span class="normal">4324</span>
 <span class="normal">4325</span>
-<span class="normal">4326</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">4326</span>
+<span class="normal">4327</span>
+<span class="normal">4328</span>
+<span class="normal">4329</span>
+<span class="normal">4330</span>
+<span class="normal">4331</span>
+<span class="normal">4332</span>
+<span class="normal">4333</span>
+<span class="normal">4334</span>
+<span class="normal">4335</span>
+<span class="normal">4336</span>
+<span class="normal">4337</span>
+<span class="normal">4338</span>
+<span class="normal">4339</span>
+<span class="normal">4340</span>
+<span class="normal">4341</span>
+<span class="normal">4342</span>
+<span class="normal">4343</span>
+<span class="normal">4344</span>
+<span class="normal">4345</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">DesignDeployInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">DesignDeployResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -10870,7 +10968,7 @@ functions still run.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

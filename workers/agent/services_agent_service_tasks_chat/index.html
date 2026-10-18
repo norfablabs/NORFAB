@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2411,6 +2411,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../netbox/services_netbox_service_tasks_move_ip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Move IP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../netbox/services_netbox_service_tasks_create_ip/" class="md-nav__link">
         
   
@@ -3339,17 +3367,6 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#inputs" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Inputs
-      
-    </span>
-  </a>
-  
-</li>
       
         <li class="md-nav__item">
   <a href="#output" class="md-nav__link">
@@ -4684,6 +4701,34 @@
     
   
     NFCLI Shell Client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../clients_agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Client Agent
   
 
     
@@ -7011,17 +7056,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#inputs" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Inputs
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -7101,33 +7135,9 @@
 <p>task api name: <code>invoke</code></p>
 </blockquote>
 <p>Invokes an Agent worker with user instructions. The task is commonly used as an interactive chat surface, but the API task name is <code>invoke</code>.</p>
-<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th style="text-align: right;">Required</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>instructions</code></td>
-<td style="text-align: right;">Yes</td>
-<td>User instructions to send to the agent</td>
-</tr>
-<tr>
-<td><code>name</code></td>
-<td style="text-align: right;">No</td>
-<td>Agent name to invoke, default <code>NorFab</code></td>
-</tr>
-<tr>
-<td><code>verbose_result</code></td>
-<td style="text-align: right;">No</td>
-<td>Return the full message payload instead of only the final response</td>
-</tr>
-</tbody>
-</table>
+<p>Select the built-in <code>NorFab</code> agent or supply an <code>nf://</code> or <code>git://</code> YAML definition
+as <code>name</code>. See <a href="../services_agent_service_inventory/">inventory and definitions</a>.
+Each call starts a fresh conversation; there is no conversation thread setting.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>By default, returns the final agent response text. With <code>verbose_result=True</code>, returns the full agent invocation payload.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
@@ -7135,10 +7145,10 @@
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Ask the default agent a question:</p>
-<div class="highlight"><pre><span></span><code>nf#agent<span class="w"> </span>invoke<span class="w"> </span>instructions<span class="w"> </span><span class="s2">&quot;Summarize the current NorFab inventory&quot;</span>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>agent<span class="w"> </span>invoke<span class="w"> </span>instructions<span class="w"> </span><span class="s2">&quot;Summarize the current NorFab inventory&quot;</span>
 </code></pre></div>
-<p>Invoke a named agent:</p>
-<div class="highlight"><pre><span></span><code>nf#agent<span class="w"> </span>invoke<span class="w"> </span>name<span class="w"> </span>NorFab<span class="w"> </span>instructions<span class="w"> </span><span class="s2">&quot;Check whether any workers are unhealthy&quot;</span>
+<p>Invoke a custom agent:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>agent<span class="w"> </span>invoke<span class="w"> </span>name<span class="w"> </span>nf://agents/interface_check.yaml<span class="w"> </span>instructions<span class="w"> </span><span class="s2">&quot;Check interfaces on r1&quot;</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7211,6 +7221,158 @@ nf#
 
     <div class="doc doc-contents first">
 
+        <p>Run instructions with the built-in agent or a custom YAML definition.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>job</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Job(worker: object = None, juuid: str = None, client_address: str = None, timeout: int = None, args: list = None, kwargs: dict = None, task: str = None, client_input_queue: object = None) (norfab.core.worker.Job)" href="../../../api_reference_core_norfab_worker/#norfab.core.worker.Job">Job</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Job context used to report execution progress.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>instructions</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Request sent to the agent.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>NorFab</code> for the built-in task-discovery agent, or an
+<code>nf://</code> or <code>git://</code> URL to a YAML agent definition. Custom
+definitions require <code>name</code> and <code>system_prompt</code> and may supply
+<code>tools</code> and <code>llm</code>. Defaults to <code>NorFab</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;NorFab&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>verbose_result</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Return the full agent invocation payload when
+true; otherwise return the final response content. Defaults to false.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Result</code></td>            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Final response content or the full invocation payload.
+Each invocation starts a fresh conversation without stored history.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The built-in agent has no configured <code>default_llm</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="FileNotFoundError">FileNotFoundError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The custom definition cannot be fetched.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="KeyError">KeyError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A required definition or fallback model setting is missing.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\agent_worker\agent_worker.py</code></summary>
@@ -7257,7 +7419,28 @@ nf#
 <span class="normal">349</span>
 <span class="normal">350</span>
 <span class="normal">351</span>
-<span class="normal">352</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">InvokeInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">InvokeResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
@@ -7278,6 +7461,27 @@ nf#
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NorFab&quot;</span><span class="p">,</span>
     <span class="n">verbose_result</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run instructions with the built-in agent or a custom YAML definition.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        job (Job): Job context used to report execution progress.</span>
+<span class="sd">        instructions (str): Request sent to the agent.</span>
+<span class="sd">        name (str): ``NorFab`` for the built-in task-discovery agent, or an</span>
+<span class="sd">            ``nf://`` or ``git://`` URL to a YAML agent definition. Custom</span>
+<span class="sd">            definitions require ``name`` and ``system_prompt`` and may supply</span>
+<span class="sd">            ``tools`` and ``llm``. Defaults to ``NorFab``.</span>
+<span class="sd">        verbose_result (bool): Return the full agent invocation payload when</span>
+<span class="sd">            true; otherwise return the final response content. Defaults to false.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Result: Final response content or the full invocation payload.</span>
+<span class="sd">            Each invocation starts a fresh conversation without stored history.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RuntimeError: The built-in agent has no configured ``default_llm``.</span>
+<span class="sd">        FileNotFoundError: The custom definition cannot be fetched.</span>
+<span class="sd">        KeyError: A required definition or fallback model setting is missing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">()</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Invoke: Processing instructions with &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; agent&quot;</span><span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;getting </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> agent ready&quot;</span><span class="p">)</span>
@@ -7430,7 +7634,7 @@ nf#
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

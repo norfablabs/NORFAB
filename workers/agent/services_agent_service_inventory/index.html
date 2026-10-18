@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2411,6 +2411,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../netbox/services_netbox_service_tasks_move_ip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Move IP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../netbox/services_netbox_service_tasks_create_ip/" class="md-nav__link">
         
   
@@ -3213,6 +3241,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -3229,6 +3275,75 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#worker-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worker configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-agent-definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom agent definitions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom agent definitions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tool-definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool definitions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-the-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run the agent
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -4590,6 +4705,34 @@
     
   
     NFCLI Shell Client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../clients_agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Client Agent
   
 
     
@@ -6910,6 +7053,64 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#worker-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worker configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-agent-definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom agent definitions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom agent definitions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tool-definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool definitions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-the-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run the agent
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -6929,14 +7130,140 @@
 
 
 <h1 id="agent-worker-inventory">Agent Worker Inventory<a class="headerlink" href="#agent-worker-inventory" title="Permanent link">¤</a></h1>
-<p>Sample Agent Worker Inventory</p>
-<div class="highlight"><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">agent</span>
-<span class="nt">broker_endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tcp://127.0.0.1:5555&quot;</span>
-<span class="nt">llm_flavour</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ollama</span>
-<span class="nt">llm_model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lama3.1:8b</span>
-<span class="nt">llm_temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
-<span class="nt">llm_base_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://127.0.0.1:11434&quot;</span>
+<p>The <code>agent</code> service runs on a worker. For local chat, see <a href="../../../clients_agent/">Client Agent</a>.</p>
+<h2 id="worker-configuration">Worker configuration<a class="headerlink" href="#worker-configuration" title="Permanent link">¤</a></h2>
+<div class="highlight"><span class="filename">inventory.yaml</span><pre><span></span><code><span class="nt">workers</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">agent-worker-1</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">agents/common.yaml</span>
+<span class="nt">topology</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">workers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">agent-worker-1</span>
 </code></pre></div>
+<div class="highlight"><span class="filename">agents/common.yaml</span><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">agent</span>
+<span class="nt">default_llm</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ollama</span>
+<span class="w">  </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qwen3:8b</span>
+<span class="w">  </span><span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://127.0.0.1:11434</span>
+<span class="w">  </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
+</code></pre></div>
+<p><code>default_llm</code> is required for the built-in <code>NorFab</code> agent and custom definitions
+without a nonempty <code>llm</code> mapping. Supported providers are <strong>ollama</strong> and <strong>groq</strong>.
+Set <code>model</code> and <code>provider</code>; other keys are passed to the provider's LangChain
+constructor, for example <code>base_url</code>, <code>temperature</code>, or <code>api_key</code>.
+Groq requires <code>langchain-groq</code> to be installed separately.</p>
+<p>The old <code>llm_flavour</code>, <code>llm_model</code>, <code>llm_temperature</code> and <code>llm_base_url</code> settings
+are not read. Worker inventory does not define named agent profiles.</p>
+<h2 id="custom-agent-definitions">Custom agent definitions<a class="headerlink" href="#custom-agent-definitions" title="Permanent link">¤</a></h2>
+<p>Invoke <code>name: NorFab</code> to use the built-in agent, whose tools list available tasks
+and retrieve task descriptions. To run custom tools, pass an <code>nf://</code> or <code>git://</code>
+YAML file URL as <code>name</code>. Bare custom names and local paths are not supported.</p>
+<div class="highlight"><span class="filename">agents/interface_check.yaml</span><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Interface Check</span>
+<span class="nt">system_prompt</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">  </span><span class="no">Retrieve interface information for the requested devices.</span>
+<span class="w">  </span><span class="no">Report errors and operational state with supporting evidence.</span>
+<span class="nt">tools</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">inspect_interfaces</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Read interface details from selected devices.</span>
+<span class="w">    </span><span class="nt">input_schema</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">object</span>
+<span class="w">      </span><span class="nt">properties</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">FB</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span>
+<span class="w">          </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Device name glob pattern.</span>
+<span class="w">      </span><span class="nt">required</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">FB</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">norfab</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir</span>
+<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cli</span>
+<span class="w">      </span><span class="nt">kwargs</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">commands</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">show interfaces</span>
+</code></pre></div>
+<p>Use commands appropriate to your devices.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>Required agent display name.</td>
+</tr>
+<tr>
+<td><code>system_prompt</code></td>
+<td>Required operating instructions.</td>
+</tr>
+<tr>
+<td><code>llm</code></td>
+<td>Optional complete model configuration; a nonempty mapping replaces <code>default_llm</code>, without merging.</td>
+</tr>
+<tr>
+<td><code>tools</code></td>
+<td>Mapping of tool names to definitions; defaults to no tools.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tool-definitions">Tool definitions<a class="headerlink" href="#tool-definitions" title="Permanent link">¤</a></h3>
+<p>The client agent supports the same inline tool format.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>description</code></td>
+<td>Required description shown to the model.</td>
+</tr>
+<tr>
+<td><code>input_schema</code></td>
+<td>Optional JSON Schema object with <code>properties</code>, <code>required</code>, etc. Omit for an argument-free tool.</td>
+</tr>
+<tr>
+<td><code>norfab.task</code></td>
+<td>Required NorFab task name.</td>
+</tr>
+<tr>
+<td><code>norfab.service</code></td>
+<td>Fixed service name. If omitted, the model must supply a <code>service</code> argument. A fixed service takes precedence.</td>
+</tr>
+<tr>
+<td><code>norfab.kwargs</code></td>
+<td>Fixed task arguments; override model-supplied values with the same names.</td>
+</tr>
+<tr>
+<td><code>norfab.job_data</code></td>
+<td>List of model argument names to move into the task's <code>job_data</code> mapping, for example template variables.</td>
+</tr>
+</tbody>
+</table>
+<p>Tool calls use the client's default worker selection. There is no tool-level
+worker-routing setting; <code>workers</code> in <code>norfab.kwargs</code> is passed as a task argument.</p>
+<h2 id="run-the-agent">Run the agent<a class="headerlink" href="#run-the-agent" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>agent<span class="w"> </span>invoke<span class="w"> </span>name<span class="w"> </span>nf://agents/interface_check.yaml<span class="w"> </span>instructions<span class="w"> </span><span class="s2">&quot;Check interfaces on r1&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;agent&quot;</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s2">&quot;invoke&quot;</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://agents/interface_check.yaml&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;instructions&quot;</span><span class="p">:</span> <span class="s2">&quot;Check interfaces on r1&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>Each invocation starts a fresh conversation. Worker definitions do not support
+client-agent <code>memory</code>, <code>rag</code>, <code>mcp</code>, <code>from_yaml_file</code>, or tool-discovery switches.
+See <a href="../services_agent_service_tasks_chat/">Invoke</a> for results and usage.</p>
 
 
 
@@ -7058,7 +7385,7 @@
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       
