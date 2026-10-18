@@ -129,6 +129,15 @@ class ClientMonitoringStats(BaseMonitoringStats):
     database: DatabaseMonitoringStats
 
 
+class WorkerJobMonitoringStats(BaseModel):
+    """Counts of retained worker jobs."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    total_jobs: int = 0
+    jobs_by_status: dict[str, int] = Field(default_factory=dict)
+
+
 class WorkerMonitoringStats(BaseMonitoringStats):
     """Validated worker monitoring response."""
 
@@ -142,6 +151,7 @@ class WorkerMonitoringStats(BaseMonitoringStats):
     reconnects: int
     outbound_queue_depth: int
     running_jobs: int
+    jobs: WorkerJobMonitoringStats = Field(default_factory=WorkerJobMonitoringStats)
     max_concurrent_jobs: int
     watchdog_runs: int
     keepalives_sent: int

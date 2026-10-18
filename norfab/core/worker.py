@@ -1156,6 +1156,23 @@ class JobDatabase:
             cursor = conn.execute(query, params)
             return [dict(row) for row in cursor.fetchall()]
 
+    def jobs_stats(self) -> dict:
+        """Return counts of all retained jobs, grouped by status.
+
+        Counts persist across restarts and decrease when job history is removed.
+        Failed jobs are counted separately from completed jobs.
+
+        Returns:
+            dict: Total job count and a mapping of statuses to job counts.
+        """
+        with self._transaction(write=False) as conn:
+            rows = conn.execute("SELECT status, COUNT(*) FROM jobs GROUP BY status")
+            jobs_by_status = {row[0]: row[1] for row in rows.fetchall()}
+        return {
+            "total_jobs": sum(jobs_by_status.values()),
+            "jobs_by_status": jobs_by_status,
+        }
+
     def close(self) -> None:
         """Close all database connections."""
         if hasattr(self._local, "conn"):
@@ -2367,7 +2384,16 @@ class NFPWorker:
 
     @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
     def get_stats(self) -> Result:
-        """Return the worker's validated in-memory monitoring snapshot."""
+        """Return process monitoring and retained job counts.
+
+        Job counts cover the worker's SQLite history across restarts, with no
+        time window or record limit. Removing history reduces these counts.
+
+        Returns:
+            Result: Validated monitoring snapshot, including total jobs and
+                counts by status under ``jobs``. Failed jobs are counted
+                separately from completed jobs.
+        """
         stats_data = {
             "name": self.name,
             "status": "active" if not self.exit_event.is_set() else "stopping",
@@ -2378,6 +2404,7 @@ class NFPWorker:
             "reconnects": self.monitoring.reconnects,
             "outbound_queue_depth": self.outbound_queue.qsize(),
             "running_jobs": len(self.running_jobs),
+            "jobs": self.db.jobs_stats(),
             "max_concurrent_jobs": self.max_concurrent_jobs,
             "watchdog_runs": self.watchdog.runs,
             "keepalives_sent": self.keepaliver.keepalives_send,

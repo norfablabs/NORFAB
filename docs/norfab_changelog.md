@@ -12,10 +12,10 @@
 
 ## ENHANCEMENTS
 
-1. Removed obsolete FastAPI `/api/job` handlers and unused job response models. Synchronous `/api/job/run` and generated service-task endpoints remain available.
-2. Netbox `sync_vrrp` supports shared VIP addresses across VRFs, normalizes VIP roles to `vrrp`, and adds `vip_use_vrf=False` to optionally assign new VIPs to an existing VRF. Bulk updates reduce API requests; dry-run previews retain the per-device action structure used by sync orchestration.
-
-3. Updated dependency pins:
+1. Enhanced NFCLI `show norfab workers` with a compact table showing service, status, uptime, RAM, CPU, and total retained jobs, using readable column titles. Worker `get_stats` now includes total job counts and counts by status.
+2. Removed obsolete FastAPI `/api/job` handlers and unused job response models. Synchronous `/api/job/run` and generated service-task endpoints remain available.
+3. Refactored `sync_vrrp` to support shared VIP addresses across VRFs, normalize VIP roles to `vrrp`, and added `vip_use_vrf=False` to optionally assign new VIPs to an existing VRF. Bulk updates reduce API requests; dry-run previews retain the per-device action structure used by sync orchestration.
+4. Updated dependency pins:
    - `pyzmq`: 27.1.0 -> 27.2.0.
    - `tornado`: 6.5.7 -> 6.5.10.
    - `pydantic`: 2.13.4 -> 2.14.1.

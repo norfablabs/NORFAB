@@ -9,6 +9,7 @@ import builtins
 import importlib.metadata
 import logging
 import sys
+from datetime import timedelta
 from enum import Enum
 from typing import Any, List, Optional, Union
 
@@ -133,6 +134,9 @@ class ShowBrokerModel(BaseModel):
 
 
 class ShowNorfabWorkersModel(BaseModel):
+    timeout: StrictInt = Field(
+        10, description="Timeout for worker statistics in seconds"
+    )
     status: ShowWorkersStatus = Field(None, description="Show workers status")
     jobs: ShowWorkersJobsModel = Field(None, description="Show workers jobs")
     statistics: ShowWorkersStatistics = Field(
@@ -143,6 +147,59 @@ class ShowNorfabWorkersModel(BaseModel):
     class PicleConfig:
         pipe = PipeFunctionsModel
         outputter = Outputters.outputter_nested
+
+    @staticmethod
+    def run(*args: object, **kwargs: object) -> object:
+        """Show broker-known workers with live process metrics, grouped by service."""
+        nfclient = getattr(builtins, "NFCLIENT", NFCLIENT)
+        reply = nfclient.mmi("mmi.service.broker", "show_workers")
+        if reply["errors"]:
+            return "\n".join(reply["errors"])
+
+        workers = [worker for worker in reply["results"] if worker["name"]]
+        alive = [worker["name"] for worker in workers if worker["status"] == "alive"]
+        results = (
+            nfclient.run_job(
+                "all", "get_stats", workers=alive, timeout=kwargs.get("timeout", 10)
+            )
+            if alive
+            else {}
+        ) or {}
+        rows = []
+        for worker in sorted(workers, key=lambda item: (item["service"], item["name"])):
+            result = results.get(worker["name"], {})
+            if result.get("failed"):
+                log.error(
+                    "worker '%s' statistics failed: %s",
+                    worker["name"],
+                    result.get("errors"),
+                )
+            stats = {} if result.get("failed") else (result.get("result") or {})
+            process = stats.get("process", {})
+            rows.append(
+                {
+                    "Worker": worker["name"],
+                    "Service": worker["service"],
+                    "Status": worker["status"],
+                    "Uptime": (
+                        str(timedelta(seconds=process["uptime_seconds"]))
+                        if process
+                        else "-"
+                    ),
+                    "RAM MB": (
+                        round(process["memory_rss_mbyte"])
+                        if process
+                        else "-"
+                    ),
+                    "CPU": process.get("cpu_percent", "-"),
+                    "Jobs": stats.get("jobs", {}).get("total_jobs", "-"),
+                }
+            )
+        return (
+            rows,
+            Outputters.outputter_tabulate_table,
+            {"showindex": True, "tablefmt": "simple"},
+        )
 
 
 class ShowNorfabClientModel(BaseModel):

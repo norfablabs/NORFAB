@@ -135,7 +135,8 @@ Status reports component identity, endpoints, runtime directories, and CurveZMQ
 configuration for environment troubleshooting. Versioned statistics report
 process CPU, memory, threads, TCP sockets, open file descriptors on supported
 platforms, message activity, queues, jobs, connections, and service-specific
-metrics for performance analysis and dashboards. NFCLI exposes these through
+metrics for performance analysis and dashboards. Worker statistics include total
+retained jobs and counts by status across restarts. NFCLI exposes these through
 `show norfab <component> status` and `show norfab <component> statistics`.
 **Limitations:** status output contains local filesystem paths and should only be
 shared with trusted operators; neither interface returns private key contents.
