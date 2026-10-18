@@ -327,6 +327,27 @@ class AgentWorker(NFPWorker):
         name: str = "NorFab",
         verbose_result: bool = False,
     ) -> Result:
+        """Run instructions with the built-in agent or a custom YAML definition.
+
+        Args:
+            job (Job): Job context used to report execution progress.
+            instructions (str): Request sent to the agent.
+            name (str): ``NorFab`` for the built-in task-discovery agent, or an
+                ``nf://`` or ``git://`` URL to a YAML agent definition. Custom
+                definitions require ``name`` and ``system_prompt`` and may supply
+                ``tools`` and ``llm``. Defaults to ``NorFab``.
+            verbose_result (bool): Return the full agent invocation payload when
+                true; otherwise return the final response content. Defaults to false.
+
+        Returns:
+            Result: Final response content or the full invocation payload.
+                Each invocation starts a fresh conversation without stored history.
+
+        Raises:
+            RuntimeError: The built-in agent has no configured ``default_llm``.
+            FileNotFoundError: The custom definition cannot be fetched.
+            KeyError: A required definition or fallback model setting is missing.
+        """
         ret = Result()
         log.info(f"{self.name} - Invoke: Processing instructions with '{name}' agent")
         job.event(f"getting {name} agent ready")

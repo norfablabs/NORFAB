@@ -9,13 +9,9 @@ tags:
 
 Invokes an Agent worker with user instructions. The task is commonly used as an interactive chat surface, but the API task name is `invoke`.
 
-## Inputs
-
-| Parameter | Required | Description |
-|---|---:|---|
-| `instructions` | Yes | User instructions to send to the agent |
-| `name` | No | Agent name to invoke, default `NorFab` |
-| `verbose_result` | No | Return the full message payload instead of only the final response |
+Select the built-in `NorFab` agent or supply an `nf://` or `git://` YAML definition
+as `name`. See [inventory and definitions](services_agent_service_inventory.md).
+Each call starts a fresh conversation; there is no conversation thread setting.
 
 ## Output
 
@@ -28,13 +24,13 @@ By default, returns the final agent response text. With `verbose_result=True`, r
     Ask the default agent a question:
 
     ```bash
-    nf#agent invoke instructions "Summarize the current NorFab inventory"
+    nf# agent invoke instructions "Summarize the current NorFab inventory"
     ```
 
-    Invoke a named agent:
+    Invoke a custom agent:
 
     ```bash
-    nf#agent invoke name NorFab instructions "Check whether any workers are unhealthy"
+    nf# agent invoke name nf://agents/interface_check.yaml instructions "Check interfaces on r1"
     ```
 
 === "Python"

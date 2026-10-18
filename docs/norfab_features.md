@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 17 October 2026*
+*Last updated: 18 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -1282,7 +1282,7 @@ mis-scoped tool can perform real changes.
 
 ## Client-side AI agent
 
-The Python client and NFCLI also include an optional profile-driven agent that
+The Python client and NFCLI include an optional [profile-driven agent](clients_agent.md) that
 runs beside the user rather than as a distributed Agent service worker.
 
 ### Multi-provider LLM profiles
@@ -1323,10 +1323,11 @@ embeddings, chunking, and document freshness.
 ### Conversation memory and streaming
 
 Supports token streaming, reusable thread IDs, resettable conversations,
-in-memory continuity, and optional persistent SQLite checkpoints.
+in-memory continuity, and a SQLite backend setting.
 **Use cases:** interactive troubleshooting that carries evidence across turns,
-long investigations, and resumable operator sessions. **Limitations:** retained
-conversation data may contain operationally sensitive content.
+and investigations spanning multiple messages. **Limitations:** retained
+conversation data may contain operationally sensitive content; the current SQLite
+initialization needs a fix before persistent checkpoints can be used.
 
 ### Sandboxed local filesystem tools
 

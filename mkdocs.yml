@@ -221,6 +221,7 @@ nav:
     - Runtime Monitoring Dashboard: clients_nfweb_monitoring.md
     - 3D Network Topology Application: clients_nfweb_topology.md
   - NFCLI Shell Client: clients_nfcli_overview.md
+  - Client Agent: clients_agent.md
   - Python API Client: clients_python_api_overview.md
   - ROBOT Client: clients_robot_client_overview.md
 

@@ -5,41 +5,20 @@ tags:
 
 # Agent Service
 
-The Agent Service is a key component of the Network Automations Fabric (NORFAB) that leverages AI-based agents to enhance network automation and management.
+Run an LLM agent on a NorFab worker and submit instructions through NFCLI or
+the Python job API. Agents use configured NorFab tasks as tools and return a
+final response. Each invocation starts a fresh conversation.
 
-![Nornir Agent Service Architecture](../../images/Agent_Service.jpg)
-
-# Using Ollama
-
-[Ollama](https://ollama.com/) is an application designed to facilitate the use of large language models (LLMs) on your local machine. It provides a user-friendly interface and REST API for interacting with these models, enabling various AI-driven tasks such as natural language processing, text generation, and more. By running Ollama on your PC, you can leverage the power of LLMs for a wide range of applications, including network automation, data analysis, and intelligent agent services.
-
-In the context of the NorFab Agent Service, Ollama acts as a bridge between the AI agents and the LLMs, allowing the agents to connect to and utilize the capabilities of the models specified in the inventory. This integration enhances the functionality of the Agent Service, enabling more advanced and intelligent automation tasks.
-
-Follow official Guide on how to run Ollama Models - [GitHub link](https://github.com/ollama/ollama)
-
-Once Ollama application installed, configure [NorFab Agent Worker inventory](./services_agent_service_inventory.md) and proceed with running it by updating NorFab `inventory.yaml` file:
-
-``` yaml title="inventory.yaml"
-broker:
-  endpoint: "tcp://127.0.0.1:5555"
-
-workers:
-  agent-worker-1:
-    - agents/agent-worker-1.yaml
-
-topology:
-  broker: True
-  workers:
-    - agent-worker-1
+```bash
+pip install "norfab[agentservice]"
 ```
 
-Where `agent-worker-1.yaml` content is:
+The worker supports Ollama and Groq. For Ollama, run an Ollama server and install
+the selected model. For Groq, also install `langchain-groq` and configure credentials.
 
-```
-service: agent
-broker_endpoint: "tcp://127.0.0.1:5555"
-llm_flavour: ollama
-llm_model: lama3.1:8b
-llm_temperature: 0.5
-llm_base_url: "http://127.0.0.1:11434"
-```
+- [Inventory and custom agent definitions](services_agent_service_inventory.md)
+- [Invoke an agent](services_agent_service_tasks_chat.md)
+- [Local client agent](../../clients_agent.md), for profile-based chat in NFCLI or Python
+
+The built-in `NorFab` agent discovers services and task descriptions. Custom
+definitions supply the tools needed to perform network operations.
