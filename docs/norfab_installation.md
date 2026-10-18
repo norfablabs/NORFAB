@@ -131,9 +131,12 @@ will be noted in service deployment details.
     Download and run the interactive Bash installer:
 
     ```bash
-    curl -fsSL https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_linux.sh -o install_norfab_linux.sh
-    bash install_norfab_linux.sh
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_linux.sh)"
     ```
+
+    Run this command from an interactive terminal with Bash and curl installed.
+    It downloads and runs the installer while keeping terminal input available
+    for prompts.
 
     Use Python 3.10+ with pip and venv support. The installer defaults to a local
     virtual environment, includes CLI and TUI, and lets you select services and

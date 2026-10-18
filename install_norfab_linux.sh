@@ -2,7 +2,7 @@
 # NorFab Linux interactive installer. Requires Bash and Python 3.10+ with venv.
 # Run: bash install_norfab_linux.sh
 # Download and run (prompts read from the terminal):
-# curl -fsSL https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_linux.sh -o install_norfab_linux.sh && bash install_norfab_linux.sh
+# bash -c "$(curl -fsSL https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_linux.sh)"
 # Existing inventory and selected worker configuration files are preserved.
 
 set -euo pipefail
