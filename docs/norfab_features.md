@@ -115,6 +115,8 @@ configurable ports, and generated inventory and worker configuration files.
 Python 3.10+; service dependencies and external systems must be available.
 Both installers include CLI and TUI, allow skipping environment creation, and
 refuse to overwrite existing inventory or selected worker configuration files.
+The Windows installer supports `iex (irm ...)` directly in PowerShell, with
+installer settings scoped locally and errors that leave the terminal open.
 See [Windows installer](https://github.com/norfablabs/NORFAB/blob/master/install_norfab_windows.ps1)
 and [Linux installer](https://github.com/norfablabs/NORFAB/blob/master/install_norfab_linux.sh).
 

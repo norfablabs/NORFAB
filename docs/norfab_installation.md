@@ -67,8 +67,13 @@ will be noted in service deployment details.
     and scaffolds a ready-to-run inventory for you:
 
     ```powershell
-    $p = Join-Path $env:TEMP 'install_norfab.ps1'; Invoke-WebRequest -UseBasicParsing 'https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_windows.ps1' -OutFile $p -ErrorAction Stop; $s = Get-Content -LiteralPath $p -Raw -Encoding UTF8; Set-Content -LiteralPath $p -Value $s -Encoding UTF8; powershell -ExecutionPolicy Bypass -File $p
+    iex (irm https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_windows.ps1)
     ```
+
+    Run this command in Windows PowerShell 5.1 or PowerShell 7+. `irm` downloads
+    the script and `iex` runs it. After installation, run the printed commands
+    to start `nfcli`. Installer settings stay local to the script, and failures
+    report an error without closing your terminal.
 
     !!! note "Prerequisite"
         Python 3.10 or later must be installed and on your PATH.

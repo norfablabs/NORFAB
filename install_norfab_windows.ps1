@@ -11,8 +11,8 @@
 
     *** HOW TO RUN THIS SCRIPT ***
 
-    Option A - download, save as UTF-8 with BOM for Windows PowerShell 5.1, and run:
-        $p = Join-Path $env:TEMP 'install_norfab.ps1'; $r = Invoke-WebRequest -UseBasicParsing 'https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_windows.ps1'; Set-Content -LiteralPath $p -Value $r.Content -Encoding UTF8; powershell -ExecutionPolicy Bypass -File $p
+    Option A - download and run directly in PowerShell:
+        iex (irm https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_windows.ps1)
 
     Option B - if you have already downloaded the file:
         powershell -ExecutionPolicy Bypass -File .\install_norfab_windows.ps1
@@ -29,6 +29,9 @@
     powershell -ExecutionPolicy Bypass -File .\install_norfab_windows.ps1
 #>
 
+# Keep variables, helper functions, strict mode, and error preferences local even
+# when Invoke-Expression evaluates the downloaded text in the caller's scope.
+& {
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
@@ -398,7 +401,7 @@ try {
 } catch {
     Write-Host "[!] Could not start a supported Python: $($_.Exception.Message)" -ForegroundColor Red
     Write-Host '    Python 3.10 or later must be available on PATH.' -ForegroundColor Red
-    exit 1
+    throw
 }
 
 # Ensure pip is available
@@ -407,7 +410,7 @@ try {
 } catch {
     Write-Host "[!] pip check failed: $($_.Exception.Message)" -ForegroundColor Red
     Write-Host "    Run: & '$pythonCmd' -m ensurepip --upgrade" -ForegroundColor Red
-    exit 1
+    throw
 }
 
 # ---------------------------------------------------------------------------
@@ -736,8 +739,7 @@ except Exception as error:
 
 Write-Header "Installation Complete"
 
-# The documented -File invocation runs in a child process, so changing its
-# directory or activating its venv cannot update the caller's terminal.
+# Print startup commands for both direct evaluation and saved-file invocation.
 Write-Host ''
 Write-Host '  Run these commands in your PowerShell terminal:' -ForegroundColor White
 if ($createEnvironment) {
@@ -761,3 +763,4 @@ if ($selectedAddons -contains 'nfcli') {
 }
 Write-Host ''
 Write-Info 'Documentation: https://docs.norfablabs.com/'
+}
