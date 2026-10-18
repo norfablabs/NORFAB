@@ -1,4 +1,5 @@
 import ipaddress
+import logging
 from copy import deepcopy
 from typing import Any, Union
 
@@ -14,6 +15,8 @@ from .netbox_models import (
     SyncVrrpResult,
 )
 from .netbox_worker_utilities import review_sync_task_result, sync_diff_has_changes
+
+log = logging.getLogger(__name__)
 
 VRRP_PROTOCOLS = {"vrrpv2": "vrrp2", "vrrpv3": "vrrp3"}
 VRRP_NAME_TEMPLATE = "{{ device.name }}_{{ interface }}_VRRP{{ group_id }}"
@@ -77,7 +80,9 @@ class NetboxFhrpTasks:
             with ``create``, ``update``, ``delete``, and ``in_sync`` actions
             instead. The ``diff`` field always contains the preview.
             Errors describe collection failures, missing objects, IP ownership
-            conflicts, or ambiguous group matches.
+            conflicts, ambiguous group matches, or invalid live virtual addresses.
+            Records with missing or invalid virtual addresses are reported and
+            skipped while valid records continue to synchronize.
         """
         instance = instance or self.default_instance
         ret = Result(
@@ -136,8 +141,8 @@ class NetboxFhrpTasks:
             for interface_id, interface in interfaces.items()
         }
 
-        # The getter validates record types and supplies defaults. Only translate
-        # device values to NetBox values and resolve the actual NetBox interface.
+        # The getter supplies defaults. Validate VIPs while translating device
+        # values to NetBox values and resolving the actual NetBox interface.
         job.event("collecting live VRRP data")
         parsed = self.client.run_job(
             "nornir",
@@ -172,9 +177,21 @@ class NetboxFhrpTasks:
                         continue
                     group_id = record["group"]
                     protocol = VRRP_PROTOCOLS[record["protocol"]]
-                    vrrp_vip_identity = str(
-                        ipaddress.ip_interface(record["virtual_address"]).ip
-                    )
+                    try:
+                        virtual_address = str(
+                            record.get("virtual_address") or ""
+                        ).strip()
+                        if not virtual_address:
+                            raise ValueError(f"{interface} virtual address is missing")
+                        vrrp_vip_identity = str(
+                            ipaddress.ip_interface(virtual_address).ip
+                        )
+                    except (KeyError, TypeError, ValueError) as exc:
+                        msg = f"device '{device}' returned invalid VRRP data: {exc}"
+                        job.event(msg, severity="ERROR")
+                        log.error(f"{self.name} - Sync VRRP: {msg}")
+                        ret.errors.append(msg)
+                        continue
                     auth = record["authentication_type"]
                     if auth in ("text", "simple", "plain", "cleartext"):
                         auth = "plaintext"

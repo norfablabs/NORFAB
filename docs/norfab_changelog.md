@@ -1,5 +1,9 @@
 # 0.24.15 (draft)
 
+## BUGS
+
+1. Fixed Netbox `sync_vrrp` aborting when live data contains a missing, empty, or malformed virtual address. Restored per-record error messages, ERROR events, and logging; invalid records are skipped while valid records continue to synchronize.
+
 ## ENHANCEMENTS
 
 1. Removed the generic Nornir `netconf` task in favor of dedicated NETCONF operation tasks.
