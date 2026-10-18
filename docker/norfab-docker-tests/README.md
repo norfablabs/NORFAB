@@ -4,6 +4,12 @@ This folder contains Docker runners for the repository test suite. The runners
 use the canonical inventory in `tests/nf_tests_inventory`. FileSharing uses an
 Invoke-refreshed copy so publication and runtime staging share one Docker mount.
 
+Docker runners pass `GITHUB_USERNAME`, `GITHUB_TOKEN`, and `OPENROUTER_API_KEY`
+from the host process environment into their containers for Git remotes and
+agent tests. Set the required variables in the shell that launches Invoke; restart that shell after
+changing persistent OS environment variables. These environment entries take
+precedence over service `.env` files.
+
 From the repository root, use Invoke for normal development runs:
 
 ```bash
