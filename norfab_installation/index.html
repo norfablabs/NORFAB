@@ -7197,9 +7197,11 @@ from the folder containing <code>norfab-env</code>, or use your environment's ac
 </div>
 <div class="tabbed-block">
 <p>Download and run the interactive Bash installer:</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_linux.sh<span class="w"> </span>-o<span class="w"> </span>install_norfab_linux.sh
-bash<span class="w"> </span>install_norfab_linux.sh
+<div class="highlight"><pre><span></span><code>bash<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_linux.sh<span class="k">)</span><span class="s2">&quot;</span>
 </code></pre></div>
+<p>Run this command from an interactive terminal with Bash and curl installed.
+It downloads and runs the installer while keeping terminal input available
+for prompts.</p>
 <p>Use Python 3.10+ with pip and venv support. The installer defaults to a local
 virtual environment, includes CLI and TUI, and lets you select services and
 Robot Framework. System installation follows your distribution's pip policy;
