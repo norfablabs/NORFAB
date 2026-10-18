@@ -386,3 +386,36 @@ class NetconfTask:
             capab_filter=capab_filter,
             **kwargs,
         )
+
+    def netconf_get(self, job: Job, **kwargs: Any) -> Result:
+        raise NotImplementedError("netconf_get is not implemented")
+
+    def netconf_transaction(self, job: Job, **kwargs: Any) -> Result:
+        raise NotImplementedError("netconf_transaction is not implemented")
+
+    def netconf_validate(self, job: Job, **kwargs: Any) -> Result:
+        raise NotImplementedError("netconf_validate is not implemented")
+
+    def netconf_commit(self, job: Job, **kwargs: Any) -> Result:
+        raise NotImplementedError("netconf_commit is not implemented")
+
+    def netconf_cancel_commit(self, job: Job, **kwargs: Any) -> Result:
+        raise NotImplementedError("netconf_cancel_commit is not implemented")
+
+    def netconf_discard_changes(self, job: Job, **kwargs: Any) -> Result:
+        raise NotImplementedError("netconf_discard_changes is not implemented")
+
+    def netconf_lock(self, job: Job, **kwargs: Any) -> Result:
+        raise NotImplementedError("netconf_lock is not implemented")
+
+    def netconf_unlock(self, job: Job, **kwargs: Any) -> Result:
+        raise NotImplementedError("netconf_unlock is not implemented")
+
+    def netconf_copy_config(self, job: Job, **kwargs: Any) -> Result:
+        raise NotImplementedError("netconf_copy_config is not implemented")
+
+    def netconf_delete_config(self, job: Job, **kwargs: Any) -> Result:
+        raise NotImplementedError("netconf_delete_config is not implemented")
+
+    def netconf_rpc(self, job: Job, **kwargs: Any) -> Result:
+        raise NotImplementedError("netconf_rpc is not implemented")
