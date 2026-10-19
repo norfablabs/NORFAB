@@ -99,6 +99,16 @@ def create_api_endpoint(
             workers=workers,
             timeout=timeout,
         )
+        # Client failure or shutdown can return None instead of worker results.
+        if res is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={
+                    "error": "job_result_unavailable",
+                    "service": service,
+                    "task": task_name,
+                },
+            )
         return res
 
     return endpoint
@@ -798,6 +808,16 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
             workers=workers,
             timeout=timeout,
         )
+        # Client failure or shutdown can return None instead of worker results.
+        if res is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={
+                    "error": "job_result_unavailable",
+                    "service": service,
+                    "task": task,
+                },
+            )
         return res
 
     return app

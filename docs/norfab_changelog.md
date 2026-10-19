@@ -1,4 +1,21 @@
-# 0.24.15 (draft)
+# 0.24.16 (draft)
+
+## BUGS
+
+1. Fixed Netbox `sync_vrrp` creating duplicate VIP addresses before applying existing VIP role updates, which could trigger global-table duplicate-address validation errors. Existing VIP updates now precede VIP creation; interface assignment ordering is unchanged.
+2. Fixed Netbox `sync_vrrp` treating matching IPs assigned elsewhere with `anycast`, `vip`, `vrrp`, `hsrp`, `glbp`, or `carp` roles as ownership conflicts. These records remain untouched and permit separate VIP creation; eligible unassigned IPs are still reused.
+3. FastAPI now returns an explicit HTTP 500 error when the client returns `None`, avoiding response validation errors.
+4. Fixed Netbox `create_ip`, including calls from `design_deploy`, reusing a different indexed IP on the same interface and overwriting its role. Direct prefix allocations now match the requested `ip_index` before reusing an interface address; child-subnet reuse is unchanged.
+5. Fixed Netbox `create_ip` reusing addresses from another VRF and creating indexed addresses in the global table before applying the requested VRF. Existing-IP and peer lookups now respect the supplied VRF, defaulting to the global table when omitted, and allocation includes a resolved VRF ID when applicable. Destination interfaces are resolved before allocation. When VRF is omitted, queries omit the VRF parameter and IP and parent-prefix candidates are filtered locally to the global table; child allocation uses the selected parent ID. Named-VRF parent queries use the resolved VRF ID to avoid ignored name filters.
+6. Fixed Netbox `create_ip` unnecessarily updating an unchanged VRF or re-adding existing tags. Tag updates now preserve existing tags and add only missing values.
+7. Fixed Netbox `create_prefix` parent and existing-child lookups using ignored `vrf__name` filters. Named VRFs now resolve to IDs; omitted VRFs select global prefixes locally, preventing ambiguous parent matches or reuse of a child from another VRF. Applied the same correction to `create_ip` peer-subnet and allocated-child lookups.
+
+## ENHANCEMENTS
+
+1. Unified client deadline handling: stale jobs return failed timeout results with `result=None`, preserve completed worker results, and log expiry details.
+2. Workers now record failed timeout results with `result=None`, ERROR logs, and timeout events when task execution raises after its deadline. Blocking operations are not interrupted.
+
+# 0.24.15
 
 ## BUGS
 
@@ -7,16 +24,13 @@
 ## ENHANCEMENTS
 
 1. Removed the generic Nornir `netconf` task in favor of dedicated NETCONF operation tasks.
-
 2. Scoped Nornir processor arguments by output type. Text, XML, structured-data, and test options now appear only on applicable task models. TTP processing remains supported.
 
 ## FEATURES
 
 1. Added Nornir `netconf_get_config` to retrieve NETCONF datastore configuration using ncclient or Scrapli, with per-host rendered subtree or XPath filters and Python, NFCLI, FastAPI, and MCP support.
 2. Added Nornir `netconf_edit_config` with ncclient and Scrapli backends, per-host XML templates, and Python, NFCLI, FastAPI, and MCP support. NETCONF payload rendering now runs outside the connection lock.
-
 3. Added Nornir `netconf_get_schema` to retrieve YANG or YIN modules using ncclient or Scrapli, with NFCLI, FastAPI, and MCP support.
-
 4. Added Nornir `netconf_get_capabilities` and NFCLI `netconf get-capabilities` to list and glob-filter session capabilities using ncclient or Scrapli.
 
 # 0.24.14

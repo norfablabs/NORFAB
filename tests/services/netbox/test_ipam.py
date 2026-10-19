@@ -1963,6 +1963,247 @@ class TestSyncDeviceIP:
 
 @pytest.mark.netbox_create_ip
 class TestCreateIP:
+    @pytest.mark.parametrize("ip_index", [None, 1])
+    def test_create_ip_vrf_and_tag_reuse(
+        self, nfclient: Any, ip_index: int | None
+    ) -> None:
+        """Use only an explicit VRF, default to global and merge tags once."""
+        nb = get_pynetbox(nfclient)
+        if (
+            list(nb.ipam.prefixes.filter(within_include="198.19.250.8/30"))
+            or list(nb.ipam.ip_addresses.filter(parent="198.19.250.8/30"))
+            or nb.dcim.interfaces.get(device="fceos5", name="NORFAB-IP-VRF")
+        ):
+            pytest.fail("VRF allocation test-owned data already exists")
+        prefix = global_prefix = interface = None
+        try:
+            global_prefix = nb.ipam.prefixes.create(prefix="198.19.250.8/30")
+            prefix = nb.ipam.prefixes.create(
+                prefix="198.19.250.8/30", vrf=nb.ipam.vrfs.get(name="VRF1").id
+            )
+            interface = nb.dcim.interfaces.create(
+                device=nb.dcim.devices.get(name="fceos5").id,
+                name="NORFAB-IP-VRF",
+                type="virtual",
+                vrf=nb.ipam.vrfs.get(name="VRF1").id,
+            )
+            nb.ipam.ip_addresses.create(
+                address="198.19.250.9/30",
+                assigned_object_type="dcim.interface",
+                assigned_object_id=interface.id,
+            )
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "198.19.250.8/30",
+                    "device": "fceos5",
+                    "interface": "NORFAB-IP-VRF",
+                    "ip_index": ip_index,
+                    "vrf": "VRF1",
+                    "tags": ["NORFAB"],
+                    "create_peer_ip": False,
+                },
+            )
+            result = next(iter(reply.values()))
+            assert (
+                result["failed"],
+                result["status"],
+                result["result"]["address"],
+            ) == (False, "created", "198.19.250.9/30"), result
+
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "198.19.250.8/30",
+                    "device": "fceos5",
+                    "interface": "NORFAB-IP-VRF",
+                    "ip_index": ip_index,
+                    "vrf": "VRF1",
+                    "tags": ["NORFAB", "ACCESS"],
+                    "create_peer_ip": False,
+                },
+            )
+            result = next(iter(reply.values()))
+            assert (result["failed"], result["status"]) == (False, "updated"), result
+
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "198.19.250.8/30",
+                    "device": "fceos5",
+                    "interface": "NORFAB-IP-VRF",
+                    "ip_index": ip_index,
+                    "vrf": "VRF1",
+                    "tags": ["NORFAB", "ACCESS"],
+                    "create_peer_ip": False,
+                },
+            )
+            result = next(iter(reply.values()))
+            assert (result["failed"], result["status"]) == (False, "unchanged"), result
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "198.19.250.8/30",
+                    "device": "fceos5",
+                    "interface": "NORFAB-IP-VRF",
+                    "ip_index": ip_index,
+                    "create_peer_ip": False,
+                },
+            )
+            result = next(iter(reply.values()))
+            assert (result["failed"], result["status"], result["result"]["vrf"]) == (
+                False,
+                "unchanged",
+                "None",
+            ), result
+            assert sorted(
+                (
+                    ip.address,
+                    ip.vrf.name if ip.vrf else "",
+                    sorted(t.name for t in ip.tags),
+                )
+                for ip in nb.ipam.ip_addresses.filter(parent="198.19.250.8/30")
+            ) == [
+                ("198.19.250.9/30", "", []),
+                ("198.19.250.9/30", "VRF1", ["ACCESS", "NORFAB"]),
+            ]
+        finally:
+            if prefix is not None:
+                for ip in nb.ipam.ip_addresses.filter(parent="198.19.250.8/30"):
+                    ip.delete()
+            if interface is not None:
+                interface.delete()
+            if prefix is not None:
+                prefix.delete()
+            if global_prefix is not None:
+                global_prefix.delete()
+
+    def test_ip_indexes_on_same_interface(self, nfclient: Any) -> None:
+        """Create two indexed IPs and reuse each without changing either role."""
+        nb = get_pynetbox(nfclient)
+        if (
+            nb.ipam.prefixes.get(prefix="198.19.237.0/29")
+            or list(nb.ipam.ip_addresses.filter(parent="198.19.237.0/29"))
+            or nb.dcim.interfaces.get(device="fceos4", name="NORFAB-IP-INDEX")
+        ):
+            pytest.fail("indexed interface test-owned records already exist")
+
+        prefix = interface = None
+        try:
+            prefix = nb.ipam.prefixes.create(prefix="198.19.237.0/29")
+            interface = nb.dcim.interfaces.create(
+                device=nb.dcim.devices.get(name="fceos4").id,
+                name="NORFAB-IP-INDEX",
+                type="virtual",
+            )
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "198.19.237.0/29",
+                    "device": "fceos4",
+                    "interface": "NORFAB-IP-INDEX",
+                    "ip_index": 1,
+                    "role": "anycast",
+                    "create_peer_ip": False,
+                },
+            )
+            result = next(iter(reply.values()))
+            assert (
+                result["failed"],
+                result["status"],
+                result["result"]["address"],
+            ) == (False, "created", "198.19.237.1/29"), result
+
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "198.19.237.0/29",
+                    "device": "fceos4",
+                    "interface": "NORFAB-IP-INDEX",
+                    "ip_index": 2,
+                    "role": "vip",
+                    "create_peer_ip": False,
+                },
+            )
+            result = next(iter(reply.values()))
+            assert (
+                result["failed"],
+                result["status"],
+                result["result"]["address"],
+            ) == (False, "created", "198.19.237.2/29"), result
+
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "198.19.237.0/29",
+                    "device": "fceos4",
+                    "interface": "NORFAB-IP-INDEX",
+                    "ip_index": 1,
+                    "role": "anycast",
+                    "create_peer_ip": False,
+                },
+            )
+            result = next(iter(reply.values()))
+            assert (
+                result["failed"],
+                result["status"],
+                result["result"]["address"],
+            ) == (False, "unchanged", "198.19.237.1/29"), result
+
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "198.19.237.0/29",
+                    "device": "fceos4",
+                    "interface": "NORFAB-IP-INDEX",
+                    "ip_index": 2,
+                    "role": "vip",
+                    "create_peer_ip": False,
+                },
+            )
+            result = next(iter(reply.values()))
+            assert (
+                result["failed"],
+                result["status"],
+                result["result"]["address"],
+            ) == (False, "unchanged", "198.19.237.2/29"), result
+            assert sorted(
+                (
+                    ip.address,
+                    ip.role.value,
+                    ip.assigned_object.device.name,
+                    ip.assigned_object.name,
+                )
+                for ip in nb.ipam.ip_addresses.filter(parent="198.19.237.0/29")
+            ) == [
+                ("198.19.237.1/29", "anycast", "fceos4", "NORFAB-IP-INDEX"),
+                ("198.19.237.2/29", "vip", "fceos4", "NORFAB-IP-INDEX"),
+            ]
+        finally:
+            if prefix is not None:
+                for ip in nb.ipam.ip_addresses.filter(parent="198.19.237.0/29"):
+                    ip.delete()
+            if interface is not None:
+                interface.delete()
+            if prefix is not None:
+                prefix.delete()
+
     def test_create_ip_reports_peer_allocation_error(self, nfclient: Any) -> None:
         """Keep the local IP and report an exhausted peer allocation."""
         nb = get_pynetbox(nfclient)
@@ -2038,106 +2279,160 @@ class TestCreateIP:
                 ip.delete()
             prefix.delete()
 
-    def test_promote_existing_interface_ip_to_primary(self, nfclient: Any) -> None:
-        """A repeated allocation can promote its existing interface IP."""
+    @pytest.mark.parametrize(
+        "pool,address,primary_field",
+        [
+            ("198.19.250.0/30", "198.19.250.1/30", "primary_ip4"),
+            ("2001:db8:250:24::/126", "2001:db8:250:24::1/126", "primary_ip6"),
+        ],
+    )
+    def test_promote_existing_interface_ip_to_primary(
+        self, nfclient: Any, pool: str, address: str, primary_field: str
+    ) -> None:
+        """Promote the existing interface IP and restore the device's primary."""
         nb = get_pynetbox(nfclient)
-        parent = "198.19.248.32/29"
-        device_name = "fn-ceos-sp-1"
-        if nb.ipam.prefixes.get(prefix=parent) or list(
-            nb.ipam.ip_addresses.filter(parent=parent)
+        if list(nb.ipam.prefixes.filter(within_include=pool)) or list(
+            nb.ipam.ip_addresses.filter(parent=pool)
         ):
-            pytest.skip("primary IP test prefix already contains data")
+            pytest.fail("primary IP test-owned prefix or addresses already exist")
 
-        device = nb.dcim.devices.get(name=device_name)
-        original_primary = device.primary_ip4.id if device.primary_ip4 else None
-        prefix = nb.ipam.prefixes.create(prefix=parent)
+        device = nb.dcim.devices.get(name="fceos5")
+        original_primary = getattr(device, primary_field)
+        original_primary = original_primary.id if original_primary else None
+        prefix = nb.ipam.prefixes.create(prefix=pool)
         try:
-            kwargs = {
-                "prefix": parent,
-                "device": device_name,
-                "interface": "Loopback0",
-                "create_peer_ip": False,
-            }
-            first = nfclient.run_job(
-                "netbox", "create_ip", workers="any", kwargs=kwargs
-            )
-            first_result = next(iter(first.values()))
-            assert not first_result["failed"], first_result
-            address = first_result["result"]["address"]
-
-            second = nfclient.run_job(
+            reply = nfclient.run_job(
                 "netbox",
                 "create_ip",
                 workers="any",
-                kwargs={**kwargs, "is_primary": True},
+                kwargs={
+                    "prefix": pool,
+                    "device": "fceos5",
+                    "interface": "eth1",
+                    "create_peer_ip": False,
+                },
             )
-            second_result = next(iter(second.values()))
-            assert not second_result["failed"], second_result
-            assert second_result["result"]["address"] == address
-            allocated_ip = nb.ipam.ip_addresses.get(address=address)
+            result = next(iter(reply.values()))
+            assert (result["failed"], result["result"]["address"]) == (
+                False,
+                address,
+            ), result
+            original_ip = nb.ipam.ip_addresses.get(address=address)
+
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": pool,
+                    "device": "fceos5",
+                    "interface": "eth1",
+                    "create_peer_ip": False,
+                    "is_primary": True,
+                },
+            )
+            result = next(iter(reply.values()))
+            assert (result["failed"], result["result"]["address"]) == (
+                False,
+                address,
+            ), result
             assert (
-                nb.dcim.devices.get(name=device_name).primary_ip4.id == allocated_ip.id
+                getattr(nb.dcim.devices.get(name="fceos5"), primary_field).id
+                == original_ip.id
             )
+            assert [ip.address for ip in nb.ipam.ip_addresses.filter(parent=pool)] == [
+                address
+            ]
         finally:
-            device = nb.dcim.devices.get(name=device_name)
-            current_primary = device.primary_ip4.id if device.primary_ip4 else None
-            if current_primary != original_primary:
-                device.primary_ip4 = original_primary
-                device.save()
-            for ip in nb.ipam.ip_addresses.filter(parent=parent):
+            nb.dcim.devices.get(name="fceos5").update({primary_field: original_primary})
+            for ip in nb.ipam.ip_addresses.filter(parent=pool):
                 ip.delete()
             prefix.delete()
 
     def test_ip_index_with_child_subnet(self, nfclient: Any) -> None:
-        """An indexed address reuses its interface and child subnet on repeat."""
+        """Reuse the existing child-subnet assignment before considering an index."""
         nb = get_pynetbox(nfclient)
-        parent = "198.19.248.16/29"
-        description = "NORFAB INDEXED CHILD SUBNET"
-        if list(nb.ipam.prefixes.filter(within_include=parent)) or list(
-            nb.ipam.ip_addresses.filter(parent=parent)
+        if list(nb.ipam.prefixes.filter(within_include="198.19.248.16/29")) or list(
+            nb.ipam.ip_addresses.filter(parent="198.19.248.16/29")
         ):
             pytest.skip("indexed child test prefix already contains data")
-        prefix = nb.ipam.prefixes.create(prefix=parent)
+        prefix = nb.ipam.prefixes.create(prefix="198.19.248.16/29")
+        other_prefix = None
         try:
-            addresses = []
-            for index in (1, 2):
-                reply = nfclient.run_job(
-                    "netbox",
-                    "create_ip",
-                    workers="any",
-                    kwargs={
-                        "prefix": parent,
-                        "mask_len": 31,
-                        "ip_index": index,
-                        "description": description,
-                        "device": "fn-ceos-sp-1",
-                        "interface": "Loopback0",
-                        "role": "anycast",
-                        "create_peer_ip": False,
-                    },
-                )
-                for result in reply.values():
-                    assert not result["failed"], result
-                    addresses.append(result["result"]["address"])
-            assert len(set(addresses)) == 1
-            assert len(list(nb.ipam.ip_addresses.filter(parent=parent))) == 1
-            assert len(list(nb.ipam.prefixes.filter(within=parent))) == 1
+            other_prefix = nb.ipam.prefixes.create(
+                prefix="198.19.248.16/29", vrf=nb.ipam.vrfs.get(name="VRF1").id
+            )
+            # An identical child in another VRF must remain untouched.
+            nb.ipam.prefixes.create(
+                prefix="198.19.248.16/31", vrf=nb.ipam.vrfs.get(name="VRF1").id
+            )
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "198.19.248.16/29",
+                    "mask_len": 31,
+                    "ip_index": 1,
+                    "description": "NORFAB INDEXED CHILD SUBNET",
+                    "device": "fn-ceos-sp-1",
+                    "interface": "Loopback0",
+                    "role": "anycast",
+                    "create_peer_ip": False,
+                },
+            )
+            result = next(iter(reply.values()))
+            assert (result["failed"], result["result"]["address"]) == (
+                False,
+                "198.19.248.16/31",
+            ), result
+
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "198.19.248.16/29",
+                    "mask_len": 31,
+                    "ip_index": 2,
+                    "description": "NORFAB INDEXED CHILD SUBNET",
+                    "device": "fn-ceos-sp-1",
+                    "interface": "Loopback0",
+                    "role": "anycast",
+                    "create_peer_ip": False,
+                },
+            )
+            result = next(iter(reply.values()))
+            assert (result["failed"], result["result"]["address"]) == (
+                False,
+                "198.19.248.16/31",
+            ), result
+
+            assert [
+                (ip.address, ip.vrf)
+                for ip in nb.ipam.ip_addresses.filter(parent="198.19.248.16/29")
+            ] == [("198.19.248.16/31", None)]
+            assert sorted(
+                (str(child), child.vrf.name if child.vrf else "")
+                for child in nb.ipam.prefixes.filter(within="198.19.248.16/29")
+            ) == [("198.19.248.16/31", ""), ("198.19.248.16/31", "VRF1")]
         finally:
-            for ip in nb.ipam.ip_addresses.filter(parent=parent):
+            for ip in nb.ipam.ip_addresses.filter(parent="198.19.248.16/29"):
                 ip.delete()
-            for child in nb.ipam.prefixes.filter(within=parent):
+            for child in nb.ipam.prefixes.filter(within="198.19.248.16/29"):
                 child.delete()
             prefix.delete()
+            if other_prefix is not None:
+                other_prefix.delete()
 
     def test_indexed_vip_duplicates_unassigned(self, nfclient: Any) -> None:
-        """An indexed VIP leaves an existing unassigned record in place."""
+        """Keep an unassigned VIP and create a separate interface assignment."""
         nb = get_pynetbox(nfclient)
-        parent = "198.19.248.8/31"
-        if nb.ipam.prefixes.get(prefix=parent) or list(
-            nb.ipam.ip_addresses.filter(parent=parent)
+        if nb.ipam.prefixes.get(prefix="198.19.248.8/31") or list(
+            nb.ipam.ip_addresses.filter(parent="198.19.248.8/31")
         ):
             pytest.skip("indexed VIP test prefix already contains data")
-        prefix = nb.ipam.prefixes.create(prefix=parent)
+        prefix = nb.ipam.prefixes.create(prefix="198.19.248.8/31")
         try:
             original = nb.ipam.ip_addresses.create(address="198.19.248.8/31")
             reply = nfclient.run_job(
@@ -2145,7 +2440,7 @@ class TestCreateIP:
                 "create_ip",
                 workers="any",
                 kwargs={
-                    "prefix": parent,
+                    "prefix": "198.19.248.8/31",
                     "ip_index": 1,
                     "device": "fn-ceos-sp-1",
                     "interface": "Loopback0",
@@ -2153,219 +2448,291 @@ class TestCreateIP:
                     "create_peer_ip": False,
                 },
             )
-            assert all(not result["failed"] for result in reply.values()), reply
-            records = list(nb.ipam.ip_addresses.filter(address="198.19.248.8/31"))
-            assert len(records) == 2
-            assert original.id in {ip.id for ip in records}
-            assert all(ip.role.value == "vip" for ip in records)
-            assert any(
-                ip.assigned_object.device.name == "fn-ceos-sp-1"
-                for ip in records
-                if ip.assigned_object
-            )
+            result = next(iter(reply.values()))
+            assert (result["failed"], result["result"]["address"]) == (
+                False,
+                "198.19.248.8/31",
+            ), result
+            assert nb.ipam.ip_addresses.get(id=original.id).assigned_object is None
+            assert sorted(
+                (
+                    ip.address,
+                    ip.role.value,
+                    ip.assigned_object.device.name if ip.assigned_object else "",
+                    ip.assigned_object.name if ip.assigned_object else "",
+                )
+                for ip in nb.ipam.ip_addresses.filter(parent="198.19.248.8/31")
+            ) == [
+                ("198.19.248.8/31", "vip", "", ""),
+                ("198.19.248.8/31", "vip", "fn-ceos-sp-1", "Loopback0"),
+            ]
         finally:
-            for ip in nb.ipam.ip_addresses.filter(parent=parent):
+            for ip in nb.ipam.ip_addresses.filter(parent="198.19.248.8/31"):
                 ip.delete()
             prefix.delete()
 
     def test_ip_index_usable_hosts(self, nfclient: Any) -> None:
-        """Index /30 hosts from one and reject its network and broadcast positions."""
+        """Preview both usable /30 hosts and reject an out-of-range index."""
         nb = get_pynetbox(nfclient)
-        parent = "198.19.248.4/30"
-        if nb.ipam.prefixes.get(prefix=parent) or list(
-            nb.ipam.ip_addresses.filter(parent=parent)
+        if nb.ipam.prefixes.get(prefix="198.19.248.4/30") or list(
+            nb.ipam.ip_addresses.filter(parent="198.19.248.4/30")
         ):
             pytest.skip("indexed IP test prefix already contains data")
-        prefix = nb.ipam.prefixes.create(prefix=parent)
+        prefix = nb.ipam.prefixes.create(prefix="198.19.248.4/30")
         try:
-            for index, expected in ((1, "198.19.248.5/30"), (2, "198.19.248.6/30")):
-                reply = nfclient.run_job(
-                    "netbox",
-                    "create_ip",
-                    workers="any",
-                    kwargs={"prefix": parent, "ip_index": index, "dry_run": True},
-                )
-                for result in reply.values():
-                    assert not result["failed"], result
-                    assert result["result"]["address"] == expected
             reply = nfclient.run_job(
                 "netbox",
                 "create_ip",
                 workers="any",
-                kwargs={"prefix": parent, "ip_index": 3, "dry_run": True},
+                kwargs={"prefix": "198.19.248.4/30", "ip_index": 1, "dry_run": True},
             )
-            assert all(result["failed"] for result in reply.values()), reply
+            result = next(iter(reply.values()))
+            assert (result["failed"], result["result"]["address"]) == (
+                False,
+                "198.19.248.5/30",
+            ), result
+
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={"prefix": "198.19.248.4/30", "ip_index": 2, "dry_run": True},
+            )
+            result = next(iter(reply.values()))
+            assert (result["failed"], result["result"]["address"]) == (
+                False,
+                "198.19.248.6/30",
+            ), result
+
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={"prefix": "198.19.248.4/30", "ip_index": 3, "dry_run": True},
+            )
+            result = next(iter(reply.values()))
+            assert result["failed"] is True, result
+            assert list(nb.ipam.ip_addresses.filter(parent="198.19.248.4/30")) == []
         finally:
             prefix.delete()
 
     @pytest.mark.parametrize("role", ["anycast", "vip"])
     def test_indexed_shared_ip(self, nfclient: Any, role: str) -> None:
-        """Reuse an indexed IP on its interface and duplicate it for another."""
+        """Share index 1 across devices, add index 2 and preview without writes."""
         nb = get_pynetbox(nfclient)
-        parent = "198.19.248.0/31"
-        devices = ["fn-ceos-sp-1", "fn-ceos-sp-2"]
-        if nb.ipam.prefixes.get(prefix=parent) or list(
-            nb.ipam.ip_addresses.filter(parent=parent)
+        if nb.ipam.prefixes.get(prefix="198.19.248.0/31") or list(
+            nb.ipam.ip_addresses.filter(parent="198.19.248.0/31")
         ):
             pytest.skip("indexed IP test prefix already contains data")
-        prefix = nb.ipam.prefixes.create(prefix=parent)
+        prefix = nb.ipam.prefixes.create(prefix="198.19.248.0/31")
         try:
-            first_interface = nb.dcim.interfaces.get(
-                device=devices[0], name="Loopback0"
-            )
-            second_interface = nb.dcim.interfaces.get(
-                device=devices[1], name="Loopback0"
-            )
-            first_ip_id = None
-            for device in devices:
-                reply = nfclient.run_job(
-                    "netbox",
-                    "create_ip",
-                    workers="any",
-                    kwargs={
-                        "prefix": parent,
-                        "ip_index": 1,
-                        "device": device,
-                        "interface": "Loopback0",
-                        "role": role,
-                        "create_peer_ip": False,
-                    },
-                )
-                for result in reply.values():
-                    assert not result["failed"], result
-                    assert result["result"]["address"] == "198.19.248.0/31"
-                if device == devices[0]:
-                    first_ip_id = nb.ipam.ip_addresses.get(address="198.19.248.0/31").id
-            records = list(nb.ipam.ip_addresses.filter(address="198.19.248.0/31"))
-            assert len(records) == 2
-            assert first_ip_id in {ip.id for ip in records}
-            assert (
-                nb.ipam.ip_addresses.get(id=first_ip_id).assigned_object_id
-                == first_interface.id
-            )
-            assert {ip.assigned_object_id for ip in records} == {
-                first_interface.id,
-                second_interface.id,
-            }
-            assert all(ip.role.value == role for ip in records)
-            # A different index cannot change an existing interface assignment.
-            repeat = nfclient.run_job(
-                "netbox",
-                "create_ip",
-                workers="any",
-                kwargs={
-                    "prefix": parent,
-                    "ip_index": 2,
-                    "device": devices[1],
-                    "interface": "Loopback0",
-                    "role": role,
-                    "create_peer_ip": False,
-                },
-            )
-            assert all(not result["failed"] for result in repeat.values()), repeat
-            assert (
-                len(list(nb.ipam.ip_addresses.filter(address="198.19.248.0/31"))) == 2
-            )
             reply = nfclient.run_job(
                 "netbox",
                 "create_ip",
                 workers="any",
                 kwargs={
-                    "prefix": parent,
+                    "prefix": "198.19.248.0/31",
+                    "ip_index": 1,
+                    "device": "fn-ceos-sp-1",
+                    "interface": "Loopback0",
+                    "role": role,
+                    "create_peer_ip": False,
+                },
+            )
+            result = next(iter(reply.values()))
+            assert (result["failed"], result["result"]["address"]) == (
+                False,
+                "198.19.248.0/31",
+            ), result
+
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "198.19.248.0/31",
+                    "ip_index": 1,
+                    "device": "fn-ceos-sp-2",
+                    "interface": "Loopback0",
+                    "role": role,
+                    "create_peer_ip": False,
+                },
+            )
+            result = next(iter(reply.values()))
+            assert (result["failed"], result["result"]["address"]) == (
+                False,
+                "198.19.248.0/31",
+            ), result
+
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "198.19.248.0/31",
+                    "ip_index": 2,
+                    "device": "fn-ceos-sp-2",
+                    "interface": "Loopback0",
+                    "role": role,
+                    "create_peer_ip": False,
+                },
+            )
+            result = next(iter(reply.values()))
+            assert (
+                result["failed"],
+                result["status"],
+                result["result"]["address"],
+            ) == (False, "created", "198.19.248.1/31"), result
+            assert sorted(
+                (
+                    ip.address,
+                    ip.role.value,
+                    ip.assigned_object.device.name,
+                    ip.assigned_object.name,
+                )
+                for ip in nb.ipam.ip_addresses.filter(parent="198.19.248.0/31")
+            ) == [
+                ("198.19.248.0/31", role, "fn-ceos-sp-1", "Loopback0"),
+                ("198.19.248.0/31", role, "fn-ceos-sp-2", "Loopback0"),
+                ("198.19.248.1/31", role, "fn-ceos-sp-2", "Loopback0"),
+            ]
+
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "198.19.248.0/31",
                     "ip_index": 2,
                     "role": "vip",
                     "create_peer_ip": False,
                     "dry_run": True,
                 },
             )
-            for result in reply.values():
-                assert not result["failed"], result
-                assert result["result"]["address"] == "198.19.248.1/31"
-            assert len(list(nb.ipam.ip_addresses.filter(parent=parent))) == 2
+            result = next(iter(reply.values()))
+            assert (
+                result["failed"],
+                result["dry_run"],
+                result["result"]["address"],
+            ) == (False, True, "198.19.248.1/31"), result
+            assert sorted(
+                (
+                    ip.address,
+                    ip.role.value,
+                    ip.assigned_object.device.name,
+                    ip.assigned_object.name,
+                )
+                for ip in nb.ipam.ip_addresses.filter(parent="198.19.248.0/31")
+            ) == [
+                ("198.19.248.0/31", role, "fn-ceos-sp-1", "Loopback0"),
+                ("198.19.248.0/31", role, "fn-ceos-sp-2", "Loopback0"),
+                ("198.19.248.1/31", role, "fn-ceos-sp-2", "Loopback0"),
+            ]
         finally:
-            for ip in nb.ipam.ip_addresses.filter(parent=parent):
+            for ip in nb.ipam.ip_addresses.filter(parent="198.19.248.0/31"):
                 ip.delete()
             prefix.delete()
 
     def test_merges_named_custom_field_references(self, nfclient: Any) -> None:
-        """Resolve IP custom-field names and retain references on repeat calls."""
+        """Replace a site reference and add to site references on the same IP."""
         nb = get_pynetbox(nfclient)
-        parent = "198.19.249.0/29"
-        description = "NORFAB IP CUSTOM FIELD ALLOCATION"
-        site_names = ["NORFAB IP CF SITE A", "NORFAB IP CF SITE B"]
-        field_names = ["norfab_ip_cf_site", "norfab_ip_cf_sites"]
         if (
-            nb.ipam.prefixes.get(prefix=parent)
-            or any(nb.dcim.sites.get(name=name) for name in site_names)
-            or any(nb.extras.custom_fields.get(name=name) for name in field_names)
+            list(nb.ipam.prefixes.filter(within_include="198.19.250.4/30"))
+            or list(nb.ipam.ip_addresses.filter(parent="198.19.250.4/30"))
+            or nb.extras.custom_fields.get(name="norfab_create_ip_reference_site")
+            or nb.extras.custom_fields.get(name="norfab_create_ip_reference_sites")
         ):
-            pytest.skip("IP custom-field test objects already exist")
+            pytest.fail(
+                "IP reference test-owned prefix, addresses or fields already exist"
+            )
 
+        prefix = None
+        fields = []
         try:
-            nb.ipam.prefixes.create({"prefix": parent})
-            sites = nb.dcim.sites.create(
-                [
-                    {"name": site_names[0], "slug": "norfab-ip-cf-site-a"},
-                    {"name": site_names[1], "slug": "norfab-ip-cf-site-b"},
-                ]
-            )
-            nb.extras.custom_fields.create(
-                [
-                    {
-                        "name": field_names[0],
-                        "type": "object",
-                        "object_types": ["ipam.ipaddress"],
-                        "related_object_type": "dcim.site",
-                    },
-                    {
-                        "name": field_names[1],
-                        "type": "multiobject",
-                        "object_types": ["ipam.ipaddress"],
-                        "related_object_type": "dcim.site",
-                    },
-                ]
-            )
-            for site_name in site_names:
-                reply = nfclient.run_job(
-                    "netbox",
-                    "create_ip",
-                    workers="any",
-                    kwargs={
-                        "prefix": parent,
-                        "description": description,
-                        "create_peer_ip": False,
-                        "custom_fields": {
-                            field_names[0]: site_name,
-                            field_names[1]: [site_name],
-                        },
-                    },
+            prefix = nb.ipam.prefixes.create(prefix="198.19.250.4/30")
+            fields.append(
+                nb.extras.custom_fields.create(
+                    name="norfab_create_ip_reference_site",
+                    type="object",
+                    object_types=["ipam.ipaddress"],
+                    related_object_type="dcim.site",
                 )
-                for result in reply.values():
-                    assert not result["failed"], result
-                addresses = list(nb.ipam.ip_addresses.filter(parent=parent))
-                assert len(addresses) == 1
-                current = addresses[0]
-                assert current.custom_fields[field_names[0]]["id"] == next(
-                    site.id for site in sites if site.name == site_name
+            )
+            fields.append(
+                nb.extras.custom_fields.create(
+                    name="norfab_create_ip_reference_sites",
+                    type="multiobject",
+                    object_types=["ipam.ipaddress"],
+                    related_object_type="dcim.site",
                 )
-                expected = sites[:1] if site_name == site_names[0] else sites
-                assert {
-                    item["id"] for item in current.custom_fields[field_names[1]]
-                } == {site.id for site in expected}
+            )
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "198.19.250.4/30",
+                    "description": "NORFAB IP REFERENCE TEST",
+                    "create_peer_ip": False,
+                    "custom_fields": {
+                        "norfab_create_ip_reference_site": "NORFAB-LAB",
+                        "norfab_create_ip_reference_sites": ["NORFAB-LAB"],
+                    },
+                },
+            )
+            result = next(iter(reply.values()))
+            assert (result["failed"], result["result"]["address"]) == (
+                False,
+                "198.19.250.5/30",
+            ), result
+            ip = nb.ipam.ip_addresses.get(address="198.19.250.5/30")
+            assert (
+                ip.custom_fields["norfab_create_ip_reference_site"]["name"],
+                [
+                    site["name"]
+                    for site in ip.custom_fields["norfab_create_ip_reference_sites"]
+                ],
+            ) == ("NORFAB-LAB", ["NORFAB-LAB"])
+
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "198.19.250.4/30",
+                    "description": "NORFAB IP REFERENCE TEST",
+                    "create_peer_ip": False,
+                    "custom_fields": {
+                        "norfab_create_ip_reference_site": "SALTNORNIR-LAB",
+                        "norfab_create_ip_reference_sites": ["SALTNORNIR-LAB"],
+                    },
+                },
+            )
+            result = next(iter(reply.values()))
+            assert (result["failed"], result["result"]["address"]) == (
+                False,
+                "198.19.250.5/30",
+            ), result
+            ip = nb.ipam.ip_addresses.get(address="198.19.250.5/30")
+            assert (
+                ip.custom_fields["norfab_create_ip_reference_site"]["name"],
+                sorted(
+                    site["name"]
+                    for site in ip.custom_fields["norfab_create_ip_reference_sites"]
+                ),
+            ) == ("SALTNORNIR-LAB", ["NORFAB-LAB", "SALTNORNIR-LAB"])
+            assert [
+                ip.address
+                for ip in nb.ipam.ip_addresses.filter(parent="198.19.250.4/30")
+            ] == ["198.19.250.5/30"]
         finally:
-            for address in nb.ipam.ip_addresses.filter(parent=parent):
-                address.delete()
-            prefix = nb.ipam.prefixes.get(prefix=parent)
-            if prefix:
+            if prefix is not None:
+                for ip in nb.ipam.ip_addresses.filter(parent="198.19.250.4/30"):
+                    ip.delete()
+            for field in reversed(fields):
+                field.delete()
+            if prefix is not None:
                 prefix.delete()
-            for name in field_names:
-                field = nb.extras.custom_fields.get(name=name)
-                if field:
-                    field.delete()
-            for name in site_names:
-                site = nb.dcim.sites.get(name=name)
-                if site:
-                    site.delete()
 
     @pytest.mark.parametrize("protocol, mask_len", [("vrrp2", None), ("vrrp3", 32)])
     def test_create_ip_vrrp_group(self, nfclient, protocol, mask_len):
@@ -2793,19 +3160,18 @@ class TestCreateIP:
             if nb_prefix is not None:
                 nb_prefix.delete()
 
-    def test_create_ip_with_vrf_tags_tenant_role_dnsname_comments(self, nfclient):
-        if self.nb_version is None:
-            self.nb_version = get_nb_version(nfclient)
-
-        delete_ips("10.0.0.0/24", nfclient)
-
-        if self.nb_version[0] == 4:
-            create_1 = nfclient.run_job(
+    def test_create_ip_with_vrf_tags_tenant_role_dnsname_comments(
+        self, nfclient: Any
+    ) -> None:
+        """Allocate from a dedicated seeded VRF1 pool with metadata."""
+        delete_ips("198.19.250.16/30", nfclient)
+        try:
+            reply = nfclient.run_job(
                 "netbox",
                 "create_ip",
                 workers="any",
                 kwargs={
-                    "prefix": "10.0.0.0/24",
+                    "prefix": "198.19.250.16/30",
                     "device": "fceos4",
                     "interface": "eth1",
                     "description": "foo1",
@@ -2815,15 +3181,17 @@ class TestCreateIP:
                     "dns_name": "foo1.lab.local",
                     "role": "anycast",
                     "comments": "Some comments",
+                    "create_peer_ip": False,
                 },
             )
-            print("create_1")
-            pprint.pprint(create_1, width=200)
-
-            worker, res1 = tuple(create_1.items())[0]
-
-            assert res1["failed"] == False, "Allocation failed"
-            assert res1["result"]["address"], "No ip allocated"
+            result = next(iter(reply.values()))
+            assert not result["failed"], result
+            assert (result["result"]["address"], result["result"]["vrf"]) == (
+                "198.19.250.17/30",
+                "VRF1",
+            )
+        finally:
+            delete_ips("198.19.250.16/30", nfclient)
 
     def test_create_ip_non_existing_device(self, nfclient):
         if self.nb_version is None:
@@ -3014,19 +3382,16 @@ class TestCreateIP:
             assert res1["status"] == "created", "Unexpected status"
             assert "dev" in res1["resources"]
 
-    def test_create_ip_with_branch(self, nfclient):
-        if self.nb_version is None:
-            self.nb_version = get_nb_version(nfclient)
+    def test_create_ip_with_branch(self, nfclient: Any) -> None:
+        """Allocate from a dedicated seeded VRF1 pool inside a branch."""
         delete_branch("create_ip_1", nfclient)
-        delete_ips("10.0.0.0/24", nfclient)
-
-        if self.nb_version[0] == 4:
-            create_1 = nfclient.run_job(
+        try:
+            reply = nfclient.run_job(
                 "netbox",
                 "create_ip",
                 workers="any",
                 kwargs={
-                    "prefix": "10.0.0.0/24",
+                    "prefix": "198.19.250.20/30",
                     "device": "fceos4",
                     "interface": "eth1",
                     "description": "foo1",
@@ -3036,19 +3401,19 @@ class TestCreateIP:
                     "dns_name": "foo1.lab.local",
                     "role": "anycast",
                     "comments": "Some comments",
+                    "create_peer_ip": False,
                     "branch": "create_ip_1",
                 },
             )
-            print("create_1")
-            pprint.pprint(create_1, width=200)
-
-            worker, res1 = tuple(create_1.items())[0]
-
-            assert res1["failed"] == False, "Allocation failed"
-            assert res1["result"]["address"], "No ip allocated"
-            assert (
-                res1["result"]["branch"] == "create_ip_1"
-            ), "No branch info in results"
+            result = next(iter(reply.values()))
+            assert not result["failed"], result
+            assert (result["result"]["address"], result["result"]["vrf"]) == (
+                "198.19.250.21/30",
+                "VRF1",
+            )
+            assert result["result"]["branch"] == "create_ip_1"
+        finally:
+            delete_branch("create_ip_1", nfclient)
 
     def test_create_ip_with_mask_len(self, nfclient):
         delete_prefixes_within("10.0.0.0/24", nfclient)
@@ -3287,6 +3652,101 @@ class TestCreateIP:
 
 @pytest.mark.netbox_create_prefix
 class TestCreatePrefix:
+    @pytest.mark.parametrize("vrf", [None, "VRF1"])
+    def test_create_prefix_scopes_vrf(self, nfclient: Any, vrf: str | None) -> None:
+        """Allocate and reuse only in the selected VRF despite duplicate CIDRs."""
+        nb = get_pynetbox(nfclient)
+        if list(nb.ipam.prefixes.filter(within_include="198.19.250.32/29")):
+            pytest.fail("prefix VRF test-owned records already exist")
+        parents = []
+        try:
+            parents.append(
+                nb.ipam.prefixes.create(
+                    prefix="198.19.250.32/29", description="NORFAB PREFIX VRF PARENT"
+                )
+            )
+            parents.append(
+                nb.ipam.prefixes.create(
+                    prefix="198.19.250.32/29",
+                    description="NORFAB PREFIX VRF PARENT",
+                    vrf=nb.ipam.vrfs.get(name="VRF1").id,
+                )
+            )
+            foreign = nb.ipam.prefixes.create(
+                prefix="198.19.250.32/30",
+                description="NORFAB PREFIX VRF CHILD",
+                vrf=None if vrf else nb.ipam.vrfs.get(name="VRF1").id,
+            )
+            foreign_vrf = foreign.vrf.id if foreign.vrf else None
+            reply = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "NORFAB PREFIX VRF PARENT",
+                    "prefixlen": 30,
+                    "description": "NORFAB PREFIX VRF CHILD",
+                    "vrf": vrf,
+                    "dry_run": True,
+                },
+            )
+            result = next(iter(reply.values()))
+            assert not result["failed"], result
+            assert (result["dry_run"], result["result"]["prefix"]) == (
+                True,
+                "198.19.250.32/30",
+            )
+            assert len(list(nb.ipam.prefixes.filter(within="198.19.250.32/29"))) == 1
+
+            reply = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "198.19.250.32/29",
+                    "prefixlen": 30,
+                    "description": "NORFAB PREFIX VRF CHILD",
+                    "vrf": vrf,
+                },
+            )
+            result = next(iter(reply.values()))
+            assert not result["failed"], result
+            assert (
+                result["status"],
+                result["result"]["prefix"],
+                result["result"]["vrf"],
+            ) == ("created", "198.19.250.32/30", vrf)
+
+            reply = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": {"prefix": "198.19.250.32/29"},
+                    "prefixlen": 30,
+                    "description": "NORFAB PREFIX VRF CHILD",
+                    "vrf": vrf,
+                },
+            )
+            result = next(iter(reply.values()))
+            assert not result["failed"], result
+            assert result["status"] == "unchanged", result
+            assert sorted(
+                (item.prefix, item.vrf.name if item.vrf else "")
+                for item in nb.ipam.prefixes.filter(within="198.19.250.32/29")
+            ) == [("198.19.250.32/30", ""), ("198.19.250.32/30", "VRF1")]
+            current = nb.ipam.prefixes.get(id=foreign.id)
+            assert (current.vrf.id if current.vrf else None, current.description) == (
+                foreign_vrf,
+                "NORFAB PREFIX VRF CHILD",
+            )
+        finally:
+            if parents:
+                for child in nb.ipam.prefixes.filter(within="198.19.250.32/29"):
+                    child.delete()
+            for parent in reversed(parents):
+                parent.delete()
+
     nb_version = None
 
     def test_adds_tags_and_array_custom_fields(self, nfclient: Any) -> None:
@@ -4102,6 +4562,7 @@ class TestCreatePrefix:
                 workers="any",
                 kwargs={
                     "parent": "10.2.0.0/24",
+                    "vrf": "VRF1",
                     "prefixlen": 30,
                     "description": f"test create prefix {rand}",
                     "site": "NORFAB-LAB",
@@ -4112,12 +4573,17 @@ class TestCreatePrefix:
                     "status": "reserved",
                 },
             )
+            # Stop here if initial allocation fails, before testing updates.
+            for result in create_1.values():
+                assert not result["failed"], result
+
             create_2 = nfclient.run_job(
                 "netbox",
                 "create_prefix",
                 workers="any",
                 kwargs={
                     "parent": "10.2.0.0/24",
+                    "vrf": "VRF1",
                     "description": f"test create prefix {rand}",
                     "site": "SALTNORNIR-LAB",
                     "tenant": "SALTNORNIR",

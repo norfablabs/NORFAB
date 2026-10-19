@@ -81,6 +81,8 @@
     "prefixes": [
       "10.0.0.0/24",
       "10.0.2.0/24",
+      "198.19.250.16/30 (VRF1; create_ip metadata test)",
+      "198.19.250.20/30 (VRF1; create_ip branch test)",
       "198.18.250.0/24",
       "198.19.238.0/24",
       "172.81.1.100/30"
@@ -90,6 +92,106 @@
     ]
   },
   "tests": {
+    "test_ipam.py::TestCreatePrefix::test_create_prefix_with_attributes_updates": {
+      "mode": "main_mutating",
+      "persistent_prefix": "10.2.0.0/24 (VRF1; existing TestCreatePrefix pool in tests/netbox_data.py)",
+      "coverage": "Both allocation and update explicitly request VRF1. Initial allocation success is checked before updating site, tenant, role, comments, tags and status.",
+      "cleanup": "Retains the existing class-pool setup: clears child prefixes within 10.2.0.0/24 before running. Keeps the seeded VRF1 parent and reference records. Run sequentially with other tests using this legacy class pool."
+    },
+    "test_ipam.py::TestCreatePrefix::test_create_prefix_scopes_vrf": {
+      "mode": "main_mutating",
+      "read_only_vrf": "VRF1",
+      "prefixes": ["198.19.250.32/29 (global and VRF1)", "198.19.250.32/30 (global and VRF1)"],
+      "coverage": "Network, description and dictionary parent inputs select the requested VRF among duplicate CIDRs. Dry-run makes no changes; creation and repeat preserve an identical child in the other VRF, including its record ID, VRF and description.",
+      "cleanup": "Fails before writes if the reserved range contains prefixes. Deletes only children in the owned range and parents returned by setup. Retains seeded VRF1."
+    },
+    "test_ipam.py::TestCreateIP::test_create_ip_with_vrf_tags_tenant_role_dnsname_comments": {
+      "mode": "main_mutating",
+      "read_only_device": "fceos4",
+      "interfaces": ["fceos4:eth1 (existing)"],
+      "persistent_prefix": "198.19.250.16/30 (VRF1; tests/netbox_data.py)",
+      "ip_addresses": ["198.19.250.17/30"],
+      "read_only_references": ["VRF1", "NORFAB tenant", "NORFAB and ACCESS tags"],
+      "coverage": "Allocates an anycast IP with tags, tenant, DNS name and comments from its dedicated seeded VRF1 pool.",
+      "cleanup": "Deletes only IPs in the dedicated pool before and after the test, including assertion failures. Retains the seeded prefix, device, interface and related records. Does not touch 10.0.0.0/24."
+    },
+    "test_ipam.py::TestCreateIP::test_create_ip_with_branch": {
+      "mode": "branch_feature",
+      "read_only_device": "fceos4",
+      "interfaces": ["fceos4:eth1 (existing)"],
+      "persistent_prefix": "198.19.250.20/30 (VRF1; tests/netbox_data.py)",
+      "branches": ["create_ip_1"],
+      "ip_addresses": ["198.19.250.21/30 (branch only)"],
+      "coverage": "Allocates an IP in VRF1 inside a branch using a dedicated parent seeded in main before branch creation.",
+      "cleanup": "Deletes only the owned branch before and after the test. Retains all main records, including the persistent prefix. Does not clear any main IP pool."
+    },
+    "test_ipam.py::TestCreateIP::test_create_ip_vrf_and_tag_reuse": {
+      "mode": "main_mutating",
+      "read_only_device": "fceos5",
+      "read_only_vrf": "VRF1",
+      "read_only_tags": ["NORFAB", "ACCESS"],
+      "interfaces": ["fceos5:NORFAB-IP-VRF (test-owned, VRF1)"],
+      "prefixes": ["198.19.250.8/30 (global and VRF1)"],
+      "ip_addresses": ["198.19.250.9/30 (global and VRF1)"],
+      "coverage": "Indexed and next-available allocation use an explicit VRF and ignore an existing global IP on the same interface. Repeated VRF and tag requests are unchanged. Omitting VRF reuses the global IP even though the interface belongs to VRF1.",
+      "cleanup": "Fails before writes if reserved records exist. Deletes only IPs in its created prefix range, created interface and created prefix, including partial setup. Retains seeded device, VRF and tags."
+    },
+    "test_ipam.py::TestCreateIP::test_promote_existing_interface_ip_to_primary": {
+      "mode": "main_mutating",
+      "devices": ["fceos5 (primary_ip4 or primary_ip6 temporarily changed and restored)"],
+      "interfaces": ["fceos5:eth1 (existing)"],
+      "prefixes": ["198.19.250.0/30", "2001:db8:250:24::/126"],
+      "ip_addresses": ["198.19.250.1/30", "2001:db8:250:24::1/126"],
+      "coverage": "Allocates an interface IP, promotes the same record to primary and verifies no duplicate. Reuses the existing device and interface without creating replacements.",
+      "cleanup": "Fails before writes if reserved prefix or addresses exist. Restores the original primary field before deleting only IPs in the owned prefix and the created prefix, including after failed task calls."
+    },
+    "test_ipam.py::TestCreateIP::test_merges_named_custom_field_references": {
+      "mode": "main_mutating",
+      "prefixes": ["198.19.250.4/30"],
+      "ip_addresses": ["198.19.250.5/30"],
+      "read_only_sites": ["NORFAB-LAB", "SALTNORNIR-LAB"],
+      "custom_fields": ["norfab_create_ip_reference_site", "norfab_create_ip_reference_sites"],
+      "coverage": "Resolves seeded site names on creation, replaces the object reference and adds to the multiobject reference on reuse. Sites are neither created nor modified. Address space is distinct from the status test's 198.19.249.0/29.",
+      "cleanup": "Fails before writes if reserved prefix, addresses or fields exist. Deletes only IPs in the created prefix, custom fields returned by individual create calls and the created prefix, including after partial setup. Retains both seeded sites."
+    },
+    "test_ipam.py::TestCreateIP::test_indexed_shared_ip": {
+      "mode": "main_mutating",
+      "read_only_devices": ["fn-ceos-sp-1", "fn-ceos-sp-2"],
+      "interfaces": ["fn-ceos-sp-1:Loopback0 (existing)", "fn-ceos-sp-2:Loopback0 (existing)"],
+      "prefixes": ["198.19.248.0/31"],
+      "coverage": "Linear calls duplicate index 1 across two interfaces, then allocate index 2 on the second interface. Explicit address, role and assignment lists verify all three records before and after dry-run for anycast and vip.",
+      "cleanup": "Skips before writes if the reserved prefix or addresses exist. Deletes only addresses in its owned prefix and the created prefix; existing devices and interfaces are retained."
+    },
+    "test_ipam.py::TestCreateIP::test_ip_indexes_on_same_interface": {
+      "mode": "main_mutating",
+      "read_only_device": "fceos4",
+      "prefixes": ["198.19.237.0/29"],
+      "interfaces": ["fceos4:NORFAB-IP-INDEX"],
+      "coverage": "Linear calls allocate indexes 1 and 2 on one interface without descriptions, then repeat both requests and require unchanged results. Compares both stored addresses, roles and assignments against literal values without duplicates.",
+      "cleanup": "Fails before writes if reserved records exist. Deletes only IPs in its owned prefix and its created interface and prefix, including after partial setup."
+    },
+    "test_ipam.py::TestCreateIP::test_ip_index_with_child_subnet": {
+      "mode": "main_mutating",
+      "read_only_device": "fn-ceos-sp-1",
+      "interfaces": ["fn-ceos-sp-1:Loopback0 (existing)"],
+      "prefixes": ["198.19.248.16/29 (global and VRF1)", "198.19.248.16/31 (global allocation and owned VRF1 collision)"],
+      "coverage": "Explicit index-1 and index-2 calls with mask_len=31 both return the existing child-subnet address 198.19.248.16/31; exactly one global IP remains; global child creation and lookup preserve an identical owned VRF1 child and parent.",
+      "cleanup": "Skips if reserved prefixes or IPs exist. Deletes only IPs and child prefixes in the owned parent and the created parent. Retains seeded device and interface."
+    },
+    "test_ipam.py::TestCreateIP::test_indexed_vip_duplicates_unassigned": {
+      "mode": "main_mutating",
+      "read_only_device": "fn-ceos-sp-1",
+      "interfaces": ["fn-ceos-sp-1:Loopback0 (existing)"],
+      "prefixes": ["198.19.248.8/31"],
+      "coverage": "An indexed VIP creates a separate interface assignment while retaining the original unassigned record. Compares address, role and assignment tuples to explicit values.",
+      "cleanup": "Skips if reserved prefix or IPs exist. Deletes only IPs in the owned prefix and the created prefix. Retains seeded device and interface."
+    },
+    "test_ipam.py::TestCreateIP::test_ip_index_usable_hosts": {
+      "mode": "main_mutating",
+      "prefixes": ["198.19.248.4/30"],
+      "coverage": "Explicit dry-run calls preview indexes 1 and 2 as 198.19.248.5/30 and 198.19.248.6/30, reject index 3 and verify no IPs were created.",
+      "cleanup": "Skips if reserved prefix or IPs exist. Deletes only the created prefix."
+    },
     "test_connections.py::TestGetTopology::test_get_topology_device_regex": {
       "mode": "main_readonly",
       "devices": ["bulk-conn-01", "bulk-conn-02", "bulk-conn-03", "bulk-conn-06", "bulk-conn-07", "bulk-conn-08", "bulk-conn-09", "bulk-conn-10"],

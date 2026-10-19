@@ -54,6 +54,16 @@ To get started with the FastAPI Service, you need to define the necessary parame
 Generic `/api/job` routes are not available. Use `/api/job/run` with service, task,
 and job options, or generated service-task endpoints with task arguments in the JSON body.
 
+Both endpoint types pass the job `timeout` to the client (default: 600 seconds).
+When the job deadline expires, the response retains the worker-keyed result
+format and HTTP 200 status. Outstanding workers have `failed: true`,
+`status: "timeout"`, `result: null`, and an explanatory error including the job
+UUID. Results already received from other workers are preserved. Client logs identify the expired job. The client job is marked `STALE`;
+timeout does not cancel worker execution or roll back changes. Workers log and
+record timeout results when task execution raises after its deadline.
+If the client returns no result (`None`), both endpoint types return HTTP 500
+with a `job_result_unavailable` error identifying the service and task.
+
 ### Authentication
 
 FastAPI NorFab service supports bearer token authentication using authorization header:

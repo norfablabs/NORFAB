@@ -2570,6 +2570,7 @@ class NFPWorker:
                 task=f"{self.name}:{task}",
                 errors=[traceback.format_exc()],
                 messages=[f"Worker experienced error: '{e}'"],
+                status="timeout" if job.is_timed_out() else "error",
                 failed=True,
                 juuid=uuid,
             )

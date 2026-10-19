@@ -30,6 +30,7 @@ from .netbox_models import (
 )
 from .netbox_worker_utilities import (
     map_interface_name,
+    merge_array_values,
     merge_resolved_custom_fields,
     resolve_vrf,
     review_sync_task_result,
@@ -345,7 +346,9 @@ class NetboxIpTasks:
         This task finds or creates an IP address in NetBox, updates its metadata,
         optionally links it to a device/interface, and supports a dry run mode for
         previewing changes. Existing group or interface assignments are reused
-        before ``ip_index`` selects an address for a new allocation. An indexed
+        before allocating. For direct prefix allocations, interface reuse matches
+        the address selected by ``ip_index`` when supplied. Child-subnet reuse
+        with a different ``mask_len`` retains assignment-first behavior. An indexed
         address already in NetBox can be duplicated for anycast or VIP roles.
 
         Args:
@@ -379,8 +382,12 @@ class NetboxIpTasks:
                 Cannot accompany device, interface, or is_primary=True. Disables peer
                 allocation and defaults role to vrrp. Missing or ambiguous groups raise
                 NetboxAllocationError before allocation. Returned when supplied.
-            vrf (str, optional): The VRF (Virtual Routing and Forwarding) instance.
-            tags (list, optional): A list of tags to associate with the IP address.
+            vrf (str, optional): Existing VRF name. Defaults to the global table
+                when omitted, regardless of the destination interface's VRF.
+                Existing IP lookups are scoped to this VRF. A supplied name must
+                resolve before allocation.
+            tags (list, optional): Tags to add without removing existing tags or
+                duplicating tags already assigned.
             dns_name (str, optional): The DNS name for the IP address.
             tenant (str, optional): The tenant associated with the IP address.
             comments (str, optional): Additional comments for the IP address.
@@ -396,6 +403,9 @@ class NetboxIpTasks:
                 existing IP addresses. Ignored when ``dry_run=True``.
             ip_index (int, optional): One-based position among usable IPs in the
                 selected subnet. On a /31 or /127, both addresses are usable.
+                Direct prefix allocations reuse only the selected interface IP.
+                Existing child-subnet assignments are reused before indexing when
+                ``mask_len`` differs from the parent prefix length.
                 Out-of-range positions raise ``NetboxAllocationError``. When
                 ``mask_len`` creates a child subnet, dry runs use the parent
                 subnet because they do not create child subnets.
@@ -408,6 +418,10 @@ class NetboxIpTasks:
         Returns:
             Result: Allocation details. If no child subnet can be selected, the
                 result is marked failed and includes any subnet probe errors.
+
+        Raises:
+            NetboxAllocationError: The requested VRF or destination interface does
+                not exist, or an address cannot be selected or allocated.
 
         Tasks execution follow these steps:
 
@@ -425,7 +439,7 @@ class NetboxIpTasks:
 
         5. If not a dry run, creates the next available IP in the prefix.
 
-        6. Updates IP attributes (description, VRF, tenant, DNS name, comments, role, tags)
+        6. Updates IP attributes (description, tenant, DNS name, comments, role, tags)
             if provided and different from current values. Handles interface assignment and
             can set the IP as primary for the device.
 
@@ -446,6 +460,22 @@ class NetboxIpTasks:
             f"creating IP address in '{instance}' for "
             f"'{device}:{interface}' from prefix '{prefix}', dry_run={dry_run}"
         )
+
+        # Resolve the destination before allocating an IP or child prefix.
+        nb_interface = None
+        if device and interface:
+            nb_interface = nb.dcim.interfaces.get(device=device, name=interface)
+            if not nb_interface:
+                raise NetboxAllocationError(
+                    f"Unable to source '{device}:{interface}' interface from Netbox"
+                )
+        # Only an explicit VRF changes the global-table default.
+        vrf_id = None
+        if vrf:
+            nb_vrf = nb.ipam.vrfs.get(name=vrf)
+            if not nb_vrf:
+                raise NetboxAllocationError(f"Unable to source VRF '{vrf}' from Netbox")
+            vrf_id = nb_vrf.id
 
         nb_vrrp_group = None
         if vrrp_group is not None:
@@ -471,14 +501,7 @@ class NetboxIpTasks:
                 is_network = True
             except Exception:
                 is_network = False
-            if is_network is True and vrf:
-                prefix = {"prefix": prefix, "vrf__name": vrf}
-            elif is_network is True:
-                prefix = {"prefix": prefix}
-            elif is_network is False and vrf:
-                prefix = {"description": prefix, "vrf__name": vrf}
-            elif is_network is False:
-                prefix = {"description": prefix}
+            prefix = {"prefix" if is_network else "description": prefix}
         elif isinstance(prefix, dict):
             prefix = dict(prefix)
             prefix_site = prefix.pop("site", None)
@@ -499,44 +522,65 @@ class NetboxIpTasks:
                         f"Failed to get parent prefix role '{prefix_role}' from NetBox"
                     )
                 prefix["role_id"] = nb_role.id
+        if vrf_id is not None:
+            prefix["vrf_id"] = vrf_id
         nb_prefixes = self.bulk_filter(nb.ipam.prefixes, **prefix)
+        if vrf_id is None:
+            # Without a requested VRF, keep only global prefixes.
+            nb_prefixes = [item for item in nb_prefixes if item.vrf is None]
+
         if not nb_prefixes:
             raise NetboxAllocationError(
                 f"Unable to source parent prefix from Netbox - {prefix}"
             )
-        # try to source existing IP from netbox
+        # Omit unknown VRFs from queries and select global candidates locally.
+        vrf_filters = {"vrf_id": vrf_id} if vrf_id is not None else {}
         for nb_prefix in nb_prefixes:
+            filters = {"parent": str(nb_prefix), **vrf_filters}
             if nb_vrrp_group is not None:
-                filters = {
-                    "assigned_object_type": "ipam.fhrpgroup",
-                    "assigned_object_id": nb_vrrp_group.id,
-                    "parent": str(nb_prefix),
-                }
+                filters.update(
+                    assigned_object_type="ipam.fhrpgroup",
+                    assigned_object_id=nb_vrrp_group.id,
+                )
                 if description:
                     filters["description"] = description
-                nb_ip = nb.ipam.ip_addresses.get(**filters)
             elif device and interface:
-                candidates = list(
-                    nb.ipam.ip_addresses.filter(
-                        device=device, interface=interface, parent=str(nb_prefix)
+                filters.update(device=device, interface=interface)
+            elif description:
+                filters["description"] = description
+            else:
+                continue
+            candidates = list(nb.ipam.ip_addresses.filter(**filters))
+            if vrf_id is None:
+                candidates = [ip for ip in candidates if ip.vrf is None]
+            if device and interface:
+                # Keep child-subnet reuse unchanged when mask_len allocates one.
+                network = ipaddress.ip_network(str(nb_prefix))
+                if ip_index is not None and mask_len in (None, network.prefixlen):
+                    selected_ip = next(
+                        islice(network.hosts(), ip_index - 1, ip_index), None
                     )
-                )
+                    if selected_ip is None:
+                        raise NetboxAllocationError(
+                            f"ip_index {ip_index} exceeds the usable IPs in {network}"
+                        )
+                    candidates = [
+                        ip
+                        for ip in candidates
+                        if ipaddress.ip_interface(ip.address).ip == selected_ip
+                    ]
                 if description:
                     matching = [
                         ip for ip in candidates if ip.description == description
                     ]
                     if matching:
                         candidates = matching
-                if len(candidates) > 1:
-                    raise NetboxAllocationError(
-                        f"Multiple IP addresses match '{device}:{interface}' "
-                        f"within prefix '{nb_prefix}' with description preference '{description}'"
-                    )
-                nb_ip = candidates[0] if candidates else None
-            elif description:
-                nb_ip = nb.ipam.ip_addresses.get(
-                    description=description, parent=str(nb_prefix)
+            if len(candidates) > 1:
+                raise NetboxAllocationError(
+                    f"Multiple IP addresses match within prefix '{nb_prefix}' "
+                    f"in VRF '{vrf}' for '{device}:{interface}', description '{description}'"
                 )
+            nb_ip = candidates[0] if candidates else None
             if nb_ip:
                 break
         # if no existing IP found, find parent prefix that has available subnets to allocate
@@ -551,7 +595,8 @@ class NetboxIpTasks:
                     try:
                         candidate = self.create_prefix(
                             job=job,
-                            parent=str(nb_prefix),
+                            parent={"id": nb_prefix.id},
+                            vrf=vrf,
                             prefixlen=mask_len,
                             instance=instance,
                             branch=branch,
@@ -576,9 +621,9 @@ class NetboxIpTasks:
 
         # create new IP address
         if not nb_ip:
-            parent_prefix_len = ipaddress.ip_network(str(nb_prefix)).prefixlen
-            # A host prefix has only one address, regardless of peer settings.
             allocation_prefix = ipaddress.ip_network(str(nb_prefix))
+            parent_prefix_len = allocation_prefix.prefixlen
+            # A host prefix has only one address, regardless of peer settings.
             host_allocation = (
                 mask_len if mask_len is not None else allocation_prefix.prefixlen
             ) == allocation_prefix.max_prefixlen
@@ -601,19 +646,37 @@ class NetboxIpTasks:
                     # try to source peer ip subnet
                     nb_peer_ip = None
                     if peer["remote_device"] and peer["remote_interface"]:
-                        nb_peer_ip = nb.ipam.ip_addresses.get(
-                            device=peer["remote_device"],
-                            interface=peer["remote_interface"],
-                            parent=str(nb_prefix),
+                        peer_ips = list(
+                            nb.ipam.ip_addresses.filter(
+                                device=peer["remote_device"],
+                                interface=peer["remote_interface"],
+                                parent=str(nb_prefix),
+                                **vrf_filters,
+                            )
                         )
+                        if vrf_id is None:
+                            peer_ips = [ip for ip in peer_ips if ip.vrf is None]
+                        if len(peer_ips) > 1:
+                            raise NetboxAllocationError(
+                                f"Multiple peer IP addresses match within prefix '{nb_prefix}' in VRF '{vrf}'"
+                            )
+                        nb_peer_ip = peer_ips[0] if peer_ips else None
                     # try to source peer ip subnet
                     nb_peer_prefix = None
                     if nb_peer_ip:
                         peer_ip = ipaddress.ip_interface(nb_peer_ip.address)
-                        nb_peer_prefix = nb.ipam.prefixes.get(
-                            prefix=str(peer_ip.network),
-                            vrf__name=vrf,
+                        peer_prefixes = list(
+                            nb.ipam.prefixes.filter(
+                                prefix=str(peer_ip.network), **vrf_filters
+                            )
                         )
+                        if vrf_id is None:
+                            peer_prefixes = [
+                                item for item in peer_prefixes if item.vrf is None
+                            ]
+                        if len(peer_prefixes) > 1:
+                            raise NetboxAllocationError("multiple peer prefixes match")
+                        nb_peer_prefix = peer_prefixes[0] if peer_prefixes else None
                     elif create_peer_ip and peer["remote_interface"]:
                         create_peer_ip_data = {
                             "device": peer["remote_device"],
@@ -649,7 +712,7 @@ class NetboxIpTasks:
                 while not job.is_timed_out():
                     child_subnet = self.create_prefix(
                         job=job,
-                        parent=str(nb_prefix),
+                        parent={"id": nb_prefix.id},
                         prefixlen=mask_len,
                         vrf=vrf,
                         tags=tags,
@@ -664,10 +727,20 @@ class NetboxIpTasks:
                             f"'{mask_len}' inside '{prefix}' parent prefix"
                         )
 
-                    child_prefix = {"prefix": child_subnet.result["prefix"]}
-                    if vrf:
-                        child_prefix["vrf__name"] = vrf
-                    nb_child_prefix = nb.ipam.prefixes.get(**child_prefix)
+                    child_prefix = {
+                        "prefix": child_subnet.result["prefix"],
+                        **vrf_filters,
+                    }
+                    child_prefixes = list(nb.ipam.prefixes.filter(**child_prefix))
+                    if vrf_id is None:
+                        child_prefixes = [
+                            item for item in child_prefixes if item.vrf is None
+                        ]
+                    if len(child_prefixes) > 1:
+                        raise NetboxAllocationError(
+                            "multiple allocated child prefixes match"
+                        )
+                    nb_child_prefix = child_prefixes[0] if child_prefixes else None
 
                     if not nb_child_prefix:
                         raise NetboxAllocationError(
@@ -716,15 +789,21 @@ class NetboxIpTasks:
                 if dry_run:
                     preview_address = address
                 else:
-                    if existing_ip and existing_ip.role != role:
+                    if (
+                        existing_ip
+                        and getattr(existing_ip.role, "value", existing_ip.role) != role
+                    ):
                         # NetBox requires the existing record to have a shared role.
                         existing_ip.update({"role": role})
-                    nb_ip = nb.ipam.ip_addresses.create(address=address, role=role)
+                    nb_ip = nb.ipam.ip_addresses.create(
+                        address=address, role=role, vrf=vrf_id
+                    )
             else:
                 if dry_run:
                     preview_address = str(nb_prefix.available_ips.list()[0])
                 else:
-                    nb_ip = nb_prefix.available_ips.create()
+                    # Explicit None keeps new addresses in the global table.
+                    nb_ip = nb_prefix.available_ips.create(vrf=vrf_id)
 
             if dry_run:
                 ret.status = "unchanged"
@@ -786,9 +865,6 @@ class NetboxIpTasks:
         if description and description != nb_ip.description:
             nb_ip.description = description
             has_changes = True
-        if vrf and vrf != nb_ip.vrf:
-            nb_ip.vrf = {"name": vrf}
-            has_changes = True
         if tenant and tenant != getattr(nb_ip.tenant, "name", None):
             nb_ip.tenant = {"name": tenant}
             has_changes = True
@@ -804,17 +880,13 @@ class NetboxIpTasks:
         if status and status != getattr(nb_ip.status, "value", nb_ip.status):
             nb_ip.status = status
             has_changes = True
-        if tags and not any(t in nb_ip.tags for t in tags):
-            for t in tags:
-                if t not in nb_ip.tags:
-                    nb_ip.tags.append({"name": t})
-                    has_changes = True
+        if tags:
+            current_tags = merge_array_values(nb_ip.tags, [], attribute="name")
+            merged_tags = merge_array_values(nb_ip.tags, tags, attribute="name")
+            if merged_tags != current_tags:
+                nb_ip.tags = merged_tags
+                has_changes = True
         if device and interface:
-            nb_interface = nb.dcim.interfaces.get(device=device, name=interface)
-            if not nb_interface:
-                raise NetboxAllocationError(
-                    f"Unable to source '{device}:{interface}' interface from Netbox"
-                )
             if not nb_ip.assigned_object or (
                 nb_ip.assigned_object.id != nb_interface.id
             ):
@@ -826,18 +898,15 @@ class NetboxIpTasks:
                 )
             if is_primary is True:
                 device_record = nb.dcim.devices.get(name=device)
-                if ipaddress.ip_interface(str(nb_ip)).version == 4:
-                    if (
-                        not device_record.primary_ip4
-                        or device_record.primary_ip4.id != nb_ip.id
-                    ):
-                        device_record.primary_ip4 = nb_ip.id
-                        nb_device = device_record
-                elif (
-                    not device_record.primary_ip6
-                    or device_record.primary_ip6.id != nb_ip.id
-                ):
-                    device_record.primary_ip6 = nb_ip.id
+                # Select the primary field once for either address family.
+                primary_field = (
+                    "primary_ip4"
+                    if ipaddress.ip_interface(str(nb_ip)).version == 4
+                    else "primary_ip6"
+                )
+                primary_ip = getattr(device_record, primary_field)
+                if not primary_ip or primary_ip.id != nb_ip.id:
+                    setattr(device_record, primary_field, nb_ip.id)
                     nb_device = device_record
         if mask_len and not str(nb_ip).endswith(f"/{mask_len}"):
             address = str(nb_ip).split("/")[0]

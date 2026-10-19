@@ -19,6 +19,7 @@ from .netbox_worker_utilities import review_sync_task_result, sync_diff_has_chan
 log = logging.getLogger(__name__)
 
 VRRP_PROTOCOLS = {"vrrpv2": "vrrp2", "vrrpv3": "vrrp3"}
+IP_ROLES_ALLOW_DUPLICATES = {"anycast", "vip", "vrrp", "hsrp", "glbp", "carp"}
 VRRP_NAME_TEMPLATE = "{{ device.name }}_{{ interface }}_VRRP{{ group_id }}"
 VRRP_NAME_TEMPLATE_ENV = Environment(undefined=StrictUndefined, autoescape=False)
 
@@ -57,6 +58,9 @@ class NetboxFhrpTasks:
         and interface priorities. Support the same VIP in different VRFs.
         Existing records are never deleted. Existing VIP masks and VRFs are
         preserved, and synchronized VIPs receive the role ``vrrp``.
+        Eligible unassigned IPs are reused. IPs assigned elsewhere with anycast,
+        VIP, VRRP, HSRP, GLBP, or CARP roles permit separate VIP creation and
+        retain their existing roles and assignments.
 
         Args:
             job: NorFab job object.
@@ -433,23 +437,38 @@ class NetboxFhrpTasks:
                 return ret
             ip_record = group["vips"].get(vrrp_vip_identity) if group else None
             conflict = None
+            # Keep the target group's own VIP; only search when it needs one.
             if ip_record is None:
                 for ip in ips.get(vrrp_vip_identity, []):
+                    # Another planned group has already claimed this record.
                     if ip["reserved"]:
                         continue
                     owner = ip["data"]["assigned_object_id"]
+                    # Reuse eligible unassigned IPs before checking roles. Their
+                    # current role does not prevent assigning them to this group.
                     if owner is None:
+                        # Global records are reusable; named VRFs must match.
                         if ip["vrf"] is None or ip["vrf"] == vrf:
                             ip_record = ip
                             break
                         continue
+                    # A group in another routing context keeps its own VIP;
+                    # this group needs a separate record for the same address.
                     if (
                         owner in groups
                         and len(groups[owner]["vrfs"]) == 1
                         and groups[owner]["vrfs"] != {vrf}
                     ):
                         continue
+                    # Skip anycast, VIP, or other redundancy IPs already assigned
+                    # to a different interface or group.
+                    if (
+                        owner is not None
+                        and ip["data"]["role"] in IP_ROLES_ALLOW_DUPLICATES
+                    ):
+                        continue
                     conflict = ip
+                # Do not take an ordinary assigned IP from another object.
                 if ip_record is None and conflict is not None:
                     owner = conflict["data"]["assigned_object_id"]
                     if conflict["data"]["assigned_object_type"] == "ipam.fhrpgroup":
@@ -657,8 +676,8 @@ class NetboxFhrpTasks:
         ]
         if updates:
             nb.ipam.fhrp_groups.update(updates)
-        # VIPs and memberships have the same create/update workflow. Only their
-        # endpoint, grouping, and group-relation field differ.
+        # VIPs and memberships share payload preparation. Update existing VIP
+        # roles before creating duplicates so NetBox permits shared addresses.
         job.event("applying VRRP VIP and interface assignment changes")
         for endpoint, desired, diff, records, relation in (
             (
@@ -694,9 +713,14 @@ class NetboxFhrpTasks:
             for fields in [*creates, *updates]:
                 if relation in fields:
                     fields[relation] = groups[fields[relation]]["id"]
+            # NetBox validates duplicate roles against existing records, so
+            # normalize existing VIP roles before submitting new duplicates.
+            if updates and relation == "assigned_object_id":
+                endpoint.update(updates)
             if creates:
                 endpoint.create(creates)
-            if updates:
+            # Memberships retain their existing create-before-update ordering.
+            if updates and relation == "group":
                 endpoint.update(updates)
 
         job.event("vrrp sync complete; deletion candidates are retained")

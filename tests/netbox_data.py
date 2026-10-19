@@ -384,6 +384,17 @@ platforms = [
 
 prefixes = [
     {"prefix": "10.0.0.0/24", "description": "TEST NEXT IP PREFIX"},
+    # Separate persistent VRF1 pools for metadata and branching IP tests.
+    {
+        "prefix": "198.19.250.16/30",
+        "description": "NORFAB CREATE IP VRF METADATA",
+        "vrf": {"name": "VRF1"},
+    },
+    {
+        "prefix": "198.19.250.20/30",
+        "description": "NORFAB CREATE IP VRF BRANCH",
+        "vrf": {"name": "VRF1"},
+    },
     {"prefix": "10.1.0.0/24", "description": "TEST CREATE PREFIXES"},
     {
         "prefix": "10.2.0.0/24",

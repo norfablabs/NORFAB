@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 18 October 2026*
+*Last updated: 19 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -153,9 +153,14 @@ resources may still require coordination.
 
 Provides blocking execution, asynchronous submission, user-supplied UUIDs,
 deadlines, worker selectors, deferred results, and recoverable futures.
+Expired client jobs retain `STALE` state and return failed task results with
+`status="timeout"` and `result=null` through Python and REST. Completed worker
+results are preserved. REST returns an explicit HTTP 500 error if no client
+result is available. Workers report timeout results when task execution raises after its deadline.
 **Use cases:** simple scripts, fire-and-track operations, long-running changes,
 and application-controlled job correlation. **Limitations:** callers must set
 timeouts appropriate to the work and retain UUIDs for asynchronous jobs.
+Timeout does not interrupt blocking operations or roll back external changes.
 [Python client details](clients_python_api_overview.md#running-jobs)
 
 ### Live events and interactive approvals
@@ -879,6 +884,8 @@ links.
 ### IP address and prefix allocation
 
 Interface IP allocation prefers an exact description match or reuses the sole existing address within the selected prefix, including anycast and VIP addresses. Ambiguous candidates fail instead of creating another address.
+IP reuse and parent-prefix selection respect the supplied VRF and default to the global table when omitted, regardless of the destination interface VRF. New IPs and child prefixes remain in that selected VRF. Named VRFs and destination interfaces are resolved before allocation; repeated matching VRF and tag requests leave existing records unchanged, while missing tags are added.
+For direct prefix allocations with `ip_index`, reuse first matches the selected address, allowing distinct indexes on the same interface without overwriting other addresses' roles. Child-subnet reuse with a different `mask_len` retains assignment-first behavior.
 
 Allocates next-available addresses or child prefixes, assigns interface and
 primary IP data, carries tenant/VRF/site/role/status/tags metadata, supports connected
@@ -887,7 +894,7 @@ allocation. **Use cases:** provisioning links, loopbacks, management addresses,
 new devices, and template-driven zero-touch workflows.
 Peer allocation errors are reported after the local address is allocated.
 Failed child-subnet availability checks are included in IP allocation errors.
-Prefix dry runs select the first available range that fits the requested child prefix length.
+Prefix dry runs select the first available range that fits the requested child prefix length. Prefix allocation and reuse resolve explicit VRF names to IDs and otherwise select global parents and children, including when the same CIDR exists in multiple VRFs.
 Design device roles match existing records by supplied slug or slugified name.
 Design cable connections accept tenant names or reference dictionaries.
 New BGP sessions accept existing tenant names in single and bulk creation, including design peerings and reverse sessions.

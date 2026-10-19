@@ -1,8 +1,10 @@
 import pprint
 import queue
+import socket
 import threading
 import time
 from pathlib import Path
+from urllib.parse import urlsplit
 from uuid import uuid4
 
 import pytest
@@ -68,6 +70,16 @@ class TestRemoteBrokerClient:
                 "zmq_auth": True,
             }
         }
+        endpoint = inventory_data["broker"]["endpoint"]
+        broker_address = urlsplit(endpoint)
+        try:
+            with socket.create_connection(
+                (broker_address.hostname, broker_address.port), timeout=5
+            ):
+                pass
+        except OSError as exc:
+            pytest.skip(f"remote broker TCP connection to {endpoint} failed: {exc}")
+
         client_name = f"test_remote_broker_client_{uuid4().hex}"
         nf = NorFab(
             inventory_data=inventory_data,

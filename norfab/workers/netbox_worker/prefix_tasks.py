@@ -70,7 +70,7 @@ class NetboxPrefixTasks:
                 - IPv4 prefix string e.g. 10.0.0.0/24
                 - IPv6 prefix string e.g. 2001::/64
                 - Prefix description string to filter by
-                - Dictionary with prefix filters for `pynetbox` prefixes.get method
+                - Dictionary with NetBox prefix lookup filters
                     e.g. `{"prefix": "10.0.0.0/24", "site": "foo"}`
 
             custom_fields (dict, optional): Custom-field names and values to PATCH
@@ -83,7 +83,9 @@ class NetboxPrefixTasks:
                 deduplication to source existing prefixes.
             prefixlen (int, optional): The prefix length of the new prefix to create, by default
                 allocates next available /30 point-to-point prefix.
-            vrf (str, optional): Name of the VRF to associate with the prefix.
+            vrf (str, optional): Existing VRF name for parent selection and child
+                allocation. Defaults to global when omitted; no VRF is inferred.
+                Existing child lookups are restricted to the selected VRF.
             tags (Union[None, list], optional): Tag names to add to the prefix.
             tenant (str, optional): Name of the tenant to associate with the prefix.
             comments (str, optional): Comments for the prefix.
@@ -106,7 +108,7 @@ class NetboxPrefixTasks:
                 report the planned association without writing it.
 
         Raises:
-            NetboxAllocationError: The parent or requested VLAN/group cannot be
+            NetboxAllocationError: The parent, VRF, or requested VLAN/group cannot be
                 resolved uniquely, allocation fails, or an existing prefix has
                 a different length. VLAN lookup failures occur before allocation.
         """
@@ -142,6 +144,15 @@ class NetboxPrefixTasks:
             f"processing prefix create request within '{parent}' for '/{prefixlen}' subnet"
         )
 
+        # Resolve only an explicit VRF; omission always selects global.
+        vrf_id = None
+        if vrf:
+            nb_vrf = nb.ipam.vrfs.get(name=vrf)
+            if not nb_vrf:
+                raise NetboxAllocationError(f"Unable to source VRF '{vrf}' from Netbox")
+            vrf_id = nb_vrf.id
+        vrf_filters = {"vrf_id": vrf_id} if vrf_id is not None else {}
+
         # source parent prefix from Netbox
         if isinstance(parent, str):
             # check if parent prefix is IP network or description
@@ -150,14 +161,7 @@ class NetboxPrefixTasks:
                 is_network = True
             except Exception:
                 is_network = False
-            if is_network is True and vrf:
-                parent_filters = {"prefix": parent, "vrf__name": vrf}
-            elif is_network is True:
-                parent_filters = {"prefix": parent}
-            elif is_network is False and vrf:
-                parent_filters = {"description": parent, "vrf__name": vrf}
-            elif is_network is False:
-                parent_filters = {"description": parent}
+            parent_filters = {"prefix" if is_network else "description": parent}
         elif isinstance(parent, dict):
             parent_filters = dict(parent)
             parent_site = parent_filters.pop("site", None)
@@ -168,23 +172,23 @@ class NetboxPrefixTasks:
                         f"Failed to get parent prefix site '{parent_site}' from NetBox"
                     )
                 parent_filters.update(scope_type="dcim.site", scope_id=nb_site.id)
-        nb_parent_prefix = nb.ipam.prefixes.get(**parent_filters)
-        if not nb_parent_prefix:
-            job.event(f"parent prefix not found in NetBox: {parent}", severity="ERROR")
+        # Filter global candidates locally before checking for ambiguous parents.
+        parent_filters.update(vrf_filters)
+        parents = list(nb.ipam.prefixes.filter(**parent_filters))
+        if vrf_id is None:
+            parents = [item for item in parents if item.vrf is None]
+        if len(parents) > 1:
+            raise NetboxAllocationError(
+                f"Multiple parent prefixes match {parent} in VRF '{vrf}'"
+            )
+        if not parents:
             raise NetboxAllocationError(
                 f"Unable to source parent prefix from Netbox - {parent}"
             )
-
-        # check that parent vrf and new prefix vrf are same
-        if vrf and str(nb_parent_prefix.vrf) != vrf:
-            raise NetboxAllocationError(
-                f"Parent prefix vrf '{nb_parent_prefix.vrf}' not same as requested child prefix vrf '{vrf}'"
-            )
+        nb_parent_prefix = parents[0]
 
         # try to source existing prefix from netbox
         prefix_filters = {}
-        if vrf:
-            prefix_filters["vrf__name"] = vrf
         if site:
             prefix_filters["site__name"] = site
         if role:
@@ -192,10 +196,18 @@ class NetboxPrefixTasks:
         if description:
             prefix_filters["description"] = description
         try:
-            if prefix_filters:
-                nb_prefix = nb.ipam.prefixes.get(
-                    within=nb_parent_prefix.prefix, **prefix_filters
+            if vrf or prefix_filters:
+                # Preserve the existing reuse trigger and scope its candidates to VRF.
+                matches = list(
+                    nb.ipam.prefixes.filter(
+                        within=nb_parent_prefix.prefix, **prefix_filters, **vrf_filters
+                    )
                 )
+                if vrf_id is None:
+                    matches = [item for item in matches if item.vrf is None]
+                if len(matches) > 1:
+                    raise NetboxAllocationError("multiple existing prefixes match")
+                nb_prefix = matches[0] if matches else None
         except Exception as e:
             raise NetboxAllocationError(
                 f"Failed to source existing prefix from Netbox using filters '{prefix_filters}', error: {e}"
@@ -245,7 +257,7 @@ class NetboxPrefixTasks:
             else:
                 try:
                     nb_prefix = nb_parent_prefix.available_prefixes.create(
-                        {"prefix_length": prefixlen}
+                        {"prefix_length": prefixlen, "vrf": vrf_id}
                     )
                 except Exception as e:
                     raise NetboxAllocationError(

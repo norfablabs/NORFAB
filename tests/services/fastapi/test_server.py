@@ -38,6 +38,7 @@ class TestFastAPIServer:
                     "kwargs": {
                         "commands": ["show clock", "show hostname"],
                         "FC": "spine",
+                        "on_failed": True,
                     },
                 }
             ),
@@ -64,6 +65,7 @@ class TestFastAPIServer:
                     "kwargs": {
                         "commands": ["show clock", "show hostname"],
                         "FC": "spine",
+                        "on_failed": True,
                     },
                 }
             ),
@@ -112,6 +114,7 @@ class TestFastAPIServer:
                 {
                     "suite": "nf://nornir_test_suites/suite_1.txt",
                     "FC": "spine",
+                    "on_failed": True,
                     "workers": "nornir-worker-1",
                 }
             ),

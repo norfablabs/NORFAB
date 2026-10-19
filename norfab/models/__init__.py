@@ -91,6 +91,7 @@ class InputResponseModel(BaseModel):
 
 class ResultStatuses(str, Enum):
     completed = "completed"
+    timeout = "timeout"
     no_match = "no_match"
     failed = "failed"
     skipped = "skipped"
@@ -118,6 +119,7 @@ class Result(BaseModel, use_enum_values=True):
             - 'completed' - task was executed successfully and resources were found
             - 'no_match' - task was executed, but no resources matched the criteria or filters provided
             - 'failed' - task was executed, but failed
+            - 'timeout' - job exceeded its timeout; result is None
             - 'skipped' - task was not executed, but skipped for some reason
             - `error` - attempted to execute the task, but an error occurred
 

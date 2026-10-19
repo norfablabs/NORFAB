@@ -19,7 +19,7 @@ import orjson
 import zmq
 
 from norfab.core.inventory import NorFabInventory
-from norfab.models import InputResponseModel
+from norfab.models import InputResponseModel, Result
 from norfab.utils.markdown_results import markdown_results
 
 from . import NFP
@@ -280,6 +280,63 @@ class ClientJobDatabase:
                 f"UPDATE jobs SET {', '.join(fields)} WHERE {where_clause}",
                 (*values, *where_values),
             )
+
+    def expire_job(self, uuid: str) -> dict | None:
+        """Finalize an expired job atomically, preserving completed worker results.
+
+        Args:
+            uuid: Job identifier.
+
+        Returns:
+            The current job snapshot, or None if the job does not exist.
+            Expired jobs become STALE with failed timeout results whose payload
+            is None. Completed worker results and terminal states are preserved.
+            Active jobs are returned unchanged. Expiry does not cancel workers.
+        """
+        with self._transaction(write=True) as conn:
+            row = conn.execute("SELECT * FROM jobs WHERE uuid = ?", (uuid,)).fetchone()
+            if row is None:
+                return None
+            job = self._hydrate(row)
+            if job["status"] in TERMINAL_JOB_STATUSES or time.time() < job["deadline"]:
+                return job
+            message = (
+                f"job '{uuid}' service '{job['service']}' task '{job['task']}' "
+                f"timeout expired after {job['timeout']} seconds; worker execution may continue"
+            )
+            results = job.get("result_data") or {}
+            workers = job["workers_dispatched"] or job["workers_requested"]
+            if isinstance(workers, str):
+                workers = [workers]
+            # Keep completed results; synthesize timeouts only for missing replies.
+            for worker in workers:
+                if worker not in results:
+                    results[worker] = Result(
+                        result=None,
+                        failed=True,
+                        status="timeout",
+                        errors=[message],
+                        juuid=uuid,
+                        service=job["service"],
+                        task=job["task"],
+                    ).model_dump()
+            conn.execute(
+                "UPDATE jobs SET status = ?, result_data = ?, errors = ?, completed_timestamp = ? WHERE uuid = ?",
+                (
+                    JobStatus.STALE,
+                    self._compress(results),
+                    orjson.dumps([message]).decode(),
+                    time.ctime(),
+                    uuid,
+                ),
+            )
+            job.update(status=JobStatus.STALE, result_data=results, errors=[message])
+            log.error(
+                "%s; outstanding workers: %s",
+                message,
+                [w for w in workers if results[w].get("status") == "timeout"],
+            )
+            return job
 
     def fetch_jobs(
         self,
@@ -665,6 +722,11 @@ class NFPJobFuture:
             if timeout is not None:
                 remaining_time = timeout - (time.time() - wait_started)
                 if remaining_time <= 0:
+                    # Finalize deadline expiry without waiting for the dispatcher.
+                    job = self.client.job_db.expire_job(self.uuid)
+                    if job and job["status"] in TERMINAL_JOB_STATUSES:
+                        self.mark_done(job)
+                        break
                     return None
                 wait_time = min(wait_time, remaining_time)
 
@@ -672,7 +734,7 @@ class NFPJobFuture:
 
         job = self.final_job_snapshot or self.client.job_db.get_job(self.uuid)
         result = None
-        if job and job["status"] == JobStatus.COMPLETED:
+        if job and job["status"] in (JobStatus.COMPLETED, JobStatus.STALE):
             result = job.get("result_data")
 
         if markdown and job:
@@ -1074,6 +1136,12 @@ def dispatch_new_jobs(client) -> None:
         if juuid not in client.job_futures:
             continue
 
+        # Do not dispatch queued jobs whose deadline has already passed.
+        if time.time() >= job["deadline"]:
+            job = client.job_db.expire_job(juuid)
+            client.job_futures[juuid].mark_done(job)
+            continue
+
         try:
             # Send POST request (non-blocking)
             service = client.ensure_bytes(job["service"])
@@ -1119,6 +1187,7 @@ def poll_active_jobs(client) -> None:
     """
     # Jobs that are ready for GET polling (dispatched or started)
     active_statuses = [
+        JobStatus.SUBMITTING,
         JobStatus.DISPATCHED,
         JobStatus.STARTED,
         JobStatus.WAITING_CLIENT_INPUT,
@@ -1138,15 +1207,13 @@ def poll_active_jobs(client) -> None:
 
         # Check if job has exceeded deadline
         if now >= deadline:
-            client.job_db.update_job(
-                juuid,
-                status=JobStatus.STALE,
-                errors=["Job deadline reached without completion"],
-                completed_ts=time.ctime(),
-            )
+            job = client.job_db.expire_job(juuid)
             future = client.job_futures.get(juuid)
             if future:
-                future.mark_done(client.job_db.get_job(juuid))
+                future.mark_done(job)
+            continue
+
+        if job["status"] == JobStatus.SUBMITTING:
             continue
 
         try:
@@ -1919,7 +1986,9 @@ class NFPClient(object):
             nowait (bool, optional): If false, wait for job to complete for timeout, return job details otherwise
 
         Returns:
-            Any: The result of the job if successful, or None if the job failed, timed out, or became stale.
+            Any: Worker results, including failed timeout results for stale jobs
+                (status="timeout", result=None). Expiry does not cancel workers.
+                Returns None on client failure or shutdown.
         """
         future = self.submit_job(
             service=service,
