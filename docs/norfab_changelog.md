@@ -1,3 +1,10 @@
+# 0.24.17 (unreleased)
+
+## FEATURES
+
+1. Added Nornir `netconf_get` and NFCLI `netconf get` to retrieve configuration and operational state using ncclient or Scrapli, with per-host rendered subtree or XPath filters, IETF interfaces, routing, and hardware getters plus OpenConfig interfaces, LLDP, BGP, and system getters, XML processors, FastAPI, and MCP support.
+2. Added NETCONF `xmltodict` processing through Python and NFCLI, with XML processor options for configuration edits and schema retrieval and a dedicated XML processor guide.
+
 # 0.24.16
 
 ## BUGS

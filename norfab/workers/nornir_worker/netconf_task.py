@@ -13,11 +13,22 @@ from .nornir_models import (
     NetconfEditConfigInput,
     NetconfGetCapabilitiesInput,
     NetconfGetConfigInput,
+    NetconfGetInput,
     NetconfGetSchemaInput,
     NetconfResult,
 )
 
 log = logging.getLogger(__name__)
+
+NETCONF_GETTERS = {
+    "ietf_interfaces": '<interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces"/>',
+    "openconfig_interfaces": '<interfaces xmlns="http://openconfig.net/yang/interfaces"/>',
+    "openconfig_lldp": '<lldp xmlns="http://openconfig.net/yang/lldp"/>',
+    "openconfig_bgp": '<network-instances xmlns="http://openconfig.net/yang/network-instance"><network-instance><protocols><protocol><bgp/></protocol></protocols></network-instance></network-instances>',
+    "openconfig_system": '<system xmlns="http://openconfig.net/yang/system"/>',
+    "ietf_routing": '<routing xmlns="urn:ietf:params:xml:ns:yang:ietf-routing"/>',
+    "ietf_hardware": '<hardware xmlns="urn:ietf:params:xml:ns:yang:ietf-hardware"/>',
+}
 
 # --------------------------------------------------------------------------
 # NETCONF TASK MODELS
@@ -177,7 +188,8 @@ class NetconfTask:
                 filters replies locally after retrieval.
             job_data: Optional template context data or URL to a YAML data file.
             **kwargs: Common Nornir host filters, processors, retry options,
-                to_dict and add_details serialization options.
+                XML processors (xmltodict, xpath, xml_flake), to_dict and
+                add_details serialization options.
 
         Returns:
             Result: XML replies under each host's get_config key, or serialized
@@ -249,7 +261,8 @@ class NetconfTask:
             plugin: Backend name: ncclient (default) or scrapli.
             job_data: Template context data or URL to a YAML data file.
             **kwargs: Common Nornir host filters, processors, retry options,
-                to_dict and add_details serialization options.
+                XML processors (xmltodict, xpath, xml_flake), to_dict and
+                add_details serialization options.
 
         Returns:
             Result: XML replies under each host's edit_config key, or serialized
@@ -305,8 +318,8 @@ class NetconfTask:
                 the server select a version.
             format: Schema format: yang (default) or yin.
             plugin: Backend name: ncclient (default) or scrapli.
-            **kwargs: Common host filters, retries, processors and serialization
-                options applicable to this task.
+            **kwargs: Common host filters, retries, XML processors (xmltodict,
+                xpath, xml_flake) and serialization options applicable to this task.
 
         Returns:
             Result: XML replies containing schema text under get_schema for
@@ -387,8 +400,119 @@ class NetconfTask:
             **kwargs,
         )
 
-    def netconf_get(self, job: Job, **kwargs: Any) -> Result:
-        raise NotImplementedError("netconf_get is not implemented")
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NetconfGetInput,
+        output=NetconfResult,
+        mcp={
+            "annotations": {
+                "title": "NETCONF Get Data",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def netconf_get(
+        self,
+        job: Job,
+        plugin: str = "ncclient",
+        filter_subtree: str = None,
+        filter_xpath: str = None,
+        job_data: Any = None,
+        ietf_interfaces: bool = False,
+        openconfig_interfaces: bool = False,
+        openconfig_lldp: bool = False,
+        openconfig_bgp: bool = False,
+        openconfig_system: bool = False,
+        ietf_routing: bool = False,
+        ietf_hardware: bool = False,
+        **kwargs: Any,
+    ) -> Result:
+        """Retrieve device configuration and operational state using NETCONF get.
+
+        Args:
+            job: NorFab job metadata.
+            plugin: NETCONF backend: ncclient (default) or scrapli.
+            filter_subtree: Optional XML subtree or NorFab template URL. Rendered
+                per host with host, job_data, norfab and netbox context variables.
+                Mutually exclusive with filter_xpath and predefined getters. Omit
+                all selections to retrieve available configuration and state data.
+            filter_xpath: XPath expression or NorFab template URL, rendered with
+                the same context as filter_subtree. Requires the device XPath
+                capability. Explicit namespace mappings are not exposed. This
+                filters on the server; the common xpath processor instead
+                filters replies locally after retrieval.
+            job_data: Optional template context data or URL to a YAML data file.
+            ietf_interfaces: Retrieve the standard IETF interfaces subtree.
+                Defaults to false. Mutually exclusive with filter_subtree and
+                filter_xpath. Requires device support for ietf-interfaces;
+                empty replies remain successful. Does not select the legacy
+                interfaces-state subtree. Only one getter or explicit filter
+                may be selected. All getters require device model support;
+                empty replies remain successful.
+            openconfig_interfaces: Retrieve the OpenConfig interfaces subtree. Defaults to false.
+            openconfig_lldp: Retrieve the OpenConfig LLDP subtree. Defaults to false.
+            openconfig_bgp: Retrieve OpenConfig BGP configuration and state across
+                network instances. Defaults to false. May include large RIB data.
+            openconfig_system: Retrieve the OpenConfig system subtree. Defaults to false.
+            ietf_routing: Retrieve the IETF routing subtree. Defaults to false.
+            ietf_hardware: Retrieve the IETF hardware subtree. Defaults to false.
+            **kwargs: Common Nornir host filters, processors, retry options,
+                XML processors (xmltodict, xpath, xml_flake), to_dict and
+                add_details serialization options.
+
+        Returns:
+            Result: XML replies under each host's get key (rpc for unfiltered
+                Scrapli requests), or serialized
+                records when to_dict is false. RPC and connection errors mark
+                host results as failed; unmatched hosts return status no_match.
+
+        Raises:
+            FileNotFoundError: If a referenced template cannot be fetched.
+
+        """
+        for getter, selected in {
+            "ietf_interfaces": ietf_interfaces,
+            "openconfig_interfaces": openconfig_interfaces,
+            "openconfig_lldp": openconfig_lldp,
+            "openconfig_bgp": openconfig_bgp,
+            "openconfig_system": openconfig_system,
+            "ietf_routing": ietf_routing,
+            "ietf_hardware": ietf_hardware,
+        }.items():
+            if selected:
+                filter_subtree = NETCONF_GETTERS[getter]
+        # Scrapli get requires a filter; use an unfiltered RPC when omitted.
+        if plugin == "scrapli" and filter_subtree is None and filter_xpath is None:
+            return self._run_netconf(
+                job, call="rpc", plugin=plugin, filter_="<get/>", **kwargs
+            )
+        template = None
+        filter_type = None
+        if filter_subtree is not None:
+            template = filter_subtree
+            filter_type = "subtree"
+        if filter_xpath is not None:
+            template = filter_xpath
+            filter_type = "xpath"
+        render = None
+        if template is not None:
+            if plugin == "ncclient":
+                render = {"filter": template}
+                kwargs["ftype"] = filter_type
+            else:
+                render = {"filter_": template}
+                kwargs["filter_type"] = filter_type
+        return self._run_netconf(
+            job,
+            call="get",
+            plugin=plugin,
+            render=render,
+            job_data=job_data,
+            **kwargs,
+        )
 
     def netconf_transaction(self, job: Job, **kwargs: Any) -> Result:
         raise NotImplementedError("netconf_transaction is not implemented")

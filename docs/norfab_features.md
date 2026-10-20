@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 19 October 2026*
+*Last updated: 20 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -538,15 +538,17 @@ community plugin without changing NORFAB core. **Limitations:** there is no code
 sandbox; plugins are trusted Python code and dependencies must exist on each
 worker. [Task details](workers/nornir/services_nornir_service_tasks_task.md)
 
-### NETCONF operations and transactions
+### NETCONF data retrieval
 
-Runs arbitrary ncclient manager or Scrapli NETCONF methods, retrieves/filter
-configuration, capabilities and schemas, sends RPCs, and supports an ordered
-transaction flow with lock, discard, edit, validate, confirmed/final commit,
-failure cleanup, and unlock where the server supports them. **Use cases:**
-model-driven configuration, YANG data retrieval, safe candidate changes, and
-custom RPC automation. **Limitations:** plugin keyword names differ and device
-NETCONF capabilities determine transaction steps.
+Retrieve configuration and operational state with `netconf_get` through Python,
+NFCLI, FastAPI, and MCP using ncclient or Scrapli. Supports per-host rendered
+subtree or XPath filters, IETF interfaces/routing/hardware and OpenConfig interfaces/LLDP/BGP/system getters, and XML reply
+processors, including `xmltodict` conversion, local XPath, and XML flake extraction. **Use cases:** retrieve live
+state and configuration for model-driven checks. **Limitations:** available data
+and XPath support depend on device capabilities and YANG models. Dedicated tasks
+also retrieve configuration datastores, capabilities, and schemas, and edit
+configuration. Transaction and arbitrary RPC tasks are not implemented.
+[Task details](workers/nornir/services_nornir_service_tasks_netconf_get.md)
 
 ### Network utility checks
 

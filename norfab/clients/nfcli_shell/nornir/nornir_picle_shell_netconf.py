@@ -5,11 +5,27 @@ from norfab.workers.nornir_worker.nornir_models import (
     NetconfEditConfigInput,
     NetconfGetCapabilitiesInput,
     NetconfGetConfigInput,
+    NetconfGetInput,
     NetconfGetSchemaInput,
 )
 
 from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 from .nornir_picle_shell_common import NorniHostsFilters
+
+
+class CallGet(
+    NetconfGetInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    @staticmethod
+    def run(*args: object, **kwargs: object) -> object:
+        return NornirNetconfShell.run(*args, _task="netconf_get", **kwargs)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
 
 
 class CallGetConfig(
@@ -73,6 +89,9 @@ class CallGetCapabilities(
 
 
 class NornirNetconfShell(BaseModel):
+    get: CallGet = Field(
+        None, description="Retrieve configuration and operational state"
+    )
     get_capabilities: CallGetCapabilities = Field(
         None, alias="get-capabilities", description="List NETCONF capabilities"
     )

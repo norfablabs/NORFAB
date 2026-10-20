@@ -207,3 +207,68 @@ class TestDummyPluginShell:
                 "more",
             ]
         )
+
+
+class TestNornirNetconfGet:
+    @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
+    def test_get(
+        self, picle_shell: Any, capsys: pytest.CaptureFixture[str], plugin: str
+    ) -> None:
+        shell, _ = picle_shell
+        shell.onecmd("top")
+        shell.onecmd(
+            f"nornir netconf get plugin {plugin} workers nornir-worker-1 "
+            "FL ceos-spine-1 on-failed filter-subtree nf://netconf/get_system.xml"
+        )
+        output = capsys.readouterr().out
+        assert "ceos-spine-1" in output
+        assert "<hostname>ceos-spine-1</hostname>" in output
+
+    @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
+    @pytest.mark.parametrize(
+        "getter",
+        [
+            "ietf-interfaces",
+            "openconfig-interfaces",
+            "openconfig-lldp",
+            "openconfig-bgp",
+            "openconfig-system",
+            "ietf-routing",
+            "ietf-hardware",
+        ],
+    )
+    def test_getters(
+        self,
+        picle_shell: Any,
+        capsys: pytest.CaptureFixture[str],
+        plugin: str,
+        getter: str,
+    ) -> None:
+        shell, _ = picle_shell
+        shell.onecmd("top")
+        shell.onecmd(
+            f"nornir netconf get {getter} plugin {plugin} "
+            "workers nornir-worker-1 FL ceos-spine-1 on-failed"
+        )
+        output = capsys.readouterr().out
+        assert "ceos-spine-1" in output
+        assert "rpc-reply" in output
+        assert "Traceback" not in output
+
+
+class TestNornirNetconfXmlProcessors:
+    @pytest.mark.parametrize("command", ["get", "get-config"])
+    def test_xmltodict(
+        self, picle_shell: Any, capsys: pytest.CaptureFixture[str], command: str
+    ) -> None:
+        shell, _ = picle_shell
+        shell.onecmd("top")
+        shell.onecmd(
+            f"nornir netconf {command} xmltodict xpath (//hostname)[1] "
+            "plugin ncclient workers nornir-worker-1 FL ceos-spine-1 on-failed"
+        )
+        output = capsys.readouterr().out
+        assert "hostname:" in output
+        assert "ceos-spine-1" in output
+        assert "<hostname" not in output
+        assert "Traceback" not in output

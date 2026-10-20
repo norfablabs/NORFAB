@@ -6,6 +6,10 @@ and MCP tools.
 
 ## Output
 
+Use [XML processors](services_nornir_service_tasks_netconf_processors.md) to convert replies to
+dictionaries (`xmltodict`), select XML elements (`xpath`), or extract flat
+values (`xml-flake`).
+
 Default results contain an XML reply under each host's `get_config` key.
 `add_details=True` includes execution metadata; `to_dict=False` returns serialized
 records. Connection and RPC failures appear in per-host results.
@@ -177,6 +181,7 @@ root
             ├── tf-skip-failed:    Skip failed task results when saving to file
             ├── diff:    File group name to diff task results against
             ├── diff-last:    Previous saved file version to diff against
+            ├── xmltodict:    Convert XML replies to dictionaries with DataProcessor, default 'False'
             ├── xpath:    XPath expression to run with DataProcessor
             ├── xml-flake:    XML flake pattern for DataProcessor
             ├── plugin:    NETCONF backend, default 'NetconfPlugin.ncclient'

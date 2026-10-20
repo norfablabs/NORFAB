@@ -414,3 +414,308 @@ class TestNetconfGetCapabilities:
             kwargs={"plugin": plugin, "FB": "no-such-netconf-host"},
         )
         assert result["nornir-worker-1"]["status"] == "no_match"
+
+
+class TestNetconfGet:
+    @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
+    @pytest.mark.parametrize("filtered", [False, True])
+    def test_running(self, nfclient: object, plugin: str, filtered: bool) -> None:
+        """Read real XML from every configured cEOS host with either backend."""
+        hosts = [
+            "ceos-spine-1",
+            "ceos-spine-2",
+            "ceos-leaf-1",
+            "ceos-leaf-2",
+            "ceos-leaf-3",
+        ]
+        kwargs = {"plugin": plugin, "FL": hosts, "on_failed": True}
+        if filtered:
+            kwargs["filter_subtree"] = (
+                '<system xmlns="http://openconfig.net/yang/system"><config><hostname/></config></system>'
+            )
+        ret = nfclient.run_job(
+            "nornir",
+            "netconf_get",
+            workers=["nornir-worker-1", "nornir-worker-2"],
+            kwargs=kwargs,
+        )
+        seen = set()
+        assert ret
+        for worker, result in ret.items():
+            assert result["failed"] is False, (worker, result)
+            for host, operations in result["result"].items():
+                operation = "rpc" if plugin == "scrapli" and not filtered else "get"
+                root = ElementTree.fromstring(operations[operation])
+                assert any(node.text == host for node in root.iter()), operations
+                seen.add(host)
+        assert seen == set(hosts)
+
+    @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
+    def test_operational_state(self, nfclient: object, plugin: str) -> None:
+        """Get returns operational state as well as configuration data."""
+        result = nfclient.run_job(
+            "nornir",
+            "netconf_get",
+            workers="nornir-worker-1",
+            kwargs={
+                "plugin": plugin,
+                "FL": ["ceos-spine-1"],
+                "on_failed": True,
+                "filter_subtree": '<system xmlns="http://openconfig.net/yang/system"><state><hostname/></state></system>',
+            },
+        )["nornir-worker-1"]
+        assert result["failed"] is False, result
+        root = ElementTree.fromstring(result["result"]["ceos-spine-1"]["get"])
+        states = [node for node in root.iter() if node.tag.split("}")[-1] == "state"]
+        assert any(
+            node.text == "ceos-spine-1" for state in states for node in state.iter()
+        )
+
+    @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
+    def test_no_match(self, nfclient: object, plugin: str) -> None:
+        ret = nfclient.run_job(
+            "nornir",
+            "netconf_get",
+            workers="nornir-worker-1",
+            kwargs={"plugin": plugin, "FB": "no-such-netconf-host"},
+        )
+        assert ret["nornir-worker-1"]["status"] == "no_match"
+
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {"plugin": "invalid"},
+            {"ietf_interfaces": "true"},
+            {"openconfig_interfaces": True, "ietf_interfaces": True},
+            {"openconfig-interfaces": True, "filter-xpath": "/system"},
+            {"openconfig_lldp": True, "ietf_interfaces": True},
+            {"openconfig-lldp": True, "filter-xpath": "/system"},
+            {"openconfig_bgp": True, "ietf_interfaces": True},
+            {"openconfig-bgp": True, "filter-xpath": "/system"},
+            {"openconfig_system": True, "ietf_interfaces": True},
+            {"openconfig-system": True, "filter-xpath": "/system"},
+            {"ietf_routing": True, "ietf_interfaces": True},
+            {"ietf-routing": True, "filter-xpath": "/system"},
+            {"ietf_hardware": True, "ietf_interfaces": True},
+            {"ietf-hardware": True, "filter-xpath": "/system"},
+            {"ietf_interfaces": True, "filter_subtree": "<system/>"},
+            {"ietf_interfaces": True, "filter_xpath": "/system"},
+            {"ietf-interfaces": True, "filter-subtree": "<system/>"},
+            {"filter_subtree": ""},
+            {"filter_xpath": ""},
+            {"filter_subtree": "<system/>", "filter_xpath": "/system"},
+            {"filter-subtree": "<system/>", "filter-xpath": "/system"},
+        ],
+    )
+    def test_invalid_arguments(self, nfclient: object, kwargs: dict) -> None:
+        """Validate rejected inputs through the worker's public interface."""
+        result = nfclient.run_job(
+            "nornir",
+            "netconf_get",
+            workers="nornir-worker-1",
+            kwargs=kwargs,
+        )["nornir-worker-1"]
+        assert result["failed"] is True, result
+        assert result["errors"], result
+
+    @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
+    def test_template_file_and_details(self, nfclient: object, plugin: str) -> None:
+        """Fetch a filter file, render host context, and include task details."""
+        ret = nfclient.run_job(
+            "nornir",
+            "netconf_get",
+            workers="nornir-worker-1",
+            kwargs={
+                "plugin": plugin,
+                "FL": ["ceos-spine-1"],
+                "on_failed": True,
+                "filter_subtree": "nf://netconf/get_system.xml",
+                "add_details": True,
+            },
+        )
+        result = ret["nornir-worker-1"]
+        assert result["failed"] is False, result
+        assert set(result["result"]) == {"ceos-spine-1"}
+        operation = result["result"]["ceos-spine-1"]["get"]
+        assert operation["failed"] is False
+        assert "ceos-spine-1" in operation["result"]
+
+    @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
+    def test_list_result(self, nfclient: object, plugin: str) -> None:
+        ret = nfclient.run_job(
+            "nornir",
+            "netconf_get",
+            workers="nornir-worker-1",
+            kwargs={
+                "plugin": plugin,
+                "FL": ["ceos-spine-1"],
+                "on_failed": True,
+                "to_dict": False,
+                "add_details": True,
+            },
+        )
+        result = ret["nornir-worker-1"]
+        assert result["failed"] is False, result
+        assert isinstance(result["result"], list) and result["result"]
+        assert all(record["host"] == "ceos-spine-1" for record in result["result"])
+
+    @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
+    def test_invalid_xml_and_recovery(self, nfclient: object, plugin: str) -> None:
+        """A malformed filter fails without contaminating the next operation."""
+        kwargs = {"plugin": plugin, "FL": ["ceos-spine-1"], "on_failed": True}
+        ret = nfclient.run_job(
+            "nornir",
+            "netconf_get",
+            workers="nornir-worker-1",
+            kwargs={**kwargs, "filter_subtree": "<broken"},
+        )
+        assert ret["nornir-worker-1"]["failed"] is True
+        ret = nfclient.run_job(
+            "nornir",
+            "netconf_get",
+            workers="nornir-worker-1",
+            kwargs=kwargs,
+        )
+        result = ret["nornir-worker-1"]
+        assert result["failed"] is False, result
+        assert (
+            "ceos-spine-1"
+            in result["result"]["ceos-spine-1"]["rpc" if plugin == "scrapli" else "get"]
+        )
+
+    @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
+    @pytest.mark.parametrize(
+        "expression",
+        [
+            "/*[local-name()='system']/*[local-name()='config']/*[local-name()='hostname']",
+            "nf://netconf/get_hostname.xpath",
+        ],
+    )
+    def test_xpath(self, nfclient: object, plugin: str, expression: str) -> None:
+        """Check XPath replies or explicit failure on devices without support."""
+        capabilities = nfclient.run_job(
+            "nornir",
+            "netconf_get_capabilities",
+            workers="nornir-worker-1",
+            kwargs={
+                "plugin": plugin,
+                "FL": ["ceos-spine-1"],
+                "on_failed": True,
+            },
+        )["nornir-worker-1"]
+        assert capabilities["failed"] is False, capabilities
+        supports_xpath = (
+            "urn:ietf:params:netconf:capability:xpath:1.0"
+            in capabilities["result"]["ceos-spine-1"]["server_capabilities"]
+        )
+        ret = nfclient.run_job(
+            "nornir",
+            "netconf_get",
+            workers="nornir-worker-1",
+            kwargs={
+                "plugin": plugin,
+                "FL": ["ceos-spine-1"],
+                "on_failed": True,
+                "filter_xpath": expression,
+            },
+        )
+        result = ret["nornir-worker-1"]
+        if not supports_xpath:
+            assert result["failed"] is True, result
+            error = str(result["result"]).lower()
+            assert "xpath" in error or "filter" in error, result
+            return
+        assert result["failed"] is False, result
+        root = ElementTree.fromstring(result["result"]["ceos-spine-1"]["get"])
+        assert any(node.text == "ceos-spine-1" for node in root.iter())
+        assert not any(node.tag.split("}")[-1] == "interfaces" for node in root.iter())
+
+    @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
+    @pytest.mark.parametrize(
+        "getter",
+        [
+            "ietf_interfaces",
+            "openconfig_interfaces",
+            "openconfig_lldp",
+            "openconfig_bgp",
+            "openconfig_system",
+            "ietf_routing",
+            "ietf_hardware",
+        ],
+    )
+    def test_getters(self, nfclient: object, plugin: str, getter: str) -> None:
+        """The getter returns a non-empty result dictionary with either backend."""
+        result = nfclient.run_job(
+            "nornir",
+            "netconf_get",
+            workers="nornir-worker-1",
+            kwargs={
+                "plugin": plugin,
+                "FL": ["ceos-spine-1"],
+                "on_failed": True,
+                getter: True,
+            },
+        )["nornir-worker-1"]
+        assert result["failed"] is False, result
+        assert isinstance(result["result"], dict) and result["result"]
+
+
+class TestNetconfXmlProcessors:
+    @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
+    @pytest.mark.parametrize("task", ["netconf_get", "netconf_get_config"])
+    @pytest.mark.parametrize("processor", ["xmltodict", "xml_flake", "xpath"])
+    def test_xml_processors(
+        self, nfclient: object, plugin: str, task: str, processor: str
+    ) -> None:
+        """Process real NETCONF XML replies through the public task interface."""
+        options = {
+            "xmltodict": {"xmltodict": True},
+            "xml_flake": {"xml_flake": "*hostname*"},
+            "xpath": {"xpath": "//hostname"},
+        }
+        result = nfclient.run_job(
+            "nornir",
+            task,
+            workers="nornir-worker-1",
+            kwargs={
+                "plugin": plugin,
+                "FL": ["ceos-spine-1"],
+                "on_failed": True,
+                "filter_subtree": '<system xmlns="http://openconfig.net/yang/system"><config><hostname/></config></system>',
+                **options[processor],
+            },
+        )["nornir-worker-1"]
+        assert result["failed"] is False, result
+        value = result["result"]["ceos-spine-1"][task.removeprefix("netconf_")]
+        if processor == "xmltodict":
+            assert isinstance(value, dict) and value
+            assert "ceos-spine-1" in str(value)
+        elif processor == "xml_flake":
+            assert isinstance(value, dict) and value
+            assert all("hostname" in key for key in value)
+            assert "ceos-spine-1" in value.values()
+        else:
+            assert isinstance(value, str)
+            assert "<hostname" in value
+            assert ">ceos-spine-1</hostname>" in value
+
+    @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
+    def test_xpath_then_xmltodict(self, nfclient: object, plugin: str) -> None:
+        """Select one XML element before converting it to a dictionary."""
+        result = nfclient.run_job(
+            "nornir",
+            "netconf_get",
+            workers="nornir-worker-1",
+            kwargs={
+                "plugin": plugin,
+                "FL": ["ceos-spine-1"],
+                "on_failed": True,
+                "filter_subtree": '<system xmlns="http://openconfig.net/yang/system"><config><hostname/></config></system>',
+                "xpath": "(//hostname)[1]",
+                "xmltodict": True,
+            },
+        )["nornir-worker-1"]
+        assert result["failed"] is False, result
+        value = result["result"]["ceos-spine-1"]["get"]
+        assert isinstance(value, dict) and "hostname" in value
+        assert "ceos-spine-1" in str(value["hostname"])

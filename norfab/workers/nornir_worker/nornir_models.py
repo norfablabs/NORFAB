@@ -261,6 +261,12 @@ class NornirTextProcessorArgs(BaseModel, use_enum_values=True, populate_by_name=
 class NornirXmlProcessorArgs(BaseModel, use_enum_values=True, populate_by_name=True):
     """Processors for XML replies."""
 
+    xmltodict: StrictBool = Field(
+        False,
+        description="Convert XML replies to dictionaries with DataProcessor",
+        json_schema_extra={"presence": True},
+    )
+
     xpath: Union[None, StrictStr] = Field(
         None,
         description="XPath expression to run with DataProcessor",
@@ -1227,6 +1233,101 @@ class NetconfConfigTarget(str, Enum):
     candidate = "candidate"
 
 
+class NetconfGetInput(
+    NornirXmlProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    plugin: NetconfPlugin = Field(NetconfPlugin.ncclient, description="NETCONF backend")
+    ietf_interfaces: StrictBool = Field(
+        False,
+        alias="ietf-interfaces",
+        description="Retrieve the IETF interfaces subtree",
+        json_schema_extra={"presence": True},
+    )
+    openconfig_interfaces: StrictBool = Field(
+        False,
+        alias="openconfig-interfaces",
+        description="Retrieve the OpenConfig interfaces subtree",
+        json_schema_extra={"presence": True},
+    )
+    openconfig_lldp: StrictBool = Field(
+        False,
+        alias="openconfig-lldp",
+        description="Retrieve the OpenConfig LLDP subtree",
+        json_schema_extra={"presence": True},
+    )
+    openconfig_bgp: StrictBool = Field(
+        False,
+        alias="openconfig-bgp",
+        description="Retrieve the OpenConfig BGP across network instances subtree",
+        json_schema_extra={"presence": True},
+    )
+    openconfig_system: StrictBool = Field(
+        False,
+        alias="openconfig-system",
+        description="Retrieve the OpenConfig system subtree",
+        json_schema_extra={"presence": True},
+    )
+    ietf_routing: StrictBool = Field(
+        False,
+        alias="ietf-routing",
+        description="Retrieve the IETF routing subtree",
+        json_schema_extra={"presence": True},
+    )
+    ietf_hardware: StrictBool = Field(
+        False,
+        alias="ietf-hardware",
+        description="Retrieve the IETF hardware subtree",
+        json_schema_extra={"presence": True},
+    )
+    filter_subtree: Union[None, StrictStr] = Field(
+        None,
+        min_length=1,
+        description="XML subtree filter or template URL",
+        alias="filter-subtree",
+        examples=['<interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces"/>'],
+    )
+    filter_xpath: Union[None, StrictStr] = Field(
+        None,
+        min_length=1,
+        description="XPath filter or template URL",
+        alias="filter-xpath",
+        examples=["/*[local-name()='system']"],
+    )
+    job_data: Any = Field(
+        None,
+        description="Template data or YAML file URL",
+        alias="job-data",
+    )
+
+    @model_validator(mode="after")
+    def validate_filters(self) -> "NetconfGetInput":
+        """Allow at most one predefined getter or explicit filter."""
+        if (
+            sum(
+                (
+                    self.ietf_interfaces,
+                    self.openconfig_interfaces,
+                    self.openconfig_lldp,
+                    self.openconfig_bgp,
+                    self.openconfig_system,
+                    self.ietf_routing,
+                    self.ietf_hardware,
+                    self.filter_subtree is not None,
+                    self.filter_xpath is not None,
+                )
+            )
+            > 1
+        ):
+            raise ValueError(
+                "predefined getters, filter_subtree and filter_xpath are mutually exclusive"
+            )
+        return self
+
+
 class NetconfGetConfigInput(
     NornirXmlProcessorArgs,
     NornirCommonArgs,
@@ -1267,7 +1368,11 @@ class NetconfGetConfigInput(
 
 
 class NetconfEditConfigInput(
-    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
+    NornirXmlProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     plugin: NetconfPlugin = Field(NetconfPlugin.ncclient, description="NETCONF backend")
     config: StrictStr = Field(
@@ -1296,7 +1401,11 @@ class NetconfSchemaFormat(str, Enum):
 
 
 class NetconfGetSchemaInput(
-    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
+    NornirXmlProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     identifier: StrictStr = Field(..., min_length=1, description="YANG module name")
     version: Union[None, StrictStr] = Field(

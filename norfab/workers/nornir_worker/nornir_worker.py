@@ -547,6 +547,7 @@ class NornirWorker(
             diff (str, optional): Configuration for DiffProcessor.
             diff_last (int, optional): Number of last diffs to keep for DiffProcessor.
             dp (list, optional): Configuration for DataProcessor.
+            xmltodict (bool, optional): Convert XML replies to dictionaries using load_xml.
             xml_flake (str, optional): Pattern for xml_flake function in DataProcessor.
             match (str, optional): Pattern for match function in DataProcessor.
             before (int, optional): Number of lines before match in DataProcessor.
@@ -573,6 +574,7 @@ class NornirWorker(
         diff = kwargs.pop("diff", "")  # diff processor
         diff_last = kwargs.pop("diff_last", 1) if diff else None  # diff processor
         dp = kwargs.pop("dp", [])  # data processor
+        xmltodict = kwargs.pop("xmltodict", False)  # XML to dictionary
         xml_flake = kwargs.pop("xml_flake", "")  # data processor xml_flake function
         match = kwargs.pop("match", "")  # data processor match function
         before = kwargs.pop("before", 0)  # data processor match function
@@ -622,6 +624,8 @@ class NornirWorker(
                     [{"fun": "xpath", "expr": xpath, "recover": True, "rm_ns": True}]
                 )
             )
+        if xmltodict:
+            processors.append(DataProcessor([{"fun": "load_xml"}]))
         if jmespath:
             processors.append(DataProcessor([{"fun": "jmespath", "expr": jmespath}]))
         if match:

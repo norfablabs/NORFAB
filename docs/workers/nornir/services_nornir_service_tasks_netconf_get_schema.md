@@ -5,6 +5,10 @@ The device must implement NETCONF monitoring `get-schema`.
 
 ## Output
 
+Use [XML processors](services_nornir_service_tasks_netconf_processors.md) to convert replies to
+dictionaries (`xmltodict`), select XML elements (`xpath`), or extract flat
+values (`xml-flake`).
+
 Per-host XML replies contain the schema text. The operation key is `get_schema`
 for ncclient and `rpc` for Scrapli, which sends the standard RPC directly.
 Missing modules and unsupported operations mark hosts as failed.
@@ -93,6 +97,9 @@ root
             ├── identifier (R):    YANG module name
             ├── version:    Module revision
             ├── format:    Schema format, default 'NetconfSchemaFormat.yang'
+            ├── xmltodict:    Convert XML replies to dictionaries with DataProcessor, default 'False'
+            ├── xpath:    XPath expression to run with DataProcessor
+            ├── xml-flake:    XML flake pattern for DataProcessor
             └── plugin:    NETCONF backend, default 'NetconfPlugin.ncclient'
 nf#
 ```
