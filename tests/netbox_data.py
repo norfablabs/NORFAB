@@ -1022,6 +1022,23 @@ interfaces.append(
     }
 )
 
+# Persistent interfaces owned by TestSyncVlans; tests restore VLAN fields only.
+interfaces.extend(
+    [
+        {
+            "name": name,
+            "device": {"name": device},
+            "type": interface_type,
+            "description": "TEST_SYNC_VLANS",
+        }
+        for device, lag in [
+            ("fn-ceos-lf-1", "Port-Channel31"),
+            ("fn-ceos-lf-2", "Port-Channel32"),
+        ]
+        for name, interface_type in [(lag, "lag"), ("Ethernet5", "1000base-t")]
+    ]
+)
+
 # add FakeNOS interfaces used by VRRP synchronization tests
 vrrp_vrf_devices = ("fn-vrrp-vrf-1", "fn-vrrp-vrf-2")
 vrrp_interface_vrfs = {

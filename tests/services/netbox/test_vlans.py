@@ -1122,57 +1122,44 @@ class TestSyncVlans:
         assert self.group_1 is not None
         assert self.group_2 is not None
         self._delete_test_vlans()
-        # VLAN sync now assigns existing interfaces. Supply the live LAGs and
-        # restore memberships after each test so interface tests remain isolated.
-        created_interfaces = []
+        # Only snapshot VLAN-owned baseline interfaces, never another suite's
+        # temporary interfaces on these shared devices.
         original_interfaces = []
         for device_name, lag_name in (
             (self.DEVICE_1, "Port-Channel31"),
             (self.DEVICE_2, "Port-Channel32"),
         ):
-            device = self.nb.dcim.devices.get(name=device_name)
-            interfaces = list(self.nb.dcim.interfaces.filter(device_id=device.id))
-            original_interfaces.extend(
-                {
-                    "id": interface.id,
-                    "mode": interface.mode.value if interface.mode else "",
-                    "tagged_vlans": [vlan.id for vlan in interface.tagged_vlans],
-                    "untagged_vlan": (
-                        interface.untagged_vlan.id if interface.untagged_vlan else None
-                    ),
-                }
-                for interface in interfaces
-            )
-            for name, interface_type in (
-                (lag_name, "lag"),
-                ("Ethernet5", "1000base-t"),
-            ):
-                interface = next(
-                    (item for item in interfaces if item.name == name), None
+            for name in (lag_name, "Ethernet5"):
+                interface = self.nb.dcim.interfaces.get(device=device_name, name=name)
+                assert interface is not None, (
+                    f"seeded NetBox interface '{device_name}:{name}' is missing; "
+                    "populate the baseline with tests/netbox_data.py"
                 )
-                if interface is None:
-                    interface = self.nb.dcim.interfaces.create(
-                        device=device.id, name=name, type=interface_type
-                    )
-                    created_interfaces.append(interface)
-                else:
-                    self.nb.dcim.interfaces.update(
-                        [
-                            {
-                                "id": interface.id,
-                                "tagged_vlans": [],
-                                "untagged_vlan": None,
-                            }
-                        ]
-                    )
+                original_interfaces.append(
+                    {
+                        "id": interface.id,
+                        "mode": interface.mode.value if interface.mode else "",
+                        "tagged_vlans": [vlan.id for vlan in interface.tagged_vlans],
+                        "untagged_vlan": (
+                            interface.untagged_vlan.id
+                            if interface.untagged_vlan
+                            else None
+                        ),
+                    }
+                )
         try:
+            self.nb.dcim.interfaces.update(
+                [
+                    {"id": interface["id"], "tagged_vlans": [], "untagged_vlan": None}
+                    for interface in original_interfaces
+                ]
+            )
             yield
         finally:
-            self._delete_test_vlans()
-            if original_interfaces:
+            try:
                 self.nb.dcim.interfaces.update(original_interfaces)
-            for interface in reversed(created_interfaces):
-                interface.delete()
+            finally:
+                self._delete_test_vlans()
 
     def _delete_test_vlans(self) -> None:
         for vid in self.TEST_VIDS:

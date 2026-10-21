@@ -461,6 +461,15 @@
     },
     "test_vlans.py::TestSyncVlans": {
       "mode": "main_mutating",
+      "interfaces": [
+        "fn-ceos-lf-1:Port-Channel31",
+        "fn-ceos-lf-1:Ethernet5",
+        "fn-ceos-lf-2:Port-Channel32",
+        "fn-ceos-lf-2:Ethernet5"
+      ],
+      "persistent_seed": "tests/netbox_data.py defines these four interfaces with description TEST_SYNC_VLANS; populate them before running this class.",
+      "ownership": "Only this class mutates VLAN mode and memberships on these interfaces. Devices are shared; all other interfaces are outside this class's ownership.",
+      "cleanup": "Snapshot and restore mode, tagged_vlans and untagged_vlan only on the four listed interfaces. Always attempt owned VLAN cleanup even if restoration fails. Never create or delete interfaces in the fixture; preserve the seeded interfaces and devices.",
       "devices": [
         "fn-ceos-lf-1",
         "fn-ceos-lf-2"
