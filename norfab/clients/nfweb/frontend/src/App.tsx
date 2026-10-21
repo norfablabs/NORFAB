@@ -10,18 +10,21 @@ import {
 import {
   ActionIcon,
   Alert,
-  Avatar,
+  Burger,
   Badge,
   Group,
   Loader,
   ScrollArea,
   Stack,
   Text,
+  TextInput,
   Tooltip,
 } from "@mantine/core";
 import {
   IconAlertCircle,
   IconHelpHexagon,
+  IconSearch,
+  IconX,
 } from "@tabler/icons-react";
 import { api, openTopologyStream } from "./api";
 import AppFooter from "./components/AppFooter";
@@ -124,7 +127,6 @@ export default function App() {
     links: TopologyLink[];
   }>({ nodes: [], links: [] });
   const graphStageRef = useRef<HTMLElement | null>(null);
-  const hasFramedGraph = useRef(false);
   const positions = useRef(new Map<string, NodeCoordinates>());
   const newestSnapshot = useRef<TopologySnapshot | null>(null);
   const [snapshot, setSnapshot] = useState<TopologySnapshot | null>(null);
@@ -154,7 +156,8 @@ export default function App() {
   const [layoutRunning, setLayoutRunning] = useState(true);
   const [visualizationPaused, setVisualizationPaused] = useState(false);
   const [rotationEnabled, setRotationEnabled] = useState(false);
-  const [bloomEnabled, setBloomEnabled] = useState(true);
+  const [bloomEnabled, setBloomEnabled] = useState(false);
+  const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
   const [rotationSpeed, setRotationSpeed] = useState(1);
   const [nodeDistance, setNodeDistance] = useState(85);
   const [nodeSizeMode, setNodeSizeMode] = useState<NodeSizeMode>("fixed");
@@ -179,19 +182,16 @@ export default function App() {
   }, [live]);
 
   useEffect(() => {
-    const selectView = () =>
+    const selectView = () => {
       setActiveView(
         window.location.hash === "#monitoring" ? "monitoring" : "topology",
       );
+      setMobileNavigationOpen(false);
+    };
     window.addEventListener("hashchange", selectView);
     return () => window.removeEventListener("hashchange", selectView);
   }, []);
 
-  useEffect(() => {
-    const graph = graphRef.current;
-    graph?.d3Force("charge")?.strength(-220);
-    graph?.d3Force("link")?.distance(nodeDistance);
-  }, [nodeDistance, snapshot?.snapshot_id]);
 
   useEffect(() => {
     const controls = graphRef.current?.controls() as
@@ -213,6 +213,10 @@ export default function App() {
     });
     observer.observe(stage);
     return () => observer.disconnect();
+  }, [activeView]);
+
+  useEffect(() => {
+    document.title = `NORFAB NFWeb - ${activeView === "monitoring" ? "Monitoring" : "Topology"}`;
   }, [activeView]);
 
   const rememberNodePositions = useCallback(() => {
@@ -297,7 +301,11 @@ export default function App() {
         if (!cancelled) appendCollectionLog(entries);
       })
       .catch((reason: Error) => setError(reason.message));
-    const closeStream = openTopologyStream(acceptLiveSnapshot, setConnection);
+    const closeStream = openTopologyStream(
+      acceptLiveSnapshot,
+      setConnection,
+      (entry) => appendCollectionLog([entry]),
+    );
     return () => {
       cancelled = true;
       closeStream();
@@ -448,36 +456,6 @@ export default function App() {
     renderedGraphData.current = graphData;
   }, [graphData]);
 
-  useEffect(() => {
-    const linkForce = graphRef.current?.d3Force("link") as
-      | {
-          strength: (
-            accessor: (link: RenderedTopologyLink) => number,
-          ) => unknown;
-        }
-      | undefined;
-    if (!linkForce) return;
-    const degrees = new Map<string, number>();
-    graphData.links.forEach((link) => {
-      if (link.visualOnly) return;
-      [endpointId(link.source), endpointId(link.target)].forEach((nodeId) =>
-        degrees.set(nodeId, (degrees.get(nodeId) ?? 0) + 1),
-      );
-    });
-    linkForce.strength((link) => {
-      if (link.visualOnly) return 0;
-      return (
-        1 /
-        Math.max(
-          1,
-          Math.min(
-            degrees.get(endpointId(link.source)) ?? 1,
-            degrees.get(endpointId(link.target)) ?? 1,
-          ),
-        )
-      );
-    });
-  }, [graphData]);
 
   const relatedConnections = useMemo(() => {
     if (!snapshot || !selected) return [];
@@ -501,14 +479,6 @@ export default function App() {
     );
   }, [snapshot, selected]);
 
-  useEffect(() => {
-    if (hasFramedGraph.current || graphData.nodes.length === 0) return;
-    const timer = window.setTimeout(() => {
-      graphRef.current?.zoomToFit(700, 160);
-      hasFramedGraph.current = true;
-    }, 900);
-    return () => window.clearTimeout(timer);
-  }, [graphData.nodes.length]);
 
   const selectHistory = async (snapshotId: string) => {
     if (!snapshotId) return;
@@ -546,6 +516,7 @@ export default function App() {
   const applyDeviceSelection = async () => {
     if (applyingDevices) return;
     setApplyingDevices(true);
+    setCollectionLog([]);
     setError(null);
     setLive(true);
     liveRef.current = true;
@@ -554,8 +525,6 @@ export default function App() {
       const result = await api.selectDevices(draftDevices);
       setSelectedDevices(result.selected);
       setHistory([]);
-      setCollectionLog([]);
-      hasFramedGraph.current = false;
       if (result.snapshot) {
         acceptLiveSnapshot(result.snapshot);
       } else {
@@ -642,6 +611,9 @@ export default function App() {
     setSelected(item);
   };
 
+  const normalizedSearch = search.trim();
+  const searchIsApplied =
+    Boolean(activeSearch) && normalizedSearch.toLowerCase() === activeSearch.toLowerCase();
   const streamLabel = !live
     ? "Historical"
     : connection === "connected"
@@ -659,14 +631,21 @@ export default function App() {
 
   return (
     <main
-      className={`app-shell${activeView === "monitoring" ? " monitoring-shell" : ""}`}
+      className={`app-shell${activeView === "monitoring" ? " monitoring-shell" : ""}${mobileNavigationOpen ? " navigation-open" : ""}`}
       id={activeView}
     >
       <header className="topbar">
         <Group className="brand" gap="sm" wrap="nowrap">
-          <Avatar color="fabric" radius="sm">
-            N
-          </Avatar>
+          <Burger
+            className="mobile-navigation-toggle"
+            opened={mobileNavigationOpen}
+            onClick={() => setMobileNavigationOpen((open) => !open)}
+            aria-label="Toggle applications"
+            aria-controls="application-navigation"
+            aria-expanded={mobileNavigationOpen}
+            size="sm"
+          />
+          <img className="brand-logo" src="/norfab.jpg" alt="" width={56} height={40} />
           <div>
             <Text fw={800} size="sm">
               NORFAB
@@ -677,70 +656,111 @@ export default function App() {
           </div>
         </Group>
         {activeView === "topology" ? (
-          <ScrollArea
-            className="topbar-title toolbar-scroll"
-            offsetScrollbars="present"
-            scrollbarSize={5}
-            scrollbars="x"
-            type="auto"
-            viewportProps={{
-              "aria-label": "Topology toolbar",
-              role: "region",
-            }}
-          >
-            <TopologyToolbar
-            deviceOptions={deviceOptions}
-            selectedDevices={selectedDevices}
-            draftDevices={draftDevices}
-            discoveringDevices={discoveringDevices}
-            applyingDevices={applyingDevices}
-            onDraftDevices={setDraftDevices}
-            onApplyDevices={applyDeviceSelection}
-            search={search}
-            onSearch={setSearch}
-            activeSearch={activeSearch}
-            onApplySearch={setActiveSearch}
-            topologySources={[...topologySources]}
-            onTopologySources={(sources) =>
-              setTopologySources(
-                new Set(sources as Array<TopologyOrigin | "circuits">),
-              )
-            }
-            protocols={[...protocols]}
-            onProtocols={(values) => setProtocols(new Set(values))}
-            statsMode={statsMode}
-            onStatsMode={setStatsMode}
-            health={health}
-            onHealth={setHealth}
-            hasGraph={graphData.nodes.length > 0}
-            visualizationPaused={visualizationPaused}
-            layoutRunning={layoutRunning}
-            rotationEnabled={rotationEnabled}
-            bloomEnabled={bloomEnabled}
-            rotationSpeed={rotationSpeed}
-            nodeDistance={nodeDistance}
-            nodeSizeMode={nodeSizeMode}
-            onToggleVisualization={toggleVisualization}
-            onToggleLayout={() =>
-              layoutRunning ? pauseLayout() : startLayout()
-            }
-            onToggleRotation={toggleRotation}
-            onToggleBloom={() => setBloomEnabled((enabled) => !enabled)}
-            onRotationSpeed={setRotationSpeed}
-            onNodeDistance={changeNodeDistance}
-            onNodeSizeMode={setNodeSizeMode}
-            refreshing={refreshing}
-            canRefresh={selectedDevices.length > 0}
-            onRefresh={refreshTopology}
-            streamLabel={streamLabel}
-            streamColor={streamColor}
-            live={live}
-            history={history}
-            snapshotId={snapshot?.snapshot_id}
-            onSelectHistory={selectHistory}
-            onLive={returnToLive}
+          <div className="topbar-title topology-header">
+            <ScrollArea
+              className="toolbar-scroll"
+              offsetScrollbars="present"
+              scrollbarSize={5}
+              scrollbars="x"
+              type="auto"
+              viewportProps={{
+                "aria-label": "Topology toolbar",
+                role: "region",
+              }}
+            >
+              <TopologyToolbar
+                deviceOptions={deviceOptions}
+                selectedDevices={selectedDevices}
+                draftDevices={draftDevices}
+                discoveringDevices={discoveringDevices}
+                applyingDevices={applyingDevices}
+                onDraftDevices={setDraftDevices}
+                onApplyDevices={applyDeviceSelection}
+                topologySources={[...topologySources]}
+                onTopologySources={(sources) =>
+                  setTopologySources(
+                    new Set(sources as Array<TopologyOrigin | "circuits">),
+                  )
+                }
+                protocols={[...protocols]}
+                onProtocols={(values) => setProtocols(new Set(values))}
+                statsMode={statsMode}
+                onStatsMode={setStatsMode}
+                health={health}
+                onHealth={setHealth}
+                hasGraph={graphData.nodes.length > 0}
+                visualizationPaused={visualizationPaused}
+                layoutRunning={layoutRunning}
+                rotationEnabled={rotationEnabled}
+                bloomEnabled={bloomEnabled}
+                rotationSpeed={rotationSpeed}
+                nodeDistance={nodeDistance}
+                nodeSizeMode={nodeSizeMode}
+                onToggleVisualization={toggleVisualization}
+                onToggleLayout={() =>
+                  layoutRunning ? pauseLayout() : startLayout()
+                }
+                onToggleRotation={toggleRotation}
+                onToggleBloom={() => setBloomEnabled((enabled) => !enabled)}
+                onRotationSpeed={setRotationSpeed}
+                onNodeDistance={changeNodeDistance}
+                onNodeSizeMode={setNodeSizeMode}
+                refreshing={refreshing}
+                canRefresh={selectedDevices.length > 0}
+                onRefresh={refreshTopology}
+                streamLabel={streamLabel}
+                streamColor={streamColor}
+                live={live}
+                history={history}
+                snapshotId={snapshot?.snapshot_id}
+                onSelectHistory={selectHistory}
+                onLive={returnToLive}
+              />
+            </ScrollArea>
+            <TextInput
+              className="toolbar-control toolbar-control--search"
+              aria-label="Find infrastructure"
+              value={search}
+              onChange={(event) => setSearch(event.currentTarget.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") setActiveSearch(normalizedSearch);
+              }}
+              placeholder="Find infrastructure…"
+              leftSectionPointerEvents="all"
+              leftSection={
+                <Tooltip label={searchIsApplied ? "Disable search highlight" : "Apply search highlight"}>
+                  <ActionIcon
+                    aria-label={searchIsApplied ? "Disable topology search" : "Apply topology search"}
+                    color={searchIsApplied ? "orange" : "gray"}
+                    disabled={!searchIsApplied && !normalizedSearch}
+                    onClick={() => setActiveSearch(searchIsApplied ? "" : normalizedSearch)}
+                    size="sm"
+                    variant={searchIsApplied ? "light" : "subtle"}
+                  >
+                    <IconSearch size={14} />
+                  </ActionIcon>
+                </Tooltip>
+              }
+              rightSection={
+                search || activeSearch ? (
+                  <ActionIcon
+                    variant="subtle"
+                    color="gray"
+                    size="sm"
+                    aria-label="Clear search"
+                    onClick={() => {
+                      setSearch("");
+                      setActiveSearch("");
+                    }}
+                  >
+                    <IconX size={13} />
+                  </ActionIcon>
+                ) : undefined
+              }
+              size="xs"
             />
-          </ScrollArea>
+
+          </div>
         ) : (
           <Group className="monitoring-topbar-title" gap="sm">
             <Text fw={700} size="sm">
@@ -883,16 +903,14 @@ export default function App() {
               width={graphSize.width}
               height={graphSize.height}
               graphData={graphData}
+              nodeDistance={nodeDistance}
+              fitScope={snapshot?.devices.join("\0") ?? ""}
               rememberNodePositions={rememberNodePositions}
               selectGraphItem={selectGraphItem}
               onEngineStop={() => {
                 const data = renderedGraphData.current;
                 rememberNodePositions();
                 if (data.nodes.length) setLayoutRunning(false);
-                if (!hasFramedGraph.current && data.nodes.length) {
-                  graphRef.current?.zoomToFit(700, 160);
-                  hasFramedGraph.current = true;
-                }
               }}
               bloomEnabled={bloomEnabled}
             />

@@ -83,6 +83,7 @@ function openSnapshotStream<T>(
   path: string,
   onSnapshot: (snapshot: T) => void,
   onState: (state: StreamState) => void,
+  onLog?: (entry: TopologyLogEntry) => void,
 ): () => void {
   let socket: WebSocket | null = null;
   let stopped = false;
@@ -105,11 +106,11 @@ function openSnapshotStream<T>(
       if (stopped) return;
       if (typeof event.data !== "string") return;
       try {
-        const message = JSON.parse(event.data) as {
-          type: string;
-          data?: T;
-        };
+        const message = JSON.parse(event.data) as
+          | { type: "snapshot"; data?: T }
+          | { type: "log"; data?: TopologyLogEntry };
         if (message.type === "snapshot" && message.data) onSnapshot(message.data);
+        if (message.type === "log" && message.data) onLog?.(message.data);
       } catch {
         // Ignore malformed frames and keep the live stream connected.
       }
@@ -144,6 +145,7 @@ export function openMonitoringStream(
 export function openTopologyStream(
   onSnapshot: (snapshot: TopologySnapshot) => void,
   onState: (state: StreamState) => void,
+  onLog?: (entry: TopologyLogEntry) => void,
 ): () => void {
-  return openSnapshotStream("/api/v1/topology/stream", onSnapshot, onState);
+  return openSnapshotStream("/api/v1/topology/stream", onSnapshot, onState, onLog);
 }

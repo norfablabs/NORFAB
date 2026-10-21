@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { TopologyLink, TopologyNode } from "./types";
 import {
+  attractNodesToCenter,
   addParallelCurves,
   addTrafficLanes,
   directionalTraffic,
@@ -31,6 +32,17 @@ function link(
 }
 
 describe("topology graph helpers", () => {
+  it("gently pulls disconnected nodes toward the center in all three dimensions", () => {
+    const nodes = [
+      { id: "a", label: "A", health: "healthy" as const, layers: [], origin: [], attributes: {}, x: 1000, y: -500, z: 250, vx: 1, vy: 2, vz: 3 },
+      { id: "b", label: "B", health: "healthy" as const, layers: [], origin: [], attributes: {} },
+    ];
+    attractNodesToCenter(nodes, 0.5);
+    expect(nodes[0]).toMatchObject({ vx: -19, vy: 12, vz: -2 });
+    expect(nodes[1]).toMatchObject({ vx: 0, vy: 0, vz: 0 });
+    expect(nodes[0].x).toBe(1000);
+  });
+
   it("uses the node-state colors shown by the health selector", () => {
     expect(HEALTH_COLORS).toEqual({
       healthy: "#22c55e",

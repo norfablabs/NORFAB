@@ -5,6 +5,15 @@
 1. Added Nornir `netconf_get` and NFCLI `netconf get` to retrieve configuration and operational state using ncclient or Scrapli, with per-host rendered subtree or XPath filters, IETF interfaces, routing, and hardware getters plus OpenConfig interfaces, LLDP, BGP, and system getters, XML processors, FastAPI, and MCP support.
 2. Added NETCONF `xmltodict` processing through Python and NFCLI, with XML processor options for configuration edits and schema retrieval and a dedicated XML processor guide.
 
+## ENHANCEMENTS
+
+1. Nornir `parse` with TTP now compiles the template once per job and copies the parser per host, preserving host isolation. Local parsing benchmarks improved by 37–63%; this measures parsing time, not total device collection time.
+2. Refined NFWeb's existing layout with NORFAB branding, consistent neutral colors and controls, mobile application navigation, and improved chart sizing. Removed unused navigation placeholders and reduced Monitoring's bundled chart imports.
+3. NFWeb Topology now streams collection events while jobs run, avoids duplicate events, reports layer collection timings, and preserves the log scroll position when reading earlier events. Each record occupies one horizontally scrollable line containing timestamp, worker, status, and message, with red errors and yellow warnings.
+4. Moved topology search beside the selected-item inspector, brought disconnected node groups closer together, and fitted nodes and labels into the initial viewport while layout settles. Automatic fitting stops when the user navigates the graph. Retained the original dark graph background for optional bloom.
+5. NFWeb Monitoring now refreshes worker job counts alongside runtime statistics.
+6. Updated scale-environment FakeNOS IOS XR profiles for the BGP commands used by current TTP templates, including VRF-neighbor queries and neighbor-group membership. Restart the FakeNOS worker to reload changed profiles.
+
 # 0.24.16
 
 ## BUGS

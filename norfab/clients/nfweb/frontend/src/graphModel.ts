@@ -57,6 +57,14 @@ export type RenderedTopologyLink = TopologyLink & {
 export type GraphData = { nodes: GraphNode[]; links: RenderedTopologyLink[] };
 export type GraphHandle = ForceGraphMethods<GraphNode, RenderedTopologyLink>;
 
+export function attractNodesToCenter(nodes: GraphNode[], alpha: number): void {
+  for (const node of nodes) {
+    node.vx = (node.vx ?? 0) - (node.x ?? 0) * alpha * 0.04;
+    node.vy = (node.vy ?? 0) - (node.y ?? 0) * alpha * 0.04;
+    node.vz = (node.vz ?? 0) - (node.z ?? 0) * alpha * 0.04;
+  }
+}
+
 export function endpointId(value: string | TopologyNode): string {
   return typeof value === "string" ? value : value.id;
 }

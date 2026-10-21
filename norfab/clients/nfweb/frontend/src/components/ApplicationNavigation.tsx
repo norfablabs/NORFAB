@@ -1,14 +1,11 @@
 import { NavLink, ScrollArea, Stack, Text } from "@mantine/core";
 import {
-  IconGauge,
   IconHeartbeat,
   IconLayoutDashboard,
-  IconSettings,
   IconTopologyStar3,
 } from "@tabler/icons-react";
 
 const NAVIGATION = [
-  { id: "overview", label: "Overview", icon: IconGauge, items: [] },
   {
     id: "dashboards",
     label: "Dashboards",
@@ -28,7 +25,6 @@ const NAVIGATION = [
       },
     ],
   },
-  { id: "admin", label: "Admin", icon: IconSettings, items: [] },
 ] as const;
 
 export type NavigationSection = (typeof NAVIGATION)[number]["id"];
@@ -46,7 +42,7 @@ export default function ApplicationNavigation({
   onToggle,
 }: ApplicationNavigationProps) {
   return (
-    <aside className="control-panel" aria-label="NFWeb applications">
+    <aside id="application-navigation" className="control-panel" aria-label="NFWeb applications">
       <ScrollArea h="100%" type="auto" scrollbarSize={6}>
         <Text className="navigation-heading" fw={600} size="sm" mb="sm" px="sm">
           Applications
@@ -54,7 +50,6 @@ export default function ApplicationNavigation({
         <Stack className="sidebar-navigation" gap={4}>
           {NAVIGATION.map((section) => {
             const SectionIcon = section.icon;
-            const hasChildren = section.items.length > 0;
             return (
               <NavLink
                 className="navigation-link"
@@ -62,13 +57,8 @@ export default function ApplicationNavigation({
                 key={section.id}
                 label={section.label}
                 leftSection={<SectionIcon size={18} />}
-                opened={hasChildren ? open === section.id : undefined}
-                disabled={!hasChildren}
-                onChange={
-                  hasChildren
-                    ? (opened) => onToggle(opened ? section.id : null)
-                    : undefined
-                }
+                opened={open === section.id}
+                onChange={(opened) => onToggle(opened ? section.id : null)}
                 variant="light"
               >
                 {section.items.map((item) => {

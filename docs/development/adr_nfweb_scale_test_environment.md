@@ -99,7 +99,7 @@ platform-native commands selected by the `ttp_templates` getters:
 | Platform | LLDP | BGP | Interfaces |
 | --- | --- | --- | --- |
 | Arista EOS | `show lldp neighbors detail \| json` | `show ip bgp neighbors vrf all \| json` | `show interfaces` |
-| Cisco IOS XR | `show lldp neighbors detail` | `show bgp neighbors` | `show interfaces` |
+| Cisco IOS XR | `show lldp neighbors detail` | `show bgp neighbors`, `show bgp vrf all neighbors`, `show run formal router bgp \| inc neighbor` | `show interfaces` |
 | Juniper Junos | `show lldp neighbors detail \| display json` | `show bgp neighbor \| display json` | `show interfaces` |
 
 Synthetic outputs follow the platform fixture shapes published by the

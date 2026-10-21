@@ -1,4 +1,10 @@
-import { expect, test, type Page, type Route } from "@playwright/test";
+import { expect, test, type Page, type Route, type WebSocketRoute } from "@playwright/test";
+import type { Mesh, Object3D, PerspectiveCamera, Scene, WebGLRenderer } from "three";
+
+type GraphTestWindow = Window & {
+  __THREE_DEVTOOLS__?: EventTarget;
+  graphFrame?: { scene: Scene; camera: PerspectiveCamera };
+};
 
 const snapshot = {
   snapshot_id: "e2e-snapshot",
@@ -231,6 +237,74 @@ test("renders the topology shell, header history, and configured footer", async 
   expect(details!.y).toBeCloseTo(0, 0);
   expect(details!.height).toBeGreaterThan(graph!.height);
   expect(history!.y).toBeLessThan(graph!.y);
+  const search = await page.getByRole("textbox", { name: "Find infrastructure" }).boundingBox();
+  expect(search).not.toBeNull();
+  expect(search!.x).toBeGreaterThan(graph!.x + graph!.width / 2);
+  expect(search!.x + search!.width).toBeLessThanOrEqual(details!.x);
+  const refresh = await page.getByRole("button", { name: "Refresh topology" }).boundingBox();
+  const inspectorHeader = await page.locator(".detail-header").boundingBox();
+  expect(search!.y).toBeCloseTo(refresh!.y, 0);
+  expect(inspectorHeader!.y + inspectorHeader!.height).toBeCloseTo(graph!.y, 0);
+});
+
+test("keeps collection entries on one horizontally scrollable line with severity colors", async ({ page }) => {
+  await page.routeWebSocket("**/api/v1/topology/stream", (socket) => {
+    socket.send(JSON.stringify({ type: "snapshot", data: snapshot }));
+    for (const severity of ["INFO", "WARNING", "ERROR"]) {
+      socket.send(JSON.stringify({ type: "log", data: {
+        id: `format-${severity}`, snapshot_id: snapshot.snapshot_id,
+        collected_at: snapshot.collected_at, timestamp: snapshot.collected_at,
+        kind: "event", service: "nornir", worker: "nornir-worker-1",
+        severity, status: "running", message: `${severity} collection output with enough detail to wrap inside the inspector`,
+      } }));
+    }
+  });
+  await page.reload();
+  for (const [severity, color] of [["INFO", "rgb(185, 196, 209)"], ["WARNING", "rgb(255, 212, 59)"], ["ERROR", "rgb(255, 135, 135)"]]) {
+    const row = page.locator(".terminal-line").filter({ hasText: `${severity} collection output` });
+    await expect(row.locator(".terminal-message")).toHaveCSS("color", color);
+    if (severity !== "INFO") await expect(row.locator("time")).toHaveCSS("color", color);
+    const time = await row.locator("time").boundingBox();
+    const worker = await row.locator(".terminal-worker").boundingBox();
+    expect(worker!.y).toBeCloseTo(time!.y, 0);
+    const message = await row.locator(".terminal-message").boundingBox();
+    expect(message!.y).toBeCloseTo(time!.y, 0);
+  }
+  expect(await page.locator(".terminal-log").evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
+});
+
+test("shows collection progress before selection completes without duplicating the final log", async ({ page }) => {
+  let stream!: WebSocketRoute;
+  await page.routeWebSocket("**/api/v1/topology/stream", (socket) => {
+    stream = socket;
+    socket.send(JSON.stringify({ type: "snapshot", data: snapshot }));
+  });
+  await page.reload();
+  await expect(page.getByText("2 nodes / 1 link", { exact: true })).toBeVisible();
+  const event = {
+    service: "nornir", task: "parse_ttp", severity: "INFO", status: "running",
+    message: "collecting output from leaf-01", timestamp: snapshot.collected_at,
+  };
+  const completed = { ...snapshot, snapshot_id: "progress-snapshot", events: [event] };
+  let release!: () => void;
+  const pending = new Promise<void>((resolve) => { release = resolve; });
+  await page.route("**/api/v1/topology/selection", async (route) => {
+    stream.send(JSON.stringify({ type: "log", data: {
+      ...event, id: "progress-snapshot:event:0", snapshot_id: "progress-snapshot",
+      collected_at: snapshot.collected_at, kind: "event",
+    } }));
+    await pending;
+    stream.send(JSON.stringify({ type: "snapshot", data: completed }));
+    await route.fulfill({ json: { selected: snapshot.devices, snapshot: completed } });
+  });
+  await page.getByRole("button", { name: "Select topology devices" }).click();
+  await page.getByRole("menuitem", { name: "Apply device scope" }).click();
+  const line = page.locator(".terminal-line").filter({ hasText: event.message });
+  await expect(line).toHaveCount(1);
+  await expect(page.getByRole("menuitem", { name: "Apply device scope" })).toContainText("Collecting");
+  release();
+  await expect(page.getByRole("menuitem", { name: "Apply device scope" })).toBeHidden();
+  await expect(line).toHaveCount(1);
 });
 
 test("uses working Mantine toolbar controls", async ({ page }) => {
@@ -277,11 +351,32 @@ test("uses working Mantine toolbar controls", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Pause rendering" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Freeze layout" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Enable rotation" })).toBeVisible();
-  const bloomToggle = page.getByRole("button", { name: "Disable bloom" });
+  const bloomToggle = page.getByRole("button", { name: "Enable bloom" });
   await expect(bloomToggle).toBeVisible();
   await bloomToggle.click();
-  await expect(page.getByRole("button", { name: "Enable bloom" })).toBeVisible();
-  await page.getByRole("button", { name: "Enable bloom" }).click();
+  await expect(page.getByRole("button", { name: "Disable bloom" })).toBeVisible();
+  await page.evaluate(() => new Promise<void>((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+  }));
+  const bloomImage = await page.locator(".graph-stage canvas").screenshot();
+  const darkFraction = await page.evaluate(async (encoded) => {
+    const image = new Image();
+    image.src = `data:image/png;base64,${encoded}`;
+    await image.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext("2d")!;
+    context.drawImage(image, 0, 0);
+    const { data } = context.getImageData(0, 0, canvas.width, canvas.height);
+    let dark = 0;
+    for (let index = 0; index < data.length; index += 4) {
+      if (Math.max(data[index], data[index + 1], data[index + 2]) < 40) dark++;
+    }
+    return dark / (canvas.width * canvas.height);
+  }, bloomImage.toString("base64"));
+  expect(darkFraction).toBeGreaterThan(0.75);
+  await page.getByRole("button", { name: "Disable bloom" }).click();
   const rotationSpeed = page.getByRole("button", {
     name: "Select rotation speed, current 1x",
   });
@@ -436,4 +531,86 @@ test("selects a topology snapshot from the history dropdown", async ({ page }) =
 
   await expect(page.getByText("1 node / 0 links", { exact: true })).toBeVisible();
   await expect(page.getByText("Historical", { exact: true })).toBeVisible();
+});
+
+
+test("frames disconnected groups and isolated nodes while preserving user zoom", async ({ page }) => {
+  test.setTimeout(60_000);
+  // Observe Three.js through its devtools hook without exposing application state.
+  await page.addInitScript(() => {
+    const target = window as GraphTestWindow;
+    target.__THREE_DEVTOOLS__ = new EventTarget();
+    target.__THREE_DEVTOOLS__.addEventListener("observe", (event) => {
+      const renderer = (event as CustomEvent).detail as WebGLRenderer & { isWebGLRenderer?: boolean };
+      if (!renderer.isWebGLRenderer) return;
+      const render = renderer.render;
+      renderer.render = (scene, camera) => {
+        if (camera.type === "PerspectiveCamera") {
+          target.graphFrame = { scene: scene as Scene, camera: camera as PerspectiveCamera };
+        }
+        render.call(renderer, scene, camera);
+      };
+    });
+  });
+  const nodes = Array.from({ length: 36 }, (_, index) => ({
+    ...snapshot.nodes[0], id: `group-node-${index}`, label: `node-${index}`,
+  }));
+  const links = Array.from({ length: 24 }, (_, index) => {
+    const group = Math.floor(index / 3) * 4;
+    const member = index % 3;
+    return { ...snapshot.links[0], id: `group-link-${index}`,
+      source: nodes[group + member].id, target: nodes[group + member + 1].id };
+  });
+  await page.routeWebSocket("**/api/v1/topology/stream", (socket) => {
+    socket.send(JSON.stringify({ type: "snapshot", data: { ...snapshot, nodes, links } }));
+  });
+  for (const [width, height] of [[1440, 900], [1024, 768], [390, 844]]) {
+    await page.setViewportSize({ width, height });
+    await page.reload();
+    await expect(page.getByText("36 nodes / 24 links", { exact: true })).toBeVisible();
+    const visibleNodes = () => page.evaluate(() => {
+      const frame = (window as GraphTestWindow).graphFrame;
+      if (!frame) return { count: 0, outside: ["not ready"] };
+      const outside: string[] = [];
+      let count = 0;
+      frame.scene.traverse((object: Object3D & { __graphObjType?: string; __data?: { id: string } }) => {
+        if (object.__graphObjType !== "node") return;
+        count++;
+        const position = object.getWorldPosition(object.position.clone()).project(frame.camera);
+        if (Math.abs(position.x) > 0.98 || Math.abs(position.y) > 0.98 || Math.abs(position.z) > 1) {
+          outside.push(object.__data?.id ?? "unknown");
+        }
+        // Check sphere/label bounds as well as node centers.
+        object.traverse((child) => {
+          const geometry = (child as Mesh).geometry;
+          if (!geometry) return;
+          geometry.computeBoundingBox();
+          const box = geometry.boundingBox!;
+          for (const x of [box.min.x, box.max.x]) {
+            for (const y of [box.min.y, box.max.y]) {
+              for (const z of [box.min.z, box.max.z]) {
+                const point = child.position.clone().set(x, y, z).applyMatrix4(child.matrixWorld).project(frame.camera);
+                if (Math.abs(point.x) > 1 || Math.abs(point.y) > 1 || Math.abs(point.z) > 1) outside.push("clipped geometry");
+              }
+            }
+          }
+        });
+      });
+      return { count, outside };
+    });
+    await expect.poll(visibleNodes).toEqual({ count: 36, outside: [] });
+    if (width === 1440) {
+      const before = await page.evaluate(() => (window as GraphTestWindow).graphFrame!.camera.position.z);
+      await page.locator(".graph-stage canvas").hover();
+      await page.mouse.wheel(0, -200);
+      await expect.poll(() => page.evaluate(() => (window as GraphTestWindow).graphFrame!.camera.position.z)).not.toBe(before);
+      const after = await page.evaluate(() => (window as GraphTestWindow).graphFrame!.camera.position.toArray());
+      await expect(page.getByRole("button", { name: "Recalculate layout" })).toBeVisible({ timeout: 15_000 });
+      const settled = await page.evaluate(() => (window as GraphTestWindow).graphFrame!.camera.position.toArray());
+      settled.forEach((coordinate, index) => expect(coordinate).toBeCloseTo(after[index], 5));
+    } else {
+      await expect(page.getByRole("button", { name: "Recalculate layout" })).toBeVisible({ timeout: 15_000 });
+    }
+    await expect.poll(visibleNodes).toEqual({ count: 36, outside: [] });
+  }
 });

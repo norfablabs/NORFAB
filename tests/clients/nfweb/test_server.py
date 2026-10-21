@@ -5,8 +5,9 @@ from tempfile import TemporaryDirectory
 from typing import Any
 
 import pytest
-from tornado.testing import AsyncHTTPTestCase
+from tornado.testing import AsyncHTTPTestCase, gen_test
 from tornado.web import Application
+from tornado.websocket import websocket_connect
 
 from norfab.clients.nfweb.config import NFWebFooterConfig
 from norfab.clients.nfweb.monitoring.application import MonitoringApplication
@@ -21,6 +22,7 @@ from norfab.clients.nfweb.topology.application import TopologyApplication
 from norfab.clients.nfweb.topology.history import TopologyHistoryStore
 from norfab.clients.nfweb.topology.models import (
     TopologyCollectionEvent,
+    TopologyLogEntry,
     TopologySnapshot,
 )
 from norfab.clients.nfweb.topology.web import (
@@ -141,10 +143,11 @@ class TestNFWebApplication(AsyncHTTPTestCase):
         super().setUp()
 
     def get_app(self) -> Application:
+        self.topology_broadcaster = TopologySnapshotBroadcaster()
         topology = TopologyApplication(
             self.collector,
             self.topology_history,
-            TopologySnapshotBroadcaster(),
+            self.topology_broadcaster,
         )
         monitoring = MonitoringApplication(
             self.monitoring_collector,
@@ -163,6 +166,34 @@ class TestNFWebApplication(AsyncHTTPTestCase):
         super().tearDown()
         self.topology_history.close()
         self._temporary_directory.cleanup()
+
+    @gen_test
+    async def test_topology_websocket_publishes_progress_before_next_snapshot(
+        self,
+    ) -> None:
+        connection = await websocket_connect(
+            self.get_url("/api/v1/topology/stream").replace("http:", "ws:", 1)
+        )
+        try:
+            initial = json.loads(await connection.read_message())
+            assert initial["type"] == "snapshot"
+            entry = TopologyLogEntry(
+                id="pending:event:0",
+                snapshot_id="pending",
+                collected_at=datetime.now(timezone.utc),
+                kind="event",
+                service="nornir",
+                message="collecting CLI output",
+                severity="INFO",
+            )
+            await self.topology_broadcaster.publish_log(entry)
+            progress = json.loads(await connection.read_message())
+            assert progress["type"] == "log"
+            assert progress["data"]["id"] == entry.id
+            assert progress["data"]["message"] == entry.message
+            assert self.topology_history.count() == 1
+        finally:
+            connection.close()
 
     def test_health_route(self) -> None:
         health = self.fetch("/api/v1/health")

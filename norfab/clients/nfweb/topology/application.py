@@ -44,6 +44,7 @@ class TopologyApplication:
                 config=config,
                 history=history,
                 on_snapshot=broadcaster.publish,
+                on_log=broadcaster.publish_log,
             )
             return cls(collector, history, broadcaster)
         except Exception:

@@ -23,8 +23,10 @@ from norfab.clients.nfweb.topology.layers import (
 from norfab.clients.nfweb.topology.models import (
     LayerPatch,
     TopologyCollectionError,
+    TopologyCollectionEvent,
     TopologyDeviceOption,
     TopologyLink,
+    TopologyLogEntry,
     TopologyNode,
     TopologySnapshot,
 )
@@ -32,6 +34,7 @@ from norfab.clients.nfweb.topology.models import (
 log = logging.getLogger(__name__)
 
 SnapshotCallback = Callable[[TopologySnapshot], Awaitable[None] | None]
+LogCallback = Callable[[TopologyLogEntry], Awaitable[None] | None]
 
 
 class TopologyCollector:
@@ -44,13 +47,15 @@ class TopologyCollector:
         history: TopologyHistoryStore,
         adapters: list[TopologyLayerAdapter] | None = None,
         on_snapshot: SnapshotCallback | None = None,
+        on_log: LogCallback | None = None,
     ) -> None:
-        """Configure collection state, persistence, and snapshot publication."""
+        """Configure collection state, persistence, and snapshot/progress publication."""
         self.client = client
         self.config = config
         self.history = history
         self.adapters = list(adapters or enabled_adapters(config))
         self.on_snapshot = on_snapshot
+        self.on_log = on_log
         self._periodic: PeriodicCallback | None = None
         self._collection_lock = asyncio.Lock()
         self._active_task: asyncio.Task | None = None
@@ -98,7 +103,7 @@ class TopologyCollector:
         if not self.selected_devices:
             return None
         if self._collection_lock.locked():
-            log.warning("NFWeb topology collection skipped because a cycle is active")
+            log.warning("nfweb topology collection skipped because a cycle is active")
             return None
         async with self._collection_lock:
             self.last_started_at = datetime.now(timezone.utc)
@@ -114,7 +119,7 @@ class TopologyCollector:
                 return snapshot
             except Exception as exc:
                 self.last_error = str(exc)
-                log.exception("NFWeb topology collection failed")
+                log.exception("nfweb topology collection failed")
                 return None
 
     async def collect_once(self, force: bool = False) -> TopologySnapshot:
@@ -122,14 +127,41 @@ class TopologyCollector:
         if not self.selected_devices:
             raise RuntimeError("topology collection requires selected devices")
         started = time.perf_counter()
+        snapshot = TopologySnapshot(devices=list(self.selected_devices))
+
+        async def publish_event(event: TopologyCollectionEvent) -> None:
+            if self.on_log is not None:
+                result = self.on_log(
+                    TopologyLogEntry(
+                        id=f"{snapshot.snapshot_id}:event:{len(context.events) - 1}",
+                        snapshot_id=snapshot.snapshot_id,
+                        collected_at=snapshot.collected_at,
+                        kind="event",
+                        **event.model_dump(),
+                    )
+                )
+                if result is not None:
+                    await result
+
         context = CollectionContext(
             config=self.config,
             devices=list(self.selected_devices),
+            on_event=publish_event,
         )
         patches: list[LayerPatch] = []
         errors = []
 
         for adapter in self.adapters:
+            layer_started = time.perf_counter()
+            await context.emit_event(
+                TopologyCollectionEvent(
+                    service="topology",
+                    task=adapter.name,
+                    message=f"collecting {adapter.name} layer",
+                    status="running",
+                    timestamp=datetime.now(timezone.utc).isoformat(),
+                )
+            )
             cache_key = adapter.__class__.__name__
             cached = self._layer_cache.get(cache_key)
             now = time.monotonic()
@@ -149,6 +181,18 @@ class TopologyCollector:
                             )
                         ],
                     )
+            elapsed = round((time.perf_counter() - layer_started) * 1000)
+            await context.emit_event(
+                TopologyCollectionEvent(
+                    service="topology",
+                    task=adapter.name,
+                    message=f"collected {adapter.name} layer in {elapsed} ms"
+                    + (f" with {len(patch.errors)} error(s)" if patch.errors else ""),
+                    severity="WARNING" if patch.errors else "INFO",
+                    status="failed" if patch.errors else "completed",
+                    timestamp=datetime.now(timezone.utc).isoformat(),
+                )
+            )
             patches.append(patch)
             errors.extend(patch.errors)
             for node in patch.nodes:
@@ -173,6 +217,7 @@ class TopologyCollector:
         else:
             status = "empty"
         return TopologySnapshot(
+            snapshot_id=snapshot.snapshot_id,
             collected_at=datetime.now(timezone.utc),
             duration_ms=round((time.perf_counter() - started) * 1000),
             status=status,

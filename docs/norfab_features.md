@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 20 October 2026*
+*Last updated: 21 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -56,7 +56,9 @@ resident memory; worker resource comparisons; stacked fabric-wide broker and
 worker CPU and memory consumption; selected-worker trends; and
 local-client job totals and interval status activity from the existing client job
 database. Selecting a worker also shows a full-width status card summarizing its
-recent jobs, statuses, and tasks through the existing worker `job_list` task.
+recent jobs, statuses, and tasks through the existing worker `job_list` task, with
+manual refresh and a retrieval timestamp. Charts retain readable heights in a
+vertically scrollable dashboard.
 ECharts supplies resource trends, stacked job-status activity bars,
 data zoom, and
 worker comparisons. Worker comparisons rank combined CPU and relative-memory
@@ -76,7 +78,10 @@ The first built-in application is the **3D topology observatory**. Its persisten
 Vasturiano scene seeds selected devices from cached Nornir inventory, complements
 them with selected-host NetBox topology and live LLDP, BGP, and interface state,
 makes partial collection failures visible, and stores compressed snapshots in a
-rolling three-hour local SQLite history. Matching physical connections merge
+rolling three-hour local SQLite history. Collection events and layer timings
+stream progressively before the completed snapshot, with stable IDs to avoid
+duplicate log entries. Single-line entries scroll horizontally and highlight errors in red and warnings
+in yellow. Matching physical connections merge
 their NetBox, Nornir, and live-LLDP origins while parallel interface records remain
 available in the inspector. Its shared
 shell provides
@@ -86,10 +91,13 @@ component system with Tabler icons, Topology and Protocols multi-selects, and an
 exclusive Stats mode for traffic, error counters, or interface transitions.
 Traffic renders telemetry-backed physical-link directions as shallow,
 independently colored and animated lanes,
-fully opaque health-colored nodes with matching States-dropdown keys, toggleable
-3D bloom, and Enter-submitted topology
-search that highlights matches without removing non-matching elements. It also
-provides nested application navigation and searchable, sortable inspector tables.
+fully opaque health-colored nodes with matching States-dropdown keys, compact
+placement of disconnected groups, initial camera fitting that respects user
+interaction, toggleable
+3D bloom (off by default), and Enter-submitted topology
+search pinned beside the inspector that highlights matches without removing non-matching elements. It also
+provides nested application navigation with an explicit mobile menu button and
+searchable, sortable inspector tables.
 The local runtime supports graceful Ctrl+C
 shutdown with a second-interrupt forced-exit fallback. **Topology use cases:**
 weather-map dashboards, topology exploration, current-state windows, incident

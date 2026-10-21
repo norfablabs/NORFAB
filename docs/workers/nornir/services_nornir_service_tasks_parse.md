@@ -27,6 +27,10 @@ Three tasks for parsing network device CLI output into structured data:
 | `workers` | No | Nornir workers to target. Defaults to all workers. |
 | `FC`, `FB`, `FH`, `FL`, `FM`, `FG`, `FR`, `FO`, `FP`, `FX`, `FN`, `hosts` | No | Host filters. |
 
+TTP compiles each job's template once and copies the compiled parser for each host.
+This reduces repeated template setup while keeping host inputs, input processing,
+and result structures isolated.
+
 ## Output
 
 The parse tasks return structured per-host data. The shape depends on the parser: NAPALM returns getter payloads, TTP returns the requested TTP structure, and TextFSM returns parsed records from either a supplied template or NTC-Templates auto-detection.

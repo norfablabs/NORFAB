@@ -53,10 +53,6 @@ interface TopologyToolbarProps {
   applyingDevices: boolean;
   onDraftDevices: (devices: string[]) => void;
   onApplyDevices: () => void | Promise<void>;
-  search: string;
-  onSearch: (value: string) => void;
-  activeSearch: string;
-  onApplySearch: (value: string) => void;
   topologySources: string[];
   onTopologySources: (sources: string[]) => void;
   protocols: string[];
@@ -100,10 +96,6 @@ export default function TopologyToolbar({
   applyingDevices,
   onDraftDevices,
   onApplyDevices,
-  search,
-  onSearch,
-  activeSearch,
-  onApplySearch,
   topologySources,
   onTopologySources,
   protocols,
@@ -153,13 +145,6 @@ export default function TopologyToolbar({
     await onApplyDevices();
     setDeviceMenuOpened(false);
     setDeviceFilter("");
-  };
-  const normalizedSearch = search.trim();
-  const searchIsApplied =
-    Boolean(activeSearch) &&
-    normalizedSearch.toLowerCase() === activeSearch.toLowerCase();
-  const toggleSearch = () => {
-    onApplySearch(searchIsApplied ? "" : normalizedSearch);
   };
 
   return (
@@ -283,48 +268,6 @@ export default function TopologyToolbar({
         </Menu.Dropdown>
       </Menu>
 
-      <TextInput
-        className="toolbar-control toolbar-control--search"
-        aria-label="Find infrastructure"
-        value={search}
-        onChange={(event) => onSearch(event.currentTarget.value)}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") onApplySearch(normalizedSearch);
-        }}
-        placeholder="Find infrastructure…"
-        leftSectionPointerEvents="all"
-        leftSection={
-          <Tooltip label={searchIsApplied ? "Disable search highlight" : "Apply search highlight"}>
-            <ActionIcon
-              aria-label={searchIsApplied ? "Disable topology search" : "Apply topology search"}
-              color={searchIsApplied ? "fabric" : "gray"}
-              disabled={!searchIsApplied && !normalizedSearch}
-              onClick={toggleSearch}
-              size="sm"
-              variant={searchIsApplied ? "light" : "subtle"}
-            >
-              <IconSearch size={14} />
-            </ActionIcon>
-          </Tooltip>
-        }
-        rightSection={
-          search || activeSearch ? (
-            <ActionIcon
-              variant="subtle"
-              color="gray"
-              size="sm"
-              aria-label="Clear search"
-              onClick={() => {
-                onSearch("");
-                onApplySearch("");
-              }}
-            >
-              <IconX size={13} />
-            </ActionIcon>
-          ) : undefined
-        }
-        size="xs"
-      />
 
       <Group
         className="toolbar-control toolbar-layer-group"

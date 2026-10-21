@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import re
 from dataclasses import dataclass, field
-from typing import Any, Iterable, Mapping, Protocol
+from typing import Any, Awaitable, Callable, Iterable, Mapping, Protocol
 
 from norfab.clients.nfweb.topology.config import TopologyConfig
 from norfab.clients.nfweb.topology.models import (
@@ -27,6 +27,13 @@ class CollectionContext:
     devices: list[str] = field(default_factory=list)
     ip_to_device: dict[str, str] = field(default_factory=dict)
     events: list[TopologyCollectionEvent] = field(default_factory=list)
+    on_event: Callable[[TopologyCollectionEvent], Awaitable[None]] | None = None
+
+    async def emit_event(self, event: TopologyCollectionEvent) -> None:
+        """Retain an event and publish it immediately when a listener is attached."""
+        self.events.append(event)
+        if self.on_event is not None:
+            await self.on_event(event)
 
 
 class TopologyLayerAdapter(Protocol):
@@ -56,7 +63,7 @@ async def _submit_job(
     kwargs: dict[str, Any],
     timeout: int,
 ) -> Any:
-    """Submit one NORFAB job without blocking the NFWeb event loop."""
+    """Submit a NORFAB job and stream events while asynchronously awaiting its result."""
     future = client.submit_job(
         service=service,
         task=task,
@@ -65,29 +72,30 @@ async def _submit_job(
         timeout=timeout,
     )
     deadline = asyncio.get_running_loop().time() + timeout
-    while not future.done_event.is_set():
+    while True:
+        for raw_event in future.events(timeout=0):
+            event = _as_dict(raw_event)
+            if not isinstance(event, Mapping) or not event.get("message"):
+                continue
+            await context.emit_event(
+                TopologyCollectionEvent(
+                    service=service,
+                    message=str(event["message"]),
+                    severity=str(event.get("severity") or "INFO"),
+                    task=str(event["task"]) if event.get("task") else task,
+                    worker=str(event["worker"]) if event.get("worker") else None,
+                    status=str(event["status"]) if event.get("status") else None,
+                    timestamp=(
+                        str(event["timestamp"]) if event.get("timestamp") else None
+                    ),
+                    resource=event.get("resource"),
+                )
+            )
         remaining = deadline - asyncio.get_running_loop().time()
-        if remaining <= 0:
+        if future.done_event.is_set() or remaining <= 0:
             break
         await asyncio.sleep(min(0.05, remaining))
-    result = future.result(timeout=0)
-    for raw_event in future.events(timeout=0):
-        event = _as_dict(raw_event)
-        if not isinstance(event, Mapping) or not event.get("message"):
-            continue
-        context.events.append(
-            TopologyCollectionEvent(
-                service=service,
-                message=str(event["message"]),
-                severity=str(event.get("severity") or "INFO"),
-                task=str(event["task"]) if event.get("task") else task,
-                worker=str(event["worker"]) if event.get("worker") else None,
-                status=str(event["status"]) if event.get("status") else None,
-                timestamp=(str(event["timestamp"]) if event.get("timestamp") else None),
-                resource=event.get("resource"),
-            )
-        )
-    return result
+    return future.result(timeout=0)
 
 
 def _worker_payloads(

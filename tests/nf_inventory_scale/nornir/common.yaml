@@ -1,6 +1,6 @@
 service: nornir
 watchdog_interval: 30
-connections_idle_timeout: 0
+connections_idle_timeout: 600
 max_concurrent_jobs: 5
 runner:
   plugin: RetryRunner

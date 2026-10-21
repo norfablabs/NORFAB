@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import {
   ActionIcon,
   Badge,
@@ -123,6 +124,13 @@ export default function InspectorPanel({
   onTab,
   onClose,
 }: InspectorPanelProps) {
+  const logRef = useRef<HTMLOListElement>(null);
+  const followLog = useRef(true);
+  useEffect(() => {
+    if (logRef.current && followLog.current) {
+      logRef.current.scrollTop = logRef.current.scrollHeight;
+    }
+  }, [collectionLog]);
   const title =
     selected?.kind === "node"
       ? selected.value.label
@@ -324,20 +332,25 @@ export default function InspectorPanel({
             No NORFAB collection events yet.
           </Text>
         ) : (
-          <ol className="terminal-log">
+          <ol
+            className="terminal-log"
+            ref={logRef}
+            onScroll={(event) => {
+              const element = event.currentTarget;
+              followLog.current = element.scrollHeight - element.scrollTop - element.clientHeight < 24;
+            }}
+          >
             {collectionLog.map((entry) => (
               <li
                 className={`terminal-line ${entry.severity.toLowerCase()}`}
                 key={entry.id}
               >
                 <time>{eventTime(entry.timestamp)}</time>
-                <b>{entry.severity.toUpperCase()}</b>
                 <span className="terminal-worker">{entry.worker ?? "-"}</span>
                 <span className={`terminal-status ${entry.status ?? ""}`}>
                   {entry.status ?? "-"}
                 </span>
                 <span className="terminal-message">
-                  {entry.service}.{entry.task ?? "job"}
                   {eventResource(entry.resource)
                     ? ` [${eventResource(entry.resource)}]`
                     : ""}{" "}

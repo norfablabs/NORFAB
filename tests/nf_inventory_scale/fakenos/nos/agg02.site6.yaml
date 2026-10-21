@@ -2204,3 +2204,77 @@ commands:
     output: true
   _default_:
     output: '% Invalid input'
+  show bgp vrf all neighbors:
+    output: ""
+  show run formal router bgp | inc neighbor:
+    output: |-
+      router bgp 65059 neighbor 10.250.0.83 use neighbor-group AGG-ACCESS
+      router bgp 65059 neighbor 10.250.0.84 use neighbor-group AGG-ACCESS
+      router bgp 65059 neighbor 10.250.0.85 use neighbor-group AGG-ACCESS
+      router bgp 65059 neighbor 10.250.0.86 use neighbor-group AGG-ACCESS
+      router bgp 65059 neighbor 10.250.0.87 use neighbor-group AGG-ACCESS
+      router bgp 65059 neighbor 10.250.0.88 use neighbor-group AGG-ACCESS
+      router bgp 65059 neighbor 10.250.0.89 use neighbor-group AGG-ACCESS
+      router bgp 65059 neighbor 10.250.0.90 use neighbor-group AGG-ACCESS
+      router bgp 65059 neighbor 10.250.0.91 use neighbor-group AGG-ACCESS
+      router bgp 65059 neighbor 10.250.0.92 use neighbor-group AGG-ACCESS
+      router bgp 65059 neighbor 10.250.0.93 use neighbor-group AGG-ACCESS
+      router bgp 65059 neighbor 10.250.0.94 use neighbor-group AGG-ACCESS
+      router bgp 65059 neighbor 10.250.0.95 use neighbor-group AGG-ACCESS
+      router bgp 65059 neighbor 10.250.0.96 use neighbor-group AGG-ACCESS
+      router bgp 65059 neighbor 10.250.0.97 use neighbor-group AGG-ACCESS
+      router bgp 65059 neighbor 10.250.0.98 use neighbor-group AGG-ACCESS
+      router bgp 65059 neighbor 10.250.0.99 use neighbor-group AGG-ACCESS
+      router bgp 65059 neighbor 10.250.0.100 use neighbor-group AGG-ACCESS
+      router bgp 65059 neighbor 10.250.0.43 use neighbor-group AGG-RR
+      router bgp 65059 neighbor 10.250.0.44 use neighbor-group AGG-RR
+      router bgp 65059 neighbor 198.18.0.226 use neighbor-group TRANSIT-2
+      router bgp 65059 neighbor 198.18.0.243 use neighbor-group TRANSIT-3
+      router bgp 65059 neighbor 198.18.1.10 use neighbor-group TRANSIT-4
+      router bgp 65059 neighbor 198.18.1.27 use neighbor-group TRANSIT-5
+      router bgp 65059 neighbor 198.18.1.44 use neighbor-group TRANSIT-6
+      router bgp 65059 neighbor 198.18.1.61 use neighbor-group TRANSIT-7
+      router bgp 65059 neighbor 198.18.1.78 use neighbor-group TRANSIT-8
+      router bgp 65059 neighbor 198.18.1.95 use neighbor-group TRANSIT-1
+      router bgp 65059 neighbor 198.18.1.112 use neighbor-group TRANSIT-2
+      router bgp 65059 neighbor 198.18.1.129 use neighbor-group TRANSIT-3
+      router bgp 65059 neighbor 198.18.1.146 use neighbor-group TRANSIT-4
+      router bgp 65059 neighbor 198.18.1.163 use neighbor-group TRANSIT-5
+      router bgp 65059 neighbor 198.18.1.180 use neighbor-group TRANSIT-6
+      router bgp 65059 neighbor 198.18.1.197 use neighbor-group TRANSIT-7
+      router bgp 65059 neighbor 198.18.1.214 use neighbor-group TRANSIT-8
+      router bgp 65059 neighbor 198.18.1.231 use neighbor-group TRANSIT-1
+      router bgp 65059 neighbor 198.18.1.248 use neighbor-group TRANSIT-2
+      router bgp 65059 neighbor 198.18.2.15 use neighbor-group TRANSIT-3
+      router bgp 65059 neighbor 198.18.2.32 use neighbor-group TRANSIT-4
+      router bgp 65059 neighbor 198.18.2.49 use neighbor-group TRANSIT-5
+      router bgp 65059 neighbor 198.18.2.66 use neighbor-group TRANSIT-6
+      router bgp 65059 neighbor 198.18.2.83 use neighbor-group TRANSIT-7
+      router bgp 65059 neighbor 198.18.2.100 use neighbor-group TRANSIT-8
+      router bgp 65059 neighbor 198.18.2.117 use neighbor-group TRANSIT-1
+      router bgp 65059 neighbor 198.18.2.134 use neighbor-group TRANSIT-2
+      router bgp 65059 neighbor 198.18.2.151 use neighbor-group TRANSIT-3
+      router bgp 65059 neighbor 198.18.2.168 use neighbor-group TRANSIT-4
+      router bgp 65059 neighbor 198.18.2.185 use neighbor-group TRANSIT-5
+      router bgp 65059 neighbor 198.18.2.202 use neighbor-group TRANSIT-6
+      router bgp 65059 neighbor 198.18.2.219 use neighbor-group TRANSIT-7
+      router bgp 65059 neighbor 198.18.2.236 use neighbor-group TRANSIT-8
+      router bgp 65059 neighbor 198.18.3.3 use neighbor-group TRANSIT-1
+      router bgp 65059 neighbor 198.18.3.20 use neighbor-group TRANSIT-2
+      router bgp 65059 neighbor 198.18.3.37 use neighbor-group TRANSIT-3
+      router bgp 65059 neighbor 198.18.3.54 use neighbor-group TRANSIT-4
+      router bgp 65059 neighbor 198.18.3.71 use neighbor-group TRANSIT-5
+      router bgp 65059 neighbor 198.18.3.88 use neighbor-group TRANSIT-6
+      router bgp 65059 neighbor 198.18.3.105 use neighbor-group TRANSIT-7
+      router bgp 65059 neighbor 198.18.3.122 use neighbor-group TRANSIT-8
+      router bgp 65059 neighbor 198.18.3.139 use neighbor-group TRANSIT-1
+      router bgp 65059 neighbor 198.18.3.156 use neighbor-group TRANSIT-2
+      router bgp 65059 neighbor 198.18.3.173 use neighbor-group TRANSIT-3
+      router bgp 65059 neighbor 198.18.3.190 use neighbor-group TRANSIT-4
+      router bgp 65059 neighbor 198.18.0.7 use neighbor-group TRANSIT-7
+      router bgp 65059 neighbor 198.18.0.24 use neighbor-group TRANSIT-8
+      router bgp 65059 neighbor 198.18.0.41 use neighbor-group TRANSIT-1
+      router bgp 65059 neighbor 198.18.0.58 use neighbor-group TRANSIT-2
+      router bgp 65059 neighbor 198.18.0.75 use neighbor-group TRANSIT-3
+      router bgp 65059 neighbor 198.18.0.92 use neighbor-group TRANSIT-4
+      router bgp 65059 neighbor 198.18.0.109 use neighbor-group TRANSIT-5

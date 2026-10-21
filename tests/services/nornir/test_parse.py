@@ -1,5 +1,8 @@
 import pprint
+
 import pytest
+
+from norfab.core.client import NFPClient
 
 pytestmark = [
     pytest.mark.nornir,
@@ -90,6 +93,34 @@ class TestNornirParseTasks:
                 assert (
                     "fqdn" in res[0] and "hostname" in res[0]
                 ), f"{host} unexpected parsing results"
+
+    @pytest.mark.parametrize("structure", ["flat_list", "list", "dictionary"])
+    def test_parse_ttp_keeps_host_results_isolated(
+        self, nfclient: NFPClient, structure: str
+    ) -> None:
+        result = nfclient.run_job(
+            "nornir",
+            "parse_ttp",
+            workers=["nornir-worker-1"],
+            kwargs={
+                "on_failed": True,
+                "FL": ["ceos-spine-1", "ceos-spine-2"],
+                "template": "ttp://platform/arista_eos_show_hostname.txt",
+                "commands": "show hostname",
+                "structure": structure,
+            },
+        )["nornir-worker-1"]
+        assert result["failed"] is False
+        assert set(result["result"]) == {"ceos-spine-1", "ceos-spine-2"}
+        hostnames = []
+        for parsed in result["result"].values():
+            if structure == "dictionary":
+                parsed = parsed["_root_template_"]
+            while isinstance(parsed, list):
+                assert len(parsed) == 1
+                parsed = parsed[0]
+            hostnames.append(parsed["hostname"])
+        assert len(set(hostnames)) == 2
 
     def test_nornir_parse_ttp_templates_template(self, nfclient):
         ret = nfclient.run_job(

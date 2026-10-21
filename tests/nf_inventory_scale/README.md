@@ -34,6 +34,14 @@ through the normal file-sharing path and can take several minutes. The inventory
 allows up to ten minutes for worker initialization; subsequent collection uses the
 normal NFWeb refresh behavior.
 
+The IOS XR profiles include `show bgp neighbors`, `show bgp vrf all neighbors`,
+and `show run formal router bgp | inc neighbor` for the current BGP getter. The
+VRF command returns no additional neighbors because these fixtures use the default
+VRF; formal configuration supplies neighbor-group membership. NOS profiles are
+loaded when the FakeNOS worker initializes, so restart the scale environment to
+load profile changes. Restarting only an existing FakeNOS network reuses the
+worker's loaded plugin definitions.
+
 The synthetic command formats were designed and validated against the MIT-licensed
 [ttp_templates platform test fixtures](https://github.com/dmulyalin/ttp_templates/tree/master/test/platform).
 No scale-only source or control is exposed by NFWeb.

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { MutableRefObject } from "react";
 import ForceGraph3D from "react-force-graph-3d";
 import {
@@ -9,9 +9,11 @@ import {
   SRGBColorSpace,
   Vector2,
 } from "three";
+import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import type { SelectedItem } from "./types";
 import {
+  attractNodesToCenter,
   HEALTH_COLORS,
   LAYER_COLORS,
   LAYER_LABELS,
@@ -76,6 +78,8 @@ interface TopologyGraphProps {
   width: number;
   height: number;
   graphData: GraphData;
+  nodeDistance: number;
+  fitScope: string;
   rememberNodePositions: () => void;
   selectGraphItem: (item: SelectedItem) => void;
   onEngineStop: () => void;
@@ -98,21 +102,78 @@ export default function TopologyGraph({
   width,
   height,
   graphData,
+  nodeDistance,
+  fitScope,
   rememberNodePositions,
   selectGraphItem,
   onEngineStop,
   bloomEnabled,
 }: TopologyGraphProps) {
+  const initialFit = useRef(true);
+  const layoutStopped = useRef(false);
+  const fitFrame = useRef<number | null>(null);
+
+  const fitInitialLayout = useCallback((finished = false) => {
+    if (!initialFit.current) return;
+    if (fitFrame.current !== null) cancelAnimationFrame(fitFrame.current);
+    // Fit after Three.js has updated node objects for this simulation tick.
+    fitFrame.current = requestAnimationFrame(() => {
+      fitFrame.current = null;
+      const graph = graphRef.current;
+      if (!initialFit.current || !graph || !graphData.nodes.length || width <= 1 || height <= 1) return;
+      graph.scene().updateMatrixWorld(true);
+      graph.zoomToFit(0, Math.min(80, width * 0.1, height * 0.1));
+      if (finished) initialFit.current = false;
+    });
+  }, [graphData, graphRef, width, height]);
+
+  useEffect(() => {
+    initialFit.current = true;
+  }, [fitScope]);
+
+  useEffect(() => {
+    const controls = graphRef.current?.controls() as OrbitControls | undefined;
+    const stopFitting = () => { initialFit.current = false; };
+    controls?.addEventListener("start", stopFitting);
+    return () => {
+      controls?.removeEventListener("start", stopFitting);
+      if (fitFrame.current !== null) cancelAnimationFrame(fitFrame.current);
+    };
+  }, [graphRef]);
+
+  useEffect(() => {
+    fitInitialLayout(layoutStopped.current);
+  }, [fitInitialLayout]);
+
+  useEffect(() => {
+    const graph = graphRef.current;
+    if (!graph) return;
+    graph.d3Force("charge")?.strength(-220).distanceMax(nodeDistance * 3);
+    graph.d3Force("cohesion", (alpha: number) => attractNodesToCenter(graphData.nodes, alpha));
+    const degrees = new Map<string, number>();
+    for (const link of graphData.links) {
+      if (link.visualOnly) continue;
+      for (const nodeId of [endpointId(link.source), endpointId(link.target)]) {
+        degrees.set(nodeId, (degrees.get(nodeId) ?? 0) + 1);
+      }
+    }
+    graph.d3Force("link")?.distance(nodeDistance).strength((link: RenderedTopologyLink) =>
+      link.visualOnly ? 0 : 1 / Math.max(1, Math.min(
+        degrees.get(endpointId(link.source)) ?? 1,
+        degrees.get(endpointId(link.target)) ?? 1,
+      )),
+    );
+  }, [graphData, graphRef, nodeDistance]);
+
   useEffect(() => {
     const composer = graphRef.current?.postProcessingComposer();
-    if (!composer) return;
+    if (!composer || !bloomEnabled) return;
     const bloomPass = new UnrealBloomPass(
       new Vector2(width, height),
       1.15,
       0.65,
       0.08,
     );
-    bloomPass.enabled = bloomEnabled;
     composer.addPass(bloomPass);
     return () => {
       composer.removePass(bloomPass);
@@ -210,7 +271,15 @@ export default function TopologyGraph({
       }}
       onNodeDragEnd={rememberNodePositions}
       onBackgroundClick={() => selectGraphItem(null)}
-      onEngineStop={onEngineStop}
+      onEngineTick={() => {
+        layoutStopped.current = false;
+        fitInitialLayout();
+      }}
+      onEngineStop={() => {
+        layoutStopped.current = true;
+        fitInitialLayout(true);
+        onEngineStop();
+      }}
     />
   );
 }

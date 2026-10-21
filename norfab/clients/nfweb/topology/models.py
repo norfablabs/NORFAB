@@ -55,7 +55,7 @@ class TopologyCollectionError(BaseModel):
 
 
 class TopologyCollectionEvent(BaseModel):
-    """A NORFAB job event emitted while collecting a topology layer."""
+    """A job event or layer timing emitted while collecting topology."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -79,7 +79,7 @@ class TopologyDeviceOption(BaseModel):
 
 
 class TopologyLogEntry(BaseModel):
-    """One persistent terminal line derived from a topology snapshot."""
+    """One terminal line streamed live or derived from a retained topology snapshot."""
 
     model_config = ConfigDict(extra="forbid")
 

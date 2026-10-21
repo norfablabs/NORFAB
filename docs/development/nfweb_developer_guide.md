@@ -254,7 +254,17 @@ an independent cache timestamp. Normal periodic collection reuses a fresh cache;
 the Refresh action calls `collect(force=True)` and bypasses every layer cache.
 
 Do not add another independent browser-owned polling loop. One collector is shared
-by all browser tabs.
+by all browser tabs. Layer collection remains ordered so inventory address mapping
+is available to BGP and SSH sessions are not used by concurrent layer jobs.
+
+`_submit_job()` drains each future's events without blocking while the job runs.
+`CollectionContext.emit_event()` retains events and forwards them to the collector's
+log callback. The topology WebSocket emits `log` frames containing `TopologyLogEntry`
+values before the final `snapshot` frame. Layer start/completion events include
+elapsed milliseconds to distinguish slow collection stages. Streamed event IDs use
+the eventual snapshot ID and event index, matching history-derived entries so the
+browser can merge them without duplication. Events become persistent only when
+the completed snapshot is inserted.
 
 ## Keep Graph Contracts Stable
 
@@ -456,14 +466,15 @@ applications and remains a fixed-width shell column. Topology remains the defaul
 the URL hash selects Monitoring. Topology controls, including
 the snapshot selector, return-to-live action, and trailing stream-status badge,
 belong in one non-wrapping, horizontally scrollable application toolbar, not the
-navigation panel. Link controls use compact Mantine menus. **Topology** is a union
+navigation panel. Search stays pinned at the header’s right edge next to the inspector. Link controls use compact Mantine menus. **Topology** is a union
 multi-select for NetBox, Nornir connections, LLDP, and circuits. **Protocols**
 contains BGP and is the extension point for later protocol layers. **Stats** is a
 single-value choice between Off, Traffic, Errors, and Flaps. The remaining
 desktop content width is split 80% for the topology stage and 20% for the
 inspector, and the inspector spans into the top-right corner above its content.
 The graph-control group includes a bloom toggle implemented with Three.js
-`UnrealBloomPass`. Search text is a draft until the user presses Enter or clicks
+`UnrealBloomPass`; bloom is off by default and allocates its pass only when enabled.
+Search text is a draft until the user presses Enter or clicks
 the magnifying-glass button. Applying a search keeps every node and link allowed
 by the layer and health filters visible, then enlarges and brightens only directly
 matching nodes or links. Node-name matches do not spread to adjacent links or
@@ -471,11 +482,13 @@ neighbouring nodes. Clicking the active
 magnifying glass disables the highlight without discarding the typed query.
 Every inspector tab uses the same Mantine searchable, sortable table composition;
 add domain columns and row adapters instead of another details layout. A shared
-footer owns the configured message and external resource pictograms. Overview and
-Admin are intentionally empty placeholders.
+footer owns the configured message and external resource pictograms. Only implemented
+applications appear in navigation; a mobile menu button toggles the existing sidebar.
 
 Monitoring uses Mantine for cards, alerts, selects, buttons, and badges.
-It passes ECharts options directly to `ReactECharts`; avoid a local abstraction
+It registers only the required ECharts charts/components and Canvas renderer through
+`echarts/core`, then passes options directly to `echarts-for-react/esm/core`.
+Avoid a local abstraction
 until more than one monitoring view has concrete shared requirements. Aligned
 worker CPU and memory comparisons use the same worker order. The bottom worker
 selection drives separate CPU and memory time series, while the adjacent job bar
@@ -484,8 +497,10 @@ between retained native-client database samples. It must not infer exact job
 transitions because the aggregate database statistics do not contain a transition
 journal.
 The selected worker also drives a full-width database status card below those
-charts. Its request is independent of periodic snapshot collection and failures
-remain local to the card.
+charts. Selecting a worker or completing a manual Refresh reloads that card and
+shows its retrieval time. Requests remain independent of periodic snapshot collection
+and failures remain local to the card. Monitoring scrolls vertically rather than
+shrinking chart containers to fit the viewport.
 Comparison charts rank workers by CPU percentage plus memory relative to the
 largest current worker and show ten rows at a time. React owns one shared worker
 window for both charts so vertical scrolling stays synchronized; each new sample
@@ -508,8 +523,9 @@ displayed. In live mode, new frames update the graph. Selecting history from the
 top bar's timestamp dropdown disables live display without stopping collection.
 Return to live selects the newest known snapshot.
 
-Collection logs are merged by stable entry ID and bounded to 300 lines in browser
-memory. The initial `/logs` request restores retained events after page reload.
+Collection logs arrive during collection, are merged by stable entry ID, and are
+bounded to 300 lines in browser memory. The terminal follows new entries while
+scrolled to the bottom and preserves the position when the operator scrolls up. The initial `/logs` request restores retained events after page reload.
 
 ### Vasturiano and Three.js Rules
 
@@ -529,7 +545,15 @@ memory. The initial `/logs` request restores retained events after page reload.
 - Pausing layout pins nodes through `fx`, `fy`, and `fz`. Starting layout removes
   those fields and reheats the D3 force simulation.
 - Layout distance changes the link force's `distance` parameter. It is not camera
-  zoom.
+  zoom. The renderer bounds charge repulsion to three link distances and adds weak
+  attraction toward the origin so disconnected components do not drift far apart.
+- Configure graph forces in `TopologyGraph` after the lazy renderer mounts, rather
+  than assuming its ref exists in an App snapshot effect.
+- Fit the initial camera after rendered node transforms update and again when the
+  layout settles. Use padding bounded by the actual viewport. Avoid fixed-delay
+  fitting: a slow mount or still-running simulation can invalidate that fit.
+- Stop initial fitting on OrbitControls' `start` event to respect user interaction.
+  Fit state resets on a renderer mount or device-scope change, not every snapshot.
 - Pausing the view stops rendering animation. It is separate from pausing the
   force layout.
 - Node labels are Three.js sprites added with `nodeThreeObjectExtend`; they do not
@@ -785,9 +809,6 @@ Keep these visible when planning work:
 - LLDP canonicalization covers case, FQDN variants, whitespace, and common
   interface abbreviations. Ambiguous device aliases and vendor-specific interface
   spellings are deliberately preserved rather than guessed.
-
-Empty Overview and Admin navigation sections are reserved extension points, not
-incomplete application behavior.
 
 Do not solve these gaps incidentally during an unrelated change. Make the smallest
 coherent change, add tests for the intended behavior, and update this list when a

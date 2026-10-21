@@ -31,15 +31,15 @@ The dashboard provides:
   status, and task counts returned by that worker's existing `job_list` task.
 
 The browser receives new samples over a WebSocket. The Refresh button requests an
-immediate sample; if shared collection is already running, the request reuses the
-latest completed sample instead of returning a conflict. A dashboard selector
+immediate sample and reloads the selected worker's recent job counts; if shared
+collection is already running, the request reuses the latest completed sample instead of returning a conflict. A dashboard selector
 reads the latest shared sample every 5, 10, 30, or 60 seconds without starting a
 second collection. Periodic server collection remains shared by all browser tabs. Worker
 comparison charts show ten workers at a time and share one vertical scroll/zoom
 position when more workers are available.
 
-The job activity chart compares each retained database snapshot with the previous
-sample and stacks positive increases for `FAILED`, `STARTED`, `COMPLETED`, and
+The fabric-wide job activity chart is independent of worker selection. It
+compares each retained database snapshot with the previous sample and stacks positive increases for `FAILED`, `STARTED`, `COMPLETED`, and
 `STALE`. The client database stores current aggregate counts rather than a status
 transition journal, so decreases are not presented as invented transitions.
 
@@ -59,9 +59,13 @@ message accounting. The dashboard reads aggregate database statistics; it does
 not capture or retain message payloads or create a separate monitoring database.
 Message, failure, reconnect, and watchdog counters are process-lifetime totals;
 each resets when its owning broker, client, or worker process restarts.
-Selecting a worker makes one targeted `job_list` request and summarizes at most
-the latest 1,000 returned records. The card labels a full window as truncated;
-it does not present the bounded result as an all-time worker total.
+Selecting a worker or completing a manual Refresh makes a targeted `job_list`
+request and summarizes at most the latest 1,000 returned records. The card labels a full window as truncated;
+it does not present the bounded result as an all-time worker total. The card shows
+when the data was retrieved.
+
+The dashboard scrolls vertically on shorter screens to keep charts readable.
+On small screens, controls wrap and the applications button opens the sidebar.
 
 Broker, client, and worker responses share a versioned Pydantic contract from
 `norfab.core.monitoring`. Every response contains `schema_version`, `collected_at`,

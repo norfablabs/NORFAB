@@ -3,6 +3,8 @@ import threading
 from pathlib import Path
 from typing import Any, Iterator
 
+import pytest
+
 from norfab.clients.nfweb.topology.collector import TopologyCollector
 from norfab.clients.nfweb.topology.config import TopologyConfig
 from norfab.clients.nfweb.topology.history import TopologyHistoryStore
@@ -31,7 +33,8 @@ class CompletedFuture:
         return self._result
 
     def events(self, timeout: int) -> Iterator[dict[str, Any]]:
-        yield from self._events
+        while self._events:
+            yield self._events.pop(0)
 
 
 class FakeClient:
@@ -292,6 +295,91 @@ class TestTopologyCollector:
 
         assert asyncio.run(exercise()) == {"worker": {"result": {}, "errors": []}}
 
+    def test_submit_job_publishes_events_before_completion(self) -> None:
+        future = CompletedFuture(
+            {"worker": {"result": {}, "errors": []}},
+            [{"message": "collecting device output"}],
+        )
+        future.done_event.clear()
+
+        class EventClient:
+            def submit_job(self, **kwargs: Any) -> CompletedFuture:
+                return future
+
+        async def exercise() -> None:
+            received = asyncio.Event()
+
+            async def on_event(event: Any) -> None:
+                assert event.message == "collecting device output"
+                assert not future.done_event.is_set()
+                received.set()
+
+            context = CollectionContext(config=TopologyConfig(), on_event=on_event)
+            task = asyncio.create_task(
+                _submit_job(
+                    EventClient(),
+                    context,
+                    "nornir",
+                    "parse_ttp",
+                    workers="all",
+                    kwargs={},
+                    timeout=1,
+                )
+            )
+            await asyncio.wait_for(received.wait(), timeout=1)
+            assert not task.done()
+            future.done_event.set()
+            await task
+            assert len(context.events) == 1
+
+        asyncio.run(exercise())
+
+    def test_progress_log_ids_match_persisted_snapshot(self, tmp_path: Path) -> None:
+        async def exercise() -> None:
+            entered = asyncio.Event()
+            release = asyncio.Event()
+            entries = []
+
+            class SlowLayer:
+                name = "topology"
+                refresh_interval = 30
+
+                async def collect(
+                    self, client: Any, context: CollectionContext
+                ) -> LayerPatch:
+                    entered.set()
+                    await release.wait()
+                    return LayerPatch(name=self.name)
+
+            async def on_log(entry: Any) -> None:
+                entries.append(entry)
+
+            history = TopologyHistoryStore(tmp_path / "progress.sqlite")
+            collector = TopologyCollector(
+                FakeClient(),
+                TopologyConfig(devices=["r1"]),
+                history,
+                adapters=[SlowLayer()],
+                on_log=on_log,
+            )
+            try:
+                task = asyncio.create_task(collector.collect())
+                await asyncio.wait_for(entered.wait(), timeout=1)
+                assert not task.done()
+                assert history.count() == 0
+                assert entries[0].message == "collecting topology layer"
+                release.set()
+                snapshot = await task
+                assert snapshot is not None
+                assert [entry.id for entry in entries] == [
+                    entry.id for entry in history.logs(["r1"])
+                ]
+                assert len(entries) == 2
+            finally:
+                history.close()
+
+        asyncio.run(exercise())
+
     def test_device_discovery_uses_nornir_only(self) -> None:
         options, errors = asyncio.run(
             discover_device_options(FakeClient(), TopologyConfig())
@@ -515,3 +603,31 @@ class TestTopologyCollector:
 
         asyncio.run(collector.stop())
         history.close()
+
+    def test_scale_profiles_cover_current_ttp_getter_commands(self) -> None:
+        yaml = pytest.importorskip("yaml")
+        ttp = pytest.importorskip("ttp").ttp
+        get_template = pytest.importorskip("ttp_templates").get_template
+        scale = Path(__file__).parents[2] / "nf_inventory_scale"
+        hosts = yaml.safe_load(
+            (scale / "fakenos/network.yaml").read_text(encoding="utf-8")
+        )["hosts"]
+        inputs = [
+            parameters
+            for getter in ("lldp_neighbors", "bgp_neighbors", "interfaces_status")
+            for template_inputs in ttp(
+                template=get_template(get=getter), log_level="ERROR"
+            )
+            .get_input_load()
+            .values()
+            for parameters in template_inputs.values()
+        ]
+        for name, host in hosts.items():
+            profile = scale / "fakenos/nos" / f"{name}.yaml"
+            commands = yaml.safe_load(profile.read_text(encoding="utf-8"))["commands"]
+            for parameters in inputs:
+                if host["platform"] in parameters.get("platform", []):
+                    missing = set(parameters["commands"]) - set(commands)
+                    assert (
+                        not missing
+                    ), f"{name} lacks getter commands: {sorted(missing)}"

@@ -15,10 +15,6 @@ describe("TopologyToolbar", () => {
           applyingDevices={false}
           onDraftDevices={() => undefined}
           onApplyDevices={() => undefined}
-          search=""
-          onSearch={() => undefined}
-          activeSearch=""
-          onApplySearch={() => undefined}
           topologySources={["netbox", "nornir", "live-lldp", "circuits"]}
           onTopologySources={() => undefined}
           protocols={["bgp"]}
@@ -66,8 +62,6 @@ describe("TopologyToolbar", () => {
       markup.indexOf('aria-label="Select topology devices"'),
     );
     expect(markup).toContain("1 selected");
-    expect(markup).toContain('aria-label="Find infrastructure"');
-    expect(markup).toContain('aria-label="Apply topology search"');
     expect(markup).toContain("Link selectors");
     expect(markup).toContain('aria-label="Select topology links"');
     expect(markup).toContain('aria-label="Select protocols"');

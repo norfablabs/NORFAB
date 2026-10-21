@@ -11,13 +11,13 @@ import tornado.websocket
 from norfab.clients.nfweb.server import NFWebJSONHandler, _json
 from norfab.clients.nfweb.topology.collector import TopologyCollector
 from norfab.clients.nfweb.topology.history import TopologyHistoryStore
-from norfab.clients.nfweb.topology.models import TopologySnapshot
+from norfab.clients.nfweb.topology.models import TopologyLogEntry, TopologySnapshot
 
 log = logging.getLogger(__name__)
 
 
 class TopologySnapshotBroadcaster:
-    """Publish completed topology snapshots to connected browsers."""
+    """Publish topology snapshots and collection progress to connected browsers."""
 
     def __init__(self) -> None:
         """Initialize the set of active topology WebSocket connections."""
@@ -25,13 +25,21 @@ class TopologySnapshotBroadcaster:
 
     async def publish(self, snapshot: TopologySnapshot) -> None:
         """Send one snapshot to every currently connected browser."""
-        message = _json({"type": "snapshot", "data": snapshot}).decode("utf-8")
+        await self._publish({"type": "snapshot", "data": snapshot})
+
+    async def publish_log(self, entry: TopologyLogEntry) -> None:
+        """Send a collection event before the completed snapshot is available."""
+        await self._publish({"type": "log", "data": entry})
+
+    async def _publish(self, frame: dict[str, Any]) -> None:
+        """Serialize one frame and send it to the connected browsers."""
+        message = _json(frame).decode("utf-8")
         for connection in tuple(self.connections):
             try:
                 await connection.write_message(message)
             except Exception:
                 self.connections.discard(connection)
-                log.warning("Removed failed NFWeb topology WebSocket", exc_info=True)
+                log.warning("removed failed nfweb topology websocket", exc_info=True)
 
 
 class TopologyAPIHandler(NFWebJSONHandler):
@@ -162,7 +170,7 @@ class TopologySelectionHandler(NFWebJSONHandler):
 
 
 class TopologyWebSocket(tornado.websocket.WebSocketHandler):
-    """Push snapshots from the local collector to connected browsers."""
+    """Push topology snapshots and progressive collection events to browsers."""
 
     def initialize(
         self,

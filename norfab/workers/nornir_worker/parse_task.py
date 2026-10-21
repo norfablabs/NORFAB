@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 from typing import Any, Union
 
 from nornir_salt.plugins.functions import FFun_functions
@@ -179,7 +180,9 @@ class ParseTask:
         Parse network device output using a TTP template.
 
         Fetches CLI output from devices based on the template's input
-        definitions, then parses the collected output with TTP.
+        definitions, then parses the collected output with TTP. Compiles the
+        template once per job and copies its compiled state for each host, keeping
+        inputs and parsing results isolated.
 
         Args:
             job: NorFab Job object containing relevant metadata.
@@ -217,8 +220,8 @@ class ParseTask:
 
         # go over template's inputs and collect commands to fetch from devices
         cli_runs = []
-        parser = ttp(template=template, log_level="ERROR")
-        for template_name, inputs in parser.get_input_load().items():
+        compiled_parser = ttp(template=template, log_level="ERROR")
+        for template_name, inputs in compiled_parser.get_input_load().items():
             inputs = inputs or {"Default_Input": {}}
             for input_name, input_params in inputs.items():
                 cli_runs.append(
@@ -257,7 +260,7 @@ class ParseTask:
             )
             if result.failed:
                 log.error(
-                    f"Failed collecting commands output, errors: {result.errors or result.messages}"
+                    f"failed collecting commands output, errors: {result.errors or result.messages}"
                 )
                 job.event("failed collecting commands output", severity="ERROR")
                 ret.errors.extend(result.errors)
@@ -269,7 +272,7 @@ class ParseTask:
                 input_data = []
                 for cmdname, cmdres in hres.items():
                     if cmdres["failed"]:
-                        msg = f"Failed collecting command '{cmdname}' output from '{hname}', error: {cmdres['exception']}"
+                        msg = f"failed collecting command '{cmdname}' output from '{hname}', error: {cmdres['exception']}"
                         log.error(msg)
                         ret.errors.append(msg)
                         job.event(msg, severity="ERROR")
@@ -277,7 +280,7 @@ class ParseTask:
                     input_data.append(cmdres["result"])
                 # parse command results
                 if input_data:
-                    parser = ttp(template=template, log_level="ERROR")
+                    parser = deepcopy(compiled_parser)
                     parser.add_input(
                         data="\n\n".join(input_data),
                         input_name=cli_run["input_name"],
@@ -289,7 +292,7 @@ class ParseTask:
                         structure=structure, templates=cli_run["template_name"]
                     )
                 else:
-                    msg = f"No input data collected for '{hname}' device"
+                    msg = f"no input data collected for '{hname}' device"
                     log.error(msg)
                     ret.errors.append(msg)
                     job.event(msg, severity="ERROR")

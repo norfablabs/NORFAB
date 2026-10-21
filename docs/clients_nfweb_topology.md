@@ -102,6 +102,7 @@ The topology dashboard provides:
 - a **Protocols** multi-select containing BGP;
 - a mutually exclusive **Stats** selector with Off, Traffic, Errors, and Flaps;
 - health and text filters across device metadata such as site, role, and address;
+- search pinned at the top-right of the topology header beside the inspector;
 - node and link inspection with source properties, state, and available metrics;
 - traffic animation and utilization coloring when Traffic statistics are selected;
 - red error links when any reported input, output, or CRC error counter is non-zero;
@@ -110,18 +111,24 @@ The topology dashboard provides:
 - subdued grey links when the selected statistic is unavailable, without hiding
   structural topology;
 - stable node positions and a persistent 3D camera across live snapshots;
+- gentle centering and bounded repulsion to keep disconnected groups closer;
+- automatic camera fitting during the initial layout and once it settles, with
+  viewport-aware padding; orbiting, panning, or zooming stops automatic fitting;
 - automatic coordinate locking after layout convergence, with explicit controls
   to restart or pause layout calculation without refreshes rearranging the graph;
 - independent view pause, camera rotation, node-distance, and node-size controls;
+- optional bloom, disabled by default for clearer node labels;
 - fixed, connection-count, or traffic-derived node sizing;
 - compact inspector tabs with search and column sorting for status and
   utilisation, related NetBox/LLDP/BGP connections, and complete source
   properties;
 - explicit partial, failed, disconnected, empty, and unsupported-WebGL states;
 - a persistent, scope-aware terminal log containing up to 300 entries and matching
-  NFCLI's timestamp, severity, worker, status, task, resource, and message layout;
-- vertical and horizontal log scrolling so long terminal lines remain available
-  without wrapping or truncation;
+  one record per line: timestamp, worker, status, resource, and message;
+- progressive job events and layer timings during collection, with automatic log
+  following while scrolled to the bottom;
+- vertical and horizontal log scrolling without wrapping or truncation; error
+  entries are red and warning entries yellow;
 - a manual refresh action that bypasses NFWeb caches and repeats the scoped
   inventory, topology, and live reads without refreshing Nornir inventory;
 - a single-line, horizontally scrollable top toolbar containing live status, a

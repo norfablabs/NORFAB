@@ -11,9 +11,9 @@ operator's computer. It connects directly to an existing NORFAB broker through t
 native Python client and presents focused browser applications to browsers on the
 operator's network.
 
-The application sidebar uses Mantine's nested-navbar pattern for Overview,
-Dashboards, and Admin. The Dashboards section contains runtime Monitoring and 3D
-Topology. Dashboard-specific controls belong to the center application header
+The application sidebar uses Mantine's nested-navbar pattern. Its Dashboards
+section contains runtime Monitoring and 3D Topology; on small screens, the
+applications button opens and closes the sidebar. Dashboard-specific controls belong to the center application header
 rather than the application sidebar.
 
 NFWeb uses Mantine's maintained React components and Tabler icons for its common
