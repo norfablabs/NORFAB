@@ -9,7 +9,7 @@ import threading
 import time
 import zlib
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union
 
 if TYPE_CHECKING:
     from norfab.core.agent import NFAgent
@@ -1302,8 +1302,8 @@ class NFPClient(object):
             Sends a job reply message to the broker requesting job results.
         get_iter(service, task, args=None, kwargs=None, workers="all", uuid=None, timeout=600):
             Sends a job reply message to the broker requesting job results and yields results iteratively.
-        fetch_file(url, destination=None, chunk_size=250000, pipeline=10, timeout=600, read=False):
-            Downloads a file from the Broker File Sharing Service.
+        fetch_file(url: str | list[str], chunk_size=256000, pipeline=10, timeout=600, read=False):
+            Downloads one file or a batch through the File Sharing service.
         run_job(service, task, uuid=None, args=None, kwargs=None, workers="all", timeout=600):
             Runs a job and returns results produced by workers.
         run_job_iter(service, task, uuid=None, args=None, kwargs=None, workers="all", timeout=600):
@@ -1732,162 +1732,209 @@ class NFPClient(object):
 
     def fetch_file(
         self,
-        url: str,
+        url: str | list[str],
         chunk_size: int = 256000,
         pipeline: int = 10,
         timeout: int = 600,
         read: bool = False,
-    ) -> Tuple[str, Any]:
-        """
-        Fetches a file from a given URL and saves it to a specified destination.
+    ) -> dict | list[dict]:
+        """Download files, reusing cached copies when their hashes match.
 
-        Parameters:
-            url (str): The URL of the file to be fetched.
-            chunk_size (int, optional): The size of each chunk to be fetched. Default is 250000 bytes.
-            pipeline (int, optional): The number of chunks to be fetched in transit. Default is 10.
-            timeout (int, optional): The maximum time (in seconds) to wait for the file to be fetched. Default is 600 seconds.
-            read (bool, optional): If True, the file content is read and returned. If False, the file path is returned. Default is False.
+        Queries all FileSharing workers for file details, then downloads files
+        sequentially, alternating between available workers in round-robin order.
+        Selection restarts on each call. Git URLs use each worker's resolved path.
+
+        Args:
+            url: An nf:// or git:// URL, or a list of URLs.
+            chunk_size: Bytes per chunk. Defaults to 256000.
+            pipeline: Maximum continuation requests in flight. Defaults to 10.
+            timeout: Seconds to wait for each job. Defaults to 600.
+            read: Return UTF-8 text instead of local paths. Defaults to False.
 
         Returns:
-            tuple: A tuple containing the status code (str) and the reply (str). The reply can be the file content, file path, or an error message.
+            A dictionary with status, content, and error for a string URL, or a
+            list of dictionaries in input order for a URL list. Missing files
+            return status 404. An empty list returns an empty list.
 
         Raises:
-            Exception: If there is an error in fetching the file or if the file's MD5 hash does not match the expected hash.
+            TypeError: If url is not a string or a list of strings.
+            OSError: If a local file operation fails; stops the batch.
+            UnicodeError: If read=True and the file is not valid UTF-8.
         """
-
-        # round up digit e.g. if 2.0 -> 2 if 2.1 -> 3 if 0.01 -> 1
-        def round_up(num: float) -> int:
-            return max(1, (int(num) + (not num.is_integer())))
-
-        uuid = uuid4().hex
-        result = {"status": "200", "content": None, "error": None}
-        downloaded = False
-        filesharing_worker = None
-
-        # Ask File Sharing to synchronize and resolve Git-backed URLs, then use
-        # the existing nf:// transfer path against the worker that owns the remote.
-        if url.startswith("git://"):
-            resolved_urls = self.run_job(
-                service="filesharing",
-                workers="all",
-                task="resolve_git_url",
-                kwargs={"url": url},
-                timeout=timeout,
+        # Accept one URL or a list; keep the original return format.
+        single = isinstance(url, str)
+        if single:
+            url = [url]
+        if not isinstance(url, list) or any(not isinstance(item, str) for item in url):
+            raise TypeError("url must be a string or a list of strings")
+        # Resolve Git URLs to file paths on each worker.
+        git_results = {}
+        git_urls = [item for item in url if item.startswith("git://")]
+        if git_urls:
+            git_results = (
+                self.run_job(
+                    service="filesharing",
+                    workers="all",
+                    task="resolve_git_url",
+                    kwargs={"url": git_urls},
+                    timeout=timeout,
+                )
+                or {}
             )
-            for worker_name, worker_result in resolved_urls.items():
-                if worker_result["failed"]:
-                    continue
-                url = worker_result["result"]
-                filesharing_worker = worker_name
-                break
-            else:
-                result["status"] = "404"
-                result["error"] = "Git URL resolution failed"
-                return result
 
-        # run sanity checks
-        if not url.startswith("nf://"):
-            result["status"] = "500"
-            result["error"] = "Invalid url format"
-            return result
-
-        # prevent path traversal / absolute paths
-        url_path = url.replace("nf://", "").replace("\\", "/")
-        url_path = url_path.lstrip("/\\")
-        destination = os.path.realpath(
-            os.path.join(self.base_dir, "fetchedfiles", *url_path.split("/"))
-        )
+        # Get file sizes and hashes from all workers in one request.
+        metadata_urls = [item for item in url if item.startswith("nf://")]
+        for response in git_results.values():
+            if not response["failed"]:
+                metadata_urls.extend(
+                    entry["result"]
+                    for entry in (response["result"] or {}).values()
+                    if not entry["failed"]
+                )
+        metadata = {}
+        if metadata_urls:
+            metadata = (
+                self.run_job(
+                    service="filesharing",
+                    workers="all",
+                    task="file_details",
+                    kwargs={"url": metadata_urls},
+                    timeout=timeout,
+                )
+                or {}
+            )
+        workers = sorted(metadata)
+        next_worker = 0
+        results = []
         fetched_root = os.path.realpath(os.path.join(self.base_dir, "fetchedfiles"))
-        if os.path.commonpath([fetched_root, destination]) != fetched_root:
-            result["status"] = "500"
-            result["error"] = "Invalid url path"
-            return result
+        # Loop over URLs and download each file from an available worker.
+        for item in url:
+            result = {"status": "404", "content": None, "error": "file not found"}
+            results.append(result)
+            if not item.startswith(("nf://", "git://")):
+                result.update(status="500", error="Invalid url format")
+                continue
 
-        os.makedirs(os.path.split(destination)[0], exist_ok=True)
-
-        self.file_transfers[uuid] = {
-            "total_bytes_received": 0,  # Total bytes received
-            "offset": 0,  # Offset of next chunk request
-            "credit": pipeline,  # Up to PIPELINE chunks in transit
-            "chunk_size": chunk_size,
-            "file_hash": hashlib.md5(),
-        }
-
-        # get file details
-        file_details = self.run_job(
-            service="filesharing",
-            workers=[filesharing_worker] if filesharing_worker else "all",
-            task="file_details",
-            kwargs={"url": url},
-            timeout=timeout,
-        )
-        for w_name, w_res in file_details.items():
-            if not w_res["failed"]:
-                file_details = w_res["result"]
-                self.file_transfers[uuid].update(file_details)
-                self.file_transfers[uuid]["w_name"] = w_name
-                self.file_transfers[uuid]["chunk_requests_remaining"] = round_up(
-                    file_details["size_bytes"] / chunk_size
+            # Choose the next worker that has this file.
+            resolved_url = item
+            details = None
+            # Try each worker once, starting where the previous selection left off.
+            for offset in range(len(workers)):
+                # Wrap back to the first worker after reaching the end of the list.
+                index = (next_worker + offset) % len(workers)
+                worker = workers[index]
+                response = metadata[worker]
+                if response["failed"]:
+                    continue
+                candidate_url = item
+                if item.startswith("git://"):
+                    resolution = git_results.get(worker)
+                    if not resolution or resolution["failed"]:
+                        continue
+                    entry = (resolution["result"] or {}).get(item)
+                    if not entry or entry["failed"]:
+                        continue
+                    candidate_url = entry["result"]
+                entry = (response["result"] or {}).get(candidate_url)
+                if entry and not entry["failed"]:
+                    details = entry["result"]
+                    resolved_url = candidate_url
+                    # Start the next file with the worker after this one.
+                    next_worker = (index + 1) % len(workers)
+                    break
+            if not resolved_url.startswith("nf://"):
+                continue
+            destination = os.path.realpath(
+                os.path.join(
+                    fetched_root,
+                    *resolved_url.removeprefix("nf://")
+                    .replace("\\", "/")
+                    .lstrip("/")
+                    .split("/"),
                 )
-                break
-        else:
-            result["status"] = "404"
-            result["error"] = "File download failed - file not found"
-            _ = self.file_transfers.pop(uuid)
-            return result
-
-        log.debug(f"{self.name}:fetch_file - retrieved file details - {file_details}")
-
-        # check if file already downloaded
-        if os.path.isfile(destination):
-            file_hash = hashlib.md5()
-            with open(destination, "rb") as f:
-                chunk = f.read(8192)
-                while chunk:
-                    file_hash.update(chunk)
-                    chunk = f.read(8192)
-            md5hash = file_hash.hexdigest()
-            downloaded = md5hash == file_details["md5hash"]
-
-        if file_details["exists"] and not downloaded:
-            self.file_transfers[uuid]["destination"] = open(destination, "wb")
-            # decrement by 1 because calling fetch_job sends first chunk
-            self.file_transfers[uuid]["chunk_requests_remaining"] -= 1
-            # run fetch file job
-            file_fetch_job = self.run_job(
-                uuid=uuid,
-                service="filesharing",
-                workers=[w_name],
-                task="fetch_file",
-                kwargs={"url": url, "offset": 0, "chunk_size": chunk_size},
-                timeout=timeout,
             )
-            file_fetch_job = file_fetch_job[w_name]
-
-            if file_fetch_job["failed"]:
-                result["status"] = "404"
-                result["error"] = file_fetch_job["errors"]
-                downloaded = False
-            else:
-                downloaded = True
-
-        if downloaded:
-            # Verify streaming did not mark job failed (e.g., MD5 mismatch)
-            download_job = self.job_db.get_job(uuid)
-            if download_job and download_job.get("status") == JobStatus.FAILED:
-                result["error"] = (
-                    f"File download job {uuid} failed: {download_job.get('errors', [])}"
+            # Reject paths outside the local cache directory.
+            try:
+                safe = os.path.commonpath([fetched_root, destination]) == fetched_root
+            except ValueError:
+                safe = False
+            if not safe:
+                result.update(status="500", error="Invalid url path")
+                continue
+            if details is None:
+                continue
+            result.update(status="200", error=None)
+            # Check whether the cached file matches the worker's copy.
+            cached = False
+            if os.path.isfile(destination):
+                file_hash = hashlib.md5()
+                with open(destination, "rb") as file_obj:
+                    chunk = file_obj.read(8192)
+                    while chunk:
+                        file_hash.update(chunk)
+                        chunk = file_obj.read(8192)
+                cached = file_hash.hexdigest() == details["md5hash"]
+            # Download the file if it is missing or has changed.
+            if not cached:
+                os.makedirs(os.path.dirname(destination), exist_ok=True)
+                uuid = uuid4().hex
+                self.file_transfers[uuid] = {
+                    **details,
+                    "destination": open(destination, "wb"),
+                    "total_bytes_received": 0,
+                    "offset": 0,
+                    "credit": pipeline,
+                    "chunk_size": chunk_size,
+                    "file_hash": hashlib.md5(),
+                    # The first chunk arrives automatically; request the remaining chunks.
+                    "chunk_requests_remaining": max(
+                        0,
+                        (details["size_bytes"] + chunk_size - 1) // chunk_size - 1,
+                    ),
+                }
+                # Fetch from the worker that supplied the file details.
+                reply = (
+                    self.run_job(
+                        uuid=uuid,
+                        service="filesharing",
+                        workers=[worker],
+                        task="fetch_file",
+                        kwargs={
+                            "url": resolved_url,
+                            "offset": 0,
+                            "chunk_size": chunk_size,
+                        },
+                        timeout=timeout,
+                    )
+                    or {}
                 )
-                result["status"] = "400"
-            elif read:
-                with open(destination, "r", encoding="utf-8") as f:
-                    result["content"] = f.read()
+                # Check the worker reply and the downloaded file hash.
+                self.file_transfers[uuid]["destination"].close()
+                response = reply.get(worker)
+                if not response or response["failed"]:
+                    result.update(
+                        status="404",
+                        error=(
+                            response["errors"] if response else "File download failed"
+                        ),
+                    )
+                elif (
+                    self.file_transfers[uuid]["file_hash"].hexdigest()
+                    != details["md5hash"]
+                ):
+                    result.update(
+                        status="400", error="Download failed, MD5 hash mismatch"
+                    )
+                self.file_transfers.pop(uuid)
+                if result["status"] != "200":
+                    continue
+            # Return the file contents or its local path.
+            if read:
+                with open(destination, "r", encoding="utf-8") as file_obj:
+                    result["content"] = file_obj.read()
             else:
                 result["content"] = destination
-
-        _ = self.file_transfers.pop(uuid)
-
-        return result
+        return results[0] if single else results
 
     def recover_job_futures(self) -> None:
         active_statuses = [

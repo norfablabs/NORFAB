@@ -7,12 +7,14 @@
 
 ## ENHANCEMENTS
 
-1. Nornir `parse` with TTP now compiles the template once per job and copies the parser per host, preserving host isolation. Local parsing benchmarks improved by 37–63%; this measures parsing time, not total device collection time.
-2. Refined NFWeb's existing layout with NORFAB branding, consistent neutral colors and controls, mobile application navigation, and improved chart sizing. Removed unused navigation placeholders and reduced Monitoring's bundled chart imports.
-3. NFWeb Topology now streams collection events while jobs run, avoids duplicate events, reports layer collection timings, and preserves the log scroll position when reading earlier events. Each record occupies one horizontally scrollable line containing timestamp, worker, status, and message, with red errors and yellow warnings.
-4. Moved topology search beside the selected-item inspector, brought disconnected node groups closer together, and fitted nodes and labels into the initial viewport while layout settles. Automatic fitting stops when the user navigates the graph. Retained the original dark graph background for optional bloom.
-5. NFWeb Monitoring now refreshes worker job counts alongside runtime statistics.
-6. Updated scale-environment FakeNOS IOS XR profiles for the BGP commands used by current TTP templates, including VRF-neighbor queries and neighbor-group membership. Restart the FakeNOS worker to reload changed profiles.
+1. File-fetch client and worker helpers now accept URL strings or lists, preserving single-file responses and returning ordered lists for batch inputs. FileSharing batches metadata and Git resolution, synchronizing each referenced remote once per request. Discovery queries all FileSharing workers and rotates file downloads across available workers, preserving each worker's Git mount. Nornir test suites share fetched assets across hosts. Single-file caller syntax, per-file streaming, and cache hash validation are preserved. Files without usable metadata return a normal missing-file result. Batch tasks collect entry errors, and failed downloads retain worker errors before hash validation.
+2. FakeNOS now fetches NOS profiles in batches during worker startup, reducing sequential metadata requests while preserving profile order, cache validation, and individual profile error reporting.
+3. Nornir `parse` with TTP now compiles the template once per job and copies the parser per host, preserving host isolation. Local parsing benchmarks improved by 37–63%; this measures parsing time, not total device collection time.
+4. Refined NFWeb's existing layout with NORFAB branding, consistent neutral colors and controls, mobile application navigation, and improved chart sizing. Removed unused navigation placeholders and reduced Monitoring's bundled chart imports.
+5. NFWeb Topology now streams collection events while jobs run, avoids duplicate events, reports layer collection timings, and preserves the log scroll position when reading earlier events. Each record occupies one horizontally scrollable line containing timestamp, worker, status, and message, with red errors and yellow warnings.
+6. Moved topology search beside the selected-item inspector, brought disconnected node groups closer together, and fitted nodes and labels into the initial viewport while layout settles. Automatic fitting stops when the user navigates the graph. Retained the original dark graph background for optional bloom.
+7. NFWeb Monitoring now refreshes worker job counts alongside runtime statistics.
+8. Updated scale-environment FakeNOS IOS XR profiles for the BGP commands used by current TTP templates, including VRF-neighbor queries and neighbor-group membership. Restart the FakeNOS worker to reload changed profiles.
 
 # 0.24.16
 

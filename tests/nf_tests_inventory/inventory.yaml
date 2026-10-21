@@ -57,6 +57,7 @@ plugins:
 topology:
   broker: true
   workers:
+  - filesharing-worker-2
   - netbox-worker-1.1
   - netbox-worker-1.2
   - nornir-worker-1
@@ -89,6 +90,8 @@ workers:
   - fastmcp/common.yaml
   filesharing-worker-1:
   - filesharing/git.yaml
+  filesharing-worker-2:
+  - filesharing/worker2.yaml
   netbox-worker-1.*:
   - netbox/common.yaml
   nornir-*:

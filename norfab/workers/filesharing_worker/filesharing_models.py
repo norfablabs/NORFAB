@@ -142,10 +142,8 @@ class RemoteNameInput(BaseModel, use_enum_values=True, populate_by_name=True):
 
 
 class ResolveGitUrlInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    url: StrictStr = Field(
-        ...,
-        min_length=1,
-        description="Git file URL in git://<remote-name>/<path> format",
+    url: StrictStr | list[StrictStr] = Field(
+        ..., description="Git file URL or URL list to resolve"
     )
 
 
@@ -186,10 +184,14 @@ class GitCloneResult(Result):
     )
 
 
+class ResolveGitUrlEntry(Result):
+    result: StrictStr | None = Field(None, description="Resolved published nf:// URL")
+
+
 class ResolveGitUrlResult(Result):
-    result: Union[StrictStr, None] = Field(
-        None,
-        description="Resolved nf:// URL after successful Git synchronization",
+    result: dict[StrictStr, ResolveGitUrlEntry] | StrictStr | None = Field(
+        default_factory=dict,
+        description="Resolved URL for string input, or per-URL results for list input",
     )
 
 
@@ -238,9 +240,9 @@ class ListFilesResult(Result):
 
 
 class FileDetailsInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    url: StrictStr = Field(
+    url: StrictStr | list[StrictStr] = Field(
         ...,
-        description="File URL starting with nf:// to get details for",
+        description="File URL or URL list starting with nf:// to inspect",
     )
 
 
@@ -250,10 +252,14 @@ class FileDetailsPayload(BaseModel):
     exists: StrictBool = Field(False, description="True if the file exists")
 
 
+class FileDetailsEntry(Result):
+    result: FileDetailsPayload | None = Field(None, description="Metadata on success")
+
+
 class FileDetailsResult(Result):
-    result: FileDetailsPayload = Field(
-        {},
-        description="File details",
+    result: dict[StrictStr, FileDetailsEntry] | FileDetailsPayload | None = Field(
+        default_factory=dict,
+        description="Metadata for string input, or per-URL results for list input",
     )
 
 

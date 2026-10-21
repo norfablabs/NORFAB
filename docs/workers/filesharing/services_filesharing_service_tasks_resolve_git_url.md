@@ -13,23 +13,13 @@ configured remote, and returns the file's published `nf://` URL. The task does
 not stream file content. `NFPClient.fetch_file()` calls it automatically before
 using the existing File Sharing transfer flow.
 
-## Inputs
-
-| Parameter | Required | Description |
-|---|---:|---|
-| `url` | Yes | File URL in `git://<remote-name>/<path>` format |
-
 ## Output
 
-Successful resolution returns an `nf://` URL using the remote's configured
-mount:
-
-```json
-"nf://repositories/network-assets/templates/base.j2"
-```
-
-Invalid URLs, unknown remotes, paths outside the selected mount, missing files,
-and Git synchronization failures return a failed result.
+Returns results keyed by original Git URL. Each entry contains `failed`, `errors`,
+and `result`; successful results contain the file's published `nf://` URL using
+its remote's configured mount. Missing files, invalid paths, and failed remotes
+produce individual failures. Each valid referenced remote is synchronized once
+per request. The `url` argument accepts a string or list. A string retains the original single-file result containing the published URL directly, or a failed result.
 
 ## Examples
 
@@ -54,7 +44,7 @@ and Git synchronization failures return a failed result.
             service="filesharing",
             task="resolve_git_url",
             workers="filesharing-worker-1",
-            kwargs={"url": "git://network-assets/templates/base.j2"},
+            kwargs={"url": ["git://network-assets/templates/base.j2"]},
         )
         print(result)
     ```
@@ -85,3 +75,5 @@ and Git synchronization failures return a failed result.
 ## Python API Reference
 
 ::: norfab.workers.filesharing_worker.git_tasks.GitTasks.resolve_git_url
+
+Batch entry errors are also collected in the outer result's `errors` list, while successful entries remain available.

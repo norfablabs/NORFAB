@@ -5,5 +5,5 @@ instances:
   prod:
     default: true
     url: http://netbox.lab:8000
-    token: nbt_KPcm4NdP9p6H.jt0LgAi6HD2ZubMDQ02syQDZz7Rb2MfJe7JuI8gz
+    token: nbt_YE8yDqZepeM6.VNbftetSfVBjap23WoRWlMWJOQz40kKmGkQJih9e
     ssl_verify: false

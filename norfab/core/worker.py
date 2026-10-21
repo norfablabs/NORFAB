@@ -1922,38 +1922,42 @@ class NFPWorker:
         return any(str(url).startswith(k) for k in ["nf://", "git://"])
 
     def fetch_file(
-        self, url: str, raise_on_fail: bool = False, read: bool = True
-    ) -> str:
-        """
-        Function to download file from broker File Sharing Service
+        self, url: str | list[str], raise_on_fail: bool = False, read: bool = True
+    ) -> str | None | list[str | None]:
+        """Fetch one or more published files through the worker's client.
 
         Args:
-            url: file location string in ``nf://<filepath>`` or
-                ``git://<remote-name>/<filepath>`` format
-            raise_on_fail: raise FileNotFoundError if download fails
-            read: if True returns file content, return OS path to saved file otherwise
+            url: An nf:// or git:// URL, or a list of URLs.
+            raise_on_fail: Raise after fetching if any URL failed. Defaults to False.
+            read: Return text content when True (default), otherwise local paths.
 
         Returns:
-            str: File content if read is True, otherwise OS path to the saved file.
+            File content or path for a string URL, or a list in input order for
+            a URL list, preserving duplicate positions. Failed entries are None.
+            An empty list returns an empty list without submitting jobs.
 
         Raises:
-            FileNotFoundError: If raise_on_fail is True and the download fails.
+            TypeError: If url is neither a string nor a list of strings.
+            ValueError: If a single URL has an unsupported scheme.
+            FileNotFoundError: If raise_on_fail is True and any file failed.
         """
-        if not self.is_url(url):
+        single = isinstance(url, str)
+        if single and not self.is_url(url):
             raise ValueError(f"Invalid URL format: {url}")
-
-        result = self.client.fetch_file(url=url, read=read)
-        status = result["status"]
-        file_content = result["content"]
-        msg = f"{self.name} - worker '{url}' fetch file failed with status '{status}'"
-
-        if status == "200":
-            return file_content
-        elif raise_on_fail is True:
-            raise FileNotFoundError(msg)
-        else:
-            log.error(msg)
-            return None
+        results = self.client.fetch_file(url=url, read=read)
+        urls = [url] if single else url
+        results = [results] if single else results
+        failed = []
+        content = []
+        for item, result in zip(urls, results):
+            content.append(result["content"] if result["status"] == "200" else None)
+            if result["status"] != "200":
+                message = f"{self.name} - fetching '{item}' failed: {result['error']}"
+                log.error(message)
+                failed.append(item)
+        if failed and raise_on_fail:
+            raise FileNotFoundError(f"failed to fetch files: {', '.join(failed)}")
+        return content[0] if single else content
 
     def jinja2_render_templates(
         self,

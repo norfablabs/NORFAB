@@ -12,19 +12,9 @@ in chunks with offset support. In most user code, prefer the client helper
 method `NFPClient.fetch_file()` because it handles streaming, caching, local
 file management, and on-demand Git remote synchronization.
 
-## Inputs
-
-| Parameter | Required | Description |
-|---|---:|---|
-| `url` | Yes | `nf://` file URL, or `git://<remote-name>/<path>` when using the client or worker helper |
-| `chunk_size` | No | Number of bytes to return from the given offset when invoking the task directly |
-| `offset` | No | Byte offset for direct task invocation |
-| `destination` | No | Local destination path when using the CLI/helper |
-| `read` | No | Return file content as text instead of only downloading |
-
 ## Output
 
-The client helper returns a dictionary whose `content` value is either the local file path or the file text when `read=True`. Direct task invocation returns a chunk-oriented response intended for the helper protocol.
+The client helper accepts a URL string or list of URLs. A string returns the original `status`, `content`, and `error` dictionary; a list returns a list of those dictionaries in input order, preserving duplicate positions. Content is the local path or UTF-8 text with `read=True`. Metadata is checked in one batch, while changed files stream individually. Discovery queries all FileSharing workers. Each call rotates file selections across workers with successful metadata, skipping missing files. Each transfer uses its selected worker, including that worker's resolved Git mount. Local file and decoding errors propagate to the caller and stop a batch. The low-level worker task still streams one file per job and returns a boolean completion result; raw chunks arrive separately over STREAM messages.
 
 ## Examples
 
@@ -33,7 +23,7 @@ The client helper returns a dictionary whose `content` value is either the local
     Download a file:
 
     ```bash
-    nf#file copy url nf://filesharing/test_file_1.txt destination ./test_file_1.txt
+    nf#file copy url nf://filesharing/test_file_1.txt
     ```
 
     Print file content:
@@ -92,29 +82,13 @@ The client helper returns a dictionary whose `content` value is either the local
         print(result["content"])
     ```
 
-    Direct lifecycle - direct task invocation:
+    Multiple files, including mixed sources:
 
     ```python
-    from norfab.core.nfapi import NorFab
-
-    nf = NorFab(inventory="./inventory.yaml")
-    try:
-        nf.start()
-        client = nf.make_client()
-
-        result = client.run_job(
-            service="filesharing",
-            task="fetch_file",
-            workers="any",
-            kwargs={
-                "url": "nf://filesharing/test_file_1.txt",
-                "chunk_size": 256000,
-                "offset": 0,
-            },
-        )
-        print(result)
-    finally:
-        nf.destroy()
+    urls = ["nf://templates/base.j2", "git://network-assets/README.md"]
+    results = client.fetch_file(url=urls, read=True)
+    for url, entry in zip(urls, results):
+        print(url, entry["status"], entry["content"], entry["error"])
     ```
 
 ## Filesharing Fetch File Command Shell Reference
@@ -139,4 +113,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.filesharing_worker.filesharing_worker.FileSharingWorker.fetch_file
+::: norfab.workers.filesharing_worker.local_files_tasks.LocalFilesTasks.fetch_file

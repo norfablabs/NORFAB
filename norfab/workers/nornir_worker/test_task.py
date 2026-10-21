@@ -149,13 +149,21 @@ class TestTask:
             raise RuntimeError(msg) from e
 
         # download pattern, schema and custom function files
+        asset_urls = [
+            item[key]
+            for suite_tests in tests.values()
+            for item in suite_tests
+            for key in ["pattern", "schema", "function_file"]
+            if self.is_url(item.get(key))
+        ]
+        assets = dict(
+            zip(asset_urls, self.fetch_file(asset_urls, raise_on_fail=True, read=True))
+        )
         for host_name in tests.keys():
             for index, item in enumerate(tests[host_name]):
                 for k in ["pattern", "schema", "function_file"]:
                     if self.is_url(item.get(k)):
-                        item[k] = self.fetch_file(
-                            item[k], raise_on_fail=True, read=True
-                        )
+                        item[k] = assets[item[k]]
                         if k == "function_file":
                             item["function_text"] = item.pop(k)
                 tests[host_name][index] = item

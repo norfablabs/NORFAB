@@ -1,0 +1,3 @@
+service: filesharing
+# Tests run from tests/, matching the testing framework's working directory.
+base_dir: ./nf_tests_inventory/filesharing/worker2

@@ -12,7 +12,7 @@ The implementation is split across:
 
 ## Purpose
 
-`NFPClient.fetch_file()` downloads `nf://...` files from a `filesharing` worker into the client’s local `fetchedfiles/` folder.
+`NFPClient.fetch_file()` accepts an `nf://...` or `git://...` URL string or a list of URLs and downloads files from a `filesharing` worker into the client’s local `fetchedfiles/` folder.
 
 `filesharing` is a built-in NORFAB service. When you start NORFAB via `NorFab` (NFAPI) with broker enabled, NFAPI injects a default File Sharing worker (`filesharing-worker-1`) into the inventory and adds it to the topology so it is started alongside other workers.
 
@@ -28,14 +28,39 @@ This is implemented in `norfab/core/nfapi.py`:
 
 ## High-level flow
 
-1. Client validates the URL (`nf://...`) and prepares a destination path under `${base_dir}/fetchedfiles/`.
-2. Client calls `filesharing.file_details` (normal job/response) to discover:
-   - `exists`, `size_bytes`, `md5hash`
-   - and to pick a worker that has the file
-3. Client starts a `filesharing.fetch_file` job on the chosen worker with `offset=0` and `chunk_size=256000` (by default but can be adjusted using the `chunk_size` argument).
-4. Worker reads the file and pushes each chunk using `job.stream(chunk)` (NFP `STREAM`).
-5. Client `zmq_send_recv` thread writes each chunk to disk, updates running MD5, and sends `PUT` messages to request the next offsets until complete.
-6. When total received bytes match `size_bytes`, client closes the file and verifies the MD5.
+1. Normalize a string or URL list internally without deduplicating it.
+2. Resolve Git URLs in one request using `workers="all"`. Each worker
+   synchronizes each referenced remote once per request.
+3. Request file metadata from all workers in one batch, including resolved Git
+   paths. Select an available worker per file, rotating through workers within
+   this call and skipping missing or failed entries. For Git URLs, use that
+   worker's resolved path.
+4. Hash cached files and reuse matching copies without creating transfer state.
+5. Download changed or absent files sequentially from their selected workers using
+   the existing single-file task and STREAM/PUT protocol. Each transfer has a UUID.
+6. Check download results and streamed hashes, closing files and clearing transfer
+   state after the transfer job returns, including failed replies.
+
+There is no fixed client-side limit of 100 URLs per metadata request.
+
+String input returns the original single-file `{status, content, error}` response.
+List input returns a list of those responses in the same order, retaining duplicate
+positions. With `read=False`, content is the cached
+path; with `read=True`, it is UTF-8 text. Empty lists return `[]` without jobs.
+Discovery and worker failures are returned per file. Local file errors propagate
+to the caller and stop the batch. Each file uses metadata and content from the
+same worker.
+
+`NFPWorker.fetch_file(url)` returns one file's content or path; a URL list returns
+a list of contents or paths in input order. Failed entries are `None`.
+`raise_on_fail=True` raises after processing the batch and identifies failed URLs.
+NFCLI retains its existing single-file calls.
+
+Metadata and Git-resolution tasks also preserve their original single-string
+responses. List inputs return per-URL result mappings containing `failed`,
+`errors`, and `result`; the client consumes those mappings internally.
+The wire-level streaming task still handles one file per job; its inputs and
+raw stream framing are unchanged. `timeout` applies to each submitted job.
 
 ### Flow diagram
 
@@ -47,9 +72,9 @@ sequenceDiagram
   participant W as FileSharingWorker
   participant J as Worker Job object (Job)
 
-  C->>B: POST filesharing:file_details {url}
-  B->>W: POST {url}
-  W-->>B: RESPONSE 200 {exists,size_bytes,md5hash}
+  C->>B: POST filesharing:file_details {url: [urls]}
+  B->>W: POST {url: [urls]}
+  W-->>B: RESPONSE 200 {url: {failed,result: metadata}}
   B-->>C: RESPONSE 200 {…}
 
   Note over C: allocate transfer state (uuid, credit=pipeline)
@@ -202,7 +227,7 @@ If MD5 mismatches, the client marks the job as failed and logs an error.
 - **Timeouts**
   - Worker `filesharing.fetch_file` defaults `chunk_timeout=5` seconds.
   - If the client stops sending `PUT` requests, the worker raises `RuntimeError`.
-  - Client `fetch_file(timeout=...)` limits the overall `run_job()` operations (details + streaming job).
+  - Client `fetch_file(timeout=...)` sets the timeout for each submitted job, not a shared whole-batch deadline.
 
 - **Local storage path**
   - Downloads go to `${base_dir}/fetchedfiles/<nf-path>`.
@@ -211,8 +236,9 @@ If MD5 mismatches, the client marks the job as failed and logs an error.
   - `fetch_file(read=True)` opens the downloaded file as UTF-8 text (`open(..., "r", encoding="utf-8")`).
   - For binary files, prefer `read=False` and open the returned path in binary mode.
 
-- **Single worker selection**
-  - `file_details` is called on `workers="all"`, but `fetch_file` streams from the *first* worker that reports `exists`.
+- **Worker selection**
+  - Discovery queries all workers. Each call rotates file selections across workers
+    with successful metadata; transfers use the selected worker.
 
 ## Debugging tips
 

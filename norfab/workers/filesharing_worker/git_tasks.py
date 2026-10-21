@@ -484,43 +484,69 @@ class GitTasks:
             }
         },
     )
-    def resolve_git_url(self, job: Job, url: str) -> Result:
-        """Synchronize a Git remote and resolve its file URL to an nf:// URL.
+    def resolve_git_url(self, job: Job, url: str | list[str]) -> Result:
+        """Synchronize remotes and resolve a batch of Git URLs.
 
         Args:
-            job: Active worker job used by the Git synchronization task.
-            url: File URL in ``git://<remote-name>/<path>`` format.
+            job: Active worker job used for synchronization events.
+            url: A git:// URL or list of URLs. An empty list returns no entries.
 
         Returns:
-            A result containing the published ``nf://`` file URL. Invalid URLs,
-            unknown remotes, unsafe paths, and synchronization failures produce
-            failed results.
+            For string input, a published nf:// URL or a failed result. For list
+            input, per-URL results containing published URLs or individual errors.
+            Each referenced valid remote is synchronized once per request. A
+            remote synchronization failure affects only that remote's entries.
+            Entry errors are also collected in the outer result errors list.
         """
-        remote_path = url.removeprefix("git://").replace("\\", "/")
-        name, separator, file_path = remote_path.partition("/")
-        if not url.startswith("git://") or not name or not separator or not file_path:
-            return Result(failed=True, errors=[f"'{url}' - invalid Git URL format"])
+        urls = [url] if isinstance(url, str) else url
+        synced = {}
+        ret = Result(result={})
+        for item in urls:
+            try:
+                remote_path = item.removeprefix("git://").replace("\\", "/")
+                name, separator, file_path = remote_path.partition("/")
+                if (
+                    not item.startswith("git://")
+                    or not name
+                    or not separator
+                    or not file_path
+                ):
+                    raise ValueError(f"'{item}' - invalid Git URL format")
 
-        remote = self.remotes.get(name)
-        if remote is None:
-            return Result(failed=True, errors=[f"Remote '{name}' is not configured"])
-        if remote["type"] != "git":
-            return Result(failed=True, errors=[f"Remote '{name}' is not a git remote"])
+                remote = self.remotes.get(name)
+                if remote is None:
+                    raise ValueError(f"Remote '{name}' is not configured")
+                if remote["type"] != "git":
+                    raise ValueError(f"Remote '{name}' is not a git remote")
 
-        mount_path = self._safe_path(remote["mount"])
-        resolved_path = os.path.abspath(os.path.join(mount_path, *file_path.split("/")))
-        if os.path.commonpath([mount_path, resolved_path]) != mount_path:
-            return Result(failed=True, errors=[f"'{url}' - invalid Git URL path"])
+                mount_path = self._safe_path(remote["mount"])
+                resolved_path = os.path.abspath(
+                    os.path.join(mount_path, *file_path.split("/"))
+                )
+                if os.path.commonpath([mount_path, resolved_path]) != mount_path:
+                    raise ValueError(f"'{item}' - invalid Git URL path")
 
-        sync_result = self.git_clone(job, name)
-        if sync_result.failed:
-            return Result(failed=True, errors=sync_result.errors)
-        if not os.path.isfile(resolved_path):
-            return Result(failed=True, errors=[f"'{url}' file not found"])
-
-        published_path = os.path.relpath(resolved_path, mount_path).replace(os.sep, "/")
-        resolved_url = f"{remote['mount'].rstrip('/')}/{published_path}"
-        return Result(result=resolved_url)
+                # Share one synchronization across all files from this remote.
+                if name not in synced:
+                    synced[name] = self.git_clone(job, name)
+                sync_result = synced[name]
+                if sync_result.failed:
+                    entry = Result(failed=True, errors=sync_result.errors)
+                elif not os.path.isfile(resolved_path):
+                    entry = Result(failed=True, errors=[f"'{item}' file not found"])
+                else:
+                    published_path = os.path.relpath(resolved_path, mount_path).replace(
+                        os.sep, "/"
+                    )
+                    resolved_url = f"{remote['mount'].rstrip('/')}/{published_path}"
+                    entry = Result(result=resolved_url)
+            except (OSError, ValueError) as exc:
+                entry = Result(failed=True, errors=[str(exc)])
+            ret.errors.extend(entry.errors)
+            ret.result[item] = entry.model_dump()
+        if isinstance(url, str):
+            return entry
+        return ret
 
     def start_git_sync(self) -> threading.Thread | None:
         """Start periodic Git synchronization when at least one remote enables it.

@@ -4,6 +4,8 @@ import pprint
 
 import pytest
 
+from norfab.core.client import NFPClient
+
 pytestmark = [
     pytest.mark.filesharing,
     pytest.mark.filesharing_file_details,
@@ -143,3 +145,45 @@ class TestFileDetails:
 # ----------------------------------------------------------------------------
 # WALK TESTS
 # ----------------------------------------------------------------------------
+
+
+class TestFileDetailsBatch:
+    def test_batch_keeps_metadata_and_individual_errors(
+        self, nfclient: NFPClient
+    ) -> None:
+        urls = [
+            "nf://filesharing/test_file_1.txt",
+            "nf://filesharing/non_existent_file.txt",
+            "nf://../../outside",
+            "ftp://invalid",
+        ]
+        response = nfclient.run_job(
+            "filesharing",
+            "file_details",
+            workers=["filesharing-worker-1"],
+            kwargs={"url": urls},
+        )["filesharing-worker-1"]
+
+        assert response["failed"] is False
+        entries = response["result"]
+        assert response["errors"] == [
+            error for entry in entries.values() for error in entry["errors"]
+        ]
+        assert list(entries) == urls
+        assert entries[urls[0]]["result"]["exists"] is True
+        with open("nf_tests_inventory/filesharing/test_file_1.txt", "rb") as source:
+            expected = hashlib.md5(source.read()).hexdigest()
+        assert entries[urls[0]]["result"]["md5hash"] == expected
+        assert all(
+            entries[url]["failed"] and entries[url]["errors"] for url in urls[1:]
+        )
+
+    def test_empty_batch_returns_no_entries(self, nfclient: NFPClient) -> None:
+        response = nfclient.run_job(
+            "filesharing",
+            "file_details",
+            workers=["filesharing-worker-1"],
+            kwargs={"url": []},
+        )["filesharing-worker-1"]
+        assert response["failed"] is False
+        assert response["result"] == {}

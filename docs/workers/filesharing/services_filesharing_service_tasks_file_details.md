@@ -7,17 +7,11 @@ tags:
 
 > task api name: `file_details`
 
-The `file_details` task returns metadata about a file, including existence status, size in bytes, and MD5 hash. Use it to verify file integrity or check a file before downloading it.
-
-## Inputs
-
-| Parameter | Required | Description |
-|---|---:|---|
-| `url` | Yes | File URL to inspect |
+The `file_details` task returns metadata about one or more files, including existence status, size in bytes, and MD5 hash. Use it to verify file integrity or check a file before downloading it.
 
 ## Output
 
-Returns metadata for the requested file, including whether it exists, its size, and its MD5 hash when available.
+Returns results keyed by requested URL. Each entry contains `failed`, `errors`, and `result`; successful result payloads contain `exists`, `size_bytes`, and `md5hash`. Missing or unsafe files fail individually. An empty list returns an empty mapping. A string URL retains the original single-file result containing metadata directly, or a failed result for a missing or unsafe file.
 
 ## Examples
 
@@ -43,7 +37,7 @@ Returns metadata for the requested file, including whether it exists, its size, 
             service="filesharing",
             task="file_details",
             workers="any",
-            kwargs={"url": "nf://filesharing/test_file_1.txt"},
+            kwargs={"url": ["nf://filesharing/test_file_1.txt"]},
         )
         print(result)
     ```
@@ -62,7 +56,7 @@ Returns metadata for the requested file, including whether it exists, its size, 
             service="filesharing",
             task="file_details",
             workers="any",
-            kwargs={"url": "nf://templates/base.j2"},
+            kwargs={"url": ["nf://templates/base.j2"]},
         )
         print(result)
     finally:
@@ -86,3 +80,5 @@ nf#
 ## Python API Reference
 
 ::: norfab.workers.filesharing_worker.filesharing_worker.FileSharingWorker.file_details
+
+Batch entry errors are also collected in the outer result's `errors` list, while successful entries remain available.

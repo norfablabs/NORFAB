@@ -195,8 +195,8 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
         """
         Load NOS plugin definitions declared in the worker inventory.
 
-        Fetches each plugin file listed under the ``nos_plugins`` key of the
-        FakeNOS inventory, parses the YAML content, and returns the list of
+        Fetches plugin files under ``nos_plugins`` in metadata batches, reuses
+        unchanged cached files, parses their YAML, and returns the list of
         plugin dictionaries ready to be passed to :class:`FakeNOS`.
 
         Returns:
@@ -204,11 +204,15 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
             configured or all plugins fail to load.
         """
         ret = []
-        for name, plugin in self.fakenos_inventory.get("nos_plugins", {}).items():
+        plugins = self.fakenos_inventory.get("nos_plugins", {})
+        files = self.fetch_file(list(plugins.values()))
+        for (name, plugin), content in zip(plugins.items(), files):
             try:
-                ret.append(yaml.safe_load(self.fetch_file(plugin, raise_on_fail=True)))
+                if content is None:
+                    raise FileNotFoundError(plugin)
+                ret.append(yaml.safe_load(content))
             except Exception as e:
-                log.error(f"{name} - Plugin load failed, error: {e}", exc_info=True)
+                log.error(f"{name} - plugin load failed, error: {e}", exc_info=True)
         return ret
 
     def auto_start_networks(self) -> None:

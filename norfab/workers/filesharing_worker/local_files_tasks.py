@@ -101,41 +101,48 @@ class LocalFilesTasks:
             }
         },
     )
-    def file_details(self, url: str) -> Result:
-        """Return integrity and size details for one published file.
+    def file_details(self, url: str | list[str]) -> Result:
+        """Return integrity and size details for one or more published files.
 
         Args:
-            url: File URL beginning with ``nf://``.
+            url: An nf:// URL or list of URLs. An empty list returns no entries.
 
         Returns:
-            A result containing ``md5hash``, ``size_bytes``, and ``exists``.
-            Missing files and unsafe URLs produce failed results.
+            For string input, a result containing md5hash, size_bytes, and exists,
+            or a failed result for a missing or unsafe file. For list input,
+            results keyed by URL, each containing metadata or an independent failure.
+            Entry errors are also collected in the outer result errors list.
         """
-        ret = Result(result={"md5hash": None, "size_bytes": None, "exists": False})
-        try:
-            full_path = self._safe_path(url)
-        except ValueError as exc:
-            ret.failed = True
-            ret.errors = [str(exc)]
-            return ret
-        exists = os.path.exists(full_path) and os.path.isfile(full_path)
-
-        if exists:
-            with open(full_path, "rb") as file_obj:
-                file_hash = hashlib.md5()
-                chunk = file_obj.read(8192)
-                while chunk:
-                    file_hash.update(chunk)
-                    chunk = file_obj.read(8192)
-            ret.result = {
-                "md5hash": file_hash.hexdigest(),
-                "size_bytes": os.path.getsize(full_path),
-                "exists": True,
-            }
-        else:
-            ret.failed = True
-            ret.errors = [f"'{url}' file not found"]
-
+        urls = [url] if isinstance(url, str) else url
+        ret = Result(result={})
+        for item in urls:
+            entry = Result(
+                result={"md5hash": None, "size_bytes": None, "exists": False}
+            )
+            try:
+                full_path = self._safe_path(item)
+                if not os.path.isfile(full_path):
+                    entry.failed = True
+                    entry.errors = [f"'{item}' file not found"]
+                else:
+                    file_hash = hashlib.md5()
+                    with open(full_path, "rb") as file_obj:
+                        chunk = file_obj.read(8192)
+                        while chunk:
+                            file_hash.update(chunk)
+                            chunk = file_obj.read(8192)
+                    entry.result = {
+                        "md5hash": file_hash.hexdigest(),
+                        "size_bytes": os.path.getsize(full_path),
+                        "exists": True,
+                    }
+            except (OSError, ValueError) as exc:
+                entry.failed = True
+                entry.errors = [str(exc)]
+            ret.errors.extend(entry.errors)
+            ret.result[item] = entry.model_dump()
+        if isinstance(url, str):
+            return entry
         return ret
 
     @Task(

@@ -60,7 +60,7 @@ Networks with `auto_start: false` remain available in inventory but are not star
 
 ### `nos_plugins`
 
-Optional mapping of custom NOS plugin names to file paths or URLs. Each plugin file must contain a valid FakeNOS NOS plugin definition in YAML format.
+Optional mapping of custom NOS plugin names to file paths or URLs. Each plugin file must contain a valid FakeNOS NOS plugin definition in YAML format. Profiles are fetched in batches at worker startup, preserving their configured order. Cached profiles are validated against remote hashes; unchanged content is reused. Restart the worker to reload changed profiles.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
