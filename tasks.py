@@ -526,7 +526,7 @@ def _netbox_group_task(group):
 
     @task(
         help={
-            "build": "Build the NetBox runner image before testing.",
+            "build": "Rebuild for dependency updates, NorFab code edits need no rebuild.",
             "python_version": "Docker runner Python version.",
         }
     )
@@ -809,7 +809,7 @@ def _suite_task(suite):
             "marker": "Override the suite's pytest marker.",
             "keyword": "Pytest -k expression.",
             "pytest_args": "Additional quoted pytest arguments.",
-            "build": "Build the runner image before testing.",
+            "build": "Rebuild for dependency updates, NorFab code edits need no rebuild.",
             "python_version": "Docker runner Python version.",
             "parallel_runs": "Maximum concurrent per-file test containers.",
         },
@@ -890,7 +890,12 @@ def docker_tests_prepare(_context, force_certificates=False):
     },
 )
 def docker_tests_build(_context, suite="", python_version=""):
-    """Build Docker test runner images."""
+    """Rebuild for dependency updates, NorFab code edits need no rebuild.
+
+    Rebuild after changing dependencies or Docker image configuration. Local
+    source and test edits are mounted into containers and need no rebuild;
+    start a new test run to use them.
+    """
     if suite and suite not in SUITES:
         raise ValueError(f"Unknown suite {suite!r}; choose from {', '.join(SUITES)}")
     services = [SUITES[suite][0]] if suite else [item[0] for item in SUITES.values()]
@@ -900,7 +905,7 @@ def docker_tests_build(_context, suite="", python_version=""):
 @task(
     name="docker-tests-all",
     help={
-        "build": "Build runner images before testing.",
+        "build": "Rebuild for dependency updates, NorFab code edits need no rebuild.",
         "python_version": "Docker runner Python version.",
         "parallel_runs": "Maximum concurrent per-file test containers.",
     },

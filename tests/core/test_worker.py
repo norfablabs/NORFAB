@@ -6,6 +6,7 @@ import time
 import pytest
 from pydantic import ValidationError
 
+from norfab.core.client import NFPClient
 from norfab.core.worker import Task
 
 pytestmark = pytest.mark.core
@@ -471,3 +472,33 @@ class TestWorkerJobsApi:
             assert results["failed"] is False, f"{worker} failed to run the task"
             assert results["result"]["result_data"] == None
             assert results["result"]["job_events"] == []
+
+
+class TestWorkerMessaging:
+    def test_worker_sends_burst_results_and_events(self, nfclient: NFPClient) -> None:
+        futures = [
+            nfclient.submit_job("DummyService", "event_task", workers="dummy-worker-1")
+            for _ in range(110)
+        ]
+        for future in futures:
+            result = future.result(timeout=30)["dummy-worker-1"]
+            assert not result["failed"], result
+            events = list(future.events(timeout=1))
+            assert any(event["message"] == "dummy progress event" for event in events)
+            assert any(event["event_type"] == "result_ready" for event in events)
+
+    def test_worker_heartbeats_continue_while_idle(self, nfclient: NFPClient) -> None:
+        worker = "dummy-worker-1"
+        before = nfclient.run_job("DummyService", "get_stats", workers=worker)[worker][
+            "result"
+        ]
+        result = nfclient.run_job(
+            "DummyService", "echo", workers=worker, kwargs={"sleep": 6}
+        )[worker]
+        assert not result["failed"], result
+        after = nfclient.run_job("DummyService", "get_stats", workers=worker)[worker][
+            "result"
+        ]
+        assert after["keepalives_sent"] > before["keepalives_sent"]
+        assert after["keepalives_received"] > before["keepalives_received"]
+        assert after["reconnects"] == before["reconnects"]

@@ -4068,6 +4068,9 @@ class NetboxDesignTasks:
     ) -> Result:
         """Render and flatten a design, validate it, then deploy ordered collections.
 
+        Fetches Jinja and custom function files in separate batches, executing
+        each group in its declared order.
+
         Updates add tags, custom-field list entries, and the supported native
         relationship lists. Scalar fields and context-data dictionaries replace
         their current values. Object custom-field names resolve to NetBox IDs.
@@ -4187,16 +4190,18 @@ class NetboxDesignTasks:
                 input_model.model_rebuild(_types_namespace=model_globals)
                 context = input_model.model_validate(context).model_dump()
 
-            filters = {}
             for name, url in jinja_functions.items():
                 if not self.is_url(url):
                     raise ValueError(
                         f"Jinja function '{name}' must use an nf:// or git:// URL"
                     )
+            filters = {}
+            for (name, url), source in zip(
+                jinja_functions.items(),
+                self.fetch_file(list(jinja_functions.values()), raise_on_fail=True),
+            ):
                 namespace = {}
-                exec(
-                    self.fetch_file(url, raise_on_fail=True), namespace, namespace
-                )  # nosec B102
+                exec(source, namespace, namespace)  # nosec B102
                 function = namespace.get(name)
                 if not callable(function):
                     raise ValueError(
@@ -4234,14 +4239,18 @@ class NetboxDesignTasks:
             validated = DesignDocument.model_validate(flattened)
             lookup_cache = build_lookup_cache(self, nb, validated)
             job.check_timeout()
-            custom_functions = {}
             for name, url in validated.custom_functions.items():
                 if not self.is_url(url):
                     raise ValueError(f"custom function '{name}' must use a file URL")
+            custom_functions = {}
+            for (name, url), source in zip(
+                validated.custom_functions.items(),
+                self.fetch_file(
+                    list(validated.custom_functions.values()), raise_on_fail=True
+                ),
+            ):
                 namespace = {}
-                exec(
-                    self.fetch_file(url, raise_on_fail=True), namespace, namespace
-                )  # nosec B102
+                exec(source, namespace, namespace)  # nosec B102
                 function = namespace.get(name)
                 if not callable(function):
                     raise ValueError(

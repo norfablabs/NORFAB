@@ -148,6 +148,133 @@ Exiting...
 
 NorFab CLI supports Tab completions, question mark help together with sub-shells, read more about NorFab CLI and how to use it [here](clients_nfcli_overview.md).
 
+## Getting started with the Python API
+
+You can also start NorFab from Python with an inventory dictionary instead of YAML
+files. Install `norfab[nornirservice]` as shown above, save this script as
+`getting_started.py`, and run `python getting_started.py`.
+
+The script starts a local broker and Nornir worker, lists workers and host details
+like the NFCLI commands above, then shuts everything down. Listing inventory does
+not connect to the device. Replace the example device settings before running
+network automation tasks. Port 5555 must be available; runtime files are created
+under `__norfab__` in the current working directory.
+
+=== "Explicit startup and shutdown"
+
+    ```python title="getting_started.py"
+    from pprint import pprint
+
+    from norfab.core.nfapi import NorFab
+
+
+    def main():
+        inventory = {
+            "broker": {"endpoint": "tcp://127.0.0.1:5555"},
+            "workers": {
+                "nornir-worker-1": [
+                    {
+                        "service": "nornir",
+                        "runner": {"plugin": "RetryRunner"},
+                        "hosts": {
+                            "ios-device-1": {
+                                "hostname": "192.168.1.1",
+                                "platform": "cisco_ios",
+                                "username": "admin",
+                                "password": "admin",
+                            }
+                        },
+                    }
+                ]
+            },
+            "topology": {"broker": True, "workers": ["nornir-worker-1"]},
+        }
+        nf = NorFab(inventory_data=inventory)
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            # Equivalent to: show norfab broker workers
+            pprint(client.mmi("mmi.service.broker", "show_workers"))
+
+            # Equivalent to: show nornir hosts table details
+            pprint(
+                client.run_job(
+                    service="nornir",
+                    task="get_nornir_hosts",
+                    workers="nornir-worker-1",
+                    kwargs={"details": True},
+                )
+            )
+        finally:
+            nf.destroy()
+
+
+    # Required when starting worker processes on Windows and macOS.
+    if __name__ == "__main__":
+        main()
+    ```
+
+=== "Context manager"
+
+    The `with` statement starts NorFab and creates its client. Leaving the block
+    automatically shuts NorFab down, including when commands raise an exception.
+
+    ```python title="getting_started.py"
+    from pprint import pprint
+
+    from norfab.core.nfapi import NorFab
+
+
+    def main():
+        inventory = {
+            "broker": {"endpoint": "tcp://127.0.0.1:5555"},
+            "workers": {
+                "nornir-worker-1": [
+                    {
+                        "service": "nornir",
+                        "runner": {"plugin": "RetryRunner"},
+                        "hosts": {
+                            "ios-device-1": {
+                                "hostname": "192.168.1.1",
+                                "platform": "cisco_ios",
+                                "username": "admin",
+                                "password": "admin",
+                            }
+                        },
+                    }
+                ]
+            },
+            "topology": {"broker": True, "workers": ["nornir-worker-1"]},
+        }
+        with NorFab(inventory_data=inventory) as nf:
+            client = nf.client
+
+            # Equivalent to: show norfab broker workers
+            pprint(client.mmi("mmi.service.broker", "show_workers"))
+
+            # Equivalent to: show nornir hosts table details
+            pprint(
+                client.run_job(
+                    service="nornir",
+                    task="get_nornir_hosts",
+                    workers="nornir-worker-1",
+                    kwargs={"details": True},
+                )
+            )
+
+
+    # Required when starting worker processes on Windows and macOS.
+    if __name__ == "__main__":
+        main()
+    ```
+
+
+Worker configuration dictionaries go inside a list, just like file paths in the
+YAML inventory. `run_job()` returns results keyed by worker name, including the
+`result`, `failed`, and `errors` fields. `pprint()` displays those results directly
+instead of formatting an NFCLI table.
+
 :star: That's it :star:
 
 Where to go next? Checkout tutorials section or read about NORFAB concepts.

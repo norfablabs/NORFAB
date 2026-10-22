@@ -149,7 +149,7 @@ poetry run inv docker-tests-core
 poetry run inv docker-tests-all
 ```
 
-**SUPER IMPORTANT — NetBox test data:** LLM agents must read and maintain [tests/netbox_data_manifest.json](tests/netbox_data_manifest.json) when adding or changing tests that use NetBox data. Record new tests and their data there. Tests that mutate NetBox must use their own records and address space; never reuse data owned by other tests. Clean up only records the test owns.
+**SUPER IMPORTANT — NetBox test data:** LLM agents must read and maintain [tests/netbox_data_manifest.json](tests/netbox_data_manifest.json) when adding or changing tests that use NetBox data. Record only NetBox database records and address space that tests read, create, update, or delete, including ownership and cleanup. Do not record local files, file-fetch behavior, temporary scripts, caches, or other resources outside NetBox. Tests that do not use NetBox data need no manifest entry, even if they exercise a NetBox worker task. Tests that mutate NetBox must use their own records and address space; never reuse data owned by other tests. Clean up only records the test owns.
 
 ### Linting & Formatting
 
@@ -189,8 +189,10 @@ poetry run inv docs-build
 #### Feature Documentation Maintenance
 
 - `docs/norfab_features.md` is the evaluator- and RFP-oriented catalogue of NORFAB capabilities.
-- When adding, changing, deprecating, or removing a code feature, review and update the relevant feature wording on this page in the same change.
-- Keep each entry concise and verify its description, supported interfaces, use cases, limitations, documentation links, and the page's **Last updated** date.
+- Add or expand entries only for notable new capabilities relevant to technical evaluation or RFP responses, such as a new service, task family, integration, or supported interface.
+- Do not update this catalogue for every minor enhancement, bug fix, refactor, or internal performance improvement. Record those changes in the changelog and relevant task or developer documentation instead.
+- Correct existing entries when a change, deprecation, or removal would otherwise leave the catalogue materially inaccurate. Keep entries focused on capabilities rather than implementation details or release history.
+- When updating the catalogue, keep entries concise, verify descriptions, supported interfaces, use cases, limitations, and documentation links, and update the page's **Last updated** date. Leave the date unchanged when the catalogue does not change.
 
 ## Inventory File Structure
 

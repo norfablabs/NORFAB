@@ -1,17 +1,18 @@
-# 0.24.17 (unreleased)
+# 0.25.0 (unreleased)
 
 ## BUGS
 
 1. Fixed Nornir `create_host_from_netbox` forwarding configured `netbox.timeout` to Netbox `get_nornir_inventory`, causing an unexpected keyword argument error. The configured timeout now controls the client wait, falling back to the task's timeout argument, with a minimum of 10 seconds.
+2. Fixed FastAPI and FastMCP Uvicorn logs bypassing NorFab's terminal logging level during NFCLI startup. Both workers now use NorFab's logging handlers by default, respecting separate terminal and file levels; explicit FastAPI Uvicorn logging overrides remain supported.
 
 ## FEATURES
 
-1. Added Nornir `netconf_get` and NFCLI `netconf get` to retrieve configuration and operational state using ncclient or Scrapli, with per-host rendered subtree or XPath filters, IETF interfaces, routing, and hardware getters plus OpenConfig interfaces, LLDP, BGP, and system getters, XML processors, FastAPI, and MCP support.
+1. Added Nornir NETCONF tasks `netconf_get`, `netconf_get_config`, `netconf_edit_config`, `netconf_get_schema`, and `netconf_get_capabilities`, with NFCLI commands and ncclient or Scrapli backends. Supports configuration and operational-state retrieval, datastore reads and edits, YANG/YIN schema retrieval, capability filtering, per-host rendered XML configuration and subtree/XPath filters, XML processors, FastAPI, and MCP. The `netconf_get` task includes IETF interfaces, routing, and hardware getters plus OpenConfig interfaces, LLDP, BGP, and system getters.
 2. Added NETCONF `xmltodict` processing through Python and NFCLI, with XML processor options for configuration edits and schema retrieval and a dedicated XML processor guide.
 
 ## ENHANCEMENTS
 
-1. File-fetch client and worker helpers now accept URL strings or lists, preserving single-file responses and returning ordered lists for batch inputs. FileSharing batches metadata and Git resolution, synchronizing each referenced remote once per request. Discovery queries all FileSharing workers and rotates file downloads across available workers, preserving each worker's Git mount. Nornir test suites share fetched assets across hosts. Single-file caller syntax, per-file streaming, and cache hash validation are preserved. Files without usable metadata return a normal missing-file result. Batch tasks collect entry errors, and failed downloads retain worker errors before hash validation.
+1. File-fetch client and worker helpers now accept URL strings or lists, preserving single-file responses and returning ordered lists for batch inputs. FileSharing batches metadata and Git resolution, synchronizing each referenced remote once per request. Discovery queries all FileSharing workers and rotates file downloads across available workers, preserving each worker's Git mount. Nornir test suites share fetched assets across hosts. NetBox `design_deploy` batches Jinja and custom function file fetches while preserving execution order. Single-file caller syntax, per-file streaming, and cache hash validation are preserved. Files without usable metadata return a normal missing-file result. Batch tasks collect entry errors, and failed downloads retain worker errors before hash validation.
 2. FakeNOS now fetches NOS profiles in batches during worker startup, reducing sequential metadata requests while preserving profile order, cache validation, and individual profile error reporting.
 3. Nornir `parse` with TTP now compiles the template once per job and copies the parser per host, preserving host isolation. Local parsing benchmarks improved by 37–63%; this measures parsing time, not total device collection time.
 4. Refined NFWeb's existing layout with NORFAB branding, consistent neutral colors and controls, mobile application navigation, and improved chart sizing. Removed unused navigation placeholders and reduced Monitoring's bundled chart imports.
@@ -19,9 +20,9 @@
 6. Moved topology search beside the selected-item inspector, brought disconnected node groups closer together, and fitted nodes and labels into the initial viewport while layout settles. Automatic fitting stops when the user navigates the graph. Retained the original dark graph background for optional bloom.
 7. NFWeb Monitoring now refreshes worker job counts alongside runtime statistics.
 8. Updated scale-environment FakeNOS IOS XR profiles for the BGP commands used by current TTP templates, including VRF-neighbor queries and neighbor-group membership. Restart the FakeNOS worker to reload changed profiles.
-
-9. Client result retrieval now follows worker `result_ready` events, with periodic GET polling every 10 seconds for outstanding workers. Deadline checks remain independent, and restarted clients immediately retrieve outstanding saved results.
-10. A native socket pair now wakes the client socket thread for outgoing messages and shutdown, replacing its 100 ms polling timeout while preserving bounded outgoing batches and incoming message handling.
+9. A native socket pair now wakes the worker socket thread for outgoing results, events, file chunks, and shutdown, replacing its fixed 100 ms polling timeout. Idle waits follow heartbeat deadlines, preserving heartbeat and reconnect handling.
+10. Client result retrieval now follows worker `result_ready` events, with periodic GET polling every 10 seconds for outstanding workers. Deadline checks remain independent, and restarted clients immediately retrieve outstanding saved results.
+11. A native socket pair now wakes the client socket thread for outgoing messages and shutdown, replacing its 100 ms polling timeout while preserving bounded outgoing batches and incoming message handling.
 
 # 0.24.16
 

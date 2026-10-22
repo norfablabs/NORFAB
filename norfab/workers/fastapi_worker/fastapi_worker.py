@@ -308,6 +308,7 @@ class FastAPIWorker(NFPWorker):
         self.uvicorn_inventory = {
             "host": "0.0.0.0",
             "port": 8000,
+            "log_config": None,  # use the worker's NorFab logging handlers
             **self.fastapi_inventory.pop("uvicorn", {}),
         }
 

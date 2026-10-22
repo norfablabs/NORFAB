@@ -12,6 +12,7 @@ from fnmatch import fnmatch
 from typing import Any, Iterator, Optional
 
 import orjson
+import uvicorn
 from diskcache import FanoutCache
 from mcp import types
 from mcp.server.auth.provider import AccessToken
@@ -1129,9 +1130,14 @@ class FastMCPWorker(NFPWorker):
             prompt_data = self.get_prompt_data(name)
             return self.render_task_prompt(prompt_data, arguments)
 
-        self.app_server_thread = threading.Thread(
-            target=self.app.run, kwargs={"transport": "streamable-http"}
+        # Serve directly so the SDK does not replace NorFab logging handlers.
+        config = uvicorn.Config(
+            app=self.app.streamable_http_app(),
+            host=self.fastmcp_inventory["host"],
+            port=self.fastmcp_inventory["port"],
+            log_config=None,
         )
+        self.app_server_thread = threading.Thread(target=uvicorn.Server(config).run)
         self.app_server_thread.start()
 
         log.info(

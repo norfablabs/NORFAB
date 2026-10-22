@@ -6,6 +6,7 @@ import logging
 import os
 import queue
 import signal
+import socket
 import sqlite3
 import subprocess
 import threading
@@ -1449,8 +1450,23 @@ def zmq_send_recv(worker: object, destroy_event: threading.Event) -> None:
 
         msg = None
         try:
-            items = worker.poller.poll(NFP.ZMQ_SEND_RECV_POLL_TIMEOUT_MS)
-            if items:
+            # Wait until the next heartbeat deadline, unless messages are queued.
+            heartbeat_deadline = min(
+                worker.keepaliver.keepalive_at, worker.keepaliver.holdtime
+            )
+            timeout = max(1, int((heartbeat_deadline - time.time()) * 1000))
+            if not worker.outbound_queue.empty():
+                timeout = 0
+            items = dict(worker.poller.poll(timeout))
+
+            # Clear notifications; queued messages are sent at the top of the loop.
+            if items.get(worker.wakeup_reader.fileno(), 0) & zmq.POLLIN:
+                try:
+                    while worker.wakeup_reader.recv(4096):
+                        pass
+                except BlockingIOError:
+                    pass
+            if items.get(worker.broker_socket, 0) & zmq.POLLIN:
                 try:
                     msg = worker.broker_socket.recv_multipart(zmq.NOBLOCK)
                 except zmq.Again:
@@ -1628,6 +1644,10 @@ class NFPWorker:
 
         self.ctx = zmq.Context()
         self.poller = zmq.Poller()
+        self.wakeup_reader, self.wakeup_writer = socket.socketpair()
+        self.wakeup_reader.setblocking(False)
+        self.wakeup_writer.setblocking(False)
+        self.poller.register(self.wakeup_reader, zmq.POLLIN)
         self.reconnect_to_broker()
 
         self.client = NFPClient(
@@ -1727,6 +1747,10 @@ class NFPWorker:
             self.outbound_queue.put(
                 ready_msg, block=True, timeout=NFP.OUTBOUND_QUEUE_TIMEOUT
             )
+            try:
+                self.wakeup_writer.send(b"\x00")
+            except BlockingIOError:
+                pass  # A pending notification already guarantees a wake-up.
         log.debug(f"{self.name} - NFP.READY prepared for broker '{self.broker}'")
 
         if self.keepaliver is not None:
@@ -1795,6 +1819,15 @@ class NFPWorker:
                 f"{self.name} - outbound queue is full, dropping '{command}' "
                 f"message to broker"
             )
+            return
+
+        try:
+            self.wakeup_writer.send(b"\x00")
+        except BlockingIOError:
+            pass  # A pending notification already guarantees a wake-up.
+        except OSError:
+            if not self.destroy_event.is_set():
+                raise
 
     def load_inventory(self) -> dict:
         """
@@ -1885,6 +1918,10 @@ class NFPWorker:
         """
         self.worker_exit()
         self.destroy_event.set()
+        try:
+            self.wakeup_writer.send(b"\x00")
+        except BlockingIOError:
+            pass  # A pending notification will wake the socket thread.
         self.client.destroy()
 
         # join all the threads
@@ -1902,6 +1939,9 @@ class NFPWorker:
         # close database
         self.db.close()
 
+        self.poller.unregister(self.wakeup_reader)
+        self.wakeup_reader.close()
+        self.wakeup_writer.close()
         self.ctx.destroy(0)
 
         # stop keepalives

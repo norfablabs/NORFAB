@@ -1,6 +1,8 @@
 """NetBox design deployment integration tests."""
 
 import time
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any
 from unittest.mock import Mock
 
@@ -198,6 +200,49 @@ class TestDesignDeploy:
             assert not result["failed"], result
             assert result["dry_run"] is True
             assert result["result"] == expected
+
+    def test_bulk_function_files(self, nfclient: Any) -> None:
+        """Render and execute multiple file-backed functions without NetBox writes."""
+        root = Path(nfclient.inventory.base_dir) / "netbox" / "designs"
+        with TemporaryDirectory(prefix="bulk-functions-", dir=root) as directory:
+            folder = Path(directory)
+            urls = {}
+            for name in ("first", "second"):
+                (folder / f"{name}.py").write_text(
+                    f"def {name}(**kwargs):\n    return '{name}'\n", encoding="utf-8"
+                )
+                urls[name] = f"nf://netbox/designs/{folder.name}/{name}.py"
+            design = (
+                "jinja_functions:\n"
+                + "".join(f"  {name}: {url}\n" for name, url in urls.items())
+                + "custom_functions:\n"
+                + "".join(f"  {name}: {url}\n" for name, url in urls.items())
+                + "tenants:\n"
+                + "".join(
+                    "  - custom_function: " + "{{ " + name + "() }}\n" for name in urls
+                )
+            )
+            try:
+                response = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="netbox-worker-1.1",
+                    kwargs={"design": design, "dry_run": True},
+                )
+                assert response
+                result = response["netbox-worker-1.1"]
+                assert not result["failed"], result
+                assert result["result"]["tenants"]["custom"] == [
+                    {"function": name, "result": name} for name in urls
+                ]
+            finally:
+                # Remove downloaded scripts from the worker's file cache.
+                nfclient.run_job(
+                    "netbox",
+                    "delete_fetched_files",
+                    workers="netbox-worker-1.1",
+                    kwargs={"filepath": f"netbox/designs/{folder.name}"},
+                )
 
     def test_peer_group_dry_run(self, nfclient: Any) -> None:
         """Plan a peer group without writing it to NetBox."""

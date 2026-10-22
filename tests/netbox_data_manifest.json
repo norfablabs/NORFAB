@@ -2,7 +2,7 @@
   "purpose": "Reference for test authors. Record NetBox objects read or changed by each test area; this file is not loaded by pytest.",
   "ownership": "All integration tests use the main NetBox database. Each mutating test area should own distinct records and delete only those records. Branches are used only by tests that explicitly verify branch behavior. This manifest is an author reference and is not loaded by pytest.",
   "known_overlaps": [
-    "Other sync task files still use the original fn-ceos-* FakeNOS dataset. Audit their records before adding new parallel sync tests."
+    "Other sync tests still share the original fn-ceos-* NetBox device records. Audit record ownership before adding parallel sync tests."
   ],
   "branch_feature_tests": {
     "services/containerlab/test_inventory.py": [
@@ -205,7 +205,7 @@
     "test_connections.py::TestGetConnections::test_get_connections_performance": {
       "mode": "main_readonly",
       "devices": ["bulk-conn-01", "bulk-conn-02", "bulk-conn-03"],
-      "coverage": "Reads 600 seeded connections through the public client and requires the call to complete in under 20 seconds. Does not mutate or clean up seed records."
+      "coverage": "Reads 600 seeded connections. Does not mutate or clean up seed records."
     },
     "services/nornir/test_jinja2.py::TestNornirJinja2Filters": {
       "mode": "main_readonly",
@@ -225,9 +225,8 @@
       "mode": "branch_feature",
       "devices": ["fceos4"],
       "branches": ["norfab-clab-inventory-read"],
-      "containerlab_lab": "norfab-netbox-inventory-load",
-      "coverage": "Reads the existing fceos4 device without modifying records. Loads a single-node lab with load_netbox_branch and load_netbox_instance=prod, verifying automatic enrichment and preserved Containerlab SSH settings in a dry run. Branch provisioning is performed automatically by the NetBox read task.",
-      "cleanup": "Deletes only the owned branch and Containerlab lab; main NetBox records are not changed."
+      "coverage": "Reads the existing fceos4 device without modifying main records. The NetBox read task provisions the owned branch.",
+      "cleanup": "Deletes only the owned branch; main NetBox records are not changed."
     },
     "test_circuits.py::TestGetCircuits": {
       "mode": "main_readonly",
@@ -246,7 +245,7 @@
     },
     "test_interfaces.py::TestGetInterfaces": {
       "mode": "main_readonly",
-      "coverage": "Includes forced cache reads after caching only fceos4:eth8, then requesting eth8 and eth9 on the same worker. No NetBox records are changed.",
+      "coverage": "Reads fceos4:eth8 and fceos4:eth9. No NetBox records are changed.",
       "devices": [
         "ceos1",
         "fceos4"
@@ -292,7 +291,6 @@
       "interfaces": [
         "TEST_SYNC_MODE_CLEAR"
       ],
-      "live_source": "Loopback10 mapped to the test-owned interface",
       "vlan_group": "NORFAB INTERFACE MODE CLEAR",
       "vlan_group_slug": "norfab-interface-mode-clear",
       "vlan_ids": [
@@ -333,8 +331,7 @@
         "10.83.15.33/30",
         "10.83.250.250/32",
         "10.184.0.0/31"
-      ],
-      "source": "tests/nf_tests_inventory/fakenos/custom_nos/netbox_ipam_*.yaml"
+      ]
     },
     "test_bgp.py::TestSyncBgpPeerings": {
       "mode": "main_mutating",
@@ -357,7 +354,6 @@
         64999
       ],
       "branch_test": "test_sync_bgp_peerings_with_branch",
-      "source": "tests/nf_tests_inventory/fakenos/custom_nos/netbox_bgp_*.yaml",
       "ip_ranges": [
         "10.81.0.0/16",
         "10.181.0.0/16",
@@ -385,12 +381,12 @@
         "test_check_device_sync_selective_interfaces_only",
         "test_check_device_sync_selective_ip_only"
       ],
-      "notes": "Selective checks retain all nine categories in summaries and diffs; disabled categories are None. No records are created or changed."
+      "notes": "Reads the listed devices without creating or changing NetBox records."
     },
     "test_sync.py::TestSyncAll": {
-      "notes": "Sync-all excludes MAC synchronization. BGP community orchestration is covered without NetBox writes by TestSyncAllOrchestration; existing integration calls disable community writes to preserve data ownership.",
+      "notes": "Integration calls disable BGP community writes to preserve data ownership.",
       "mode": "main_mutating",
-      "cleanup": "Delete only records assigned to this class's original spine devices, plus the exact owned VRRP VIP/group for 10.3.250.1/32. BGP and IPAM use separate FakeNOS source data.",
+      "cleanup": "Delete only records assigned to this class's original spine devices, plus the exact owned VRRP VIP/group for 10.3.250.1/32.",
       "devices": [
         "fn-ceos-sp-1",
         "fn-ceos-sp-2"
@@ -415,7 +411,6 @@
         "10.85.252.1/32",
         "10.185.0.0/31"
       ],
-      "source": "tests/nf_tests_inventory/fakenos/custom_nos/netbox_prefix_*.yaml",
       "cleanup": "Delete only exact prefixes, IPs, interface, and VRF created by this class."
     },
     "test_vlans.py::TestCreateVlan": {
@@ -549,18 +544,12 @@
         "198.19.238.1/32"
       ],
       "persistent_seed": "tests/netbox_data.py uses the regular vrfs, devices, interfaces, prefixes, vrrp_groups and ip_addresses dictionaries. Full population creates VRFs and interfaces, then FHRP groups/assignments, then VIPs. --vrrp manages only dictionary-defined groups/assignments; --ip-addresses manages their VIPs. Test fixtures reset mutable VIPs/groups before exercising sync.",
-      "fakenos_inventory": "tests/nf_tests_inventory/fakenos/nornir_cli_ceos_spine_leaf.yaml with NETBOX_VRRP_VRF in custom_nos/netbox_vrrp_vrf.yaml",
-      "nornir_inventory": "tests/nf_tests_inventory/nornir/nornir-worker-4.yaml",
       "interfaces": [
         "xr1:GigabitEthernet0/0/0/3",
         "xr1:GigabitEthernet0/0/0/4",
         "xr1:BVI123",
         "fn-vrrp-vrf-1:Vlan10,Vlan20,Vlan30",
         "fn-vrrp-vrf-2:Vlan10,Vlan20,Vlan30"
-      ],
-      "nornir_hosts": [
-        "fn-vrrp-vrf-1:6286",
-        "fn-vrrp-vrf-2:6287"
       ],
       "vrfs": [
         "TEST_VRRP_BLUE",
@@ -577,11 +566,7 @@
         "TEST_VRRP_AMBIGUOUS_0",
         "TEST_VRRP_AMBIGUOUS_1"
       ],
-      "fakenos_networks": [
-        "netbox-vrrp-sync",
-        "nornir-cli-ceos-spine-leaf (persistent fn-vrrp-vrf-* hosts)"
-      ],
-      "cleanup": "XR tests use sync_vrrp_fixture to clean class-owned VIPs and groups while retaining seeded devices and interfaces. VRF tests reset only owned VIPs/groups and preserve baseline devices, VRFs, interfaces, prefix and running hosts. The missing-VRF test restores TEST_VRRP_BLUE and owned Vlan10 references in finally. In netbox_data.py, IP cleanup deletes VIP dictionaries before VRRP cleanup deletes group dictionaries; device/interface, prefix and VRF cleanup use their existing dedicated functions. Test fixtures never stop the shared FakeNOS network."
+      "cleanup": "XR tests use sync_vrrp_fixture to clean class-owned VIPs and groups while retaining seeded devices and interfaces. VRF tests reset only owned VIPs/groups and preserve baseline devices, VRFs, interfaces and prefix. The missing-VRF test restores TEST_VRRP_BLUE and owned Vlan10 references in finally. In netbox_data.py, IP cleanup deletes VIP dictionaries before VRRP cleanup deletes group dictionaries; device/interface, prefix and VRF cleanup use their existing dedicated functions."
     },
     "test_fhrp.py::TestSyncVrrpEmptyResult": {
       "mode": "main_mutating",
@@ -612,10 +597,6 @@
         "A9K-RSP440-TR",
         "ASR-9006-FAN-V2"
       ]
-    },
-    "test_designs.py::TestDesignDeploy::test_dry_run_render": {
-      "mode": "read_only",
-      "coverage": "Renders inline YAML, invalid YAML, and unchanged dictionary designs with both dry_run values. No NetBox objects are read or written; client setup only."
     },
     "test_bgp.py::TestCreateBgpPeering::create_tenant": {
       "mode": "main_mutating",
