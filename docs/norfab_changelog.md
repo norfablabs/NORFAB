@@ -1,5 +1,9 @@
 # 0.24.17 (unreleased)
 
+## BUGS
+
+1. Fixed Nornir `create_host_from_netbox` forwarding configured `netbox.timeout` to Netbox `get_nornir_inventory`, causing an unexpected keyword argument error. The configured timeout now controls the client wait, falling back to the task's timeout argument, with a minimum of 10 seconds.
+
 ## FEATURES
 
 1. Added Nornir `netconf_get` and NFCLI `netconf get` to retrieve configuration and operational state using ncclient or Scrapli, with per-host rendered subtree or XPath filters, IETF interfaces, routing, and hardware getters plus OpenConfig interfaces, LLDP, BGP, and system getters, XML processors, FastAPI, and MCP support.
@@ -15,6 +19,9 @@
 6. Moved topology search beside the selected-item inspector, brought disconnected node groups closer together, and fitted nodes and labels into the initial viewport while layout settles. Automatic fitting stops when the user navigates the graph. Retained the original dark graph background for optional bloom.
 7. NFWeb Monitoring now refreshes worker job counts alongside runtime statistics.
 8. Updated scale-environment FakeNOS IOS XR profiles for the BGP commands used by current TTP templates, including VRF-neighbor queries and neighbor-group membership. Restart the FakeNOS worker to reload changed profiles.
+
+9. Client result retrieval now follows worker `result_ready` events, with periodic GET polling every 10 seconds for outstanding workers. Deadline checks remain independent, and restarted clients immediately retrieve outstanding saved results.
+10. A native socket pair now wakes the client socket thread for outgoing messages and shutdown, replacing its 100 ms polling timeout while preserving bounded outgoing batches and incoming message handling.
 
 # 0.24.16
 

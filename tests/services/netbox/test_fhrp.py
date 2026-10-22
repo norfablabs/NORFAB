@@ -469,10 +469,11 @@ class TestSyncVrrp:
     def test_sync_vrrp_does_not_reassign_an_assigned_ip(
         self, nfclient: Any, dry_run: bool
     ) -> None:
-        """Protect a matching VIP address already assigned to another interface.
+        """Protect an ordinary IP address already assigned to another interface.
 
-        Assign the desired VIP to a different XR interface and run sync in
-        either live or dry-run mode. Verify the response identifies the address
+        Assign the desired address without a redundancy role to a different XR
+        interface and run sync in either live or dry-run mode. Verify the
+        response identifies the address
         ownership conflict and affected membership. Check that the original
         IP owner and role remain unchanged and no group or assignment is
         created for the blocked membership."""
@@ -482,7 +483,6 @@ class TestSyncVrrp:
         existing_ip = nb.ipam.ip_addresses.create(
             address=address,
             status="active",
-            role="vip",
             assigned_object_type="dcim.interface",
             assigned_object_id=interface.id,
         )
@@ -501,7 +501,7 @@ class TestSyncVrrp:
         assert existing_ip.assigned_object_type == "dcim.interface"
         assert existing_ip.assigned_object.id == interface.id
         role = getattr(existing_ip.role, "value", existing_ip.role)
-        assert role == "vip"
+        assert role is None
         target_interface = nb.dcim.interfaces.get(
             device=self.DEVICE, name=self.INTERFACES[10]
         )

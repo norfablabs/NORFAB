@@ -44,6 +44,7 @@ class EventStatusValues(str, Enum):
 
 class EventTypes(str, Enum):
     progress = "progress"
+    result_ready = "result_ready"
     input_request = "input_request"
     input_response = "input_response"
 

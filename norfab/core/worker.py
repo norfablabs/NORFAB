@@ -2507,6 +2507,7 @@ class NFPWorker:
         4. Handles any exceptions raised during task execution, logging errors and creating a failed Result object if needed.
         5. Saves the result of the job execution to the database.
         6. Marks the job as completed or failed in the database.
+        7. Emits the result_ready event after persistence.
 
         Args:
             uuid (str): The job UUID to process.
@@ -2608,7 +2609,7 @@ class NFPWorker:
         _ = self.running_jobs.pop(uuid)
 
         # inform client that job completed
-        job.event(message="completed", status="completed")
+        job.event(message="completed", status="completed", event_type="result_ready")
 
     def work(self) -> None:
         """

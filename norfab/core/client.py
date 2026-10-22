@@ -4,6 +4,7 @@ import logging
 import os
 import queue
 import shutil
+import socket
 import sqlite3
 import threading
 import time
@@ -681,6 +682,7 @@ class NFPJobFuture:
         self.done_event = threading.Event()
         self.final_job_snapshot = None
         self.input_request_ids = set()
+        self.pending_inputs = {}
 
     def add_event(self, event: dict) -> bool:
         input_request = (event.get("extras") or {}).get("input_request")
@@ -806,8 +808,18 @@ def zmq_send_recv(client: object) -> None:
 
         msg = None
         try:
-            items = client.poller.poll(NFP.ZMQ_SEND_RECV_POLL_TIMEOUT_MS)
-            if items:
+            # Keep draining bounded batches without sleeping while work remains.
+            # Otherwise, wait for broker traffic or an outgoing-queue notification.
+            items = dict(
+                client.poller.poll(0 if not client.outbound_queue.empty() else None)
+            )
+            if items.get(client.wakeup_reader.fileno(), 0) & zmq.POLLIN:
+                try:
+                    while client.wakeup_reader.recv(4096):
+                        pass
+                except BlockingIOError:
+                    pass
+            if items.get(client.broker_socket, 0) & zmq.POLLIN:
                 try:
                     msg = client.broker_socket.recv_multipart(zmq.NOBLOCK)
                 except zmq.Again:
@@ -880,7 +892,7 @@ def zmq_send_recv(client: object) -> None:
 
 def handle_event(client: object, juuid: str, payload: dict, msg: list) -> None:
     """
-    Handle EVENT messages and update job database accordingly.
+    Store and deliver events, update input state, and queue marked result GETs.
 
     Args:
         client: The client instance
@@ -900,6 +912,50 @@ def handle_event(client: object, juuid: str, payload: dict, msg: list) -> None:
         task=payload.get("task"),
         event_data=payload,
     )
+
+    job = client.job_db.get_job(juuid)
+    if not job or job["status"] in TERMINAL_JOB_STATUSES:
+        return
+    worker = payload.get("worker")
+    extras = payload.get("extras") or {}
+    if worker not in job["workers_dispatched"]:
+        return
+
+    # Input events update the job immediately, without waiting for GET polling.
+    if future and payload.get("event_type") in ("input_request", "input_response"):
+        if payload["event_type"] == "input_request" and extras.get("input_request"):
+            # Track each worker separately: several workers can need input at once.
+            future.pending_inputs[worker] = extras["input_request"]["id"]
+        elif future.pending_inputs.get(worker) == (
+            extras.get("input_response") or {}
+        ).get("input_id"):
+            # An old response must not clear a newer request from the same worker.
+            future.pending_inputs.pop(worker, None)
+        # Keep the job waiting until every worker's outstanding request is resolved.
+        client.job_db.update_job(
+            juuid,
+            status=(
+                JobStatus.WAITING_CLIENT_INPUT
+                if future.pending_inputs
+                else JobStatus.STARTED
+            ),
+        )
+
+    # handle worker reporting results completion
+    if (
+        payload.get("event_type") == "result_ready"
+        and worker not in job["workers_completed"]
+    ):
+        # Completion notifications do not postpone periodic polling for other workers.
+        client.send_to_broker(
+            NFP.GET,
+            client.ensure_bytes(job["service"]),
+            client.ensure_bytes([worker]),
+            client.ensure_bytes(juuid),
+            client.ensure_bytes(
+                {"task": job["task"], "kwargs": job["kwargs"], "args": job["args"]}
+            ),
+        )
 
 
 def handle_response(client: object, juuid: str, status: str, payload: dict) -> None:
@@ -934,6 +990,9 @@ def handle_response(client: object, juuid: str, status: str, payload: dict) -> N
 
     # Broker accepted POST - contains dispatched workers list
     if status == "202":  # ACCEPTED
+        # Only the first POST acknowledgement establishes the worker set.
+        if job["workers_dispatched"]:
+            return
         workers_list = payload["workers"]
         client.job_db.update_job(
             juuid,
@@ -949,9 +1008,13 @@ def handle_response(client: object, juuid: str, status: str, payload: dict) -> N
         worker_single = payload["worker"]
         started = set(job.get("workers_started", []))
         started.add(worker_single)
+        job_status = JobStatus.STARTED
+        # A worker's acknowledgement must not clear another worker's input wait.
+        if job["status"] == JobStatus.WAITING_CLIENT_INPUT:
+            job_status = JobStatus.WAITING_CLIENT_INPUT
         client.job_db.update_job(
             juuid,
-            status=JobStatus.STARTED,
+            status=job_status,
             workers_started=list(started),
         )
         log.debug(
@@ -971,11 +1034,25 @@ def handle_response(client: object, juuid: str, status: str, payload: dict) -> N
                 completed.add(worker_name)
             existing_results.update(payload)
 
+        # A worker with a saved result no longer needs input, even if its input-response event was missed.
+        future = client.job_futures.get(juuid)
+        if future:
+            for worker in completed:
+                future.pending_inputs.pop(worker, None)
         is_complete = completed == dispatched and len(dispatched) > 0
+
+        # Finish only when every dispatched worker has returned a result.
+        if is_complete:
+            job_status = JobStatus.COMPLETED
+        # Partial results must preserve any remaining worker's input wait.
+        elif future and future.pending_inputs:
+            job_status = JobStatus.WAITING_CLIENT_INPUT
+        else:
+            job_status = JobStatus.STARTED
 
         client.job_db.update_job(
             juuid,
-            status=JobStatus.COMPLETED if is_complete else JobStatus.STARTED,
+            status=job_status,
             workers_completed=list(completed),
             result_data=existing_results,
             completed_ts=time.ctime() if is_complete else None,
@@ -1003,6 +1080,11 @@ def handle_response(client: object, juuid: str, status: str, payload: dict) -> N
 
         input_request = payload.get("input_request")
         if input_request:
+            # GET polling can find an input request whose event was missed.
+            # Track it so another worker's reply does not clear the input wait.
+            future = client.job_futures.get(juuid)
+            if future:
+                future.pending_inputs[worker] = input_request["id"]
             event = {
                 "event_type": "input_request",
                 "worker": worker,
@@ -1036,9 +1118,14 @@ def handle_response(client: object, juuid: str, status: str, payload: dict) -> N
         workers_started = list(job.get("workers_started", []))
         if worker and worker not in workers_started:
             workers_started.append(worker)
+        # A running worker's poll reply must not clear another worker's input wait.
+        if job["status"] == JobStatus.WAITING_CLIENT_INPUT:
+            job_status = JobStatus.WAITING_CLIENT_INPUT
+        else:
+            job_status = JobStatus.STARTED
         client.job_db.update_job(
             juuid,
-            status=JobStatus.STARTED,
+            status=job_status,
             workers_started=workers_started,
         )
         return
@@ -1182,8 +1269,8 @@ def dispatch_new_jobs(client) -> None:
 
 def poll_active_jobs(client) -> None:
     """
-    Find active jobs and send GET requests to poll for results.
-    Non-blocking: sends request with 5-second throttling via last_poll_timestamp.
+    Expire overdue jobs and queue periodic job polling GET requests.
+    Completion events retrieve results independently of the polling interval.
     """
     # Jobs that are ready for GET polling (dispatched or started)
     active_statuses = [
@@ -1193,7 +1280,22 @@ def poll_active_jobs(client) -> None:
         JobStatus.WAITING_CLIENT_INPUT,
     ]
 
-    # fetch_jobs filters by min_poll_age to enforce polling throttle
+    # Select overdue jobs before LIMIT so older running jobs cannot hide them.
+    with client.job_db._transaction() as conn:
+        overdue = conn.execute(
+            "SELECT uuid FROM jobs WHERE status IN (?, ?, ?, ?) AND deadline <= ? "
+            "ORDER BY deadline, rowid LIMIT ?",
+            (*active_statuses, time.time(), client.dispatch_batch_size),
+        ).fetchall()
+    for row in overdue:
+        job = client.job_db.expire_job(row["uuid"])
+        future = client.job_futures.get(row["uuid"])
+        if future:
+            future.mark_done(job)
+
+    # SUBMITTING jobs have no worker list yet and must not occupy polling batches.
+    active_statuses.remove(JobStatus.SUBMITTING)
+    # fetch_jobs filters by min_poll_age to enforce the periodic polling interval.
     for job in client.job_db.fetch_jobs(
         active_statuses,
         limit=client.dispatch_batch_size,
@@ -1213,14 +1315,16 @@ def poll_active_jobs(client) -> None:
                 future.mark_done(job)
             continue
 
-        if job["status"] == JobStatus.SUBMITTING:
-            continue
-
         try:
             # Send GET request (non-blocking)
             service = client.ensure_bytes(job["service"])
             uuid_bytes = client.ensure_bytes(juuid)
-            workers = client.ensure_bytes(job["workers_dispatched"])
+            missing = sorted(
+                set(job["workers_dispatched"]) - set(job["workers_completed"])
+            )
+            if not missing:
+                continue
+            workers = client.ensure_bytes(missing)
             request = client.ensure_bytes(
                 {
                     "task": job["task"],
@@ -1231,7 +1335,7 @@ def poll_active_jobs(client) -> None:
 
             client.send_to_broker(NFP.GET, service, workers, uuid_bytes, request)
 
-            # Update last_poll_ts to enforce 5-second throttle
+            # Only periodic job polling advances the polling timestamp.
             client.job_db.update_job(
                 juuid,
                 last_poll_ts=time.time(),
@@ -1269,6 +1373,12 @@ def dispatcher(client) -> None:
         )
         client.dispatcher_event.wait(timeout=0.1 if has_active_jobs else 1)
         client.dispatcher_event.clear()
+
+    # An external exit event must also release the socket thread's blocking poll.
+    try:
+        client.wakeup_writer.send(b"\x00")
+    except BlockingIOError:
+        pass  # A full notification buffer already guarantees a wake-up.
 
 
 class NFPClient(object):
@@ -1383,11 +1493,16 @@ class NFPClient(object):
         )  # destroy event, used by worker to stop its client
         self.mmi_queue = queue.Queue(maxsize=0)
         self.outbound_queue = queue.Queue(maxsize=NFP.OUTBOUND_QUEUE_SIZE)
+        # Native sockets allow any producer thread to wake the sole ZeroMQ owner.
+        self.wakeup_reader, self.wakeup_writer = socket.socketpair()
+        self.wakeup_reader.setblocking(False)
+        self.wakeup_writer.setblocking(False)
+        self.poller.register(self.wakeup_reader, zmq.POLLIN)
         self.job_futures = {}
         self.dispatcher_event = threading.Event()
 
         # Configuration for dispatcher
-        self.poll_interval = 0.5  # Seconds between GET polls for same job (throttling)
+        self.poll_interval = 10  # Seconds between periodic GET polls for the same job
         self.dispatch_batch_size = 10  # Max jobs to process per dispatch cycle
         self.recover_job_futures()
 
@@ -1577,6 +1692,15 @@ class NFPClient(object):
                 f"{self.name} - outbound queue is full, dropping '{command}' "
                 f"message to broker"
             )
+            return
+
+        try:
+            self.wakeup_writer.send(b"\x00")
+        except BlockingIOError:
+            pass  # The queued message is safe; a notification is already pending.
+        except OSError:
+            if not self.destroy_event.is_set():
+                raise
 
     def mmi(
         self,
@@ -1946,17 +2070,14 @@ class NFPClient(object):
         ]
         for job in self.job_db.fetch_jobs(active_statuses, limit=10000):
             if job["deadline"] and time.time() >= job["deadline"]:
-                self.job_db.update_job(
-                    job["uuid"],
-                    status=JobStatus.STALE,
-                    errors=["Job deadline reached while client was offline"],
-                    completed_ts=time.ctime(),
-                )
+                self.job_db.expire_job(job["uuid"])
                 continue
 
             if job["status"] == JobStatus.SUBMITTING:
                 self.job_db.update_job(job["uuid"], status=JobStatus.NEW)
 
+            # Poll restored jobs immediately to fetch results saved while the client was offline.
+            self.job_db.update_job(job["uuid"], last_poll_ts=0)
             self.job_futures[job["uuid"]] = NFPJobFuture(
                 client=self,
                 uuid=job["uuid"],
@@ -2101,8 +2222,15 @@ class NFPClient(object):
         for background threads to stop, then destroys the client context to
         ensure a clean shutdown.
         """
+        if self.ctx.closed:
+            return
         log.info(f"{self.name} - client interrupt received, killing client")
         self.destroy_event.set()
+        self.dispatcher_event.set()
+        try:
+            self.wakeup_writer.send(b"\x00")
+        except BlockingIOError:
+            pass  # A pending notification will wake the socket thread.
         for future in self.job_futures.values():
             future.mark_done(self.job_db.get_job(future.uuid))
         # Wait for background threads to exit before destroying the ZMQ context.
@@ -2110,9 +2238,12 @@ class NFPClient(object):
         # between their destroy_event check and a socket call, causing
         # "not a socket" ZMQError when ctx.destroy() closes sockets under them.
         if self.recv_thread.is_alive():
-            self.recv_thread.join(timeout=2)
+            self.recv_thread.join()
         if self.dispatcher_thread.is_alive():
-            self.dispatcher_thread.join(timeout=2)
+            self.dispatcher_thread.join()
+        self.poller.unregister(self.wakeup_reader)
+        self.wakeup_reader.close()
+        self.wakeup_writer.close()
         self.job_db.close()
         self.ctx.destroy()
         # close all file transfer files

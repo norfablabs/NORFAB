@@ -3,6 +3,7 @@ import queue
 import socket
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from urllib.parse import urlsplit
 from uuid import uuid4
@@ -11,11 +12,15 @@ import pytest
 
 from norfab.core import NFP
 from norfab.core.client import (
+    ClientJobDatabase,
     JobStatus,
     NFPClient,
     NFPJobFuture,
+    handle_event,
     handle_response,
+    poll_active_jobs,
 )
+from norfab.core.monitoring import ProcessMonitor
 from norfab.core.nfapi import NorFab
 
 pytestmark = pytest.mark.core
@@ -348,6 +353,246 @@ class TestClientRunJob:
             and event.get("status") == "timeout"
             for event in events
         )
+
+
+class TestClientCompletionEvents:
+    @pytest.mark.parametrize("task", ["dummy_task", "input_request_timeout_task"])
+    def test_completion_without_recovery_get(
+        self, nfclient: NFPClient, task: str
+    ) -> None:
+        """Saved results, including failures, arrive without periodic GETs."""
+        original_interval = nfclient.poll_interval
+        nfclient.poll_interval = 3600
+        try:
+            future = nfclient.submit_job(
+                "DummyService", task, workers=["dummy-worker-1"], timeout=15
+            )
+            result = future.result(timeout=15)
+            job = nfclient.job_db.get_job(future.uuid)
+            assert job["status"] == JobStatus.COMPLETED
+            assert result["dummy-worker-1"]["failed"] == (
+                task == "input_request_timeout_task"
+            )
+            assert any(
+                event.get("event_type") == "result_ready"
+                for event in future.events(timeout=1)
+            )
+            assert time.time() - job["last_poll_timestamp"] < nfclient.poll_interval
+        finally:
+            nfclient.poll_interval = original_interval
+
+    def test_multiworker_completion_preserves_dispatch(
+        self, nfclient: NFPClient
+    ) -> None:
+        """Targeted GET acknowledgements cannot shrink the expected worker set."""
+        original_interval = nfclient.poll_interval
+        nfclient.poll_interval = 3600
+        try:
+            future = nfclient.submit_job(
+                "nornir",
+                "get_version",
+                workers=["nornir-worker-1", "nornir-worker-2"],
+                timeout=20,
+            )
+            result = future.result(timeout=20)
+            expected = {"nornir-worker-1", "nornir-worker-2"}
+            assert set(result) == expected
+            assert all(not entry["failed"] for entry in result.values())
+            assert (
+                set(nfclient.job_db.get_job(future.uuid)["workers_dispatched"])
+                == expected
+            )
+        finally:
+            nfclient.poll_interval = original_interval
+
+    def test_deadlines_ignore_recovery_age_and_batch(self, nfclient: NFPClient) -> None:
+        """Overdue jobs beyond a batch expire while recent polls remain throttled."""
+        jobs = []
+        for _ in range(nfclient.dispatch_batch_size + 1):
+            juuid = uuid4().hex
+            nfclient.job_db.add_job(
+                uuid=juuid,
+                service="DummyService",
+                task="dummy_task",
+                workers=["dummy-worker-1"],
+                args=[],
+                kwargs={},
+                timeout=1,
+                deadline=time.time() - 1,
+            )
+            nfclient.job_db.update_job(
+                juuid,
+                status=JobStatus.STARTED,
+                workers_dispatched=["dummy-worker-1", "missing-worker"],
+                workers_completed=["dummy-worker-1"],
+                result_data={"dummy-worker-1": {"result": "preserved"}},
+                last_poll_ts=time.time(),
+            )
+            jobs.append(juuid)
+        poll_active_jobs(nfclient)
+        poll_active_jobs(nfclient)
+        for juuid in jobs:
+            job = nfclient.job_db.get_job(juuid)
+            assert job["status"] == JobStatus.STALE
+            assert job["result_data"]["dummy-worker-1"]["result"] == "preserved"
+            assert job["result_data"]["missing-worker"]["status"] == "timeout"
+
+    def test_restart_recovers_result_without_resubmission(
+        self, nfclient: NFPClient
+    ) -> None:
+        """A client offline at completion retrieves the saved worker result."""
+        name = f"completion-restart-{uuid4().hex}"
+        client = NFPClient(nfclient.inventory, nfclient.broker, name)
+        try:
+            future = client.submit_job(
+                "DummyService",
+                "input_request_timeout_task",
+                workers=["dummy-worker-1"],
+                timeout=20,
+            )
+            for event in future.events(timeout=5):
+                if event.get("event_type") == "input_request":
+                    break
+            else:
+                pytest.fail("worker did not request input")
+            original = client.job_db.get_job(future.uuid)
+            assert original["workers_dispatched"] == ["dummy-worker-1"]
+            client.destroy()
+            time.sleep(2)  # The worker's one-second input wait finishes while offline.
+            client = NFPClient(nfclient.inventory, nfclient.broker, name)
+            assert client.zmq_name == name
+            assert (
+                client.job_db.get_job(future.uuid)["created_at"]
+                == original["created_at"]
+            )
+            result = client.job_futures[future.uuid].result(timeout=10)
+            assert result["dummy-worker-1"]["failed"] is True
+            assert "Client input timed out" in result["dummy-worker-1"]["messages"][0]
+        finally:
+            client.destroy()
+
+    def test_late_acknowledgements_preserve_workers_and_input(
+        self, nfclient: NFPClient
+    ) -> None:
+        """Targeted GET acknowledgements and worker replies preserve pending input."""
+        juuid = uuid4().hex
+        nfclient.job_db.add_job(
+            uuid=juuid,
+            service="DummyService",
+            task="dummy_task",
+            workers=["first", "second"],
+            args=[],
+            kwargs={},
+            timeout=60,
+            deadline=time.time() + 60,
+        )
+        future = NFPJobFuture(
+            nfclient, juuid, "DummyService", "dummy_task", ["first", "second"], 60, {}
+        )
+        nfclient.job_futures[juuid] = future
+        future.pending_inputs["second"] = "input-id"
+        nfclient.job_db.update_job(
+            juuid,
+            status=JobStatus.WAITING_CLIENT_INPUT,
+            workers_dispatched=["first", "second"],
+        )
+        try:
+            handle_response(nfclient, juuid, "202", {"workers": ["first"]})
+            handle_response(nfclient, juuid, "201", {"worker": "first"})
+            handle_response(nfclient, juuid, "200", {"first": {"result": "done"}})
+            handle_response(nfclient, juuid, "300", {"worker": "first"})
+            job = nfclient.job_db.get_job(juuid)
+            assert job["workers_dispatched"] == ["first", "second"]
+            assert job["status"] == JobStatus.WAITING_CLIENT_INPUT
+            assert job["result_data"] == {"first": {"result": "done"}}
+            assert not future.done_event.is_set()
+        finally:
+            nfclient.job_db.update_job(juuid, status=JobStatus.FAILED)
+            nfclient.job_futures.pop(juuid)
+
+
+class TestClientSocketWakeup:
+    def test_idle_send_burst_and_multiple_producers(self, nfclient: NFPClient) -> None:
+        """An idle owner wakes, drains multiple batches, and handles broker replies."""
+        client = NFPClient(nfclient.inventory, nfclient.broker, f"wakeup-{uuid4().hex}")
+        try:
+            assert (
+                client.mmi("mmi.service.broker", "show_broker_version", timeout=10)[
+                    "status"
+                ]
+                == "200"
+            )
+            request = client.ensure_bytes(
+                {"task": "show_broker_version", "args": [], "kwargs": {}}
+            )
+            identifiers = [
+                uuid4().hex.encode()
+                for _ in range(NFP.ZMQ_SEND_RECV_DRAIN_LIMIT * 2 + 3)
+            ]
+            # Queue more than two drain batches, then wake the owner through normal sends.
+            for juuid in identifiers:
+                client.outbound_queue.put_nowait(
+                    client.build_message.client_to_broker_mmi(
+                        command=NFP.MMI,
+                        service=b"mmi.service.broker",
+                        workers=b"all",
+                        uuid=juuid,
+                        request=request,
+                    )
+                )
+            producer_ids = [uuid4().hex.encode() for _ in range(16)]
+            with ThreadPoolExecutor(max_workers=4) as producers:
+                sends = [
+                    producers.submit(
+                        client.send_to_broker,
+                        NFP.MMI,
+                        b"mmi.service.broker",
+                        b"all",
+                        juuid,
+                        request,
+                    )
+                    for juuid in producer_ids
+                ]
+                for send in sends:
+                    send.result(timeout=10)
+            expected = set(identifiers + producer_ids)
+            received = set()
+            deadline = time.time() + 20
+            while received != expected and time.time() < deadline:
+                reply = client.mmi_queue.get(timeout=max(0.1, deadline - time.time()))
+                assert reply[5] == b"200"
+                received.add(reply[4])
+            assert received == expected
+            assert client.outbound_queue.empty()
+            assert client.recv_thread.is_alive()
+        finally:
+            client.destroy()
+
+    def test_external_exit_and_repeated_shutdown(self, nfclient: NFPClient) -> None:
+        """External exit wakes an idle owner and shutdown closes resources once."""
+        exit_event = threading.Event()
+        client = NFPClient(
+            nfclient.inventory, nfclient.broker, f"exit-{uuid4().hex}", exit_event
+        )
+        try:
+            assert (
+                client.mmi("mmi.service.broker", "show_broker_version", timeout=10)[
+                    "status"
+                ]
+                == "200"
+            )
+            exit_event.set()
+            client.dispatcher_thread.join(timeout=5)
+            client.recv_thread.join(timeout=5)
+            assert not client.dispatcher_thread.is_alive()
+            assert not client.recv_thread.is_alive()
+            client.destroy()
+            client.destroy()
+            assert client.wakeup_reader.fileno() == -1
+            assert client.wakeup_writer.fileno() == -1
+            assert client.ctx.closed
+        finally:
+            client.destroy()
 
 
 class TestAddJobDb:
@@ -1247,12 +1492,24 @@ class TestJobStatusTransitions:
 
 
 class TestClientMessaging:
-    def test_send_to_broker_queues_prepared_message(self) -> None:
+    @pytest.mark.parametrize("full_notification_buffer", [False, True])
+    def test_send_to_broker_queues_prepared_message(
+        self, full_notification_buffer: bool
+    ) -> None:
         client = NFPClient.__new__(NFPClient)
         client.name = "test-client"
         client.destroy_event = threading.Event()
         client.outbound_queue = queue.Queue(maxsize=NFP.OUTBOUND_QUEUE_SIZE)
         client.build_message = NFP.MessageBuilder()
+        client.wakeup_reader, client.wakeup_writer = socket.socketpair()
+        client.wakeup_reader.setblocking(False)
+        client.wakeup_writer.setblocking(False)
+
+        if full_notification_buffer:
+            # A full notification channel must not prevent queueing a message.
+            with pytest.raises(BlockingIOError):
+                while True:
+                    client.wakeup_writer.send(b"\x00" * 4096)
 
         client.send_to_broker(
             NFP.GET,
@@ -1266,3 +1523,68 @@ class TestClientMessaging:
         msg = client.outbound_queue.get_nowait()
         assert msg[1] == NFP.CLIENT
         assert msg[2] == NFP.GET
+        assert client.wakeup_reader.recv(1) == b"\x00"
+        client.wakeup_reader.close()
+        client.wakeup_writer.close()
+
+    def test_result_ready_queues_only_missing_worker(self, tmp_path: Path) -> None:
+        """Only a saved-result marker queues GET; duplicates after collection do not."""
+        client = NFPClient.__new__(NFPClient)
+        client.name = "test-completion"
+        client.wakeup_reader, client.wakeup_writer = socket.socketpair()
+        client.wakeup_reader.setblocking(False)
+        client.wakeup_writer.setblocking(False)
+        client.destroy_event = threading.Event()
+        client.outbound_queue = queue.Queue()
+        client.build_message = NFP.MessageBuilder()
+        client.job_futures = {}
+        client.monitoring = ProcessMonitor()
+        client.job_db = ClientJobDatabase(str(tmp_path / "events.db"))
+        juuid = uuid4().hex
+        client.job_db.add_job(
+            uuid=juuid,
+            service="dummy",
+            task="echo",
+            workers=["first", "second"],
+            args=[],
+            kwargs={},
+            timeout=60,
+            deadline=time.time() + 60,
+        )
+        client.job_db.update_job(
+            juuid,
+            status=JobStatus.STARTED,
+            workers_dispatched=["first", "second"],
+            last_poll_ts=123,
+        )
+        try:
+            handle_event(client, juuid, {"worker": "first", "status": "completed"}, [])
+            assert client.outbound_queue.empty()
+            notification = {"worker": "first", "event_type": "result_ready"}
+            handle_event(client, juuid, notification, [])
+            message = client.outbound_queue.get_nowait()
+            assert message[2] == NFP.GET
+            assert b'["first"]' in message
+            assert client.job_db.get_job(juuid)["last_poll_timestamp"] == 123
+            handle_response(client, juuid, "200", {"first": {"result": "done"}})
+            handle_event(client, juuid, notification, [])
+            assert client.outbound_queue.empty()
+            handle_event(
+                client,
+                juuid,
+                {"worker": "unknown", "event_type": "result_ready"},
+                [],
+            )
+            assert client.outbound_queue.empty()
+            client.job_db.update_job(juuid, status=JobStatus.STALE)
+            handle_event(
+                client,
+                juuid,
+                {"worker": "second", "event_type": "result_ready"},
+                [],
+            )
+            assert client.outbound_queue.empty()
+        finally:
+            client.job_db.close()
+            client.wakeup_reader.close()
+            client.wakeup_writer.close()

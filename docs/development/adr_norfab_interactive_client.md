@@ -50,10 +50,21 @@ set minimal:
 - `progress`
 - `input_request`
 - `input_response`
+- `result_ready`
 
 Use `progress` for normal progress messages and job lifecycle updates such as
 started, completed, failed, or stale. Use `status` for the exact lifecycle
-state.
+state. The final event after result persistence uses `result_ready`.
+
+## Completion result retrieval
+
+Workers mark their final event with `event_type="result_ready"` after saving the
+result. The client queues a GET for that worker and merges the saved result using
+the existing response path. Progress events alone do not complete futures.
+Periodic GETs run every 10 seconds for outstanding workers; deadline checks remain
+independent. The socket thread blocks until broker traffic or a native socket-pair notification
+arrives. Queue insertion and shutdown signal the socket pair; the dispatcher
+retains its existing database scan intervals.
 
 ## Context
 

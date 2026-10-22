@@ -533,7 +533,7 @@
     },
     "test_fhrp.py::TestSyncVrrp": {
       "mode": "main_mutating",
-      "coverage": "XR getter and sync tests cover compatible per-device action previews, including group and VIP field changes, dual-stack groups, VIP creation, reuse (including an unassigned VIP for an existing group), role normalization, conflict protection during dry runs and writes, and idempotency. Priority-only updates leave group and VIP records unchanged. VIP drift keeps the existing group and assignment, creates the live VIP, and retains the old VIP unchanged. Persistent fn-vrrp-vrf-* hosts use the same VIP and group ID in BLUE, RED and global VRFs. Cover later peer discovery, named VIP VRF shortcut, creation-only vip_use_vrf, preservation of existing VIP VRFs, missing VRF reporting and ambiguous groups.",
+      "coverage": "XR getter and sync tests cover compatible per-device action previews, including group and VIP field changes, dual-stack groups, VIP creation, reuse (including an unassigned VIP for an existing group), role normalization, conflict protection for an ordinary assigned IP without a redundancy role during dry runs and writes, and idempotency. Priority-only updates leave group and VIP records unchanged. VIP drift keeps the existing group and assignment, creates the live VIP, and retains the old VIP unchanged. Persistent fn-vrrp-vrf-* hosts use the same VIP and group ID in BLUE, RED and global VRFs. Cover later peer discovery, named VIP VRF shortcut, creation-only vip_use_vrf, preservation of existing VIP VRFs, missing VRF reporting and ambiguous groups.",
       "devices": [
         "xr1",
         "fn-vrrp-vrf-1",

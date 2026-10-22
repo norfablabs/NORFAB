@@ -1,7 +1,7 @@
 # Client completion events and socket wake-up plan
 
-Status: proposed. Reviewed against the current implementation on 21 October 2026.
-This plan does not change runtime behavior.
+Status: Part 1 implemented on 22 October 2026; core and FileSharing validation passed.
+Part 2 implemented on 22 October 2026; Windows socket wake-up validation passed.
 
 ## Objective
 
@@ -13,7 +13,7 @@ Keep public client methods, worker task interfaces, result formats, SQLite job
 storage, and the existing broker protocol commands unchanged. Keep the dispatcher
 and ZeroMQ owner threads; do not introduce asyncio or another worker thread.
 
-## Current behavior and findings
+## Original behavior and findings
 
 - `submit_job()` writes the job, creates its future, and wakes the dispatcher.
 - `dispatch_new_jobs()` queues POST. Only `zmq_send_recv()` sends and receives
@@ -39,8 +39,8 @@ and ZeroMQ owner threads; do not introduce asyncio or another worker thread.
 ## Part 1: event-triggered result retrieval
 
 1. **Mark the worker's final event.** In `run_next_job()`, add
-   `extras={"result_ready": True}` to the existing final completion event, after
-   database persistence. Keep its existing event type and status. Ordinary task
+   `event_type="result_ready"` to the existing final completion event, after
+   database persistence. Keep its existing completed status. Ordinary task
    progress events must not trigger retrieval merely because they say completed.
    The event sender already includes the worker name, service, and job UUID.
 
@@ -72,7 +72,7 @@ and ZeroMQ owner threads; do not introduce asyncio or another worker thread.
    verify that batches do not starve later jobs.
 
 6. **Make GET polling a recovery path.** Increase the existing `poll_interval`
-   from 0.5 to 30 seconds. Query only dispatched workers without saved results;
+   from 0.5 to 10 seconds. Query only dispatched workers without saved results;
    never send an empty target list. Completion events bypass this interval.
    Review timestamp handling so repeated events from one worker do not postpone
    recovery indefinitely for another. No new public configuration is required.
@@ -88,6 +88,18 @@ and ZeroMQ owner threads; do not introduce asyncio or another worker thread.
    Update the client job status from actual input-request/response events when
    appropriate, without reopening terminal jobs. Keep GET's 102 handling for
    recovery, including input-ID deduplication. Test this with multiple workers.
+
+### Implementation scope and separate review
+
+Part 1 keeps the existing dispatcher, socket thread, event delivery, response
+merging, and database schema. Deadline selection is an inline bounded query;
+no helper functions were added. Futures keep outstanding input IDs by worker so
+one worker's response cannot clear another worker's input-waiting status.
+
+Part 2 adds a nonblocking native socket pair to the existing poller. Queue
+insertion and shutdown signal it; outgoing batches remain bounded. The dispatcher
+also signals it on external exit. Both threads stop before sockets are closed.
+No helper functions or additional threads were added.
 
 ## Part 2: remove the client socket's 100 ms wait
 
@@ -152,11 +164,41 @@ Run focused integration suites first, then the core and FileSharing suites.
 Run formatting and lint checks for touched files. Validate socket wake-up on
 both Windows and Linux; report any platform not exercised.
 
+### Validation results: 22 October 2026
+
+Local Windows / Python 3.13, following the testing framework:
+
+- `poetry run pytest core -q -k 'not load_inventory_from_dictionary'`:
+  152 passed, 1 skipped, 1 deselected.
+- `poetry run pytest services/filesharing -q`: 71 passed, using both FileSharing workers.
+- Black checks and `git diff --check` passed. Ruff reported no new findings
+  compared with HEAD; existing annotation findings remain.
+
+The full core attempt stalled in the dictionary-inventory fixture, whose workers
+repeatedly reported broker keepalive expiry at port 7777. That test was excluded
+from the completed core run. Linux was not exercised in this initial Part 1 run.
+
+### Part 2 validation results: 22 October 2026
+
+Local Windows / Python 3.13:
+
+- Native `socket.socketpair()` readiness was verified with the ZeroMQ poller.
+- `poetry run pytest core services/filesharing -q -k 'not load_inventory_from_dictionary'`:
+  226 passed, 1 skipped, 1 deselected, using both FileSharing workers.
+- Checks cover idle sends, multiple producers, more than two outgoing batches,
+  incoming broker replies, a full notification buffer, external exit, and repeated shutdown.
+- Black, targeted Ruff checks (E/F/I with the repository's E501 exclusion), and
+  `git diff --check` passed. Existing annotation findings were not changed.
+
+The previously stalled dictionary-inventory test remains excluded. Linux was
+not exercised because the Docker Linux engine was unavailable. The worker's
+100 ms socket polling constant is unchanged. Periodic job polling remains 10 seconds.
+
 ## Documentation and scope
 
 Update the interactive-client ADR, file-streaming developer guide, feature
 catalogue, and latest changelog to describe event-triggered GET with recovery.
-Keep documentation explicit that 30-second recovery polling remains. Update
+Keep documentation explicit that 10-second periodic polling remains. Update
 comments and docstrings when changing their behavior.
 
 Expected runtime files: `norfab/core/client.py` and `norfab/core/worker.py`.

@@ -186,6 +186,15 @@ worker.send_to_broker(NFP.STREAM, msg)
 
 The broker forwards `STREAM` to the client without wrapping the chunk into JSON.
 
+## Completion and recovery
+
+After saving its result, the worker emits a final event with
+`event_type="result_ready"`. The client requests that worker's saved result with
+GET. Periodic GETs remain at 10-second intervals for outstanding workers, with
+independent deadline checks. The socket thread wakes on broker traffic or a
+native socket-pair notification after outgoing queue insertion. Shutdown wakes
+both existing threads before closing sockets. STREAM and PUT handling are unchanged.
+
 ## How `PUT` is used (client → worker)
 
 In file download, `PUT` does not upload file content.

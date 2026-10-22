@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 21 October 2026*
+*Last updated: 22 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -161,6 +161,9 @@ resources may still require coordination.
 
 Provides blocking execution, asynchronous submission, user-supplied UUIDs,
 deadlines, worker selectors, deferred results, and recoverable futures.
+Worker `result_ready` events trigger targeted result retrieval. Periodic GET polling
+every 10 seconds retrieves outstanding results if notifications are missed. The client socket
+thread wakes on broker traffic, queued outgoing messages, or shutdown.
 Expired client jobs retain `STALE` state and return failed task results with
 `status="timeout"` and `result=null` through Python and REST. Completed worker
 results are preserved. REST returns an explicit HTTP 500 error if no client

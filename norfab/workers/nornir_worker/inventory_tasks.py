@@ -86,6 +86,7 @@ class InventoryTasks:
             nornir_netbox_options = self.nornir_worker_inventory["netbox"].copy()
         else:
             nornir_netbox_options = {}
+        timeout = max(10, nornir_netbox_options.pop("timeout", timeout))
 
         # Task arguments that are present override worker inventory options.
         if interfaces is not None:
