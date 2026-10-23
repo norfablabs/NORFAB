@@ -613,6 +613,12 @@
       "absent_models": ["NORFAB DESIGN MODEL REFERENCE MISSING"],
       "ownership": "Owns and deletes all records, including one type per manufacturer with the same model. Covers dry-run creation, creation, repeat update, missing and ambiguous models, and explicit manufacturer disambiguation."
     },
+    "test_designs.py::TestDesignDeploy::test_device_status": {
+      "mode": "main_mutating",
+      "devices": ["norfab-design-device-status"],
+      "read_only": "Reads seed device fceos4 and its site, role, device type, and manufacturer for creation references.",
+      "ownership": "Creates and deletes only its device. Verifies planned default, explicit active update, and preservation when status is omitted. Leaves seed records unchanged."
+    },
     "test_designs.py::TestDesignDeploy::test_device_roles_match_by_slug": {
       "mode": "main_mutating",
       "device_role_slugs": ["norfab-design-role-slug", "norfab-design-role-custom"],

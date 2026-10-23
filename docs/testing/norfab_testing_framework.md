@@ -141,7 +141,13 @@ Use a directory, file, class, or method path to narrow collection; use `-m` for 
 | FileSharing | `filesharing_walk` | FileSharing walk task tests |
 | Workflow | `workflow_run` | Workflow run task tests |
 
-Group tests in `Test...` classes. Exercise real services through the public client interface and the `nfclient` fixture. Keep test data explicit, clean up only data created by the test, and make cleanup safe after partial failures. Put service markers on test files and register new task markers in `pyproject.toml`.
+### Writing tests
+
+- Use integration tests through the public client interface and the `nfclient` fixture whenever possible. Exercise real services and assert observable results.
+- Keep each test small and focused on one behavior. Use only the setup, data, and assertions needed to verify it.
+- Prefer extending related tests for new behavior when they remain focused. Create a dedicated test when existing tests cover unrelated behavior.
+- Group tests in `Test...` classes. Put service markers on test files and register new task markers in `pyproject.toml`.
+- Keep test data explicit, clean up only data created by the test, and make cleanup safe after partial failures. Reuse shared seed records for read-only references; create owned records for mutations.
 
 ### NetBox test data ownership
 

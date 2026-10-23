@@ -4,7 +4,10 @@
 
 1. Read the relevant repository guides before changing code or tests; follow their established patterns.
 2. Keep implementations simple and direct. Avoid unnecessary abstractions, compatibility paths, and helpers used only once or twice.
-3. Follow `docs/testing/norfab_testing_framework.md` when writing or running tests.
+3. Follow `docs/testing/norfab_testing_framework.md` when writing or running tests:
+   - Use integration tests through the public client interface whenever possible.
+   - Keep tests small and focused.
+   - Prefer extending related tests for new behavior, create a dedicated test when existing tests are unrelated.
 4. Preserve public task arguments and client interfaces unless a change is explicitly requested.
 5. Validate data at the appropriate boundary; avoid repeating the same checks deeper in the implementation.
 6. Write useful Google-style docstrings for tasks. Document every argument, the result, important behavior, limitations, and relevant errors; keep them accurate when changing a task.

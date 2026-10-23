@@ -116,6 +116,42 @@ class TestDesignDeploy:
             for item in reversed(owned):
                 item.delete()
 
+    def test_device_status(self, nfclient: Any) -> None:
+        """Default new devices to planned without resetting existing status."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        name = "norfab-design-device-status"
+        assert not nb.dcim.devices.get(name=name)
+        seed = nb.dcim.devices.get(name="fceos4")
+        device = {
+            "name": name,
+            "site": seed.site.name,
+            "role": seed.role.name,
+            "device_type": {
+                "manufacturer": seed.device_type.manufacturer.name,
+                "model": seed.device_type.model,
+            },
+        }
+        try:
+            for status, expected in (
+                ({}, "planned"),
+                ({"status": "active"}, "active"),
+                ({}, "active"),
+            ):
+                response = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={"design": {"devices": [{**device, **status}]}},
+                )
+                assert response
+                for result in response.values():
+                    assert not result["failed"], result
+                assert nb.dcim.devices.get(name=name).status.value == expected
+        finally:
+            created = nb.dcim.devices.get(name=name)
+            if created:
+                created.delete()
+
     def test_move_ip_wrapper(self, nfclient: Any) -> None:
         """Deploy top-level and nested IP move wrappers against Netbox."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)

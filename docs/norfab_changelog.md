@@ -27,7 +27,8 @@
 10. Client result retrieval now follows worker `result_ready` events, with periodic GET polling every 10 seconds for outstanding workers. Deadline checks remain independent, and restarted clients immediately retrieve outstanding saved results.
 11. A native socket pair now wakes the client socket thread for outgoing messages and shutdown, replacing its 100 ms polling timeout while preserving bounded outgoing batches and incoming message handling.
 12. Nornir `task` plugins that explicitly declare `job`, including optional `job=None` and keyword-only parameters, now receive the current NorFab Job object and can emit per-host events with `job.event()`. Worker events are deep-copied before queueing to isolate nested event data from subsequent changes.
-13. Netbox `design_deploy` device definitions now accept a device type model string, resolved to its manufacturer and model from Netbox. Missing or ambiguous models fail before device writes; explicit manufacturer/model dictionaries remain supported.
+13. Netbox `design_deploy` device definitions now accept a device type model string, resolved to its manufacturer and model from Netbox. Missing or ambiguous models fail before device writes; explicit manufacturer/model dictionaries remain supported. 
+14. New devices default to planned status; omitted status preserves existing device status.
 
 ---
 

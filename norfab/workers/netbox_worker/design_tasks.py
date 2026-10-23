@@ -1948,6 +1948,8 @@ def process_devices(
     a supplied tenant that selects exactly one device, otherwise matching fails.
     Omitted site leaves an existing device's site unchanged; new devices must
     still supply the attributes required by NetBox.
+    New devices default to planned status. Omitted status leaves existing
+    devices unchanged; an explicit status applies to creates and updates.
     String device-type references must match exactly one existing model in
     NetBox, including during dry runs. Dictionaries specify manufacturer and
     model explicitly to disambiguate device types.
@@ -2016,6 +2018,8 @@ def process_devices(
         else:
             created.append(record)
     created = [dict(record) for record in created]
+    for record in created:
+        record.setdefault("status", "planned")
     for record in created + updated:
         for field in ("site", "role", "platform", "tenant"):
             if record.get(field) is not None:
@@ -4115,6 +4119,8 @@ class NetboxDesignTasks:
                 Device-type references accept manufacturer/model dictionaries
                 or model strings matching exactly one existing NetBox type.
                 String references must exist in NetBox even during dry runs.
+                New devices default to planned status; omitted status preserves
+                existing device status.
             context: Jinja2 variables, optionally checked by design_input_schema.
             instance: NetBox instance name; defaults to the worker's instance.
             dry_run: Return planned writes without changing NetBox.
