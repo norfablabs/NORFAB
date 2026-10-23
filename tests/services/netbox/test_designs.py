@@ -4,7 +4,6 @@ import time
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
-from unittest.mock import Mock
 
 import pynetbox
 import pytest
@@ -20,6 +19,103 @@ pytestmark = [pytest.mark.netbox, pytest.mark.netbox_design_deploy]
 
 
 class TestDesignDeploy:
+    def test_device_type_model_reference(self, nfclient: Any) -> None:
+        """Resolve unique models and reject missing or ambiguous device types."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        name = "norfab-design-model-reference"
+        model = "NORFAB DESIGN MODEL REFERENCE"
+        owned = []
+        try:
+            for endpoint, attributes in (
+                (nb.dcim.sites, {"name": name, "slug": name}),
+                (nb.dcim.device_roles, {"name": name, "slug": name}),
+                (nb.dcim.manufacturers, {"name": name, "slug": name}),
+                (
+                    nb.dcim.manufacturers,
+                    {"name": name + "-other", "slug": name + "-other"},
+                ),
+            ):
+                assert not endpoint.get(name=attributes["name"]), attributes
+                owned.append(endpoint.create(attributes))
+            site, role, manufacturer, other_manufacturer = owned
+            assert not nb.dcim.devices.get(name=name)
+            assert not list(
+                nb.dcim.device_types.filter(model=[model, model + " MISSING"])
+            )
+            device_type = nb.dcim.device_types.create(
+                model=model, slug=name, manufacturer=manufacturer.id
+            )
+            owned.append(device_type)
+            device = {
+                "name": name,
+                "site": site.name,
+                "role": role.name,
+                "device_type": model,
+            }
+            for dry_run in (True, False, False):
+                response = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={"design": {"devices": [device]}, "dry_run": dry_run},
+                )
+                result = next(iter(response.values()))
+                actual = nb.dcim.devices.get(name=name)
+                if actual and len(owned) == 5:
+                    # Track the device before assertions so failures still clean it up.
+                    owned.append(actual)
+                assert not result["failed"], result
+                assert bool(actual) is not dry_run
+                if actual:
+                    assert actual.device_type.id == device_type.id
+
+            for reference in (model + " MISSING", model):
+                if reference == model:
+                    duplicate = nb.dcim.device_types.create(
+                        model=model, slug=name, manufacturer=other_manufacturer.id
+                    )
+                    # Devices must be deleted before their device types.
+                    owned.insert(5, duplicate)
+                response = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={
+                        "design": {"devices": [{**device, "device_type": reference}]}
+                    },
+                )
+                result = next(iter(response.values()))
+                assert result["failed"], result
+                assert ("not found" if reference != model else "ambiguous") in str(
+                    result["errors"]
+                )
+                assert nb.dcim.devices.get(name=name).device_type.id == device_type.id
+
+            response = nfclient.run_job(
+                "netbox",
+                "design_deploy",
+                workers="any",
+                kwargs={
+                    "design": {
+                        "devices": [
+                            {
+                                **device,
+                                "device_type": {
+                                    "manufacturer": manufacturer.name,
+                                    "model": model,
+                                },
+                            }
+                        ]
+                    }
+                },
+            )
+            result = next(iter(response.values()))
+            assert not result["failed"], result
+            assert nb.dcim.devices.get(name=name).device_type.id == device_type.id
+        finally:
+            for item in reversed(owned):
+                item.delete()
+
     def test_move_ip_wrapper(self, nfclient: Any) -> None:
         """Deploy top-level and nested IP move wrappers against Netbox."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
@@ -107,25 +203,47 @@ class TestDesignDeploy:
             for port in interfaces:
                 port.delete()
 
-    def test_design_timeout(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """Stop preparation with a timeout error after a slow connection setup."""
-        from norfab.core.worker import Job
-        from norfab.workers.netbox_worker.netbox_worker import NetboxWorker
-
-        worker = object.__new__(NetboxWorker)
-        worker.name = "timeout-test"
-        worker.default_instance = "test"
-
-        def slow_connection(*args: Any, **kwargs: Any) -> None:
-            time.sleep(2)
-
-        worker._get_pynetbox = slow_connection
-        job = Job(juuid="design-timeout-test", task="design_deploy", timeout=1)
-        monkeypatch.setattr(Job, "event", Mock())
-        result = worker.design_deploy(job=job, design={})
-        assert result.failed
-        assert "1-second timeout" in " ".join(result.errors)
-        assert result.result == {}
+    def test_design_timeout(self, nfclient: Any) -> None:
+        """Stop subsequent collections after a slow custom function times out."""
+        worker = "netbox-worker-1.1"
+        design = {
+            "custom_functions": {
+                "slow_design_record": "nf://netbox/designs/slow_design_record.py",
+            },
+            "tenants": [{"custom_function": "slow_design_record", "delay": 2}],
+            "regions": [{"custom_function": "slow_design_record", "delay": 0}],
+        }
+        submitted = nfclient.run_job(
+            "netbox",
+            "design_deploy",
+            workers=worker,
+            kwargs={"design": design, "dry_run": True},
+            timeout=1,
+            nowait=True,
+        )
+        # Client expiry may precede the worker reply; inspect its saved result.
+        deadline = time.monotonic() + 30
+        while time.monotonic() < deadline:
+            response = nfclient.run_job(
+                "netbox",
+                "job_details",
+                workers=worker,
+                kwargs={"uuid": submitted["uuid"], "events": False},
+            )
+            details = response[worker]
+            if not details["failed"] and details["result"].get("result_data"):
+                break
+            time.sleep(0.2)
+        else:
+            pytest.fail(f"worker did not save the design timeout result: {response}")
+        result = details["result"]["result_data"]["result"][worker]
+        assert result["failed"], result
+        assert "failed to deploy tenants" in " ".join(result["errors"])
+        assert "1-second timeout" in " ".join(result["errors"])
+        assert result["result"]["tenants"]["custom"] == [
+            {"function": "slow_design_record", "result": {"delay": 2}}
+        ]
+        assert "regions" not in result["result"]
 
     @pytest.mark.parametrize("explicit_slug", [False, True])
     def test_device_roles_match_by_slug(
@@ -3262,6 +3380,9 @@ tenants:
                 ]
             },
             {"tenants": {"name": "tenant-1"}},
+            {"devices": [{"name": "invalid", "device_type": ""}]},
+            {"devices": [{"name": "invalid", "device_type": "   "}]},
+            {"devices": [{"name": "invalid", "device_type": 42}]},
             {"tenants": ["tenant-1"]},
             {"vrfs": [{"name": "invalid", "import_route_targets": ["64512:100"]}]},
             {"vrfs": [{"name": "invalid", "import_route_targets": [{"query": {}}]}]},

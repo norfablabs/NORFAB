@@ -12,8 +12,11 @@ worker tasks handle operations that need allocation or other special behavior.
 Unique-name relationships use strings, for example `manufacturer: ACME NETWORKS`,
 `region: ACME REGION`, and `rir: ACME PRIVATE`. Handlers convert these to NetBox
 name lookups; name-only dictionaries are rejected. Device-type references use
-`{manufacturer: ACME NETWORKS, model: ACME BRANCH ROUTER}` because model alone
-does not identify a device type.
+`{manufacturer: ACME NETWORKS, model: ACME BRANCH ROUTER}` to identify a type
+explicitly. A model string is also accepted when it matches exactly one existing
+NetBox device type. Missing or ambiguous models fail before device writes.
+String references must exist in NetBox even during dry runs; use the dictionary
+form for device types declared in the same design when previewing deployment.
 
 Design metadata (`design_input_schema`, `jinja_functions`) and object lists are
 top-level keys in one YAML document; metadata precedes templated collections.

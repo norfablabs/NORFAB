@@ -1948,6 +1948,9 @@ def process_devices(
     a supplied tenant that selects exactly one device, otherwise matching fails.
     Omitted site leaves an existing device's site unchanged; new devices must
     still supply the attributes required by NetBox.
+    String device-type references must match exactly one existing model in
+    NetBox, including during dry runs. Dictionaries specify manufacturer and
+    model explicitly to disambiguate device types.
 
     Args:
         worker: NetBox worker used for bulk reads and delegated tasks.
@@ -1961,6 +1964,10 @@ def process_devices(
 
     Returns:
         dict: Object identities grouped under ``created`` and ``updated``.
+
+    Raises:
+        ValueError: Device identity is ambiguous, or a string device-type
+            reference matches zero or multiple existing types.
     """
     log.debug(
         "process_devices: processing %d records, dry_run=%s", len(records), dry_run
@@ -2013,9 +2020,36 @@ def process_devices(
         for field in ("site", "role", "platform", "tenant"):
             if record.get(field) is not None:
                 record[field] = {"name": record[field]}
+    models = {
+        record["device_type"]
+        for record in records
+        if isinstance(record.get("device_type"), str)
+    }
+    device_types = {}
+    if models:
+        for item in worker.bulk_filter(
+            nb.dcim.device_types, model=list(models), fields="id,model,manufacturer"
+        ):
+            device_types.setdefault(item.model, []).append(item)
     for record in created + updated:
         if "device_type" in record:
-            device_type = dict(record["device_type"])
+            reference = record["device_type"]
+            if isinstance(reference, str):
+                matches = device_types.get(reference, [])
+                if not matches:
+                    raise ValueError(
+                        f"device {record['name']}: device type model '{reference}' not found"
+                    )
+                if len(matches) != 1:
+                    raise ValueError(
+                        f"device {record['name']}: ambiguous device type model '{reference}'; "
+                        "provide manufacturer and model"
+                    )
+                reference = {
+                    "model": matches[0].model,
+                    "manufacturer": matches[0].manufacturer.name,
+                }
+            device_type = dict(reference)
             device_type["manufacturer__name"] = device_type.pop("manufacturer")
             record["device_type"] = device_type
     merge_design_array_fields(
@@ -4078,6 +4112,9 @@ class NetboxDesignTasks:
         Args:
             job: NorFab job injected by the task framework.
             design: YAML text, NorFab file URL, or parsed design dictionary.
+                Device-type references accept manufacturer/model dictionaries
+                or model strings matching exactly one existing NetBox type.
+                String references must exist in NetBox even during dry runs.
             context: Jinja2 variables, optionally checked by design_input_schema.
             instance: NetBox instance name; defaults to the worker's instance.
             dry_run: Return planned writes without changing NetBox.

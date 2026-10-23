@@ -1060,13 +1060,15 @@ class DesignDocument(BaseModel):
         for record in self.devices:
             if "custom_function" not in record and "device_type" in record:
                 reference = record["device_type"]
+                if isinstance(reference, str) and reference.strip():
+                    continue
                 if (
                     not isinstance(reference, dict)
                     or set(reference) != {"manufacturer", "model"}
                     or not all(isinstance(value, str) for value in reference.values())
                 ):
                     raise ValueError(
-                        "device_type requires manufacturer and model strings"
+                        "device_type requires a nonblank model string or manufacturer and model strings"
                     )
         for field in type(self).model_fields:
             records = getattr(self, field)

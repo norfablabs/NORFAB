@@ -227,6 +227,8 @@ Each design section contains a list of object records. The rows show the order i
 
 Ordinary records use Netbox API field names. Handlers bulk-create missing objects and bulk-update existing ones. Common name references, such as `device.site`, `device.role`, and `vlan.group`, are resolved by their handlers. Fields without a documented name shorthand must use a payload accepted by the target Netbox API. Unknown top-level collections are rejected.
 
+Devices accept `device_type: {manufacturer: ACME, model: AGG SWITCH}` or `device_type: AGG SWITCH`. A string must match exactly one existing Netbox model, including during dry runs; missing or ambiguous models fail. Use the dictionary form to disambiguate or preview types defined in the same design.
+
 When updating an existing record, design handlers add requested tags and custom-field list values without removing existing members. They also add VRF and L2VPN route targets, interface tagged VLANs, and config-context scope lists. Config-context `sites` and `tenants` accept name lists; other scope lists use NetBox IDs. Scalar custom fields replace their old values. VLAN-group `vid_ranges`, local context data, and config-context `data` retain replacement behavior. Named object and multiobject custom-field values are resolved to NetBox IDs before writes.
 
 
@@ -1039,7 +1041,7 @@ Device records may contain `interfaces`, `bgp_peerings`, `power_ports`, `console
 
     Prerequisites: Named site, role, manufacturer, and device type.
 
-    A compact interface `vrrp` record creates an FHRP group, its VIP IP address, and an assignment to the interface. The protocol defaults to `vrrp2`. The same group can be assigned to a second device with a different priority.
+    A compact interface `vrrp` record creates an FHRP group, its VIP IP address, and an assignment to the interface. The protocol defaults to `vrrp2`. The same group can be assigned to a second device with a different priority. This example shows both device-type reference forms; `AGG SWITCH` must uniquely identify an existing model.
 
     ```yaml
     devices:
@@ -1058,7 +1060,7 @@ Device records may contain `interfaces`, `bgp_peerings`, `power_ports`, `console
       - name: branch-agg-2
         site: BRANCH-1
         role: AGGREGATION
-        device_type: {manufacturer: ACME, model: AGG SWITCH}
+        device_type: AGG SWITCH
         interfaces:
           Vlan100:
             type: virtual
@@ -1082,9 +1084,7 @@ Device records may contain `interfaces`, `bgp_peerings`, `power_ports`, `console
     - name: branch-agg-2
       site: BRANCH-1
       role: AGGREGATION
-      device_type:
-        manufacturer: ACME
-        model: AGG SWITCH
+      device_type: AGG SWITCH
     interfaces:
     - type: virtual
       name: Vlan100
