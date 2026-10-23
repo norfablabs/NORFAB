@@ -7,6 +7,218 @@ import pytest
 pytestmark = [pytest.mark.nornir, pytest.mark.nornir_netconf]
 
 
+class TestNetconfCommit:
+    @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
+    @pytest.mark.parametrize("to_dict", [True, False])
+    @pytest.mark.parametrize("confirmed", [False, True])
+    def test_commit_unchanged_candidate(
+        self, nfclient: object, plugin: str, to_dict: bool, confirmed: bool
+    ) -> None:
+        """Commit only when candidate already matches running configuration."""
+        common = {"plugin": plugin, "FL": ["ceos-spine-1"], "on_failed": True}
+        snapshots = []
+        for source in ("running", "candidate"):
+            read = nfclient.run_job(
+                "nornir",
+                "netconf_get_config",
+                workers="nornir-worker-1",
+                kwargs={**common, "source": source},
+            )["nornir-worker-1"]
+            assert read["failed"] is False, read
+            root = ElementTree.fromstring(read["result"]["ceos-spine-1"]["get_config"])
+            data = next(node for node in root if node.tag.split("}")[-1] == "data")
+            snapshots.append(
+                ElementTree.canonicalize(
+                    ElementTree.tostring(data, encoding="unicode"), strip_text=True
+                )
+            )
+        if snapshots[0] != snapshots[1]:
+            pytest.skip("candidate contains changes not owned by this test")
+        options = {}
+        if confirmed:
+            options = {
+                "confirmed": True,
+                "confirm_delay": 30,
+                "persist": "norfab-commit-test",
+            }
+        try:
+            result = nfclient.run_job(
+                "nornir",
+                "netconf_commit",
+                workers="nornir-worker-1",
+                kwargs={
+                    **common,
+                    **options,
+                    "run_task_retry": 0,
+                    "to_dict": to_dict,
+                    "add_details": True,
+                },
+            )["nornir-worker-1"]
+            assert result["failed"] is False, result
+            if to_dict:
+                record = result["result"]["ceos-spine-1"]["commit"]
+            else:
+                record = result["result"][0]
+                assert record["host"] == "ceos-spine-1"
+                assert record["name"] == "commit"
+            assert record["failed"] is False, record
+            root = ElementTree.fromstring(record["result"])
+            assert any(node.tag.split("}")[-1] == "ok" for node in root.iter())
+        finally:
+            if confirmed:
+                confirmation = nfclient.run_job(
+                    "nornir",
+                    "netconf_commit",
+                    workers="nornir-worker-1",
+                    kwargs={
+                        **common,
+                        "persist_id": "norfab-commit-test",
+                        "run_task_retry": 0,
+                    },
+                )["nornir-worker-1"]
+                assert confirmation["failed"] is False, confirmation
+
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {"plugin": "invalid"},
+            {"confirmed": "yes"},
+            {"confirmed": True, "confirm_delay": 0},
+            {"confirm_delay": 30},
+            {"persist": "test"},
+            {"persist_id": ""},
+            {"persist": "test", "persist_id": "test", "confirmed": True},
+            {"persist_id": "test", "confirmed": True},
+        ],
+    )
+    def test_invalid_arguments(self, nfclient: object, kwargs: dict) -> None:
+        result = nfclient.run_job(
+            "nornir",
+            "netconf_commit",
+            workers="nornir-worker-1",
+            kwargs=kwargs,
+        )["nornir-worker-1"]
+        assert result["failed"] is True, result
+        assert result["errors"], result
+
+    @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
+    @pytest.mark.parametrize(
+        "options",
+        [
+            {},
+            {"confirmed": True, "confirm_delay": 30, "persist": "norfab-test"},
+            {"persist_id": "norfab-test"},
+        ],
+    )
+    def test_no_match(self, nfclient: object, plugin: str, options: dict) -> None:
+        result = nfclient.run_job(
+            "nornir",
+            "netconf_commit",
+            workers="nornir-worker-1",
+            kwargs={"plugin": plugin, "FB": "no-such-netconf-host", **options},
+        )["nornir-worker-1"]
+        assert result["status"] == "no_match"
+        assert result["result"] == {}
+
+
+class TestNetconfValidate:
+    @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
+    @pytest.mark.parametrize("source", ["candidate", "running", "startup"])
+    def test_datastore(self, nfclient: object, plugin: str, source: str) -> None:
+        """Return the device's validation reply, including existing lab errors."""
+        capabilities = nfclient.run_job(
+            "nornir",
+            "netconf_get_capabilities",
+            workers="nornir-worker-1",
+            kwargs={"plugin": plugin, "FL": ["ceos-spine-1"], "on_failed": True},
+        )["nornir-worker-1"]
+        assert capabilities["failed"] is False, capabilities
+        supports_validate = any(
+            ":validate:" in capability
+            for capability in capabilities["result"]["ceos-spine-1"][
+                "server_capabilities"
+            ]
+        )
+        result = nfclient.run_job(
+            "nornir",
+            "netconf_validate",
+            workers="nornir-worker-1",
+            kwargs={
+                "plugin": plugin,
+                "source": source,
+                "FL": ["ceos-spine-1"],
+                "on_failed": True,
+                "run_task_retry": 0,
+            },
+        )["nornir-worker-1"]
+        reply = result["result"]["ceos-spine-1"]["validate"]
+        if not supports_validate:
+            assert result["failed"] is True, result
+            assert (
+                "MissingCapabilityError" in reply or "CapabilityNotSupported" in reply
+            ), reply
+            return
+        if result["failed"]:
+            # cEOS can reject existing configuration or unsupported datastores.
+            assert "rpc-error" in reply or "RPCError" in reply, reply
+        else:
+            root = ElementTree.fromstring(reply)
+            assert any(node.tag.split("}")[-1] == "ok" for node in root.iter())
+
+    @pytest.mark.parametrize(
+        "kwargs", [{"source": "invalid"}, {"source": ""}, {"plugin": "invalid"}]
+    )
+    def test_invalid_arguments(self, nfclient: object, kwargs: dict) -> None:
+        result = nfclient.run_job(
+            "nornir",
+            "netconf_validate",
+            workers="nornir-worker-1",
+            kwargs=kwargs,
+        )["nornir-worker-1"]
+        assert result["failed"] is True, result
+        assert result["errors"], result
+
+    @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
+    @pytest.mark.parametrize("to_dict", [True, False])
+    def test_no_match(self, nfclient: object, plugin: str, to_dict: bool) -> None:
+        result = nfclient.run_job(
+            "nornir",
+            "netconf_validate",
+            workers="nornir-worker-1",
+            kwargs={
+                "plugin": plugin,
+                "FB": "no-such-netconf-host",
+                "to_dict": to_dict,
+            },
+        )["nornir-worker-1"]
+        assert result["status"] == "no_match"
+        assert result["result"] == ({} if to_dict else [])
+
+    @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
+    def test_list_result(self, nfclient: object, plugin: str) -> None:
+        """Preserve validation replies and failures in detailed list results."""
+        result = nfclient.run_job(
+            "nornir",
+            "netconf_validate",
+            workers="nornir-worker-1",
+            kwargs={
+                "plugin": plugin,
+                "source": "running",
+                "FL": ["ceos-spine-1"],
+                "on_failed": True,
+                "run_task_retry": 0,
+                "to_dict": False,
+                "add_details": True,
+            },
+        )["nornir-worker-1"]
+        assert isinstance(result["result"], list) and result["result"], result
+        record = result["result"][0]
+        assert record["host"] == "ceos-spine-1"
+        assert record["name"] == "validate"
+        assert record["failed"] == result["failed"]
+        assert record["result"], record
+
+
 class TestNetconfGetConfig:
     @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
     @pytest.mark.parametrize("filtered", [False, True])
@@ -285,6 +497,125 @@ class TestNetconfEditConfig:
                 "plugin": plugin,
                 "FL": ["ceos-spine-1"],
                 "on_failed": True,
+                "config": '<config><norfab-invalid xmlns="urn:norfab:invalid"/></config>',
+            },
+        )["nornir-worker-1"]
+        assert result["failed"] is True, result
+
+
+class TestNetconfTransaction:
+    @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
+    @pytest.mark.parametrize("template_file", [False, True])
+    def test_edit_and_restore(
+        self, nfclient: object, plugin: str, template_file: bool
+    ) -> None:
+        """Create a test-owned loopback, verify its description, and delete it."""
+        common = {"plugin": plugin, "FL": ["ceos-spine-1"], "on_failed": True}
+        transaction = {**common, "target": "running", "validate": False}
+        subtree = '<interfaces xmlns="http://openconfig.net/yang/interfaces"><interface><name>Loopback3998</name></interface></interfaces>'
+        before = nfclient.run_job(
+            "nornir",
+            "netconf_get_config",
+            workers="nornir-worker-1",
+            kwargs={**common, "filter_subtree": subtree},
+        )["nornir-worker-1"]
+        assert before["failed"] is False, before
+        assert (
+            "Loopback3998" not in before["result"]["ceos-spine-1"]["get_config"]
+        ), "test interface already exists"
+        try:
+            result = nfclient.run_job(
+                "nornir",
+                "netconf_transaction",
+                workers="nornir-worker-1",
+                kwargs={
+                    **transaction,
+                    "config": (
+                        "nf://netconf/transaction_loopback.xml"
+                        if template_file
+                        else '<config><interfaces xmlns="http://openconfig.net/yang/interfaces"><interface><name>Loopback3998</name><config><name>Loopback3998</name><type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:softwareLoopback</type><description>{{ job_data.description }}</description></config></interface></interfaces></config>'
+                    ),
+                    "job_data": {"description": "norfab-netconf-transaction-test"},
+                    "to_dict": not template_file,
+                    "add_details": template_file,
+                },
+            )["nornir-worker-1"]
+            assert result["failed"] is False, result
+            if template_file:
+                record = result["result"][0]
+                assert record["host"] == "ceos-spine-1"
+                assert record["failed"] is False
+                steps = record["result"]
+            else:
+                steps = result["result"]["ceos-spine-1"]["transaction"]
+            assert isinstance(steps, list) and steps
+            assert any("edit_config" in step for step in steps)
+            read = nfclient.run_job(
+                "nornir",
+                "netconf_get_config",
+                workers="nornir-worker-1",
+                kwargs={**common, "filter_subtree": subtree},
+            )["nornir-worker-1"]
+            assert read["failed"] is False, read
+            assert (
+                "norfab-netconf-transaction-test"
+                in read["result"]["ceos-spine-1"]["get_config"]
+            )
+        finally:
+            cleanup = nfclient.run_job(
+                "nornir",
+                "netconf_transaction",
+                workers="nornir-worker-1",
+                kwargs={
+                    **transaction,
+                    "config": '<config><interfaces xmlns="http://openconfig.net/yang/interfaces"><interface xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" nc:operation="remove"><name>Loopback3998</name></interface></interfaces></config>',
+                },
+            )["nornir-worker-1"]
+            assert cleanup["failed"] is False, cleanup
+        after = nfclient.run_job(
+            "nornir",
+            "netconf_get_config",
+            workers="nornir-worker-1",
+            kwargs={**common, "filter_subtree": subtree},
+        )["nornir-worker-1"]
+        assert after["failed"] is False, after
+        assert "Loopback3998" not in after["result"]["ceos-spine-1"]["get_config"]
+
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {},
+            {"config": ""},
+            {"config": "<config/>", "target": "startup"},
+            {"config": "<config/>", "plugin": "invalid"},
+            {"config": "<config/>", "confirm_delay": 0},
+            {"config": "<config/>", "commit_final_delay": -1},
+        ],
+    )
+    def test_invalid_arguments(self, nfclient: object, kwargs: dict) -> None:
+        """Validate rejected inputs through the worker's public interface."""
+        result = nfclient.run_job(
+            "nornir",
+            "netconf_transaction",
+            workers="nornir-worker-1",
+            kwargs=kwargs,
+        )["nornir-worker-1"]
+        assert result["failed"] is True, result
+        assert result["errors"], result
+
+    def test_invalid_configuration(self, nfclient: object) -> None:
+        """Propagate ncclient RPC failure; cEOS stalls on this edit via Scrapli."""
+        result = nfclient.run_job(
+            "nornir",
+            "netconf_transaction",
+            workers="nornir-worker-1",
+            kwargs={
+                "plugin": "ncclient",
+                "FL": ["ceos-spine-1"],
+                "on_failed": True,
+                "target": "running",
+                "validate": False,
+                "run_task_retry": 0,
                 "config": '<config><norfab-invalid xmlns="urn:norfab:invalid"/></config>',
             },
         )["nornir-worker-1"]

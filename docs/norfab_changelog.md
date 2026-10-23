@@ -9,6 +9,9 @@
 
 1. Added Nornir NETCONF tasks `netconf_get`, `netconf_get_config`, `netconf_edit_config`, `netconf_get_schema`, and `netconf_get_capabilities`, with NFCLI commands and ncclient or Scrapli backends. Supports configuration and operational-state retrieval, datastore reads and edits, YANG/YIN schema retrieval, capability filtering, per-host rendered XML configuration and subtree/XPath filters, XML processors, FastAPI, and MCP. The `netconf_get` task includes IETF interfaces, routing, and hardware getters plus OpenConfig interfaces, LLDP, BGP, and system getters.
 2. Added NETCONF `xmltodict` processing through Python and NFCLI, with XML processor options for configuration edits and schema retrieval and a dedicated XML processor guide.
+3. Added Nornir `netconf_transaction` task, with per-host configuration templates, backend arguments, NFCLI, FastAPI, and MCP support.
+4. Added Nornir `netconf_validate` to validate candidate, running, or startup configuration with ncclient or Scrapli, including NFCLI, XML processors, FastAPI, and MCP support.
+5. Added Nornir `netconf_commit` for candidate commits and confirmed commits with rollback timers and persistence tokens, including NFCLI, XML processors, FastAPI, and MCP support.
 
 ## ENHANCEMENTS
 
@@ -23,6 +26,7 @@
 9. A native socket pair now wakes the worker socket thread for outgoing results, events, file chunks, and shutdown, replacing its fixed 100 ms polling timeout. Idle waits follow heartbeat deadlines, preserving heartbeat and reconnect handling.
 10. Client result retrieval now follows worker `result_ready` events, with periodic GET polling every 10 seconds for outstanding workers. Deadline checks remain independent, and restarted clients immediately retrieve outstanding saved results.
 11. A native socket pair now wakes the client socket thread for outgoing messages and shutdown, replacing its 100 ms polling timeout while preserving bounded outgoing batches and incoming message handling.
+12. Nornir `task` plugins that explicitly declare `job`, including optional `job=None` and keyword-only parameters, now receive the current NorFab Job object and can emit per-host events with `job.event()`. Worker events are deep-copied before queueing to isolate nested event data from subsequent changes.
 
 # 0.24.16
 

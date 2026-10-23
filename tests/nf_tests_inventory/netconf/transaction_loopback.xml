@@ -1,0 +1,12 @@
+<config>
+  <interfaces xmlns="http://openconfig.net/yang/interfaces">
+    <interface>
+      <name>Loopback3998</name>
+      <config>
+        <name>Loopback3998</name>
+        <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:softwareLoopback</type>
+        <description>{{ job_data.description }}</description>
+      </config>
+    </interface>
+  </interfaces>
+</config>

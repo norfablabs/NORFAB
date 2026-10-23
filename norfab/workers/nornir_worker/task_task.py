@@ -5,6 +5,7 @@ from nornir_salt.plugins.functions import ResultSerializer
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
+from norfab.utils.worker_utils import is_need_argument
 
 from .nornir_models import (
     TaskInput,
@@ -55,6 +56,10 @@ class TaskTask:
         ```
 
         Note:
+            Plugins that explicitly declare a `job` parameter, including
+            `job=None` or a keyword-only parameter, receive the current NorFab
+            Job object and can emit events with `job.event(...)`.
+
             The `CONNECTION_NAME` must be defined within the custom task function file if
             RetryRunner is in use. Otherwise, the connection retry logic is skipped, and
             connections to all hosts are initiated simultaneously up to the number of `num_workers`.
@@ -110,6 +115,9 @@ class TaskTask:
             )
 
         nr = self._add_processors(filtered_nornir, kwargs, job)  # add processors
+
+        if is_need_argument(task_function, "job"):
+            kwargs["job"] = job
 
         # run task
         log.debug(f"{self.name} - running Nornir task '{plugin}', kwargs '{kwargs}'")

@@ -160,6 +160,32 @@ def task(task: Task, **kwargs) -> Result:
 		how to construct  `inventory.yaml` file.	
 		
 
+## Emit Events from a Custom Task
+
+Declare a `job` parameter to receive the current NorFab Job object automatically.
+Required `job`, optional `job=None`, and keyword-only `job` parameters are supported;
+accepting only `**kwargs` does not request the job object. Do not supply `job` in
+client arguments.
+
+Save this plugin as `nornir_tasks/events.py` in the file service:
+
+```python title="events.py"
+from nornir.core.task import Result, Task
+
+def task(task: Task, job = None) -> Result:
+    job.event(f"processing host '{task.host.name}'")
+    return Result(host=task.host, result="done")
+```
+
+Run it with `plugin="nf://nornir_tasks/events.py"`. Each host execution can call
+`job.event()` safely from its Nornir thread. Include the host name in the message
+to distinguish events from different hosts. Use `severity="WARNING"` or
+`severity="ERROR"` when appropriate; the default severity is `INFO`.
+
+If the plugin runs subtasks with `task.run(...)`, pass `job=job` explicitly to
+subtasks that declare it. Treat the shared Job object as read-only apart from
+calling its methods.
+
 ## Use Community Module Task
 
 It is possible to run any Nornir task plugin created by open 

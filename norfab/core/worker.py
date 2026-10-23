@@ -34,6 +34,7 @@ from norfab import models
 from norfab.core.inventory import NorFabInventory
 from norfab.models import InputRequestModel, NorFabEvent, Result
 from norfab.utils.nflogging import read_jsonl_logs, setup_process_logging
+from norfab.utils.worker_utils import is_need_argument
 
 from . import NFP
 from .client import NFPClient
@@ -460,11 +461,11 @@ class Task:
         @functools.wraps(self.function)
         def wrapper(*args: object, **kwargs: object):
             # remove `job` argument if function does not expect it
-            if self.is_need_argument(function, "job") is False:
+            if is_need_argument(function, "job") is False:
                 _ = kwargs.pop("job", None)
 
             # remove `progress` argument if function does not expect it
-            if self.is_need_argument(function, "progress") is False:
+            if is_need_argument(function, "progress") is False:
                 _ = kwargs.pop("progress", None)
 
             # validate input arguments
@@ -579,13 +580,6 @@ class Task:
                 },
             }
         }
-
-    def is_need_argument(self, function: callable, argument: str) -> bool:
-        """
-        Determines whether a given argument name is required by the function.
-        """
-        fun_args, *_ = inspect.getfullargspec(function)
-        return argument in fun_args
 
     def merge_args_to_kwargs(self, args: List, kwargs: Dict) -> Dict:
         """
@@ -2124,7 +2118,7 @@ class NFPWorker:
         event_dict = event_data.model_dump(exclude_none=True)
 
         # emit event to the broker
-        self.event_queue.put(event_dict)
+        self.event_queue.put(copy.deepcopy(event_dict))
 
         # check if need to emit log for this event
         if self.inventory["logging"].get("log_events", False):

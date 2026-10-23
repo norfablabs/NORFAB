@@ -1386,6 +1386,106 @@ class NetconfEditConfigInput(
     )
 
 
+class NetconfCommitInput(
+    NornirXmlProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    plugin: NetconfPlugin = Field(NetconfPlugin.ncclient, description="NETCONF backend")
+    confirmed: StrictBool = Field(False, description="Start a confirmed commit")
+    confirm_delay: Union[None, StrictInt] = Field(
+        None,
+        gt=0,
+        alias="confirm-delay",
+        description="Confirmed commit rollback timeout in seconds; omit for device default",
+    )
+    persist: Union[None, StrictStr] = Field(
+        None,
+        min_length=1,
+        description="Token to keep a confirmed commit across sessions",
+    )
+    persist_id: Union[None, StrictStr] = Field(
+        None,
+        min_length=1,
+        alias="persist-id",
+        description="Token identifying the persistent confirmed commit to confirm",
+    )
+
+    @model_validator(mode="after")
+    def validate_commit_options(self) -> "NetconfCommitInput":
+        """Reject options that cannot be combined in a commit request."""
+        if self.persist_id is not None and (self.persist is not None or self.confirmed):
+            raise ValueError("persist_id cannot be combined with persist or confirmed")
+        if not self.confirmed and (
+            self.confirm_delay is not None or self.persist is not None
+        ):
+            raise ValueError("confirm_delay and persist require confirmed=True")
+        return self
+
+
+class NetconfValidateInput(
+    NornirXmlProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    plugin: NetconfPlugin = Field(NetconfPlugin.ncclient, description="NETCONF backend")
+    source: NetconfConfigSource = Field(
+        NetconfConfigSource.candidate, description="Datastore to validate"
+    )
+
+
+class NetconfTransactionInput(
+    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
+):
+    plugin: NetconfPlugin = Field(NetconfPlugin.ncclient, description="NETCONF backend")
+    config: StrictStr = Field(
+        ..., min_length=1, description="XML config wrapper or NorFab template URL"
+    )
+    target: Union[None, NetconfConfigTarget] = Field(
+        None, description="Datastore to edit; omit for backend automatic selection"
+    )
+    job_data: Any = Field(
+        None, alias="job-data", description="Template data or YAML file URL"
+    )
+    validate: StrictBool = Field(
+        True, description="Validate when supported by the device"
+    )
+    confirmed: StrictBool = Field(
+        True, description="Use confirmed commit when supported"
+    )
+    confirm_delay: StrictInt = Field(
+        60,
+        gt=0,
+        alias="confirm-delay",
+        description="Confirmed commit timeout in seconds",
+    )
+    commit_final_delay: StrictInt = Field(
+        1,
+        ge=0,
+        alias="commit-final-delay",
+        description="Delay before final commit in seconds",
+    )
+    edit_rpc: StrictStr = Field(
+        "edit_config",
+        alias="edit-rpc",
+        description="ncclient configuration edit RPC; unused by Scrapli",
+    )
+    edit_arg: dict[StrictStr, Any] = Field(
+        {},
+        alias="edit-arg",
+        description="ncclient edit RPC arguments; unused by Scrapli",
+    )
+    commit_arg: dict[StrictStr, Any] = Field(
+        {},
+        alias="commit-arg",
+        description="ncclient first commit arguments; unused by Scrapli",
+    )
+
+
 class NetconfGetCapabilitiesInput(
     NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
 ):

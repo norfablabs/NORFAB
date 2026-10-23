@@ -10,12 +10,15 @@ from norfab.core.worker import Job, Task
 from norfab.models import Result
 
 from .nornir_models import (
+    NetconfCommitInput,
     NetconfEditConfigInput,
     NetconfGetCapabilitiesInput,
     NetconfGetConfigInput,
     NetconfGetInput,
     NetconfGetSchemaInput,
     NetconfResult,
+    NetconfTransactionInput,
+    NetconfValidateInput,
 )
 
 log = logging.getLogger(__name__)
@@ -514,14 +517,197 @@ class NetconfTask:
             **kwargs,
         )
 
-    def netconf_transaction(self, job: Job, **kwargs: Any) -> Result:
-        raise NotImplementedError("netconf_transaction is not implemented")
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NetconfTransactionInput,
+        output=NetconfResult,
+        mcp={
+            "annotations": {
+                "title": "NETCONF Transaction",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def netconf_transaction(
+        self,
+        job: Job,
+        config: str,
+        target: str = None,
+        plugin: str = "ncclient",
+        job_data: Any = None,
+        validate: bool = True,
+        confirmed: bool = True,
+        confirm_delay: int = 60,
+        commit_final_delay: int = 1,
+        edit_rpc: str = "edit_config",
+        edit_arg: dict[str, Any] = None,
+        commit_arg: dict[str, Any] = None,
+        **kwargs: Any,
+    ) -> Result:
+        """Apply configuration using Nornir-Salt's NETCONF transaction call.
 
-    def netconf_validate(self, job: Job, **kwargs: Any) -> Result:
-        raise NotImplementedError("netconf_validate is not implemented")
+        Args:
+            job: NorFab job metadata.
+            config: XML including the config wrapper or a NorFab template URL.
+                Rendered per host with host, job_data, norfab and netbox context.
+            target: Datastore to edit. Omit to let the backend choose candidate
+                when supported, otherwise running.
+            plugin: Backend name: ncclient (default) or scrapli.
+            job_data: Template context data or URL to a YAML data file.
+            validate: Request validation when supported. Defaults to true.
+            confirmed: Request confirmed commit when supported. Defaults to true.
+            confirm_delay: Confirmed commit rollback timeout in seconds. Defaults to 60.
+            commit_final_delay: Seconds before automatic final confirmation. Defaults to 1.
+            edit_rpc: ncclient edit RPC name. Defaults to edit_config; ignored by Scrapli.
+            edit_arg: Additional ncclient edit RPC arguments; ignored by Scrapli.
+                The backend supplies config and target.
+            commit_arg: Additional ncclient first commit arguments; ignored by Scrapli.
+            **kwargs: Common host filters, processors, retries and serialization
+                options, plus additional Nornir-Salt backend arguments.
 
-    def netconf_commit(self, job: Job, **kwargs: Any) -> Result:
-        raise NotImplementedError("netconf_commit is not implemented")
+        Returns:
+            Result: Per-host transaction step lists under the transaction key,
+                or serialized records with to_dict=False. Nornir-Salt owns locking,
+                candidate discard, editing, validation, commit and failure cleanup.
+                Existing candidate changes are discarded. Running edits cannot be
+                rolled back by discarding candidate changes. Transactions are per
+                host, and retries may repeat them. RPC failures mark hosts failed;
+                unmatched hosts return status no_match.
+
+        Raises:
+            FileNotFoundError: If a referenced template cannot be fetched.
+        """
+        if target is not None:
+            kwargs["target"] = target
+        return self._run_netconf(
+            job,
+            call="transaction",
+            plugin=plugin,
+            render={"config": config},
+            job_data=job_data,
+            validate=validate,
+            confirmed=confirmed,
+            confirm_delay=confirm_delay,
+            commit_final_delay=commit_final_delay,
+            edit_rpc=edit_rpc,
+            edit_arg=edit_arg if edit_arg is not None else {},
+            commit_arg=commit_arg if commit_arg is not None else {},
+            **kwargs,
+        )
+
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NetconfValidateInput,
+        output=NetconfResult,
+        mcp={
+            "annotations": {
+                "title": "NETCONF Validate Configuration",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def netconf_validate(
+        self,
+        job: Job,
+        source: str = "candidate",
+        plugin: str = "ncclient",
+        **kwargs: Any,
+    ) -> Result:
+        """Validate a device configuration datastore without applying changes.
+
+        Args:
+            job: NorFab job metadata.
+            source: Datastore to validate: candidate (default), running, or
+                startup. Requires device support for the selected datastore.
+            plugin: NETCONF backend: ncclient (default) or scrapli.
+            **kwargs: Common Nornir host filters, processors, retry options,
+                XML processors (xmltodict, xpath, xml_flake), to_dict and
+                add_details serialization options.
+
+        Returns:
+            Result: XML replies under each host's validate key, normally an
+                ok reply on success, or serialized records when to_dict=False.
+                Validation, capability and connection errors mark hosts as
+                failed; unmatched hosts return status no_match. Requires the
+                NETCONF validate capability. Does not edit, lock, commit, or
+                discard configuration. A successful validation does not check
+                connectivity or service health.
+        """
+        return self._run_netconf(
+            job, call="validate", plugin=plugin, source=source, **kwargs
+        )
+
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NetconfCommitInput,
+        output=NetconfResult,
+        mcp={
+            "annotations": {
+                "title": "NETCONF Commit Configuration",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def netconf_commit(
+        self,
+        job: Job,
+        plugin: str = "ncclient",
+        confirmed: bool = False,
+        confirm_delay: int = None,
+        persist: str = None,
+        persist_id: str = None,
+        **kwargs: Any,
+    ) -> Result:
+        """Commit candidate configuration or confirm a pending confirmed commit.
+
+        Args:
+            job: NorFab job metadata.
+            plugin: NETCONF backend: ncclient (default) or scrapli.
+            confirmed: Start a confirmed commit with automatic rollback unless
+                subsequently confirmed. Defaults to false. Requires device support.
+            confirm_delay: Rollback timeout in seconds for a confirmed commit.
+                Omit for the device default. Requires confirmed=True. This is
+                separate from the client's job timeout.
+            persist: Token allowing a confirmed commit to survive session closure.
+                Requires confirmed=True and NETCONF persistent commit support.
+            persist_id: Token from a previous persistent confirmed commit to
+                confirm. Mutually exclusive with confirmed=True and persist.
+            **kwargs: Common host filters, processors, retries, XML processors
+                (xmltodict, xpath, xml_flake), to_dict and add_details options.
+
+        Returns:
+            Result: XML replies under each host's commit key, normally an ok
+                reply, or serialized records when to_dict=False. RPC, capability
+                and connection errors mark hosts failed; unmatched hosts return
+                status no_match. Requires candidate support. Commits all pending
+                candidate changes without editing, locking, or validating them.
+                Confirmed commits are not automatically finalized by this task;
+                call again without confirmed to confirm, supplying persist_id
+                for a persistent commit. Nonpersistent confirmation requires the
+                original NETCONF session. Retries may repeat commits.
+        """
+        if confirm_delay is not None:
+            kwargs["timeout"] = (
+                str(confirm_delay) if plugin == "ncclient" else confirm_delay
+            )
+        return self._run_netconf(
+            job,
+            call="commit",
+            plugin=plugin,
+            confirmed=confirmed,
+            persist=persist,
+            persist_id=persist_id,
+            **kwargs,
+        )
 
     def netconf_cancel_commit(self, job: Job, **kwargs: Any) -> Result:
         raise NotImplementedError("netconf_cancel_commit is not implemented")

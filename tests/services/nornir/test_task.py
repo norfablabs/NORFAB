@@ -1,4 +1,5 @@
 import pprint
+from uuid import uuid4
 
 import pytest
 
@@ -9,6 +10,29 @@ pytestmark = [
 
 
 class TestNornirTask:
+    def test_task_from_file_with_job(self, nfclient):
+        job_uuid = uuid4().hex
+        ret = nfclient.run_job(
+            "nornir",
+            "task",
+            uuid=job_uuid,
+            workers=["nornir-worker-1"],
+            kwargs={
+                "on_failed": True,
+                "plugin": "nf://nornir_tasks/dummy_with_job.py",
+            },
+        )
+        pprint.pprint(ret)
+
+        assert ret
+        results = ret["nornir-worker-1"]
+        assert results["failed"] is False, results
+        assert results["result"]
+        for host, res in results["result"].items():
+            assert res == {
+                "dummy_with_job": {"uuid": job_uuid, "task": "task", "host": host}
+            }
+
     def test_task_nornir_salt_nr_test(self, nfclient):
         ret = nfclient.run_job(
             "nornir",

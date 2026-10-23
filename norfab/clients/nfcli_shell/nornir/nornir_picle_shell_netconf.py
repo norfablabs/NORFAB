@@ -2,11 +2,14 @@ from picle.models import Outputters, PipeFunctionsModel
 from pydantic import BaseModel, Field
 
 from norfab.workers.nornir_worker.nornir_models import (
+    NetconfCommitInput,
     NetconfEditConfigInput,
     NetconfGetCapabilitiesInput,
     NetconfGetConfigInput,
     NetconfGetInput,
     NetconfGetSchemaInput,
+    NetconfTransactionInput,
+    NetconfValidateInput,
 )
 
 from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
@@ -58,6 +61,51 @@ class CallEditConfig(
         outputter = Outputters.outputter_nested
 
 
+class CallCommit(
+    NetconfCommitInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    @staticmethod
+    def run(*args: object, **kwargs: object) -> object:
+        return NornirNetconfShell.run(*args, _task="netconf_commit", **kwargs)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+
+
+class CallValidate(
+    NetconfValidateInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    @staticmethod
+    def run(*args: object, **kwargs: object) -> object:
+        return NornirNetconfShell.run(*args, _task="netconf_validate", **kwargs)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+
+
+class CallTransaction(
+    NetconfTransactionInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    @staticmethod
+    def run(*args: object, **kwargs: object) -> object:
+        return NornirNetconfShell.run(*args, _task="netconf_transaction", **kwargs)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+
+
 class CallGetSchema(
     NetconfGetSchemaInput,
     NorniHostsFilters,
@@ -89,6 +137,13 @@ class CallGetCapabilities(
 
 
 class NornirNetconfShell(BaseModel):
+    commit: CallCommit = Field(
+        None, description="Commit NETCONF candidate configuration"
+    )
+    validate: CallValidate = Field(None, description="Validate NETCONF configuration")
+    transaction: CallTransaction = Field(
+        None, description="Apply configuration using a NETCONF transaction"
+    )
     get: CallGet = Field(
         None, description="Retrieve configuration and operational state"
     )
