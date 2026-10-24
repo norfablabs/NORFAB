@@ -519,7 +519,12 @@ if [[ -n $env_dir ]]; then
 else
     write_info 'Folder creation skipped. Run nfcli from your existing NorFab configuration folder.'
 fi
-scripts_dir=$("$python_exe" -c 'import sysconfig; print(sysconfig.get_path("scripts"))')
-printf '      %q\n' "$scripts_dir/nfcli"
+if [[ -n $venv_path ]]; then
+    printf '      source %q\n' "$venv_path/bin/activate"
+    write_info '  nfcli'
+else
+    scripts_dir=$("$python_exe" -c 'import sysconfig; print(sysconfig.get_path("scripts"))')
+    printf '      %q\n' "$scripts_dir/nfcli"
+fi
 write_info 'nfcli starts the broker, selected workers and interactive shell.'
 write_info 'Documentation: https://docs.norfablabs.com/'

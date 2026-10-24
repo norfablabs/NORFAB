@@ -774,13 +774,15 @@ if ($envDir) {
 }
 if ($selectedAddons -contains 'nfcli') {
     if ($venvPath) {
-        $nfcliPath = Join-Path $venvPath 'Scripts\nfcli.exe'
+        $activatePath = Join-Path $venvPath 'Scripts\Activate.ps1'
+        Write-Host ("      & '{0}'" -f $activatePath.Replace("'", "''")) -ForegroundColor Cyan
+        Write-Host '      nfcli' -ForegroundColor Green
     } else {
         $scriptsDir = & $pythonExe -c "import sysconfig; print(sysconfig.get_path('scripts'))"
         if ($LASTEXITCODE -ne 0) { throw 'Cannot locate the Python scripts directory.' }
         $nfcliPath = Join-Path $scriptsDir 'nfcli.exe'
+        Write-Host ("      & '{0}'" -f $nfcliPath.Replace("'", "''")) -ForegroundColor Green
     }
-    Write-Host ("      & '{0}'" -f $nfcliPath.Replace("'", "''")) -ForegroundColor Green
     Write-Info 'nfcli starts the broker, selected workers and interactive shell.'
 } else {
     Write-Info 'The nfcli add-on was not selected. To install it using this Python:'
