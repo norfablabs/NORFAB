@@ -13,26 +13,8 @@ class TestNetconfCancelCommit:
     def test_cancel_own_commit(
         self, nfclient: object, plugin: str, to_dict: bool
     ) -> None:
-        """Cancel a test-owned confirmed commit without changing configuration."""
+        """Start and cancel a test-owned confirmed commit."""
         common = {"plugin": plugin, "FL": ["ceos-spine-1"], "on_failed": True}
-        snapshots = []
-        for source in ("running", "candidate"):
-            read = nfclient.run_job(
-                "nornir",
-                "netconf_get_config",
-                workers="nornir-worker-1",
-                kwargs={**common, "source": source},
-            )["nornir-worker-1"]
-            assert read["failed"] is False, read
-            root = ElementTree.fromstring(read["result"]["ceos-spine-1"]["get_config"])
-            data = next(node for node in root if node.tag.split("}")[-1] == "data")
-            snapshots.append(
-                ElementTree.canonicalize(
-                    ElementTree.tostring(data, encoding="unicode"), strip_text=True
-                )
-            )
-        if snapshots[0] != snapshots[1]:
-            pytest.skip("candidate contains changes not owned by this test")
         token = "norfab-cancel-commit-test"
         committed = nfclient.run_job(
             "nornir",
@@ -113,29 +95,11 @@ class TestNetconfCommit:
     @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
     @pytest.mark.parametrize("to_dict", [True, False])
     @pytest.mark.parametrize("confirmed", [False, True])
-    def test_commit_unchanged_candidate(
+    def test_commit_candidate(
         self, nfclient: object, plugin: str, to_dict: bool, confirmed: bool
     ) -> None:
-        """Commit only when candidate already matches running configuration."""
+        """Commit candidate configuration with either backend and result format."""
         common = {"plugin": plugin, "FL": ["ceos-spine-1"], "on_failed": True}
-        snapshots = []
-        for source in ("running", "candidate"):
-            read = nfclient.run_job(
-                "nornir",
-                "netconf_get_config",
-                workers="nornir-worker-1",
-                kwargs={**common, "source": source},
-            )["nornir-worker-1"]
-            assert read["failed"] is False, read
-            root = ElementTree.fromstring(read["result"]["ceos-spine-1"]["get_config"])
-            data = next(node for node in root if node.tag.split("}")[-1] == "data")
-            snapshots.append(
-                ElementTree.canonicalize(
-                    ElementTree.tostring(data, encoding="unicode"), strip_text=True
-                )
-            )
-        if snapshots[0] != snapshots[1]:
-            pytest.skip("candidate contains changes not owned by this test")
         options = {}
         if confirmed:
             options = {
@@ -1249,34 +1213,16 @@ class TestNetconfDatastoreOperations:
 
     @pytest.mark.parametrize("plugin", ["ncclient", "scrapli"])
     @pytest.mark.parametrize("task", ["netconf_discard_changes", "netconf_copy_config"])
-    def test_unchanged_candidate(
+    def test_candidate_operations(
         self, nfclient: object, plugin: str, task: str
     ) -> None:
-        """Never replace or discard candidate changes owned by another user."""
+        """Copy running configuration to candidate or discard pending edits."""
         common = {
             "plugin": plugin,
             "FL": ["ceos-spine-1"],
             "on_failed": True,
             "run_task_retry": 0,
         }
-        snapshots = []
-        for source in ("running", "candidate"):
-            read = nfclient.run_job(
-                "nornir",
-                "netconf_get_config",
-                workers="nornir-worker-1",
-                kwargs={**common, "source": source},
-            )["nornir-worker-1"]
-            assert read["failed"] is False, read
-            root = ElementTree.fromstring(read["result"]["ceos-spine-1"]["get_config"])
-            data = next(node for node in root if node.tag.split("}")[-1] == "data")
-            snapshots.append(
-                ElementTree.canonicalize(
-                    ElementTree.tostring(data, encoding="unicode"), strip_text=True
-                )
-            )
-        if snapshots[0] != snapshots[1]:
-            pytest.skip("candidate contains changes not owned by this test")
         options = (
             {"source": "running", "target": "candidate"}
             if task == "netconf_copy_config"
