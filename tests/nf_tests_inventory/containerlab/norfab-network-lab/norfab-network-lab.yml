@@ -65,6 +65,17 @@ topology:
         - 4405:443
         - 11615:161/udp
         
+    iol-r1:
+      kind: cisco_iol
+      image: vrnetlab/cisco_iol:17.16.1a
+      mgmt-ipv4: 172.100.100.16
+      ports:
+        - 2206:22
+        - 8806:80
+        - 8306:830
+        - 4406:443
+        - 11616:161/udp
+
   links:
     - endpoints: ["ceos-spine-1:eth1", "ceos-spine-2:eth1"]
     - endpoints: ["ceos-spine-1:eth2", "ceos-leaf-1:eth1"]
@@ -74,6 +85,7 @@ topology:
     - endpoints: ["ceos-spine-1:eth4", "ceos-leaf-3:eth1"]
     - endpoints: ["ceos-spine-2:eth4", "ceos-leaf-3:eth2"]
     - endpoints: ["ceos-spine-2:eth5", "vmx-1:eth1"]  
+    - endpoints: ["ceos-leaf-1:eth3", "iol-r1:eth1"]
     
 mgmt:
   network: norfab_network_lab_mgmt    # management network name

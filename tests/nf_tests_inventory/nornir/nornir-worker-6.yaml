@@ -1,4 +1,21 @@
 hosts: 
+  iol-r1:
+    hostname: containerlab.lab
+    platform: cisco_ios
+    username: admin
+    password: admin
+    port: 2206
+    connection_options:
+      scrapli:
+        port: 2206
+      ncclient:
+        port: 8306
+      scrapli_netconf:
+        port: 8306
+      napalm:
+        port: 2206
+    groups:
+      - ios_params
   vmx-1:
     hostname: containerlab.lab
     platform: juniper_junos
@@ -16,4 +33,3 @@ hosts:
         port: 8305
     groups:
       - junos_params
-        

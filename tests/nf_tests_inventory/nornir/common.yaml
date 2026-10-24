@@ -18,6 +18,39 @@ runner:
     task_timeout: 600
     
 groups:
+  ios_params:
+    connection_options:
+      scrapli:
+        platform: cisco_iosxe
+        extras:
+          auth_strict_key: False
+          ssh_config_file: False
+          transport: paramiko
+      napalm:
+        platform: ios
+      pyats:
+        platform: iosxe
+      http:
+        extras:
+          transport: https
+          verify: False
+          base_url: "restconf/data"
+          headers:
+            Content-Type: "application/yang-data+json"
+            Accept: "application/yang-data+json"
+      ncclient:
+        extras:
+          allow_agent: False
+          hostkey_verify: False
+          device_params:
+            name: iosxe
+      scrapli_netconf:
+        extras:
+          transport: paramiko
+          ssh_config_file: True
+          auth_strict_key: False
+          transport_options:
+            netconf_force_pty: False
   eos_params:
     connection_options:
       scrapli:
