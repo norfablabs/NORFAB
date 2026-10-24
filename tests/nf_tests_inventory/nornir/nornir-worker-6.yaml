@@ -1,4 +1,23 @@
 hosts: 
+  csr1k-r1:
+    hostname: containerlab.lab
+    platform: cisco_ios
+    username: admin
+    password: admin
+    port: 2207
+    connection_options:
+      scrapli:
+        port: 2207
+      ncclient:
+        port: 8307
+      scrapli_netconf:
+        port: 8307
+      napalm:
+        port: 2207
+      http:
+        port: 4407
+    groups:
+      - ios_params
   iol-r1:
     hostname: containerlab.lab
     platform: cisco_ios
