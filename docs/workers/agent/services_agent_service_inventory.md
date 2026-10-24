@@ -1,6 +1,6 @@
 # Agent Worker Inventory
 
-The `agent` service runs on a worker. For local chat, see [Client Agent](../../clients_agent.md).
+The `agent` service runs on a worker. For local chat, see [Client Agent](../../clients/clients_agent.md).
 
 ## Worker configuration
 

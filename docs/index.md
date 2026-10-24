@@ -54,6 +54,6 @@ NorFab’s architecture is designed for flexibility, scalability, and reliabilit
 
 ## Get Started
 
-- Jump into the [Getting Started Tutorial](norfab_getting_started.md)
+- Jump into the [Getting Started Tutorial](tutorials/norfab_getting_started.md)
 - Discover [Why NorFab is Different](norfab_why_use_norfab.md)
 - Ready to transform your network automation? [Contact us](mailto:dmulyalin@gmail.com) for more information or a demo.

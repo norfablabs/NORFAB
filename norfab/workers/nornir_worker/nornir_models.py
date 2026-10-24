@@ -1386,6 +1386,111 @@ class NetconfEditConfigInput(
     )
 
 
+class NetconfRpcInput(
+    NornirXmlProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    plugin: NetconfPlugin = Field(NetconfPlugin.ncclient, description="NETCONF backend")
+    rpc: StrictStr = Field(
+        ..., min_length=1, description="RPC operation XML or NorFab template URL"
+    )
+    job_data: Any = Field(
+        None, alias="job-data", description="Template data or YAML file URL"
+    )
+
+
+class NetconfDeleteTarget(str, Enum):
+    candidate = "candidate"
+    startup = "startup"
+
+
+class NetconfDeleteConfigInput(
+    NornirXmlProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    plugin: NetconfPlugin = Field(NetconfPlugin.ncclient, description="NETCONF backend")
+    target: NetconfDeleteTarget = Field(
+        ..., description="Datastore to delete; running is forbidden"
+    )
+
+
+class NetconfCopyConfigInput(
+    NornirXmlProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    plugin: NetconfPlugin = Field(NetconfPlugin.ncclient, description="NETCONF backend")
+    source: NetconfConfigSource = Field(..., description="Datastore to copy from")
+    target: NetconfConfigSource = Field(..., description="Datastore to replace")
+
+    @model_validator(mode="after")
+    def validate_datastores(self) -> "NetconfCopyConfigInput":
+        """Require different source and target datastores."""
+        if self.source == self.target:
+            raise ValueError("source and target must be different datastores")
+        return self
+
+
+class NetconfLockInput(
+    NornirXmlProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    plugin: NetconfPlugin = Field(NetconfPlugin.ncclient, description="NETCONF backend")
+    target: NetconfConfigSource = Field(
+        NetconfConfigSource.candidate, description="Datastore to lock"
+    )
+
+
+class NetconfUnlockInput(
+    NornirXmlProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    plugin: NetconfPlugin = Field(NetconfPlugin.ncclient, description="NETCONF backend")
+    target: NetconfConfigSource = Field(
+        NetconfConfigSource.candidate, description="Datastore to unlock"
+    )
+
+
+class NetconfDiscardChangesInput(
+    NornirXmlProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    plugin: NetconfPlugin = Field(NetconfPlugin.ncclient, description="NETCONF backend")
+
+
+class NetconfCancelCommitInput(
+    NornirXmlProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    plugin: NetconfPlugin = Field(NetconfPlugin.ncclient, description="NETCONF backend")
+    persist_id: Union[None, StrictStr] = Field(
+        None,
+        min_length=1,
+        alias="persist-id",
+        description="Token identifying the persistent confirmed commit to cancel",
+    )
+
+
 class NetconfCommitInput(
     NornirXmlProcessorArgs,
     NornirCommonArgs,

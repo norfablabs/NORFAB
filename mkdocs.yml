@@ -90,18 +90,17 @@ nav:
   - Why use NORFAB: norfab_why_use_norfab.md
 
 - Getting Started:
-  - Installation: norfab_installation.md
-  - Quickstart: norfab_getting_started.md
-  - Inventory: reference_norfab_inventory.md
+  - Installation: tutorials/norfab_installation.md
+  - Quickstart: tutorials/norfab_getting_started.md
+  - Inventory: reference/reference_norfab_inventory.md
 
 - Tutorials:
   - Author a Netbox Design with an Agent: tutorials/norfab_netbox_design_authoring.md
   - Docker Deployment: tutorials/norfab_docker_deployment.md
-  - Distributed Deployment: tutorials/norfab_distributed_deployment.md
   - VSCode MCP Integration: tutorials/norfab_vscode_mcp_integration.md
   
 - Services:
-  - Services Overview: services_overview.md
+  - Services Overview: workers/services_overview.md
   - Containerlab:
     - Overview: workers/containerlab/services_containerlab_service.md
     - Inventory: workers/containerlab/services_containerlab_service_inventory.md
@@ -136,6 +135,13 @@ nav:
       - File Copy: workers/nornir/services_nornir_service_tasks_file_copy.md
       - Runtime Inventory: workers/nornir/services_nornir_service_tasks_runtime_inventory.md
       - Create Host from NetBox: workers/nornir/services_nornir_service_tasks_create_host_from_netbox.md
+      - NETCONF Discard Changes: workers/nornir/services_nornir_service_tasks_netconf_discard_changes.md
+      - NETCONF Lock Datastore: workers/nornir/services_nornir_service_tasks_netconf_lock.md
+      - NETCONF Unlock Datastore: workers/nornir/services_nornir_service_tasks_netconf_unlock.md
+      - NETCONF Copy Configuration: workers/nornir/services_nornir_service_tasks_netconf_copy_config.md
+      - NETCONF Delete Configuration: workers/nornir/services_nornir_service_tasks_netconf_delete_config.md
+      - NETCONF RPC: workers/nornir/services_nornir_service_tasks_netconf_rpc.md
+      - NETCONF Cancel Commit: workers/nornir/services_nornir_service_tasks_netconf_cancel_commit.md
       - NETCONF Commit Configuration: workers/nornir/services_nornir_service_tasks_netconf_commit.md
       - NETCONF Validate Configuration: workers/nornir/services_nornir_service_tasks_netconf_validate.md
       - NETCONF Transaction: workers/nornir/services_nornir_service_tasks_netconf_transaction.md
@@ -204,7 +210,7 @@ nav:
     - Tasks:
       - Auth: workers/fastmcp/services_fastmcp_service_task_auth.md
       - Get Tools: workers/fastmcp/services_fastmcp_service_task_get_tools.md
-      - Get Prompts: workers\fastmcp\services_fastmcp_service_task_get_prompts.md
+      - Get Prompts: workers/fastmcp/services_fastmcp_service_task_get_prompts.md
   - Workflow:
     - Overview: workers/workflow/services_workflow_service.md
     - Inventory: workers/workflow/services_workflow_service_inventory.md
@@ -224,84 +230,91 @@ nav:
       - Delete Git Remote: workers/filesharing/services_filesharing_service_tasks_delete_remote_git.md
 
 - Clients:
-  - Clients Overview: clients_overview.md
+  - Clients Overview: clients/clients_overview.md
   - NFWeb Local Web Client:
-    - Overview: clients_nfweb_overview.md
-    - Runtime Monitoring Dashboard: clients_nfweb_monitoring.md
-    - 3D Network Topology Application: clients_nfweb_topology.md
-  - NFCLI Shell Client: clients_nfcli_overview.md
-  - Client Agent: clients_agent.md
-  - Python API Client: clients_python_api_overview.md
-  - ROBOT Client: clients_robot_client_overview.md
+    - Overview: clients/clients_nfweb_overview.md
+    - Runtime Monitoring Dashboard: clients/clients_nfweb_monitoring.md
+    - 3D Network Topology Application: clients/clients_nfweb_topology.md
+  - NFCLI Shell Client: clients/clients_nfcli_overview.md
+  - Client Agent: clients/clients_agent.md
+  - Python API Client: clients/clients_python_api_overview.md
+  - ROBOT Client: clients/clients_robot_client_overview.md
 
 - Customization:
   - NORFAB Hooks System: customization/norfab_hooks.md
   - Service Plugins:
     - Overview: customization/service_plugin_overview.md
     - Local Plugin: customization/service_plugin_local.md
-    - Python Module Plugin: customization/service_plugin_module.md
 
 - Reference:
   - Tags: tags.md
   - Changelog: norfab_changelog.md
   - Concepts:
-    - NORFAB Architecture: reference_architecture_norfab.md
-    - NORFAB Protocol (NFP) RFC: reference_architecture_nfp.md
+    - NORFAB Architecture: reference/architecture/reference_architecture_norfab.md
+    - NORFAB Protocol (NFP) RFC: reference/architecture/reference_architecture_nfp.md
   - API Reference:
     - Core:
-      - NFAPI (Python API): api_reference_core_norfab_nfapi.md
-      - Broker: api_reference_core_norfab_broker.md
-      - Worker Base: api_reference_core_norfab_worker.md
-      - Client: api_reference_core_norfab_client.md
-      - Simple Inventory: api_reference_core_norfab_simple_inventory.md
-      - Exceptions: api_reference_core_norfab_exceptions.md
+      - NFAPI (Python API): api_ref/core/api_reference_core_norfab_nfapi.md
+      - Broker: api_ref/core/api_reference_core_norfab_broker.md
+      - Worker Base: api_ref/core/api_reference_core_norfab_worker.md
+      - Client: api_ref/core/api_reference_core_norfab_client.md
+      - Simple Inventory: api_ref/core/api_reference_core_norfab_simple_inventory.md
+      - Exceptions: api_ref/core/api_reference_core_norfab_exceptions.md
     - Built-in Workers:
-      - Containerlab Worker: workers/containerlab/api_reference_workers_containerlab_worker.md
-      - FakeNOS Worker: workers/fakenos/api_reference_workers_fakenos_worker.md
-      - Nornir Worker: workers/nornir/api_reference_workers_nornir_worker.md
-      - Netbox Worker: workers/netbox/api_reference_workers_netbox_worker.md
-      - FastAPI Worker: workers/fastapi/api_reference_workers_fastapi_worker.md
-      - FastMCP Worker: workers/fastmcp/api_reference_workers_fastmcp_worker.md
-      - Agent Worker: workers/agent/api_reference_workers_agent_worker.md
-      - Workflow Worker: workers/workflow/api_reference_workers_workflow_worker.md
-      - Filesharing Worker: workers/filesharing/api_reference_workers_filesharing_worker.md
+      - Containerlab Worker: api_ref/workers/api_reference_workers_containerlab_worker.md
+      - FakeNOS Worker: api_ref/workers/api_reference_workers_fakenos_worker.md
+      - Nornir Worker: api_ref/workers/api_reference_workers_nornir_worker.md
+      - Netbox Worker: api_ref/workers/api_reference_workers_netbox_worker.md
+      - FastAPI Worker: api_ref/workers/api_reference_workers_fastapi_worker.md
+      - FastMCP Worker: api_ref/workers/api_reference_workers_fastmcp_worker.md
+      - Agent Worker: api_ref/workers/api_reference_workers_agent_worker.md
+      - Workflow Worker: api_ref/workers/api_reference_workers_workflow_worker.md
+      - Filesharing Worker: api_ref/workers/api_reference_workers_filesharing_worker.md
     - Built-in Clients:
-      - NFCLI Client API: api_reference_clients_nfcli_client.md
-      - ROBOT Client API: api_reference_clients_robot_client.md
-  - NORFAB Subsystems:
-    - MMI: reference_norfab_mmi_subsystem.md
-    - Jobs: reference_norfab_jobs_subsystem.md
-    - Events: reference_norfab_events_subsystem.md
+      - NFCLI Client API: api_ref/clients/api_reference_clients_nfcli_client.md
+      - ROBOT Client API: api_ref/clients/api_reference_clients_robot_client.md
 
 - Development:
   - NFWeb Developer Guide: development/nfweb_developer_guide.md
   - Docker Development: development/norfab_docker_development.md
   - Documentation Style Guide: development/documentation_style_guide.md
-  - Task Pydantic Models Guide: development/adr_tasks_pydantic_models_guide.md
+  - Task Pydantic Models Guide: development/tasks_pydantic_models_guide.md
   - File Streaming (fetch_file): development/file_streaming_fetch_file.md
+  - Documentation Backlog: development/documentation_backlog.md
+  - Known Issues: development/bug_hunt.md
   - Architecture Design Records:
-    - Hermes Agent Runtime and Autonomous Network Operations: development/adr_hermes_agent_runtime_and_autonomous_network_operations.md
-    - Netbox BGP Create/Update Tasks Plan: development/adr_netbox_bgp_create_update_tasks_plan.md
-    - Netbox Sync devices interfaces Task plan: development/adr_netbox_sync_device_interfaces_plan.md
-    - Netbox Device Check Sync Task Plan: development/adr_netbox_check_sync_plan.md
-    - FastMCP Bearer Auth plan: development\adr_fastmcp_bearer_authentication.md
-    - MCP Tools Annotations plan: development\adr_mcp_tool_annotations_plan.md
-    - FastMCP Task Call Guardrails: development/adr_fastmcp_task_call_guardrails.md
-    - FastMCP Task Result Guardrails: development/adr_fastmcp_task_result_guardrails.md
-    - Netbox Sync Devices Inventory plan: development\adr_netbox_sync_device_inventory_plan.md
-    - Norfab Interactive Client Plan: development\adr_norfab_interactive_client.md
-    - NFAPI Client First Startup: development/adr_nfapi_client_first_startup.md
-    - MCP Task Prompt Plan: development\adr_mcp_task_prompts_plan.md
-    - Norfab AAA Security Architecture: development\adr_norfab_aaa_security_architecture.md
-    - Norfab Logging Isolation: development/adr_norfab_logging_isolation.md
-    - Invoke Developer Automation: development/adr_invoke_developer_automation.md
-    - NFWeb Platform and First 3D Topology: development/adr_web_ui_topology_architecture.md
-    - NFWeb Scale-Test Environment: development/adr_nfweb_scale_test_environment.md
-    - NFWeb Browser-Native Terminal Application: development/adr_nfweb_browser_terminal_application.md
-    - Nornir SNMP Tasks: development\adr_nornir_snmp_tasks.md
-    - Nornir Create Hosts from NetBox Devices: development/adr_nornir_create_hosts_from_netbox_devices.md
-    - Single-Owner ZeroMQ Socket I/O: development/adr_norfab_single_owner_zeromq_socket_io.md
+    - Index: development/adr/index.md
+    - Packaged Python Service Plugins: development/adr/adr_service_plugin_module.md
+    - Client Completion Events and Socket Wake-Up: development/adr/adr_client_event_completion.md
+    - File Sharing Git Remotes: development/adr/adr_extensible_data_sources_and_git_sync.md
+    - Netbox Design Specification: development/adr/adr_netbox_design_specification.md
+    - Netbox Sync BGP Communities Plan: development/adr/adr_netbox_sync_bgp_community_plan.md
+    - Netbox Sync VLANs Historical Plan: development/adr/adr_netbox_sync_vlans_plan.md
+    - Docker Parallel Testing: development/adr/adr_norfab_docker_parallel_testing.md
+    - Transport Authentication Simplification: development/adr/adr_norfab_transport_authentication_simplification.md
+    - Delayed and Periodic Jobs: development/adr/adr_scheduled_and_periodic_jobs.md
+    - Hermes Agent Runtime and Autonomous Network Operations: development/adr/adr_hermes_agent_runtime_and_autonomous_network_operations.md
+    - Netbox BGP Create/Update Tasks Plan: development/adr/adr_netbox_bgp_create_update_tasks_plan.md
+    - Netbox Sync devices interfaces Task plan: development/adr/adr_netbox_sync_device_interfaces_plan.md
+    - Netbox Device Check Sync Task Plan: development/adr/adr_netbox_check_sync_plan.md
+    - FastMCP Bearer Auth plan: development/adr/adr_fastmcp_bearer_authentication.md
+    - MCP Tools Annotations plan: development/adr/adr_mcp_tool_annotations_plan.md
+    - FastMCP Task Call Guardrails: development/adr/adr_fastmcp_task_call_guardrails.md
+    - FastMCP Task Result Guardrails: development/adr/adr_fastmcp_task_result_guardrails.md
+    - Netbox Sync Devices Inventory plan: development/adr/adr_netbox_sync_device_inventory_plan.md
+    - Norfab Interactive Client Plan: development/adr/adr_norfab_interactive_client.md
+    - NFAPI Client First Startup: development/adr/adr_nfapi_client_first_startup.md
+    - MCP Task Prompt Plan: development/adr/adr_mcp_task_prompts_plan.md
+    - Norfab AAA Security Architecture: development/adr/adr_norfab_aaa_security_architecture.md
+    - Norfab Logging Isolation: development/adr/adr_norfab_logging_isolation.md
+    - Invoke Developer Automation: development/adr/adr_invoke_developer_automation.md
+    - NFWeb Platform and First 3D Topology: development/adr/adr_web_ui_topology_architecture.md
+    - NFWeb Scale-Test Environment: development/adr/adr_nfweb_scale_test_environment.md
+    - NFWeb Browser-Native Terminal Application: development/adr/adr_nfweb_browser_terminal_application.md
+    - Nornir SNMP Tasks: development/adr/adr_nornir_snmp_tasks.md
+    - Nornir Create Hosts from NetBox Devices: development/adr/adr_nornir_create_hosts_from_netbox_devices.md
+    - Single-Owner ZeroMQ Socket I/O: development/adr/adr_norfab_single_owner_zeromq_socket_io.md
   - Testing:
-    - NORFAB Testing Framework: testing/norfab_testing_framework.md
+    - NORFAB Testing Framework: development/testing/norfab_testing_framework.md
 
 - Contact Us: norfab_help_with_norfab.md

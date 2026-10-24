@@ -97,7 +97,7 @@ nf#
 
 ## Nornir Service Integration
 
-NorFab Containerlab Service integrates seamlessly with the Nornir Service to enable network automation workflows. By using the `get_nornir_inventory` task, Containerlab Service can generate a Nornir-compatible inventory for a specified lab. This inventory can then be loaded into the Nornir Service, allowing it to manage the containerlab hosts as part of its runtime inventory. Refer to [Nornir and Containerlab Services Integration](../nornir/services_nornir_service_tasks_runtime_inventory.md/#nornir-and-containerlab-services-integration)
+NorFab Containerlab Service integrates seamlessly with the Nornir Service to enable network automation workflows. By using the `get_nornir_inventory` task, Containerlab Service can generate a Nornir-compatible inventory for a specified lab. This inventory can then be loaded into the Nornir Service, allowing it to manage the containerlab hosts as part of its runtime inventory. Refer to [Nornir and Containerlab Services Integration](../nornir/services_nornir_service_tasks_runtime_inventory.md#nornir-and-containerlab-services-integration)
 
 ## Netbox Service Integration
 

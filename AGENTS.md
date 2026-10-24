@@ -4,7 +4,7 @@
 
 1. Read the relevant repository guides before changing code or tests; follow their established patterns.
 2. Keep implementations simple and direct. Avoid unnecessary abstractions, compatibility paths, and helpers used only once or twice.
-3. Follow `docs/testing/norfab_testing_framework.md` when writing or running tests:
+3. Follow `docs/development/testing/norfab_testing_framework.md` when writing or running tests:
    - Use integration tests through the public client interface whenever possible.
    - Keep tests small and focused.
    - Prefer extending related tests for new behavior, create a dedicated test when existing tests are unrelated.
@@ -144,7 +144,7 @@ poetry run nfcli --create-env norfab
 
 ### Testing
 
-Run from the repository root. See [NORFAB Testing Framework](docs/testing/norfab_testing_framework.md) for build options, test selection, and reports.
+Run from the repository root. See [NORFAB Testing Framework](docs/development/testing/norfab_testing_framework.md) for build options, test selection, and reports.
 
 ```bash
 poetry run inv docker-tests-build
@@ -303,6 +303,6 @@ Selected rule sets: `E`, `F`, `I`, `ANN`
 - Task Pydantic models: `docs/development/tasks_pydantic_models_guide.md`
 - Documentation style guide for docs changes: `docs/development/documentation_style_guide.md`
 - Feature catalogue: `docs/norfab_features.md`
-- Testing framework: `docs/testing/norfab_testing_framework.md`
-- Invoke developer automation ADR: `docs/development/adr_invoke_developer_automation.md`
+- Testing framework: `docs/development/testing/norfab_testing_framework.md`
+- Invoke developer automation ADR: `docs/development/adr/adr_invoke_developer_automation.md`
 - Docker test commands: `docker/norfab-docker-tests/README.md`

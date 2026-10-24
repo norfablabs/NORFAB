@@ -6,7 +6,7 @@ task-authored prompts.
 
 ## Prerequisites
 
-You need VS Code with GitHub Copilot, a working NORFAB environment (see [Installation Guide](../norfab_installation.md) and [Getting Started](../norfab_getting_started.md)), adjust Nornir worker devices inventory to match your use case.
+You need VS Code with GitHub Copilot, a working NORFAB environment (see [Installation Guide](norfab_installation.md) and [Getting Started](norfab_getting_started.md)), adjust Nornir worker devices inventory to match your use case.
 
 ## 1) Start NORFAB with the FastMCP worker
 
@@ -134,4 +134,4 @@ required service worker is present in your inventory.
 ## Additional resources
 
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
-- [NORFAB API Reference](../api_reference_core_norfab_nfapi.md)
+- [NORFAB API Reference](../api_ref/core/api_reference_core_norfab_nfapi.md)

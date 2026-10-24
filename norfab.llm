@@ -66,8 +66,8 @@ NorFab (Network Automation Fabric) is a distributed task automation and orchestr
 The NorFab Protocol (NFP) defines a reliable service-oriented request-reply dialog between clients, a broker, and workers. It supports presence, heartbeating, and persistent messaging, ensuring reliable communication even across network partitions.
 
 ## References
-- [Getting Started](docs/norfab_getting_started.md)
+- [Getting Started](docs/tutorials/norfab_getting_started.md)
 - [Why Use NorFab](docs/norfab_why_use_norfab.md)
-- [Services Overview](docs/services_overview.md)
-- [Docker Deployment](docs/norfab_docker_deployment.md)
-- [Protocol Details](docs/reference_architecture_nfp.md)
+- [Services Overview](docs/workers/services_overview.md)
+- [Docker Deployment](docs/tutorials/norfab_docker_deployment.md)
+- [Protocol Details](docs/reference/architecture/reference_architecture_nfp.md)

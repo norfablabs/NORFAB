@@ -7,11 +7,22 @@
 
 ## FEATURES
 
-1. Added Nornir NETCONF tasks `netconf_get`, `netconf_get_config`, `netconf_edit_config`, `netconf_get_schema`, and `netconf_get_capabilities`, with NFCLI commands and ncclient or Scrapli backends. Supports configuration and operational-state retrieval, datastore reads and edits, YANG/YIN schema retrieval, capability filtering, per-host rendered XML configuration and subtree/XPath filters, XML processors, FastAPI, and MCP. The `netconf_get` task includes IETF interfaces, routing, and hardware getters plus OpenConfig interfaces, LLDP, BGP, and system getters.
-2. Added NETCONF `xmltodict` processing through Python and NFCLI, with XML processor options for configuration edits and schema retrieval and a dedicated XML processor guide.
-3. Added Nornir `netconf_transaction` task, with per-host configuration templates, backend arguments, NFCLI, FastAPI, and MCP support.
-4. Added Nornir `netconf_validate` to validate candidate, running, or startup configuration with ncclient or Scrapli, including NFCLI, XML processors, FastAPI, and MCP support.
-5. Added Nornir `netconf_commit` for candidate commits and confirmed commits with rollback timers and persistence tokens, including NFCLI, XML processors, FastAPI, and MCP support.
+1. Added Nornir `netconf_get` to retrieve configuration and operational state, with per-host subtree/XPath filters, IETF and OpenConfig getters, XML processors, ncclient and Scrapli backends, NFCLI, FastAPI, and MCP support.
+2. Added Nornir `netconf_get_config` to retrieve datastore configuration, with per-host subtree/XPath filters, XML processors, ncclient and Scrapli backends, NFCLI, FastAPI, and MCP support.
+3. Added Nornir `netconf_edit_config` to edit datastore configuration, with per-host XML templates, XML processors, ncclient and Scrapli backends, NFCLI, FastAPI, and MCP support.
+4. Added Nornir `netconf_get_schema` to retrieve YANG or YIN schemas, with XML processors, ncclient and Scrapli backends, NFCLI, FastAPI, and MCP support.
+5. Added Nornir `netconf_get_capabilities` to list and filter device capabilities, with ncclient and Scrapli backends, NFCLI, FastAPI, and MCP support.
+6. Added NETCONF `xmltodict` processing through Python and NFCLI, with XML processor options for configuration edits and schema retrieval and a dedicated XML processor guide.
+7. Added Nornir `netconf_transaction` task, with per-host configuration templates, backend arguments, NFCLI, FastAPI, and MCP support.
+8. Added Nornir `netconf_validate` to validate candidate, running, or startup configuration with ncclient or Scrapli, including NFCLI, XML processors, FastAPI, and MCP support.
+9. Added Nornir `netconf_commit` for candidate commits and confirmed commits with rollback timers and persistence tokens, including NFCLI, XML processors, FastAPI, and MCP support.
+10. Added Nornir `netconf_cancel_commit` to roll back pending confirmed commits, with persistence tokens, ncclient and Scrapli backends, NFCLI, FastAPI, and MCP support.
+11. Added Nornir `netconf_discard_changes` to discard uncommitted candidate changes, with ncclient and Scrapli backends, NFCLI, FastAPI, MCP, and XML processors.
+12. Added Nornir `netconf_lock` to lock a NETCONF datastore, with ncclient and Scrapli backends, NFCLI, FastAPI, MCP, and XML processors.
+13. Added Nornir `netconf_unlock` to release a NETCONF datastore lock, with ncclient and Scrapli backends, NFCLI, FastAPI, MCP, and XML processors.
+14. Added Nornir `netconf_copy_config` to copy configuration between datastores, with ncclient and Scrapli backends, NFCLI, FastAPI, MCP, and XML processors.
+15. Added Nornir `netconf_delete_config` to delete configuration from a non-running datastore, with ncclient and Scrapli backends, NFCLI, FastAPI, MCP, and XML processors.
+16. Added Nornir `netconf_rpc` to send per-host rendered NETCONF operation XML, with ncclient and Scrapli backends, NFCLI, FastAPI, MCP, and XML processors.
 
 ## ENHANCEMENTS
 

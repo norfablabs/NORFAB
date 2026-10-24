@@ -2,13 +2,20 @@ from picle.models import Outputters, PipeFunctionsModel
 from pydantic import BaseModel, Field
 
 from norfab.workers.nornir_worker.nornir_models import (
+    NetconfCancelCommitInput,
     NetconfCommitInput,
+    NetconfCopyConfigInput,
+    NetconfDeleteConfigInput,
+    NetconfDiscardChangesInput,
     NetconfEditConfigInput,
     NetconfGetCapabilitiesInput,
     NetconfGetConfigInput,
     NetconfGetInput,
     NetconfGetSchemaInput,
+    NetconfLockInput,
+    NetconfRpcInput,
     NetconfTransactionInput,
+    NetconfUnlockInput,
     NetconfValidateInput,
 )
 
@@ -56,6 +63,111 @@ class CallEditConfig(
     @staticmethod
     def run(*args: object, **kwargs: object) -> object:
         return NornirNetconfShell.run(*args, _task="netconf_edit_config", **kwargs)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+
+
+class CallRpc(
+    NetconfRpcInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    @staticmethod
+    def run(*args: object, **kwargs: object) -> object:
+        return NornirNetconfShell.run(*args, _task="netconf_rpc", **kwargs)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+
+
+class CallDeleteConfig(
+    NetconfDeleteConfigInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    @staticmethod
+    def run(*args: object, **kwargs: object) -> object:
+        return NornirNetconfShell.run(*args, _task="netconf_delete_config", **kwargs)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+
+
+class CallCopyConfig(
+    NetconfCopyConfigInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    @staticmethod
+    def run(*args: object, **kwargs: object) -> object:
+        return NornirNetconfShell.run(*args, _task="netconf_copy_config", **kwargs)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+
+
+class CallUnlock(
+    NetconfUnlockInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    @staticmethod
+    def run(*args: object, **kwargs: object) -> object:
+        return NornirNetconfShell.run(*args, _task="netconf_unlock", **kwargs)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+
+
+class CallLock(
+    NetconfLockInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    @staticmethod
+    def run(*args: object, **kwargs: object) -> object:
+        return NornirNetconfShell.run(*args, _task="netconf_lock", **kwargs)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+
+
+class CallDiscardChanges(
+    NetconfDiscardChangesInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    @staticmethod
+    def run(*args: object, **kwargs: object) -> object:
+        return NornirNetconfShell.run(*args, _task="netconf_discard_changes", **kwargs)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+
+
+class CallCancelCommit(
+    NetconfCancelCommitInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    @staticmethod
+    def run(*args: object, **kwargs: object) -> object:
+        return NornirNetconfShell.run(*args, _task="netconf_cancel_commit", **kwargs)
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
@@ -137,6 +249,27 @@ class CallGetCapabilities(
 
 
 class NornirNetconfShell(BaseModel):
+    rpc: CallRpc = Field(None, description="Send a NETCONF operation XML or template")
+    delete_config: CallDeleteConfig = Field(
+        None,
+        alias="delete-config",
+        description="Delete a non-running NETCONF configuration",
+    )
+    copy_config: CallCopyConfig = Field(
+        None,
+        alias="copy-config",
+        description="Copy configuration between NETCONF datastores",
+    )
+    unlock: CallUnlock = Field(None, description="Unlock a NETCONF datastore")
+    lock: CallLock = Field(None, description="Lock a NETCONF datastore")
+    discard_changes: CallDiscardChanges = Field(
+        None,
+        alias="discard-changes",
+        description="Discard uncommitted candidate changes",
+    )
+    cancel_commit: CallCancelCommit = Field(
+        None, alias="cancel-commit", description="Cancel a pending confirmed commit"
+    )
     commit: CallCommit = Field(
         None, description="Commit NETCONF candidate configuration"
     )

@@ -1,0 +1,5 @@
+<get xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <filter type="subtree">
+    <system xmlns="{{ job_data.namespace }}"><config><hostname/></config></system>
+  </filter>
+</get>

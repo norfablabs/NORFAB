@@ -23,13 +23,13 @@ For a new development session:
 
 1. Read `AGENTS.md` for repository-wide commands and conventions.
 2. Read the
-   [NFWeb architecture decision](adr_web_ui_topology_architecture.md) for accepted
+   [NFWeb architecture decision](adr/adr_web_ui_topology_architecture.md) for accepted
    product and security boundaries. When planning terminal work, also read the
    proposed
-   [browser-native terminal decision](adr_nfweb_browser_terminal_application.md).
-3. Read the user-facing [NFWeb overview](../clients_nfweb_overview.md),
-   [monitoring dashboard guide](../clients_nfweb_monitoring.md), and
-   [topology application guide](../clients_nfweb_topology.md).
+   [browser-native terminal decision](adr/adr_nfweb_browser_terminal_application.md).
+3. Read the user-facing [NFWeb overview](../clients/clients_nfweb_overview.md),
+   [monitoring dashboard guide](../clients/clients_nfweb_monitoring.md), and
+   [topology application guide](../clients/clients_nfweb_topology.md).
 4. Inspect the current working tree before editing. NFWeb may be under active
    development, and uncommitted files belong to the developer.
 5. Treat the current source and tests as authoritative when this guide and the
@@ -577,6 +577,73 @@ invented. Node spheres are fully
 opaque and use the same green, yellow, red, and gray health palette shown in the
 States dropdown. Traffic retains a separate teal, amber, and pink scale.
 
+## Maintain Frontend Presentation and Performance
+
+Keep React, Mantine, Tabler, ECharts, and the existing 3D topology renderer. Use
+neutral charcoal surfaces, readable operational text, small consistent corner
+radii, and restrained orange branding based on the NORFAB logo. Theme values live
+in `frontend/src/main.tsx`; coordinate CSS and chart colors with that theme.
+Brand accents must remain distinct from health, severity, topology-layer, and
+traffic colors. Do not communicate status through color alone.
+
+### Layout and Interaction
+
+- Keep Monitoring vertically scrollable and prevent chart cards from shrinking
+  below a readable height. Wrap controls on narrow screens and provide explicit
+  keyboard and touch access to application navigation.
+- Preserve `#monitoring` and `#topology`, active-application browser titles, device
+  scope, filters, history/live selection, and access to collection failures.
+- Keep fabric-wide job activity clearly labelled. Selecting a worker does not
+  turn client-database job activity into worker-specific activity.
+- Manual Monitoring Refresh also reloads the selected worker's recent-job summary;
+  retain its retrieval timestamp without adding an expensive polling loop.
+- Bloom defaults to off. `TopologyGraph` allocates its postprocessing pass only
+  while enabled and disposes it when disabled. Keep it optional and measure GPU
+  cost before claiming a rendering improvement.
+
+The current sidebar, Dashboards hierarchy, toolbar, and topology/inspector split
+remain the implemented layout. Header navigation, a collapsible inspector,
+an independent Events panel, and regrouped Filters/Display controls are deferred
+design proposals. Revisit them as deliberate changes with browser coverage;
+collection events must remain accessible with no object selected.
+
+### Bundles and Dependency Cleanup
+
+Monitoring uses `echarts/core` and `echarts-for-react/esm/core`, registering the
+needed chart types, components, and renderer explicitly. Keep this modular import
+path rather than importing all of ECharts. Validate all seven charts, tooltips,
+legends, worker/time zoom, resize, and repeated mount/unmount after import changes.
+An earlier CommonJS core-entry experiment built successfully but failed at
+runtime, so a successful build alone is insufficient verification.
+
+Selective Mantine CSS imports remain a possible optimization, not an established
+saving. Cover portals, overlays, focus states, controls, and error paths before
+changing the full stylesheet import. Preserve dependencies used indirectly:
+`@mantine/hooks` is a Mantine peer dependency, Three.js supports graph objects and
+postprocessing, and generated static assets support Python-only deployment.
+Check dynamically generated selectors and lazy imports before deleting apparently
+unused CSS or modules. Rebuild generated assets rather than pruning them by hand.
+
+Record comparable production bundle sizes before and after an optimization.
+Compressed file size does not establish production HTTP transfer behavior, and
+smaller bundles do not prove runtime speedups. Profile frame time, memory, and
+update behavior separately; use the
+[NFWeb scale-test environment](adr/adr_nfweb_scale_test_environment.md) for large
+topologies.
+
+### Deferred Lifecycle Work
+
+Application-specific startup and subscriptions need a separate review: opening
+Monitoring can still initialize topology requests and its stream through the
+shared shell. Before limiting work to the active view, define cleanup and
+resynchronization on return and preserve scope, selection, filters, and history.
+Verify that switching views does not create duplicate subscriptions.
+
+Monitoring combines WebSocket delivery with interval reads. Do not remove polling
+without proving recovery from disconnects and silently stale streams. Measure
+healthy-stream request counts and test reconnect, reconciliation, and stale-data
+handling before selecting one primary update path.
+
 ## Run a Development Environment
 
 NFWeb needs an existing broker and the workers used by the selected applications.
@@ -680,8 +747,21 @@ NFWeb-focused test suite.
 | Documentation navigation | MkDocs build |
 
 Focused Vitest coverage exists for graph calculations and inspector formatting.
-There is currently no automated WebGL browser suite, so manually validate graph
+Playwright coverage lives in `frontend/e2e/topology.spec.ts` and
+`frontend/e2e/monitoring.spec.ts`, including topology interactions, chart layout,
+selected-worker refresh, and mobile application switching. These fixtures do not
+establish live-fabric behavior or large-topology performance; also validate graph
 lifecycle changes in a WebGL-capable browser.
+
+For layout changes, check 1440 x 900, 1366 x 768, 1024 x 768, and 390 x 844. Use
+more than ten workers to exercise chart windowing, long names, multiple history
+samples, missing metrics, errors, and disconnected streams. Confirm that every
+chart remains reachable, controls work with keyboard and touch, failures are
+visible without a selection, and the page has no unintended horizontal overflow.
+Exercise legends, zoom, resize, repeated mount/unmount, and application switching;
+capture browser console errors. Include a run against generated production assets
+when changing bundling or lazy loading, since Vite development mode can hide
+production-only import failures.
 
 ## Use Focused Change Playbooks
 
@@ -802,8 +882,9 @@ Keep these visible when planning work:
   dependency; revisit it only when navigation requirements become more complex.
 - TypeScript contracts remain manually authored, although an automated field-level
   parity test now prevents silent drift from the authoritative Pydantic models.
-- Graph calculations have focused Vitest coverage, but there is no automated
-  WebGL/browser lifecycle suite.
+- Playwright covers selected topology and Monitoring interactions, but large-graph
+  GPU behavior, long-session memory, and full accessibility still need dedicated
+  validation.
 - The lazy WebGL chunk remains inherently large; it is excluded from the initial
   application bundle and covered by an explicit Vite warning threshold.
 - LLDP canonicalization covers case, FQDN variants, whitespace, and common

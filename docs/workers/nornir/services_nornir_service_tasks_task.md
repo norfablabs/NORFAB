@@ -88,7 +88,7 @@ def task(task: Task, **kwargs) -> Result:
 		
 		`inventory.yaml` should be located in same folder where we 
 		start nfcli, unless `nfcli -i path_to_inventory.yaml` flag 
-		used. Refer to [Getting Started](../../norfab_getting_started.md) 
+		used. Refer to [Getting Started](../../tutorials/norfab_getting_started.md)
 		section on how to construct  `inventory.yaml` file
 		
     === "Python"
@@ -156,7 +156,7 @@ def task(task: Task, **kwargs) -> Result:
 							'task': 'nornir-worker-1:task'}}
 		```
 		
-		Refer to [Getting Started](../../norfab_getting_started.md) section on 
+		Refer to [Getting Started](../../tutorials/norfab_getting_started.md) section on
 		how to construct  `inventory.yaml` file.	
 		
 
@@ -228,7 +228,7 @@ option to provide further task parameters.
 		
 		`inventory.yaml` should be located in same folder where we 
 		start nfcli, unless `nfcli -i path_to_inventory.yaml` flag 
-		used. Refer to [Getting Started](../../norfab_getting_started.md) 
+		used. Refer to [Getting Started](../../tutorials/norfab_getting_started.md)
 		section on how to construct  `inventory.yaml` file
 		
     === "Python"
@@ -282,7 +282,7 @@ option to provide further task parameters.
 																				'ceos-spine-2'}}}
 		```
 		
-		Refer to [Getting Started](../../norfab_getting_started.md) section on 
+		Refer to [Getting Started](../../tutorials/norfab_getting_started.md) section on
 		how to construct  `inventory.yaml` file.	
 
 ## NORFAB Nornir Task Shell Reference

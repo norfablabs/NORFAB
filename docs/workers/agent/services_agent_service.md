@@ -18,7 +18,7 @@ the selected model. For Groq, also install `langchain-groq` and configure creden
 
 - [Inventory and custom agent definitions](services_agent_service_inventory.md)
 - [Invoke an agent](services_agent_service_tasks_chat.md)
-- [Local client agent](../../clients_agent.md), for profile-based chat in NFCLI or Python
+- [Local client agent](../../clients/clients_agent.md), for profile-based chat in NFCLI or Python
 
 The built-in `NorFab` agent discovers services and task descriptions. Custom
 definitions supply the tools needed to perform network operations.

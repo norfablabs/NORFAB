@@ -100,7 +100,7 @@ set OID values on devices.
         - `multi-get` retrieves multiple OIDs in a single request.
         - `set` writes a value to a writable OID on the targeted devices.
 		
-		`inventory.yaml` should be located in same folder where we start nfcli, unless `nfcli -i path_to_inventory.yaml` flag used. Refer to [Getting Started](../../norfab_getting_started.md) section on how to construct  `inventory.yaml` file
+		`inventory.yaml` should be located in same folder where we start nfcli, unless `nfcli -i path_to_inventory.yaml` flag used. Refer to [Getting Started](../../tutorials/norfab_getting_started.md) section on how to construct  `inventory.yaml` file
 		
     === "Python"
     
@@ -168,7 +168,7 @@ set OID values on devices.
         C:\nf>					 
 		```
 		
-		Refer to [Getting Started](../../norfab_getting_started.md) section on 
+		Refer to [Getting Started](../../tutorials/norfab_getting_started.md) section on
 		how to construct  `inventory.yaml` file.
 
 ## SNMP Read Operations

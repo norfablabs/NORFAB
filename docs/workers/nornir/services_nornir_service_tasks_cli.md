@@ -114,7 +114,7 @@ Below is an example of how to use the Nornir CLI task to retrieve command output
         - `cli` command switches to the CLI task sub-shell.
         - `commands` command retrieves the output of "show clock" and "show hostname" from the devices  that contain `ceos-spine` in their hostname as we use `FC` - "Filter Contains" Nornir hosts targeting filter.
 		
-		`inventory.yaml` should be located in same folder where we start nfcli, unless `nfcli -i path_to_inventory.yaml` flag used. Refer to [Getting Started](../../norfab_getting_started.md) section on how to construct  `inventory.yaml` file
+		`inventory.yaml` should be located in same folder where we start nfcli, unless `nfcli -i path_to_inventory.yaml` flag used. Refer to [Getting Started](../../tutorials/norfab_getting_started.md) section on how to construct  `inventory.yaml` file
 		
     === "Python"
     
@@ -196,7 +196,7 @@ Below is an example of how to use the Nornir CLI task to retrieve command output
         C:\nf>					 
 		```
 		
-		Refer to [Getting Started](../../norfab_getting_started.md) section on 
+		Refer to [Getting Started](../../tutorials/norfab_getting_started.md) section on
 		how to construct  `inventory.yaml` file.
 
 ## Use Different Connection Plugins
@@ -311,7 +311,7 @@ To use a specific connection plugin, ensure that your Nornir inventory is proper
         - `cli` command switches to the CLI task sub-shell.
         - `commands` command retrieves the output of "show clock" from the devices  that contain `spine` in their hostname as we use `FC` - "Filter Contains" Nornir hosts targeting filter, `plugin` argument used to inform Nornir service to use `netmiko`, `scrapli` or `napalm` modules to retrieve command output from devices.
 		
-		`inventory.yaml` should be located in same folder where we start nfcli, unless `nfcli -i path_to_inventory.yaml` flag used. Refer to [Getting Started](../../norfab_getting_started.md) section on how to construct  `inventory.yaml` file
+		`inventory.yaml` should be located in same folder where we start nfcli, unless `nfcli -i path_to_inventory.yaml` flag used. Refer to [Getting Started](../../tutorials/norfab_getting_started.md) section on how to construct  `inventory.yaml` file
 		
     === "Python"
 
@@ -388,7 +388,7 @@ To use a specific connection plugin, ensure that your Nornir inventory is proper
         C:\nf>					 
 		```
 		
-		Refer to [Getting Started](../../norfab_getting_started.md) section on 
+		Refer to [Getting Started](../../tutorials/norfab_getting_started.md) section on
 		how to construct  `inventory.yaml` file.
 
 ## Outputting Text Tables

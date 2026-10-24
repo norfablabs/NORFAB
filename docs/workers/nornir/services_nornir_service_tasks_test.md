@@ -136,7 +136,7 @@ File `suite_3.txt` stored on broker and downloaded by Nornir service prior to ru
         - `suite` argument refers to a path for `suite_3.txt` file with a set of tests to run. 
         - Devices filtered using `FC` - "Filter Contains" Nornir hosts targeting filter to only run tests on devices that contain `spine` or `leaf` in their hostname.
 		
-        `inventory.yaml` should be located in same folder where we start nfcli, unless `nfcli -i path_to_inventory.yaml` flag used. Refer to [Getting Started](../../norfab_getting_started.md) section on how to construct  `inventory.yaml` file
+        `inventory.yaml` should be located in same folder where we start nfcli, unless `nfcli -i path_to_inventory.yaml` flag used. Refer to [Getting Started](../../tutorials/norfab_getting_started.md) section on how to construct  `inventory.yaml` file
 		
     === "Python"
     
@@ -189,7 +189,7 @@ File `suite_3.txt` stored on broker and downloaded by Nornir service prior to ru
             nf.destroy()
         ```
 
-        Refer to [Getting Started](../../norfab_getting_started.md) section on how to construct  `inventory.yaml` file.
+        Refer to [Getting Started](../../tutorials/norfab_getting_started.md) section on how to construct  `inventory.yaml` file.
 
 ## Formatting Tests Output
 

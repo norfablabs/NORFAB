@@ -74,7 +74,7 @@ Example of sending configuration commands to devices.
     
 		Above sends configuration commands to all Nornir hosts that contain `spine` or `leaf` in their hostname as we use `FC` - "Filter Contains" Nornir hosts targeting filter.
 		
-		`inventory.yaml` should be located in same folder where we start nfcli, unless `nfcli -i path_to_inventory.yaml` flag used. Refer to [Getting Started](../../norfab_getting_started.md) section on how to construct  `inventory.yaml` file
+		`inventory.yaml` should be located in same folder where we start nfcli, unless `nfcli -i path_to_inventory.yaml` flag used. Refer to [Getting Started](../../tutorials/norfab_getting_started.md) section on how to construct  `inventory.yaml` file
 		
     === "Python"
     
@@ -127,7 +127,7 @@ Example of sending configuration commands to devices.
             nf.destroy()
         ```
 		 	
-		Refer to [Getting Started](../../norfab_getting_started.md) section on how to construct  `inventory.yaml` file.
+		Refer to [Getting Started](../../tutorials/norfab_getting_started.md) section on how to construct  `inventory.yaml` file.
 	
 ## Use Different Configuration Plugins
 

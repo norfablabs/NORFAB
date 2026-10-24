@@ -146,3 +146,18 @@ Before finishing a documentation change:
 - Confirm examples use real task names, aliases, and Python kwargs.
 - Confirm notes call out exposed-but-unused options or version restrictions.
 - Run Markdown, docs build, or diff checks when practical.
+
+## Documentation layout
+
+- `clients/`: user guides for client interfaces.
+- `tutorials/`: installation, quickstart, deployment, and integration walkthroughs.
+- `api_ref/core/`, `api_ref/clients/`, and `api_ref/workers/`: generated Python API references.
+- `reference/`: inventory and architecture reference material.
+- `workers/<service>/`: service overviews, inventory, and task documentation.
+- `customization/`: hooks and service plugin guides.
+- `development/adr/`: architecture decision records, with an index recording their stated status.
+- `development/testing/`: testing framework documentation.
+
+Keep the homepage, feature catalogue, project overview pages, changelog, contact page, and tags at the documentation root. Keep shared assets in `images/`, `stylesheets/`, and `javascripts/`.
+
+When moving pages, update `mkdocs.yml`, relative links, image paths, and repository references. Record missing documentation in [Documentation backlog](documentation_backlog.md) instead of publishing pages containing only `TBD`. Index entries without an explicit status must say that the status is not stated; do not infer completion from a filename.

@@ -1,4 +1,4 @@
-# Bug hunt
+# Known Issues
 
 Repository state at start: clean `master`. Findings below are triaged one at a time. No implementation or test files were changed.
 

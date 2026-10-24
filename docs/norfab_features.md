@@ -105,13 +105,13 @@ timelines, and intended-versus-observed context. **Current limitations:** NFWeb 
 no authentication, request-origin validation, or TLS, and both applications are polling-based.
 Restrict remote access to trusted administrative networks. Unknown telemetry is
 not inferred and monitoring does not capture message payloads.
-[NFWeb client details](clients_nfweb_overview.md) ·
-[Monitoring dashboard details](clients_nfweb_monitoring.md) ·
-[Topology application details](clients_nfweb_topology.md)
+[NFWeb client details](clients/clients_nfweb_overview.md) ·
+[Monitoring dashboard details](clients/clients_nfweb_monitoring.md) ·
+[Topology application details](clients/clients_nfweb_topology.md)
 
 ## Core platform
 
-NORFAB's [broker, clients, and workers](reference_architecture_norfab.md) provide
+NORFAB's [broker, clients, and workers](reference/architecture/reference_architecture_norfab.md) provide
 the shared execution layer beneath every service.
 
 ### Interactive installation
@@ -172,7 +172,7 @@ result is available. Workers report timeout results when task execution raises a
 and application-controlled job correlation. **Limitations:** callers must set
 timeouts appropriate to the work and retain UUIDs for asynchronous jobs.
 Timeout does not interrupt blocking operations or roll back external changes.
-[Python client details](clients_python_api_overview.md#running-jobs)
+[Python client details](clients/clients_python_api_overview.md#running-jobs)
 
 ### Live events and interactive approvals
 
@@ -183,7 +183,7 @@ continue or cancel from the response. **Use cases:** live progress displays,
 change approvals, human-in-the-loop workflows, and audit timelines.
 **Limitations:** interactive callers must consume events and answer before the
 request timeout.
-[Event and input details](clients_python_api_overview.md#future-based-jobs)
+[Event and input details](clients/clients_python_api_overview.md#future-based-jobs)
 
 ### Persistent client job history
 
@@ -226,7 +226,7 @@ centralized worker configuration. **Limitations:** merge order and glob overlap
 must be managed deliberately; sensitive values require appropriate secret and
 file controls. Dictionary-backed inventories preserve the caller's configuration
 for reuse across instances.
-[Inventory details](reference_norfab_inventory.md)
+[Inventory details](reference/reference_norfab_inventory.md)
 
 ### Templated inventory
 
@@ -234,7 +234,7 @@ Renders inventory files with Jinja2 before loading them. **Use cases:** computed
 endpoints, environment-dependent values, reusable worker definitions, and
 reducing duplicated YAML. **Limitations:** templates execute at inventory load
 time and should remain deterministic and reviewable.
-[Jinja2 inventory details](reference_norfab_inventory.md#jinja2-support)
+[Jinja2 inventory details](reference/reference_norfab_inventory.md#jinja2-support)
 
 ### Local environment bootstrap
 
@@ -246,7 +246,7 @@ NFCLI configuration, environment-specific endpoints, and development credentials
 kept outside inventory YAML. **Limitations:** the `.env` file is local process
 configuration rather than a secret store; files containing secrets must be
 excluded from source control and protected appropriately.
-[NFAPI environment details](api_reference_core_norfab_nfapi.md#environment-file-loading)
+[NFAPI environment details](api_ref/core/api_reference_core_norfab_nfapi.md#environment-file-loading)
 
 ### Topology dependencies and lifecycle hooks
 
@@ -296,7 +296,7 @@ worker logs through normal client calls. **Use cases:** local troubleshooting,
 centralized logging, SIEM ingestion, rotation, and environment-specific
 verbosity. **Limitations:** the selected handlers and destinations must be
 provisioned and secured by the deployment.
-[Logging inventory details](reference_norfab_inventory.md#logging-inventory-section)
+[Logging inventory details](reference/reference_norfab_inventory.md#logging-inventory-section)
 
 ### Encrypted component communication
 
@@ -305,7 +305,7 @@ clients, and workers; authentication is enabled by default. **Use cases:**
 protecting distributed fabric traffic. **Limitations:** distributed components
 must share the correct broker key, and northbound REST/MCP TLS is a separate
 deployment concern.
-[Broker inventory details](reference_norfab_inventory.md#broker-inventory-section)
+[Broker inventory details](reference/reference_norfab_inventory.md#broker-inventory-section)
 
 ### Custom service plugins
 
@@ -318,7 +318,7 @@ packaging, dependency, schema, security, and lifecycle ownership.
 
 ## NFCLI interactive shell
 
-The [NFCLI client](clients_nfcli_overview.md) provides a model-driven operations
+The [NFCLI client](clients/clients_nfcli_overview.md) provides a model-driven operations
 shell over the same task contracts used by the Python, REST, and MCP interfaces.
 When `--inventory` is omitted, `NORFAB_INVENTORY_DIR` can locate
 `inventory.yaml` and establish its base directory, which is useful for
@@ -1335,7 +1335,7 @@ mis-scoped tool can perform real changes.
 
 ## Client-side AI agent
 
-The Python client and NFCLI include an optional [profile-driven agent](clients_agent.md) that
+The Python client and NFCLI include an optional [profile-driven agent](clients/clients_agent.md) that
 runs beside the user rather than as a distributed Agent service worker.
 
 ### Multi-provider LLM profiles
@@ -1455,7 +1455,7 @@ attempts. File metadata is exposed under `show filesharing files details`.
 **Limitations:** remotes are read-only; the system Git executable is required,
 SSH credential management is not provided, shared snapshots contain no Git
 history, refresh is polling-based, and each remote tracks one branch.
-[Design decision](development/adr_extensible_data_sources_and_git_sync.md)
+[Design decision](development/adr/adr_extensible_data_sources_and_git_sync.md)
 
 ## FastAPI REST service
 

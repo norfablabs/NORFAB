@@ -110,7 +110,7 @@ Check the task reference and implementation before adding allocation arguments.
 and reuse an assigned VIP. Use a top-level `ip_addresses` allocation rather than
 an interface allocation for group VIPs. A group's nested `vip`
 accepts an explicit CIDR address, not an allocation call. See the
-[design specification TODOs](../development/adr_netbox_design_specification.md#todo).
+[design specification TODOs](../development/adr/adr_netbox_design_specification.md#todo).
 
 Do not silently drop a required relationship or claim an incomplete model is
 functional. Explain the specific gap and agree whether to use explicit values,
@@ -171,7 +171,7 @@ ip_addresses:
       description: EXAMPLE branch service address
 ```
 
-Example context: `{"parent_prefix": "192.0.2.0/24"}`. Interface assignment and more allocation patterns are in the [task reference](../workers/netbox/services_netbox_service_tasks_design_deploy.md#built-in-next-available-allocation-functions).
+Example context: `{"parent_prefix": "192.0.2.0/24"}`. Interface assignment and more allocation patterns are in the [task reference](../workers/netbox/services_netbox_service_tasks_design_deploy.md#allocation-examples).
 
 ## Deploy through NorFab MCP
 

@@ -2,6 +2,7 @@ import logging
 from typing import Any
 from xml.etree.ElementTree import Element, SubElement, tostring
 
+from lxml import etree
 from nornir_salt.plugins.functions import ResultSerializer
 from nornir_salt.plugins.tasks import ncclient_call, scrapli_netconf_call
 
@@ -10,14 +11,21 @@ from norfab.core.worker import Job, Task
 from norfab.models import Result
 
 from .nornir_models import (
+    NetconfCancelCommitInput,
     NetconfCommitInput,
+    NetconfCopyConfigInput,
+    NetconfDeleteConfigInput,
+    NetconfDiscardChangesInput,
     NetconfEditConfigInput,
     NetconfGetCapabilitiesInput,
     NetconfGetConfigInput,
     NetconfGetInput,
     NetconfGetSchemaInput,
+    NetconfLockInput,
     NetconfResult,
+    NetconfRpcInput,
     NetconfTransactionInput,
+    NetconfUnlockInput,
     NetconfValidateInput,
 )
 
@@ -112,6 +120,11 @@ class NetconfTask:
                         )
                         for argument, template in render.items()
                     }
+                    # ncclient's generic RPC expects an XML element, not XML text.
+                    if plugin == "ncclient" and call == "rpc":
+                        host.data["__task__"]["rpc_command"] = etree.fromstring(
+                            host.data["__task__"]["rpc_command"].encode("utf-8")
+                        )
             message = f"running NETCONF {call} using {plugin} on {len(nr.inventory.hosts)} hosts"
             log.info(message)
             job.event(message)
@@ -709,23 +722,337 @@ class NetconfTask:
             **kwargs,
         )
 
-    def netconf_cancel_commit(self, job: Job, **kwargs: Any) -> Result:
-        raise NotImplementedError("netconf_cancel_commit is not implemented")
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NetconfCancelCommitInput,
+        output=NetconfResult,
+        mcp={
+            "annotations": {
+                "title": "NETCONF Cancel Commit",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def netconf_cancel_commit(
+        self,
+        job: Job,
+        plugin: str = "ncclient",
+        persist_id: str = None,
+        **kwargs: Any,
+    ) -> Result:
+        """Cancel a pending confirmed commit and request immediate rollback.
 
-    def netconf_discard_changes(self, job: Job, **kwargs: Any) -> Result:
-        raise NotImplementedError("netconf_discard_changes is not implemented")
+        Args:
+            job: NorFab job metadata.
+            plugin: NETCONF backend: ncclient (default) or scrapli.
+            persist_id: Token supplied as persist when starting a persistent
+                confirmed commit. Omit for a nonpersistent commit, which must
+                be cancelled through its original NETCONF session.
+            **kwargs: Common host filters, processors, retries, XML processors
+                (xmltodict, xpath, xml_flake), to_dict and add_details options.
 
-    def netconf_lock(self, job: Job, **kwargs: Any) -> Result:
-        raise NotImplementedError("netconf_lock is not implemented")
+        Returns:
+            Result: XML replies under cancel_commit for ncclient or rpc for
+                Scrapli, normally an ok reply on success, or serialized records
+                when to_dict=False. Requires device support for cancel-commit
+                and a pending confirmed commit. RPC, capability and connection
+                errors mark hosts failed; unmatched hosts return status no_match.
+                Does not undo a normal or already confirmed commit. Target the
+                original worker and backend for nonpersistent commits. Retries
+                may report failure after an earlier cancellation succeeded.
+        """
+        if plugin == "scrapli":
+            rpc = Element(
+                "cancel-commit", xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"
+            )
+            if persist_id is not None:
+                SubElement(rpc, "persist-id").text = persist_id
+            return self._run_netconf(
+                job,
+                call="rpc",
+                plugin=plugin,
+                filter_=tostring(rpc, encoding="unicode"),
+                **kwargs,
+            )
+        return self._run_netconf(
+            job, call="cancel_commit", plugin=plugin, persist_id=persist_id, **kwargs
+        )
 
-    def netconf_unlock(self, job: Job, **kwargs: Any) -> Result:
-        raise NotImplementedError("netconf_unlock is not implemented")
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NetconfDiscardChangesInput,
+        output=NetconfResult,
+        mcp={
+            "annotations": {
+                "title": "NETCONF Discard Changes",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def netconf_discard_changes(
+        self, job: Job, plugin: str = "ncclient", **kwargs: Any
+    ) -> Result:
+        """Discard uncommitted candidate changes and restore candidate from running.
 
-    def netconf_copy_config(self, job: Job, **kwargs: Any) -> Result:
-        raise NotImplementedError("netconf_copy_config is not implemented")
+        Args:
+            job: NorFab job metadata.
+            plugin: NETCONF backend: ncclient (default) or scrapli.
+            **kwargs: Common host filters, processors, retries, XML processors,
+                to_dict and add_details serialization options.
 
-    def netconf_delete_config(self, job: Job, **kwargs: Any) -> Result:
-        raise NotImplementedError("netconf_delete_config is not implemented")
+        Returns:
+            Result: XML replies under discard_changes for ncclient or discard
+                for Scrapli, normally an ok reply. Requires candidate support.
+                Discards all pending candidate changes, including other users'
+                edits. Does not undo running changes or cancel a confirmed commit.
+                RPC and connection errors mark hosts failed; unmatched hosts
+                return status no_match. to_dict=False returns serialized records.
+        """
+        return self._run_netconf(
+            job,
+            call="discard" if plugin == "scrapli" else "discard_changes",
+            plugin=plugin,
+            **kwargs,
+        )
 
-    def netconf_rpc(self, job: Job, **kwargs: Any) -> Result:
-        raise NotImplementedError("netconf_rpc is not implemented")
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NetconfLockInput,
+        output=NetconfResult,
+        mcp={
+            "annotations": {
+                "title": "NETCONF Lock Datastore",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def netconf_lock(
+        self,
+        job: Job,
+        target: str = "candidate",
+        plugin: str = "ncclient",
+        **kwargs: Any,
+    ) -> Result:
+        """Lock a datastore for the current NETCONF session.
+
+        Args:
+            job: NorFab job metadata.
+            target: Datastore to lock: candidate (default), running, or startup.
+                Requires device support for the selected datastore.
+            plugin: NETCONF backend: ncclient (default) or scrapli.
+            **kwargs: Common host filters, processors, retries, XML processors,
+                to_dict and add_details serialization options.
+
+        Returns:
+            Result: XML replies under lock, normally an ok reply. Use the same
+                worker and backend for subsequent edits and netconf_unlock.
+                The device releases the lock when its NETCONF session closes,
+                including worker connection cleanup. Locks are per device;
+                failures do not release locks acquired on other devices.
+                RPC and connection errors mark hosts failed; unmatched hosts
+                return status no_match. to_dict=False returns serialized records.
+                Retrying a successful lock can report that it is already locked.
+        """
+        return self._run_netconf(
+            job, call="lock", plugin=plugin, target=target, **kwargs
+        )
+
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NetconfUnlockInput,
+        output=NetconfResult,
+        mcp={
+            "annotations": {
+                "title": "NETCONF Unlock Datastore",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def netconf_unlock(
+        self,
+        job: Job,
+        target: str = "candidate",
+        plugin: str = "ncclient",
+        **kwargs: Any,
+    ) -> Result:
+        """Release a datastore lock held by the current NETCONF session.
+
+        Args:
+            job: NorFab job metadata.
+            target: Datastore to unlock: candidate (default), running, or startup.
+                Requires device support for the selected datastore.
+            plugin: NETCONF backend: ncclient (default) or scrapli.
+            **kwargs: Common host filters, processors, retries, XML processors,
+                to_dict and add_details serialization options.
+
+        Returns:
+            Result: XML replies under unlock, normally an ok reply. Target the
+                worker and backend that acquired the lock; another session's
+                lock cannot be released. Does not commit or discard changes.
+                RPC and connection errors mark hosts failed; unmatched hosts
+                return status no_match. to_dict=False returns serialized records.
+                Retries may fail after an earlier unlock succeeded.
+        """
+        return self._run_netconf(
+            job, call="unlock", plugin=plugin, target=target, **kwargs
+        )
+
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NetconfCopyConfigInput,
+        output=NetconfResult,
+        mcp={
+            "annotations": {
+                "title": "NETCONF Copy Configuration",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def netconf_copy_config(
+        self,
+        job: Job,
+        source: str,
+        target: str,
+        plugin: str = "ncclient",
+        **kwargs: Any,
+    ) -> Result:
+        """Replace a target datastore with configuration from another datastore.
+
+        Args:
+            job: NorFab job metadata.
+            source: Datastore to copy from: running, candidate, or startup.
+            target: Datastore to replace: running, candidate, or startup. Must
+                differ from source. Device support is required for both datastores.
+            plugin: NETCONF backend: ncclient (default) or scrapli.
+            **kwargs: Common host filters, processors, retries, XML processors,
+                to_dict and add_details serialization options.
+
+        Returns:
+            Result: XML replies under copy_config, normally an ok reply.
+                Replaces the target rather than merging. Running replacements
+                take effect immediately; candidate changes need a separate commit.
+                Does not lock, validate, or commit. Inline XML and URL sources
+                are not exposed. RPC and connection errors mark hosts failed;
+                unmatched hosts return status no_match. to_dict=False returns
+                serialized records. Retries may copy a newer source configuration.
+        """
+        return self._run_netconf(
+            job,
+            call="copy_config",
+            plugin=plugin,
+            source=source,
+            target=target,
+            **kwargs,
+        )
+
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NetconfDeleteConfigInput,
+        output=NetconfResult,
+        mcp={
+            "annotations": {
+                "title": "NETCONF Delete Configuration",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def netconf_delete_config(
+        self, job: Job, target: str, plugin: str = "ncclient", **kwargs: Any
+    ) -> Result:
+        """Delete configuration from a non-running datastore.
+
+        Args:
+            job: NorFab job metadata.
+            target: Datastore to delete: candidate or startup. Required to avoid
+                an implicit destructive target. Running is forbidden by NETCONF.
+                The device must support deletion of the selected datastore.
+            plugin: NETCONF backend: ncclient (default) or scrapli.
+            **kwargs: Common host filters, processors, retries, XML processors,
+                to_dict and add_details serialization options.
+
+        Returns:
+            Result: XML replies under delete_config, normally an ok reply.
+                Deletes the selected configuration; it does not discard candidate
+                changes back to running. Does not back up, lock, or restore data.
+                Deleting startup configuration can affect the next device boot.
+                RPC and connection errors mark hosts failed; unmatched hosts
+                return status no_match. to_dict=False returns serialized records.
+                Repeated deletion may fail if configuration no longer exists.
+        """
+        return self._run_netconf(
+            job, call="delete_config", plugin=plugin, target=target, **kwargs
+        )
+
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NetconfRpcInput,
+        output=NetconfResult,
+        mcp={
+            "annotations": {
+                "title": "NETCONF RPC",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def netconf_rpc(
+        self,
+        job: Job,
+        rpc: str,
+        plugin: str = "ncclient",
+        job_data: Any = None,
+        **kwargs: Any,
+    ) -> Result:
+        """Send a rendered NETCONF operation, including vendor-specific RPCs.
+
+        Args:
+            job: NorFab job metadata.
+            rpc: XML operation element, without the outer rpc envelope, or a
+                NorFab template URL. Include the operation's XML namespace.
+                Rendered per host with host, job_data, norfab and netbox context.
+            plugin: NETCONF backend: ncclient (default) or scrapli.
+            job_data: Template context data or URL to a YAML data file.
+            **kwargs: Common host filters, processors, retries, XML processors,
+                to_dict and add_details serialization options.
+
+        Returns:
+            Result: XML replies under rpc, or serialized records when
+                to_dict=False. The backend supplies the NETCONF envelope.
+                Operation behavior and required capabilities depend on the XML;
+                RPCs may change configuration or operational state. No automatic
+                locking, validation, commit, or rollback is performed. RPC and
+                connection errors mark hosts failed; unmatched hosts return
+                status no_match. Retries may repeat state-changing operations.
+
+        Raises:
+            FileNotFoundError: If a referenced template cannot be fetched.
+            etree.XMLSyntaxError: If rendered ncclient XML is malformed.
+        """
+        return self._run_netconf(
+            job,
+            call="rpc",
+            plugin=plugin,
+            render={"rpc_command" if plugin == "ncclient" else "filter_": rpc},
+            job_data=job_data,
+            **kwargs,
+        )
