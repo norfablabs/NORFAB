@@ -2,6 +2,7 @@
   "purpose": "Reference for test authors. Record NetBox objects read or changed by each test area; this file is not loaded by pytest.",
   "ownership": "All integration tests use the main NetBox database. Each mutating test area should own distinct records and delete only those records. Branches are used only by tests that explicitly verify branch behavior. This manifest is an author reference and is not loaded by pytest.",
   "known_overlaps": [
+    "10.0.0.0/24 is shared by services/nornir/test_netbox_ipam.py::TestNBCreateIp and services/netbox/test_ipam.py::TestCreateIP and TestCreateIPBulk. Their setup deletes all IPs in the pool; several NetBox tests also delete child prefixes. Run these consumers sequentially until they have separate owned pools. The seeded /24 parent is retained by test cleanup.",
     "Other sync tests still share the original fn-ceos-* NetBox device records. Audit record ownership before adding parallel sync tests."
   ],
   "branch_feature_tests": {
@@ -92,6 +93,52 @@
     ]
   },
   "tests": {
+    "services/nornir/test_netbox_ipam.py::TestNBCreateIp": {
+      "mode": "main_mutating",
+      "persistent_prefix": "10.0.0.0/24 (global; description TEST NEXT IP PREFIX; tests/netbox_data.py)",
+      "devices": [
+        "fceos5",
+        "fceos4 (connected peer interfaces may receive IPs)"
+      ],
+      "coverage": "Both Jinja filter and set templates allocate IPs for fceos5 interfaces and connected peers. cfg dry_run=True prevents device configuration but does not propagate to template create_ip calls, which write to NetBox.",
+      "cleanup": "Each test deletes all IPs within 10.0.0.0/24 before allocation, without a VRF or ownership filter. Leaves allocated IPs afterward and retains the parent prefix. Shares the pool with NetBox IPAM tests; do not run concurrently."
+    },
+    "test_ipam.py::shared_10.0.0.0/24_pool": {
+      "mode": "main_mutating",
+      "persistent_prefix": "10.0.0.0/24 (global; description TEST NEXT IP PREFIX; tests/netbox_data.py)",
+      "delete_all_ips_before_test": [
+        "TestCreateIP::test_create_ip_by_prefix",
+        "TestCreateIP::test_create_ip_by_prefix_description",
+        "TestCreateIP::test_create_ip_by_prefix_multiple",
+        "TestCreateIP::test_create_ip_by_prefix_device_interface",
+        "TestCreateIP::test_create_ip_is_primary",
+        "TestCreateIP::test_create_ip_dry_run_new_ip",
+        "TestCreateIP::test_create_ip_dry_run_existing_ip",
+        "TestCreateIP::test_create_ip_with_nb_instance",
+        "TestCreateIP::test_create_ip_with_mask_len",
+        "TestCreateIP::test_create_ip_with_mask_len_dry_run",
+        "TestCreateIP::test_create_ip_check_create_peer_ip",
+        "TestCreateIP::test_create_ip_check_create_peer_ip_with_branch",
+        "TestCreateIP::test_create_ip_check_skip_create_peer_ip",
+        "TestCreateIP::test_create_ip_use_peer_ip",
+        "TestCreateIP::test_create_ip_with_link_peer_dry_run",
+        "TestCreateIP::test_create_ip_with_link_peer_within_parent",
+        "TestCreateIPBulk::test_create_ip_bulk"
+      ],
+      "delete_child_prefixes_before_test": [
+        "TestCreateIP::test_create_ip_with_mask_len",
+        "TestCreateIP::test_create_ip_with_mask_len_dry_run",
+        "TestCreateIP::test_create_ip_check_create_peer_ip",
+        "TestCreateIP::test_create_ip_check_create_peer_ip_with_branch",
+        "TestCreateIP::test_create_ip_check_skip_create_peer_ip",
+        "TestCreateIP::test_create_ip_use_peer_ip",
+        "TestCreateIP::test_create_ip_with_link_peer_dry_run",
+        "TestCreateIP::test_create_ip_with_link_peer_within_parent",
+        "TestCreateIPBulk::test_create_ip_bulk"
+      ],
+      "cleanup": "common.delete_ips uses parent=10.0.0.0/24 with no VRF or ownership filter. common.delete_prefixes_within uses within=10.0.0.0/24, deleting children but retaining the /24 parent. These tests share address space with Nornir TestNBCreateIp and must run sequentially with it. The peer-IP branch test also clears the main pool before creating its branch.",
+      "seed_lifecycle": "populate_netbox calls create_prefixes to persist the parent in NetBox. Pytest does not automatically reseed it. Explicit tests/netbox_data.py delete_prefixes cleanup deletes this seeded parent by exact CIDR."
+    },
     "test_ipam.py::TestCreatePrefix::test_create_prefix_with_attributes_updates": {
       "mode": "main_mutating",
       "persistent_prefix": "10.2.0.0/24 (VRF1; existing TestCreatePrefix pool in tests/netbox_data.py)",

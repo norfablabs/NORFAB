@@ -113,7 +113,9 @@ class TestNornirFileCopy:
         for worker, results in ret.items():
             assert results["result"] is None, f"{worker} returned results"
             assert results["failed"] is True, f"{worker} did not fail to run the task"
-            assert "fetch file failed" in results["errors"][0]
+            error = results["errors"][0]
+            assert "FileNotFoundError" in error, error
+            assert "nf://nornir/files/file_not_exist.txt" in error, error
 
 
 # ----------------------------------------------------------------------------
