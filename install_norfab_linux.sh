@@ -264,17 +264,31 @@ if [[ $answer == 2 ]]; then
     else
         write_step "Creating virtual environment at: $venv_path"
         "$python_exe" -m venv "$venv_path"
+        write_success 'Virtual environment created.'
     fi
     python_exe="$venv_path/bin/python"
-    write_success 'Virtual environment created.'
 fi
 if ! "$python_exe" -c 'import sys; sys.exit(sys.version_info < (3, 10))'; then
     write_info 'The selected environment requires Python 3.10 or later.'
     exit 1
 fi
-if ! "$python_exe" -m pip --version >/dev/null; then
-    write_info 'pip is required. Install pip for the chosen Python, then rerun.'
-    exit 1
+if ! "$python_exe" -m pip --version >/dev/null 2>&1; then
+    if [[ -n $venv_path ]]; then
+        write_step 'pip is missing; bootstrapping it in the virtual environment...'
+        if ! "$python_exe" -m ensurepip --upgrade; then
+            write_info 'Could not bootstrap pip. Install venv/ensurepip support for the Python used by this environment, then rerun.'
+            write_info 'On Debian/Ubuntu, install the matching python3-venv or python3.X-venv package.'
+            exit 1
+        fi
+        if ! "$python_exe" -m pip --version; then
+            write_info 'pip is still unavailable after bootstrapping. Repair the virtual environment or choose a new folder, then rerun.'
+            exit 1
+        fi
+        write_success 'pip is ready.'
+    else
+        write_info 'pip is required. Install pip for the chosen Python, then rerun.'
+        exit 1
+    fi
 fi
 
 # Step 3 - Choose services
