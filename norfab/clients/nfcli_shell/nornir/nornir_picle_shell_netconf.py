@@ -212,6 +212,8 @@ class CallTransaction(
 ):
     @staticmethod
     def run(*args: object, **kwargs: object) -> object:
+        if "validate_" in kwargs:
+            kwargs["validate"] = kwargs.pop("validate_")
         return NornirNetconfShell.run(*args, _task="netconf_transaction", **kwargs)
 
     class PicleConfig:
@@ -273,7 +275,9 @@ class NornirNetconfShell(BaseModel):
     commit: CallCommit = Field(
         None, description="Commit NETCONF candidate configuration"
     )
-    validate: CallValidate = Field(None, description="Validate NETCONF configuration")
+    validate_: CallValidate = Field(
+        None, alias="validate", description="Validate NETCONF configuration"
+    )
     transaction: CallTransaction = Field(
         None, description="Apply configuration using a NETCONF transaction"
     )

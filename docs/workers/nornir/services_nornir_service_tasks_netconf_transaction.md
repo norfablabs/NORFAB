@@ -132,20 +132,57 @@ Failed RPCs and connection errors mark host results as failed.
 ## Task Command Shell Reference
 
 ```bash
-nf# man tree nornir.netconf.transaction
+nf#man tree nornir.netconf.transaction
 
-transaction: Apply configuration using a NETCONF transaction
-├── config (R): XML config wrapper or NorFab template URL
-├── plugin: NETCONF backend
-├── target: Datastore to edit; omit for backend automatic selection
-├── job-data: Template data or YAML file URL
-├── validate: Validate when supported by the device
-├── confirmed: Use confirmed commit when supported
-├── confirm-delay: Confirmed commit timeout in seconds
-├── commit-final-delay: Delay before final commit in seconds
-├── edit-rpc: ncclient configuration edit RPC; unused by Scrapli
-├── edit-arg: ncclient edit RPC arguments; unused by Scrapli
-└── commit-arg: ncclient first commit arguments; unused by Scrapli
+R - required field, M - supports multiline input, D - dynamic key
+
+root
+└── nornir:    Nornir service
+    └── netconf:    Manage devices using NETCONF
+        └── transaction:    Apply configuration using a NETCONF transaction
+            ├── timeout:    Job timeout
+            ├── workers:    Filter workers to target, default 'all'
+            ├── verbose-result:    Control output details, default 'False'
+            ├── nowait:    Do not wait for job to complete, default 'False'
+            ├── FO:    Filter hosts using a Nornir-Salt Filter Object
+            ├── FB:    Filter hosts by name using glob patterns
+            ├── FH:    Filter hosts by hostname
+            ├── FC:    Filter hosts by name containment pattern
+            ├── FR:    Filter hosts by name using regular expressions
+            ├── FG:    Filter hosts by group
+            ├── FP:    Filter hosts by hostname using IP prefix
+            ├── FL:    Filter hosts by names list
+            ├── FM:    Filter hosts by platform
+            ├── FX:    Exclude hosts by name
+            ├── FN:    Negate the host filter match
+            ├── on-failed:    Run task on hosts currently marked as failed by Nornir, default 'False'
+            ├── to-dict:    Return task results as a dictionary keyed by host, default 'True'
+            ├── add-details:    Add Nornir task execution details to results, default 'False'
+            ├── progress:    Emit progress events during task execution, default 'True'
+            ├── num-workers:    RetryRunner number of threads for task execution
+            ├── num-connectors:    RetryRunner number of threads for device connections
+            ├── connect-retry:    RetryRunner number of connection attempts
+            ├── task-retry:    RetryRunner number of attempts to run each task
+            ├── reconnect-on-fail:    RetryRunner reconnects to a host after task failure
+            ├── connect-check:    RetryRunner tests TCP connectivity before opening connection
+            ├── connect-timeout:    RetryRunner TCP connection check timeout in seconds
+            ├── creds-retry:    RetryRunner connection credentials and parameters to retry
+            ├── tf:    File group name to save task results on the worker
+            ├── tf-skip-failed:    Skip failed task results when saving to file
+            ├── diff:    File group name to diff task results against
+            ├── diff-last:    Previous saved file version to diff against
+            ├── plugin:    NETCONF backend, default 'NetconfPlugin.ncclient'
+            ├── config (R):    XML config wrapper or NorFab template URL
+            ├── target:    Datastore to edit; omit for backend automatic selection
+            ├── job-data:    Template data or YAML file URL
+            ├── validate:    Validate when supported by the device, default 'True'
+            ├── confirmed:    Use confirmed commit when supported, default 'True'
+            ├── confirm-delay:    Confirmed commit timeout in seconds, default '60'
+            ├── commit-final-delay:    Delay before final commit in seconds, default '1'
+            ├── edit-rpc:    ncclient configuration edit RPC; unused by Scrapli, default 'edit_config'
+            ├── edit-arg:    ncclient edit RPC arguments; unused by Scrapli, default '{}'
+            └── commit-arg:    ncclient first commit arguments; unused by Scrapli, default '{}'
+nf#
 ```
 
 The command inherits common host filters, job options, and serialization options.

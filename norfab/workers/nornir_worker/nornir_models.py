@@ -1556,8 +1556,8 @@ class NetconfTransactionInput(
     job_data: Any = Field(
         None, alias="job-data", description="Template data or YAML file URL"
     )
-    validate: StrictBool = Field(
-        True, description="Validate when supported by the device"
+    validate_: StrictBool = Field(
+        True, alias="validate", description="Validate when supported by the device"
     )
     confirmed: StrictBool = Field(
         True, description="Use confirmed commit when supported"
@@ -1589,6 +1589,14 @@ class NetconfTransactionInput(
         alias="commit-arg",
         description="ncclient first commit arguments; unused by Scrapli",
     )
+
+    @classmethod
+    def model_json_schema(cls, *args: Any, **kwargs: Any) -> dict[str, Any]:
+        """Keep the public validate argument in schemas using Python field names."""
+        schema = super().model_json_schema(*args, **kwargs)
+        if "validate_" in schema["properties"]:
+            schema["properties"]["validate"] = schema["properties"].pop("validate_")
+        return schema
 
 
 class NetconfGetCapabilitiesInput(
