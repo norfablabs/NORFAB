@@ -416,7 +416,7 @@ $installType = Read-Choice -Prompt "Choose installation type (1/2)" -ValidValues
 
 $venvPath = $null
 if ($installType -eq "2") {
-    $defaultVenvName = "norfab-env"
+    $defaultVenvName = ".venv"
     $venvName = (Read-Host "Virtual environment folder name [default: $defaultVenvName]").Trim()
     if ($venvName -eq "") { $venvName = $defaultVenvName }
 

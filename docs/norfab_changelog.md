@@ -44,7 +44,7 @@
 14. New devices default to planned status; omitted status preserves existing device status.
 
 15. Simplified Netbox BGP peering task internals, reducing duplicate cache, payload, and policy handling while preserving task interfaces and behavior.
-16. Linux and Windows installers now confirm service selections and create projects in `./norfab`, with options to preserve or recreate existing folders.
+16. Linux and Windows installers now default to `.venv`, confirm service selections, and create projects in `./norfab`, with options to preserve or recreate existing folders.
 
 ---
 

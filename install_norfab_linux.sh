@@ -253,8 +253,8 @@ write_info '[2] Local  - create a virtual environment in a chosen folder'
 read_choice 'Choose installation type (1/2)' 2 1 2
 venv_path=''
 if [[ $answer == 2 ]]; then
-    read_answer 'Virtual environment folder name [default: norfab-env]'
-    venv_path=$("$python_exe" -c 'import os, sys; print(os.path.abspath(sys.argv[1]))' "${answer:-norfab-env}")
+    read_answer 'Virtual environment folder name [default: .venv]'
+    venv_path=$("$python_exe" -c 'import os, sys; print(os.path.abspath(sys.argv[1]))' "${answer:-.venv}")
     if [[ -e $venv_path && ! -f $venv_path/pyvenv.cfg ]]; then
         write_info "Target exists and is not a virtual environment: $venv_path"
         exit 1

@@ -93,9 +93,9 @@ will be noted in service deployment details.
     Using a virtual environment (recommended):
 
     ```powershell
-    python -m venv norfab-env
+    python -m venv .venv
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-    .\norfab-env\Scripts\Activate.ps1
+    .\.venv\Scripts\Activate.ps1
     python -m pip install "norfab[nfcli,tui,nornirservice,netboxservice]"
     ```
 
@@ -121,11 +121,11 @@ will be noted in service deployment details.
     ```
 
     If you installed into a virtual environment, activate it first. Run this
-    from the folder containing `norfab-env`, or use your environment's actual path:
+    from the folder containing `.venv`, or use your environment's actual path:
 
     ```powershell
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-    .\norfab-env\Scripts\Activate.ps1
+    .\.venv\Scripts\Activate.ps1
     python -m pip install --upgrade norfab
     ```
 
@@ -161,8 +161,8 @@ will be noted in service deployment details.
     Using a virtual environment (recommended):
 
     ```bash
-    python3 -m venv norfab-env
-    source norfab-env/bin/activate
+    python3 -m venv .venv
+    source .venv/bin/activate
     pip install norfab[nfcli,nornirservice]
     ```
 
@@ -171,7 +171,7 @@ will be noted in service deployment details.
     ```bash
     pip install --upgrade norfab
     # or inside a venv:
-    source norfab-env/bin/activate && pip install --upgrade norfab
+    source .venv/bin/activate && pip install --upgrade norfab
     ```
 
 === "Docker"
