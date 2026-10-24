@@ -1,308 +1,77 @@
-# AGENTS.md - NorFab Repository Guide
+﻿# AGENTS.md - NorFab Repository Guide
 
-## Agent Working Rules
+## Working Rules
 
-1. Read the relevant repository guides before changing code or tests; follow their established patterns.
-2. Keep implementations simple and direct. Avoid unnecessary abstractions, compatibility paths, and helpers used only once or twice.
-3. Follow `docs/development/testing/norfab_testing_framework.md` when writing or running tests:
-   - Use integration tests through the public client interface whenever possible.
-   - Keep tests small and focused.
-   - Prefer extending related tests for new behavior, create a dedicated test when existing tests are unrelated.
-4. Preserve public task arguments and client interfaces unless a change is explicitly requested.
-5. Validate data at the appropriate boundary; avoid repeating the same checks deeper in the implementation.
-6. Write useful Google-style docstrings for tasks. Document every argument, the result, important behavior, limitations, and relevant errors; keep them accurate when changing a task.
-7. Do not add an Inputs section to service task documentation. The Python API reference at the end of the page renders task inputs from the task's Google-style docstring; keep that docstring accurate instead of duplicating arguments in prose.
+- Read the relevant guides below before changing code, tests, or documentation; follow existing patterns.
+- Keep implementations simple and direct. Avoid unnecessary abstractions, compatibility paths, and helpers used only once or twice.
+- Preserve public task arguments and client interfaces unless a change is explicitly requested.
+- Validate data at the appropriate boundary; avoid repeating checks deeper in the implementation.
+- Keep task Google-style docstrings accurate. Document every argument, the result, important behavior, limitations, and relevant errors.
+- Start logging and `job.event` messages with lowercase letters. Use `severity` for event severity.
+- Fix spelling mistakes in docstrings, comments, and variable names you change.
 
-## Project Overview
+## Repository Map
 
-**NorFab** (Network Automations Fabric) is a Service-Oriented Architecture (SOA) framework for extreme network automation. It runs equally on Windows, Linux, and macOS — locally on a laptop or distributed across servers.
+NorFab is a cross-platform network automation framework. Clients submit jobs through a ZeroMQ broker to service workers using the NorFab Protocol (NFP).
 
-- **License**: Apache-2.0
-- **Python**: 3.10–3.14
-- **Docs**: https://docs.norfablabs.com
-- **Repo**: https://github.com/norfablabs/NORFAB
+| Area | Location |
+| --- | --- |
+| Lifecycle, broker, client, inventory, protocol, and worker base | `norfab/core/` |
+| Service workers and task implementations | `norfab/workers/` |
+| CLI, Robot Framework, Textual, and NFWeb clients | `norfab/clients/` |
+| Shared Pydantic models | `norfab/models/` |
+| CLI entry point | `norfab/utils/nfcli.py` |
+| Service integration tests | `tests/services/` |
+| Client and CLI tests | `tests/clients/`, `tests/nfcli/` |
+| Fixtures and test inventory | `tests/conftest.py`, `tests/nf_tests_inventory/` |
+| Documentation and Docker environments | `docs/`, `docker/` |
 
-## Architecture
+Workers extend `NFPWorker`; `@task` exposes methods to clients. Worker plugins are registered under `project.entry-points."norfab.workers"` in `pyproject.toml`. Consult that file for current dependencies, Python support, extras, entry points, and lint settings rather than duplicating them here.
 
-Three core components communicate via ZeroMQ using the NFP (NorFab Protocol):
+## Testing
 
-```
-Clients  ──►  Broker  ──►  Workers
-```
+Follow [NORFAB Testing Framework](docs/development/testing/norfab_testing_framework.md) when writing or running tests:
 
-- **Broker** (`norfab/core/broker.py`) — Central message router. Distributes jobs from clients to available service workers.
-- **Workers** (`norfab/workers/`) — Service processes that execute automation tasks. Multiple workers can form a service (load-balanced).
-- **Clients** (`norfab/clients/`) — Interfaces to submit jobs and retrieve results (Python API, CLI, Robot Framework).
-- **Inventory** (`norfab/core/inventory.py`) — YAML-based configuration loaded at startup; supports glob patterns for worker config mapping.
+- Prefer integration tests through the public client interface.
+- Keep tests small and focused. Extend related tests; add a dedicated test when existing tests are unrelated.
+- Run commands from the repository root; use the guide for suite selection, build options, and reports.
 
-### NFP Protocol
+### Netbox Test Data
 
-The communication protocol is defined in `norfab/core/NFP.py`. Workers, broker, and clients speak NFP over ZeroMQ sockets. Jobs are tracked by UUID in a SQLite database on the client side (`norfab/core/client.py`).
+Read and maintain [tests/netbox_data_manifest.json](tests/netbox_data_manifest.json) when adding or changing tests that use Netbox data.
 
-### Job Lifecycle
+- Record only Netbox database records and address space that tests read, create, update, or delete, including ownership and cleanup.
+- Tests that mutate Netbox must use their own records and address space. Never reuse data owned by other tests; clean up only records the test owns.
+- Do not record local files, file-fetch behavior, temporary scripts, caches, or other resources outside Netbox. Tests that use no Netbox data need no entry, even when exercising a Netbox worker task.
 
-`NEW` → `SUBMITTING` → `DISPATCHED` → `STARTED` → `COMPLETED` / `FAILED` / `STALE`
+## Documentation
 
-## Directory Structure
+Follow the [documentation style guide](docs/development/documentation_style_guide.md).
 
-```
-norfab/
-├── core/
-│   ├── nfapi.py        # NorFab main class — starts broker + workers + client
-│   ├── broker.py       # NFPBroker — routes jobs between clients and workers
-│   ├── worker.py       # NFPWorker base class — all service workers extend this
-│   ├── client.py       # NFPClient — submits jobs, stores results in SQLite
-│   ├── inventory.py    # NorFabInventory — loads YAML inventory files
-│   ├── NFP.py          # Protocol constants and message builders
-│   ├── keepalives.py   # Keepalive heartbeat implementation
-│   ├── security.py     # ZeroMQ certificate generation
-│   └── exceptions.py   # Custom exceptions
-├── workers/
-│   ├── nornir_worker/  # Nornir network automation service
-│   ├── netbox_worker/  # NetBox DCIM/IPAM integration service
-│   ├── agent_worker/   # AI/LLM agent service (LangChain/Ollama)
-│   ├── fastapi_worker/      # REST API service (FastAPI + Uvicorn)
-│   ├── fastmcp_worker/      # Model Context Protocol (MCP) service
-│   ├── workflow_worker/     # Workflow orchestration service
-│   ├── containerlab_worker/  # ContainerLab integration
-│   └── filesharing_worker/ # File sharing service
-├── clients/
-│   ├── nfcli_shell/nfcli_shell_client.py  # Interactive CLI (nfcli)
-│   ├── robot_client.py        # Robot Framework library
-│   ├── textual_client.py      # TUI client (Textual)
-│   └── nfweb/                 # Local web client; topology is its first application
-├── models/
-│   ├── norfab_configuration.py          # Pydantic models for inventory config
-│   ├── norfab_configuration_logging.py  # Logging config models
-│   ├── fastapi/                          # FastAPI response models
-│   └── containerlab/                     # ContainerLab models
-└── utils/
-    └── nfcli.py   # CLI entry point script
-tests/
-├── conftest.py                      # pytest fixtures (NorFab start/teardown)
-├── nf_tests_inventory/              # Test inventory (inventory.yaml + service configs)
-├── services/
-│   ├── containerlab/                 # Containerlab service tests by task area
-│   ├── dummy/                        # Dummy plugin service tests
-│   ├── fakenos/                      # FakeNOS service tests by task area
-│   ├── fastapi/                      # FastAPI service tests by task area
-│   ├── fastmcp/                      # FastMCP service tests by task area
-│   ├── filesharing/                  # FileSharing service tests by task area
-│   ├── netbox/                       # NetBox service tests by task area plus common.py helpers
-│   ├── nornir/                       # Nornir service tests by task area
-│   └── workflow/                     # Workflow service tests by task area
-├── clients/
-│   └── nfweb/                         # NFWeb API, storage, and collector tests
-└── nfcli/                            # Interactive CLI shell tests
-    ├── test_shell_client.py
-    └── test_shell_common.py
-docs/                  # MkDocs documentation source (Material theme)
-docker/                # Docker deployment configs
-```
+- Do not add an Inputs section to service task pages. The Python API reference renders arguments from the task's Google-style docstring.
+- Record user-facing changes in [the changelog](docs/norfab_changelog.md) and relevant task or developer documentation.
+- Update [the feature catalogue](docs/norfab_features.md) only for notable capabilities relevant to technical evaluation or RFPs, or to correct materially inaccurate entries after a change, deprecation, or removal. Minor enhancements, fixes, refactors, and internal performance improvements do not need catalogue entries.
+- Keep catalogue entries concise; verify capabilities, interfaces, use cases, limitations, and links. Update its **Last updated** date only when the catalogue changes.
 
-## Common Commands
+## Development Commands
 
-### Installation
+Use Poetry and Invoke from the repository root. List available tasks with `poetry run inv --list`.
 
 ```bash
-# Core only
-poetry run pip install norfab
-
-# With CLI
-poetry run pip install norfab[nfcli]
-
-# With Nornir service
-poetry run pip install norfab[nornirservice]
-
-# Everything
-poetry run pip install norfab[full]
-
-# Development (using Poetry)
-poetry install -E docs
-```
-
-### Developer Task Automation
-
-Use Invoke from the repository root for common development tasks:
-
-```bash
-poetry run inv --list
-poetry run inv checks
+poetry run inv checks             # Non-mutating Black, Ruff, and Vulture checks
+poetry run inv format             # Format with Black
+poetry run inv lint               # Run Ruff
+poetry run inv dead-code          # Report dead code without suppression or auto-fixes
 poetry run inv docs-build
 poetry run inv docs-serve
-```
-
-### Running
-
-```bash
-# Start interactive CLI (from directory containing inventory.yaml)
-poetry run nfcli
-
-# Create a new NorFab environment scaffold
-poetry run nfcli --create-env norfab
-```
-
-### Testing
-
-Run from the repository root. See [NORFAB Testing Framework](docs/development/testing/norfab_testing_framework.md) for build options, test selection, and reports.
-
-```bash
 poetry run inv docker-tests-build
 poetry run inv docker-tests-core
 poetry run inv docker-tests-all
 ```
 
-**SUPER IMPORTANT — NetBox test data:** LLM agents must read and maintain [tests/netbox_data_manifest.json](tests/netbox_data_manifest.json) when adding or changing tests that use NetBox data. Record only NetBox database records and address space that tests read, create, update, or delete, including ownership and cleanup. Do not record local files, file-fetch behavior, temporary scripts, caches, or other resources outside NetBox. Tests that do not use NetBox data need no manifest entry, even if they exercise a NetBox worker task. Tests that mutate NetBox must use their own records and address space; never reuse data owned by other tests. Clean up only records the test owns.
+## Task-Specific Guides
 
-### Linting & Formatting
-
-```bash
-# Run all non-mutating checks (Black, Ruff, and Vulture)
-poetry run inv checks
-
-# Format with Black
-poetry run inv format
-
-# Lint with Ruff
-poetry run inv lint
-
-# Ruff auto-fix
-poetry run ruff check . --fix
-
-# Report dead code; findings are not suppressed or auto-fixed
-poetry run inv dead-code
-```
-
-### Important formatting Rules
-
-1. Workers `job.event` call messages must start with lowercase letters; `job.event` calls support setting event severity through `severity=WARNING/INFO/ERROR`
-2. Logging calls, e.g. `log.info`, must start with lowercase letters
-3. Any spelling mistakes in docstrings, comments or variable names must be fixed
-
-### Documentation
-
-```bash
-# Serve docs locally
-poetry run inv docs-serve
-
-# Build docs
-poetry run inv docs-build
-```
-
-#### Feature Documentation Maintenance
-
-- `docs/norfab_features.md` is the evaluator- and RFP-oriented catalogue of NORFAB capabilities.
-- Add or expand entries only for notable new capabilities relevant to technical evaluation or RFP responses, such as a new service, task family, integration, or supported interface.
-- Do not update this catalogue for every minor enhancement, bug fix, refactor, or internal performance improvement. Record those changes in the changelog and relevant task or developer documentation instead.
-- Correct existing entries when a change, deprecation, or removal would otherwise leave the catalogue materially inaccurate. Keep entries focused on capabilities rather than implementation details or release history.
-- When updating the catalogue, keep entries concise, verify descriptions, supported interfaces, use cases, limitations, and documentation links, and update the page's **Last updated** date. Leave the date unchanged when the catalogue does not change.
-
-## Inventory File Structure
-
-NorFab is configured via a YAML `inventory.yaml`. The default search path is `./inventory.yaml`.
-
-```yaml
-broker:
-  endpoint: "tcp://127.0.0.1:5555"
-
-logging:
-  handlers:
-    terminal:
-      level: CRITICAL
-    file:
-      level: DEBUG
-
-workers:
-  nornir-*:               # glob pattern — applies to all matching workers
-    - nornir/common.yaml
-  nornir-worker-1:        # specific worker name
-    - nornir/nornir-worker-1.yaml
-
-topology:
-  broker: True            # start broker in this process
-  workers:
-    - nornir-worker-1     # start these workers in this process
-```
-
-Worker config files are merged recursively — glob patterns first, then specific names.
-
-## Python API Usage
-
-```python
-from norfab.core.nfapi import NorFab
-
-# Start NorFab (broker + workers + client)
-nf = NorFab(inventory="./inventory.yaml")
-nf.start()
-
-client = nf.make_client()
-
-# Run a job
-result = client.run_job(
-    service="nornir",
-    task="cli",
-    workers="nornir-worker-1",
-    kwargs={"commands": ["show version"]}
-)
-
-nf.destroy()
-```
-
-## Worker Plugin System
-
-Workers are registered via Python entry points in `pyproject.toml`:
-
-```toml
-[project.entry-points."norfab.workers"]
-"nornir"      = "norfab.workers.nornir_worker.nornir_worker:NornirWorker"
-"netbox"      = "norfab.workers.netbox_worker.netbox_worker:NetboxWorker"
-"fastapi"     = "norfab.workers.fastapi_worker.fastapi_worker:FastAPIWorker"
-"agent"       = "norfab.workers.agent_worker.agent_worker:AgentWorker"
-"workflow"    = "norfab.workers.workflow_worker.workflow_worker:WorkflowWorker"
-"containerlab"= "norfab.workers.containerlab_worker.containerlab_worker:ContainerlabWorker"
-"fastmcp"     = "norfab.workers.fastmcp_worker.fastmcp_worker:FastMCPWorker"
-"filesharing" = "norfab.workers.filesharing_worker.filesharing_worker:FileSharingWorker"
-"fakenos"     = "norfab.workers.fakenos_worker.fakenos_worker:FakeNOSWorker"
-```
-
-Custom workers can be registered by installing a package that declares the same entry point group. Set `service: <name>` in the worker's inventory config.
-
-## Key Design Patterns
-
-- **All workers extend `NFPWorker`** (`norfab/core/worker.py`). Task methods decorated with `@task` are auto-registered and callable by clients.
-- **Pydantic models** are used for all job inputs/output, API validation, and documentation generation.
-- **Jinja2 templating** is supported inside inventory YAML files.
-- **SQLite** stores client-side job results and events (`ClientJobDatabase` in `client.py`). Database files are stored in `__norfab__/` directories (gitignored).
-- **ZeroMQ** with optional CurveZMQ encryption (`security.py`) handles all inter-process communication.
-- **Multiprocessing** — broker and each worker run in separate OS processes (`multiprocessing.Process`).
-
-## Ruff Lint Rules
-
-Configured in `pyproject.toml`. Ignored rules:
-- `E712` — true-false-comparison
-- `E501` — line too long
-- `ANN401` — disallow `Any` annotation
-
-Selected rule sets: `E`, `F`, `I`, `ANN`
-
-## Gitignored Patterns
-
-- `__norfab__/` directories (runtime data: job DBs, certs, logs)
-- `private/` directory
-- `site/` (built docs)
-- `*.log`, `*.pyc`, `dist/`, `build/`
-
-## Community & Support
-
-- Slack: Networktocode `#norfab` channel / NetDev Community
-- GitHub Discussions: https://github.com/norfablabs/NORFAB/discussions
-
-## References
-
-- NFWeb developer guide: `docs/development/nfweb_developer_guide.md`
-- Task Pydantic models: `docs/development/tasks_pydantic_models_guide.md`
-- Documentation style guide for docs changes: `docs/development/documentation_style_guide.md`
-- Feature catalogue: `docs/norfab_features.md`
-- Testing framework: `docs/development/testing/norfab_testing_framework.md`
-- Invoke developer automation ADR: `docs/development/adr/adr_invoke_developer_automation.md`
-- Docker test commands: `docker/norfab-docker-tests/README.md`
+- [Task Pydantic models](docs/development/tasks_pydantic_models_guide.md)
+- [NFWeb development](docs/development/nfweb_developer_guide.md)
+- [Invoke automation decisions](docs/development/adr/adr_invoke_developer_automation.md)
+- [Docker test commands](docker/norfab-docker-tests/README.md)

@@ -721,6 +721,27 @@ def preseed_bgp_lookup_cache(
         log.warning(f"{worker_name} - {msg}")
 
 
+def cache_bgp_custom_field_definitions(
+    nb: Any, lookup_cache: dict, bulk_filter: Any
+) -> None:
+    """Cache BGP session object and multiobject custom-field definitions.
+
+    Reuse definitions supplied by design deployments. Otherwise, fetch them
+    once and store them in the task's shared lookup cache.
+    """
+    custom_fields = lookup_cache.setdefault("custom_fields", {})
+    if "netbox_bgp.bgpsession" in custom_fields:
+        return
+    definitions = {"object": [], "multiobject": []}
+    custom_fields["netbox_bgp.bgpsession"] = definitions
+    for field in bulk_filter(
+        nb.extras.custom_fields,
+        object_type="netbox_bgp.bgpsession",
+        type=["object", "multiobject"],
+    ):
+        definitions[field.type.value].append(field)
+
+
 class NetboxBgpPeeringsTasks:
 
     @Task(
@@ -1488,22 +1509,7 @@ class NetboxBgpPeeringsTasks:
 
         payloads = []
         if any(session.get("custom_fields") is not None for session in bgp_sessions):
-            lookup_cache.setdefault("custom_fields", {})
-            if "netbox_bgp.bgpsession" not in lookup_cache["custom_fields"]:
-                # Design deployments provide these definitions; direct calls
-                # fetch them once and keep them in the supplied lookup cache.
-                lookup_cache["custom_fields"]["netbox_bgp.bgpsession"] = {
-                    "object": [],
-                    "multiobject": [],
-                }
-                for field in self.bulk_filter(
-                    nb.extras.custom_fields,
-                    object_type="netbox_bgp.bgpsession",
-                    type=["object", "multiobject"],
-                ):
-                    lookup_cache["custom_fields"]["netbox_bgp.bgpsession"][
-                        field.type.value
-                    ].append(field)
+            cache_bgp_custom_field_definitions(nb, lookup_cache, self.bulk_filter)
 
         job.event("building BGP session create payloads")
         for bgp_session in bgp_sessions:
@@ -1533,42 +1539,37 @@ class NetboxBgpPeeringsTasks:
                 bgp_session["name"] = sname
 
             # Explicit ASN numbers win; otherwise query NetBox for each side.
-            local_query = bgp_session.get("local_as_query")
-            remote_query = bgp_session.get("remote_as_query")
-            if bgp_session_local_as is None and local_query is not None:
+            resolved_asns = {
+                "local": bgp_session_local_as,
+                "remote": bgp_session_remote_as,
+            }
+            query_failed = False
+            for side in ("local", "remote"):
+                query_field = f"{side}_as_query"
+                query = bgp_session.get(query_field)
+                if resolved_asns[side] is not None or query is None:
+                    continue
                 try:
-                    if "role" in local_query:
-                        local_query["role"] = slugify(local_query["role"])
-                    asn_obj = nb.ipam.asns.get(**local_query)
+                    if "role" in query:
+                        query["role"] = slugify(query["role"])
+                    asn_obj = nb.ipam.asns.get(**query)
                 except ValueError as exc:
                     asn_obj = None
-                    msg = f"local_as_query failed for '{sname}': {exc}"
+                    msg = f"{query_field} failed for '{sname}': {exc}"
                 else:
-                    msg = f"local_as_query found no ASN for '{sname}': {local_query}"
+                    msg = f"{query_field} found no ASN for '{sname}': {query}"
                 # NetBox may reject ambiguous filters or return no matching ASN.
                 if asn_obj is None:
                     job.event(msg, severity="ERROR")
                     log.error(f"{self.name} - {msg}")
                     ret.errors.append(msg)
-                    continue
-                bgp_session_local_as = asn_obj.asn
-
-            if bgp_session_remote_as is None and remote_query is not None:
-                try:
-                    if "role" in remote_query:
-                        remote_query["role"] = slugify(remote_query["role"])
-                    asn_obj = nb.ipam.asns.get(**remote_query)
-                except ValueError as exc:
-                    asn_obj = None
-                    msg = f"remote_as_query failed for '{sname}': {exc}"
-                else:
-                    msg = f"remote_as_query found no ASN for '{sname}': {remote_query}"
-                if asn_obj is None:
-                    job.event(msg, severity="ERROR")
-                    log.error(f"{self.name} - {msg}")
-                    ret.errors.append(msg)
-                    continue
-                bgp_session_remote_as = asn_obj.asn
+                    query_failed = True
+                    break
+                resolved_asns[side] = asn_obj.asn
+            if query_failed:
+                continue
+            bgp_session_local_as = resolved_asns["local"]
+            bgp_session_remote_as = resolved_asns["remote"]
 
             # Resolve device ID and site ID (step 6f)
             dev_info = all_device_names.get(bgp_session_device)
@@ -1937,21 +1938,7 @@ class NetboxBgpPeeringsTasks:
             session.name: session.id for session in nb_sessions_raw if session.name
         }
         if any(session.get("custom_fields") is not None for session in bgp_sessions):
-            lookup_cache.setdefault("custom_fields", {})
-            if "netbox_bgp.bgpsession" not in lookup_cache["custom_fields"]:
-                # Direct task calls fetch definitions; designs supply them in the cache.
-                lookup_cache["custom_fields"]["netbox_bgp.bgpsession"] = {
-                    "object": [],
-                    "multiobject": [],
-                }
-                for field in self.bulk_filter(
-                    nb.extras.custom_fields,
-                    object_type="netbox_bgp.bgpsession",
-                    type=["object", "multiobject"],
-                ):
-                    lookup_cache["custom_fields"]["netbox_bgp.bgpsession"][
-                        field.type.value
-                    ].append(field)
+            cache_bgp_custom_field_definitions(nb, lookup_cache, self.bulk_filter)
         job.event(f"retrieved {len(normalised_nb)} BGP session(s) from NetBox")
 
         # Build updates dictionary by NetBox ID

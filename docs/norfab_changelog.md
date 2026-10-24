@@ -41,6 +41,8 @@
 13. Netbox `design_deploy` device definitions now accept a device type model string, resolved to its manufacturer and model from Netbox. Missing or ambiguous models fail before device writes; explicit manufacturer/model dictionaries remain supported. 
 14. New devices default to planned status; omitted status preserves existing device status.
 
+15. Simplified Netbox BGP peering task internals, reducing duplicate cache, payload, and policy handling while preserving task interfaces and behavior.
+
 ---
 
 # 0.24.16
