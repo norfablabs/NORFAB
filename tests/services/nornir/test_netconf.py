@@ -1,4 +1,4 @@
-"""NETCONF task tests; live tests require the cEOS integration lab."""
+"""NETCONF task tests; live tests require the cEOS and CSR1000v integration lab."""
 
 from xml.etree import ElementTree
 
@@ -14,12 +14,12 @@ class TestNetconfCancelCommit:
         self, nfclient: object, plugin: str, to_dict: bool
     ) -> None:
         """Start and cancel a test-owned confirmed commit."""
-        common = {"plugin": plugin, "FL": ["ceos-spine-1"], "on_failed": True}
+        common = {"plugin": plugin, "FL": ["csr1k-r1"], "on_failed": True}
         token = "norfab-cancel-commit-test"
         committed = nfclient.run_job(
             "nornir",
             "netconf_commit",
-            workers="nornir-worker-1",
+            workers="nornir-worker-6",
             kwargs={
                 **common,
                 "confirmed": True,
@@ -27,14 +27,14 @@ class TestNetconfCancelCommit:
                 "persist": token,
                 "run_task_retry": 0,
             },
-        )["nornir-worker-1"]
+        )["nornir-worker-6"]
         assert committed["failed"] is False, committed
         result = None
         try:
             result = nfclient.run_job(
                 "nornir",
                 "netconf_cancel_commit",
-                workers="nornir-worker-1",
+                workers="nornir-worker-6",
                 kwargs={
                     **common,
                     "persist_id": token,
@@ -42,14 +42,14 @@ class TestNetconfCancelCommit:
                     "add_details": True,
                     "run_task_retry": 0,
                 },
-            )["nornir-worker-1"]
+            )["nornir-worker-6"]
             assert result["failed"] is False, result
             operation = "rpc" if plugin == "scrapli" else "cancel_commit"
             if to_dict:
-                record = result["result"]["ceos-spine-1"][operation]
+                record = result["result"]["csr1k-r1"][operation]
             else:
                 record = result["result"][0]
-                assert record["host"] == "ceos-spine-1"
+                assert record["host"] == "csr1k-r1"
                 assert record["name"] == operation
             assert record["failed"] is False, record
             root = ElementTree.fromstring(record["result"])
@@ -60,7 +60,7 @@ class TestNetconfCancelCommit:
                 nfclient.run_job(
                     "nornir",
                     "netconf_cancel_commit",
-                    workers="nornir-worker-1",
+                    workers="nornir-worker-6",
                     kwargs={**common, "persist_id": token, "run_task_retry": 0},
                 )
 
@@ -99,7 +99,9 @@ class TestNetconfCommit:
         self, nfclient: object, plugin: str, to_dict: bool, confirmed: bool
     ) -> None:
         """Commit candidate configuration with either backend and result format."""
-        common = {"plugin": plugin, "FL": ["ceos-spine-1"], "on_failed": True}
+        host = "csr1k-r1" if confirmed else "ceos-spine-1"
+        worker = "nornir-worker-6" if confirmed else "nornir-worker-1"
+        common = {"plugin": plugin, "FL": [host], "on_failed": True}
         options = {}
         if confirmed:
             options = {
@@ -111,7 +113,7 @@ class TestNetconfCommit:
             result = nfclient.run_job(
                 "nornir",
                 "netconf_commit",
-                workers="nornir-worker-1",
+                workers=worker,
                 kwargs={
                     **common,
                     **options,
@@ -119,13 +121,13 @@ class TestNetconfCommit:
                     "to_dict": to_dict,
                     "add_details": True,
                 },
-            )["nornir-worker-1"]
+            )[worker]
             assert result["failed"] is False, result
             if to_dict:
-                record = result["result"]["ceos-spine-1"]["commit"]
+                record = result["result"][host]["commit"]
             else:
                 record = result["result"][0]
-                assert record["host"] == "ceos-spine-1"
+                assert record["host"] == host
                 assert record["name"] == "commit"
             assert record["failed"] is False, record
             root = ElementTree.fromstring(record["result"])
@@ -135,13 +137,13 @@ class TestNetconfCommit:
                 confirmation = nfclient.run_job(
                     "nornir",
                     "netconf_commit",
-                    workers="nornir-worker-1",
+                    workers=worker,
                     kwargs={
                         **common,
                         "persist_id": "norfab-commit-test",
                         "run_task_retry": 0,
                     },
-                )["nornir-worker-1"]
+                )[worker]
                 assert confirmation["failed"] is False, confirmation
 
     @pytest.mark.parametrize(

@@ -1,0 +1,18 @@
+ip routing
+!
+interface GigabitEthernet2
+   description P2P to ceos-leaf-2 Ethernet7
+   ip address 10.10.0.19 255.255.255.254
+   no shutdown
+!
+router bgp 65107
+   bgp router-id 10.10.0.19
+   no bgp default ipv4-unicast
+   neighbor 10.10.0.18 remote-as 65102
+   neighbor 10.10.0.18 description ceos-leaf-2 Ethernet7
+   address-family ipv4 unicast
+      network 10.10.0.18 mask 255.255.255.254
+      neighbor 10.10.0.18 activate
+   exit-address-family
+!
+end

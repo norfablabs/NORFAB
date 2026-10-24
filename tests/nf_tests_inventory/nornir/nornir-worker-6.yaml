@@ -14,8 +14,6 @@ hosts:
         port: 8307
       napalm:
         port: 2207
-      http:
-        port: 4407
     groups:
       - ios_params
   iol-r1:

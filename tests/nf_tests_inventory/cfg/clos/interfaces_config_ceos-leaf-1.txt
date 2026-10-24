@@ -62,4 +62,10 @@ interface Ethernet6.310
    encapsulation dot1q vlan 310
    ip address 10.3.13.13/30
 !
+interface Ethernet7
+   description P2P to iol-r1 Ethernet0/1
+   no switchport
+   ip address 10.10.0.16/31
+   no shutdown
+!
 end

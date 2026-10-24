@@ -62,4 +62,10 @@ interface Ethernet6.320
    encapsulation dot1q vlan 320
    ip address 10.3.14.21/30
 !
+interface Ethernet7
+   description P2P to csr1k-r1 GigabitEthernet2
+   no switchport
+   ip address 10.10.0.18/31
+   no shutdown
+!
 end

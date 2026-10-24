@@ -34,8 +34,16 @@ interface Ethernet2.101
    vrf CONTROL_PLANE
    ip address 10.101.0.7/31
 !
+interface Ethernet7
+   description P2P to csr1k-r1 GigabitEthernet2
+   no switchport
+   ip address 10.10.0.18/31
+   no shutdown
+!
 router bgp 65102
    router-id 10.10.10.12
+   neighbor 10.10.0.19 remote-as 65107
+   neighbor 10.10.0.19 description csr1k-r1 GigabitEthernet2
    network 10.10.10.12/32
    neighbor EVPN-OVERLAY peer group
    neighbor EVPN-OVERLAY update-source Loopback0

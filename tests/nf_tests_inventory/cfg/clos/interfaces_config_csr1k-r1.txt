@@ -1,0 +1,8 @@
+ip routing
+!
+interface GigabitEthernet2
+   description P2P to ceos-leaf-2 Ethernet7
+   ip address 10.10.0.19 255.255.255.254
+   no shutdown
+!
+end

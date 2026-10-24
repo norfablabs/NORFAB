@@ -1,0 +1,18 @@
+ip routing
+!
+interface Ethernet0/1
+   description P2P to ceos-leaf-1 Ethernet7
+   ip address 10.10.0.17 255.255.255.254
+   no shutdown
+!
+router bgp 65106
+   bgp router-id 10.10.0.17
+   no bgp default ipv4-unicast
+   neighbor 10.10.0.16 remote-as 65101
+   neighbor 10.10.0.16 description ceos-leaf-1 Ethernet7
+   address-family ipv4 unicast
+      network 10.10.0.16 mask 255.255.255.254
+      neighbor 10.10.0.16 activate
+   exit-address-family
+!
+end
