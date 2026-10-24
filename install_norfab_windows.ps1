@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
     NorFab Windows Installation Script
@@ -129,7 +129,7 @@ function Show-Menu {
         Write-Host " - $desc" -ForegroundColor Gray
     }
     Write-Host "   [A] Select ALL services" -ForegroundColor Magenta
-    Write-Host "   [0] Continue with the current selection" -ForegroundColor DarkGray
+    Write-Host "   [0] Install without service workers (CLI and TUI included)" -ForegroundColor DarkGray
     Write-Host ""
 }
 
@@ -404,15 +404,6 @@ try {
     throw
 }
 
-# Ensure pip is available
-try {
-    Invoke-PythonChecked -Executable $pythonCmd -Arguments @('-m', 'pip', '--version') | Out-Null
-} catch {
-    Write-Host "[!] pip check failed: $($_.Exception.Message)" -ForegroundColor Red
-    Write-Host "    Run: & '$pythonCmd' -m ensurepip --upgrade" -ForegroundColor Red
-    throw
-}
-
 # ---------------------------------------------------------------------------
 # Step 2 - System or local install
 # ---------------------------------------------------------------------------
@@ -425,7 +416,7 @@ $installType = Read-Choice -Prompt "Choose installation type (1/2)" -ValidValues
 
 $venvPath = $null
 if ($installType -eq "2") {
-    $defaultVenvName = "venv"
+    $defaultVenvName = "norfab-env"
     $venvName = (Read-Host "Virtual environment folder name [default: $defaultVenvName]").Trim()
     if ($venvName -eq "") { $venvName = $defaultVenvName }
 
@@ -449,63 +440,68 @@ if ($installType -eq "2") {
 }
 $pyVersion = & $pythonExe -c "import sys; print(sys.version.split()[0]); sys.exit(0 if sys.version_info >= (3, 10) else 1)"
 if ($LASTEXITCODE -ne 0) { throw 'The selected environment requires Python 3.10 or later.' }
-Invoke-PythonChecked -Executable $pythonExe -Arguments @('-m', 'pip', '--version') | Out-Null
+try {
+    Invoke-PythonChecked -Executable $pythonExe -Arguments @('-m', 'pip', '--version') 2>$null | Out-Null
+} catch {
+    if (-not $venvPath) {
+        throw 'pip is required. Install pip for the chosen Python, then rerun.'
+    }
+    Write-Step 'pip is missing; bootstrapping it in the virtual environment...'
+    try {
+        Invoke-PythonChecked -Executable $pythonExe -Arguments @('-m', 'ensurepip', '--upgrade')
+    } catch {
+        throw 'Could not bootstrap pip. Install or repair ensurepip support for this Python, then rerun.'
+    }
+    try {
+        Invoke-PythonChecked -Executable $pythonExe -Arguments @('-m', 'pip', '--version')
+    } catch {
+        throw 'pip is still unavailable after bootstrapping. Repair the virtual environment or choose a new folder, then rerun.'
+    }
+    Write-Success 'pip is ready.'
+}
 
 # ---------------------------------------------------------------------------
 # Step 3 - Choose services
 # ---------------------------------------------------------------------------
 
-Write-Header "Select Services to Install"
-
-$menuItems = @()
-foreach ($svc in $Services) {
-    $menuItems += @{ Name = $svc.Name; Description = $svc.Description }
-}
-
-$selectedServices = @()
-$selectionDone    = $false
-
-while (-not $selectionDone) {
-    Show-Menu -Title "Available NorFab Services" -Items $menuItems
-
-    # Show currently selected
-    if ($selectedServices.Count -gt 0) {
-        Write-Host "  Currently selected: " -ForegroundColor White -NoNewline
-        Write-Host ($selectedServices -join ", ") -ForegroundColor Green
-        Write-Host ""
-    }
-
-    $selectionInput = (Read-Host "Enter numbers to toggle (repeat to deselect), A for all, 0 to continue").Trim()
-
-    if ($selectionInput -eq "0") {
-        $selectionDone = $true
-    } elseif ($selectionInput.ToLower() -eq "a") {
+$menuItems = @($Services | ForEach-Object { @{ Name = $_.Name; Description = $_.Description } })
+while ($true) {
+    Write-Header 'Select Services to Install'
+    Show-Menu -Title 'Available NorFab Services' -Items $menuItems
+    $selectionInput = (Read-Host 'Enter service number(s), separated by spaces or commas, A for all, or 0').Trim()
+    $selectedServices = @()
+    if ($selectionInput -eq 'a') {
         $selectedServices = @($Services | ForEach-Object { $_.Name })
-        $selectionDone = $true
-    } else {
-        # Support comma/space-separated entries like "1,3 5"
-        $tokens = $selectionInput -split "[,\s]+" | Where-Object { $_ -ne "" }
+    } elseif ($selectionInput -ne '0') {
+        $tokens = @($selectionInput -split '[,\s]+' | Where-Object { $_ -ne '' })
+        $validSelection = $tokens.Count -gt 0
         foreach ($token in $tokens) {
             $number = 0
-            if ([int]::TryParse($token, [ref]$number) -and $number -gt 0) {
-                $idx = $number - 1
-                if ($idx -ge 0 -and $idx -lt $Services.Count) {
-                    $svcName = $Services[$idx].Name
-                    if ($selectedServices -contains $svcName) {
-                        $selectedServices = @($selectedServices | Where-Object { $_ -ne $svcName })
-                        Write-Host "    Deselected: $svcName" -ForegroundColor DarkYellow
-                    } else {
-                        $selectedServices += $svcName
-                        Write-Host "    Selected:   $svcName" -ForegroundColor Green
-                    }
-                } else {
-                    Write-Host "    Invalid number: $token" -ForegroundColor Red
-                }
+            if ($token -match '^0*[1-8]$' -and [int]::TryParse($token, [ref]$number)) {
+                $svcName = $Services[$number - 1].Name
+                if ($selectedServices -notcontains $svcName) { $selectedServices += $svcName }
             } else {
-                Write-Host "    Invalid input: $token" -ForegroundColor Red
+                Write-Info "Invalid input: $token"
+                $validSelection = $false
             }
         }
+        if (-not $validSelection) { Write-Info 'Please select services from 1 to 8, A, or 0.'; continue }
     }
+    Write-Header 'Continue to Install'
+    Write-Info 'Selected services:'
+    if ($selectedServices.Count -eq 0) {
+        Write-Info '  None (CLI and TUI only)'
+    } else {
+        foreach ($svc in $Services) {
+            if ($selectedServices -contains $svc.Name) { Write-Info "  $($svc.Name)" }
+        }
+    }
+    Write-Info '[C] Continue installation'
+    Write-Info '[R] Re-select services'
+    Write-Info '[X] Cancel installation'
+    $confirmation = Read-Choice -Prompt 'Choose C, R, or X' -ValidValues @('c', 'r', 'x') -Default 'c'
+    if ($confirmation -eq 'c') { break }
+    if ($confirmation -eq 'x') { Write-Info 'Installation cancelled.'; return }
 }
 
 # ---------------------------------------------------------------------------
@@ -564,12 +560,41 @@ Write-Success "NorFab installed successfully."
 Write-Header "Create NorFab Environment"
 
 $envDir = $null
-$createEnvironment = Read-YesNo -Prompt 'Create a NorFab folder with inventory and worker configuration files?' -Default $true
+$createEnvironment = $false
+$projectDir = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath('./norfab')
+$existingProject = Get-Item -LiteralPath $projectDir -Force -ErrorAction SilentlyContinue
+if ($null -ne $existingProject) {
+    Write-Info "NorFab project path already exists: $projectDir"
+    Write-Info '[R] Remove the entire folder and recreate inventory and worker configuration files'
+    Write-Info '[S] Skip creating files and preserve the existing project'
+    $projectChoice = Read-Choice -Prompt 'Choose R or S' -ValidValues @('r', 's') -Default 's'
+    if ($projectChoice -eq 'r') {
+        if (-not $existingProject.PSIsContainer -or ($existingProject.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            throw 'Cannot recreate the project: the existing path must be a directory, not a symlink or junction.'
+        }
+        $expectedProject = [IO.Path]::GetFullPath((Join-Path (Get-Location).ProviderPath 'norfab'))
+        $resolvedProject = (Resolve-Path -LiteralPath $projectDir).ProviderPath
+        if (-not [string]::Equals($resolvedProject, $expectedProject, [StringComparison]::OrdinalIgnoreCase)) {
+            throw 'Cannot recreate the project: path is outside the local norfab folder.'
+        }
+        $pythonPrefix = & $pythonExe -c 'import os, sys; print(os.path.realpath(sys.prefix))'
+        if ($LASTEXITCODE -ne 0) { throw 'Cannot locate the active Python environment.' }
+        if ([string]::Equals($pythonPrefix, $resolvedProject, [StringComparison]::OrdinalIgnoreCase) -or
+            $pythonPrefix.StartsWith($resolvedProject + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+            throw 'Cannot remove the project folder containing the active Python environment; choose skip.'
+        }
+        Remove-Item -LiteralPath $resolvedProject -Recurse -Force
+        $createEnvironment = $true
+        $envDir = $projectDir
+    } else {
+        Write-Info 'Skipping project file creation.'
+        if ($existingProject.PSIsContainer) { $envDir = $projectDir }
+    }
+} elseif (Read-YesNo -Prompt 'Create ./norfab with inventory and worker configuration files?' -Default $true) {
+    $envDir = $projectDir
+    $createEnvironment = $true
+}
 if ($createEnvironment) {
-$defaultEnvDir = "norfab-project"
-$envDirInput   = (Read-Host "Folder to create NorFab environment in [default: $defaultEnvDir, '.' for current directory]").Trim()
-if ($envDirInput -eq "") { $envDirInput = $defaultEnvDir }
-$envDir = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($envDirInput)
 
 # Port configuration
 Write-Host ""
@@ -742,7 +767,7 @@ Write-Header "Installation Complete"
 # Print startup commands for both direct evaluation and saved-file invocation.
 Write-Host ''
 Write-Host '  Run these commands in your PowerShell terminal:' -ForegroundColor White
-if ($createEnvironment) {
+if ($envDir) {
     Write-Host ("      Set-Location -LiteralPath '{0}'" -f $envDir.Replace("'", "''")) -ForegroundColor Cyan
 } else {
     Write-Info 'Folder creation skipped. Run nfcli from your existing NorFab configuration folder.'

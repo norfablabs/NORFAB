@@ -5,6 +5,7 @@
 1. Fixed Nornir `create_host_from_netbox` forwarding configured `netbox.timeout` to Netbox `get_nornir_inventory`, causing an unexpected keyword argument error. The configured timeout now controls the client wait, falling back to the task's timeout argument, with a minimum of 10 seconds.
 2. Fixed FastAPI and FastMCP Uvicorn logs bypassing NorFab's terminal logging level during NFCLI startup. Both workers now use NorFab's logging handlers by default, respecting separate terminal and file levels; explicit FastAPI Uvicorn logging overrides remain supported.
 3. Fixed Nornir NETCONF input and shell model warnings about shadowing Pydantic's `validate` method, preserving the public transaction `validate` argument and NFCLI `validate` command.
+4. Linux and Windows installers now recover missing pip in local virtual environments.
 
 ## FEATURES
 
@@ -43,6 +44,7 @@
 14. New devices default to planned status; omitted status preserves existing device status.
 
 15. Simplified Netbox BGP peering task internals, reducing duplicate cache, payload, and policy handling while preserving task interfaces and behavior.
+16. Linux and Windows installers now confirm service selections and create projects in `./norfab`, with options to preserve or recreate existing folders.
 
 ---
 

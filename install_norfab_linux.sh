@@ -3,7 +3,7 @@
 # Run: bash install_norfab_linux.sh
 # Download and run (prompts read from the terminal):
 # bash -c "$(curl -fsSL https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_linux.sh)"
-# Existing inventory and selected worker configuration files are preserved.
+# Existing project files are preserved unless removal is explicitly selected.
 
 set -euo pipefail
 
@@ -292,31 +292,55 @@ if ! "$python_exe" -m pip --version >/dev/null 2>&1; then
 fi
 
 # Step 3 - Choose services
-write_header 'Select Services to Install'
 while true; do
-    printf '\n  Available NorFab Services\n'
+    write_header 'Select Services to Install'
     for i in "${!service_names[@]}"; do
         printf '  [%2d] %s - %s\n' "$((i+1))" "${service_names[i]}" "${service_descriptions[i]}"
-        [[ ${selected[i]} == 0 ]] || write_info "Currently selected: ${service_names[i]}"
     done
     write_info '[A] Select ALL services'
-    write_info '[0] Continue (keep current selection)'
-    read_answer 'Enter number(s) to toggle, A for all, 0 to continue'
-    [[ $answer == 0 ]] && break
+    write_info '[0] Install without service workers (CLI and TUI included)'
+    read_answer 'Enter service number(s), separated by spaces or commas, A for all, or 0'
+    selected=(0 0 0 0 0 0 0 0)
     if [[ $answer == a || $answer == A ]]; then
         selected=(1 1 1 1 1 1 1 1)
-        break
-    fi
-    tokens=()
-    read -r -a tokens <<< "${answer//,/ }"
-    for token in "${tokens[@]}"; do
-        if [[ $token =~ ^0*[1-8]$ ]]; then
-            i=$((10#$token - 1))
-            selected[i]=$((1-selected[i]))
-        else
-            write_info "Invalid input: $token"
+    elif [[ $answer != 0 ]]; then
+        tokens=()
+        read -r -a tokens <<< "${answer//,/ }"
+        valid_selection=1
+        (( ${#tokens[@]} )) || valid_selection=0
+        for token in "${tokens[@]}"; do
+            if [[ $token =~ ^0*[1-8]$ ]]; then
+                i=$((10#$token - 1))
+                selected[i]=1
+            else
+                write_info "Invalid input: $token"
+                valid_selection=0
+            fi
+        done
+        if [[ $valid_selection == 0 ]]; then
+            write_info 'Please select services from 1 to 8, A, or 0.'
+            continue
         fi
-    done
+    fi
+
+    write_header 'Continue to Install'
+    write_info 'Selected services:'
+    if [[ "${selected[*]}" == '0 0 0 0 0 0 0 0' ]]; then
+        write_info '  None (CLI and TUI only)'
+    else
+        for i in "${!service_names[@]}"; do
+            [[ ${selected[i]} == 0 ]] || write_info "  ${service_names[i]}"
+        done
+    fi
+    write_info '[C] Continue installation'
+    write_info '[R] Re-select services'
+    write_info '[X] Cancel installation'
+    read_choice 'Choose C, R, or X' C C c R r X x
+    case ${answer,,} in
+        c) break ;;
+        r) continue ;;
+        x) write_info 'Installation cancelled.'; exit 0 ;;
+    esac
 done
 
 # Step 4 - Choose add-ons
@@ -357,9 +381,42 @@ fi
 # Step 6 - Create NorFab environment
 write_header 'Create NorFab Environment'
 env_dir=''
-if read_yes_no 'Create a NorFab folder with inventory and worker configuration files?' y; then
-read_answer "Folder to create NorFab environment in [default: norfab-project, '.' for current directory]"
-env_dir=$("$python_exe" -c 'import os, sys; print(os.path.abspath(sys.argv[1]))' "${answer:-norfab-project}")
+create_environment=0
+project_dir=$("$python_exe" -c 'import os; print(os.path.abspath("norfab"))')
+if [[ -e $project_dir || -L $project_dir ]]; then
+    write_info "NorFab project path already exists: $project_dir"
+    write_info '[R] Remove the entire folder and recreate inventory and worker configuration files'
+    write_info '[S] Skip creating files and preserve the existing project'
+    read_choice 'Choose R or S' S R r S s
+    if [[ ${answer,,} == r ]]; then
+        "$python_exe" - "$project_dir" <<'PYEOF'
+import os
+import shutil
+import sys
+
+target = sys.argv[1]
+if os.path.islink(target) or not os.path.isdir(target):
+    sys.exit("cannot recreate the project: the existing path must be a directory, not a symlink")
+resolved = os.path.realpath(target)
+if resolved != os.path.join(os.path.realpath(os.getcwd()), "norfab"):
+    sys.exit("cannot recreate the project: path is outside the local norfab folder")
+if os.path.commonpath([resolved, os.path.realpath(sys.prefix)]) == resolved:
+    sys.exit("cannot remove the project folder containing the active Python environment; choose skip")
+shutil.rmtree(target)
+PYEOF
+        create_environment=1
+    else
+        write_info 'Skipping project file creation.'
+    fi
+    if [[ -d $project_dir ]]; then
+        env_dir=$project_dir
+    fi
+    [[ $create_environment == 0 ]] || env_dir=$project_dir
+elif read_yes_no 'Create ./norfab with inventory and worker configuration files?' y; then
+    env_dir=$project_dir
+    create_environment=1
+fi
+if [[ $create_environment == 1 ]]; then
 write_step 'Configure ports'
 read_port 'Broker port' 5555
 broker_port=$answer

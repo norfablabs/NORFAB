@@ -75,6 +75,9 @@ will be noted in service deployment details.
     to start `nfcli`. Installer settings stay local to the script, and failures
     report an error without closing your terminal.
 
+    Follow the prompts to select services and create project files in `./norfab`.
+    Existing projects can be preserved or deleted and recreated.
+
     !!! note "Prerequisite"
         Python 3.10 or later must be installed and on your PATH.
         Download from [python.org](https://www.python.org/downloads/).
@@ -143,9 +146,9 @@ will be noted in service deployment details.
     Robot Framework. System installation follows your distribution's pip policy;
     choose Local if Python is externally managed.
 
-    You can skip inventory creation. Existing inventory and selected worker files
-    are preserved; choose a new folder if they already exist. After installation,
-    run the printed commands in your terminal to start `nfcli`.
+    Follow the prompts to select services and create project files in `./norfab`.
+    Existing projects can be preserved or deleted and recreated. Run the printed
+    commands to start `nfcli`.
 
     To install manually:
 
