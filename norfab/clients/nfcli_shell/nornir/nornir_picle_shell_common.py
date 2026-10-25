@@ -266,7 +266,7 @@ class NorniHostsFilters(BaseModel):
     @staticmethod
     def source_hosts() -> list:
         ret = set()
-        result = run_future_job("nornir", "get_nornir_hosts")
+        result = builtins.NFCLIENT.run_job("nornir", "get_nornir_hosts")
         result = log_error_or_result(result)
         # result is a dict keyed by worker name with lists of hosts values
         for worker, result in result.items():

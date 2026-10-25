@@ -99,8 +99,8 @@ class TestNetconfCommit:
         self, nfclient: object, plugin: str, to_dict: bool, confirmed: bool
     ) -> None:
         """Commit candidate configuration with either backend and result format."""
-        host = "csr1k-r1" if confirmed else "ceos-spine-1"
-        worker = "nornir-worker-6" if confirmed else "nornir-worker-1"
+        host = "csr1k-r1"
+        worker = "nornir-worker-6"
         common = {"plugin": plugin, "FL": [host], "on_failed": True}
         options = {}
         if confirmed:
@@ -1043,20 +1043,25 @@ class TestNetconfGet:
         ],
     )
     def test_getters(self, nfclient: object, plugin: str, getter: str) -> None:
-        """The getter returns a non-empty result dictionary with either backend."""
+        """Getters return a data reply without RPC errors on a supported device."""
+        host = "csr1k-r1"
+        worker = "nornir-worker-6"
         result = nfclient.run_job(
             "nornir",
             "netconf_get",
-            workers="nornir-worker-1",
+            workers=worker,
             kwargs={
                 "plugin": plugin,
-                "FL": ["ceos-spine-1"],
+                "FL": [host],
                 "on_failed": True,
                 getter: True,
             },
-        )["nornir-worker-1"]
+        )[worker]
         assert result["failed"] is False, result
-        assert isinstance(result["result"], dict) and result["result"]
+        reply = ElementTree.fromstring(result["result"][host]["get"])
+        assert reply.tag.split("}")[-1] == "rpc-reply"
+        assert not any(node.tag.split("}")[-1] == "rpc-error" for node in reply.iter())
+        assert any(node.tag.split("}")[-1] == "data" for node in reply.iter())
 
 
 class TestNetconfXmlProcessors:
@@ -1219,9 +1224,11 @@ class TestNetconfDatastoreOperations:
         self, nfclient: object, plugin: str, task: str
     ) -> None:
         """Copy running configuration to candidate or discard pending edits."""
+        host = "csr1k-r1"
+        worker = "nornir-worker-6"
         common = {
             "plugin": plugin,
-            "FL": ["ceos-spine-1"],
+            "FL": [host],
             "on_failed": True,
             "run_task_retry": 0,
         }
@@ -1233,16 +1240,16 @@ class TestNetconfDatastoreOperations:
         result = nfclient.run_job(
             "nornir",
             task,
-            workers="nornir-worker-1",
+            workers=worker,
             kwargs={**common, **options},
-        )["nornir-worker-1"]
+        )[worker]
         assert result["failed"] is False, result
         operation = (
             "copy_config"
             if options
             else ("discard" if plugin == "scrapli" else "discard_changes")
         )
-        root = ElementTree.fromstring(result["result"]["ceos-spine-1"][operation])
+        root = ElementTree.fromstring(result["result"][host][operation])
         assert any(node.tag.split("}")[-1] == "ok" for node in root.iter())
 
 

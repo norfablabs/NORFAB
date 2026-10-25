@@ -7,6 +7,7 @@
 3. Fixed Nornir NETCONF input and shell model warnings about shadowing Pydantic's `validate` method, preserving the public transaction `validate` argument and NFCLI `validate` command.
 4. Linux and Windows installers now recover missing pip in local virtual environments.
 5. NFCLI file completion now combines listings from all FileSharing workers, removes duplicate suggestions, and skips failed or missing results.
+6. Fixed NFCLI Containerlab lab-name, FakeNOS network, and Nornir host completion printing job headers, events, and summaries when pressing Tab.
 
 ## FEATURES
 

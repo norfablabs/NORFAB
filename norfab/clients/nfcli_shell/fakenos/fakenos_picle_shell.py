@@ -1,3 +1,4 @@
+import builtins
 from typing import Any
 
 from picle.models import Outputters, PipeFunctionsModel
@@ -59,7 +60,7 @@ class FakeNOSShowNetworksCommand(
     @staticmethod
     def source_network() -> list:
         ret = []
-        response = run_future_job("fakenos", "inspect_networks")
+        response = builtins.NFCLIENT.run_job("fakenos", "inspect_networks")
         for wname, wres in response.items():
             ret.extend(wres["result"])
         return ret
@@ -162,7 +163,7 @@ class FakeNOSStopCommand(
     @staticmethod
     def source_network() -> list:
         ret = []
-        response = run_future_job("fakenos", "inspect_networks")
+        response = builtins.NFCLIENT.run_job("fakenos", "inspect_networks")
         for wname, wres in response.items():
             ret.extend(wres["result"])
         return ret
@@ -198,7 +199,7 @@ class FakeNOSRestartCommand(
     @staticmethod
     def source_network() -> list:
         ret = []
-        response = run_future_job("fakenos", "inspect_networks")
+        response = builtins.NFCLIENT.run_job("fakenos", "inspect_networks")
         for wname, wres in response.items():
             ret.extend(wres["result"])
         return ret
@@ -238,7 +239,7 @@ class GetFakeNOSNornirInventoryCommand(
     @staticmethod
     def source_network() -> list:
         ret = []
-        response = run_future_job("fakenos", "inspect_networks")
+        response = builtins.NFCLIENT.run_job("fakenos", "inspect_networks")
         for wname, wres in response.items():
             ret.extend(wres["result"])
         return ret

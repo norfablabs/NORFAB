@@ -244,16 +244,20 @@ class TestNornirNetconfGet:
         plugin: str,
         getter: str,
     ) -> None:
+        host = "csr1k-r1"
+        worker = "nornir-worker-6"
         shell, _ = picle_shell
         shell.onecmd("top")
         shell.onecmd(
             f"nornir netconf get {getter} plugin {plugin} "
-            "workers nornir-worker-1 FL ceos-spine-1 on-failed"
+            f"workers {worker} FL {host} on-failed"
         )
         output = capsys.readouterr().out
-        assert "ceos-spine-1" in output
+        assert host in output
         assert "rpc-reply" in output
-        assert "Traceback" not in output
+        assert "Traceback" not in output, output
+        assert "rpc-error" not in output, output
+        assert "<data" in output, output
 
 
 class TestNornirNetconfXmlProcessors:

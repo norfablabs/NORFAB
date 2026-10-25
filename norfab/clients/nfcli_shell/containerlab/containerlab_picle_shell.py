@@ -1,3 +1,4 @@
+import builtins
 import logging
 import os
 from typing import Any
@@ -77,7 +78,7 @@ class DestroyCommand(
     @staticmethod
     def source_lab_name() -> list:
         ret = []
-        result = run_future_job("containerlab", "get_running_labs")
+        result = builtins.NFCLIENT.run_job("containerlab", "get_running_labs")
         for wname, wres in result.items():
             ret.extend(wres["result"])
         return ret
@@ -120,7 +121,7 @@ class RestartCommand(
     @staticmethod
     def source_lab_name() -> list:
         ret = []
-        result = run_future_job("containerlab", "get_running_labs")
+        result = builtins.NFCLIENT.run_job("containerlab", "get_running_labs")
         for wname, wres in result.items():
             ret.extend(wres["result"])
         return ret
@@ -163,7 +164,7 @@ class SaveCommand(
     @staticmethod
     def source_lab_name() -> list:
         ret = []
-        result = run_future_job("containerlab", "get_running_labs")
+        result = builtins.NFCLIENT.run_job("containerlab", "get_running_labs")
         for wname, wres in result.items():
             ret.extend(wres["result"])
         return ret
@@ -209,7 +210,7 @@ class GetNornirInventoryCommand(
     @staticmethod
     def source_lab_name() -> list:
         ret = []
-        result = run_future_job("containerlab", "get_running_labs")
+        result = builtins.NFCLIENT.run_job("containerlab", "get_running_labs")
         for wname, wres in result.items():
             ret.extend(wres["result"])
         return ret
@@ -259,7 +260,7 @@ class ShowContainers(
     @staticmethod
     def source_lab_name() -> list:
         ret = []
-        result = run_future_job("containerlab", "get_running_labs")
+        result = builtins.NFCLIENT.run_job("containerlab", "get_running_labs")
         for wname, wres in result.items():
             ret.extend(wres["result"])
         return ret
