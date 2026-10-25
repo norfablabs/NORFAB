@@ -58,17 +58,47 @@ class TestNornirWorker:
             assert data["failed"] is False, worker_name
             assert isinstance(data["result"], list), worker_name
 
-    @pytest.mark.skip(reason="TBD")
     def test_get_stats(self, nfclient):
-        pass
+        """Return worker monitoring and retained job counters."""
+        ret = nfclient.run_job("nornir", "get_stats", workers=["nornir-worker-1"])
+        result = ret["nornir-worker-1"]
+        assert not result["failed"], result
+        stats = result["result"]
+        assert stats["name"] == "nornir-worker-1"
+        assert stats["service"] == "nornir"
+        assert stats["nornir_hosts"] > 0
+        assert stats["process"]["memory_rss_mbyte"] > 0
+        assert stats["jobs"]["total_jobs"] >= 1
 
-    @pytest.mark.skip(reason="TBD")
     def test_get_watchdog_configuration(self, nfclient):
-        pass
+        """Return watchdog timing and the default disabled idle timeout."""
+        ret = nfclient.run_job(
+            "nornir", "get_watchdog_configuration", workers=["nornir-worker-1"]
+        )
+        result = ret["nornir-worker-1"]
+        assert not result["failed"], result
+        for key in (
+            "watchdog_interval",
+            "failed_hosts_recovery_timeout",
+        ):
+            assert isinstance(result["result"][key], (int, float))
+            assert result["result"][key] >= 0
+        assert result["result"]["connections_idle_timeout"] is None
 
-    @pytest.mark.skip(reason="TBD")
     def test_get_watchdog_connections(self, nfclient):
-        pass
+        """Return connection tracking records, including an empty mapping."""
+        ret = nfclient.run_job(
+            "nornir", "get_watchdog_connections", workers=["nornir-worker-1"]
+        )
+        result = ret["nornir-worker-1"]
+        assert not result["failed"], result
+        connections = result["result"]["connections"]
+        assert isinstance(connections, dict)
+        for plugins in connections.values():
+            assert isinstance(plugins, dict)
+            for stats in plugins.values():
+                assert {"last_use", "last_keepalive", "keepalive_count"} <= stats.keys()
+                assert stats["keepalive_count"] >= 0
 
 
 # ----------------------------------------------------------------------------

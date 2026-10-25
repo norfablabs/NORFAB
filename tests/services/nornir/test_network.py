@@ -1,4 +1,5 @@
 import pprint
+from ipaddress import ip_address
 
 import pytest
 
@@ -46,8 +47,8 @@ class TestNornirNetwork:
                     res["ping"].count("Reply from") == 2
                 ), f"{worker}:{host} ping result did not get 2 replies"
 
-    @pytest.mark.skip(reason="TBD")
     def test_nornir_network_resolve_dns(self, nfclient):
+        """Resolve inventory hostnames to valid IPv4 addresses."""
         ret = nfclient.run_job(
             "nornir",
             "network",
@@ -57,12 +58,12 @@ class TestNornirNetwork:
         pprint.pprint(ret)
 
         for worker, results in ret.items():
+            assert not results["failed"], results
             assert results["result"], f"{worker} returned no test results"
             for host, res in results["result"].items():
-                assert "ping" in res, f"{worker}:{host} did not return ping result"
-                assert (
-                    "Reply from" in res["ping"]
-                ), f"{worker}:{host} ping result is not good"
+                addresses = res["resolve_dns"]
+                assert addresses, f"{worker}:{host} returned no DNS addresses"
+                assert all(ip_address(address).version == 4 for address in addresses)
 
 
 # ----------------------------------------------------------------------------

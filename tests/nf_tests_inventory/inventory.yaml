@@ -16,7 +16,7 @@ client:
         profile_name: testAgent1
         provider: openrouter
         api_key: '{{ env.get("OPENROUTER_API_KEY") }}'
-        model: nvidia/nemotron-3-super-120b-a12b:free
+        model: openrouter/free
     interfaces_check_agent:
       from_yaml_file: ./agents/client_agent_interface_health_checker.yaml
         

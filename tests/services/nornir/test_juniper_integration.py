@@ -6,19 +6,17 @@ import pytest
 pytestmark = pytest.mark.nornir
 
 # check if has access to juniper device
-vmx_1_ip = "192.168.1.130"
+vmx_1_host = "containerlab.lab"
 vmx_1_port = 2205
 try:
-    s = socket.socket()
-    s.settimeout(5)
-    s.connect((vmx_1_ip, vmx_1_port))
-    has_vmx_1 = True
-except:
+    with socket.create_connection((vmx_1_host, vmx_1_port), timeout=5):
+        has_vmx_1 = True
+except OSError:
     has_vmx_1 = False
 
 skip_if_not_has_vmx_1 = pytest.mark.skipif(
     has_vmx_1 == False,
-    reason=f"Has no connection to juniper router {vmx_1_ip}:{vmx_1_port}",
+    reason=f"Has no connection to juniper router {vmx_1_host}:{vmx_1_port}",
 )
 
 
@@ -35,6 +33,7 @@ class TestJunipervMX:
             workers=["nornir-worker-6"],
             kwargs={
                 "on_failed": True,
+                "FL": ["vmx-1"],
                 "commands": commands,
                 "plugin": plugin,
             },
@@ -58,6 +57,7 @@ class TestJunipervMX:
             workers=["nornir-worker-6"],
             kwargs={
                 "on_failed": True,
+                "FL": ["vmx-1"],
                 "config": config,
                 "plugin": "netmiko",
                 "commit": {"confirm": True, "confirm_delay": 5, "comment": "foo"},

@@ -591,9 +591,25 @@ class TestNornirTest:
                     res["tests_dry_run"][0]["name"] == "check ceos version"
                 ), f"{worker}:{host} unexpected tes name"
 
-    @pytest.mark.skip(reason="TBD")
     def test_nornir_test_suite_pattern_files(self, nfclient):
-        pass
+        """Fetch a pattern file and apply its contents to a CLI test."""
+        ret = nfclient.run_job(
+            "nornir",
+            "test",
+            workers=["nornir-worker-1"],
+            kwargs={
+                "on_failed": True,
+                "FL": ["ceos-spine-1"],
+                "suite": "nf://nornir_test_suites/suite_pattern_file.txt",
+                "return_tests_suite": True,
+            },
+        )
+        result = ret["nornir-worker-1"]
+        assert not result["failed"], result
+        assert result["result"]["test_results"] == {
+            "ceos-spine-1": {"check version from pattern file": "PASS"}
+        }
+        assert result["result"]["suite"]["ceos-spine-1"][0]["pattern"] == "cEOS"
 
     def test_nornir_test_markdown_brief(self, nfclient):
         ret = nfclient.run_job(

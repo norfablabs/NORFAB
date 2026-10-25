@@ -742,11 +742,15 @@ class TestGetTopology:
             "netbox",
             "get_topology",
             workers="any",
-            kwargs={"role": ["virtualrouter"]},
+            kwargs={
+                "devices": [f"bulk-conn-{number:02d}" for number in range(1, 11)],
+                "role": ["virtualrouter"],
+            },
         )
         pprint.pprint(ret)
 
         for worker, res in ret.items():
+            assert not res["failed"], f"{worker} - task failed"
             assert not res["errors"], f"{worker} - received error"
             assert "nodes" in res["result"], f"{worker} - no nodes in result"
             assert (
@@ -757,6 +761,22 @@ class TestGetTopology:
                     node["role"].lower() == "virtualrouter"
                 ), f"{worker} - node '{node['name']}' has unexpected role '{node['role']}'"
             node_ids = {n["id"] for n in res["result"]["nodes"]}
+            assert len(node_ids) == len(res["result"]["nodes"])
+            assert node_ids <= {
+                f"bulk-conn-{number:02d}" for number in range(1, 11)
+            }, f"{worker} - topology contains devices outside the seed set"
+            assert res["result"]["links"], f"{worker} - expected connected seed devices"
+            for node in res["result"]["nodes"]:
+                assert {"id", "name", "role", "manufacturer", "status"} <= node.keys()
+            for link in res["result"]["links"]:
+                assert {
+                    "source",
+                    "target",
+                    "src_iface",
+                    "dst_iface",
+                    "type",
+                } <= link.keys()
+
             for link in res["result"]["links"]:
                 assert (
                     link["source"] in node_ids
@@ -809,17 +829,37 @@ class TestGetTopology:
             "netbox",
             "get_topology",
             workers="any",
-            kwargs={"manufacturers": ["arista"]},
+            kwargs={
+                "devices": [f"bulk-conn-{number:02d}" for number in range(1, 11)],
+                "manufacturers": ["arista"],
+            },
         )
         pprint.pprint(ret)
 
         for worker, res in ret.items():
+            assert not res["failed"], f"{worker} - task failed"
             assert not res["errors"], f"{worker} - received error"
             assert "nodes" in res["result"], f"{worker} - no nodes in result"
             assert (
                 len(res["result"]["nodes"]) > 0
             ), f"{worker} - expected at least one node"
             node_ids = {n["id"] for n in res["result"]["nodes"]}
+            assert len(node_ids) == len(res["result"]["nodes"])
+            assert node_ids <= {
+                f"bulk-conn-{number:02d}" for number in range(1, 11)
+            }, f"{worker} - topology contains devices outside the seed set"
+            assert res["result"]["links"], f"{worker} - expected connected seed devices"
+            for node in res["result"]["nodes"]:
+                assert {"id", "name", "role", "manufacturer", "status"} <= node.keys()
+            for link in res["result"]["links"]:
+                assert {
+                    "source",
+                    "target",
+                    "src_iface",
+                    "dst_iface",
+                    "type",
+                } <= link.keys()
+
             matching_ids = {
                 n["id"]
                 for n in res["result"]["nodes"]
@@ -849,11 +889,15 @@ class TestGetTopology:
             "netbox",
             "get_topology",
             workers="any",
-            kwargs={"status": ["active"]},
+            kwargs={
+                "devices": [f"bulk-conn-{number:02d}" for number in range(1, 11)],
+                "status": ["active"],
+            },
         )
         pprint.pprint(ret)
 
         for worker, res in ret.items():
+            assert not res["failed"], f"{worker} - task failed"
             assert not res["errors"], f"{worker} - received error"
             assert "nodes" in res["result"], f"{worker} - no nodes in result"
             assert (
@@ -864,6 +908,22 @@ class TestGetTopology:
                     node["status"] == "active"
                 ), f"{worker} - node '{node['name']}' has unexpected status '{node['status']}'"
             node_ids = {n["id"] for n in res["result"]["nodes"]}
+            assert len(node_ids) == len(res["result"]["nodes"])
+            assert node_ids <= {
+                f"bulk-conn-{number:02d}" for number in range(1, 11)
+            }, f"{worker} - topology contains devices outside the seed set"
+            assert res["result"]["links"], f"{worker} - expected connected seed devices"
+            for node in res["result"]["nodes"]:
+                assert {"id", "name", "role", "manufacturer", "status"} <= node.keys()
+            for link in res["result"]["links"]:
+                assert {
+                    "source",
+                    "target",
+                    "src_iface",
+                    "dst_iface",
+                    "type",
+                } <= link.keys()
+
             for link in res["result"]["links"]:
                 assert (
                     link["source"] in node_ids

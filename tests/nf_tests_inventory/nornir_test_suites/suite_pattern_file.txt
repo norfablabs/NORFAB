@@ -1,0 +1,4 @@
+- task: show version
+  test: contains
+  pattern: nf://nornir_test_suites/pattern_ceos.txt
+  name: check version from pattern file
