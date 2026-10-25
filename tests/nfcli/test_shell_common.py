@@ -25,9 +25,10 @@ class FakeNFClient:
     def __init__(self, files):
         self.files = files
 
-    def run_job(self, service, task, kwargs):
+    def run_job(self, service, task, kwargs, workers):
         assert service == "filesharing"
         assert task == "walk"
+        assert workers == "all"
         assert kwargs == {"url": "nf://"}
         return {
             "filesharing-worker-1": {
@@ -207,6 +208,43 @@ class TestShellCommon:
             "nf://cfg/templates/",
             "load-terminal",
         ]
+
+    @pytest.mark.parametrize("reverse", [False, True])
+    def test_file_completion_combines_workers(self, monkeypatch, reverse):
+        responses = [
+            ("worker-1", {"failed": False, "result": ["nf://cfg/base.txt"]}),
+            (
+                "worker-2",
+                {
+                    "failed": False,
+                    "result": ["nf://cfg/base.txt", "nf://cfg/second.txt"],
+                },
+            ),
+            ("failed-worker", {"failed": True, "result": None}),
+            ("empty-worker", {"failed": False, "result": []}),
+        ]
+        client = FakeNFClient([])
+        monkeypatch.setattr(
+            client,
+            "run_job",
+            lambda *args, **kwargs: dict(reversed(responses) if reverse else responses),
+        )
+        monkeypatch.setattr(builtins, "NFCLIENT", client, raising=False)
+
+        assert ClientRunJobArgs.walk_norfab_files("nf://") == ["nf://cfg/"]
+        assert sorted(NornirCfgShell.source_config("nf://cfg/")) == [
+            "load-terminal",
+            "nf://cfg/base.txt",
+            "nf://cfg/second.txt",
+        ]
+
+    @pytest.mark.parametrize("response", [None, {}])
+    def test_file_completion_without_worker_results(self, monkeypatch, response):
+        client = FakeNFClient([])
+        monkeypatch.setattr(client, "run_job", lambda *args, **kwargs: response)
+        monkeypatch.setattr(builtins, "NFCLIENT", client, raising=False)
+
+        assert NornirCfgShell.source_config("nf://") == ["load-terminal"]
 
     def test_nornir_inventory_create_host_from_netbox_shell_submission(
         self, monkeypatch

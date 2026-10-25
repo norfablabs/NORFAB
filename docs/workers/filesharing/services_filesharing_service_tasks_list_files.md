@@ -9,15 +9,11 @@ tags:
 
 The `list_files` task lists the immediate files and subdirectories under a File Sharing URL. It does not descend into nested directories.
 
-## Inputs
-
-| Parameter | Required | Description |
-|---|---:|---|
-| `url` | No | Directory URL to list, default `nf://` |
-
 ## Output
 
 Returns directory entries for the requested `nf://` URL. Results are worker keyed when called through `client.run_job(...)`.
+
+NFCLI combines successful listings from all FileSharing workers into one list with duplicate entries removed. An empty directory returns an empty list; if no worker succeeds, the command reports an error.
 
 ## Examples
 
@@ -26,13 +22,13 @@ Returns directory entries for the requested `nf://` URL. Results are worker keye
     List the repository root:
 
     ```bash
-    nf#file list url nf://
+    nf#show filesharing files url nf://
     ```
 
     List a subdirectory:
 
     ```bash
-    nf#file list url nf://templates/
+    nf#show filesharing files url nf://templates/
     ```
 
 === "Python"

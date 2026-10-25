@@ -119,15 +119,8 @@ class ListFilesModel(ListFilesInput, use_enum_values=True, populate_by_name=True
     url: StrictStr = Field("nf://", description="Directory to list content for")
 
     @staticmethod
-    def source_url() -> list:
-        broker_files = run_future_job(
-            "filesharing",
-            "walk",
-            workers="any",
-            kwargs={"url": "nf://"},
-        )
-        for _w_name, wres in broker_files.items():
-            return wres["result"]
+    def source_url(choice: str = None) -> list:
+        return ClientRunJobArgs.walk_norfab_files(choice)
 
     @staticmethod
     def run(*args: object, **kwargs: object) -> Any:
@@ -136,10 +129,16 @@ class ListFilesModel(ListFilesInput, use_enum_values=True, populate_by_name=True
             "list_files",
             args=args,
             kwargs=kwargs,
-            workers="any",
+            workers="all",
         )
-        for _w_name, wres in reply.items():
-            return wres["result"]
+        successful = [wres for wres in (reply or {}).values() if not wres["failed"]]
+        if not successful:
+            raise RuntimeError(f"no successful filesharing directory listings: {reply}")
+        return list(
+            dict.fromkeys(
+                entry for wres in successful for entry in (wres["result"] or [])
+            )
+        )
 
     class PicleConfig:
         pipe = PipeFunctionsModel
@@ -154,15 +153,8 @@ class CopyFileModel(BaseModel):
     read: Optional[StrictBool] = Field(False, description="Print file content")
 
     @staticmethod
-    def source_url() -> list:
-        broker_files = run_future_job(
-            "filesharing",
-            "walk",
-            kwargs={"url": "nf://"},
-            workers="any",
-        )
-        for _w_name, wres in broker_files.items():
-            return wres["result"]
+    def source_url(choice: str = None) -> list:
+        return ClientRunJobArgs.walk_norfab_files(choice)
 
     @staticmethod
     def run(*args: object, **kwargs: object) -> Any:
@@ -176,15 +168,8 @@ class FileDetailsModel(FileDetailsInput, use_enum_values=True, populate_by_name=
     url: StrictStr = Field("nf://", description="File location")
 
     @staticmethod
-    def source_url() -> list:
-        broker_files = run_future_job(
-            "filesharing",
-            "walk",
-            kwargs={"url": "nf://"},
-            workers="any",
-        )
-        for _w_name, wres in broker_files.items():
-            return wres["result"]
+    def source_url(choice: str = None) -> list:
+        return ClientRunJobArgs.walk_norfab_files(choice)
 
     @staticmethod
     def run(*args: object, **kwargs: object) -> Any:
@@ -193,10 +178,9 @@ class FileDetailsModel(FileDetailsInput, use_enum_values=True, populate_by_name=
             "file_details",
             args=args,
             kwargs=kwargs,
-            workers="any",
+            workers="all",
         )
-        for _w_name, wres in reply.items():
-            return wres["result"]
+        return reply or {}
 
     class PicleConfig:
         pipe = PipeFunctionsModel
@@ -241,12 +225,13 @@ class DeleteFetchedFiles(ClientRunJobArgs):
         return log_error_or_result(result, verbose_result=verbose_result)
 
     @staticmethod
-    def source_filepath() -> list:
-        broker_files = run_future_job(
-            "filesharing", "any", "walk", kwargs={"url": "nf://"}
-        )
-        for _w_name, wres in broker_files.items():
-            return wres["result"]
+    def source_filepath(choice: str = None) -> list:
+        """Suggest published paths relative to worker fetch caches."""
+        prefix = "nf://" + (choice or "").removeprefix("nf://")
+        return [
+            url.removeprefix("nf://")
+            for url in ClientRunJobArgs.walk_norfab_files(prefix)
+        ]
 
     @staticmethod
     def source_workers() -> list:

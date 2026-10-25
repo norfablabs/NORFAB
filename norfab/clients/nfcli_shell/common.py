@@ -324,10 +324,25 @@ class ClientRunJobArgs(BaseModel):
 
     @staticmethod
     def walk_norfab_files(choice: str = None):
+        """Return unique file and directory completions from all workers.
+
+        Args:
+            choice: Optional nf:// prefix to complete. Defaults to the root.
+
+        Returns:
+            Matching immediate file and directory URLs combined from successful
+            FileSharing listings. Failed workers and missing results are skipped.
+        """
         NFCLIENT = builtins.NFCLIENT
-        response = NFCLIENT.run_job("filesharing", "walk", kwargs={"url": "nf://"})
-        wname, wres = next(iter(response.items()))
-        files = wres["result"]
+        response = NFCLIENT.run_job(
+            "filesharing", "walk", workers="all", kwargs={"url": "nf://"}
+        )
+        files = [
+            file
+            for wres in (response or {}).values()
+            if not wres.get("failed")
+            for file in (wres.get("result") or [])
+        ]
         choice = choice or "nf://"
         parent = choice if choice.endswith("/") else choice.rsplit("/", 1)[0] + "/"
         ret = []

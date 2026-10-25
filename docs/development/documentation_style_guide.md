@@ -41,6 +41,7 @@ When updating a service task page:
 
 ## Writing style
 
+- Before adding user-facing content, check whether users need it to use a feature, interpret results, or understand a limitation. Omit internal implementation details and routine fixes that do not help with these goals; task pages do not need an entry for every code change.
 - Prefer short sentences and active voice.
 - Use **Netbox** for the product name in prose and headings. Keep lowercase `netbox` for service names, task names, command paths, Python imports, and API references.
 - Use consistent terminology:
@@ -91,6 +92,7 @@ print("nested")
 
 ## Python API references
 
+- Never append notes or other content after the final API reference. Place updates in the relevant section above it, such as Output, Examples, or Notes / Gotchas.
 - End service task pages with the autodoc reference for the task method:
 
 ```markdown

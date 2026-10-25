@@ -13,6 +13,10 @@ The `file_details` task returns metadata about one or more files, including exis
 
 Returns results keyed by requested URL. Each entry contains `failed`, `errors`, and `result`; successful result payloads contain `exists`, `size_bytes`, and `md5hash`. Missing or unsafe files fail individually. An empty list returns an empty mapping. A string URL retains the original single-file result containing metadata directly, or a failed result for a missing or unsafe file.
 
+NFCLI returns results keyed by worker, including failures, so metadata differences between workers remain visible.
+
+Batch entry errors are also collected in the outer result's `errors` list, while successful entries remain available.
+
 ## Examples
 
 === "CLI"
@@ -20,7 +24,7 @@ Returns results keyed by requested URL. Each entry contains `failed`, `errors`, 
     Show file details:
 
     ```bash
-    nf#file details url nf://filesharing/test_file_1.txt
+    nf#show filesharing files details url nf://filesharing/test_file_1.txt
     ```
 
 === "Python"
@@ -80,5 +84,3 @@ nf#
 ## Python API Reference
 
 ::: norfab.workers.filesharing_worker.filesharing_worker.FileSharingWorker.file_details
-
-Batch entry errors are also collected in the outer result's `errors` list, while successful entries remain available.
