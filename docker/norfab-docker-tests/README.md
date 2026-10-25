@@ -58,6 +58,9 @@ markers, keywords, extra pytest arguments, dedicated NetBox file tasks, or
 per-file parallelism. The summary includes counts, durations, failures,
 missing/invalid JUnit warnings, and paths to artifacts created or updated
 during that run. The all-suites command produces one consolidated report.
+Below the summary, expand a service under `Failed tests by service` to see
+its failed/error test names. Detailed failures and the full test-duration
+table remain in their existing sections.
 
 Each service mounts:
 

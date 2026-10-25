@@ -1,5 +1,5 @@
-{% for interface in host.interfaces %}
+{% for interface in ["eth101", "eth102"] %}
 interface {{ interface }}
-  ip address {{ "10.0.0.0/24" | netbox.create_ip(host.name, interface) }}
+  ip address {{ "198.19.236.0/24" | netbox.create_ip(host.name, interface, create_peer_ip=False) }}
 !
 {% endfor %}

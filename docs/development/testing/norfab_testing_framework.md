@@ -208,6 +208,7 @@ Arguments after the service name replace its default Compose command, so include
 Each Invoke test run prints the path of its timestamped Markdown report in `docker/norfab-docker-tests/reports/`. Reports are named `docker-tests-<suite>-<timestamp>.md` or `docker-tests-all-<timestamp>.md`.
 
 - The summary table shows passed, failed, errors, skipped, duration, and suite status.
+- `Failed tests by service` provides expandable lists of failed/error test names below the summary. Expand a service to quickly find its failing tests.
 - `Failures and report problems` shows failing tests and error details.
 - `JUnit artifacts` lists XML files produced by that run. JUnit files and worker logs are under the suite's ignored `docker/norfab-docker-tests/<compose-service>/__norfab__/` tree; NetBox group and file-parallel runs use `groups/` and `parallel/` subdirectories.
 - `NO REPORT` means no JUnit file was produced; `INVALID REPORT` means the XML could not be parsed. Check the container output and runtime logs.

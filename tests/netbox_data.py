@@ -383,6 +383,7 @@ platforms = [
 ]
 
 prefixes = [
+    {"prefix": "198.19.236.0/24", "description": "NORFAB NORNIR TEMPLATE IP POOL"},
     {"prefix": "10.0.0.0/24", "description": "TEST NEXT IP PREFIX"},
     # Separate persistent VRF1 pools for metadata and branching IP tests.
     {

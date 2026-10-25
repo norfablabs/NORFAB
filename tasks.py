@@ -19,6 +19,7 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from html import escape
 from pathlib import Path
 from uuid import uuid4
 from xml.etree import ElementTree
@@ -667,9 +668,7 @@ def _write_docker_test_report(
                         }
                     )
                     if problem is not None:
-                        details = (
-                            problem.text or problem.get("message") or ""
-                        ).strip()
+                        details = (problem.text or problem.get("message") or "").strip()
                         failures.append((test_name, details))
 
         report_data[suite] = {
@@ -729,6 +728,19 @@ def _write_docker_test_report(
         f"**Total:** {totals['passed']} passed, {totals['failed']} failed, "
         f"{totals['errors']} errors, {totals['skipped']} skipped.",
     ]
+
+    failed_services = [
+        suite for suite in report_suites if report_data[suite]["failures"]
+    ]
+    if failed_services:
+        lines += ["", "## Failed tests by service"]
+        for suite in failed_services:
+            names = dict.fromkeys(
+                name for name, _details in report_data[suite]["failures"]
+            )
+            lines += ["", "<details>", f"<summary>{escape(suite)}</summary>", ""]
+            lines.extend(f"- <code>{escape(name)}</code>" for name in names)
+            lines += ["", "</details>"]
 
     problems_found = False
     for suite in report_suites:

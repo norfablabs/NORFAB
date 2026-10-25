@@ -1,5 +1,5 @@
-{% for interface in host.interfaces %}
-{% set ip = netbox.create_ip("10.0.0.0/24", host.name, interface, description="Primary interface ip") %}
+{% for interface in ["eth101", "eth102"] %}
+{% set ip = netbox.create_ip("198.19.236.0/24", host.name, interface, description="Nornir template test IP", create_peer_ip=False) %}
 interface {{ interface }}
   ip address {{ ip }}
 !

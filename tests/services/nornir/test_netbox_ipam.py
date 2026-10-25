@@ -1,8 +1,11 @@
 import pprint
+from collections.abc import Iterator
+from typing import Any
+
 import pytest
 
 try:
-    from tests.services.netbox.common import delete_ips
+    from tests.services.netbox.common import delete_ips, get_pynetbox
 except ModuleNotFoundError as exc:
     if exc.name not in {
         "tests",
@@ -11,41 +14,27 @@ except ModuleNotFoundError as exc:
         "tests.services.netbox.common",
     }:
         raise
-    from services.netbox.common import delete_ips
+    from services.netbox.common import delete_ips, get_pynetbox
 
 pytestmark = pytest.mark.nornir
 
 
 class TestNBCreateIp:
-    def delete_ips(self, prefix, nfclient):
-        resp = nfclient.run_job(
-            "netbox",
-            "rest",
-            workers="any",
-            kwargs={
-                "method": "get",
-                "api": "/ipam/ip-addresses/",
-                "params": {"parent": prefix},
-            },
-        )
-        worker, ips = tuple(resp.items())[0]
-        # pprint.pprint(ips)
-        for ip in ips["result"]["results"]:
-            delete_ip = nfclient.run_job(
-                "netbox",
-                "rest",
-                workers="any",
-                kwargs={
-                    "method": "delete",
-                    "api": f"/ipam/ip-addresses/{ip['id']}/",
-                },
-            )
-            # print("delete ip address:")
-            # pprint.pprint(delete_ip)
+    @pytest.fixture
+    def allocation_pool(self, nfclient: Any) -> Iterator[Any]:
+        """Clean the class-owned pool before and after each allocation test."""
+        prefix = "198.19.236.0/24"
+        nb = get_pynetbox(nfclient)
+        assert nb.ipam.prefixes.get(prefix=prefix) is not None, "seed prefix is missing"
+        delete_ips(prefix, nfclient)
+        try:
+            yield nb
+        finally:
+            delete_ips(prefix, nfclient)
 
-    def test_nb_create_ip_jinja2_template_with_filter(self, nfclient):
-        self.delete_ips("10.0.0.0/24", nfclient)
-
+    def test_nb_create_ip_jinja2_template_with_filter(
+        self, nfclient: Any, allocation_pool: Any
+    ) -> None:
         ret = nfclient.run_job(
             "nornir",
             "cfg",
@@ -63,12 +52,21 @@ class TestNBCreateIp:
         for worker, results in ret.items():
             assert results["failed"] is False, f"{worker} failed to run the task"
             assert (
-                results["result"]["fceos5"]["dry_run"].count("10.0.0.") > 10
+                results["result"]["fceos5"]["dry_run"].count("198.19.236.") == 2
             ), "IPs not allocated"
 
-    def test_nb_create_ip_jinja2_template_with_set(self, nfclient):
-        self.delete_ips("10.0.0.0/24", nfclient)
+        allocated = list(
+            allocation_pool.ipam.ip_addresses.filter(parent="198.19.236.0/24")
+        )
+        assert len(allocated) == 2
+        assert {
+            (ip.assigned_object.device.name, ip.assigned_object.name)
+            for ip in allocated
+        } == {("fceos5", "eth101"), ("fceos5", "eth102")}
 
+    def test_nb_create_ip_jinja2_template_with_set(
+        self, nfclient: Any, allocation_pool: Any
+    ) -> None:
         ret = nfclient.run_job(
             "nornir",
             "cfg",
@@ -86,8 +84,17 @@ class TestNBCreateIp:
         for worker, results in ret.items():
             assert results["failed"] is False, f"{worker} failed to run the task"
             assert (
-                results["result"]["fceos5"]["dry_run"].count("10.0.0.") > 10
+                results["result"]["fceos5"]["dry_run"].count("198.19.236.") == 2
             ), "IPs not allocated"
+
+        allocated = list(
+            allocation_pool.ipam.ip_addresses.filter(parent="198.19.236.0/24")
+        )
+        assert len(allocated) == 2
+        assert {
+            (ip.assigned_object.device.name, ip.assigned_object.name)
+            for ip in allocated
+        } == {("fceos5", "eth101"), ("fceos5", "eth102")}
 
 
 # ----------------------------------------------------------------------------
