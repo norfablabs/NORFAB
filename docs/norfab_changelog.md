@@ -1,3 +1,17 @@
+# 0.25.1
+
+## FEATURES
+
+1. Added client-to-worker and worker-to-worker file transfers through the broker, with on-demand `file://` job inputs, chunking, and size/MD5 verification.
+2. Added core `file_stat`, `list_files`, and `walk` tasks for native worker paths and FileSharing `nf://` URLs, plus client-local `file_stat` and `safe_path` methods.
+
+## ENHANCEMENTS
+
+1. Unified downloads through `fetch_file(..., worker=...)` and core `serve_file`, preserving batch metadata retrieval, caching, and Git resolution. Replaced FileSharing `fetch_file` and `file_details` tasks with core APIs.
+2. Corrected download pipeline limits and propagated local write errors without waiting for transfer timeouts. See the [core file-transfer reference](api_ref/core/api_reference_core_file_transfer.md).
+
+---
+
 # 0.25.0
 
 ## BUGS

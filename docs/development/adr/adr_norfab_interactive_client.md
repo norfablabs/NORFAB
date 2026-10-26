@@ -109,7 +109,7 @@ should be delivered to futures instead.
 
 `norfab/core/NFP.py` already defines `PUT`, `EVENT`, `STREAM`, `POST`, `GET`,
 and `RESPONSE`. The file streaming design in
-`docs/development/file_streaming_fetch_file.md` already treats `PUT` as a
+`docs/api_ref/core/api_reference_core_file_transfer.md` already treats `PUT` as a
 job-scoped client-to-worker control channel. The changelog for `0.15.0` also
 notes that `PUT` can be extended for user input during job execution.
 

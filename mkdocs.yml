@@ -220,10 +220,6 @@ nav:
     - Overview: workers/filesharing/services_filesharing_service.md
     - Inventory: workers/filesharing/services_filesharing_service_inventory.md
     - Tasks:
-      - List Files: workers/filesharing/services_filesharing_service_tasks_list_files.md
-      - Walk: workers/filesharing/services_filesharing_service_tasks_walk.md
-      - File Details: workers/filesharing/services_filesharing_service_tasks_file_details.md
-      - Fetch File: workers/filesharing/services_filesharing_service_tasks_fetch_file.md
       - Create Git Remote: workers/filesharing/services_filesharing_service_tasks_create_remote_git.md
       - Clone Git Remote: workers/filesharing/services_filesharing_service_tasks_git_clone.md
       - Resolve Git URL: workers/filesharing/services_filesharing_service_tasks_resolve_git_url.md
@@ -258,6 +254,7 @@ nav:
       - Broker: api_ref/core/api_reference_core_norfab_broker.md
       - Worker Base: api_ref/core/api_reference_core_norfab_worker.md
       - Client: api_ref/core/api_reference_core_norfab_client.md
+      - File Transfers: api_ref/core/api_reference_core_file_transfer.md
       - Simple Inventory: api_ref/core/api_reference_core_norfab_simple_inventory.md
       - Exceptions: api_ref/core/api_reference_core_norfab_exceptions.md
     - Built-in Workers:
@@ -279,7 +276,6 @@ nav:
   - Docker Development: development/norfab_docker_development.md
   - Documentation Style Guide: development/documentation_style_guide.md
   - Task Pydantic Models Guide: development/tasks_pydantic_models_guide.md
-  - File Streaming (fetch_file): development/file_streaming_fetch_file.md
   - Documentation Backlog: development/documentation_backlog.md
   - Known Issues: development/bug_hunt.md
   - Architecture Design Records:
@@ -287,6 +283,7 @@ nav:
     - Packaged Python Service Plugins: development/adr/adr_service_plugin_module.md
     - Client Completion Events and Socket Wake-Up: development/adr/adr_client_event_completion.md
     - File Sharing Git Remotes: development/adr/adr_extensible_data_sources_and_git_sync.md
+    - Lightweight Generic File Transfer: development/adr/adr_generic_file_transfer.md
     - Netbox Design Specification: development/adr/adr_netbox_design_specification.md
     - Netbox Sync BGP Communities Plan: development/adr/adr_netbox_sync_bgp_community_plan.md
     - Netbox Sync VLANs Historical Plan: development/adr/adr_netbox_sync_vlans_plan.md

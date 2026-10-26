@@ -1,6 +1,7 @@
 import concurrent.futures
 import copy
 import functools
+import hashlib
 import inspect
 import logging
 import os
@@ -15,6 +16,8 @@ import traceback
 import zlib
 from contextlib import contextmanager
 from typing import Any, Callable, Dict, List, Literal, Optional, Union
+from urllib.parse import unquote
+from uuid import uuid4
 
 import orjson
 import zmq
@@ -64,6 +67,7 @@ class Job:
         "kwargs",
         "task",
         "client_input_queue",
+        "binary_input_queue",
         "start_time",
         "pending_input_request",
     )
@@ -87,11 +91,102 @@ class Job:
         self.kwargs = kwargs or {}
         self.task = task
         self.client_input_queue = client_input_queue
+        self.binary_input_queue = queue.Queue()
         self.start_time = time.time()
         self.pending_input_request = None
 
     def __str__(self) -> str:
         return self.juuid
+
+    def fetch_file(
+        self, url: str, destination: str = None, chunk_size: int = 256000
+    ) -> str:
+        """Fetch a file when a task needs it, returning a local path.
+
+        Args:
+            url: file://relative or file:///absolute URL on the submitting
+                client, supplied in this job's arguments. nf:// and git:// use
+                the existing FileSharing fetch helper.
+            destination: Output path for client files; defaults to a unique
+                path under fetchedfiles. FileSharing uses its existing cache.
+            chunk_size: Bytes per client-file request, from 1 through 1048576.
+
+        Returns:
+            Local absolute path after size and MD5 verification. Client files
+            are fetched without pre-staging.
+
+        Raises:
+            ValueError: Unsupported URL or invalid chunk size.
+            OSError: File read or write failed; partial files may remain.
+            TimeoutError: The job deadline expired while fetching.
+        """
+        if not url.startswith("file://"):
+            return self.worker.fetch_file(url, read=False, raise_on_fail=True)
+        self.check_timeout()
+        timeout = (
+            max(0, self.timeout - (time.time() - self.start_time))
+            if self.timeout
+            else 600
+        )
+        destination = destination or os.path.join(
+            self.worker.client.base_dir,
+            "fetchedfiles",
+            uuid4().hex,
+            os.path.basename(self.worker.safe_path(url)),
+        )
+
+        if not 0 < chunk_size <= 1024 * 1024:
+            raise ValueError("chunk_size must be 1..1048576")
+        destination = os.path.abspath(destination)
+        os.makedirs(os.path.dirname(destination), exist_ok=True)
+        deadline = time.monotonic() + timeout
+        file_hash = hashlib.md5()
+        details = None
+        with open(destination, "wb") as target:
+            while True:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise TimeoutError(f"file transfer timed out: {url}")
+                self.worker.send_to_broker(
+                    NFP.PUT,
+                    [
+                        self.client_address.encode(),
+                        b"",
+                        self.juuid.encode(),
+                        b"200",
+                        orjson.dumps(
+                            {
+                                "file_read": True,
+                                "file_details": details is None,
+                                "path": url,
+                                "worker": self.worker.name,
+                                "offset": target.tell(),
+                                "size": chunk_size,
+                            }
+                        ),
+                    ],
+                )
+                try:
+                    status, chunk = self.binary_input_queue.get(timeout=remaining)
+                except queue.Empty:
+                    raise TimeoutError(f"file transfer timed out: {url}") from None
+                if status == b"201":
+                    details = chunk
+                    continue
+                if status != b"200":
+                    raise OSError(chunk.decode("utf-8", errors="replace"))
+                if len(chunk) > chunk_size:
+                    raise OSError("source returned more bytes than requested")
+                if not chunk:
+                    if (
+                        target.tell() != details["size_bytes"]
+                        or file_hash.hexdigest() != details["md5hash"]
+                    ):
+                        raise OSError("file transfer failed, size or MD5 hash mismatch")
+                    break
+                target.write(chunk)
+                file_hash.update(chunk)
+        return destination
 
     def is_timed_out(self) -> bool:
         """Check if the job has exceeded its timeout.
@@ -1207,7 +1302,15 @@ def _put(worker, put_queue, destroy_event) -> None:
         try:
             suuid = work[2].decode("utf-8")
             data = orjson.loads(work[3])
-            worker.running_jobs[suuid].client_input_queue.put(data)
+            job = worker.running_jobs[suuid]
+            if work[0].decode() != job.client_address:
+                continue
+            if "file_details" in data:
+                job.binary_input_queue.put((b"201", data["file_details"]))
+            elif "file_error" in data:
+                job.binary_input_queue.put((b"500", data["file_error"].encode()))
+            else:
+                job.client_input_queue.put(data)
             log.debug(f"{worker.name} - '{suuid}' added job input")
         except Exception as e:
             log.error(
@@ -1488,6 +1591,10 @@ def zmq_send_recv(worker: object, destroy_event: threading.Event) -> None:
                 worker.get_queue.put(msg)
             elif command == NFP.PUT:
                 worker.put_queue.put(msg)
+            elif command == NFP.STREAM:
+                job = worker.running_jobs.get(msg[2].decode())
+                if job and msg[0].decode() == job.client_address:
+                    job.binary_input_queue.put((b"200", msg[3]))
             elif command == NFP.KEEPALIVE:
                 worker.keepaliver.received_heartbeat([header] + msg)
             elif command == NFP.DISCONNECT:
@@ -1795,6 +1902,8 @@ class NFPWorker:
             msg = self.build_message.worker_to_broker_event(event_data=msg)
         elif command == NFP.STREAM:
             msg = self.build_message.worker_to_broker_stream(data=msg)
+        elif command == NFP.PUT:
+            msg = [b"", NFP.WORKER, command] + msg
         else:
             log.error(
                 f"{self.name} - cannot send '{command}' to broker, command unsupported"
@@ -1942,6 +2051,259 @@ class NFPWorker:
         self.keepaliver.stop()
 
         log.info(f"{self.name} - worker destroyed, message: '{message}'")
+
+    def safe_path(self, url: str) -> str:
+        """Resolve native paths or a confined FileSharing publication URL.
+
+        Args:
+            url: Plain path, file:// URL, or FileSharing-only nf:// URL.
+
+        Returns:
+            Absolute native path. Only nf:// paths are confined to base_dir;
+            native paths require trusted filesystem access.
+
+        Raises:
+            ValueError: Unsupported scheme, non-FileSharing nf:// request, or
+                a published path outside the publication root.
+        """
+        if url.startswith("nf://"):
+            if self.service != b"filesharing":
+                raise ValueError("nf:// paths require a FileSharing worker")
+            relative = url.removeprefix("nf://").replace("\\", "/").lstrip("/\\")
+            base = os.path.realpath(self.base_dir)
+            path = os.path.realpath(os.path.join(base, *relative.split("/")))
+            if os.path.commonpath([base, path]) != base:
+                raise ValueError(f"'{url}' - invalid URL path")
+            return path
+        if "://" in url and not url.startswith("file://"):
+            raise ValueError("invalid URL format")
+        path = unquote(url[7:]) if url.startswith("file://") else url
+        if os.name == "nt" and len(path) > 2 and path[0] == "/" and path[2] == ":":
+            path = path[1:]
+        return os.path.abspath(path)
+
+    @Task(
+        input=models.ListFilesInput,
+        output=models.ListFilesResult,
+        fastapi=False,
+        mcp=False,
+        agent={"enabled": False},
+    )
+    def list_files(self, url: str) -> Result:
+        """List immediate directory entries on this worker.
+
+        Args:
+            url: Native directory path, file:// URL, or published nf:// directory
+                on a FileSharing worker.
+
+        Returns:
+            Entry names, including hidden entries, without recursion. Invalid,
+            missing, or unreadable directories produce a failed result.
+        """
+        try:
+            path = self.safe_path(url)
+            if not os.path.isdir(path):
+                return Result(result=None, failed=True, errors=["Directory Not Found"])
+            return Result(result=os.listdir(path))
+        except (OSError, ValueError) as exc:
+            return Result(result=None, failed=True, errors=[str(exc)])
+
+    @Task(
+        input=models.WalkInput,
+        output=models.WalkResult,
+        fastapi=False,
+        mcp=False,
+        agent={"enabled": False},
+    )
+    def walk(self, url: str) -> Result:
+        """Recursively list files on this worker.
+
+        Args:
+            url: Native directory path, file:// URL, or published nf:// directory
+                on a FileSharing worker.
+
+        Returns:
+            Absolute native paths, or nf:// URLs for published input. Filenames
+            starting with a dot and roots containing two or more double-underscore
+            markers are omitted. Directory symlinks are not followed. Invalid or
+            missing roots produce failed results; os.walk skips inaccessible children.
+        """
+        try:
+            path = self.safe_path(url)
+            if not os.path.isdir(path):
+                return Result(result=None, failed=True, errors=["Directory Not Found"])
+            files_list = []
+            for root, _directories, files in os.walk(path):
+                if root.count("__") >= 2:
+                    continue
+                for filename in files:
+                    if filename.startswith("."):
+                        continue
+                    file_path = os.path.join(root, filename)
+                    if url.startswith("nf://"):
+                        relative = os.path.relpath(
+                            file_path, os.path.realpath(self.base_dir)
+                        )
+                        files_list.append("nf://" + relative.replace(os.sep, "/"))
+                    else:
+                        files_list.append(file_path)
+            return Result(result=files_list)
+        except (OSError, ValueError) as exc:
+            return Result(result=None, failed=True, errors=[str(exc)])
+
+    @Task(
+        input=models.FileStatInput,
+        output=models.FileStatResult,
+        fastapi=False,
+        mcp=False,
+        agent={"enabled": False},
+    )
+    def file_stat(self, url: str | list[str]) -> Result:
+        """Return size and MD5 for local or published files.
+
+        Args:
+            url: A path, file URL, or list of paths/URLs. FileSharing workers
+                also accept nf:// paths within their publication directory.
+
+        Returns:
+            For a string, metadata containing md5hash, size_bytes, and exists.
+            For a list, per-URL results with independent failures and collected
+            errors. Missing, unreadable, or unsafe files produce failed entries;
+            an empty list returns no entries. MD5 detects corruption, not authenticity.
+        """
+        urls = [url] if isinstance(url, str) else url
+        ret = Result(result={})
+        for item in urls:
+            entry = Result(
+                result={"md5hash": None, "size_bytes": None, "exists": False}
+            )
+            try:
+                full_path = self.safe_path(item)
+                if not os.path.isfile(full_path):
+                    entry.failed = True
+                    entry.errors = [f"'{item}' file not found"]
+                else:
+                    file_hash = hashlib.md5()
+                    size = 0
+                    with open(full_path, "rb") as file_obj:
+                        chunk = file_obj.read(8192)
+                        while chunk:
+                            file_hash.update(chunk)
+                            size += len(chunk)
+                            chunk = file_obj.read(8192)
+                    entry.result = {
+                        "md5hash": file_hash.hexdigest(),
+                        "size_bytes": size,
+                        "exists": True,
+                    }
+            except (OSError, ValueError) as exc:
+                entry.failed = True
+                entry.errors = [str(exc)]
+            ret.errors.extend(entry.errors)
+            ret.result[item] = entry.model_dump()
+        if isinstance(url, str):
+            return entry
+        return ret
+
+    @Task(
+        input=models.ServeFileInput,
+        output=models.ServeFileResult,
+        fastapi=False,
+        mcp=False,
+        agent={"enabled": False},
+    )
+    def serve_file(self, job: Job, path: str, chunk_size: int = 256000) -> Result:
+        """Serve requested ranges within one ordinary job.
+
+        Args:
+            job: Running job whose PUT inputs request chunks and whose STREAM
+                messages carry bytes. The existing job timeout bounds the transfer.
+            path: Local path or file URL on this worker, read afresh per chunk.
+                FileSharing workers also accept nf:// within their publication root.
+            chunk_size: Bytes per requested chunk, from 1 through 1048576.
+
+        Returns:
+            True after the final chunk (empty for an empty file). Bytes are not persisted
+            as job results. Serving occupies a job slot until completion.
+
+        Raises:
+            ValueError: An nf:// URL is unsafe or used on a non-FileSharing worker.
+            OSError: Source read or receiving client write failed.
+            TimeoutError: No range request arrived before the job deadline.
+        """
+        path = self.safe_path(path)
+        size = os.path.getsize(path)
+        while True:
+            job.check_timeout()
+            remaining = (
+                job.timeout - (time.time() - job.start_time) if job.timeout else 600
+            )
+            request = job.wait_client_input(timeout=max(0, remaining))
+            if request is None:
+                raise TimeoutError(f"file transfer timed out: {path}")
+            if request.get("error"):
+                raise OSError(request["error"])
+            offset = request["offset"]
+            if type(offset) is not int or offset < 0:
+                raise ValueError("offset must be a nonnegative integer")
+            with open(path, "rb") as source:
+                source.seek(offset)
+                chunk = source.read(chunk_size)
+            if len(chunk) < min(chunk_size, size - request["offset"]):
+                raise OSError("source file changed during transfer")
+            job.stream(chunk)
+            if not chunk or request["offset"] + len(chunk) >= size:
+                return Result(result=True)
+
+    @Task(
+        input=models.ReceiveFileInput,
+        output=models.ReceiveFileResult,
+        fastapi=False,
+        mcp=False,
+        agent={"enabled": False},
+    )
+    def receive_file(
+        self,
+        job: Job,
+        url: str,
+        destination: str = None,
+        source_worker: str = None,
+        chunk_size: int = 256000,
+    ) -> Result:
+        """Pull a file from the submitting client or an explicitly named worker.
+
+        Args:
+            job: Running job providing client routing and its deadline.
+            url: Client file URL, source worker path, or existing nf:// or git:// URL.
+            destination: Local output path, overwritten if present. Defaults to
+                a unique fetchedfiles path for generic transfers. FileSharing
+                URLs retain their existing cache location.
+            source_worker: Exact source worker name. When omitted, file:// URLs
+                refer to the submitting client.
+            chunk_size: Bytes per generic chunk, from 1 through 1048576.
+
+        Returns:
+            Result containing the absolute local path after transfer completes.
+
+        Raises:
+            OSError: Source read or destination write failed; partial files remain.
+            TimeoutError: Transfer deadline expired.
+            ValueError: Unsupported URL or invalid chunk size.
+        """
+        if source_worker:
+            result = self.client.fetch_file(
+                url,
+                worker=source_worker,
+                destination=destination,
+                timeout=job.timeout or 600,
+                chunk_size=chunk_size,
+            )
+            if result["status"] != "200":
+                raise OSError(result["error"])
+            path = result["content"]
+        else:
+            path = job.fetch_file(url, destination, chunk_size)
+        return Result(result=path)
 
     def is_url(self, url: str) -> bool:
         """

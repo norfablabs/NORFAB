@@ -19,7 +19,7 @@ class TestFileDetails:
         """Test getting details of an existing file"""
         ret = nfclient.run_job(
             "filesharing",
-            "file_details",
+            "file_stat",
             workers=["filesharing-worker-1"],
             kwargs={"url": "nf://filesharing/test_file_1.txt"},
         )
@@ -51,7 +51,7 @@ class TestFileDetails:
 
         ret = nfclient.run_job(
             "filesharing",
-            "file_details",
+            "file_stat",
             workers=["filesharing-worker-1"],
             kwargs={"url": "nf://filesharing/test_file_1.txt"},
         )
@@ -66,7 +66,7 @@ class TestFileDetails:
         """Test getting details of a non-existent file"""
         ret = nfclient.run_job(
             "filesharing",
-            "file_details",
+            "file_stat",
             workers=["filesharing-worker-1"],
             kwargs={"url": "nf://filesharing/non_existent_file.txt"},
         )
@@ -82,7 +82,7 @@ class TestFileDetails:
         """Test file_details with invalid URL format"""
         ret = nfclient.run_job(
             "filesharing",
-            "file_details",
+            "file_stat",
             workers=["filesharing-worker-1"],
             kwargs={"url": "ftp://invalid"},
         )
@@ -98,7 +98,7 @@ class TestFileDetails:
         """Test getting details of a file in a subdirectory"""
         ret = nfclient.run_job(
             "filesharing",
-            "file_details",
+            "file_stat",
             workers=["filesharing-worker-1"],
             kwargs={"url": "nf://filesharing/subdir1/nested_file.txt"},
         )
@@ -127,7 +127,7 @@ class TestFileDetails:
         """Worker should reject nf:// paths that escape base_dir."""
         ret = nfclient.run_job(
             "filesharing",
-            "file_details",
+            "file_stat",
             workers=["filesharing-worker-1"],
             kwargs={"url": url},
         )
@@ -159,7 +159,7 @@ class TestFileDetailsBatch:
         ]
         response = nfclient.run_job(
             "filesharing",
-            "file_details",
+            "file_stat",
             workers=["filesharing-worker-1"],
             kwargs={"url": urls},
         )["filesharing-worker-1"]
@@ -181,7 +181,7 @@ class TestFileDetailsBatch:
     def test_empty_batch_returns_no_entries(self, nfclient: NFPClient) -> None:
         response = nfclient.run_job(
             "filesharing",
-            "file_details",
+            "file_stat",
             workers=["filesharing-worker-1"],
             kwargs={"url": []},
         )["filesharing-worker-1"]

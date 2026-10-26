@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union
 
 if TYPE_CHECKING:
     from norfab.core.agent import NFAgent
+from urllib.parse import unquote
 from uuid import uuid4  # random uuid
 
 import orjson
@@ -877,6 +878,10 @@ def zmq_send_recv(client: object) -> None:
             )
             continue
 
+        if command == NFP.PUT:
+            client.put_queue.put((juuid, payload, msg[3]))
+            client.dispatcher_event.set()
+
         # Handle EVENT messages
         if command == NFP.EVENT:
             handle_event(client, juuid, payload, msg)
@@ -920,6 +925,19 @@ def handle_event(client: object, juuid: str, payload: dict, msg: list) -> None:
     extras = payload.get("extras") or {}
     if worker not in job["workers_dispatched"]:
         return
+
+    if job["task"] == "serve_file" and payload.get("status") == "running":
+        transfer = client.file_transfers.get(juuid)
+        if transfer and not transfer["started"]:
+            transfer["started"] = True
+            transfer["credit"] -= 1
+            client.send_to_broker(
+                NFP.PUT,
+                b"all",
+                client.ensure_bytes([worker]),
+                juuid.encode(),
+                orjson.dumps({"offset": 0}),
+            )
 
     # Input events update the job immediately, without waiting for GET polling.
     if future and payload.get("event_type") in ("input_request", "input_response"):
@@ -1160,37 +1178,29 @@ def handle_stream(client, juuid: str, status: str, payload: bytes) -> None:
         log.error(f"{client.name} - received stream for unknown file transfer {juuid}")
         return
 
-    destination = file_transfer["destination"]  # file object
-    size = len(payload)
-    file_transfer["credit"] += 1  # Up to PIPELINE chunks in transit
-    file_transfer["total_bytes_received"] += size
+    if (
+        job["status"] in TERMINAL_JOB_STATUSES
+        or file_transfer["destination"].closed
+        or file_transfer["error"] is not None
+    ):
+        return
 
-    # save received chunk
-    destination.write(payload)
-    file_transfer["file_hash"].update(payload)
-
-    # check if done
-    if file_transfer["total_bytes_received"] >= file_transfer["size_bytes"]:
-        destination.close()
-
-        # check md5hash mismatch
-        file_hash = file_transfer["file_hash"].hexdigest()
-        if file_hash != file_transfer["md5hash"]:
-            client.job_db.update_job(
-                juuid,
-                status=JobStatus.FAILED,
-                errors=["Download failed, MD5 hash mismatch"],
-            )
-            log.error(
-                f"{client.name} - file download failed, MD5 hash mismatch, job '{juuid}', filename '{destination.name}'"
-            )
-            future = client.job_futures.get(juuid)
-            if future:
-                future.mark_done(client.job_db.get_job(juuid))
-
-        log.debug(
-            f"{client.name} - finished file download, job '{juuid}', filename '{destination.name}'"
+    try:
+        file_transfer["destination"].write(payload)
+    except OSError as exc:
+        file_transfer["error"] = exc
+        client.send_to_broker(
+            NFP.PUT,
+            client.ensure_bytes(job["service"]),
+            client.ensure_bytes(job["workers_requested"]),
+            juuid.encode(),
+            orjson.dumps({"error": str(exc)}),
         )
+        return
+    file_transfer["file_hash"].update(payload)
+    file_transfer["total_bytes_received"] += len(payload)
+    file_transfer["credit"] += 1
+    if file_transfer["total_bytes_received"] >= file_transfer["size_bytes"]:
         return
 
     # request next set of chunks up to credit
@@ -1365,12 +1375,15 @@ def dispatcher(client) -> None:
         try:
             dispatch_new_jobs(client)
             poll_active_jobs(client)
+            client.handle_file_request()
         except Exception as e:
             log.error(f"{client.name} - dispatcher error: {e}", exc_info=True)
         has_active_jobs = any(
             not future.done_event.is_set()
             for future in list(client.job_futures.values())
         )
+        if not client.put_queue.empty():
+            continue
         client.dispatcher_event.wait(timeout=0.1 if has_active_jobs else 1)
         client.dispatcher_event.clear()
 
@@ -1454,6 +1467,7 @@ class NFPClient(object):
             self.inventory.base_dir, "__norfab__", "files", "client", self.name
         )
         self.file_transfers = {}  # file transfers tracker
+        self.put_queue = queue.Queue()
         self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
         self.build_message = NFP.MessageBuilder()
         self.monitoring = ProcessMonitor()
@@ -1666,6 +1680,8 @@ class NFPClient(object):
                 uuid=uuid,
                 request=request,
             )
+        elif command == NFP.STREAM:
+            msg = [b"", NFP.CLIENT, command, service, workers, uuid, request]
         elif command == NFP.MMI:
             msg = self.build_message.client_to_broker_mmi(
                 command=command,
@@ -1861,6 +1877,9 @@ class NFPClient(object):
         pipeline: int = 10,
         timeout: int = 600,
         read: bool = False,
+        *,
+        worker: str = None,
+        destination: str = None,
     ) -> dict | list[dict]:
         """Download files, reusing cached copies when their hashes match.
 
@@ -1869,11 +1888,15 @@ class NFPClient(object):
         Selection restarts on each call. Git URLs use each worker's resolved path.
 
         Args:
-            url: An nf:// or git:// URL, or a list of URLs.
+            url: An nf:// or git:// URL, or a list of URLs. With worker, also
+                accepts paths and file:// URLs resolved on that worker.
             chunk_size: Bytes per chunk. Defaults to 256000.
             pipeline: Maximum continuation requests in flight. Defaults to 10.
             timeout: Seconds to wait for each job. Defaults to 600.
             read: Return UTF-8 text instead of local paths. Defaults to False.
+            worker: Exact source worker name. Omit for FileSharing discovery.
+            destination: Output path for a single native worker file. Defaults
+                to a cache path isolated by worker and source path.
 
         Returns:
             A dictionary with status, content, and error for a string URL, or a
@@ -1882,6 +1905,8 @@ class NFPClient(object):
 
         Raises:
             TypeError: If url is not a string or a list of strings.
+            ValueError: Invalid chunk size, pipeline, timeout, or destination.
+            TimeoutError: Native metadata or transfer job timed out.
             OSError: If a local file operation fails; stops the batch.
             UnicodeError: If read=True and the file is not valid UTF-8.
         """
@@ -1891,6 +1916,16 @@ class NFPClient(object):
             url = [url]
         if not isinstance(url, list) or any(not isinstance(item, str) for item in url):
             raise TypeError("url must be a string or a list of strings")
+        if destination is not None and (
+            not single or not worker or url[0].startswith(("nf://", "git://"))
+        ):
+            raise ValueError(
+                "destination requires a single native path and a named worker"
+            )
+        if worker and (not 0 < chunk_size <= 1048576 or pipeline < 1 or timeout <= 0):
+            raise ValueError(
+                "chunk_size must be 1..1048576; pipeline and timeout must be positive"
+            )
         # Resolve Git URLs to file paths on each worker.
         git_results = {}
         git_urls = [item for item in url if item.startswith("git://")]
@@ -1898,7 +1933,7 @@ class NFPClient(object):
             git_results = (
                 self.run_job(
                     service="filesharing",
-                    workers="all",
+                    workers=[worker] if worker else "all",
                     task="resolve_git_url",
                     kwargs={"url": git_urls},
                     timeout=timeout,
@@ -1915,18 +1950,26 @@ class NFPClient(object):
                     for entry in (response["result"] or {}).values()
                     if not entry["failed"]
                 )
+        if worker:
+            metadata_urls.extend(
+                item for item in url if not item.startswith(("nf://", "git://"))
+            )
         metadata = {}
         if metadata_urls:
+            stat_uuid = uuid4().hex
             metadata = (
                 self.run_job(
-                    service="filesharing",
-                    workers="all",
-                    task="file_details",
+                    service="all" if worker else "filesharing",
+                    task="file_stat",
+                    uuid=stat_uuid,
+                    workers=[worker] if worker else "all",
                     kwargs={"url": metadata_urls},
                     timeout=timeout,
                 )
                 or {}
             )
+            if worker and self.job_db.get_job(stat_uuid)["status"] == JobStatus.STALE:
+                raise TimeoutError("file metadata request timed out")
         workers = sorted(metadata)
         next_worker = 0
         results = []
@@ -1935,7 +1978,8 @@ class NFPClient(object):
         for item in url:
             result = {"status": "404", "content": None, "error": "file not found"}
             results.append(result)
-            if not item.startswith(("nf://", "git://")):
+            native = bool(worker) and not item.startswith(("nf://", "git://"))
+            if not native and not item.startswith(("nf://", "git://")):
                 result.update(status="500", error="Invalid url format")
                 continue
 
@@ -1946,13 +1990,13 @@ class NFPClient(object):
             for offset in range(len(workers)):
                 # Wrap back to the first worker after reaching the end of the list.
                 index = (next_worker + offset) % len(workers)
-                worker = workers[index]
-                response = metadata[worker]
+                selected_worker = workers[index]
+                response = metadata[selected_worker]
                 if response["failed"]:
                     continue
                 candidate_url = item
                 if item.startswith("git://"):
-                    resolution = git_results.get(worker)
+                    resolution = git_results.get(selected_worker)
                     if not resolution or resolution["failed"]:
                         continue
                     entry = (resolution["result"] or {}).get(item)
@@ -1960,26 +2004,45 @@ class NFPClient(object):
                         continue
                     candidate_url = entry["result"]
                 entry = (response["result"] or {}).get(candidate_url)
+                if entry and entry["failed"]:
+                    result["error"] = entry["errors"]
                 if entry and not entry["failed"]:
                     details = entry["result"]
                     resolved_url = candidate_url
                     # Start the next file with the worker after this one.
                     next_worker = (index + 1) % len(workers)
                     break
-            if not resolved_url.startswith("nf://"):
+            if native and details is None:
                 continue
-            destination = os.path.realpath(
-                os.path.join(
-                    fetched_root,
-                    *resolved_url.removeprefix("nf://")
-                    .replace("\\", "/")
-                    .lstrip("/")
-                    .split("/"),
+            if not native and not resolved_url.startswith("nf://"):
+                continue
+            if native:
+                local_path = (
+                    os.path.abspath(destination)
+                    if destination
+                    else os.path.join(
+                        fetched_root,
+                        hashlib.sha256(worker.encode()).hexdigest(),
+                        hashlib.sha256(item.encode()).hexdigest(),
+                        os.path.basename(self.safe_path(item)),
+                    )
                 )
-            )
+            else:
+                local_path = os.path.realpath(
+                    os.path.join(
+                        fetched_root,
+                        *resolved_url.removeprefix("nf://")
+                        .replace("\\", "/")
+                        .lstrip("/")
+                        .split("/"),
+                    )
+                )
             # Reject paths outside the local cache directory.
             try:
-                safe = os.path.commonpath([fetched_root, destination]) == fetched_root
+                safe = (
+                    native
+                    or os.path.commonpath([fetched_root, local_path]) == fetched_root
+                )
             except ValueError:
                 safe = False
             if not safe:
@@ -1990,75 +2053,230 @@ class NFPClient(object):
             result.update(status="200", error=None)
             # Check whether the cached file matches the worker's copy.
             cached = False
-            if os.path.isfile(destination):
-                file_hash = hashlib.md5()
-                with open(destination, "rb") as file_obj:
-                    chunk = file_obj.read(8192)
-                    while chunk:
-                        file_hash.update(chunk)
-                        chunk = file_obj.read(8192)
-                cached = file_hash.hexdigest() == details["md5hash"]
+            if (
+                os.path.isfile(local_path)
+                and os.path.getsize(local_path) == details["size_bytes"]
+            ):
+                cached = self.file_stat(local_path)["md5hash"] == details["md5hash"]
             # Download the file if it is missing or has changed.
             if not cached:
-                os.makedirs(os.path.dirname(destination), exist_ok=True)
+                os.makedirs(os.path.dirname(local_path), exist_ok=True)
                 uuid = uuid4().hex
                 self.file_transfers[uuid] = {
                     **details,
-                    "destination": open(destination, "wb"),
+                    "started": False,
+                    "error": None,
+                    "destination": open(local_path, "wb"),
                     "total_bytes_received": 0,
                     "offset": 0,
                     "credit": pipeline,
                     "chunk_size": chunk_size,
                     "file_hash": hashlib.md5(),
-                    # The first chunk arrives automatically; request the remaining chunks.
+                    # The starting event triggers the first request; pipeline the rest.
                     "chunk_requests_remaining": max(
                         0,
                         (details["size_bytes"] + chunk_size - 1) // chunk_size - 1,
                     ),
                 }
-                # Fetch from the worker that supplied the file details.
-                reply = (
-                    self.run_job(
-                        uuid=uuid,
-                        service="filesharing",
-                        workers=[worker],
-                        task="fetch_file",
-                        kwargs={
-                            "url": resolved_url,
-                            "offset": 0,
-                            "chunk_size": chunk_size,
-                        },
-                        timeout=timeout,
+                try:
+                    # Fetch from the worker that supplied the file details.
+                    reply = (
+                        self.run_job(
+                            uuid=uuid,
+                            service="all",
+                            workers=[selected_worker],
+                            task="serve_file",
+                            kwargs={"path": resolved_url, "chunk_size": chunk_size},
+                            timeout=timeout,
+                        )
+                        or {}
                     )
-                    or {}
-                )
-                # Check the worker reply and the downloaded file hash.
-                self.file_transfers[uuid]["destination"].close()
-                response = reply.get(worker)
-                if not response or response["failed"]:
-                    result.update(
-                        status="404",
-                        error=(
-                            response["errors"] if response else "File download failed"
-                        ),
-                    )
-                elif (
-                    self.file_transfers[uuid]["file_hash"].hexdigest()
-                    != details["md5hash"]
-                ):
-                    result.update(
-                        status="400", error="Download failed, MD5 hash mismatch"
-                    )
-                self.file_transfers.pop(uuid)
+                    transfer = self.file_transfers[uuid]
+                    if transfer["error"] is not None:
+                        raise transfer["error"]
+                    if (
+                        native
+                        and self.job_db.get_job(uuid)["status"] == JobStatus.STALE
+                    ):
+                        raise TimeoutError(f"file transfer timed out: {item}")
+                    # Check the worker reply and the downloaded file hash.
+                    response = reply.get(selected_worker)
+                    if response and response["failed"]:
+                        result.update(status="404", error=response["errors"])
+                    elif (
+                        transfer["total_bytes_received"] != details["size_bytes"]
+                        or transfer["file_hash"].hexdigest() != details["md5hash"]
+                    ):
+                        result.update(
+                            status="400",
+                            error="Download failed, size or MD5 hash mismatch",
+                        )
+                    elif not response:
+                        result.update(status="404", error="File download failed")
+                finally:
+                    self.file_transfers.pop(uuid)["destination"].close()
                 if result["status"] != "200":
                     continue
             # Return the file contents or its local path.
             if read:
-                with open(destination, "r", encoding="utf-8") as file_obj:
+                with open(local_path, "r", encoding="utf-8") as file_obj:
                     result["content"] = file_obj.read()
             else:
-                result["content"] = destination
+                result["content"] = local_path
         return results[0] if single else results
+
+    @staticmethod
+    def safe_path(url: str) -> str:
+        """Resolve a path on the client filesystem.
+
+        Args:
+            url: Plain path, file://relative URL, or file:///absolute URL.
+
+        Returns:
+            Absolute local path. Native paths are not sandboxed or confined.
+
+        Raises:
+            ValueError: Empty path or unsupported URL scheme. Published nf://
+                and git:// URLs must be downloaded with fetch_file instead.
+        """
+        if not isinstance(url, str) or not url:
+            raise ValueError("file path must be a nonempty string")
+        if "://" in url and not url.startswith("file://"):
+            raise ValueError("invalid URL format")
+        path = unquote(url[7:]) if url.startswith("file://") else url
+        if os.name == "nt" and len(path) > 2 and path[0] == "/" and path[2] == ":":
+            path = path[1:]
+        return os.path.abspath(path)
+
+    def file_stat(self, url: str) -> dict:
+        """Read local file size and MD5 without contacting a worker.
+
+        Args:
+            url: Plain path or file:// URL on this client.
+
+        Returns:
+            Metadata with md5hash, size_bytes, and exists, matching the worker
+            task's metadata fields. MD5 detects corruption, not authenticity.
+
+        Raises:
+            ValueError: Invalid path or unsupported URL scheme.
+            OSError: The file is missing, unreadable, or a directory.
+        """
+        file_hash = hashlib.md5()
+        size = 0
+        with open(self.safe_path(url), "rb") as source:
+            for chunk in iter(lambda: source.read(8192), b""):
+                file_hash.update(chunk)
+                size += len(chunk)
+        return {"md5hash": file_hash.hexdigest(), "size_bytes": size, "exists": True}
+
+    def handle_file_request(self) -> None:
+        """Handle one queued file request on the client dispatcher thread.
+
+        Return immediately when the queue is empty. Valid requests receive file
+        metadata or one binary chunk; access and read failures receive an error
+        reply. Malformed requests without usable routing are discarded. Processing
+        one request per call leaves time for job dispatch and result polling.
+        """
+        try:
+            juuid, request, service = self.put_queue.get_nowait()
+        except queue.Empty:
+            return
+        if not isinstance(request, dict) or request.get("file_read") is not True:
+            return
+        worker, url = request.get("worker"), request.get("path")
+        if not isinstance(worker, str):
+            return
+        job = self.job_db.get_job(juuid)
+        supplied = False
+        values = [job["args"], job["kwargs"]] if job else []
+        while values:
+            value = values.pop()
+            if isinstance(value, dict):
+                values.extend(value.values())
+            elif isinstance(value, (list, tuple)):
+                values.extend(value)
+            elif value == url:
+                supplied = True
+                break
+        if (
+            job
+            and job["status"] not in TERMINAL_JOB_STATUSES
+            and isinstance(url, str)
+            and url.startswith("file://")
+            and supplied
+            and worker in job["workers_dispatched"]
+        ):
+            try:
+                if request.get("file_details"):
+                    command = NFP.PUT
+                    data = orjson.dumps({"file_details": self.file_stat(url)})
+                else:
+                    offset, size = request["offset"], request["size"]
+                    if type(offset) is not int or type(size) is not int:
+                        raise ValueError("offset and size must be integers")
+                    if offset < 0 or not 0 < size <= 1048576:
+                        raise ValueError(
+                            "offset must be nonnegative and size between 1 and 1048576"
+                        )
+                    with open(self.safe_path(url), "rb") as source:
+                        source.seek(offset)
+                        data = source.read(size)
+                    command = NFP.STREAM
+            except (
+                OSError,
+                ValueError,
+                KeyError,
+                TypeError,
+                OverflowError,
+            ) as exc:
+                command = NFP.PUT
+                data = orjson.dumps({"file_error": str(exc)})
+        else:
+            command = NFP.PUT
+            data = orjson.dumps({"file_error": "file was not supplied in this job"})
+        self.send_to_broker(
+            command,
+            service,
+            self.ensure_bytes([worker]),
+            juuid.encode(),
+            data,
+        )
+
+    def upload_file(
+        self,
+        url: str,
+        worker: str,
+        destination: str = None,
+        timeout: int = 600,
+        chunk_size: int = 256000,
+    ) -> dict:
+        """Ask a worker to pull a local file through the running receive job.
+
+        Args:
+            url: Local file://relative or file:///absolute URL.
+            worker: Exact destination worker name, from any service.
+            destination: Output path on the worker, overwritten if present.
+                Defaults to a unique file in its client's fetchedfiles directory.
+            timeout: Job timeout in seconds.
+            chunk_size: Bytes per request, from 1 through 1048576.
+
+        Returns:
+            Normal job results keyed by worker; successful results contain the
+            destination path. Failed transfers may leave partial files.
+
+        Raises:
+            ValueError: URL does not use file://.
+        """
+        if not url.startswith("file://"):
+            raise ValueError("upload_file requires a file:// URL")
+        return self.run_job(
+            "all",
+            "receive_file",
+            workers=[worker],
+            timeout=timeout,
+            kwargs={"url": url, "destination": destination, "chunk_size": chunk_size},
+        )
 
     def recover_job_futures(self) -> None:
         active_statuses = [

@@ -20,7 +20,6 @@ from .filesharing_models import (
     GetVersionResult,
 )
 from .git_tasks import GitTasks
-from .local_files_tasks import LocalFilesTasks
 
 SERVICE = "filesharing"
 
@@ -32,7 +31,7 @@ log = logging.getLogger(__name__)
 # --------------------------------------------------------------------------
 
 
-class FileSharingWorker(NFPWorker, GitTasks, LocalFilesTasks):
+class FileSharingWorker(NFPWorker, GitTasks):
     """File Sharing worker providing Git-based remote synchronization and file access.
 
     Supports managing multiple configured Git remotes with automatic periodic

@@ -197,6 +197,75 @@ class Result(BaseModel, use_enum_values=True):
 # ------------------------------------------------------
 
 
+class ListFilesInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    url: StrictStr = Field(
+        ...,
+        description="Native directory path, file URL, or published nf:// URL",
+    )
+
+
+class ListFilesResult(Result):
+    result: Union[None, list[StrictStr]] = Field(
+        None,
+        description="Directory entries",
+    )
+
+
+class WalkInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    url: StrictStr = Field(
+        ...,
+        description="Native directory path, file URL, or published nf:// URL",
+    )
+
+
+class WalkResult(Result):
+    result: Union[None, list[StrictStr]] = Field(
+        None,
+        description="Absolute native paths or published nf:// URLs",
+    )
+
+
+class FileStatInput(BaseModel):
+    url: StrictStr | list[StrictStr] = Field(
+        ..., description="Local paths, file URLs, or published nf:// URLs"
+    )
+
+
+class FileStatResult(Result):
+    result: dict = Field(
+        ..., description="Metadata for a string, or per-path results for a list"
+    )
+
+
+class ServeFileInput(BaseModel):
+    path: StrictStr = Field(
+        ..., description="Source path, file URL, or published nf:// URL on FileSharing"
+    )
+    chunk_size: StrictInt = Field(
+        256000, ge=1, le=1048576, description="Bytes per chunk"
+    )
+
+
+class ServeFileResult(Result):
+    result: StrictBool = Field(..., description="True after sending the final chunk")
+
+
+class ReceiveFileInput(BaseModel):
+    url: StrictStr = Field(..., description="Source file URL or worker path")
+    destination: StrictStr | None = Field(None, description="Destination file path")
+    source_worker: StrictStr | None = Field(
+        None,
+        description="Source worker name; omitted to pull from the submitting client",
+    )
+    chunk_size: StrictInt = Field(
+        256000, ge=1, le=1048576, description="Bytes requested per chunk"
+    )
+
+
+class ReceiveFileResult(Result):
+    result: StrictStr = Field(..., description="Absolute destination file path")
+
+
 class WorkerEchoIn(BaseModel):
     job: object = Field(..., description="NorFab job object")
     sleep: StrictInt = Field(None, description="SLeep for given time")

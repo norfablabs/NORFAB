@@ -1,10 +1,13 @@
 import builtins
 import os
+import socket
 import sys
 import time
 import unittest
 import unittest.mock
+from collections.abc import Iterator
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pytest
 from picle import App
@@ -13,6 +16,7 @@ from norfab.clients.nfcli_shell.nfcli_shell_client import (
     NorFabShell,
     mount_shell_plugins,
 )
+from norfab.core.client import NFPClient
 from norfab.core.nfapi import NorFab
 from tests.services.netbox.common import get_pynetbox
 
@@ -132,3 +136,24 @@ def picle_shell():
     mount_shell_plugins(shell, nf.inventory)
     yield shell, mock_stdout
     nf.destroy()
+
+
+@pytest.fixture(scope="module")
+def transfer_client(
+    tmp_path_factory: pytest.TempPathFactory,
+) -> Iterator[tuple[NFPClient, Path]]:
+    root = tmp_path_factory.mktemp("file-transfer")
+    with socket.socket() as listener:
+        listener.bind(("127.0.0.1", 0))
+        port = listener.getsockname()[1]
+    inventory = {
+        "broker": {"endpoint": f"tcp://127.0.0.1:{port}", "zmq_auth": False},
+        "topology": {"broker": True, "workers": ["transfer-a", "transfer-b"]},
+        "workers": {"transfer-*": [{"service": "workflow"}]},
+    }
+    nf = NorFab(inventory_data=inventory, base_dir=str(root))
+    try:
+        nf.start()
+        yield nf.make_client(), root
+    finally:
+        nf.destroy()

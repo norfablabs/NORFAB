@@ -182,7 +182,7 @@ class TestFetchFileBatch:
         assert all(entry["status"] == "200" for entry in results)
         assert results[0] is not results[-2]
         assert len(jobs) == 1
-        assert jobs[0]["task"] == "file_details"
+        assert jobs[0]["task"] == "file_stat"
         assert jobs[0]["kwargs"]["url"] == requested
         assert jobs[0]["workers_requested"] == "all"
         assert nfclient.file_transfers == {}
@@ -289,7 +289,7 @@ class TestFetchFileBatch:
             "filesharing-worker-2",
         ]
         assert [
-            job["workers_requested"] for job in jobs if job["task"] == "fetch_file"
+            job["workers_requested"] for job in jobs if job["task"] == "serve_file"
         ] == [
             ["filesharing-worker-2"],
             ["filesharing-worker-1"],
@@ -328,7 +328,7 @@ class TestFetchFileBatch:
             result = nfclient.fetch_file(f"{prefix}/{published.name}", chunk_size=32)
             assert truncated.is_set()
             assert result["status"] == "404"
-            assert "chunk timeout" in str(result["error"])
+            assert "source file changed" in str(result["error"])
             assert "MD5 hash mismatch" not in str(result["error"])
             assert nfclient.file_transfers == {}
         finally:

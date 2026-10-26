@@ -18,7 +18,10 @@ Common uses:
 - Make read-only Git repository snapshots available in the `nf://` namespace
   and synchronize them on demand through `git://`.
 
-For protocol-level streaming details, see [development/file_streaming_fetch_file.md](../../development/file_streaming_fetch_file.md).
+Downloads, uploads, metadata, caching, and checksum verification belong to the
+[core file-transfer APIs](../../api_ref/core/api_reference_core_file_transfer.md).
+FileSharing handles publication and Git synchronization. Directory browsing
+uses the inherited [core tasks](../../api_ref/core/api_reference_core_file_transfer.md#browse-worker-files).
 
 ## URL format and path rules
 
@@ -38,20 +41,17 @@ For example, `git://network-assets/templates/base.j2` synchronizes the
 configured `network-assets` remote, resolves its mount, and fetches
 `templates/base.j2`.
 
-The service rejects unsupported schemes, absolute paths, directory traversal,
-and `git://` URLs that do not identify a configured remote and file path.
+Published nf:// paths cannot escape the configured base directory. Git URLs
+must identify a configured remote and file path. These publication rules do not
+restrict native filesystem paths supplied to core transfer tasks.
 
-Only the client and worker fetch helpers accept `git://`; low-level File Sharing
-tasks continue to operate on the resolved `nf://` mount.
+Client and worker fetch helpers resolve `git://` automatically through
+`resolve_git_url`. The core serving task then reads the resolved `nf://` path.
 
 ## What the service provides
 
-The File Sharing worker exposes these tasks:
+The FileSharing-specific tasks include:
 
-- **[list_files](services_filesharing_service_tasks_list_files.md)** — list directory entries (non-recursive)
-- **[walk](services_filesharing_service_tasks_walk.md)** — recursively list files under a directory (returns a list of `nf://...` file URLs)
-- **[file_details](services_filesharing_service_tasks_file_details.md)** — returns file metadata including existence, size in bytes, and MD5 hash
-- **[fetch_file](services_filesharing_service_tasks_fetch_file.md)** — streams the file to the client with chunking and offset support
 - **[create_remote_git](services_filesharing_service_tasks_create_remote_git.md)** — registers a Git remote and initializes its private local repository
 - **[git_clone](services_filesharing_service_tasks_git_clone.md)** — fetches a registered Git remote and makes its current branch available under `nf://`
 - **[delete_remote_git](services_filesharing_service_tasks_delete_remote_git.md)** — deletes and unregisters a runtime Git remote
@@ -65,4 +65,7 @@ and returns its published `nf://` URL. Client and worker file-fetch helpers call
 this task automatically and continue the transfer against the same File Sharing
 worker.
 
-For detailed information about each task, see the individual task documentation pages linked above.
+The former FileSharing `fetch_file` and `file_details` tasks are removed.
+Use `client.fetch_file()` to download and core `file_stat` to inspect metadata.
+CLI `file copy` and `show filesharing files details` commands remain available;
+see the [core reference](../../api_ref/core/api_reference_core_file_transfer.md).

@@ -1,11 +1,15 @@
 import copy
+import os
 import pprint
 import sys
+import threading
 import time
+from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
 
+from norfab.core import NFP
 from norfab.core.client import NFPClient
 from norfab.core.worker import Task
 
@@ -502,3 +506,187 @@ class TestWorkerMessaging:
         assert after["keepalives_sent"] > before["keepalives_sent"]
         assert after["keepalives_received"] > before["keepalives_received"]
         assert after["reconnects"] == before["reconnects"]
+
+
+class TestWorkerFileTransfer:
+    def test_job_pulls_relative_file_and_worker_pulls_from_worker(
+        self, transfer_client: tuple[NFPClient, Path], tmp_path: Path
+    ) -> None:
+        client, _ = transfer_client
+        source = tmp_path / "relative.txt"
+        source.write_text("receiver requests this file", encoding="utf-8")
+        url = "file://" + os.path.relpath(source).replace(os.sep, "/")
+        result = client.run_job(
+            "workflow",
+            "receive_file",
+            workers=["transfer-a"],
+            kwargs={"url": url, "chunk_size": 7},
+            timeout=20,
+        )
+        assert not result["transfer-a"]["failed"], result
+        remote = result["transfer-a"]["result"]
+        result = client.run_job(
+            "workflow",
+            "receive_file",
+            workers=["transfer-b"],
+            kwargs={"url": remote, "source_worker": "transfer-a", "chunk_size": 5},
+            timeout=20,
+        )
+        assert not result["transfer-b"]["failed"], result
+        target = client.fetch_file(result["transfer-b"]["result"], worker="transfer-b")[
+            "content"
+        ]
+        assert Path(target).read_bytes() == source.read_bytes()
+
+    def test_one_job_can_upload_to_multiple_workers(
+        self, transfer_client: tuple[NFPClient, Path], tmp_path: Path
+    ) -> None:
+        client, _ = transfer_client
+        source = tmp_path / "fanout.bin"
+        source.write_bytes(bytes(range(128)))
+        replies = client.run_job(
+            "workflow",
+            "receive_file",
+            workers=["transfer-a", "transfer-b"],
+            kwargs={"url": source.as_uri(), "chunk_size": 11},
+            timeout=10,
+        )
+        assert set(replies) == {"transfer-a", "transfer-b"}
+        for reply in replies.values():
+            assert not reply["failed"], reply
+            assert Path(reply["result"]).read_bytes() == source.read_bytes()
+
+    def test_local_url_is_not_fetched_until_requested(
+        self, transfer_client: tuple[NFPClient, Path]
+    ) -> None:
+        client, _ = transfer_client
+        result = client.run_job(
+            "workflow",
+            "echo",
+            workers=["transfer-a"],
+            kwargs={"file": "file://does-not-exist"},
+            timeout=10,
+        )
+        assert not result["transfer-a"]["failed"], result
+
+    def test_upload_uses_job_uuid_and_keeps_socket_and_input_separate(
+        self,
+        transfer_client: tuple[NFPClient, Path],
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        client, _ = transfer_client
+        source = tmp_path / "slow-input.bin"
+        source.write_bytes(b"binary input" * 10)
+        reading, release = threading.Event(), threading.Event()
+        from norfab.core import client as client_module
+
+        original_open, original_send = open, client.send_to_broker
+        stream_ids = []
+
+        def slow_open(path: str, mode: str, *args: object, **kwargs: object) -> object:
+            if str(path) == str(source) and mode == "rb":
+                reading.set()
+                assert release.wait(5)
+            return original_open(path, mode, *args, **kwargs)
+
+        def capture_send(
+            command: bytes, service: bytes, workers: bytes, uuid: bytes, request: bytes
+        ) -> None:
+            if command == NFP.STREAM:
+                stream_ids.append(uuid)
+            original_send(command, service, workers, uuid, request)
+
+        monkeypatch.setattr(client_module, "open", slow_open, raising=False)
+        monkeypatch.setattr(client, "send_to_broker", capture_send)
+        future = client.submit_job(
+            "workflow",
+            "receive_file",
+            workers=["transfer-a"],
+            kwargs={"url": source.as_uri(), "chunk_size": 17},
+            timeout=10,
+        )
+        try:
+            assert reading.wait(5)
+            # An ordinary input message must not be mistaken for file bytes.
+            future.send_response("independent-input", "text", worker="transfer-a")
+            # MMI reception must work while the dispatcher is blocked on disk.
+            assert (
+                client.mmi("mmi.service.broker", "show_workers", timeout=2)["status"]
+                == "200"
+            )
+        finally:
+            release.set()
+        result = future.result(timeout=10)["transfer-a"]
+        assert not result["failed"], result
+        assert set(stream_ids) == {future.uuid.encode()}
+        assert Path(result["result"]).read_bytes() == source.read_bytes()
+
+    def test_upload_rejects_corruption(
+        self,
+        transfer_client: tuple[NFPClient, Path],
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        client, _ = transfer_client
+        source = tmp_path / "corrupt-upload.bin"
+        source.write_bytes(b"original data" * 10)
+        original = client.send_to_broker
+
+        def corrupt(
+            command: bytes, service: bytes, workers: bytes, uuid: bytes, payload: bytes
+        ) -> None:
+            if command == NFP.STREAM and payload:
+                payload = bytes([payload[0] ^ 1]) + payload[1:]
+            original(command, service, workers, uuid, payload)
+
+        monkeypatch.setattr(client, "send_to_broker", corrupt)
+        reply = client.upload_file(source.as_uri(), "transfer-a", chunk_size=19)
+        assert reply["transfer-a"]["failed"], reply
+        assert "MD5 hash mismatch" in str(reply["transfer-a"]["errors"])
+
+    def test_native_serving_rejects_unsafe_published_paths(
+        self, transfer_client: tuple[NFPClient, Path]
+    ) -> None:
+        client, _ = transfer_client
+        for worker, path in [
+            ("filesharing-worker-1", "nf://../outside.txt"),
+            ("transfer-a", "nf://published.txt"),
+        ]:
+            reply = client.run_job(
+                "all", "serve_file", workers=[worker], kwargs={"path": path}, timeout=2
+            )
+            assert reply[worker]["failed"], reply
+
+    def test_native_directory_tasks(
+        self, transfer_client: tuple[NFPClient, Path], tmp_path: Path
+    ) -> None:
+        client, _ = transfer_client
+        (tmp_path / "visible.txt").write_text("content", encoding="utf-8")
+        (tmp_path / ".hidden").write_text("hidden", encoding="utf-8")
+        (tmp_path / "nested").mkdir()
+        (tmp_path / "nested" / "child.txt").write_text("child", encoding="utf-8")
+        listed = client.run_job(
+            "all",
+            "list_files",
+            workers=["transfer-a"],
+            kwargs={"url": tmp_path.as_uri()},
+        )["transfer-a"]
+        assert not listed["failed"], listed
+        assert set(listed["result"]) == {"visible.txt", ".hidden", "nested"}
+        walked = client.run_job(
+            "all", "walk", workers=["transfer-a"], kwargs={"url": str(tmp_path)}
+        )["transfer-a"]
+        assert not walked["failed"], walked
+        assert set(walked["result"]) == {
+            str(tmp_path / "visible.txt"),
+            str(tmp_path / "nested" / "child.txt"),
+        }
+        fetched = client.fetch_file(walked["result"], worker="transfer-a", read=True)
+        assert {entry["content"] for entry in fetched} == {"content", "child"}
+        for task in ("list_files", "walk"):
+            for url in ("nf://", str(tmp_path / "missing")):
+                reply = client.run_job(
+                    "all", task, workers=["transfer-a"], kwargs={"url": url}
+                )["transfer-a"]
+                assert reply["failed"], reply

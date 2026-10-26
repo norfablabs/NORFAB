@@ -368,10 +368,10 @@ class TestResolveGitUrlBatch:
         ]
         assert [entry["status"] for entry in results] == ["200", "200", "200", "404"]
         assert [job["task"] for job in jobs].count("resolve_git_url") == 1
-        assert [job["task"] for job in jobs].count("file_details") == 1
-        assert [job["task"] for job in jobs].count("fetch_file") == 2
+        assert [job["task"] for job in jobs].count("file_stat") == 1
+        assert [job["task"] for job in jobs].count("serve_file") == 2
         for job in jobs:
-            if job["task"] == "fetch_file":
+            if job["task"] == "serve_file":
                 assert job["workers_requested"] == [WORKER]
             else:
                 assert job["workers_requested"] == "all"
@@ -468,7 +468,7 @@ class TestResolveGitUrlBatch:
                 for uuid in nfclient.job_futures
                 if uuid not in before
             ]
-            transfers = [job for job in jobs if job["task"] == "fetch_file"]
+            transfers = [job for job in jobs if job["task"] == "serve_file"]
             assert [entry["content"] for entry in results] == [
                 "first Git file",
                 "second Git file",
@@ -477,7 +477,7 @@ class TestResolveGitUrlBatch:
                 [WORKER],
                 [worker],
             ]
-            assert [job["kwargs"]["url"] for job in transfers] == [
+            assert [job["kwargs"]["path"] for job in transfers] == [
                 f"nf://{local_git_remote['mount']}/a.txt",
                 f"nf://{mount}/b.txt",
             ]

@@ -5,6 +5,7 @@ These documents record design decisions and development work. Statuses below ref
 | Document | Recorded status |
 | --- | --- |
 | [ADR - File Sharing Git Remotes](adr_extensible_data_sources_and_git_sync.md) | Accepted |
+| [ADR - Lightweight Generic File Transfer](adr_generic_file_transfer.md) | Accepted |
 | [ADR - FastMCP Bearer Authentication](adr_fastmcp_bearer_authentication.md) | Not stated |
 | [ADR - FastMCP Task Call Guardrails](adr_fastmcp_task_call_guardrails.md) | Accepted |
 | [ADR - FastMCP Task Result Guardrails](adr_fastmcp_task_result_guardrails.md) | Proposed |

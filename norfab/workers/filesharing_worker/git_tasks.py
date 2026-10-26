@@ -143,11 +143,11 @@ class GitTasks:
             return Result(failed=True, errors=[f"Remote '{name}' is not a git remote"])
 
         # A mount cannot contain or be contained by another remote mount.
-        mount_path = self._safe_path(remote["mount"])
+        mount_path = self.safe_path(remote["mount"])
         for existing_name, existing in self.remotes.items():
             if existing_name == name:
                 continue
-            existing_path = self._safe_path(existing["mount"])
+            existing_path = self.safe_path(existing["mount"])
             if os.path.commonpath([mount_path, existing_path]) in {
                 mount_path,
                 existing_path,
@@ -266,7 +266,7 @@ class GitTasks:
 
         try:
             # Remove both the public snapshot and the private Git working tree.
-            shutil.rmtree(self._safe_path(remote["mount"]), ignore_errors=True)
+            shutil.rmtree(self.safe_path(remote["mount"]), ignore_errors=True)
             shutil.rmtree(os.path.dirname(remote["repository"]), ignore_errors=True)
         finally:
             lock.release()
@@ -347,7 +347,7 @@ class GitTasks:
             return Result(failed=True, errors=[f"Remote '{name}' is busy"])
 
         remote_dir = os.path.dirname(remote["repository"])
-        mount_dir = self._safe_path(remote["mount"])
+        mount_dir = self.safe_path(remote["mount"])
         staging_dir = os.path.join(remote_dir, "staging")
         snapshot_dir = os.path.join(staging_dir, "snapshot")
         error = "Remote synchronization failed"
@@ -519,7 +519,7 @@ class GitTasks:
                 if remote["type"] != "git":
                     raise ValueError(f"Remote '{name}' is not a git remote")
 
-                mount_path = self._safe_path(remote["mount"])
+                mount_path = self.safe_path(remote["mount"])
                 resolved_path = os.path.abspath(
                     os.path.join(mount_path, *file_path.split("/"))
                 )

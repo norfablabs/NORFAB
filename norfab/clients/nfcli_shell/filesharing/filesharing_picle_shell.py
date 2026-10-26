@@ -5,10 +5,9 @@ from typing import Any, Optional
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import BaseModel, Field, StrictBool, StrictStr
 
+from norfab.models import FileStatInput, ListFilesInput
 from norfab.workers.filesharing_worker.filesharing_models import (
     CreateRemoteGitInput,
-    FileDetailsInput,
-    ListFilesInput,
     RemoteNameInput,
 )
 
@@ -164,7 +163,7 @@ class CopyFileModel(BaseModel):
         outputter = Outputters.outputter_nested
 
 
-class FileDetailsModel(FileDetailsInput, use_enum_values=True, populate_by_name=True):
+class FileDetailsModel(FileStatInput, use_enum_values=True, populate_by_name=True):
     url: StrictStr = Field("nf://", description="File location")
 
     @staticmethod
@@ -175,7 +174,7 @@ class FileDetailsModel(FileDetailsInput, use_enum_values=True, populate_by_name=
     def run(*args: object, **kwargs: object) -> Any:
         reply = run_future_job(
             "filesharing",
-            "file_details",
+            "file_stat",
             args=args,
             kwargs=kwargs,
             workers="all",

@@ -52,9 +52,9 @@ commands = [
     b"MMI",
 ]
 
-client_commands = [OPEN, DISCONNECT, POST, GET, DELETE, PUT, MMI]
+client_commands = [OPEN, DISCONNECT, POST, GET, DELETE, PUT, STREAM, MMI]
 
-worker_commands = [OPEN, READY, KEEPALIVE, DISCONNECT, RESPONSE, STREAM, MMI]
+worker_commands = [OPEN, READY, KEEPALIVE, DISCONNECT, RESPONSE, STREAM, PUT, MMI]
 
 broker_commands = [
     OPEN,

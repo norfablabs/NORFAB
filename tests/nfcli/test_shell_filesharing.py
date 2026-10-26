@@ -82,7 +82,7 @@ def test_details_preserve_worker_results(monkeypatch):
     }
 
     def run_job(service, task, workers, args, kwargs):
-        assert (service, task, workers) == ("filesharing", "file_details", "all")
+        assert (service, task, workers) == ("filesharing", "file_stat", "all")
         return response
 
     monkeypatch.setattr(shell, "run_future_job", run_job)

@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 22 October 2026*
+*Last updated: 26 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -113,6 +113,17 @@ not inferred and monitoring does not capture message payloads.
 
 NORFAB's [broker, clients, and workers](reference/architecture/reference_architecture_norfab.md) provide
 the shared execution layer beneath every service.
+
+### Generic file transfer
+
+Clients and workers can upload to and fetch from named workers through the
+broker using the native Python API. Tasks can pull client-local `file://` inputs
+on demand, without pre-staging. Existing `nf://` and `git://` downloads retain
+FileSharing behavior. **Use cases:** supplying job inputs and retrieving worker
+artifacts. Downloads share chunk pipelining and checksum-validated caching;
+uploads also verify size and MD5. **Limitations:** trusted filesystem access,
+no resume, and no REST/MCP exposure.
+[File transfer guide](api_ref/core/api_reference_core_file_transfer.md#generic-client-and-worker-transfers)
 
 ### Interactive installation
 
@@ -1398,19 +1409,20 @@ configured Git remotes on demand through `git://` URLs.
 
 ### File discovery
 
-Lists one directory level or recursively walks files beneath the configured
-base directory. **Use cases:** locating templates, playbooks, golden configs,
+Core worker tasks list directory entries or recursively walk native paths on
+any worker. FileSharing also supports nf:// within its publication directory. **Use cases:** locating templates, playbooks, golden configs,
 and software artifacts. **Limitations:** hidden/special content is skipped by
-walk and paths cannot escape the worker base directory.
-[List files](workers/filesharing/services_filesharing_service_tasks_list_files.md) ·
-[Walk](workers/filesharing/services_filesharing_service_tasks_walk.md)
+walk; nf:// paths cannot escape the publication directory. Native paths require
+trusted filesystem access and browsing tasks are not exposed through REST/MCP.
+[List files](api_ref/core/api_reference_core_file_transfer.md#browse-worker-files) ·
+[Walk](api_ref/core/api_reference_core_file_transfer.md#browse-worker-files)
 
 ### File metadata and integrity
 
 Reports existence, byte size, and MD5 hash. **Use cases:** pre-flight checks,
 cache validation, and transfer verification. **Limitations:** MD5 is provided
 for integrity comparison, not cryptographic trust or publisher authentication.
-[Task details](workers/filesharing/services_filesharing_service_tasks_file_details.md)
+[Task details](api_ref/core/api_reference_core_file_transfer.md)
 
 ### Streamed file retrieval
 
@@ -1424,7 +1436,7 @@ software efficiently, resuming chunk flow, and avoiding duplicate downloads.
 File Sharing service, then streams the file from its configured `nf://` mount.
 **Limitations:** only `nf://` paths under the configured base directory and
 paths from configured `git://` remotes are accepted.
-[Task details](workers/filesharing/services_filesharing_service_tasks_fetch_file.md)
+[Task details](api_ref/core/api_reference_core_file_transfer.md)
 
 ### Read-only Git remotes
 

@@ -6,8 +6,10 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from urllib.parse import urlsplit
+from unittest.mock import Mock
 from uuid import uuid4
 
+import orjson
 import pytest
 
 from norfab.core import NFP
@@ -1588,3 +1590,390 @@ class TestClientMessaging:
             client.job_db.close()
             client.wakeup_reader.close()
             client.wakeup_writer.close()
+
+
+class TestClientFileTransfer:
+    @pytest.mark.parametrize("content", [b"", bytes(range(256)) * 3])
+    def test_upload_and_fetch(
+        self, transfer_client: tuple[NFPClient, Path], tmp_path: Path, content: bytes
+    ) -> None:
+        client, _ = transfer_client
+        source = tmp_path / "source.bin"
+        source.write_bytes(content)
+        result = client.upload_file(source.as_uri(), "transfer-a", chunk_size=97)
+        assert not result["transfer-a"]["failed"], result
+        remote = result["transfer-a"]["result"]
+        target = client.fetch_file(remote, worker="transfer-a", chunk_size=83)[
+            "content"
+        ]
+        assert Path(target).read_bytes() == content
+
+    def test_missing_files_fail_and_receiver_cleans_up(
+        self, transfer_client: tuple[NFPClient, Path], tmp_path: Path
+    ) -> None:
+        client, _ = transfer_client
+        source = tmp_path / "missing.bin"
+        result = client.upload_file(source.as_uri(), "transfer-a", timeout=10)
+        assert result["transfer-a"]["failed"], result
+        reply = client.fetch_file(str(source), worker="transfer-a", timeout=10)
+        assert reply["status"] == "404"
+        assert reply["content"] is None
+        failed_receive = client.run_job(
+            "all",
+            "receive_file",
+            workers=["transfer-b"],
+            kwargs={"url": str(source), "source_worker": "transfer-a"},
+            timeout=10,
+        )["transfer-b"]
+        assert failed_receive["failed"], failed_receive
+        assert failed_receive["errors"]
+        assert client.file_transfers == {}
+        job = next(
+            job
+            for job in client.job_db.fetch_jobs(task="file_stat", limit=10000)
+            if str(source) in job["kwargs"]["url"]
+        )
+        assert job["result_data"]["transfer-a"]["result"][str(source)]["failed"]
+
+    def test_concurrent_uploads(
+        self, transfer_client: tuple[NFPClient, Path], tmp_path: Path
+    ) -> None:
+        client, _ = transfer_client
+        sources = [tmp_path / f"source-{i}.bin" for i in range(2)]
+        for i, source in enumerate(sources):
+            source.write_bytes(bytes([i]) * 129)
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            replies = list(
+                executor.map(
+                    lambda source: client.upload_file(
+                        source.as_uri(), "transfer-a", chunk_size=31
+                    ),
+                    sources,
+                )
+            )
+        for source, reply in zip(sources, replies):
+            assert not reply["transfer-a"]["failed"], reply
+            target = client.fetch_file(
+                reply["transfer-a"]["result"], worker="transfer-a"
+            )["content"]
+            assert Path(target).read_bytes() == source.read_bytes()
+
+    def test_nf_url_still_uses_filesharing(
+        self, transfer_client: tuple[NFPClient, Path]
+    ) -> None:
+        client, root = transfer_client
+        (root / "published.txt").write_text("published", encoding="utf-8")
+        assert (
+            client.fetch_file("nf://published.txt", read=True)["content"] == "published"
+        )
+
+    def test_unknown_worker_fails_without_waiting_for_timeout(
+        self, transfer_client: tuple[NFPClient, Path]
+    ) -> None:
+        client, _ = transfer_client
+        result = client.fetch_file("missing", worker="absent-worker", timeout=5)
+        assert result["status"] == "404"
+        assert result["content"] is None
+        assert client.file_transfers == {}
+
+    def test_timeout_removes_pending_transfer(
+        self, transfer_client: tuple[NFPClient, Path], monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        client, _ = transfer_client
+        # Simulate a dropped request at the transport boundary.
+        monkeypatch.setattr(client, "send_to_broker", lambda *args: None)
+        with pytest.raises(TimeoutError):
+            client.fetch_file("lost.bin", worker="transfer-a", timeout=0.05)
+        assert client.file_transfers == {}
+
+    def test_download_uses_one_normal_job(
+        self, transfer_client: tuple[NFPClient, Path], tmp_path: Path
+    ) -> None:
+        client, _ = transfer_client
+        source = tmp_path / "job-download.bin"
+        source.write_bytes(b"many chunks" * 20)
+        before = client.job_db.fetch_jobs(task="serve_file", limit=10000)
+        target = client.fetch_file(str(source), worker="transfer-a", chunk_size=7)[
+            "content"
+        ]
+        jobs = client.job_db.fetch_jobs(task="serve_file", limit=10000)
+        assert len(jobs) == len(before) + 1
+        job = next(job for job in jobs if job["kwargs"]["path"] == str(source))
+        assert job["status"] == "COMPLETED"
+        details = client.run_job(
+            "workflow",
+            "job_details",
+            workers=["transfer-a"],
+            kwargs={"uuid": job["uuid"]},
+            timeout=10,
+        )["transfer-a"]["result"]
+        assert details["task"] == "serve_file"
+        assert details["status"] == "COMPLETED"
+        assert Path(target).read_bytes() == source.read_bytes()
+
+    def test_named_worker_fetch_cache_and_read(
+        self, transfer_client: tuple[NFPClient, Path], tmp_path: Path
+    ) -> None:
+        client, _ = transfer_client
+        source = tmp_path / "cached.txt"
+        source.write_text("chunked content" * 30, encoding="utf-8")
+        reply = client.fetch_file(
+            str(source), worker="transfer-a", chunk_size=13, pipeline=3
+        )
+        assert reply["status"] == "200", reply
+        target = Path(reply["content"])
+        before = target.stat().st_mtime_ns
+        assert (
+            client.fetch_file(str(source), worker="transfer-a", read=True)["content"]
+            == source.read_text()
+        )
+        assert target.stat().st_mtime_ns == before
+        source.write_text("changed content", encoding="utf-8")
+        assert (
+            client.fetch_file(str(source), worker="transfer-a", read=True)["content"]
+            == "changed content"
+        )
+
+    def test_named_worker_fetch_rejects_corruption(
+        self,
+        transfer_client: tuple[NFPClient, Path],
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        client, _ = transfer_client
+        source = tmp_path / "corrupt.bin"
+        source.write_bytes(b"original data" * 20)
+        from norfab.core import client as client_module
+
+        original = client_module.handle_stream
+
+        def corrupt(
+            receiver: NFPClient, uuid: str, status: str, payload: bytes
+        ) -> None:
+            if payload and receiver is client:
+                payload = bytes([payload[0] ^ 1]) + payload[1:]
+            return original(receiver, uuid, status, payload)
+
+        monkeypatch.setattr(client_module, "handle_stream", corrupt)
+        reply = client.fetch_file(str(source), worker="transfer-a", chunk_size=17)
+        assert reply["status"] == "400", reply
+        assert reply["content"] is None
+        assert client.file_transfers == {}
+        job = next(
+            job
+            for job in client.job_db.fetch_jobs(task="serve_file", limit=10000)
+            if job["kwargs"]["path"] == str(source)
+        )
+        assert job["status"] == "COMPLETED"
+        assert not job["result_data"]["transfer-a"]["failed"]
+
+    def test_named_worker_list_destination_and_empty(
+        self, transfer_client: tuple[NFPClient, Path], tmp_path: Path
+    ) -> None:
+        client, _ = transfer_client
+        empty, text = tmp_path / "empty.bin", tmp_path / "list.txt"
+        empty.write_bytes(b"")
+        text.write_text("list content", encoding="utf-8")
+        reply = client.fetch_file(
+            [empty.as_uri(), str(text), str(tmp_path / "absent")],
+            worker="transfer-b",
+            read=True,
+            chunk_size=3,
+            pipeline=1,
+        )
+        assert [r["status"] for r in reply] == ["200", "200", "404"]
+        assert [r["content"] for r in reply] == ["", "list content", None]
+        destination = tmp_path / "output.txt"
+        reply = client.fetch_file(
+            str(text), worker="transfer-b", destination=str(destination)
+        )
+        assert Path(reply["content"]) == destination
+        assert destination.read_text() == "list content"
+
+    def test_download_timeout_closes_transfer(
+        self,
+        transfer_client: tuple[NFPClient, Path],
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        client, _ = transfer_client
+        source = tmp_path / "timeout.bin"
+        source.write_bytes(b"source")
+        destination = tmp_path / "partial.bin"
+        original = client.send_to_broker
+
+        def drop_ranges(
+            command: bytes, service: bytes, workers: bytes, uuid: bytes, request: bytes
+        ) -> None:
+            if command != NFP.PUT:
+                original(command, service, workers, uuid, request)
+
+        monkeypatch.setattr(client, "send_to_broker", drop_ranges)
+        with pytest.raises(TimeoutError):
+            client.fetch_file(
+                str(source),
+                worker="transfer-a",
+                destination=str(destination),
+                timeout=0.2,
+            )
+        assert client.file_transfers == {}
+        # Windows refuses deletion if the transfer still holds its output open.
+        destination.unlink()
+
+    def test_published_download_uses_native_job(
+        self, transfer_client: tuple[NFPClient, Path]
+    ) -> None:
+        client, root = transfer_client
+        (root / "native-published.txt").write_text(
+            "published chunks" * 20, encoding="utf-8"
+        )
+        before = set(client.job_futures)
+        result = client.fetch_file(
+            "nf://native-published.txt", chunk_size=7, pipeline=3, read=True
+        )
+        assert result["content"] == "published chunks" * 20
+        jobs = [
+            client.job_db.get_job(uuid) for uuid in set(client.job_futures) - before
+        ]
+        assert sorted(job["task"] for job in jobs) == ["file_stat", "serve_file"]
+        assert client.file_transfers == {}
+
+    def test_mixed_sources_share_metadata_request(
+        self, transfer_client: tuple[NFPClient, Path], tmp_path: Path
+    ) -> None:
+        client, root = transfer_client
+        (root / "mixed-published.txt").write_text("published", encoding="utf-8")
+        source = tmp_path / "mixed-native.txt"
+        source.write_text("native", encoding="utf-8")
+        before = set(client.job_futures)
+        result = client.fetch_file(
+            ["nf://mixed-published.txt", source.as_uri()],
+            worker="filesharing-worker-1",
+            read=True,
+        )
+        assert [entry["content"] for entry in result] == ["published", "native"]
+        jobs = [
+            client.job_db.get_job(uuid) for uuid in set(client.job_futures) - before
+        ]
+        assert sorted(job["task"] for job in jobs) == [
+            "file_stat",
+            "serve_file",
+            "serve_file",
+        ]
+
+    @pytest.mark.parametrize("pipeline", [1, 3])
+    def test_download_respects_pipeline(
+        self,
+        transfer_client: tuple[NFPClient, Path],
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        pipeline: int,
+    ) -> None:
+        from norfab.core import client as client_module
+
+        client, _ = transfer_client
+        source = tmp_path / "pipeline.bin"
+        source.write_bytes(b"chunks" * 100)
+        send, stream = client.send_to_broker, client_module.handle_stream
+        outstanding = peak = 0
+
+        def capture_send(
+            command: bytes, service: bytes, workers: bytes, uuid: bytes, request: bytes
+        ) -> None:
+            nonlocal outstanding, peak
+            if command == NFP.PUT and "offset" in orjson.loads(request):
+                outstanding += 1
+                peak = max(peak, outstanding)
+            send(command, service, workers, uuid, request)
+
+        def capture_stream(
+            receiver: NFPClient, uuid: str, status: str, payload: bytes
+        ) -> None:
+            nonlocal outstanding
+            if receiver is client:
+                outstanding -= 1
+            stream(receiver, uuid, status, payload)
+
+        monkeypatch.setattr(client, "send_to_broker", capture_send)
+        monkeypatch.setattr(client_module, "handle_stream", capture_stream)
+        result = client.fetch_file(
+            str(source), worker="transfer-a", chunk_size=7, pipeline=pipeline
+        )
+        assert result["status"] == "200", result
+        assert peak == pipeline
+        assert outstanding == 0
+
+    def test_download_write_error_reaches_serving_job(
+        self,
+        transfer_client: tuple[NFPClient, Path],
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        from norfab.core import client as client_module
+
+        client, _ = transfer_client
+        source, destination = (
+            tmp_path / "write-source.bin",
+            tmp_path / "write-target.bin",
+        )
+        source.write_bytes(b"chunks" * 100)
+        real_open = open
+        opened = []
+
+        def failing_open(
+            path: str, mode: str, *args: object, **kwargs: object
+        ) -> object:
+            file = real_open(path, mode, *args, **kwargs)
+            if str(path) == str(destination) and mode == "wb":
+                opened.append(file)
+                wrapped = Mock(wraps=file)
+                wrapped.closed = False
+                wrapped.write.side_effect = OSError("simulated disk full")
+                return wrapped
+            return file
+
+        monkeypatch.setattr(client_module, "open", failing_open, raising=False)
+        with pytest.raises(OSError, match="simulated disk full"):
+            client.fetch_file(
+                str(source),
+                worker="transfer-a",
+                destination=str(destination),
+                chunk_size=7,
+                pipeline=1,
+                timeout=2,
+            )
+        assert client.file_transfers == {}
+        assert opened and all(file.closed for file in opened)
+        job = next(
+            job
+            for job in client.job_db.fetch_jobs(task="serve_file", limit=10000)
+            if job["kwargs"]["path"] == str(source)
+        )
+        assert job["status"] != "STALE"
+        assert job["result_data"]["transfer-a"]["failed"]
+        assert "simulated disk full" in str(job["result_data"]["transfer-a"]["errors"])
+
+    @pytest.mark.parametrize("content", [b"", b"local metadata"])
+    def test_local_file_stat(
+        self, transfer_client: tuple[NFPClient, Path], tmp_path: Path, content: bytes
+    ) -> None:
+        import hashlib
+
+        client, _ = transfer_client
+        source = tmp_path / "local-stat.bin"
+        source.write_bytes(content)
+        expected = {
+            "exists": True,
+            "size_bytes": len(content),
+            "md5hash": hashlib.md5(content).hexdigest(),
+        }
+        before = set(client.job_futures)
+        assert client.file_stat(str(source)) == expected
+        assert client.file_stat(source.as_uri()) == expected
+        assert client.safe_path(source.as_uri()) == str(source)
+        assert set(client.job_futures) == before
+        with pytest.raises(OSError):
+            client.file_stat(str(tmp_path / "missing"))
+        for url in ("nf://published.txt", "git://assets/file.txt", ""):
+            with pytest.raises(ValueError):
+                client.file_stat(url)

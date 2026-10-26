@@ -547,6 +547,8 @@ class NFPBroker:
             msg = self.build_message.broker_to_worker_put(
                 worker_address=worker.address, sender=sender, uuid=uuid, data=data
             )
+        elif command == NFP.STREAM:
+            msg = [worker.address, b"", NFP.BROKER, command, sender, b"", uuid, data]
         elif command == NFP.MMI:
             msg = self.build_message.broker_to_worker_mmi(
                 worker_address=worker.address, sender=sender, uuid=uuid, data=data
@@ -590,6 +592,8 @@ class NFPBroker:
             msg = self.build_message.broker_to_client_stream(
                 client=client, service=service, message=message
             )
+        elif command == NFP.PUT:
+            msg = [client, b"", NFP.BROKER, command, service] + message
         elif command == NFP.MMI:
             msg = self.build_message.broker_to_client_mmi(
                 client=client, service=service, message=message
@@ -653,10 +657,10 @@ class NFPBroker:
             client = msg.pop(0)
             empty = msg.pop(0)  # noqa
             self.send_to_client(client, NFP.EVENT, worker.service.name, msg)
-        elif NFP.STREAM == command and worker.is_ready():
+        elif command in (NFP.STREAM, NFP.PUT) and worker.is_ready():
             client = msg.pop(0)
             empty = msg.pop(0)  # noqa
-            self.send_to_client(client, NFP.STREAM, worker.service.name, msg)
+            self.send_to_client(client, command, worker.service.name, msg)
         elif not worker.is_ready():
             self.delete_worker(worker, disconnect=True)
         else:
