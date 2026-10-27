@@ -1953,6 +1953,8 @@ def process_devices(
     String device-type references must match exactly one existing model in
     NetBox, including during dry runs. Dictionaries specify manufacturer and
     model explicitly to disambiguate device types.
+    String config-template references must match exactly one existing template
+    name, including during dry runs. Other reference forms pass through to NetBox.
 
     Args:
         worker: NetBox worker used for bulk reads and delegated tasks.
@@ -1969,7 +1971,7 @@ def process_devices(
 
     Raises:
         ValueError: Device identity is ambiguous, or a string device-type
-            reference matches zero or multiple existing types.
+            or config-template reference matches zero or multiple existing objects.
     """
     log.debug(
         "process_devices: processing %d records, dry_run=%s", len(records), dry_run
@@ -2056,6 +2058,31 @@ def process_devices(
             device_type = dict(reference)
             device_type["manufacturer__name"] = device_type.pop("manufacturer")
             record["device_type"] = device_type
+    # Resolve config templates names
+    template_names = {
+        record["config_template"]
+        for record in records
+        if isinstance(record.get("config_template"), str)
+    }
+    config_templates = {}
+    if template_names:
+        for item in worker.bulk_filter(
+            nb.extras.config_templates, name=list(template_names), fields="id,name"
+        ):
+            config_templates.setdefault(item.name, []).append(item)
+    for record in created + updated:
+        reference = record.get("config_template")
+        if isinstance(reference, str):
+            matches = config_templates.get(reference, [])
+            if not matches:
+                raise ValueError(
+                    f"device {record['name']}: config template '{reference}' not found"
+                )
+            if len(matches) != 1:
+                raise ValueError(
+                    f"device {record['name']}: ambiguous config template '{reference}'"
+                )
+            record["config_template"] = matches[0].id
     merge_design_array_fields(
         worker, nb, lookup_cache, nb.dcim.devices, "dcim.device", created, updated
     )
@@ -2130,14 +2157,15 @@ def process_interfaces(
             if field not in payload:
                 continue
             vlans = payload[field] if field == "tagged_vlans" else [payload[field]]
-            references = [
-                (
-                    vlan_cache.get((vlan["group"], vlan["vid"]), {}).get("id")
-                    if dry_run
-                    else vlan_cache[(vlan["group"], vlan["vid"])]["id"]
-                )
-                for vlan in vlans
-            ]
+            references = []
+            for vlan in vlans:
+                cached = vlan_cache.get((vlan["group"], vlan["vid"]))
+                if cached is None and not dry_run:
+                    raise ValueError(
+                        f"interface {device}:{record['name']} {field}: "
+                        f"VLAN {vlan['group']!r}/{vlan['vid']} not found"
+                    )
+                references.append(cached["id"] if cached else None)
             payload[field] = references if field == "tagged_vlans" else references[0]
         key = (device, record["name"])
         if key in existing:

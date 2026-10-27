@@ -229,6 +229,14 @@ Ordinary records use Netbox API field names. Handlers bulk-create missing object
 
 Devices accept `device_type: {manufacturer: ACME, model: AGG SWITCH}` or `device_type: AGG SWITCH`. A string must match exactly one existing Netbox model, including during dry runs; missing or ambiguous models fail. Use the dictionary form to disambiguate or preview types defined in the same design. New devices default to `status: planned`; omitted status preserves existing device status. Explicit status applies to both creates and updates.
 
+Set a device's `config_template` to an existing template's exact name or integer ID. Names must resolve to exactly one template, including during dry runs. Omit the field to preserve an existing association, or use `null` to clear it. Templates must exist before devices are deployed.
+
+```yaml
+devices:
+  - name: branch-router-1
+    config_template: branch-router
+```
+
 When updating an existing record, design handlers add requested tags and custom-field list values without removing existing members. They also add VRF and L2VPN route targets, interface tagged VLANs, and config-context scope lists. Config-context `sites` and `tenants` accept name lists; other scope lists use NetBox IDs. Scalar custom fields replace their old values. VLAN-group `vid_ranges`, local context data, and config-context `data` retain replacement behavior. Named object and multiobject custom-field values are resolved to NetBox IDs before writes.
 
 

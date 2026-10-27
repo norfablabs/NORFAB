@@ -1,5 +1,9 @@
 # 0.25.1
 
+## BUGS
+
+1. Netbox `design_deploy` now reports the interface, VLAN field, group, and VID when an interface references a missing VLAN.
+
 ## FEATURES
 
 1. Added client-to-worker and worker-to-worker file transfers through the broker, with on-demand `file://` job inputs, chunking, and size/MD5 verification.
@@ -7,8 +11,9 @@
 
 ## ENHANCEMENTS
 
-1. Unified downloads through `fetch_file(..., worker=...)` and core `serve_file`, preserving batch metadata retrieval, caching, and Git resolution. Replaced FileSharing `fetch_file` and `file_details` tasks with core APIs.
-2. Corrected download pipeline limits and propagated local write errors without waiting for transfer timeouts. See the [core file-transfer reference](api_ref/core/api_reference_core_file_transfer.md).
+1. Netbox `design_deploy` now resolves device `config_template` names to existing templates, including validation during dry runs. Integer template IDs remain supported.
+2. Unified downloads through `fetch_file(..., worker=...)` and core `serve_file`, preserving batch metadata retrieval, caching, and Git resolution. Replaced FileSharing `fetch_file` and `file_details` tasks with core APIs.
+3. Corrected download pipeline limits and propagated local write errors without waiting for transfer timeouts. See the [core file-transfer reference](api_ref/core/api_reference_core_file_transfer.md).
 
 ---
 

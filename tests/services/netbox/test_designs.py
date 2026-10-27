@@ -4,6 +4,7 @@ import time
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
+from uuid import uuid4
 
 import pynetbox
 import pytest
@@ -19,6 +20,76 @@ pytestmark = [pytest.mark.netbox, pytest.mark.netbox_design_deploy]
 
 
 class TestDesignDeploy:
+    def test_device_config_template_reference(self, nfclient: Any) -> None:
+        """Resolve a seeded template by name or ID on one owned device."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        name = f"norfab-design-config-template-{uuid4().hex[:12]}"
+        seed = nb.dcim.devices.get(name="fceos4")
+        template = nb.extras.config_templates.get(
+            name="NORFAB Design Test Configuration"
+        )
+        assert template is not None, "design config template seed is missing"
+        try:
+            for reference, dry_run in (
+                (template.name, True),
+                (template.name, False),
+                (template.name, False),
+                (template.id, False),
+            ):
+                response = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={
+                        "design": {
+                            "devices": [
+                                {
+                                    "name": name,
+                                    "site": seed.site.name,
+                                    "role": seed.role.name,
+                                    "device_type": {
+                                        "manufacturer": seed.device_type.manufacturer.name,
+                                        "model": seed.device_type.model,
+                                    },
+                                    "config_template": reference,
+                                }
+                            ]
+                        },
+                        "dry_run": dry_run,
+                    },
+                )
+                assert response
+                for result in response.values():
+                    assert not result["failed"], result
+                device = nb.dcim.devices.get(name=name)
+                if dry_run:
+                    assert device is None
+                else:
+                    assert device.config_template.id == template.id
+            for dry_run in (True, False):
+                response = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={
+                        "design": {
+                            "devices": [
+                                {"name": name, "config_template": name + "-missing"}
+                            ]
+                        },
+                        "dry_run": dry_run,
+                    },
+                )
+                assert response
+                for result in response.values():
+                    assert result["failed"], result
+                    assert "not found" in str(result["errors"])
+                assert nb.dcim.devices.get(name=name).config_template.id == template.id
+        finally:
+            device = nb.dcim.devices.get(name=name)
+            if device:
+                device.delete()
+
     def test_device_type_model_reference(self, nfclient: Any) -> None:
         """Resolve unique models and reject missing or ambiguous device types."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)

@@ -3182,6 +3182,11 @@ circuits.extend(
 
 config_templates = [
     {
+        "name": "NORFAB Design Test Configuration",
+        "template_code": "hostname {{ device.name }}",
+        "associated_devices": [],
+    },
+    {
         "name": "Arista cEOS Configuration",
         "template_code": """
 {% for server in dns_servers -%}
@@ -3189,7 +3194,7 @@ ip name-server {{ server }}
 {% endfor %}        
         """,
         "associated_devices": ["ceos1"],
-    }
+    },
 ]
 
 

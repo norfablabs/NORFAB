@@ -39,6 +39,7 @@
   },
   "main_seed": {
     "source": "tests/netbox_data.py",
+    "config_templates": ["NORFAB Design Test Configuration"],
     "devices": [
       "ceos1",
       "ceos-spine-1",
@@ -652,6 +653,13 @@
       "mode": "main_mutating",
       "tenants": ["norfab-test_create_bgp_peering_single", "norfab-test_create_bgp_peering_bulk"],
       "coverage": "Existing single and bulk creation tests assign an owned tenant; bulk also verifies omitted tenant. Fixture deletes only sessions assigned to its tenant and the tenant it created."
+    },
+    "test_designs.py::TestDesignDeploy::test_device_config_template_reference": {
+      "mode": "main_mutating",
+      "devices": ["norfab-design-config-template-<12 hex run suffix>"],
+      "absent_config_templates": ["norfab-design-config-template-<12 hex run suffix>-missing"],
+      "read_only": "Reads fceos4 and its site, role, device type, and manufacturer for creation references. Reads NORFAB Design Test Configuration by name and ID; never modifies or deletes the seeded template. Seed lifecycle is managed by tests/netbox_data.py.",
+      "ownership": "Creates and deletes one uniquely named device, including after partial failures. Covers dry-run creation, creation, repeat update, integer IDs, and missing names during dry runs and real deployments. Does not reuse or delete devices left by earlier runs."
     },
     "test_designs.py::TestDesignDeploy::test_device_type_model_reference": {
       "mode": "main_mutating",
