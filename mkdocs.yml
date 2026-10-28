@@ -285,6 +285,7 @@ nav:
     - File Sharing Git Remotes: development/adr/adr_extensible_data_sources_and_git_sync.md
     - Lightweight Generic File Transfer: development/adr/adr_generic_file_transfer.md
     - Netbox Design Specification: development/adr/adr_netbox_design_specification.md
+    - Netbox Markdown Design Parser: development/adr/adr_netbox_design_markdown_parser.md
     - Netbox Sync BGP Communities Plan: development/adr/adr_netbox_sync_bgp_community_plan.md
     - Netbox Sync VLANs Historical Plan: development/adr/adr_netbox_sync_vlans_plan.md
     - Docker Parallel Testing: development/adr/adr_norfab_docker_parallel_testing.md
