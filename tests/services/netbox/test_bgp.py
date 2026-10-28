@@ -1619,6 +1619,56 @@ def _cleanup_test_asns(nb):
 
 @pytest.mark.netbox_create_bgp_peering
 class TestCreateBgpPeering:
+    def test_interface_peer_derivation_matches_local_family(
+        self, nfclient: Any
+    ) -> None:
+        """Derive each peer from the first interface IP in the queried family."""
+        nb = get_pynetbox(nfclient)
+        device = BGP_CREATE_SESSIONS_TEST_DEVICES[0]
+        interface = nb.dcim.interfaces.create(
+            device=nb.dcim.devices.get(name=device).id,
+            name="norfab-bgp-dual-stack",
+            type="virtual",
+        )
+        addresses = []
+        try:
+            for address in ("192.0.2.240/31", "2001:db8:bf::/127"):
+                addresses.append(
+                    nb.ipam.ip_addresses.create(
+                        address=address,
+                        assigned_object_type="dcim.interface",
+                        assigned_object_id=interface.id,
+                    )
+                )
+            for family, peer in ((4, "192.0.2.241"), (6, "2001:db8:bf::1")):
+                response = nfclient.run_job(
+                    "netbox",
+                    "create_bgp_peering",
+                    workers="any",
+                    kwargs={
+                        "device": device,
+                        "local_interface": interface.name,
+                        "local_ip_query": {
+                            "interface_id": interface.id,
+                            "family": family,
+                        },
+                        "local_as": _TEST_LOCAL_AS,
+                        "remote_as": _TEST_REMOTE_AS,
+                        "rir": "lab",
+                        "name_template": "{{ remote_address }}",
+                        "create_reverse": False,
+                        "dry_run": True,
+                    },
+                )
+                assert response
+                for result in response.values():
+                    assert not result["failed"], result
+                    assert not result["errors"], result
+                    assert result["result"]["create"] == [peer]
+        finally:
+            for address in addresses:
+                address.delete()
+            interface.delete()
 
     @pytest.fixture
     def create_tenant(self, request: Any) -> Any:

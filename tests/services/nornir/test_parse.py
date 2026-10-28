@@ -122,6 +122,56 @@ class TestNornirParseTasks:
             hostnames.append(parsed["hostname"])
         assert len(set(hostnames)) == 2
 
+    @pytest.mark.parametrize("structure", ["flat_list", "list", "dictionary"])
+    def test_parse_ttp_multiple_inputs(
+        self, nfclient: NFPClient, structure: str
+    ) -> None:
+        template = """
+<template name="hostnames" results="per_template">
+<input name="first">
+commands = ["show hostname"]
+</input>
+<input name="second">
+commands = ["show hostname"]
+</input>
+<group name="first" input="first">
+Hostname: {{ hostname }}
+</group>
+<group name="second" input="second">
+Hostname: {{ hostname }}
+</group>
+<macro>
+def combine(data):
+    return {"hostnames": [data["first"]["hostname"], data["second"]["hostname"]]}
+</macro>
+<output macro="combine"/>
+</template>
+"""
+        result = nfclient.run_job(
+            "nornir",
+            "parse_ttp",
+            workers=["nornir-worker-1"],
+            kwargs={
+                "on_failed": True,
+                "FL": ["ceos-spine-1", "ceos-spine-2"],
+                "template": template,
+                "structure": structure,
+            },
+        )["nornir-worker-1"]
+        assert result["failed"] is False
+        assert set(result["result"]) == {"ceos-spine-1", "ceos-spine-2"}
+        hostnames = []
+        for parsed in result["result"].values():
+            if structure == "dictionary":
+                parsed = parsed["hostnames"]
+            while isinstance(parsed, list):
+                assert len(parsed) == 1
+                parsed = parsed[0]
+            first, second = parsed["hostnames"]
+            assert first == second
+            hostnames.append(first)
+        assert len(set(hostnames)) == 2
+
     def test_nornir_parse_ttp_templates_template(self, nfclient):
         ret = nfclient.run_job(
             "nornir",

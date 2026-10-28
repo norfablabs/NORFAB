@@ -2,6 +2,8 @@ vrf instance CONTROL_PLANE
 !
 ip routing
 ip routing vrf CONTROL_PLANE
+ipv6 unicast-routing
+ipv6 unicast-routing vrf CONTROL_PLANE
 !
 interface Loopback0
    description Router ID
@@ -11,12 +13,14 @@ interface Ethernet2
    description P2P to ceos-leaf-1 Ethernet2
    no switchport
    ip address 10.10.0.2/31
+   ipv6 address 2001:beef:0:2::/127
 !
 interface Ethernet2.101
    description Control Plane P2P to ceos-leaf-1 Ethernet2.101
    encapsulation dot1q vlan 101
    vrf CONTROL_PLANE
    ip address 10.101.0.2/31
+   ipv6 address 2001:beef:101:2::/127
 !
 interface Ethernet3
    description P2P to ceos-leaf-2 Ethernet2
@@ -62,6 +66,8 @@ router bgp 65002
    neighbor EVPN-OVERLAY send-community standard extended
    neighbor 10.10.0.3 remote-as 65101
    neighbor 10.10.0.3 description ceos-leaf-1 Ethernet2
+   neighbor 2001:beef:0:2::1 remote-as 65101
+   neighbor 2001:beef:0:2::1 description ceos-leaf-1 Ethernet2 IPv6
    neighbor 10.10.0.3 route-map ALLOW-ALL in
    neighbor 10.10.0.3 route-map ALLOW-ALL out
    neighbor 10.10.0.7 remote-as 65102
@@ -87,6 +93,9 @@ router bgp 65002
    neighbor 10.10.0.15 route-map ALLOW-ALL out
    address-family evpn
       neighbor EVPN-OVERLAY activate
+   address-family ipv6
+      neighbor 2001:beef:0:2::1 activate
+      redistribute connected
    vrf CONTROL_PLANE
       neighbor 10.101.0.3 remote-as 65101
       neighbor 10.101.0.3 description ceos-leaf-1 Ethernet2.101
@@ -96,3 +105,8 @@ router bgp 65002
       neighbor 10.101.0.11 description ceos-leaf-3 Ethernet2.101
       neighbor 10.101.0.15 remote-as 65105
       neighbor 10.101.0.15 description vmx-1 eth1.101
+      neighbor 2001:beef:101:2::1 remote-as 65101
+      neighbor 2001:beef:101:2::1 description ceos-leaf-1 Ethernet2.101 IPv6
+      address-family ipv6
+         neighbor 2001:beef:101:2::1 activate
+         redistribute connected

@@ -1138,7 +1138,9 @@ class NetboxBgpPeeringsTasks:
         IPAM or created on demand.  When ``local_interface`` is provided the local
         address is resolved from IPAM. If ``remote_address`` is omitted, the
         remote address is derived from the first IP assigned to that interface
-        for IPv4 /30 or /31 and IPv6 /127 subnets. This uses subnet arithmetic
+        matching the resolved local address's family, or the first IP overall
+        when no local address is supplied. Derivation supports IPv4 /30 or /31
+        and IPv6 /127 subnets. This uses subnet arithmetic
         and does not require a cable or remote interface recorded in NetBox.
         For example, ``10.0.0.1/30`` yields ``10.0.0.2``. Supplying only
         ``local_address`` without ``local_interface`` does not trigger derivation.
@@ -1157,7 +1159,9 @@ class NetboxBgpPeeringsTasks:
             device (str, optional): Local device name. Required in single-session mode.
             local_address (str, optional): Local IP address string. Derived from ``local_interface`` when omitted.
             remote_address (str, optional): Remote IP address string. When omitted,
-                derived from the first IP assigned to ``local_interface`` for
+                derived from the first IP assigned to ``local_interface`` matching
+                the resolved local address's family (or the first IP overall
+                when no local address is supplied) for
                 IPv4 /30 or /31 and IPv6 /127 subnets. An explicit value takes
                 precedence over derivation.
             local_as (int, optional): Local AS number. Takes precedence over ``local_as_query``.
@@ -1361,8 +1365,19 @@ class NetboxBgpPeeringsTasks:
                         continue
 
                     ip_list = ips_by_intf_id.get(intf.id, [])
+                    local_address = bgp_session.get("local_address")
+                    # Select IPs of the same family as the local address.
+                    if local_address and not bgp_session.get("remote_address"):
+                        family = ipaddress.ip_interface(local_address).version
+                        ip_list = [
+                            ip
+                            for ip in ip_list
+                            if ipaddress.ip_interface(ip.address).version == family
+                        ]
                     if not ip_list:
                         msg = f"no IP address assigned to interface '{intf_name}' on '{bgp_session_device}'"
+                        if local_address:
+                            msg += f" matching the family of local address '{local_address}'"
                         job.event(msg, severity="WARNING")
                         log.warning(f"{self.name} - {msg}")
                         ret.errors.append(msg)

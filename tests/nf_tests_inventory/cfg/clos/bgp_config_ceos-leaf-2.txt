@@ -2,6 +2,7 @@ vrf instance CONTROL_PLANE
 !
 ip routing
 ip routing vrf CONTROL_PLANE
+ipv6 unicast-routing
 !
 interface Loopback0
    description Router ID

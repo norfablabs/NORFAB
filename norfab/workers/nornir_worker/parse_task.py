@@ -182,7 +182,8 @@ class ParseTask:
         Fetches CLI output from devices based on the template's input
         definitions, then parses the collected output with TTP. Compiles the
         template once per job and copies its compiled state for each host, keeping
-        inputs and parsing results isolated.
+        inputs and parsing results isolated. All named inputs for a host are
+        populated before parsing and running template outputs.
 
         Args:
             job: NorFab Job object containing relevant metadata.
@@ -238,6 +239,8 @@ class ParseTask:
         )
 
         # collect commands output from devices
+        host_parsers = {}
+        host_templates = {}
         for cli_run in cli_runs:
             cli_run_filters = {
                 k: cli_run["params"][k]
@@ -267,7 +270,7 @@ class ParseTask:
                 ret.messages.extend(result.messages)
                 if not result.result or not isinstance(result.result, dict):
                     continue
-            # parse commands output for each host
+            # assign commands output to each host's named input
             for hname, hres in result.result.items():
                 input_data = []
                 for cmdname, cmdres in hres.items():
@@ -278,19 +281,18 @@ class ParseTask:
                         job.event(msg, severity="ERROR")
                         continue
                     input_data.append(cmdres["result"])
-                # parse command results
                 if input_data:
-                    parser = deepcopy(compiled_parser)
+                    if hname not in host_parsers:
+                        host_parsers[hname] = deepcopy(compiled_parser)
+                        host_templates[hname] = []
+                    parser = host_parsers[hname]
                     parser.add_input(
                         data="\n\n".join(input_data),
                         input_name=cli_run["input_name"],
                         template_name=cli_run["template_name"],
                     )
-                    # run parsing in single process
-                    parser.parse(one=True)
-                    ret.result[hname] = parser.result(
-                        structure=structure, templates=cli_run["template_name"]
-                    )
+                    if cli_run["template_name"] not in host_templates[hname]:
+                        host_templates[hname].append(cli_run["template_name"])
                 else:
                     msg = f"no input data collected for '{hname}' device"
                     log.error(msg)
@@ -298,6 +300,13 @@ class ParseTask:
                     job.event(msg, severity="ERROR")
                     if strict:
                         raise RuntimeError(msg)
+
+        # parse once all inputs for each host have been populated
+        for hname, parser in host_parsers.items():
+            parser.parse(one=True)
+            ret.result[hname] = parser.result(
+                structure=structure, templates=host_templates[hname]
+            )
 
         # if strict - check hosts parsing results and raise error if empty
         if strict:

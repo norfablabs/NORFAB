@@ -649,6 +649,13 @@
         "ASR-9006-FAN-V2"
       ]
     },
+    "test_bgp.py::TestCreateBgpPeering::test_interface_peer_derivation_matches_local_family": {
+      "mode": "main_mutating",
+      "read_only": "Reads fn-bgp-sp-1 as the parent device and the lab RIR; uses ASNs 64999 and 64998 through the existing BGP creation test lifecycle.",
+      "interfaces": ["fn-bgp-sp-1:norfab-bgp-dual-stack"],
+      "ip_addresses": ["192.0.2.240/31", "2001:db8:bf::/127"],
+      "ownership": "Creates and deletes its own interface and assigned addresses in finally. Peering requests use dry_run and do not create sessions or peer IPs."
+    },
     "test_bgp.py::TestCreateBgpPeering::create_tenant": {
       "mode": "main_mutating",
       "tenants": ["norfab-test_create_bgp_peering_single", "norfab-test_create_bgp_peering_bulk"],

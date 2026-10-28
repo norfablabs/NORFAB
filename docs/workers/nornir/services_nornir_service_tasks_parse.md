@@ -30,6 +30,8 @@ Three tasks for parsing network device CLI output into structured data:
 TTP compiles each job's template once and copies the compiled parser for each host.
 This reduces repeated template setup while keeping host inputs, input processing,
 and result structures isolated.
+All named inputs for a host are populated before parsing, so template output
+macros can combine results from multiple inputs.
 
 ## Output
 

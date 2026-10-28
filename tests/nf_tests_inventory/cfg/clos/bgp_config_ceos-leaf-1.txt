@@ -2,6 +2,8 @@ vrf instance CONTROL_PLANE
 !
 ip routing
 ip routing vrf CONTROL_PLANE
+ipv6 unicast-routing
+ipv6 unicast-routing vrf CONTROL_PLANE
 !
 interface Loopback0
    description Router ID
@@ -16,23 +18,27 @@ interface Ethernet1
    description P2P to ceos-spine-1 Ethernet2
    no switchport
    ip address 10.10.0.1/31
+   ipv6 address 2001:beef:0:1::1/127
 !
 interface Ethernet1.101
    description Control Plane P2P to ceos-spine-1 Ethernet2.101
    encapsulation dot1q vlan 101
    vrf CONTROL_PLANE
    ip address 10.101.0.1/31
+   ipv6 address 2001:beef:101:1::1/127
 !
 interface Ethernet2
    description P2P to ceos-spine-2 Ethernet2
    no switchport
    ip address 10.10.0.3/31
+   ipv6 address 2001:beef:0:2::1/127
 !
 interface Ethernet2.101
    description Control Plane P2P to ceos-spine-2 Ethernet2.101
    encapsulation dot1q vlan 101
    vrf CONTROL_PLANE
    ip address 10.101.0.3/31
+   ipv6 address 2001:beef:101:2::1/127
 !
 ip prefix-list ALLOW-ALL seq 10 permit 0.0.0.0/0 le 32
 !
@@ -55,6 +61,10 @@ router bgp 65101
    neighbor 10.10.0.0 description ceos-spine-1 Ethernet2
    neighbor 10.10.0.2 remote-as 65002
    neighbor 10.10.0.2 description ceos-spine-2 Ethernet2
+   neighbor 2001:beef:0:1:: remote-as 65001
+   neighbor 2001:beef:0:1:: description ceos-spine-1 Ethernet2 IPv6
+   neighbor 2001:beef:0:2:: remote-as 65002
+   neighbor 2001:beef:0:2:: description ceos-spine-2 Ethernet2 IPv6
    neighbor 10.10.10.1 peer group EVPN-OVERLAY
    neighbor 10.10.10.1 remote-as 65001
    neighbor 10.10.10.1 description ceos-spine-1 Loopback0 EVPN
@@ -70,6 +80,10 @@ router bgp 65101
       neighbor 10.10.0.2 prefix-list ALLOW-ALL out
       neighbor 10.10.0.0 prefix-list ALLOW-ALL in
       neighbor 10.10.0.0 prefix-list ALLOW-ALL out
+   address-family ipv6
+      neighbor 2001:beef:0:1:: activate
+      neighbor 2001:beef:0:2:: activate
+      redistribute connected
    vrf CONTROL_PLANE
       router-id 10.101.1.11
       redistribute connected
@@ -77,3 +91,11 @@ router bgp 65101
       neighbor 10.101.0.0 description ceos-spine-1 Ethernet2.101
       neighbor 10.101.0.2 remote-as 65002
       neighbor 10.101.0.2 description ceos-spine-2 Ethernet2.101
+      neighbor 2001:beef:101:1:: remote-as 65001
+      neighbor 2001:beef:101:1:: description ceos-spine-1 Ethernet2.101 IPv6
+      neighbor 2001:beef:101:2:: remote-as 65002
+      neighbor 2001:beef:101:2:: description ceos-spine-2 Ethernet2.101 IPv6
+      address-family ipv6
+         neighbor 2001:beef:101:1:: activate
+         neighbor 2001:beef:101:2:: activate
+         redistribute connected

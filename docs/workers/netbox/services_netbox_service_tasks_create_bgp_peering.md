@@ -11,6 +11,8 @@ Creates one or many BGP sessions in NetBox. Supports single-session mode (indivi
 
 ## How It Works
 
+When deriving a missing remote address, the task uses the first interface IP in the resolved local address's family. Without a supplied or queried local address, it uses the first interface IP. Use `family: 4` or `family: 6` in a scoped `local_ip_query` to select a family. The query must match exactly one address.
+
 Supply `tenant` as an existing tenant name for a new session. Bulk entries specify
 their own tenant, and reverse sessions inherit it. Existing sessions remain unchanged.
 

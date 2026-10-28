@@ -325,6 +325,8 @@ Entries under `bgp_peerings` call `create_bgp_peering` after the design's device
 Design peerings create only the specified direction by default. Set `create_reverse: true` on a peering to create the reverse session as well. The standalone `create_bgp_peering` task retains its own default.
 Peering records can specify an existing tenant name with `tenant`. Reverse sessions inherit it; existing sessions are left unchanged.
 
+For a dual-stack interface, use two peering entries with scoped `local_ip_query` filters containing `family: 4` and `family: 6`. Each query must match one address. With `local_interface` supplied, an omitted remote address is derived from the first interface IP in the selected family, for IPv4 /30 or /31 and IPv6 /127 subnets.
+
 ```yaml
 bgp_peerings:
   - name: ACME BRANCH PEER

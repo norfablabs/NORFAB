@@ -3,6 +3,8 @@
 ## BUGS
 
 1. Netbox `design_deploy` now reports the interface, VLAN field, group, and VID when an interface references a missing VLAN.
+2. Netbox `create_bgp_peering` now derives a missing remote peer from the first interface IP matching the resolved local address's family, including when selected with `local_ip_query`.
+3. Fixed Nornir `parse_ttp` losing earlier named inputs; all inputs for each host are now parsed together before template output macros run.
 
 ## FEATURES
 
