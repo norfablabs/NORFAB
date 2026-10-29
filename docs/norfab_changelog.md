@@ -1,9 +1,10 @@
-# 0.26.0 (Draft)
+# 0.25.2
 
 ## BUGS
 
 1. Windows and Linux installers now disable automatic Nornir logging configuration to prevent conflicting logging warnings when starting NFCLI.
 2. Fixed the Bash installer failing with `bad substitution` on macOS's bundled Bash when handling installation choices.
+3. Fixed Netbox `design_deploy` failing for YAML and Markdown file URLs. Markdown designs resolve relative Jinja includes from their extracted design blocks without parsing prose as Jinja.
 
 ## ENHANCEMENTS
 

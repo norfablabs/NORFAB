@@ -4390,11 +4390,14 @@ class NetboxDesignTasks:
                 )
                 template = None
             elif isinstance(design, str):
-                source = (
-                    self.fetch_file(design_url, raise_on_fail=True)
-                    if design_url
-                    else design
-                )
+                if design_url:
+                    design_path = self.fetch_file(
+                        design_url, read=False, raise_on_fail=True
+                    )
+                    with open(design_path, "r", encoding="utf-8") as file_obj:
+                        source = file_obj.read()
+                else:
+                    source = design
                 if design_url and design_url.endswith((".md", ".markdown")):
                     parsed = self.parse_markdown_design(job=job, markdown=source).result
                     source = parsed["design"]
@@ -4481,11 +4484,8 @@ class NetboxDesignTasks:
             if template is not None:
                 loader = None
                 if design_url:
-                    loader = FileSystemLoader(
-                        os.path.dirname(
-                            self.jinja2_fetch_template(design_url, content=template)
-                        )
-                    )
+                    self.jinja2_fetch_includes(template, design_url)
+                    loader = FileSystemLoader(os.path.dirname(design_path))
                 environment = Environment(loader=loader)
                 environment.filters.update(filters)
                 environment.globals.update(filters)

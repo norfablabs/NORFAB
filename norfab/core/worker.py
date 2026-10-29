@@ -2425,11 +2425,29 @@ class NFPWorker:
         # load Jinja2 template content to parse "include"-ed files
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
+        self.jinja2_fetch_includes(content, url)
+        return filepath
+
+    def jinja2_fetch_includes(self, content: str, url: str) -> None:
+        """Recursively download templates included by the supplied Jinja2 source.
+
+        Args:
+            content: Jinja2 source to inspect without rendering or downloading it.
+            url: Source template's ``nf://`` or ``git://`` URL, used to resolve
+                literal relative include names. Dynamic includes are unsupported.
+
+        Returns:
+            None. Included templates are downloaded to the local file cache.
+
+        Raises:
+            FileNotFoundError: If an included template cannot be downloaded.
+            Exception: If Jinja2 template parsing fails.
+        """
         j2env = Environment(loader="BaseLoader")
         try:
             parsed_content = j2env.parse(content)
         except Exception as e:
-            msg = f"{self.name} - Jinja2 template parsing failed '{url}', error: '{e}'"
+            msg = f"{self.name} - jinja2 template parsing failed '{url}', error: '{e}'"
             raise Exception(msg)
 
         # run recursion on include statements
@@ -2437,8 +2455,6 @@ class NFPWorker:
             include_file = node.template.value
             base_url = url.rsplit("/", 1)[0]
             self.jinja2_fetch_template(f"{base_url}/{include_file}")
-
-        return filepath
 
     def event(
         self,

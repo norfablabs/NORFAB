@@ -35,6 +35,9 @@ class TestParseMarkdownDesign:
                 )
             (folder / f"design.{extension}").write_text(source, encoding="utf-8")
             (folder / "records.yaml").write_text(
+                "{% include 'tenant.yaml' %}\n", encoding="utf-8"
+            )
+            (folder / "tenant.yaml").write_text(
                 "  - name: \"{{ context.site | default('YAML') }}\"\n", encoding="utf-8"
             )
             response = nfclient.run_job(
