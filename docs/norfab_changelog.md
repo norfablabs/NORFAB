@@ -1,3 +1,21 @@
+# 0.26.0 (Draft)
+
+## BUGS
+
+1. Windows and Linux installers now disable automatic Nornir logging configuration to prevent conflicting logging warnings when starting NFCLI.
+2. Fixed the Bash installer failing with `bad substitution` on macOS's bundled Bash when handling installation choices.
+
+## ENHANCEMENTS
+
+1. Windows and Linux installers now create `.env` credential placeholders for selected Nornir and Netbox services. Generated inventories read these values using Jinja environment lookups, and sample Nornir hosts inherit the default credentials.
+
+## FEATURES
+
+1. Added Netbox [`parse_markdown_design`](workers/netbox/services_netbox_service_tasks_parse_markdown_design.md) to convert marked Markdown blocks into YAML/Jinja design source and separate literal context, combining repeated collection sections and moving metadata from any block to the start without rendering or deploying them. 
+2. `design_deploy` updated to accept `.md` and `.markdown` file URLs, to parse and render markdown formatted designs
+
+---
+
 # 0.25.1
 
 ## BUGS

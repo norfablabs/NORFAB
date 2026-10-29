@@ -1188,10 +1188,28 @@ class DesignDocument(BaseModel):
         return self
 
 
+class ParseMarkdownDesignInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    markdown: StrictStr = Field(
+        ..., description="Markdown design source or nf:// or git:// file URL"
+    )
+
+
+class ParseMarkdownDesignPayload(BaseModel):
+    design: StrictStr = Field("", description="Assembled, unrendered YAML/Jinja design")
+    context: dict[StrictStr, Any] = Field({}, description="Literal document context")
+
+
+class ParseMarkdownDesignResult(Result):
+    result: ParseMarkdownDesignPayload = Field(
+        ParseMarkdownDesignPayload(),
+        description="Converted design and extracted context",
+    )
+
+
 class DesignDeployInput(BaseModel, use_enum_values=True, populate_by_name=True):
     design: Union[StrictStr, dict[StrictStr, Any]] = Field(
         ...,
-        description="NetBox design as YAML text, file URL, or parsed dictionary",
+        description="NetBox design as YAML text, YAML or Markdown file URL, or parsed dictionary",
     )
     context: Union[StrictStr, dict[StrictStr, Any]] = Field(
         default={},

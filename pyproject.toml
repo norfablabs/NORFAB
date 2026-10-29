@@ -100,6 +100,7 @@ diskcache = { version = "5.6.3", optional = true }
 pynetbox = { version = "7.8.0", optional = true }
 httpx = { version = "0.28.1", optional = true }
 deepdiff = { version = "9.1.0", optional = true }
+markdown-it-py = { version = "4.2.0", optional = true }
 
 # FastAPI Service Dependencies
 fastapi = { version = "0.143.3", optional = true, extras = ["standard"] }
@@ -187,7 +188,8 @@ netboxservice = [
     "diskcache",
     "httpx",
     "datamodel-code-generator",
-    "deepdiff"
+    "deepdiff",
+    "markdown-it-py"
 ]
 fastapiservice = [
     "fastapi",
@@ -263,6 +265,7 @@ full = [
     "httpx",
     "datamodel-code-generator",
     "deepdiff",
+    "markdown-it-py",
     "fastapi",
     "uvicorn",
     "python-multipart",
@@ -349,6 +352,7 @@ markers = [
     "netbox_create_bgp_peering: NetBox create_bgp_peering task tests",
     "netbox_create_asn: NetBox create_asn task tests",
     "netbox_design_deploy: NetBox design_deploy task tests",
+    "netbox_parse_markdown_design: Netbox Markdown design conversion tests",
     "netbox_create_device_interfaces: NetBox create_device_interfaces task tests",
     "netbox_move_ip: NetBox move_ip task tests",
     "netbox_create_ip: NetBox create_ip task tests",

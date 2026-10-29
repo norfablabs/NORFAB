@@ -5,6 +5,7 @@
     "Other sync tests still share the original fn-ceos-* NetBox device records. Audit record ownership before adding parallel sync tests."
   ],
   "branch_feature_tests": {
+    "test_designs.py": ["TestDesignDeploy::test_deploy_markdown_in_branch"],
     "services/containerlab/test_inventory.py": [
       "test_load_containerlab_inventory_with_netbox"
     ],
@@ -94,6 +95,13 @@
     ]
   },
   "tests": {
+    "test_designs.py::TestDesignDeploy::test_deploy_markdown_in_branch": {
+      "mode": "branch_feature",
+      "branches": ["norfab-markdown-<12 hex run suffix>"],
+      "tenants": ["norfab-markdown-<12 hex run suffix>"],
+      "sites": ["norfab-markdown-<12 hex run suffix>"],
+      "ownership": "Owns its uniquely named branch, tenant and site. Creates records only in that branch. Reads main to verify isolation. Finally deletes only the owned branch, discarding its records."
+    },
     "services/nornir/test_netbox_ipam.py::TestNBCreateIp": {
       "mode": "main_mutating",
       "persistent_prefix": "198.19.236.0/24 (global; description NORFAB NORNIR TEMPLATE IP POOL; tests/netbox_data.py)",

@@ -168,8 +168,11 @@ runner:
 # Host inventory - add your devices here
 hosts: {}
 groups: {}
-defaults: {}
-logging: {}
+defaults:
+  username: "{{ env.get('NORNIR_USERNAME', '') }}"
+  password: "{{ env.get('NORNIR_PASSWORD', '') }}"
+logging:
+  enabled: false
 user_defined: {}
 "@
             "nornir/nornir-worker-1.yaml" = @"
@@ -178,8 +181,6 @@ hosts:
   ios-device-1:
     hostname: 192.168.1.1
     platform: cisco_ios
-    username: admin
-    password: admin
 "@
         }
         WorkersSection = @"
@@ -209,8 +210,8 @@ grapqhl_max_workers: 4
 instances:
   prod:
     default: True
-    url: "http://192.168.1.100:8000/"
-    token: "CHANGE_ME_netbox_api_token"
+    url: "{{ env.get('NETBOX_URL', '') }}"
+    token: "{{ env.get('NETBOX_TOKEN', '') }}"
     ssl_verify: False
 "@
         }
@@ -613,6 +614,14 @@ if ($selectedServices -contains "fastmcpservice") {
 
 # Check every target before writing any configuration; preserve existing projects.
 $targetPaths = @((Join-Path $envDir 'inventory.yaml'))
+$envLines = @()
+if ($selectedServices -contains 'nornirservice') {
+    $envLines += @('NORNIR_USERNAME=admin', 'NORNIR_PASSWORD=CHANGE_ME')
+}
+if ($selectedServices -contains 'netboxservice') {
+    $envLines += @('NETBOX_URL=http://192.168.1.100:8000/', 'NETBOX_TOKEN=CHANGE_ME_netbox_api_token')
+}
+if ($envLines.Count -gt 0) { $targetPaths += Join-Path $envDir '.env' }
 foreach ($svcName in $selectedServices) {
     $svc = $Services | Where-Object { $_.Name -eq $svcName }
     foreach ($relativePath in $svc.WorkerFiles.Keys) { $targetPaths += Join-Path $envDir $relativePath }
@@ -625,6 +634,12 @@ foreach ($target in $targetPaths) {
 
 Write-Step "Creating environment directory: $envDir"
 New-Item -ItemType Directory -Path $envDir -Force | Out-Null
+if ($envLines.Count -gt 0) {
+    $envPath = Join-Path $envDir '.env'
+    [IO.File]::WriteAllLines($envPath, [string[]]$envLines, (New-Object System.Text.UTF8Encoding($false)))
+    Write-Success "Created: $envPath"
+    Write-Info 'Edit .env with your service credentials before starting nfcli.'
+}
 
 Write-Step "Generating inventory files..."
 

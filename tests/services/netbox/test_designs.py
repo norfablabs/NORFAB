@@ -20,6 +20,64 @@ pytestmark = [pytest.mark.netbox, pytest.mark.netbox_design_deploy]
 
 
 class TestDesignDeploy:
+    def test_deploy_markdown_in_branch(self, nfclient: Any) -> None:
+        """Deploy a Markdown file in an owned branch and delete the branch afterwards."""
+        name = f"norfab-markdown-{uuid4().hex[:12]}"
+        try:
+            response = nfclient.run_job(
+                "netbox",
+                "design_deploy",
+                workers="any",
+                kwargs={
+                    "design": "nf://netbox/designs/markdown_branch_test.md",
+                    "context": {"name": name},
+                    "branch": name,
+                },
+            )
+            assert response
+            for result in response.values():
+                assert not result["failed"], result
+                for collection in ("tenants", "sites"):
+                    assert result["result"][collection] == {
+                        "created": [name],
+                        "updated": [],
+                    }
+
+            for object_type in ("tenancy.tenants", "dcim.sites"):
+                for branch, count in ((name, 1), (None, 0)):
+                    response = nfclient.run_job(
+                        "netbox",
+                        "crud_read",
+                        workers="any",
+                        kwargs={
+                            "object_type": object_type,
+                            "filters": {"name": name},
+                            "branch": branch,
+                        },
+                    )
+                    assert response
+                    for result in response.values():
+                        assert not result["failed"], result
+                        assert result["result"]["count"] == count
+                        if count:
+                            record = result["result"]["results"][0]
+                            assert (
+                                record["description"]
+                                == "Created from a Markdown design."
+                            )
+                            if object_type == "dcim.sites":
+                                assert record["tenant"]["name"] == name
+        finally:
+            response = nfclient.run_job(
+                "netbox",
+                "delete_branch",
+                workers="any",
+                kwargs={"branch": name},
+            )
+            assert response
+            for result in response.values():
+                assert not result["failed"], result
+
     def test_device_config_template_reference(self, nfclient: Any) -> None:
         """Resolve a seeded template by name or ID on one owned device."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)

@@ -16,7 +16,7 @@ These documents record design decisions and development work. Statuses below ref
 | [BGP Peerings Tasks Split Plan](adr_netbox_bgp_create_update_tasks_plan.md) | Not stated |
 | [ADR - NetBox check_device_sync Task Implementation Plan](adr_netbox_check_sync_plan.md) | Not stated |
 | [ADR: NetBox design deployment](adr_netbox_design_specification.md) | Not stated |
-| [ADR: Netbox Markdown design parser](adr_netbox_design_markdown_parser.md) | Proposed |
+| [ADR: Netbox Markdown design parser](adr_netbox_design_markdown_parser.md) | Accepted |
 | [ADR - NetBox `sync_bgp_community` Task Plan](adr_netbox_sync_bgp_community_plan.md) | Accepted |
 | [ADR - NetBox sync_device_interfaces Refactor Plan](adr_netbox_sync_device_interfaces_plan.md) | Not stated |
 | [ADR - NetBox sync_device_inventory Task Plan](adr_netbox_sync_device_inventory_plan.md) | Not stated |

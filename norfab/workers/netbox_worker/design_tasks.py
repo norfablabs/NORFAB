@@ -1,16 +1,22 @@
 """Render NetBox designs and dispatch supported object collections."""
 
+import csv
 import inspect
+import io
+import json
 import logging
 import os
+import re
 from copy import deepcopy
 from functools import partial
 from ipaddress import ip_interface, ip_network
 from typing import Any, Union
 
+import orjson
 import yaml
 from datamodel_code_generator import DataModelType, InputFileType, generate
 from jinja2 import Environment, FileSystemLoader
+from markdown_it import MarkdownIt
 from pydantic import BaseModel
 
 from norfab.core.worker import Job, Task
@@ -22,6 +28,8 @@ from .netbox_models import (
     DesignDeployResult,
     DesignDocument,
     NetboxFastApiArgs,
+    ParseMarkdownDesignInput,
+    ParseMarkdownDesignResult,
 )
 from .netbox_worker_utilities import (
     merge_array_values,
@@ -4109,6 +4117,188 @@ DESIGN_HANDLERS_ORDER = {
 
 class NetboxDesignTasks:
     @Task(
+        input=ParseMarkdownDesignInput,
+        output=ParseMarkdownDesignResult,
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={"annotations": {"title": "Parse Markdown Design", "readOnlyHint": True}},
+    )
+    def parse_markdown_design(self, job: Job, markdown: str) -> Result:
+        """Extract a YAML/Jinja design and its context from Markdown code blocks.
+
+        - Mark design blocks with ``yaml design``. Other examples and prose are ignored.
+        - Repeated collections are joined in document order. Records are not deduplicated.
+        - Metadata can appear anywhere. The schema and function URLs are placed first.
+        - Indent list items and multiline values. Inline collections are unsupported.
+        - Keep Jinja loops and variables within one section. Templates are not rendered.
+
+        Args:
+            job: NorFab job injected by the task framework.
+            markdown: Markdown text or an ``nf://`` or ``git://`` file URL.
+                Use ``yaml context.KEY``, ``json context.KEY``, ``csv context.KEY``,
+                or ``text context.KEY`` for context. Place ``<!-- context.KEY -->``
+                before an unfenced Markdown table. Each KEY names one unique
+                top-level value. CSV and Markdown table cells stay strings.
+                Text keeps its final newline. YAML values must be JSON-serializable.
+
+        Returns:
+            Result with ``design`` source text and a separate ``context`` dictionary.
+            No Netbox access, function execution, include discovery or deployment occurs.
+
+        Raises:
+            ValueError: A design section, marker, context target or table is invalid.
+            Exception: File fetching, context parsing, Jinja syntax checks or job
+                timeout checks fail. NorFab reports these as task errors.
+        """
+        ret = Result(task=f"{self.name}:parse_markdown_design", result={})
+        job.check_timeout()
+        if self.is_url(markdown):
+            markdown = self.fetch_file(markdown, raise_on_fail=True)
+        metadata_keys = (
+            "design_input_schema",
+            "jinja_functions",
+            "custom_functions",
+        )
+        collections = set(DesignDocument.model_fields) - set(metadata_keys)
+        sections = {}
+        metadata = {}
+        context = {}
+        design_blocks = 0
+        # Read tagged code blocks and marked tables from the Markdown token stream.
+        tokens = iter(MarkdownIt().enable("table").parse(markdown))
+        for token in tokens:
+            if token.type == "html_block" and re.match(
+                r"<!--\s*context\.", token.content.strip()
+            ):
+                target = re.fullmatch(
+                    r"<!--\s*(context\.[\w.-]+)\s*-->", token.content.strip()
+                )
+                if not target:
+                    raise ValueError("invalid context table marker")
+                table = next(tokens, None)
+                if table is None or table.type != "table_open":
+                    raise ValueError("expected a Markdown table after context marker")
+                rows = []
+                for cell in tokens:
+                    if cell.type == "table_close":
+                        break
+                    if cell.type == "tr_open":
+                        rows.append([])
+                    elif cell.type == "inline":
+                        rows[-1].append(cell.content)
+                rows = iter(rows)
+                marker = ["markdown", target[1]]
+            elif token.type == "fence":
+                marker = token.info.split()
+                if (
+                    len(marker) == 2
+                    and marker[0] == "markdown"
+                    and marker[1].startswith("context.")
+                ):
+                    raise ValueError(
+                        "use <!-- context.KEY --> before an unfenced Markdown table"
+                    )
+            else:
+                continue
+            if not marker or not (
+                "design" in marker
+                or any(part.startswith("context.") for part in marker)
+            ):
+                continue
+            job.check_timeout()
+            if marker == ["yaml", "design"]:
+                design_blocks += 1
+                # Split on unindented keys. Leave YAML values and Jinja intact.
+                parts = re.split(r"(?m)^([A-Za-z_]\w*):([^\n]*)\n", token.content)
+                if any(
+                    line.strip() and not line.startswith("#")
+                    for line in parts[0].splitlines()
+                ):
+                    raise ValueError("expected a design section header")
+                # Each split yields a key, inline value and section body.
+                for key, value, body in zip(parts[1::3], parts[2::3], parts[3::3]):
+                    # Keep adjacent sections separate when the final fence is unclosed.
+                    if body and not body.endswith("\n"):
+                        body += "\n"
+                    if key in metadata_keys:
+                        if key in metadata:
+                            raise ValueError(f"duplicate metadata key '{key}'")
+                        metadata[key] = f"{key}:{value}\n{body}"
+                    else:
+                        if key not in collections:
+                            raise ValueError(f"unknown design key '{key}'")
+                        if value.strip() and not value.lstrip().startswith("#"):
+                            raise ValueError("inline collection values are unsupported")
+                        if re.search(r"(?m)^(?![\s#]|\{%|\{#).+", body):
+                            raise ValueError(
+                                "indent collection items and block-scalar content"
+                            )
+                        sections.setdefault(key, []).append(
+                            (value.lstrip() + "\n" if value.strip() else "") + body
+                        )
+                    # Check section scope without rendering or resolving includes.
+                    Environment().parse(body)
+            elif len(marker) == 2 and marker[0] in {
+                "yaml",
+                "json",
+                "csv",
+                "text",
+                "markdown",
+            }:
+                # Context is literal data. Never render its contents with Jinja.
+                language, target = marker
+                if not re.fullmatch(r"context\.[A-Za-z_][\w-]*", target):
+                    raise ValueError("context target must name one top-level key")
+                key = target.split(".", 1)[1]
+                if key in context:
+                    raise ValueError(f"duplicate context target '{key}'")
+                if language == "yaml":
+                    value = yaml.safe_load(token.content)
+                elif language == "json":
+                    value = json.loads(token.content)
+                elif language == "text":
+                    value = token.content
+                else:
+                    if language == "csv":
+                        rows = csv.reader(io.StringIO(token.content), strict=True)
+                    headers = next(rows, [])
+                    if (
+                        not headers
+                        or any(not h.strip() for h in headers)
+                        or len(set(headers)) != len(headers)
+                    ):
+                        raise ValueError(
+                            f"{language.upper()} headers must be nonempty and unique"
+                        )
+                    value = []
+                    for row_number, row in enumerate(rows, 2):
+                        if len(row) != len(headers):
+                            raise ValueError(
+                                f"{language.upper()} row {row_number} has incorrect width"
+                            )
+                        value.append(dict(zip(headers, row)))
+                try:
+                    orjson.dumps(value)
+                except TypeError as exc:
+                    raise ValueError(
+                        f"context.{key} must be JSON-serializable: {exc}"
+                    ) from exc
+                context[key] = value
+            else:
+                raise ValueError(f"invalid design/context fence marker '{token.info}'")
+        if not design_blocks:
+            raise ValueError("no yaml design blocks found")
+        # Put metadata first and emit one header for each combined collection.
+        ret.result = {
+            "design": "".join(metadata[key] for key in metadata_keys if key in metadata)
+            + "".join(
+                key + ":\n" + "".join(bodies) for key, bodies in sections.items()
+            ),
+            "context": context,
+        }
+        job.check_timeout()
+        return ret
+
+    @Task(
         input=DesignDeployInput,
         output=DesignDeployResult,
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
@@ -4144,12 +4334,14 @@ class NetboxDesignTasks:
         Args:
             job: NorFab job injected by the task framework.
             design: YAML text, NorFab file URL, or parsed design dictionary.
+                File URLs ending in .md or .markdown are converted from Markdown first.
                 Device-type references accept manufacturer/model dictionaries
                 or model strings matching exactly one existing NetBox type.
                 String references must exist in NetBox even during dry runs.
                 New devices default to planned status; omitted status preserves
                 existing device status.
             context: Jinja2 variables, optionally checked by design_input_schema.
+                Explicit values override Markdown context by top-level key.
             instance: NetBox instance name; defaults to the worker's instance.
             dry_run: Return planned writes without changing NetBox.
             branch: NetBox Branching plugin branch name.
@@ -4203,6 +4395,10 @@ class NetboxDesignTasks:
                     if design_url
                     else design
                 )
+                if design_url and design_url.endswith((".md", ".markdown")):
+                    parsed = self.parse_markdown_design(job=job, markdown=source).result
+                    source = parsed["design"]
+                    context = {**parsed["context"], **context}
                 metadata_lines = []
                 for line in source.splitlines():
                     if (
@@ -4286,7 +4482,9 @@ class NetboxDesignTasks:
                 loader = None
                 if design_url:
                     loader = FileSystemLoader(
-                        os.path.dirname(self.jinja2_fetch_template(design_url))
+                        os.path.dirname(
+                            self.jinja2_fetch_template(design_url, content=template)
+                        )
                     )
                 environment = Environment(loader=loader)
                 environment.filters.update(filters)

@@ -52,9 +52,9 @@ read_yes_no() {
     while true; do
         read_answer "$1 [$hint]"
         answer=${answer:-$2}
-        case ${answer,,} in
-            y|yes) return 0 ;;
-            n|no) return 1 ;;
+        case $answer in
+            [yY]|[yY][eE][sS]) return 0 ;;
+            [nN]|[nN][oO]) return 1 ;;
             *) write_info 'Please enter Y or N.' ;;
         esac
     done
@@ -115,8 +115,11 @@ runner:
 # Host inventory - add your devices here
 hosts: {}
 groups: {}
-defaults: {}
-logging: {}
+defaults:
+  username: "{{ env.get('NORNIR_USERNAME', '') }}"
+  password: "{{ env.get('NORNIR_PASSWORD', '') }}"
+logging:
+  enabled: false
 user_defined: {}
 EOF
             yaml_files+=("$env_dir/nornir/common.yaml")
@@ -127,8 +130,6 @@ hosts:
   ios-device-1:
     hostname: 192.168.1.1
     platform: cisco_ios
-    username: admin
-    password: admin
 EOF
             yaml_files+=("$env_dir/nornir/nornir-worker-1.yaml")
             ;;
@@ -145,8 +146,8 @@ grapqhl_max_workers: 4
 instances:
   prod:
     default: True
-    url: "http://192.168.1.100:8000/"
-    token: "CHANGE_ME_netbox_api_token"
+    url: "{{ env.get('NETBOX_URL', '') }}"
+    token: "{{ env.get('NETBOX_TOKEN', '') }}"
     ssl_verify: False
 EOF
             yaml_files+=("$env_dir/netbox/netbox-worker-1.yaml")
@@ -336,10 +337,10 @@ while true; do
     write_info '[R] Re-select services'
     write_info '[X] Cancel installation'
     read_choice 'Choose C, R, or X' C C c R r X x
-    case ${answer,,} in
-        c) break ;;
-        r) continue ;;
-        x) write_info 'Installation cancelled.'; exit 0 ;;
+    case $answer in
+        [cC]) break ;;
+        [rR]) continue ;;
+        [xX]) write_info 'Installation cancelled.'; exit 0 ;;
     esac
 done
 
@@ -388,7 +389,7 @@ if [[ -e $project_dir || -L $project_dir ]]; then
     write_info '[R] Remove the entire folder and recreate inventory and worker configuration files'
     write_info '[S] Skip creating files and preserve the existing project'
     read_choice 'Choose R or S' S R r S s
-    if [[ ${answer,,} == r ]]; then
+    if [[ $answer == r || $answer == R ]]; then
         "$python_exe" - "$project_dir" <<'PYEOF'
 import os
 import shutil
@@ -439,6 +440,16 @@ if [[ ${selected[4]} == 1 ]]; then
 fi
 # Check all targets before writing any configuration, including dangling symlinks.
 target_paths=("$env_dir/inventory.yaml")
+env_lines=()
+if [[ ${selected[0]} == 1 ]]; then
+    env_lines+=('NORNIR_USERNAME=admin' 'NORNIR_PASSWORD=CHANGE_ME')
+fi
+if [[ ${selected[1]} == 1 ]]; then
+    env_lines+=('NETBOX_URL=http://192.168.1.100:8000/' 'NETBOX_TOKEN=CHANGE_ME_netbox_api_token')
+fi
+if (( ${#env_lines[@]} > 0 )); then
+    target_paths+=("$env_dir/.env")
+fi
 for i in "${!service_names[@]}"; do
     [[ ${selected[i]} == 1 ]] || continue
     key=${service_keys[i]}
@@ -452,6 +463,11 @@ for target in "${target_paths[@]}"; do
     fi
 done
 mkdir -p "$env_dir"
+if (( ${#env_lines[@]} > 0 )); then
+    (umask 077; printf '%s\n' "${env_lines[@]}" > "$env_dir/.env")
+    write_success "Created: $env_dir/.env"
+    write_info 'Edit .env with your service credentials before starting nfcli.'
+fi
 write_step 'Generating inventory files...'
 yaml_files=("$env_dir/inventory.yaml")
 {

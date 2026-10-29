@@ -62,7 +62,7 @@ will be noted in service deployment details.
 
 === "Windows"
 
-    Download and run the interactive installer script — it guides you through
+    Run the interactive installer script - it guides you through
     choosing a system-wide or virtual-environment install, selects service extras,
     and scaffolds a ready-to-run inventory for you:
 
@@ -78,9 +78,28 @@ will be noted in service deployment details.
     Follow the prompts to select services and create project files in `./norfab`.
     Existing projects can be preserved or deleted and recreated.
 
+    From the directory where you ran the installer, activate the virtual
+    environment. mchange folder to norfab and run `nfcli`:
+
+    ```powershell
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; .\.venv\Scripts\Activate.ps1
+    cd norfab
+    nfcli
+    ```
+
+    Activate the environment again in each new PowerShell session. If you chose
+    another environment folder, use its path instead of `.venv`.
+
+    When Nornir or Netbox is selected, edit the generated `norfab/.env` before
+    starting NFCLI. Set `NORNIR_USERNAME` and `NORNIR_PASSWORD` for Nornir, and
+    `NETBOX_URL` and `NETBOX_TOKEN` for Netbox. Worker inventories read these
+    values automatically; sample Nornir hosts inherit the default credentials.
+
     !!! note "Prerequisite"
         Python 3.10 or later must be installed and on your PATH.
         Download from [python.org](https://www.python.org/downloads/).
+
+    **Install Manually**
 
     To install manually, run these commands in PowerShell:
 
@@ -150,6 +169,25 @@ will be noted in service deployment details.
     Existing projects can be preserved or deleted and recreated. Run the printed
     commands to start `nfcli`.
 
+    From the directory where you ran the installer, activate the virtual
+    environment, change into the `norfab` folder, and run `nfcli`:
+
+    ```bash
+    source .venv/bin/activate
+    cd norfab
+    nfcli
+    ```
+
+    Activate the environment again in each new terminal session. If you chose
+    another environment folder, use its path instead of `.venv`.
+
+    When Nornir or Netbox is selected, edit the generated `norfab/.env` before
+    starting NFCLI. Set `NORNIR_USERNAME` and `NORNIR_PASSWORD` for Nornir, and
+    `NETBOX_URL` and `NETBOX_TOKEN` for Netbox. Worker inventories read these
+    values automatically; sample Nornir hosts inherit the default credentials.
+
+    **Install Manually**
+    
     To install manually:
 
     ```bash

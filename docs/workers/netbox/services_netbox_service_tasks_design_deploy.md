@@ -7,6 +7,15 @@ tags:
 
 `design_deploy` renders a YAML design with Jinja2, validates the rendered document, then creates or updates Netbox objects in dependency order. It never deletes objects omitted from the design. Existing objects receive the supplied fields on every run. The task does not calculate a diff before sending updates.
 
+## Markdown designs
+
+Pass a `.md` or `.markdown` file URL to convert its marked design blocks before
+deployment. Document context provides defaults. Explicit task context overrides
+matching top-level keys. Relative Jinja includes resolve from the file's directory.
+
+See [Markdown design](services_netbox_service_tasks_parse_markdown_design.md)
+for supported block tags and examples.
+
 ## Design overview
 
 **Netbox Design Driven Modeling (NDDM)** is an approach to building and maintaining the Netbox data model from reusable network designs. A design describes the objects and relationships needed for a site, service, or network pattern in YAML. Jinja2 templates let you reuse the same design for multiple deployments by supplying different context values, such as site names, device names, or address pools.
