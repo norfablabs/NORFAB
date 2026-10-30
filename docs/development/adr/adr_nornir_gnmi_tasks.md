@@ -8,8 +8,9 @@ The first slice exposes only `gnmi_get`, using the linear `run_gnmi` method.
 Rendering and additional abstraction are deferred. The MVP follows existing
 models with `extra="allow"` because runtime validation includes the injected
 job argument; stricter argument handling below remains a proposed follow-up.
-Live reads remain unverified: integration attempts timed out establishing gRPC
-connections to the configured lab ports.
+Live Get reads are verified against all five cEOS lab devices after applying
+port mappings. Use `/system/config/hostname`; EOS rejects `openconfig-system`
+as a gNMI origin.
 
 ## Context
 

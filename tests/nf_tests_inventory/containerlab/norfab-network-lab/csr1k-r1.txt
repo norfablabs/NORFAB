@@ -1,0 +1,12 @@
+hostname csr1k-r1
+!
+! Plaintext gNMI for the integration lab.
+gnxi
+gnxi server
+gnxi port 50052
+!
+netconf-yang
+netconf-yang feature candidate-datastore
+restconf
+!
+end

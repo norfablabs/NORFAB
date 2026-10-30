@@ -27,7 +27,7 @@ def test_gnmi_get(
         "gnmi_get",
         workers=worker,
         kwargs={
-            "path": ["openconfig-system:system/config/hostname"],
+            "path": ["/system/config/hostname"],
             "datatype": "config",
             "encoding": "json_ietf",
             "FL": hosts,
@@ -82,17 +82,50 @@ def test_gnmi_get_invalid_arguments(nfclient: object, kwargs: dict) -> None:
     assert "ValidationError" in str(result), result
 
 
+@pytest.mark.parametrize(
+    "selector",
+    [
+        "path /system",
+        "openconfig-system",
+        "openconfig-interfaces",
+        "openconfig-lldp",
+        "openconfig-platform",
+    ],
+)
 def test_gnmi_get_shell(
     nfclient: object,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
+    selector: str,
 ) -> None:
     """Run the real shell command through the integration client."""
     monkeypatch.setattr(builtins, "NFCLIENT", nfclient, raising=False)
     output = StringIO()
     shell = App(NornirGnmiShell, stdout=output)
     shell.onecmd(
-        "get workers nornir-worker-1 FL no-such-gnmi-host path /system verbose-result"
+        f"get workers nornir-worker-1 FL no-such-gnmi-host {selector} verbose-result"
     )
     captured = capsys.readouterr().out + output.getvalue()
     assert "no_match" in captured, captured
+
+
+@pytest.mark.parametrize(
+    "getter,node",
+    [
+        ("openconfig_system", "system"),
+        ("openconfig_interfaces", "interfaces"),
+        ("openconfig_lldp", "lldp"),
+        ("openconfig_platform", "components"),
+    ],
+)
+def test_gnmi_get_shortcuts(nfclient: object, getter: str, node: str) -> None:
+    result = nfclient.run_job(
+        "nornir",
+        "gnmi_get",
+        workers="nornir-worker-1",
+        kwargs={getter: True, "FL": ["ceos-spine-1"], "on_failed": True},
+    )["nornir-worker-1"]
+    assert result["failed"] is False, result
+    notifications = result["result"]["ceos-spine-1"]["get"]["notification"]
+    assert notifications, result
+    assert node in str(notifications), result

@@ -9,7 +9,7 @@ from .nornir_picle_shell_common import NorniHostsFilters
 
 class GnmiGetShell(GnmiGetInput, NorniHostsFilters, ClientRunJobArgs):
     path: str | list[str] = Field(
-        ..., description="YANG path or list of paths to retrieve"
+        [], description="YANG path or list of paths to retrieve"
     )
 
     @staticmethod

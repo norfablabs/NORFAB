@@ -2,7 +2,7 @@
 
 ## FEATURES
 
-1. Added Nornir [`gnmi_get`](workers/nornir/services_nornir_service_tasks_gnmi.md) with host filtering, structured processors, and NFCLI `nornir gnmi get`.
+1. Added Nornir [`gnmi_get`](workers/nornir/services_nornir_service_tasks_gnmi.md) with host filtering, structured processors, and NFCLI `nornir gnmi get`, including `openconfig-system`, `openconfig-interfaces`, `openconfig-lldp`, and `openconfig-platform` getters.
 
 ## BUGS
 

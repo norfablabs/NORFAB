@@ -30,7 +30,7 @@ with `insecure: true`.
 === "CLI"
 
     ```bash
-    nf# nornir gnmi get FL ceos-spine-1 path openconfig-system:system/config/hostname datatype config
+    nf# nornir gnmi get FL ceos-spine-1 path /system/config/hostname datatype config
     ```
 
 === "Python"
@@ -44,16 +44,32 @@ with `insecure: true`.
             "nornir", "gnmi_get",
             kwargs={
                 "FL": ["ceos-spine-1"],
-                "path": ["openconfig-system:system/config/hostname"],
+                "path": ["/system/config/hostname"],
                 "datatype": "config",
             },
         )
         print(result)
     ```
 
+## Named getters
+
+Use `openconfig-system` or `openconfig-interfaces` in NFCLI instead of `path`:
+
+```bash
+nf# nornir gnmi get openconfig-interfaces FL ceos-spine-1
+```
+
+Python uses `openconfig_system=True` and `openconfig_interfaces=True`.
+The shortcuts request `openconfig:/system` and `openconfig:/interfaces`,
+respectively: `openconfig` is the gNMI origin, while the shortcut names identify
+YANG modules. `openconfig-lldp` (`openconfig_lldp=True` in Python) requests
+`openconfig:/lldp`; `openconfig-platform` (`openconfig_platform=True`) requests
+`openconfig:/components` for hardware inventory and sensors. All getters can be combined with explicit paths. At least one path or
+getter is required; devices must support the selected OpenConfig tree.
+
 ## Notes
 
-- Paths must be a nonempty list. Use `prefix` for a shared path prefix and
+- Explicit paths are a list. Use `prefix` for a shared path prefix and
   `target` for a gNMI target name.
 - Encoding defaults to backend negotiation; an explicit encoding must be
   supported by the device.

@@ -2256,6 +2256,21 @@ class SnmpMultiSetResult(NornirSerializedResult):
 
 
 # gNMI task models
+class GnmiDataType(str, Enum):
+    all_ = "all"
+    config = "config"
+    state = "state"
+    operational = "operational"
+
+
+class GnmiEncoding(str, Enum):
+    json = "json"
+    json_ietf = "json_ietf"
+    bytes_ = "bytes"
+    proto = "proto"
+    ascii_ = "ascii"
+
+
 class GnmiGetInput(
     NornirStructuredProcessorArgs,
     NornirCommonArgs,
@@ -2266,21 +2281,56 @@ class GnmiGetInput(
     path: list[
         Annotated[StrictStr, StringConstraints(strip_whitespace=True, min_length=1)]
     ] = Field(
-        ...,
-        min_length=1,
-        description="YANG paths to retrieve",
+        [],
+        description="YANG paths to retrieve, optionally combined with named getters",
     )
+    openconfig_system: StrictBool = Field(
+        False,
+        alias="openconfig-system",
+        description="Get the OpenConfig system tree",
+        json_schema_extra={"presence": True},
+    )
+    openconfig_interfaces: StrictBool = Field(
+        False,
+        alias="openconfig-interfaces",
+        description="Get the OpenConfig interfaces tree",
+        json_schema_extra={"presence": True},
+    )
+
+    openconfig_lldp: StrictBool = Field(
+        False,
+        alias="openconfig-lldp",
+        description="Get the OpenConfig LLDP tree",
+        json_schema_extra={"presence": True},
+    )
+    openconfig_platform: StrictBool = Field(
+        False,
+        alias="openconfig-platform",
+        description="Get the OpenConfig components tree",
+        json_schema_extra={"presence": True},
+    )
+
+    @model_validator(mode="after")
+    def validate_paths(self) -> "GnmiGetInput":
+        if (
+            not self.path
+            and not self.openconfig_system
+            and not self.openconfig_interfaces
+            and not self.openconfig_lldp
+            and not self.openconfig_platform
+        ):
+            raise ValueError("provide path or an OpenConfig getter")
+        return self
+
     prefix: StrictStr = Field("", description="Common YANG path prefix")
     target: Union[None, StrictStr] = Field(None, description="gNMI target name")
-    datatype: Literal["all", "config", "state", "operational"] = Field(
-        "all",
+    datatype: GnmiDataType = Field(
+        GnmiDataType.all_,
         description="Data type to retrieve",
     )
-    encoding: Union[None, Literal["json", "json_ietf", "bytes", "proto", "ascii"]] = (
-        Field(
-            None,
-            description="Response encoding; default negotiates with the device",
-        )
+    encoding: Union[None, GnmiEncoding] = Field(
+        None,
+        description="Response encoding; default negotiates with the device",
     )
 
 

@@ -8,6 +8,13 @@ from norfab.models import Result
 
 from .nornir_models import GnmiGetInput, GnmiResult
 
+GNMI_GETTERS = {
+    "openconfig_system": "openconfig:/system",
+    "openconfig_interfaces": "openconfig:/interfaces",
+    "openconfig_lldp": "openconfig:/lldp",
+    "openconfig_platform": "openconfig:/components",
+}
+
 
 class GnmiTasks:
     def run_gnmi(self, job: Job, call: str, **kwargs: Any) -> Result:
@@ -59,22 +66,30 @@ class GnmiTasks:
     def gnmi_get(
         self,
         job: Job,
-        path: list[str],
+        path: list[str] = None,
         prefix: str = "",
         target: str = None,
         datatype: str = "all",
         encoding: str = None,
+        openconfig_system: bool = False,
+        openconfig_interfaces: bool = False,
+        openconfig_lldp: bool = False,
+        openconfig_platform: bool = False,
         **kwargs: Any,
     ) -> Result:
         """Retrieve configuration or operational state over gNMI.
 
         Args:
             job: NorFab job metadata.
-            path: Nonempty list of YANG paths to retrieve.
+            path: YANG paths to retrieve; requires a path or a named getter.
             prefix: Common path prefix.
             target: Optional gNMI target name.
             datatype: Data selection: all, config, state, or operational.
             encoding: Optional encoding; defaults to backend negotiation.
+            openconfig_system: Retrieve openconfig:/system.
+            openconfig_interfaces: Retrieve openconfig:/interfaces.
+            openconfig_lldp: Retrieve openconfig:/lldp.
+            openconfig_platform: Retrieve openconfig:/components.
             **kwargs: Common Nornir host filters, processors, retry options,
                 to_dict and add_details serialization options.
 
@@ -85,6 +100,15 @@ class GnmiTasks:
                 YANG models and supported encodings determine available data.
                 Configure port, credentials and TLS in connection_options.pygnmi.
         """
+        path = list(path or [])
+        for getter, selected in {
+            "openconfig_system": openconfig_system,
+            "openconfig_interfaces": openconfig_interfaces,
+            "openconfig_lldp": openconfig_lldp,
+            "openconfig_platform": openconfig_platform,
+        }.items():
+            if selected:
+                path.append(GNMI_GETTERS[getter])
         return self.run_gnmi(
             job,
             call="get",

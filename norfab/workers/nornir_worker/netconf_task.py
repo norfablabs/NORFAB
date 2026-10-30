@@ -32,11 +32,11 @@ from .nornir_models import (
 log = logging.getLogger(__name__)
 
 NETCONF_GETTERS = {
-    "ietf_interfaces": '<interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces"/>',
     "openconfig_interfaces": '<interfaces xmlns="http://openconfig.net/yang/interfaces"/>',
     "openconfig_lldp": '<lldp xmlns="http://openconfig.net/yang/lldp"/>',
     "openconfig_bgp": '<network-instances xmlns="http://openconfig.net/yang/network-instance"><network-instance><protocols><protocol><bgp/></protocol></protocols></network-instance></network-instances>',
     "openconfig_system": '<system xmlns="http://openconfig.net/yang/system"/>',
+    "ietf_interfaces": '<interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces"/>',
     "ietf_routing": '<routing xmlns="urn:ietf:params:xml:ns:yang:ietf-routing"/>',
     "ietf_hardware": '<hardware xmlns="urn:ietf:params:xml:ns:yang:ietf-hardware"/>',
 }
@@ -490,11 +490,11 @@ class NetconfTask:
 
         """
         for getter, selected in {
-            "ietf_interfaces": ietf_interfaces,
             "openconfig_interfaces": openconfig_interfaces,
             "openconfig_lldp": openconfig_lldp,
             "openconfig_bgp": openconfig_bgp,
             "openconfig_system": openconfig_system,
+            "ietf_interfaces": ietf_interfaces,
             "ietf_routing": ietf_routing,
             "ietf_hardware": ietf_hardware,
         }.items():
