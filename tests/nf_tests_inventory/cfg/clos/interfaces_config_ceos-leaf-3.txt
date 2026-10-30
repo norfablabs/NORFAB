@@ -62,4 +62,10 @@ interface Ethernet6.330
    encapsulation dot1q vlan 330
    ip address 10.3.15.29/30
 !
+interface Ethernet7
+   description P2P to xrd-1 GigabitEthernet0/0/0/0
+   no switchport
+   ip address 10.10.0.20/31
+   no shutdown
+!
 end

@@ -1,0 +1,16 @@
+route-policy ALLOW-ALL
+ pass
+end-policy
+!
+router bgp 65108
+ bgp router-id 10.10.0.21
+ address-family ipv4 unicast
+  network 10.10.0.20/31
+ !
+ neighbor 10.10.0.20
+  remote-as 65103
+  description ceos-leaf-3 Ethernet7
+  address-family ipv4 unicast
+   route-policy ALLOW-ALL in
+   route-policy ALLOW-ALL out
+  !

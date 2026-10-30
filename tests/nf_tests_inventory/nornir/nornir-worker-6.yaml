@@ -1,4 +1,34 @@
 hosts: 
+  xrd-1:
+    hostname: containerlab.lab
+    platform: cisco_xr
+    username: clab
+    password: clab@123
+    port: 2208
+    connection_options:
+      scrapli:
+        platform: cisco_iosxr
+        port: 2208
+        extras:
+          auth_strict_key: False
+          ssh_config_file: False
+          transport: paramiko
+      ncclient:
+        port: 8308
+        extras:
+          allow_agent: False
+          hostkey_verify: False
+          device_params:
+            name: iosxr
+      scrapli_netconf:
+        port: 8308
+        extras:
+          transport: paramiko
+          ssh_config_file: True
+          auth_strict_key: False
+      napalm:
+        platform: iosxr
+        port: 2208
   csr1k-r1:
     hostname: containerlab.lab
     platform: cisco_ios

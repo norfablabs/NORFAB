@@ -87,6 +87,19 @@ topology:
         - 4407:443
         - 11617:161/udp
 
+    xrd-1:
+      kind: cisco_xrd
+      image: ios-xrd-control-plane:26-1-1
+      startup-config: xrd-1.txt
+      mgmt-ipv4: 172.100.100.18
+      ports:
+        - 2208:22
+        - 8808:80
+        - 8308:830
+        - 4408:443
+        - 11618:161/udp
+        - 9338:9339
+
   links:
     - endpoints: ["ceos-spine-1:eth1", "ceos-spine-2:eth1"]
     - endpoints: ["ceos-spine-1:eth2", "ceos-leaf-1:eth1"]
@@ -98,6 +111,7 @@ topology:
     - endpoints: ["ceos-spine-2:eth5", "vmx-1:eth1"]  
     - endpoints: ["ceos-leaf-1:eth7", "iol-r1:eth1"]
     - endpoints: ["ceos-leaf-2:eth7", "csr1k-r1:eth1"]
+    - endpoints: ["ceos-leaf-3:eth7", "xrd-1:Gi0-0-0-0"]
     
     # Unconnected physical ports used by the CLOS test fixtures.
     - {type: dummy, endpoint: {node: ceos-spine-1, interface: eth6}}

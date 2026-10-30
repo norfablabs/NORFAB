@@ -1,0 +1,20 @@
+hostname xrd-1
+!
+line default
+ transport input ssh
+!
+ssh server v2
+ssh server vrf default
+ssh server netconf vrf default
+!
+netconf-yang agent
+ ssh
+!
+grpc
+ port 9339
+ no-tls
+ address-family dual
+!
+snmp-server community norfab RW
+!
+end

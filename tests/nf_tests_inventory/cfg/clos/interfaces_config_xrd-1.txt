@@ -1,0 +1,5 @@
+interface GigabitEthernet0/0/0/0
+ description P2P to ceos-leaf-3 Ethernet7
+ ipv4 address 10.10.0.21 255.255.255.254
+ no shutdown
+
