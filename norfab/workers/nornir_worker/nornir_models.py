@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Dict, Literal, Union
+from typing import Annotated, Any, Dict, Literal, Union
 
 from pydantic import (
     BaseModel,
@@ -9,6 +9,7 @@ from pydantic import (
     StrictFloat,
     StrictInt,
     StrictStr,
+    StringConstraints,
     model_validator,
 )
 
@@ -2251,4 +2252,40 @@ class SnmpMultiSetResult(NornirSerializedResult):
     result: Union[dict[StrictStr, Any], list[Any]] = Field(
         {},
         description="SNMP MULTISET results keyed by host",
+    )
+
+
+# gNMI task models
+class GnmiGetInput(
+    NornirStructuredProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    path: list[
+        Annotated[StrictStr, StringConstraints(strip_whitespace=True, min_length=1)]
+    ] = Field(
+        ...,
+        min_length=1,
+        description="YANG paths to retrieve",
+    )
+    prefix: StrictStr = Field("", description="Common YANG path prefix")
+    target: Union[None, StrictStr] = Field(None, description="gNMI target name")
+    datatype: Literal["all", "config", "state", "operational"] = Field(
+        "all",
+        description="Data type to retrieve",
+    )
+    encoding: Union[None, Literal["json", "json_ietf", "bytes", "proto", "ascii"]] = (
+        Field(
+            None,
+            description="Response encoding; default negotiates with the device",
+        )
+    )
+
+
+class GnmiResult(NornirSerializedResult):
+    result: Union[dict[StrictStr, Any], list[Any]] = Field(
+        {},
+        description="Per-host get replies or serialized records; notification values depend on device YANG models",
     )

@@ -434,8 +434,9 @@ class TestNornirTest:
         pprint.pprint(ret)
 
         for worker, results in ret.items():
+            assert results["failed"] is True, f"{worker} was expecting the task to fail"
             assert (
-                "Jinja2 template parsing failed" in results["errors"][0]
+                "jinja2 template parsing failed" in results["errors"][0]
             ), f"{worker} was expecting Jinja2 rendering to fail"
 
     def test_nornir_test_suite_custom_functions_files(self, nfclient):

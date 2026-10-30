@@ -74,6 +74,7 @@ Use a directory, file, class, or method path to narrow collection; use `-m` for 
 | Nornir | `nornir_network` | Nornir network task tests |
 | Nornir | `nornir_parse` | Nornir parse task tests |
 | Nornir | `nornir_runtime_inventory` | Nornir runtime_inventory task tests |
+| Nornir | `nornir_gnmi` | Nornir gNMI get task tests |
 | Nornir | `nornir_snmp` | Nornir snmp task tests |
 | Nornir | `nornir_task` | Nornir task task tests |
 | Nornir | `nornir_test` | Nornir test task tests |

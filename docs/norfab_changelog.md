@@ -1,5 +1,9 @@
 # 0.25.3 (Draft)
 
+## FEATURES
+
+1. Added Nornir [`gnmi_get`](workers/nornir/services_nornir_service_tasks_gnmi.md) with host filtering, structured processors, and NFCLI `nornir gnmi get`.
+
 ## BUGS
 
 1. Netbox Markdown design deployment preserves the final newline in YAML context block scalars when rendering Jinja templates.

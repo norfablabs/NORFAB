@@ -30,6 +30,11 @@ hosts:
         extras:
           allow_agent: False
           hostkey_verify: False
+      pygnmi:
+        port: 6030
+        extras:
+          insecure: True
+          gnmi_timeout: 10
       puresnmp:
         port: 11610
 
@@ -63,6 +68,11 @@ hosts:
         extras:
           allow_agent: False
           hostkey_verify: False
+      pygnmi:
+        port: 6031
+        extras:
+          insecure: True
+          gnmi_timeout: 10
       puresnmp:
         port: 11611
         

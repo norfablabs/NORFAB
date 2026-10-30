@@ -151,6 +151,7 @@ nav:
       - NETCONF Get Data: workers/nornir/services_nornir_service_tasks_netconf_get.md
       - NETCONF XML Processors: workers/nornir/services_nornir_service_tasks_netconf_processors.md
       - NETCONF Get Configuration: workers/nornir/services_nornir_service_tasks_netconf_get_config.md
+      - gNMI Get: workers/nornir/services_nornir_service_tasks_gnmi.md
       - SNMP: workers/nornir/services_nornir_service_tasks_snmp.md
       - Errdisabled Hosts: workers/nornir/services_nornir_service_tasks_errdisabled_hosts.md
     - Jinja2 Filters: workers/nornir/services_nornir_service_jinja2_filters.md

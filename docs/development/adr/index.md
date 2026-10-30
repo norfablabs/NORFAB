@@ -32,6 +32,7 @@ These documents record design decisions and development work. Statuses below ref
 | [ADR - Simplify NorFab ZeroMQ CURVE Trust and Peer Admission](adr_norfab_transport_authentication_simplification.md) | Proposed |
 | [ADR - Nornir Create Hosts from NetBox Devices](adr_nornir_create_hosts_from_netbox_devices.md) | Proposed |
 | [ADR - Nornir SNMP Tasks](adr_nornir_snmp_tasks.md) | Proposed |
+| [ADR - Nornir gNMI Tasks](adr_nornir_gnmi_tasks.md) | Get MVP implemented; set/delete proposed |
 | [ADR - Delayed and Periodic NorFab Jobs](adr_scheduled_and_periodic_jobs.md) | Proposed |
 | [ADR: NFWeb Local Application Platform and 3D Topology Architecture](adr_web_ui_topology_architecture.md) | Not stated |
 | [ADR - Client Completion Events and Socket Wake-Up](adr_client_event_completion.md) | Accepted |

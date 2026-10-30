@@ -33,6 +33,7 @@ from norfab.models import Result
 from .cfg_task import CfgTask
 from .cli_task import CliTask
 from .file_copy_task import FileCopyTask
+from .gnmi_tasks import GnmiTasks
 from .inventory_tasks import InventoryTasks
 from .netconf_task import NetconfTask
 from .network_task import NetworkTask
@@ -388,6 +389,7 @@ class NornirWorker(
     FileCopyTask,
     NetconfTask,
     SnmpTask,
+    GnmiTasks,
 ):
     """
     NornirWorker class for managing Nornir Service tasks.

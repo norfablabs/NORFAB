@@ -25,6 +25,7 @@ from .nornir_picle_shell_common import (
 )
 from .nornir_picle_shell_diagram import NornirDiagramShell
 from .nornir_picle_shell_file_copy import NornirFileCopyShell
+from .nornir_picle_shell_gnmi import NornirGnmiShell
 from .nornir_picle_shell_inventory import NornirInventoryShell
 from .nornir_picle_shell_netconf import NornirNetconfShell
 from .nornir_picle_shell_network import NornirNetworkShell
@@ -348,6 +349,7 @@ class NornirServiceCommands(BaseModel):
     netconf: NornirNetconfShell = Field(
         None, description="Manage devices using NETCONF"
     )
+    gnmi: NornirGnmiShell = Field(None, description="Retrieve device data using gNMI")
     snmp: NornirSnmpShell = Field(None, description="Interact with devices using SNMP")
     clear: NornirClearCommandsModel = Field(
         None, description="Clear Nornir service state"

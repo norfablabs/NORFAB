@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 30 October 2026*
+*Last updated: 31 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -670,6 +670,13 @@ Python, NFCLI, FastAPI, and MCP. Supports ncclient and Scrapli NETCONF, per-host
 rendered subtree or XPath filters, and XML result processors. Datastore and YANG model
 support depend on the device. Server XPath filtering requires the device XPath capability.
 [Task details](workers/nornir/services_nornir_service_tasks_netconf_get_config.md)
+
+### gNMI data retrieval
+
+Nornir retrieves configuration and operational data through pygnmi using Python,
+NFCLI, FastAPI, and MCP. Supports YANG paths, host filters, and structured
+processors. Device YANG models and encodings determine available data; writes
+and subscriptions are not exposed. See [gNMI Get](workers/nornir/services_nornir_service_tasks_gnmi.md).
 
 ### SNMP operations
 

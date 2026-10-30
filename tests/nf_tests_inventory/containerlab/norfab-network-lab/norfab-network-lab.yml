@@ -14,6 +14,7 @@ topology:
         - 8300:830
         - 4400:443
         - 11610:161/udp
+        - 6030:6030
     ceos-spine-2: 
       kind: ceos
       image: ceosimage:4.35.2F  
@@ -24,6 +25,7 @@ topology:
         - 8301:830
         - 4401:443
         - 11611:161/udp
+        - 6031:6030
     ceos-leaf-1: 
       kind: ceos
       image: ceosimage:4.35.2F  
@@ -34,6 +36,7 @@ topology:
         - 8302:830
         - 4402:443
         - 11612:161/udp
+        - 6032:6030
     ceos-leaf-2: 
       kind: ceos
       image: ceosimage:4.35.2F  
@@ -44,6 +47,7 @@ topology:
         - 8303:830
         - 4403:443
         - 11613:161/udp
+        - 6033:6030
     ceos-leaf-3: 
       kind: ceos
       image: ceosimage:4.35.2F  
@@ -54,6 +58,7 @@ topology:
         - 8304:830
         - 4404:443
         - 11614:161/udp
+        - 6034:6030
     vmx-1:
       kind: juniper_vmx
       image: vrnetlab/juniper_vmx:23.2R2-S1.3
