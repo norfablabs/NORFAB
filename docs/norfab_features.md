@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 29 October 2026*
+*Last updated: 30 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -785,10 +785,10 @@ NetBox data model and do not provide every safeguard of a dedicated task.
 
 ### Additive NetBox designs
 
-The separate [`parse_markdown_design` task](workers/netbox/services_netbox_service_tasks_parse_markdown_design.md)
-converts marked Markdown fences into unrendered YAML/Jinja and literal context,
-combining repeated collection sections. Available through Python, FastAPI and MCP;
-`design_deploy` also accepts `.md` and `.markdown` file URLs and uses document context as defaults.
+[`design_deploy`](workers/netbox/services_netbox_service_tasks_design_deploy.md#markdown-designs)
+accepts `.md` and `.markdown` files with marked YAML/Jinja design blocks and
+YAML, CSV or table context. Repeated collections are combined; explicit task
+context overrides document defaults. Available through Python, NFCLI, FastAPI and MCP.
 
 Deploys static or Jinja2-rendered YAML designs. Handlers for tenants, regions,
 manufacturers, platforms, device types, device roles, sites, rack roles, racks,

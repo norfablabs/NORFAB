@@ -2,16 +2,20 @@
 
 ## Status
 
-Accepted, 2026-10-29. Extends the [design specification](adr_netbox_design_specification.md).
+Accepted, 2026-10-29. Updated, 2026-10-30: parsing is internal to deployment. Extends the [design specification](adr_netbox_design_specification.md).
 
 ## Decision
 
-Use `markdown-it-py` in a separate `parse_markdown_design` task to convert
-Markdown text or a file URL into YAML/Jinja source and literal context. Return
-`design` and `context` separately. `design_deploy` also calls this parser for file
-URLs ending in `.md` or `.markdown`. Explicit task context overrides document values by top-level
-key before schema validation. Conversion does not render templates,
-discover includes, execute functions or access Netbox.
+Use `markdown-it-py` in the internal `parse_markdown_design` method called by
+`design_deploy` for `.md` and `.markdown` file URLs. Return assembled design
+source and document context as a plain dictionary. There is no separate parser
+task, API model or endpoint; preview with `design_deploy(dry_run_render=True)`.
+This keeps one public interface for preparation and deployment.
+
+YAML/CSV context blocks and Markdown table cells render using only explicit task
+context. Task values override document defaults by top-level key before schema
+validation. The parser does not render the assembled design, discover includes,
+execute custom functions or access Netbox.
 
 ### Blocks
 
@@ -21,8 +25,6 @@ discover includes, execute functions or access Netbox.
 | `yaml context.vlans` | YAML value assigned to `context.vlans` |
 | `csv context.connections` | CSV rows assigned as a list of dictionaries |
 | `<!-- context.site_vlans -->` before an unfenced table | Table rows assigned as a list of dictionaries |
-| `json context.name` | JSON context value |
-| `text context.name` | Literal context string |
 
 Scan each `yaml design` block for unindented literal `key:` headers. Each header
 starts a section ending at the next header or block end. A block may contain
@@ -57,16 +59,16 @@ statements are not headers. Require indented list items and block-scalar content
 keep Jinja control flow within a section so regrouping preserves its scope.
 Reject unknown top-level keys and inline collection values such as `devices: []`.
 Repeated collection headers are expected and their bodies are concatenated.
-Rendered YAML validation is outside this task. No record deduplication or deep merging.
+Rendered YAML validation follows parsing in design_deploy. No record deduplication or deep merging.
 
 Put literal `design_input_schema`, `jinja_functions`, and `custom_functions` in
 any `yaml design` block; each metadata key occurs once. Emit them before
-collections, with the schema first, followed by Jinja and custom functions.
+collections, with schema, custom functions, Jinja functions and standalone Jinja blocks in that order.
 Keep existing function URLs;
 inline Python is outside scope. This block is visible in Markdown previews;
 front matter is unnecessary.
 
-Collect context as literal data without Jinja rendering. CSV/table cells remain
+Render YAML/CSV context before parsing and Markdown cells after table extraction, using only explicit task context. CSV/table cells remain
 strings. Reject duplicate/empty headers, malformed CSV row widths, and duplicate
 context targets. Return document context separately. Callers can override its
 top-level keys before deployment. Targets name one top-level key.
@@ -79,8 +81,7 @@ remain ignored. Table row widths follow the library's padding and truncation rul
 1. Parse Markdown tokens; ignore unmarked examples and prose.
 2. Assemble one YAML/Jinja source, with metadata first and grouped collections.
 3. Return the unrendered source and extracted context.
-4. Callers optionally use existing schema validation, rendering and deployment
-   through a separate `design_deploy` call.
+4. Continue schema validation, rendering and deployment within the same `design_deploy` call.
 
 NorFab handles task errors. Conversion has no dry-run mode.
 Direct `.md` or `.markdown` deployment resolves includes from the Markdown file's directory.

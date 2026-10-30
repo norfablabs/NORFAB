@@ -352,7 +352,6 @@ markers = [
     "netbox_create_bgp_peering: NetBox create_bgp_peering task tests",
     "netbox_create_asn: NetBox create_asn task tests",
     "netbox_design_deploy: NetBox design_deploy task tests",
-    "netbox_parse_markdown_design: Netbox Markdown design conversion tests",
     "netbox_create_device_interfaces: NetBox create_device_interfaces task tests",
     "netbox_move_ip: NetBox move_ip task tests",
     "netbox_create_ip: NetBox create_ip task tests",

@@ -177,7 +177,6 @@ nav:
       - Create VLAN: workers/netbox/services_netbox_service_tasks_create_vlan.md
       - Create Device Interfaces: workers/netbox/services_netbox_service_tasks_create_device_interfaces.md
       - Design Deploy: workers/netbox/services_netbox_service_tasks_design_deploy.md
-      - Parse Markdown Design: workers/netbox/services_netbox_service_tasks_parse_markdown_design.md
       - Sync Device Inventory: workers/netbox/services_netbox_service_tasks_sync_device_inventory.md
       - Sync Device Interfaces: workers/netbox/services_netbox_service_tasks_sync_device_interfaces.md
       - Sync VLANs: workers/netbox/services_netbox_service_tasks_sync_vlans.md

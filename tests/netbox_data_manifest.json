@@ -5,7 +5,7 @@
     "Other sync tests still share the original fn-ceos-* NetBox device records. Audit record ownership before adding parallel sync tests."
   ],
   "branch_feature_tests": {
-    "test_designs.py": ["TestDesignDeploy::test_deploy_markdown_in_branch"],
+    "test_designs.py": ["TestMarkdownDesignDeploy::test_deploy_markdown_in_branch"],
     "services/containerlab/test_inventory.py": [
       "test_load_containerlab_inventory_with_netbox"
     ],
@@ -95,7 +95,7 @@
     ]
   },
   "tests": {
-    "test_designs.py::TestDesignDeploy::test_deploy_markdown_in_branch": {
+    "test_designs.py::TestMarkdownDesignDeploy::test_deploy_markdown_in_branch": {
       "mode": "branch_feature",
       "branches": ["norfab-markdown-<12 hex run suffix>"],
       "tenants": ["norfab-markdown-<12 hex run suffix>"],

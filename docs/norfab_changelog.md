@@ -1,3 +1,22 @@
+# 0.25.3 (Draft)
+
+## BUGS
+
+1. Netbox Markdown design deployment preserves the final newline in YAML context block scalars when rendering Jinja templates.
+
+## ENHANCEMENTS
+
+1. Netbox Markdown designs now accept standalone Jinja statements, expressions, and comments inside `yaml design` fences. These blocks appear after metadata and before collections, allowing shared variables and logic.
+2. Markdown design deployment renders YAML and CSV context blocks, including Jinja loops, and Markdown table cells using only supplied task context.
+
+## CHANGES
+
+1. Netbox Markdown design parsing is now a method used by `design_deploy`. The separate `parse_markdown_design` task and its API models are removed. Use Markdown file URLs with `dry_run_render=True` to preview.
+2. Markdown design files passed to Netbox `design_deploy` no longer support `json context.KEY` or `text context.KEY` fences. Use `yaml context.KEY` with a YAML mapping or a `|` block scalar instead.
+3. Netbox Markdown design documentation is now part of the [design deployment guide](workers/netbox/services_netbox_service_tasks_design_deploy.md#markdown-designs). Markdown deployment tests are grouped in `TestMarkdownDesignDeploy` in `test_designs.py`.
+
+---
+
 # 0.25.2
 
 ## BUGS
@@ -12,7 +31,7 @@
 
 ## FEATURES
 
-1. Added Netbox [`parse_markdown_design`](workers/netbox/services_netbox_service_tasks_parse_markdown_design.md) to convert marked Markdown blocks into YAML/Jinja design source and separate literal context, combining repeated collection sections and moving metadata from any block to the start without rendering or deploying them. 
+1. Added Netbox [`parse_markdown_design`](workers/netbox/services_netbox_service_tasks_design_deploy.md#markdown-designs) to convert marked Markdown blocks into YAML/Jinja design source and separate literal context, combining repeated collection sections and moving metadata from any block to the start without rendering or deploying them.
 2. `design_deploy` updated to accept `.md` and `.markdown` file URLs, to parse and render markdown formatted designs
 
 ---
@@ -1248,7 +1267,7 @@ Below changes are to simplify NorFab codebase and reduce maintenance burden.
     - picle: 0.9.0 → 0.11.0 - enhanced command help and man tree output, commands history
 
 2. Netbox worker refactoring:
-  
+
    - moving tasks out to dedicated files to shrink main worker .py file
    - moved Netbox worker related models under worker folder itself
    - get_circuit changing cache argument to None to honor global cache setting
@@ -1259,7 +1278,7 @@ Below changes are to simplify NorFab codebase and reduce maintenance burden.
 5. Enhancing workers and client jobs database operations toward reducing memory usage and improving speed - switching to orjson instead of json, dropping text columns in favour of byte blobs and switching zlib compression to level 1
 6. Adding `orjson` lib to core dependencies
 7. Refactored Nornir worker:
-  
+
   - splitting tasks into dedicated files and moving all in dedicated folder
   - moving related pydantic models under new nornir_worker folder
 
@@ -1314,7 +1333,7 @@ Below changes are to simplify NorFab codebase and reduce maintenance burden.
     - uvicorn: 0.35.0 → 0.40.0
     - python-multipart: 0.0.20 → 0.0.22
     - mcp pinned to 1.26.0
-    
+
 ### DOCS
 
 1. Updating FastMCP service documentation
@@ -1478,7 +1497,7 @@ Below changes are to simplify NorFab codebase and reduce maintenance burden.
   - update_device_facts -> sync_device_facts
   - update_device_interfaces -> sync_device_interfaces
   - update_device_ip -> sync_device_ip
-  
+
 ### FEATURES
 
 1. Netbox service - get_connections enhanced to retrieve power outlet connections.
@@ -1611,7 +1630,7 @@ Below changes are to simplify NorFab codebase and reduce maintenance burden.
 3. Added Netbox service `create_ip` task to allocate new or source existing IP from prefix
 4. Added `nb_create_ip` Jinja2 filter to Nornir service to source IP allocations during templates rendering
 5. Added nfcli shell `netbox create ip` command to run IP allocations from interactive command line
- 
+
 ---
 
 ## 0.9.1

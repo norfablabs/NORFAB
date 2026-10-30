@@ -3,11 +3,18 @@
 import time
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from textwrap import dedent
 from typing import Any
 from uuid import uuid4
 
 import pynetbox
 import pytest
+import yaml
+from jinja2 import Environment
+
+from tests.nf_tests_inventory.netbox.designs.acme_site_description import (
+    acme_site_description,
+)
 
 try:
     from tests.netbox_data import NB_API_TOKEN, NB_URL
@@ -20,63 +27,6 @@ pytestmark = [pytest.mark.netbox, pytest.mark.netbox_design_deploy]
 
 
 class TestDesignDeploy:
-    def test_deploy_markdown_in_branch(self, nfclient: Any) -> None:
-        """Deploy a Markdown file in an owned branch and delete the branch afterwards."""
-        name = f"norfab-markdown-{uuid4().hex[:12]}"
-        try:
-            response = nfclient.run_job(
-                "netbox",
-                "design_deploy",
-                workers="any",
-                kwargs={
-                    "design": "nf://netbox/designs/markdown_branch_test.md",
-                    "context": {"name": name},
-                    "branch": name,
-                },
-            )
-            assert response
-            for result in response.values():
-                assert not result["failed"], result
-                for collection in ("tenants", "sites"):
-                    assert result["result"][collection] == {
-                        "created": [name],
-                        "updated": [],
-                    }
-
-            for object_type in ("tenancy.tenants", "dcim.sites"):
-                for branch, count in ((name, 1), (None, 0)):
-                    response = nfclient.run_job(
-                        "netbox",
-                        "crud_read",
-                        workers="any",
-                        kwargs={
-                            "object_type": object_type,
-                            "filters": {"name": name},
-                            "branch": branch,
-                        },
-                    )
-                    assert response
-                    for result in response.values():
-                        assert not result["failed"], result
-                        assert result["result"]["count"] == count
-                        if count:
-                            record = result["result"]["results"][0]
-                            assert (
-                                record["description"]
-                                == "Created from a Markdown design."
-                            )
-                            if object_type == "dcim.sites":
-                                assert record["tenant"]["name"] == name
-        finally:
-            response = nfclient.run_job(
-                "netbox",
-                "delete_branch",
-                workers="any",
-                kwargs={"branch": name},
-            )
-            assert response
-            for result in response.values():
-                assert not result["failed"], result
 
     def test_device_config_template_reference(self, nfclient: Any) -> None:
         """Resolve a seeded template by name or ID on one owned device."""
@@ -3728,3 +3678,427 @@ tenants:
                 tenant = nb.tenancy.tenants.get(name=name)
                 if tenant:
                     tenant.delete()
+
+
+def preview_markdown(nfclient: Any, markdown: str, context: dict | None = None) -> dict:
+    root = Path(nfclient.inventory.base_dir) / "netbox" / "designs"
+    with TemporaryDirectory(prefix="markdown-design-", dir=root) as directory:
+        folder = Path(directory)
+        (folder / "design.md").write_text(markdown, encoding="utf-8")
+        return nfclient.run_job(
+            "netbox",
+            "design_deploy",
+            workers="any",
+            kwargs={
+                "design": f"nf://netbox/designs/{folder.name}/design.md",
+                "context": context or {},
+                "dry_run_render": True,
+            },
+        )
+
+
+class TestMarkdownDesignDeploy:
+    def test_deploy_markdown_in_branch(self, nfclient: Any) -> None:
+        """Deploy a Markdown file in an owned branch and delete the branch afterwards."""
+        name = f"norfab-markdown-{uuid4().hex[:12]}"
+        try:
+            response = nfclient.run_job(
+                "netbox",
+                "design_deploy",
+                workers="any",
+                kwargs={
+                    "design": "nf://netbox/designs/markdown_branch_test.md",
+                    "context": {"name": name},
+                    "branch": name,
+                },
+            )
+            assert response
+            for result in response.values():
+                assert not result["failed"], result
+                for collection in ("tenants", "sites"):
+                    assert result["result"][collection] == {
+                        "created": [name],
+                        "updated": [],
+                    }
+
+            for object_type in ("tenancy.tenants", "dcim.sites"):
+                for branch, count in ((name, 1), (None, 0)):
+                    response = nfclient.run_job(
+                        "netbox",
+                        "crud_read",
+                        workers="any",
+                        kwargs={
+                            "object_type": object_type,
+                            "filters": {"name": name},
+                            "branch": branch,
+                        },
+                    )
+                    assert response
+                    for result in response.values():
+                        assert not result["failed"], result
+                        assert result["result"]["count"] == count
+                        if count:
+                            record = result["result"]["results"][0]
+                            assert (
+                                record["description"]
+                                == "Created from a Markdown design."
+                            )
+                            if object_type == "dcim.sites":
+                                assert record["tenant"]["name"] == name
+        finally:
+            response = nfclient.run_job(
+                "netbox",
+                "delete_branch",
+                workers="any",
+                kwargs={"branch": name},
+            )
+            assert response
+            for result in response.values():
+                assert not result["failed"], result
+
+    def test_documented_example(self, nfclient: Any) -> None:
+        page = (
+            Path(__file__).parents[3]
+            / "docs/workers/netbox/services_netbox_service_tasks_design_deploy.md"
+        ).read_text(encoding="utf-8")
+        example = dedent(
+            page.split('=== "Complete example"', 1)[1].split('=== "Run"', 1)[0]
+        )
+        markdown = example.split("````markdown\n", 1)[1].split("````", 1)[0]
+        response = preview_markdown(nfclient, markdown, {"site": "BRISBANE"})
+        assert response
+        for result in response.values():
+            assert not result["failed"], result
+            rendered = yaml.safe_load(result["result"])
+            assert rendered["tenants"] == [{"name": "BRISBANE-tenant"}]
+            assert rendered["regions"] == [{"name": "BRISBANE-region"}]
+            assert rendered["sites"] == [
+                {
+                    "name": "BRISBANE",
+                    "tenant": "BRISBANE-tenant",
+                    "region": "BRISBANE-region",
+                    "description": "Approved: Branch rollout",
+                }
+            ]
+
+    @pytest.mark.parametrize("extension", ["md", "markdown"])
+    @pytest.mark.parametrize("override", [False, True])
+    def test_table_jinja_preview(
+        self, nfclient: Any, extension: str, override: bool
+    ) -> None:
+        root = Path(nfclient.inventory.base_dir) / "netbox" / "designs"
+        with TemporaryDirectory(prefix="table-jinja-", dir=root) as directory:
+            folder = Path(directory)
+            (folder / f"design.{extension}").write_text(
+                "```yaml design\ndesign_input_schema:\n  type: object\n"
+                "  properties:\n    rows:\n      type: array\n"
+                "      items:\n        type: object\n        properties:\n"
+                "          name: {type: string, pattern: '^BRISBANE'}\n"
+                "tenants:\n  - name: {{ context.rows[0].name | tojson }}\n```\n"
+                "<!-- context.rows -->\n| name |\n| --- |\n"
+                "| {{ context.site }}-r1 |\n",
+                encoding="utf-8",
+            )
+            context = (
+                {"rows": [{"name": "BRISBANE-override"}]}
+                if override
+                else {"site": "BRISBANE"}
+            )
+            response = nfclient.run_job(
+                "netbox",
+                "design_deploy",
+                workers="any",
+                kwargs={
+                    "design": f"nf://netbox/designs/{folder.name}/design.{extension}",
+                    "context": context,
+                    "dry_run_render": True,
+                },
+            )
+            assert response
+            for result in response.values():
+                assert not result["failed"], result
+                assert yaml.safe_load(result["result"])["tenants"] == [
+                    {"name": "BRISBANE-override" if override else "BRISBANE-r1"}
+                ]
+
+    @pytest.mark.parametrize("extension", ["md", "markdown", "yaml"])
+    @pytest.mark.parametrize("context", [{}, {"site": "OVERRIDE"}])
+    def test_deploy_file_preview(
+        self, nfclient: Any, extension: str, context: dict
+    ) -> None:
+        root = Path(nfclient.inventory.base_dir) / "netbox" / "designs"
+        with TemporaryDirectory(prefix="markdown-preview-", dir=root) as directory:
+            folder = Path(directory)
+            source = "tenants:\n{% include 'records.yaml' %}\n"
+            if extension in {"md", "markdown"}:
+                source = (
+                    "Ignored {{ unfinished Jinja and {% include 'missing.yaml' %}.\n"
+                    "```yaml context.site\nDOCUMENT\n```\n"
+                    "```yaml design\n" + source + "```\n"
+                    "```yaml design\ndesign_input_schema:\n  type: object\n"
+                    "  properties:\n    site: {type: string}\n  required: [site]\n```\n"
+                    "```yaml design\n{% set suffix = '-jinja' %}\n```\n"
+                )
+            (folder / f"design.{extension}").write_text(source, encoding="utf-8")
+            (folder / "records.yaml").write_text(
+                "{% include 'tenant.yaml' %}\n", encoding="utf-8"
+            )
+            (folder / "tenant.yaml").write_text(
+                "  - name: \"{{ context.site | default('YAML') }}{{ suffix | default('') }}\"\n",
+                encoding="utf-8",
+            )
+            response = nfclient.run_job(
+                "netbox",
+                "design_deploy",
+                workers="any",
+                kwargs={
+                    "design": f"nf://netbox/designs/{folder.name}/design.{extension}",
+                    "context": context,
+                    "dry_run_render": True,
+                },
+            )
+            assert response
+            for result in response.values():
+                assert not result["failed"], result
+                rendered = yaml.safe_load(result["result"])
+                assert rendered["tenants"] == [
+                    {
+                        "name": context.get(
+                            "site",
+                            "DOCUMENT" if extension in {"md", "markdown"} else "YAML",
+                        )
+                        + ("-jinja" if extension in {"md", "markdown"} else "")
+                    }
+                ]
+
+    @pytest.mark.parametrize(
+        "blocks,error",
+        [
+            ("", "no yaml design blocks"),
+            ("```yaml design\nplain text\n```", "expected a design section"),
+            ("```yaml design\n{% set x = %}\n```", "Expected an expression"),
+            (
+                "```yaml design\nunknown:\n  - name: '{{ x }}'\n```",
+                "unknown design key",
+            ),
+            ("```yaml design\nunknown:\n  - name: x\n```", "unknown design key"),
+            ("```yaml design\ndevices: []\n```", "inline collection"),
+            ("```yaml design\ndevices:\n- name: x\n```", "indent"),
+            (
+                "```yaml design\ndevices:\n{% for x in [] %}\ninterfaces:\n{% endfor %}\n```",
+                "end of template",
+            ),
+            ("```csv context.links\na,a\n1,2\n```", "CSV headers"),
+            ("```csv context.links\na,b\n1\n```", "CSV row"),
+            (
+                "```yaml context.x\n1\n```\n```yaml context.x\n2\n```",
+                "duplicate context",
+            ),
+            ("```yaml context.x.y\nx\n```", "context target"),
+            (
+                "```yaml design\njinja_functions: {}\njinja_functions: {}\n```",
+                "metadata",
+            ),
+            ("```json context.x\n{}\n```", "invalid design/context fence"),
+            ("```text context.x\nx\n```", "invalid design/context fence"),
+            ("```csv context.x\na,\n1,2\n```", "CSV headers"),
+            ("```python design\nx\n```", "invalid design/context fence"),
+            (
+                "<!-- context.x -->\n\nnot a table",
+                "expected a Markdown table",
+            ),
+            (
+                "<!-- context.x -->\n\n| a | a |\n| --- | --- |\n| 1 | 2 |\n",
+                "MARKDOWN headers",
+            ),
+            (
+                "<!-- context.x -->\n\n| a | |\n| --- | --- |\n| 1 | 2 |\n",
+                "MARKDOWN headers",
+            ),
+            (
+                "<!-- context.x -->\n\n| a |\n| --- |\n| 1 |\n\n```yaml context.x\n[]\n```",
+                "duplicate context",
+            ),
+            (
+                "```yaml context.x\n100: {name: USERS}\n```",
+                "context.x must be JSON-serializable",
+            ),
+            (
+                "```yaml context.x\n!!binary YWJj\n```",
+                "context.x must be JSON-serializable",
+            ),
+            (
+                "```yaml context.x\n!!set {a: null}\n```",
+                "context.x must be JSON-serializable",
+            ),
+        ],
+    )
+    def test_invalid_input(self, nfclient: Any, blocks: str, error: str) -> None:
+        response = preview_markdown(nfclient, blocks)
+        assert response
+        for result in response.values():
+            assert result["failed"], result
+            assert error in " ".join(result["errors"])
+
+    @pytest.mark.parametrize("language", ["yaml", "csv"])
+    @pytest.mark.parametrize("override", [False, True])
+    def test_context_rendering(
+        self, nfclient: Any, language: str, override: bool
+    ) -> None:
+        blob = (
+            "{% for n in range(context.count) %}\n- name: r{{ n }}\n{% endfor %}"
+            if language == "yaml"
+            else "name\n{% for n in range(context.count) %}r{{ n }}\n{% endfor %}"
+        )
+        if override:
+            blob = (
+                "- name: '{{ context.missing }}'"
+                if language == "yaml"
+                else "name\n{{ context.missing }}"
+            )
+        response = preview_markdown(
+            nfclient,
+            f"```{language} context.rows\n{blob}\n```\n"
+            "```yaml design\n{% set prefix = 'tenant-' %}\n```\n"
+            "```yaml design\ntenants:\n{% for row in context.rows %}\n"
+            "  - name: {{ (prefix ~ row.name) | tojson }}\n{% endfor %}\n```\n",
+            {"rows": [{"name": "override"}]} if override else {"count": 2},
+        )
+        assert response
+        for result in response.values():
+            assert not result["failed"], result
+            assert yaml.safe_load(result["result"])["tenants"] == (
+                [{"name": "tenant-override"}]
+                if override
+                else [{"name": "tenant-r0"}, {"name": "tenant-r1"}]
+            )
+
+    @pytest.mark.parametrize(
+        "cell,error",
+        [
+            ("{{ context.missing }}", "missing"),
+            ("{% set x = %}", "Expected an expression"),
+            ("{{ shared }}", "shared"),
+        ],
+    )
+    def test_table_errors(self, nfclient: Any, cell: str, error: str) -> None:
+        response = preview_markdown(
+            nfclient,
+            "```yaml design\n{% set shared = 3 %}\n```\n"
+            "<!-- context.rows -->\n| name |\n| --- |\n| " + cell + " |\n",
+        )
+        assert response
+        for result in response.values():
+            assert result["failed"], result
+            assert error in str(result["errors"])
+
+    @pytest.mark.parametrize("gap", ["\n", "\n\n"])
+    @pytest.mark.parametrize("indent", ["", " ", "  ", "   "])
+    def test_tables_and_sections(self, nfclient: Any, gap: str, indent: str) -> None:
+        response = preview_markdown(
+            nfclient,
+            "Ignored {{ broken and {% include 'missing' %}.\n"
+            + indent
+            + "<!-- context.rows -->"
+            + gap
+            + "| name | description |\n| --- | --- |\n| 0100 | users \\| office |\n"
+            "| {{ context.name }} | {{ context.description }} |\n\n"
+            "```yaml context.note\n|\n  multiline\n  content\n```\n"
+            "```yaml design\ntenants:\n  - name: fixed\n```\n"
+            "```yaml design\ntenants:\n{% for row in context.rows %}\n"
+            "  - name: {{ row.name | tojson }}\n    description: {{ row.description | tojson }}\n"
+            "{% endfor %}\nregions:\n  - name: {{ context.note | tojson }}\n```",
+            {"name": "{{ literal }}", "description": "first|second\nthird"},
+        )
+        assert response
+        for result in response.values():
+            assert not result["failed"], result
+            rendered = yaml.safe_load(result["result"])
+            assert rendered["tenants"] == [
+                {"name": "fixed"},
+                {"name": "0100", "description": "users | office"},
+                {"name": "{{ literal }}", "description": "first|second\nthird"},
+            ]
+            assert rendered["regions"] == [{"name": "multiline\ncontent\n"}]
+
+    @pytest.mark.parametrize("closing", ["```", ""])
+    def test_final_fence(self, nfclient: Any, closing: str) -> None:
+        response = preview_markdown(
+            nfclient,
+            "```yaml design\ntenants:\n  - name: A\n```\n"
+            "```yaml design\ntenants:\n  - name: B\n" + closing,
+        )
+        assert response
+        for result in response.values():
+            assert not result["failed"], result
+            assert yaml.safe_load(result["result"])["tenants"] == [
+                {"name": "A"},
+                {"name": "B"},
+            ]
+
+    def test_acme_file(self, nfclient: Any) -> None:
+        context = {
+            "site": "NORFAB ACME TEST",
+            "parent_prefix": "198.19.224.0/20",
+            "vlans": [
+                {"name": "USERS", "vid": 100, "enabled": True},
+                {"name": "MANAGEMENT", "vid": 200, "enabled": False},
+            ],
+            "links": [
+                {"port": "Ethernet1", "description": "uplink, primary"},
+                {"port": "Ethernet2", "description": "backup uplink"},
+            ],
+            "site_vlans": [
+                {
+                    "site": "NORFAB ACME TEST",
+                    "name": "USERS",
+                    "vid": "100",
+                    "status": "active",
+                },
+                {
+                    "site": "NORFAB ACME TEST",
+                    "name": "MANAGEMENT",
+                    "vid": "200",
+                    "status": "planned",
+                },
+            ],
+        }
+        original = (
+            Path(__file__).parents[2]
+            / "nf_tests_inventory/netbox/designs/acme_branch_network_design_v1.yaml"
+        ).read_text(encoding="utf-8")
+        environment = Environment()
+        environment.filters["acme_site_description"] = acme_site_description
+        expected = yaml.safe_load(
+            environment.from_string(original).render(context=context)
+        )
+        expected["design_input_schema"]["properties"].update(
+            {
+                "links": {"type": "array"},
+                "vlans": {"type": "array"},
+                "site_vlans": {"type": "array"},
+            }
+        )
+        response = nfclient.run_job(
+            "netbox",
+            "design_deploy",
+            workers="any",
+            kwargs={
+                "design": "nf://netbox/designs/acme_branch_network_design_v1.md",
+                "dry_run_render": True,
+            },
+        )
+        assert response
+        for result in response.values():
+            assert not result["failed"], result
+            assert yaml.safe_load(result["result"]) == expected
+
+    def test_parser_not_exposed(self, nfclient: Any) -> None:
+        response = nfclient.run_job(
+            "netbox",
+            "parse_markdown_design",
+            workers="any",
+            kwargs={"markdown": "```yaml design\ntenants:\n  - name: A\n```"},
+        )
+        assert response
+        assert all(result["failed"] for result in response.values())

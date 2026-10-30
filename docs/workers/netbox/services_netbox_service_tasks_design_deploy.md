@@ -7,22 +7,13 @@ tags:
 
 `design_deploy` renders a YAML design with Jinja2, validates the rendered document, then creates or updates Netbox objects in dependency order. It never deletes objects omitted from the design. Existing objects receive the supplied fields on every run. The task does not calculate a diff before sending updates.
 
-## Markdown designs
-
-Pass a `.md` or `.markdown` file URL to convert its marked design blocks before
-deployment. Document context provides defaults. Explicit task context overrides
-matching top-level keys. Relative Jinja includes resolve from the file's directory.
-
-See [Markdown design](services_netbox_service_tasks_parse_markdown_design.md)
-for supported block tags and examples.
-
 ## Design overview
 
 **Netbox Design Driven Modeling (NDDM)** is an approach to building and maintaining the Netbox data model from reusable network designs. A design describes the objects and relationships needed for a site, service, or network pattern in YAML. Jinja2 templates let you reuse the same design for multiple deployments by supplying different context values, such as site names, device names, or address pools.
 
 NorFab implements this approach through `design_deploy`: it turns the design into Netbox objects, resolves supported references, and processes collections in dependency order. Designs can include resource allocation requests for values that are not known in advance. Keeping designs and their context in version control makes the intended model reviewable and reusable.
 
-NDDM designs are additive and idempotent. Deployment creates missing objects and updates matched objects according to each handler's rules. Reapplying the same design reuses those objects instead of creating duplicates. Objects omitted from a design remain in Netbox. Custom functions must implement their own idempotent behavior. The task models data in Netbox; applying device configuration is a separate automation step.
+NDDM designs are additive and idempotent. Deployment creates missing objects and updates matched objects according to each handler's rules. Reapplying the same design reuses those objects instead of creating duplicates. Objects omitted from a design remain in Netbox. Custom functions must implement their own idempotent behavior. The task models data in Netbox. Applying device configuration is a separate automation step.
 
 === "Two-router design"
 
@@ -196,26 +187,26 @@ Each design section contains a list of object records. The rows show the order i
 
 | Order | Design top-level key | Netbox object | Match fields | Description and current limitations |
 | ---: | --- | --- | --- | --- |
-| 1 | `tenants` | `netbox.tenancy.tenants` | `name` | — |
+| 1 | `tenants` | `netbox.tenancy.tenants` | `name` | - |
 | 2 | `regions` | `netbox.dcim.regions` | `name` | Parent can be a name. |
-| 3 | `manufacturers` | `netbox.dcim.manufacturers` | `name` | — |
+| 3 | `manufacturers` | `netbox.dcim.manufacturers` | `name` | - |
 | 4 | `platforms` | `netbox.dcim.platforms` | `name` | Manufacturer can be a name. |
 | 5 | `device_types` | `netbox.dcim.device_types` | `manufacturer`, `model` | Default platform can be a name. |
 | 6 | `device_roles` | `netbox.dcim.device_roles` | `slug` | Uses the supplied slug or generates it from the name. |
 | 7 | `sites` | `netbox.dcim.sites` | `name` | Region and tenant can be names. |
-| 8 | `rack_roles` | `netbox.dcim.rack_roles` | `name` | — |
+| 8 | `rack_roles` | `netbox.dcim.rack_roles` | `name` | - |
 | 9 | `racks` | `netbox.dcim.racks` | `site`, `name` | Site, role, and tenant can be names. |
-| 10 | `roles` | `netbox.ipam.roles` | `name` | — |
-| 11 | `rirs` | `netbox.ipam.rirs` | `name` | — |
+| 10 | `roles` | `netbox.ipam.roles` | `name` | - |
+| 11 | `rirs` | `netbox.ipam.rirs` | `name` | - |
 | 12 | `asn_ranges` | `netbox.ipam.asn_ranges` | `name` | Ranges are not site-scoped. |
 | 13 | `asns` | `netbox.ipam.asns` | `asn` | Explicit numbers are matched globally. `create_asn` allocates from a named range. Supports `sites` and `role`. |
 | 14 | `vlan_groups` | `netbox.ipam.vlan_groups` | `name` | Scope by rack, location, site, site group, region, cluster, or cluster group. |
 | 15 | `vlans` | `netbox.ipam.vlans` | `group`, `vid` | VLANs with a specified ID require both fields. Existing VLANs gain new tags and custom-field list items. `create_vlan` allocates a VID. Direct VLAN `site` is unsupported. |
 | 16 | `route_targets` | `netbox.ipam.route_targets` | `name` | VRF and L2VPN references can inline target dictionaries. |
 | 17 | `vrfs` | `netbox.ipam.vrfs` | `name`, `rd` | Import/export route targets accept named definitions or query filters. Existing target lists gain missing targets. |
-| 18 | `l2vpns` | `netbox.vpn.l2vpns` | `name` | Import/export route targets accept named definitions or query filters. Existing target lists gain missing targets. Nested terminations are flattened; named VLAN terminations also populate `vlans`. |
+| 18 | `l2vpns` | `netbox.vpn.l2vpns` | `name` | Import/export route targets accept named definitions or query filters. Existing target lists gain missing targets. Nested terminations are flattened. Named VLAN terminations also populate `vlans`. |
 | 19 | `prefixes` | `netbox.ipam.prefixes` | `prefix`, `vrf` | Explicit prefixes can select location, site, site group, or region scope, and refer to a VLAN by `{group, vid}`. Existing prefixes gain new tags and custom-field list items. `create_prefix` supports site scope and VLAN association through `vlan` (VID) plus `vlan_group` (name). |
-| 20 | `devices` | `netbox.dcim.devices` | `name`; `tenant` disambiguates duplicate names | Nested components are flattened before writes. |
+| 20 | `devices` | `netbox.dcim.devices` | `name`. `tenant` disambiguates duplicate names | Nested components are flattened before writes. |
 | 21 | `interfaces` | `netbox.dcim.interfaces` | `device`, `name` | Independent interfaces are written before those with `parent`, `lag`, or `bridge`. |
 | 22 | `l2vpn_terminations` | `netbox.vpn.l2vpn_terminations` | Attached interface or VLAN | Attachments require `l2vpn` and either `device` with `interface`, or VLAN `group` with `vid`. An attachment already used by another L2VPN is rejected. |
 | 23 | `power_ports` | `netbox.dcim.power_ports` | `device`, `name` | Nested connection is flattened. |
@@ -223,7 +214,7 @@ Each design section contains a list of object records. The rows show the order i
 | 25 | `power_outlets` | `netbox.dcim.power_outlets` | `device`, `name` | Nested connection is flattened. |
 | 26 | `console_server_ports` | `netbox.dcim.console_server_ports` | `device`, `name` | Nested connection is flattened. |
 | 27 | `connections` | `netbox.dcim.cables` | Existing cable on both terminations | Creates interface, console, and power cables. Tenant can be a name or reference dictionary. Each end currently has one termination. An already-cabled port cannot be moved. |
-| 28 | `vrrp_groups` | `netbox.ipam.fhrp_groups` | `protocol`, `group_id` | Inline `vip` becomes an explicit IP address; use top-level `create_ip.vrrp_group` for allocation. |
+| 28 | `vrrp_groups` | `netbox.ipam.fhrp_groups` | `protocol`, `group_id` | Inline `vip` becomes an explicit IP address. Use top-level `create_ip.vrrp_group` for allocation. |
 | 29 | `ip_addresses` | `netbox.ipam.ip_addresses` | `address`, `vrf` | Addresses with specified values are bulk-written. `create_ip` allocates the next available address and can assign it to an interface or named VRRP group. |
 | 30 | `vrrp_group_assignments` | `netbox.ipam.fhrp_group_assignments` | `group`, `interface` | Associates an existing group and interface with priority. |
 | 31 | `primary_ip` | `netbox.dcim.devices` | Device: `site` and `name`, plus `tenant` when supplied | Sets an existing `primary_ip4` or `primary_ip6`. It does not create the address. |
@@ -231,12 +222,12 @@ Each design section contains a list of object records. The rows show the order i
 | 33 | `routing_policies` | `netbox.plugins.bgp.routing_policy` | `name` | Peering references can inline policy dictionaries or use policy names. |
 | 34 | `peer_groups` | `netbox.plugins.bgp.peer_group` | `name` | Peering references can provide a name or inline dictionary. |
 | 35 | `bgp_peerings` | `netbox.plugins.bgp.session` | Supplied or generated `name` | Uses `create_bgp_peering` to create missing sessions. Existing sessions are left unchanged. Design peerings default to `create_reverse: false`. Supports named or inline peer groups and import/export policies. |
-| 36 | `config_context` | `netbox.extras.config_contexts` | `name` | `data` is a dictionary; `sites` and `tenants` accept name lists for scope. |
+| 36 | `config_context` | `netbox.extras.config_contexts` | `name` | `data` is a dictionary. `sites` and `tenants` accept name lists for scope. |
 | 37 | `local_context_data` | `netbox.dcim.devices` | Device: `site` and `name`, plus `tenant` when supplied | Replaces each device's local context dictionary last. |
 
 Ordinary records use Netbox API field names. Handlers bulk-create missing objects and bulk-update existing ones. Common name references, such as `device.site`, `device.role`, and `vlan.group`, are resolved by their handlers. Fields without a documented name shorthand must use a payload accepted by the target Netbox API. Unknown top-level collections are rejected.
 
-Devices accept `device_type: {manufacturer: ACME, model: AGG SWITCH}` or `device_type: AGG SWITCH`. A string must match exactly one existing Netbox model, including during dry runs; missing or ambiguous models fail. Use the dictionary form to disambiguate or preview types defined in the same design. New devices default to `status: planned`; omitted status preserves existing device status. Explicit status applies to both creates and updates.
+Devices accept `device_type: {manufacturer: ACME, model: AGG SWITCH}` or `device_type: AGG SWITCH`. A string must match exactly one existing Netbox model, including during dry runs. Missing or ambiguous models fail. Use the dictionary form to disambiguate or preview types defined in the same design. New devices default to `status: planned`. Omitted status preserves existing device status. Explicit status applies to both creates and updates.
 
 Set a device's `config_template` to an existing template's exact name or integer ID. Names must resolve to exactly one template, including during dry runs. Omit the field to preserve an existing association, or use `null` to clear it. Templates must exist before devices are deployed.
 
@@ -246,7 +237,7 @@ devices:
     config_template: branch-router
 ```
 
-When updating an existing record, design handlers add requested tags and custom-field list values without removing existing members. They also add VRF and L2VPN route targets, interface tagged VLANs, and config-context scope lists. Config-context `sites` and `tenants` accept name lists; other scope lists use NetBox IDs. Scalar custom fields replace their old values. VLAN-group `vid_ranges`, local context data, and config-context `data` retain replacement behavior. Named object and multiobject custom-field values are resolved to NetBox IDs before writes.
+When updating an existing record, design handlers add requested tags and custom-field list values without removing existing members. They also add VRF and L2VPN route targets, interface tagged VLANs, and config-context scope lists. Config-context `sites` and `tenants` accept name lists. Other scope lists use NetBox IDs. Scalar custom fields replace their old values. VLAN-group `vid_ranges`, local context data, and config-context `data` retain replacement behavior. Named object and multiobject custom-field values are resolved to NetBox IDs before writes.
 
 
 
@@ -283,10 +274,10 @@ Task wrappers call standalone NorFab NetBox service tasks during the relevant de
 | --- | --- |
 | [create_asn](services_netbox_service_tasks_create_asn.md) | Allocates or reuses an ASN in `asns` or BGP peering `local_as` and `remote_as`. |
 | [create_vlan](services_netbox_service_tasks_create_vlan.md) | Selects an available VID from an existing VLAN group's allowed ranges. |
-| [create_prefix](services_netbox_service_tasks_create_prefix.md) | Allocates a child prefix of the requested length inside an existing parent prefix; supports VLAN association by VID and group name. |
+| [create_prefix](services_netbox_service_tasks_create_prefix.md) | Allocates a child prefix of the requested length inside an existing parent prefix. Supports VLAN association by VID and group name. |
 | [move_ip](services_netbox_service_tasks_move_ip.md) | Moves all addresses from a source interface and optionally sets destination primaries. |
 | [create_ip](services_netbox_service_tasks_create_ip.md) | Allocates an address from an existing prefix and can assign it to a device interface or named VRRP group. |
-| [create_bgp_peering](services_netbox_service_tasks_create_bgp_peering.md) | Creates a BGP session under `bgp_peerings`; can derive the local address from an interface and create a reverse session. |
+| [create_bgp_peering](services_netbox_service_tasks_create_bgp_peering.md) | Creates a BGP session under `bgp_peerings`. Can derive the local address from an interface and create a reverse session. |
 
 Both forms belong under `ip_addresses`. Specify each address when its value is known:
 
@@ -332,7 +323,7 @@ For each object type, specified values are created or updated before next-availa
 Entries under `bgp_peerings` call `create_bgp_peering` after the design's devices, interfaces, IP addresses, and ASNs have been deployed. Use a stable supplied or generated session name so repeat deployments find the existing session. Existing sessions are not updated by the design:
 
 Design peerings create only the specified direction by default. Set `create_reverse: true` on a peering to create the reverse session as well. The standalone `create_bgp_peering` task retains its own default.
-Peering records can specify an existing tenant name with `tenant`. Reverse sessions inherit it; existing sessions are left unchanged.
+Peering records can specify an existing tenant name with `tenant`. Reverse sessions inherit it. Existing sessions are left unchanged.
 
 For a dual-stack interface, use two peering entries with scoped `local_ip_query` filters containing `family: 4` and `family: 6`. Each query must match one address. With `local_interface` supplied, an omitted remote address is derived from the first interface IP in the selected family, for IPv4 /30 or /31 and IPv6 /127 subnets.
 
@@ -443,7 +434,7 @@ bgp_peerings:
 
 === "VLAN"
 
-    The design creates a VLAN group allowing IDs 100–199, then `create_vlan` selects the next available ID for `ACME USERS`. Its name and group identify it on a repeat run.
+    The design creates a VLAN group allowing IDs 100-199, then `create_vlan` selects the next available ID for `ACME USERS`. Its name and group identify it on a repeat run.
 
     ```yaml
     vlan_groups:
@@ -512,7 +503,7 @@ vlan_groups:
 
 The standalone [create_prefix task](services_netbox_service_tasks_create_prefix.md) takes a `parent` prefix or parent filter dictionary and a `prefixlen`, then allocates an available child prefix. A stable `description`, optionally with `site`, `role`, or `vrf`, helps it find the same child on repeat deployment. `create_prefix.parent` can select the parent through a dictionary of filters. The task accepts `site` for the allocated child's scope and the pair `vlan` (VID) and `vlan_group` (group name) to associate an existing VLAN. Site cannot replace the group for VLAN identification. It has no `location`, `site_group`, or `region` argument for the child.
 
-Both `vlan` and `vlan_group` must be supplied together. The VLAN must exist when allocation runs; VLANs defined in the same design are created before prefixes. A missing group or VLAN stops allocation. On repeat deployment, the association is updated if needed; omitting both arguments preserves it.
+Both `vlan` and `vlan_group` must be supplied together. The VLAN must exist when allocation runs. VLANs defined in the same design are created before prefixes. A missing group or VLAN stops allocation. On repeat deployment, the association is updated if needed. Omitting both arguments preserves it.
 
 ```yaml
 vlan_groups:
@@ -584,7 +575,7 @@ references. The field's related object type determines how strings are matched:
 | Other object types | Name |
 
 Each reference must match exactly one existing object when its record is
-processed. Ambiguous matches cause an error; use a numeric ID to distinguish
+processed. Ambiguous matches cause an error. Use a numeric ID to distinguish
 objects with the same address, prefix, value, CID, model, or name. Referenced
 objects must already exist or be created earlier in the deployment order.
 Devices are processed before IP addresses, so device custom fields cannot
@@ -681,7 +672,7 @@ When `branch` is supplied to `design_deploy`, the provided `netbox` client is al
 
 Every ordinary top-level object collection can mix object definitions and custom function records. Custom function records pass through flattening and lookup preparation without requiring object identity fields such as a route target `name` or a VLAN `group`. The collection handler processes object definitions first, then the custom functions run in record order. The function receives its record's remaining fields and handles its own Netbox writes. `local_context_data` uses the [separate device-local contract](#device-local-context).
 
-For these object records, the return value is a report to the caller. Deployment appends it to the collection's `custom` list in the same order as the custom function records. It does not use the value to create or update an object, supply fields to another handler, or resolve references in later collections. The function must make any Netbox writes itself and honor `dry_run`. A string, number, dictionary, list, or `None` can be returned; choose a JSON-serializable value that is useful to callers.
+For these object records, the return value is a report to the caller. Deployment appends it to the collection's `custom` list in the same order as the custom function records. It does not use the value to create or update an object, supply fields to another handler, or resolve references in later collections. The function must make any Netbox writes itself and honor `dry_run`. A string, number, dictionary, list, or `None` can be returned. Choose a JSON-serializable value that is useful to callers.
 
 | Function outcome | Deployment behavior |
 | --- | --- |
@@ -729,7 +720,7 @@ For these object records, the return value is a report to the caller. Deployment
     {"route_targets": {"custom": [{"function": "allocate_bgp_route_target", "result": {"name": "65000:100"}}]}}
     ```
 
-    The dictionary describes what the function did; the returned `name` is not used for the Netbox write or for later VRF or L2VPN references. Returning `name` as a string would instead put `"65000:100"` in `result`. Custom functions must handle their own lookups and writes, including dry-run behavior. Only load trusted Python files.
+    The dictionary describes what the function did. The returned `name` is not used for the Netbox write or for later VRF or L2VPN references. Returning `name` as a string would instead put `"65000:100"` in `result`. Custom functions must handle their own lookups and writes, including dry-run behavior. Only load trusted Python files.
 
 === "Calculated VLAN name"
 
@@ -1019,7 +1010,7 @@ Device records may contain `interfaces`, `bgp_peerings`, `power_ports`, `console
 
     Prerequisites: Named site, role, device type, both IP addresses, both ASNs, and the BGP plugin.
 
-    Device-level `bgp_peerings` is a list. Flattening adds `device`; `name` is optional and is generated by `create_bgp_peering` when omitted. Supply addresses explicitly when no local interface is given.
+    Device-level `bgp_peerings` is a list. Flattening adds `device`. `name` is optional and is generated by `create_bgp_peering` when omitted. Supply addresses explicitly when no local interface is given.
 
     ```yaml
     devices:
@@ -1060,7 +1051,7 @@ Device records may contain `interfaces`, `bgp_peerings`, `power_ports`, `console
 
     Prerequisites: Named site, role, manufacturer, and device type.
 
-    A compact interface `vrrp` record creates an FHRP group, its VIP IP address, and an assignment to the interface. The protocol defaults to `vrrp2`. The same group can be assigned to a second device with a different priority. This example shows both device-type reference forms; `AGG SWITCH` must uniquely identify an existing model.
+    A compact interface `vrrp` record creates an FHRP group, its VIP IP address, and an assignment to the interface. The protocol defaults to `vrrp2`. The same group can be assigned to a second device with a different priority. This example shows both device-type reference forms. `AGG SWITCH` must uniquely identify an existing model.
 
     ```yaml
     devices:
@@ -1620,7 +1611,7 @@ Device records may contain `interfaces`, `bgp_peerings`, `power_ports`, `console
 
     All parent, LAG, and bridge interfaces must be defined in the design or already exist in Netbox. A newly created dependent interface cannot itself be the parent of another new interface in the same deployment, because only two passes are performed.
 
-Device deployment searches by name only. A single match is updated, with site and tenant treated as update attributes. When multiple devices share a name, the supplied tenant must select exactly one; missing tenant, no tenant match, or multiple tenant matches cause an ambiguity error. Site does not disambiguate devices. Interfaces and IP assignments refer to a device by name, so use unambiguous device names for designs that include those nested objects. The separate primary-IP and local-context stages retain their site/name and optional tenant matching.
+Device deployment searches by name only. A single match is updated, with site and tenant treated as update attributes. When multiple devices share a name, the supplied tenant must select exactly one. Missing tenant, no tenant match, or multiple tenant matches cause an ambiguity error. Site does not disambiguate devices. Interfaces and IP assignments refer to a device by name, so use unambiguous device names for designs that include those nested objects. The separate primary-IP and local-context stages retain their site/name and optional tenant matching.
 
 ## Nested VRRP Group Records
 
@@ -1706,7 +1697,7 @@ Import/export lists also accept `query` to select existing route targets using
 Netbox filters, including custom fields. Queries run after template rendering
 and attach all matches. They do not create or update targets. A query matching
 nothing causes an error, including in dry runs. Queries can match targets created
-earlier in the same deployment; during a dry run those targets must already exist.
+earlier in the same deployment. During a dry run those targets must already exist.
 Duplicate matches are attached once. Use either `query` or a named definition
 in each entry.
 
@@ -1730,13 +1721,13 @@ instance and its custom-field definitions.
 Each termination attaches one device interface (`device` and `interface`) or
 one VLAN (`group` and `vid`). Add `name` to a VLAN termination to create or
 update that VLAN before attaching it. Additional fields on that entry describe
-the VLAN; flattening retains only `l2vpn`, `group`, and `vid` on the termination.
+the VLAN. Flattening retains only `l2vpn`, `group`, and `vid` on the termination.
 This works for nested and top-level terminations. VLAN definitions are deduplicated
 by group and VID: definitions already in `vlans` take precedence, followed by
 the first extracted termination definition. Entries without `name`
 remain references. The interface or referenced VLAN must already exist or be
 defined earlier in the design. NetBox permits only one L2VPN termination per
-attached object; deployment reports a conflict rather than moving an object
+attached object. Deployment reports a conflict rather than moving an object
 from another L2VPN. Omitted terminations are not deleted.
 
 ```yaml
@@ -1771,7 +1762,7 @@ l2vpn_terminations:
 The example creates or updates VLAN 100 in `BRANCH VLANS`, then attaches it
 to `BRANCH EVPN`. The routers and their interfaces must already exist or be
 defined elsewhere in the design. The `customer_id` custom field must already
-be defined in Netbox; omit `custom_fields` if it is not available.
+be defined in Netbox. Omit `custom_fields` if it is not available.
 
 During flattening, the named VLAN termination produces two records:
 
@@ -1793,10 +1784,10 @@ l2vpn_terminations:
 
 To attach an existing VLAN without updating its properties, supply only
 `group` and integer `vid` in the nested termination. That reference does not
-create a missing VLAN; deployment fails if it cannot resolve the VLAN.
+create a missing VLAN. Deployment fails if it cannot resolve the VLAN.
 Named entries apply all additional fields, including tags and custom fields,
 to the VLAN, rather than to the termination. VLAN groups must exist or be
-defined in `vlan_groups`; termination extraction does not create groups.
+defined in `vlan_groups`. Termination extraction does not create groups.
 
 The `l2vpn_terminations` stage runs after interfaces. A dry run can report
 planned terminations even when their interfaces or VLANs are also planned and
@@ -1951,7 +1942,7 @@ A `custom_function` on a `config_context` record uses the same [arguments and re
 
 === "Shared site context"
 
-    `config_context` matches an existing ConfigContext by `name`, creating it if absent or updating it if present. `sites` and `tenants` scope the context by name to objects created earlier or already in Netbox. Unknown tenant names fail; a dry run cannot resolve tenants that are only planned. Updates add scope associations without removing existing ones. Without a scope, the context applies globally, so specify one when the data is site-specific.
+    `config_context` matches an existing ConfigContext by `name`, creating it if absent or updating it if present. `sites` and `tenants` scope the context by name to objects created earlier or already in Netbox. Unknown tenant names fail. A dry run cannot resolve tenants that are only planned. Updates add scope associations without removing existing ones. Without a scope, the context applies globally, so specify one when the data is site-specific.
 
     ```yaml
     sites:
@@ -2011,7 +2002,7 @@ A `custom_function` on a `config_context` record uses the same [arguments and re
 
 `local_context_data` updates a `local_context_data` field on one device, not a reusable ConfigContext object. Both nested and top-level local context definitions run in the final deployment stage, after all other design objects have been created or updated. Custom functions can query those objects through the provided `netbox` client to calculate device context. Local context replaces the previous dictionary rather than merging with it.
 
-A `custom_function` inside `local_context_data` must return the **complete context-data dictionary** to store on the matched device. For example, `return {"routing": {"router_id": "192.0.2.1"}}` sets the device's `local_context_data` to exactly that dictionary. The handler performs the device update; the function does not need to call `device.update()` or `netbox.dcim.devices.update()`. The return value is not placed under a `custom` result list or passed to another design collection.
+A `custom_function` inside `local_context_data` must return the **complete context-data dictionary** to store on the matched device. For example, `return {"routing": {"router_id": "192.0.2.1"}}` sets the device's `local_context_data` to exactly that dictionary. The handler performs the device update. The function does not need to call `device.update()` or `netbox.dcim.devices.update()`. The return value is not placed under a `custom` result list or passed to another design collection.
 
 !!! note "Final-stage queries and branching"
 
@@ -2215,6 +2206,183 @@ The function receives the full device record so it can inspect fields beyond its
 
     A missing or ambiguous device fails outside dry-run mode. The update replaces its prior local context.
 
+## Markdown designs
+
+A Markdown design keeps network notes, input data and Netbox object definitions
+in one readable file. Reviewers can understand the design and check the records
+it will create or update. Use it for branch networks, repeatable site builds and
+service definitions. Store the file in version control to review notes and data
+changes together.
+
+Key features:
+
+- Keep headings, diagrams and explanations alongside YAML/Jinja design blocks.
+- Define input data with YAML, CSV or visible Markdown tables.
+- Split collections across sections. Repeated collections are combined.
+- Validate inputs with a schema and reuse designs with different task context.
+- Define shared Jinja variables and use file-backed Jinja or deployment functions.
+- Set shared Netbox configuration context and device-local context.
+- Preview rendered YAML or deploy the file directly.
+
+Pass a `.md` or `.markdown` file URL to `design_deploy`. Only marked blocks and
+tables supply data. Other text and unmarked examples are ignored. Preview with
+`dry_run_render=True` before deploying.
+
+=== "Design blocks"
+
+    Split a design across `yaml design` fences. Repeated collections are joined
+    in document order. Records are not deduplicated. Keep each loop inside one
+    collection section and indent records. Inline collections such as `sites: []`
+    are unsupported.
+
+    ````markdown
+    ```yaml design
+    {% set prefix = 'branch-' %}
+    ```
+
+    ```yaml design
+    tenants:
+      - name: "{{ prefix }}{{ context.site }}"
+    ```
+    ````
+
+    Assembly order is schema, custom functions, Jinja functions, standalone Jinja
+    blocks, then collections. Put each metadata key in one block. Standalone
+    Jinja blocks retain document order and must each contain complete syntax.
+    Relative includes resolve from the Markdown file's directory.
+
+=== "Context"
+
+    Use `yaml context.KEY`, `csv context.KEY`, or a marked Markdown table. Each
+    key must be unique and top-level. YAML preserves types. CSV/table cells stay
+    strings. Use YAML `|` scalars for multiline text. JSON and text fences are
+    unsupported.
+
+    ````markdown
+    ```yaml context.settings
+    enabled: true
+    note: |
+      Branch rollout
+    ```
+
+    ```csv context.links
+    name,description
+    {% for n in range(context.count) %}
+    r{{ n }},"Router {{ n }}"
+    {% endfor %}
+    ```
+
+    <!-- context.regions -->
+    | name |
+    | --- |
+    | {{ context.site }}-region |
+    ````
+
+    YAML/CSV blocks render before parsing. Markdown cells render individually.
+    Only explicit task context is available, not document values, schema defaults,
+    shared Jinja variables or custom functions. Rendering is single-pass and
+    undefined variables fail. Escape source table pipes as `\|`. Quote generated
+    YAML/CSV values appropriately. Table headers stay literal.
+
+    Document context supplies defaults. Task context overrides whole top-level
+    keys. Overridden definitions are not rendered. Context must be JSON-serializable.
+
+=== "Complete example"
+
+    Save as `nf://netbox/designs/branch.md`. This creates a tenant, region and site
+    using all three context formats and shared Jinja logic:
+
+    ````markdown
+    # Branch rollout
+
+    ```yaml context.settings
+    note: Branch rollout
+    ```
+
+    ```csv context.tenants
+    name
+    {{ context.site }}-tenant
+    ```
+
+    <!-- context.regions -->
+    | name |
+    | --- |
+    | {{ context.site }}-region |
+
+    ```yaml design
+    design_input_schema:
+      type: object
+      properties:
+        site: {type: string}
+        settings: {type: object}
+        tenants: {type: array}
+        regions: {type: array}
+      required: [site]
+    ```
+
+    ```yaml design
+    {% set description = 'Approved: ' ~ context.settings.note %}
+    ```
+
+    ```yaml design
+    tenants:
+    {% for tenant in context.tenants %}
+      - name: {{ tenant.name | tojson }}
+    {% endfor %}
+    regions:
+    {% for region in context.regions %}
+      - name: {{ region.name | tojson }}
+    {% endfor %}
+    sites:
+      - name: {{ context.site | tojson }}
+        tenant: {{ context.tenants[0].name | tojson }}
+        region: {{ context.regions[0].name | tojson }}
+        description: {{ description | tojson }}
+    ```
+    ````
+
+=== "Run"
+
+    Preview through Python. Remove `dry_run_render` to deploy:
+
+    ```python
+    result = client.run_job(
+        "netbox", "design_deploy", workers="any",
+        kwargs={
+            "design": "nf://netbox/designs/branch.md",
+            "context": {"site": "BRISBANE"},
+            "dry_run_render": True,
+        },
+    )
+    ```
+
+    Or use NFCLI:
+
+    ```text
+    nf# netbox design deploy design nf://netbox/designs/branch.md context '{"site":"BRISBANE"}' dry-run-render
+    ```
+
+
+### Authoring rules
+
+- Mark design blocks with `yaml design` and close each fence explicitly.
+- Define each context key once. Use top-level names such as `context.settings`.
+  Put nested values inside a YAML block instead of using `context.settings.name`.
+- Keep YAML context JSON-serializable. Quote numeric mapping keys. Avoid binary
+  values and sets.
+- Keep CSV and Markdown table headers unique and nonempty. Check table widths.
+  Markdown tables can pad missing cells or ignore extra cells.
+- Put each schema or function metadata key in one design block.
+- Indent collection records and multiline values. Do not use inline collections
+  such as `devices: []`.
+- Put shared Jinja assignments in separate design blocks. Keep each loop or
+  conditional complete within one block and one collection section.
+- Render context from explicit task input only. Context blocks cannot reference
+  other document context, schema defaults or shared design variables.
+- Make rendered YAML and CSV valid for their format. Escape source pipes in
+  Markdown table cells as `\|`.
+- Preview with `dry_run_render=True` to check the assembled design before deployment.
+
 ## Design Deployment Output
 
 With `dry_run_render=True`, `result` contains the rendered text and the result's `dry_run` flag is `True`. Dictionary designs return the supplied dictionary unchanged. This option takes precedence over `dry_run` and returns before YAML parsing, flattening, design validation, lookups, or deployment-time custom functions. Context and initial metadata parsing, input-schema validation, Netbox client setup, and Jinja2 functions still run.
@@ -2287,7 +2455,7 @@ Errors identify the collection that stopped deployment. Earlier collections are 
 ## Notes
 
 - A dry run does not create prerequisites, so it cannot fully resolve references to objects proposed earlier in the same design.
-- Explicit ASN, VLAN, and prefix records can supply object and multiobject custom-field references by string reference or ID, using the matching fields described in [Custom fields](#custom-fields). String references must identify exactly one existing object when that record is processed. Updates add multiobject references and other list values without removing current values; scalar and `null` values replace them. Custom-field definitions must already exist in NetBox.
+- Explicit ASN, VLAN, and prefix records can supply object and multiobject custom-field references by string reference or ID, using the matching fields described in [Custom fields](#custom-fields). String references must identify exactly one existing object when that record is processed. Updates add multiobject references and other list values without removing current values. Scalar and `null` values replace them. Custom-field definitions must already exist in NetBox.
 - Check that named parents, device types, sites, interfaces, and allocation pools exist or are created earlier in the design order.
 - Jinja filters, input models, and custom functions execute Python inside the worker. Use trusted files.
 - See the [ACME design example](https://github.com/norfablabs/NORFAB/blob/main/tests/nf_tests_inventory/netbox/designs/acme_branch_network_design_v1.yaml) for a full nested design.

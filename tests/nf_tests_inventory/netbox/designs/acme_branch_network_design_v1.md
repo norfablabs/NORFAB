@@ -55,7 +55,7 @@ those depend on the device configuration and acceptance testing.
 ## Deployment boundary
 
 This document models inventory and relationships in Netbox. It does not push
-switch or router configuration. Convert it with `parse_markdown_design`, review
+switch or router configuration. Preview it with `design_deploy` and `dry_run_render=True`, review
 the returned source and context, then use `design_deploy` for a preview or approved
 Netbox update. The deployment input schema is deliberately kept at the end.
 
@@ -74,7 +74,7 @@ All reference fields are accepted by the input schema at the end.
 NORFAB ACME TEST
 ```
 
-```json context.parent_prefix
+```yaml context.parent_prefix
 "198.19.224.0/20"
 ```
 
