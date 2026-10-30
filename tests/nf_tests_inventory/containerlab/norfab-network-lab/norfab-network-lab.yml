@@ -69,6 +69,7 @@ topology:
         - 8305:830
         - 4405:443
         - 11615:161/udp
+        - 6035:32767
         
     iol-r1:
       kind: cisco_iol
@@ -91,6 +92,7 @@ topology:
         - 8307:830
         - 4407:443
         - 11617:161/udp
+        - 6037:50052
 
     xrd-1:
       kind: cisco_xrd

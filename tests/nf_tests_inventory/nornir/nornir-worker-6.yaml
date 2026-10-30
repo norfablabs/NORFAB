@@ -6,6 +6,11 @@ hosts:
     password: clab@123
     port: 2208
     connection_options:
+      pygnmi:
+        port: 9338
+        extras:
+          insecure: True
+          gnmi_timeout: 10
       scrapli:
         platform: cisco_iosxr
         port: 2208
@@ -36,6 +41,11 @@ hosts:
     password: admin
     port: 2207
     connection_options:
+      pygnmi:
+        port: 6037
+        extras:
+          insecure: True
+          gnmi_timeout: 10
       scrapli:
         port: 2207
       ncclient:
@@ -70,6 +80,11 @@ hosts:
     password: admin@123
     port: 2205
     connection_options:
+      pygnmi:
+        port: 6035
+        extras:
+          insecure: True
+          gnmi_timeout: 10
       scrapli:
         port: 2205
       ncclient:
