@@ -671,12 +671,14 @@ rendered subtree or XPath filters, and XML result processors. Datastore and YANG
 support depend on the device. Server XPath filtering requires the device XPath capability.
 [Task details](workers/nornir/services_nornir_service_tasks_netconf_get_config.md)
 
-### gNMI data retrieval
+### gNMI data retrieval and configuration
 
 Nornir retrieves configuration and operational data through pygnmi using Python,
 NFCLI, FastAPI, and MCP. Supports YANG paths, host filters, and structured
-processors. Device YANG models and encodings determine available data; writes
-and subscriptions are not exposed. See [gNMI Get](workers/nornir/services_nornir_service_tasks_gnmi.md).
+processors. Device YANG models and encodings determine available data. Set
+supports combined updates, replacements, and deletions with JSON object payloads;
+subscriptions are not exposed. See [gNMI Get](workers/nornir/services_nornir_service_tasks_gnmi_get.md) and
+[Set](workers/nornir/services_nornir_service_tasks_gnmi_set.md).
 
 ### SNMP operations
 

@@ -127,25 +127,6 @@ enabled.
 Nornir task results include hosts executed during the current job in
 `resources`, and hosts that failed during that job in `resources_failed`.
 
-## NETCONF Connection Inventory
-
-Configure the selected connection plugin on the host or inherited group:
-
-```yaml
-connection_options:
-  ncclient:
-    port: 830
-    extras:
-      hostkey_verify: true
-  scrapli_netconf:
-    port: 830
-    extras:
-      auth_strict_key: true
-      transport: paramiko
-```
-
-Credentials inherit from the Nornir host. Configure SSH host trust before use.
-
 ## Netbox Inventory Integration
 
 NorFab Nornir Worker supports tight integration with Netbox to fetch devices data such as device interfaces, ip addresses, circuits, configuration context. Netbox 3.7.x and 4.x.x supported. 
@@ -209,3 +190,167 @@ Indicates whether to fetch circuits data from Netbox and map it to hosts data.
 **primary_ip**
 
 Specifies what Netbox device IP address to use for Nornir host's `hostname` parameter, supported values are `ipv4`, `ip4`, `ipv6` or `ip6`, uses Netbox device name instead if no primary IP address mapped to the device in Netbox.
+
+
+## NETCONF Connection Inventory
+
+Configure the backend selected by the task's `plugin` argument. Use `ncclient`
+for `plugin=ncclient` and `scrapli_netconf` for `plugin=scrapli`. Add these settings
+to a host or an inherited group. Username and password inherit from the host.
+
+NETCONF normally uses port `830`. Set the connection port explicitly when the
+host's main port is SSH. The device-specific tabs below use the mapped ports
+from the test lab. Replace them with the port your device uses.
+
+=== "ncclient"
+
+    Use the default backend with SSH host key checking enabled. Add the device's
+    SSH key to the worker's known hosts before connecting.
+
+    ```yaml
+    connection_options:
+      ncclient:
+        port: 830
+        extras:
+          hostkey_verify: true
+          allow_agent: false
+    ```
+
+=== "Scrapli"
+
+    Select `plugin=scrapli` in the task. This example uses the Paramiko SSH
+    transport and checks the device's SSH host key.
+
+    ```yaml
+    connection_options:
+      scrapli_netconf:
+        port: 830
+        extras:
+          transport: paramiko
+          auth_strict_key: true
+          ssh_config_file: true
+    ```
+
+=== "IOS XR"
+
+    The XRD lab router uses port `8308`. Set ncclient's device name to `iosxr`.
+
+    ```yaml
+    connection_options:
+      ncclient:
+        port: 8308
+        extras:
+          hostkey_verify: true
+          allow_agent: false
+          device_params:
+            name: iosxr
+    ```
+
+=== "IOS XE"
+
+    The CSR1000v lab router uses port `8307`. Set ncclient's device name to `iosxe`.
+
+    ```yaml
+    connection_options:
+      ncclient:
+        port: 8307
+        extras:
+          hostkey_verify: true
+          allow_agent: false
+          device_params:
+            name: iosxe
+    ```
+
+=== "Junos"
+
+    The vMX lab router uses port `8305`. Set ncclient's device name to `junos`.
+
+    ```yaml
+    connection_options:
+      ncclient:
+        port: 8305
+        extras:
+          hostkey_verify: true
+          device_params:
+            name: junos
+    ```
+
+=== "Arista EOS"
+
+    This example matches the cEOS lab's Scrapli connection settings, with SSH
+    host key checking enabled. Select `plugin=scrapli` in the task. The first
+    spine uses port `8300`.
+
+    ```yaml
+    connection_options:
+      scrapli_netconf:
+        port: 8300
+        extras:
+          transport: paramiko
+          auth_strict_key: true
+          ssh_config_file: true
+          transport_options:
+            netconf_force_pty: false
+    ```
+
+The test inventories disable SSH host key checking for disposable lab devices.
+If needed in that lab, use `hostkey_verify: false` for ncclient or
+`auth_strict_key: false` for Scrapli. Keep checking enabled for trusted device
+connections.
+
+## gNMI connection inventory
+
+Configure gNMI tasks using `connection_options.pygnmi`. Username and password
+inherit from the host. Set the port explicitly when the host's main port is SSH.
+The port and encryption settings must match the device's gNMI service.
+
+=== "With Encryption"
+
+    Use TLS and verify the device certificate. Place the CA certificate that
+    signed the device certificate at `/etc/norfab/certs/device-ca.pem` on each
+    Nornir worker. Use the device's real CA certificate, not a sample certificate.
+
+    ```yaml
+    connection_options:
+      pygnmi:
+        port: 6030
+        extras:
+          insecure: false
+          path_cert: /etc/norfab/certs/device-ca.pem
+          gnmi_timeout: 10
+    ```
+
+=== "Without Encryption"
+
+    Use plaintext only in a trusted test lab. The device must allow unencrypted
+    gNMI connections.
+
+    ```yaml
+    connection_options:
+      pygnmi:
+        port: 6030
+        extras:
+          insecure: true
+          gnmi_timeout: 10
+    ```
+
+=== "Juniper"
+
+    This example uses a plaintext Junos lab service on port `57400`. Use the
+    port configured on your router, or its mapped port when using containers.
+    `no_qos_marking` prevents subscription requests from including a QoS marking,
+    which some Junos versions reject.
+
+    ```yaml
+    connection_options:
+      pygnmi:
+        port: 57400
+        extras:
+          insecure: true
+          no_qos_marking: true
+          gnmi_timeout: 10
+    ```
+
+    For an encrypted Junos service, use `insecure: false` and `path_cert` as in
+    the With Encryption tab. Keep `no_qos_marking: true`.
+

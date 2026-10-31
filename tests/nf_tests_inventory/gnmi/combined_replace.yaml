@@ -1,0 +1,4 @@
+- - interface[name=Loopback1985]/config
+  - name: Loopback1985
+    type: iana-if-type:softwareLoopback
+    description: norfab-gnmi-combined-replace

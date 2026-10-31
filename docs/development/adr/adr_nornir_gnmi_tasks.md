@@ -2,9 +2,13 @@
 
 ## Status
 
-Get MVP implemented; set/delete remain proposed. Date: 2026-10-31.
+Get, Set, and Delete MVP implemented. Date: 2026-10-31.
 
-The first slice exposes only `gnmi_get`, using the linear `run_gnmi` method.
+The implementation exposes `gnmi_get`, `gnmi_set`, and `gnmi_delete`, using the linear
+`run_gnmi` method. Set accepts JSON object payloads for update/replace and
+path lists for delete. Scalar values and extensions remain deferred.
+Set update, replace, combined operations, serialization, and NFCLI writes
+are verified through nfclient against cEOS, with test-owned data cleanup.
 Rendering and additional abstraction are deferred. The MVP follows existing
 models with `extra="allow"` because runtime validation includes the injected
 job argument; stricter argument handling below remains a proposed follow-up.
@@ -43,7 +47,7 @@ and one `run_gnmi` runner. Register the mixin on `NornirWorker`.
 | Public task | Arguments | Backend call |
 | --- | --- | --- |
 | `gnmi_get` | Required `path: list[str]`; optional `prefix=""`, `target=None`, `datatype="all"`, `encoding=None` | `get` |
-| `gnmi_set` | Optional `update`, `replace`, `delete`, `prefix=""`, `target=None`, `encoding=None`, `extension=None`; at least one nonempty operation required | `set` |
+| `gnmi_set` | Optional `update`, `replace`, `delete`, `prefix=""`, `target=None`, `encoding=None`; at least one nonempty operation required | `set` |
 | `gnmi_delete` | Required `path: list[str]`; optional `prefix=""`, `target=None` | `set`, with `delete=path` |
 
 All tasks accept the existing common Nornir filters, processors, retry and
@@ -60,8 +64,7 @@ Define `GnmiGetInput`, `GnmiSetInput`, `GnmiDeleteInput`, and `GnmiResult` in
 
 Require nonempty path lists with nonblank strings; allow explicit `/` paths.
 Validate update/replace entries as two-item path/value pairs before the plugin
-can silently discard malformed entries. Accept JSON-compatible values without
-requiring dictionaries. Validate datatype against `all`, `config`, `state`,
+can silently discard malformed entries. The Set MVP requires JSON-compatible dictionaries; scalar payloads are deferred. Validate datatype against `all`, `config`, `state`,
 `operational`; validate explicit encodings against pygnmi's supported values.
 Leave encoding unset by default to retain backend negotiation.
 Reject backend-dispatch overrides and arguments belonging to other operations

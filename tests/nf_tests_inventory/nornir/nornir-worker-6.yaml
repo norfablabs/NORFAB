@@ -85,6 +85,7 @@ hosts:
         extras:
           insecure: True
           gnmi_timeout: 10
+          no_qos_marking: True
       scrapli:
         port: 2205
       ncclient:

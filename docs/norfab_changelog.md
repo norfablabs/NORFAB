@@ -1,14 +1,23 @@
-# 0.25.3 (Draft)
+# 0.26.0 (Draft)
 
 ## FEATURES
 
-1. Added Nornir [`gnmi_get`](workers/nornir/services_nornir_service_tasks_gnmi.md) with host filtering, structured processors, and NFCLI `nornir gnmi get`, including `openconfig-system`, `openconfig-interfaces`, `openconfig-lldp`, and `openconfig-platform` getters.
+1. Added Nornir [`gnmi_get`](workers/nornir/services_nornir_service_tasks_gnmi_get.md) with host filtering, structured processors, and NFCLI `nornir gnmi get`, including `openconfig-system`, `openconfig-interfaces`, `openconfig-lldp`, and `openconfig-platform` getters.
+
+2. Added Nornir [`gnmi_set`](workers/nornir/services_nornir_service_tasks_gnmi_set.md) and NFCLI `nornir gnmi set` for combined configuration updates, replacements, and deletions using JSON object payloads.
+
+3. Added Nornir [`gnmi_delete`](workers/nornir/services_nornir_service_tasks_gnmi_delete.md) and NFCLI `nornir gnmi delete` for dedicated configuration path deletion, with prefix and target support.
+
+4. Added Nornir [`gnmi_get_capabilities`](workers/nornir/services_nornir_service_tasks_gnmi_get_capabilities.md) and NFCLI `nornir gnmi get-capabilities` to discover advertised models, encodings, and gNMI version.
 
 ## BUGS
 
 1. Netbox Markdown design deployment preserves the final newline in YAML context block scalars when rendering Jinja templates.
 
 ## ENHANCEMENTS
+
+1. gNMI Get, Set, and Delete now accept `nf://` JSON/YAML files for operation payloads and path lists.
+
 
 1. Netbox Markdown designs now accept standalone Jinja statements, expressions, and comments inside `yaml design` fences. These blocks appear after metadata and before collections, allowing shared variables and logic.
 2. Markdown design deployment renders YAML and CSV context blocks, including Jinja loops, and Markdown table cells using only supplied task context.

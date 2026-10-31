@@ -5,6 +5,7 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    JsonValue,
     StrictBool,
     StrictFloat,
     StrictInt,
@@ -2278,11 +2279,14 @@ class GnmiGetInput(
     use_enum_values=True,
     populate_by_name=True,
 ):
-    path: list[
-        Annotated[StrictStr, StringConstraints(strip_whitespace=True, min_length=1)]
-    ] = Field(
+    path: (
+        Annotated[StrictStr, StringConstraints(pattern=r"^nf://.+")]
+        | list[
+            Annotated[StrictStr, StringConstraints(strip_whitespace=True, min_length=1)]
+        ]
+    ) = Field(
         [],
-        description="YANG paths to retrieve, optionally combined with named getters",
+        description="YANG paths or nf:// JSON/YAML list, optionally combined with named getters",
     )
     openconfig_system: StrictBool = Field(
         False,
@@ -2328,14 +2332,107 @@ class GnmiGetInput(
         GnmiDataType.all_,
         description="Data type to retrieve",
     )
+    encoding: GnmiEncoding = Field(
+        None,
+        description="Response encoding. Default negotiates with the device",
+    )
+
+
+class GnmiSetInput(
+    NornirStructuredProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    update: (
+        Annotated[StrictStr, StringConstraints(pattern=r"^nf://.+")]
+        | list[
+            tuple[
+                Annotated[StrictStr, StringConstraints(min_length=1, pattern=r"\S")],
+                dict[StrictStr, JsonValue],
+            ]
+        ]
+    ) = Field(
+        [],
+        description="Path/object pairs or nf:// JSON/YAML list to merge",
+    )
+    replace: (
+        Annotated[StrictStr, StringConstraints(pattern=r"^nf://.+")]
+        | list[
+            tuple[
+                Annotated[StrictStr, StringConstraints(min_length=1, pattern=r"\S")],
+                dict[StrictStr, JsonValue],
+            ]
+        ]
+    ) = Field(
+        [],
+        description="Path/object pairs or nf:// JSON/YAML list to replace subtrees",
+    )
+    delete: (
+        Annotated[StrictStr, StringConstraints(pattern=r"^nf://.+")]
+        | list[Annotated[StrictStr, StringConstraints(min_length=1, pattern=r"\S")]]
+    ) = Field(
+        [],
+        description="Configuration paths or nf:// JSON/YAML list to delete",
+    )
+    prefix: StrictStr = Field("", description="Common YANG path prefix")
+    target: Union[None, StrictStr] = Field(None, description="gNMI target name")
     encoding: Union[None, GnmiEncoding] = Field(
         None,
-        description="Response encoding; default negotiates with the device",
+        description="Payload encoding; default negotiates with the device",
     )
+
+    @model_validator(mode="after")
+    def validate_operations(self) -> "GnmiSetInput":
+        if not self.update and not self.replace and not self.delete:
+            raise ValueError(
+                "provide at least one update, replace, or delete operation"
+            )
+        return self
+
+
+class GnmiDeleteInput(
+    NornirStructuredProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    path: (
+        Annotated[StrictStr, StringConstraints(pattern=r"^nf://.+")]
+        | list[Annotated[StrictStr, StringConstraints(min_length=1, pattern=r"\S")]]
+    ) = Field(
+        ...,
+        min_length=1,
+        description="Configuration paths or nf:// JSON/YAML list to delete",
+    )
+    prefix: StrictStr = Field("", description="Common YANG path prefix")
+    target: Union[None, StrictStr] = Field(None, description="gNMI target name")
+
+    @model_validator(mode="after")
+    def validate_delete_arguments(self) -> "GnmiDeleteInput":
+        if {"update", "replace", "delete", "call", "name_arg"}.intersection(
+            self.model_extra or {}
+        ):
+            raise ValueError(
+                "use path for delete; other operations and dispatch overrides are not accepted"
+            )
+        return self
+
+
+class GnmiCapabilitiesInput(
+    NornirStructuredProcessorArgs,
+    NornirCommonArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    """Common host filters, processors, retries, and serialization options."""
 
 
 class GnmiResult(NornirSerializedResult):
     result: Union[dict[StrictStr, Any], list[Any]] = Field(
         {},
-        description="Per-host get replies or serialized records; notification values depend on device YANG models",
+        description="Per-host gNMI operation replies or serialized records",
     )

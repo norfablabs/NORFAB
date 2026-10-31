@@ -1,0 +1,4 @@
+- - openconfig:/interfaces/interface[name=Loopback1997]/config
+  - name: Loopback1997
+    type: iana-if-type:softwareLoopback
+    description: norfab-file-update

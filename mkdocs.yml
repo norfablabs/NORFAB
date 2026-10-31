@@ -108,93 +108,96 @@ nav:
       - Deploy: workers/containerlab/services_containerlab_service_tasks_deploy.md
       - Deploy Netbox: workers/containerlab/services_containerlab_service_tasks_deploy_netbox.md
       - Destroy: workers/containerlab/services_containerlab_service_tasks_destroy.md
-      - Save: workers/containerlab/services_containerlab_service_tasks_save.md
-      - Restart: workers/containerlab/services_containerlab_service_tasks_restart.md
-      - Inspect: workers/containerlab/services_containerlab_service_tasks_inspect.md
       - Get Nornir Inventory: workers/containerlab/services_containerlab_service_tasks_nornir_inventory.md
+      - Inspect: workers/containerlab/services_containerlab_service_tasks_inspect.md
+      - Restart: workers/containerlab/services_containerlab_service_tasks_restart.md
+      - Save: workers/containerlab/services_containerlab_service_tasks_save.md
   - FakeNOS:
     - Overview: workers/fakenos/services_fakenos_service.md
     - Inventory: workers/fakenos/services_fakenos_service_inventory.md
     - Tasks:
+      - Get Nornir Inventory: workers/fakenos/services_fakenos_service_tasks_get_nornir_inventory.md
+      - Inspect Networks: workers/fakenos/services_fakenos_service_tasks_inspect_networks.md
+      - Restart: workers/fakenos/services_fakenos_service_tasks_restart.md
       - Start: workers/fakenos/services_fakenos_service_tasks_start.md
       - Stop: workers/fakenos/services_fakenos_service_tasks_stop.md
-      - Restart: workers/fakenos/services_fakenos_service_tasks_restart.md
-      - Inspect Networks: workers/fakenos/services_fakenos_service_tasks_inspect_networks.md
-      - Get Nornir Inventory: workers/fakenos/services_fakenos_service_tasks_get_nornir_inventory.md
   - Nornir:
     - Overview: workers/nornir/services_nornir_service.md
     - Inventory: workers/nornir/services_nornir_service_inventory.md
     - Tasks:
-      - Task: workers/nornir/services_nornir_service_tasks_task.md
-      - CLI: workers/nornir/services_nornir_service_tasks_cli.md
       - CFG: workers/nornir/services_nornir_service_tasks_cfg.md
-      - Test: workers/nornir/services_nornir_service_tasks_test.md
-      - Network: workers/nornir/services_nornir_service_tasks_network.md
-      - Parse: workers/nornir/services_nornir_service_tasks_parse.md
-      - Diagram: workers/nornir/services_nornir_service_tasks_diagram.md
-      - File Copy: workers/nornir/services_nornir_service_tasks_file_copy.md
-      - Runtime Inventory: workers/nornir/services_nornir_service_tasks_runtime_inventory.md
+      - CLI: workers/nornir/services_nornir_service_tasks_cli.md
       - Create Host from NetBox: workers/nornir/services_nornir_service_tasks_create_host_from_netbox.md
-      - NETCONF Discard Changes: workers/nornir/services_nornir_service_tasks_netconf_discard_changes.md
-      - NETCONF Lock Datastore: workers/nornir/services_nornir_service_tasks_netconf_lock.md
-      - NETCONF Unlock Datastore: workers/nornir/services_nornir_service_tasks_netconf_unlock.md
-      - NETCONF Copy Configuration: workers/nornir/services_nornir_service_tasks_netconf_copy_config.md
-      - NETCONF Delete Configuration: workers/nornir/services_nornir_service_tasks_netconf_delete_config.md
-      - NETCONF RPC: workers/nornir/services_nornir_service_tasks_netconf_rpc.md
+      - Diagram: workers/nornir/services_nornir_service_tasks_diagram.md
+      - Errdisabled Hosts: workers/nornir/services_nornir_service_tasks_errdisabled_hosts.md
+      - File Copy: workers/nornir/services_nornir_service_tasks_file_copy.md
+      - gNMI Delete: workers/nornir/services_nornir_service_tasks_gnmi_delete.md
+      - gNMI Get: workers/nornir/services_nornir_service_tasks_gnmi_get.md
+      - gNMI Get Capabilities: workers/nornir/services_nornir_service_tasks_gnmi_get_capabilities.md
+      - gNMI Set: workers/nornir/services_nornir_service_tasks_gnmi_set.md
       - NETCONF Cancel Commit: workers/nornir/services_nornir_service_tasks_netconf_cancel_commit.md
       - NETCONF Commit Configuration: workers/nornir/services_nornir_service_tasks_netconf_commit.md
-      - NETCONF Validate Configuration: workers/nornir/services_nornir_service_tasks_netconf_validate.md
-      - NETCONF Transaction: workers/nornir/services_nornir_service_tasks_netconf_transaction.md
+      - NETCONF Copy Configuration: workers/nornir/services_nornir_service_tasks_netconf_copy_config.md
+      - NETCONF Delete Configuration: workers/nornir/services_nornir_service_tasks_netconf_delete_config.md
+      - NETCONF Discard Changes: workers/nornir/services_nornir_service_tasks_netconf_discard_changes.md
       - NETCONF Edit Configuration: workers/nornir/services_nornir_service_tasks_netconf_edit_config.md
       - NETCONF Get Capabilities: workers/nornir/services_nornir_service_tasks_netconf_get_capabilities.md
-      - NETCONF Get Schema: workers/nornir/services_nornir_service_tasks_netconf_get_schema.md
-      - NETCONF Get Data: workers/nornir/services_nornir_service_tasks_netconf_get.md
-      - NETCONF XML Processors: workers/nornir/services_nornir_service_tasks_netconf_processors.md
       - NETCONF Get Configuration: workers/nornir/services_nornir_service_tasks_netconf_get_config.md
-      - gNMI Get: workers/nornir/services_nornir_service_tasks_gnmi.md
+      - NETCONF Get Data: workers/nornir/services_nornir_service_tasks_netconf_get.md
+      - NETCONF Get Schema: workers/nornir/services_nornir_service_tasks_netconf_get_schema.md
+      - NETCONF Lock Datastore: workers/nornir/services_nornir_service_tasks_netconf_lock.md
+      - NETCONF RPC: workers/nornir/services_nornir_service_tasks_netconf_rpc.md
+      - NETCONF Transaction: workers/nornir/services_nornir_service_tasks_netconf_transaction.md
+      - NETCONF Unlock Datastore: workers/nornir/services_nornir_service_tasks_netconf_unlock.md
+      - NETCONF Validate Configuration: workers/nornir/services_nornir_service_tasks_netconf_validate.md
+      - NETCONF XML Processors: workers/nornir/services_nornir_service_tasks_netconf_processors.md
+      - Network: workers/nornir/services_nornir_service_tasks_network.md
+      - Parse: workers/nornir/services_nornir_service_tasks_parse.md
+      - Runtime Inventory: workers/nornir/services_nornir_service_tasks_runtime_inventory.md
       - SNMP: workers/nornir/services_nornir_service_tasks_snmp.md
-      - Errdisabled Hosts: workers/nornir/services_nornir_service_tasks_errdisabled_hosts.md
+      - Task: workers/nornir/services_nornir_service_tasks_task.md
+      - Test: workers/nornir/services_nornir_service_tasks_test.md
     - Jinja2 Filters: workers/nornir/services_nornir_service_jinja2_filters.md
   - Netbox:
     - Overview: workers/netbox/services_netbox_service.md
     - Inventory: workers/netbox/services_netbox_service_inventory.md
     - Tasks:
-      - GraphQL: workers/netbox/services_netbox_service_tasks_graphql.md
-      - REST: workers/netbox/services_netbox_service_tasks_rest.md
-      - Get Devices: workers/netbox/services_netbox_service_tasks_get_devices.md
-      - Get Interfaces: workers/netbox/services_netbox_service_tasks_get_interfaces.md
-      - Get Connections: workers/netbox/services_netbox_service_tasks_get_connections.md
-      - Get Circuits: workers/netbox/services_netbox_service_tasks_get_circuits.md
-      - Get BGP Peerings: workers/netbox/services_netbox_service_tasks_get_bgp_peerings.md
-      - Get Nornir Inventory: workers/netbox/services_netbox_service_tasks_get_nornir_inventory.md
-      - Get Containerlab Inventory: workers/netbox/services_netbox_service_tasks_get_containerlab_inventory.md
-      - Get Topology Data: workers/netbox/services_netbox_service_tasks_get_topology.md
-      - Move IP: workers/netbox/services_netbox_service_tasks_move_ip.md
+      - Check Device Sync: workers/netbox/services_netbox_service_tasks_check_device_sync.md
+      - Create ASN: workers/netbox/services_netbox_service_tasks_create_asn.md
+      - Create BGP Peering: workers/netbox/services_netbox_service_tasks_create_bgp_peering.md
+      - Create Device Interfaces: workers/netbox/services_netbox_service_tasks_create_device_interfaces.md
       - Create IP: workers/netbox/services_netbox_service_tasks_create_ip.md
       - Create IP Bulk: workers/netbox/services_netbox_service_tasks_create_ip_bulk.md
       - Create Prefix: workers/netbox/services_netbox_service_tasks_create_prefix.md
-      - Create ASN: workers/netbox/services_netbox_service_tasks_create_asn.md
-      - Create VLAN Group: workers/netbox/services_netbox_service_tasks_create_vlan_group.md
       - Create VLAN: workers/netbox/services_netbox_service_tasks_create_vlan.md
-      - Create Device Interfaces: workers/netbox/services_netbox_service_tasks_create_device_interfaces.md
+      - Create VLAN Group: workers/netbox/services_netbox_service_tasks_create_vlan_group.md
+      - CRUD: workers/netbox/services_netbox_service_tasks_crud.md
       - Design Deploy: workers/netbox/services_netbox_service_tasks_design_deploy.md
-      - Sync Device Inventory: workers/netbox/services_netbox_service_tasks_sync_device_inventory.md
+      - Get BGP Peerings: workers/netbox/services_netbox_service_tasks_get_bgp_peerings.md
+      - Get Circuits: workers/netbox/services_netbox_service_tasks_get_circuits.md
+      - Get Connections: workers/netbox/services_netbox_service_tasks_get_connections.md
+      - Get Containerlab Inventory: workers/netbox/services_netbox_service_tasks_get_containerlab_inventory.md
+      - Get Devices: workers/netbox/services_netbox_service_tasks_get_devices.md
+      - Get Interfaces: workers/netbox/services_netbox_service_tasks_get_interfaces.md
+      - Get Nornir Inventory: workers/netbox/services_netbox_service_tasks_get_nornir_inventory.md
+      - Get Topology Data: workers/netbox/services_netbox_service_tasks_get_topology.md
+      - GraphQL: workers/netbox/services_netbox_service_tasks_graphql.md
+      - Move IP: workers/netbox/services_netbox_service_tasks_move_ip.md
+      - REST: workers/netbox/services_netbox_service_tasks_rest.md
+      - Sync All: workers/netbox/services_netbox_service_tasks_sync_all.md
+      - Sync BGP ASNs: workers/netbox/services_netbox_service_tasks_sync_bgp_asn.md
+      - Sync BGP Communities: workers/netbox/services_netbox_service_tasks_sync_bgp_community.md
+      - Sync BGP Peerings: workers/netbox/services_netbox_service_tasks_sync_bgp_peerings.md
       - Sync Device Interfaces: workers/netbox/services_netbox_service_tasks_sync_device_interfaces.md
+      - Sync Device Inventory: workers/netbox/services_netbox_service_tasks_sync_device_inventory.md
+      - Sync Device IP: workers/netbox/services_netbox_service_tasks_sync_device_ip.md
+      - Sync Device Prefixes: workers/netbox/services_netbox_service_tasks_sync_device_prefixes.md
+      - Sync MAC Addresses: workers/netbox/services_netbox_service_tasks_sync_mac_addresses.md
       - Sync VLANs: workers/netbox/services_netbox_service_tasks_sync_vlans.md
       - Sync VRFs: workers/netbox/services_netbox_service_tasks_sync_vrfs.md
       - Sync VRRP: workers/netbox/services_netbox_service_tasks_sync_vrrp.md
-      - Sync BGP ASNs: workers/netbox/services_netbox_service_tasks_sync_bgp_asn.md
-      - Sync BGP Communities: workers/netbox/services_netbox_service_tasks_sync_bgp_community.md
-      - Sync MAC Addresses: workers/netbox/services_netbox_service_tasks_sync_mac_addresses.md
-      - Sync Device IP: workers/netbox/services_netbox_service_tasks_sync_device_ip.md
-      - Sync Device Prefixes: workers/netbox/services_netbox_service_tasks_sync_device_prefixes.md
-      - Sync BGP Peerings: workers/netbox/services_netbox_service_tasks_sync_bgp_peerings.md
-      - Check Device Sync: workers/netbox/services_netbox_service_tasks_check_device_sync.md
-      - Sync All: workers/netbox/services_netbox_service_tasks_sync_all.md
-      - Create BGP Peering: workers/netbox/services_netbox_service_tasks_create_bgp_peering.md
       - Update BGP Peering: workers/netbox/services_netbox_service_tasks_update_bgp_peering.md
       - Update Interfaces Description: workers/netbox/services_netbox_service_tasks_update_interfaces_description.md
-      - CRUD: workers/netbox/services_netbox_service_tasks_crud.md
   - Agent:
     - Overview: workers/agent/services_agent_service.md
     - Inventory: workers/agent/services_agent_service_inventory.md
@@ -210,8 +213,8 @@ nav:
     - Inventory: workers/fastmcp/services_fastmcp_service_inventory.md
     - Tasks:
       - Auth: workers/fastmcp/services_fastmcp_service_task_auth.md
-      - Get Tools: workers/fastmcp/services_fastmcp_service_task_get_tools.md
       - Get Prompts: workers/fastmcp/services_fastmcp_service_task_get_prompts.md
+      - Get Tools: workers/fastmcp/services_fastmcp_service_task_get_tools.md
   - Workflow:
     - Overview: workers/workflow/services_workflow_service.md
     - Inventory: workers/workflow/services_workflow_service_inventory.md
@@ -221,10 +224,10 @@ nav:
     - Overview: workers/filesharing/services_filesharing_service.md
     - Inventory: workers/filesharing/services_filesharing_service_inventory.md
     - Tasks:
-      - Create Git Remote: workers/filesharing/services_filesharing_service_tasks_create_remote_git.md
       - Clone Git Remote: workers/filesharing/services_filesharing_service_tasks_git_clone.md
-      - Resolve Git URL: workers/filesharing/services_filesharing_service_tasks_resolve_git_url.md
+      - Create Git Remote: workers/filesharing/services_filesharing_service_tasks_create_remote_git.md
       - Delete Git Remote: workers/filesharing/services_filesharing_service_tasks_delete_remote_git.md
+      - Resolve Git URL: workers/filesharing/services_filesharing_service_tasks_resolve_git_url.md
 
 - Clients:
   - Clients Overview: clients/clients_overview.md

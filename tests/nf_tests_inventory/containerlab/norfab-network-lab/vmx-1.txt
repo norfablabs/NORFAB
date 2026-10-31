@@ -1,4 +1,5 @@
 set system host-name vmx-1
+set system schema openconfig unhide
 set system services netconf ssh
 set system services extension-service request-response grpc clear-text port 57400
 set snmp community norfab authorization read-write
