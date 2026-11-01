@@ -4,26 +4,40 @@ import copy
 import importlib
 import logging
 import os
+import sqlite3
 import uuid
 from fnmatch import fnmatch
-from typing import Any, Callable, Iterator, List
+from typing import Callable, Iterator
 
-import yaml
-from datamodel_code_generator import Formatter, GenerateConfig, generate_dynamic_models
-from fastembed import TextEmbedding
 from langchain.agents import create_agent
-from langchain.tools import tool as langchain_tool
-from langchain_core.runnables import RunnableLambda
+from langchain_core.callbacks import BaseCallbackHandler
+from langchain_core.language_models import BaseChatModel
 from langchain_core.tools import StructuredTool
-from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.checkpoint.memory import MemorySaver
-from langgraph.checkpoint.sqlite import SqliteSaver
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, PointStruct, VectorParams
-
-from norfab.core.inventory import merge_recursively
 
 log = logging.getLogger(__name__)
+
+
+class AgentProgress(BaseCallbackHandler):
+    """Report model and tool activity to a message/severity event receiver."""
+
+    def __init__(self, event: Callable) -> None:
+        self.event = event
+
+    def on_chat_model_start(
+        self, serialized: dict, messages: list, **kwargs: object
+    ) -> None:
+        self.event("thinking...", severity="INFO")
+
+    def on_tool_start(self, serialized: dict, input_str: str, **kwargs: object) -> None:
+        self.event(f"calling {serialized['name']}", severity="INFO")
+
+    def on_tool_end(self, output: object, **kwargs: object) -> None:
+        self.event(f"tool {kwargs['name']} completed", severity="INFO")
+
+    def on_tool_error(self, error: BaseException, **kwargs: object) -> None:
+        self.event(f"tool failed: {error}", severity="ERROR")
+
 
 # ------------------------------------------------------------------------------------------
 # LLM Factory
@@ -43,11 +57,11 @@ _PROVIDER_MAP = {
 }
 
 
-def _make_llm(cfg: dict):
+def _make_llm(cfg: dict) -> BaseChatModel:
     """Instantiate a LangChain chat model from an agent profile LLM config dict.
 
     Args:
-        cfg (dict): LLM configuration dict from the agent profile.
+        cfg (dict): Provider selector and provider constructor arguments.
 
     Returns:
         BaseChatModel: Instantiated LangChain chat model.
@@ -69,15 +83,7 @@ def _make_llm(cfg: dict):
         ) from exc
 
     cls = getattr(mod, class_name)
-    kwargs: dict = {}
-    if cfg.get("model"):
-        kwargs["model"] = cfg["model"]
-    if cfg.get("api_key"):
-        kwargs["api_key"] = cfg["api_key"]
-    if cfg.get("temperature") is not None:
-        kwargs["temperature"] = cfg["temperature"]
-    if cfg.get("base_url"):
-        kwargs["base_url"] = cfg["base_url"]
+    kwargs = {key: value for key, value in cfg.items() if key != "provider"}
     # OpenRouter uses ChatOpenAI — provide default base_url if not set
     if provider == "openrouter" and "base_url" not in kwargs:
         kwargs["base_url"] = "https://openrouter.ai/api/v1"
@@ -90,55 +96,11 @@ def _make_llm(cfg: dict):
 # ------------------------------------------------------------------------------------------
 
 
-def _make_service_tool(client, service: str, task_name: str, description: str):
-    """Return a single LangChain StructuredTool wrapping one NorFab task.
-
-    Args:
-        client: NFPClient instance used to dispatch jobs.
-        service (str): NorFab service name.
-        task_name (str): Task name within the service.
-        description (str): Tool description shown to the LLM.
-
-    Returns:
-        StructuredTool: Configured LangChain tool for the given task.
-    """
-
-    def run(**kwargs: Any) -> Any:
-        workers = kwargs.pop("workers", "all")
-        log.info(
-            f"NFAgent - tool call started: service='{service}', task='{task_name}', workers='{workers}'"
-        )
-        try:
-            ret = client.run_job(
-                service=service, task=task_name, kwargs=kwargs, workers=workers
-            )
-        except Exception as exc:
-            log.error(
-                f"NFAgent - tool call failed: service='{service}', task='{task_name}', error='{exc}'",
-                exc_info=True,
-            )
-            raise
-
-        log.info(
-            f"NFAgent - tool call completed: service='{service}', task='{task_name}'"
-        )
-
-        return ret
-
-    tool_name = f"service_{service}__task_{task_name}".replace("-", "_")
-    return StructuredTool.from_function(
-        func=run,
-        name=tool_name,
-        description=description or f"Run NorFab task {service}/{task_name}",
-    )
-
-
-def _make_norfab_tools(client, timeout: int = 10) -> list:
+def _make_norfab_tools(client: object, timeout: int = 10) -> list:
     """
     Auto-discover NorFab services and generate one LangChain tool per task.
 
-    Uses the same MMI discovery pattern as the FastMCP worker.  Tasks that
-    set ``mcp: false`` in their ``@Task`` decorator are skipped.
+    Tasks with ``agent=False`` or ``agent.enabled=False`` are skipped.
 
     Args:
         client: NFPClient instance.
@@ -147,18 +109,18 @@ def _make_norfab_tools(client, timeout: int = 10) -> list:
     Returns:
         list[StructuredTool]: List of LangChain StructuredTool objects.
     """
-    tools = []
+    tools = {}
 
     # Discover available services from the broker
     svc_result = client.mmi("mmi.service.broker", "show_workers", timeout=timeout)
     if svc_result.get("status") != "200" or svc_result.get("errors"):
         log.warning(
-            f"NFAgent - NorFab service discovery failed: {svc_result.get('errors')}"
+            f"agent - NorFab service discovery failed: {svc_result.get('errors')}"
         )
-        return tools
+        return []
 
     services = list({s["service"] for s in svc_result.get("results", [])})
-    log.debug(f"NFAgent - discovered services for tool generation: {services}")
+    log.debug(f"agent - discovered services for tool generation: {services}")
 
     for service in services:
         tasks_result = client.run_job(
@@ -171,7 +133,10 @@ def _make_norfab_tools(client, timeout: int = 10) -> list:
             continue
         for wres in tasks_result.values():
             for task in wres.get("result", []):
-                if task.get("agent", {}).get("enabled") is False:
+                if (
+                    task.get("agent") is False
+                    or task.get("agent", {}).get("enabled") is False
+                ):
                     continue
                 task_name = f"service_{service}__task_{task['name']}".replace("-", "_")
                 description = (
@@ -179,34 +144,18 @@ def _make_norfab_tools(client, timeout: int = 10) -> list:
                     or task.get("description")
                     or f"NorFab {service}/{task_name}"
                 )
-                task["norfab"] = {"service": service, "task": task["name"]}
-                if isinstance(task.get("input_schema"), dict):
-                    task["input_schema"] = make_pydantic_model(
-                        task["input_schema"], task_name
-                    )
-                tools.append(
-                    langchain_tool(
-                        task_name,
-                        make_runnable(client, task, task_name),
-                        infer_schema=False,
-                        parse_docstring=False,
-                        description=description,
-                        args_schema=task.get("input_schema", {}),
-                    )
-                )
+                schema = copy.deepcopy(task.get("inputSchema", {}))
+                schema.get("properties", {}).pop("job", None)
+                schema["required"] = [
+                    key for key in schema.get("required", []) if key != "job"
+                ]
+                tools[task_name] = {
+                    "description": description,
+                    "input_schema": schema,
+                    "norfab": {"service": service, "task": task["name"]},
+                }
 
-                # task_name = task["name"]
-                # description = task.get("description") or f"NorFab {service}/{task_name}"
-                # try:
-                #     tools.append(
-                #         _make_service_tool(client, service, task_name, description)
-                #     )
-                # except Exception as exc:
-                #     log.warning(
-                #         f"NFAgent - could not create tool for {service}/{task_name}: {exc}"
-                #     )
-
-    return tools
+    return make_agent_inline_tools(client, tools)
 
 
 # ------------------------------------------------------------------------------------------
@@ -215,33 +164,45 @@ def _make_norfab_tools(client, timeout: int = 10) -> list:
 
 
 def make_runnable(client: object, tool: dict, tool_name: str) -> Callable:
-    def run_norfab_task(kwargs: dict) -> dict:
+    """Wrap a native task call for an agent tool.
+
+    Args:
+        client (object): NFPClient used to execute the task.
+        tool (dict): Inline tool definition with a ``norfab`` task mapping.
+        tool_name (str): Name used in logging and progress events.
+
+    Returns:
+        Callable: Function accepting model keyword arguments and returning task
+            results. Fixed arguments override model-supplied values.
+    """
+
+    def run_norfab_task(**kwargs: object) -> dict:
         """
         Args:
-            kwargs (dict): arguments passed on by LLM
+            **kwargs (object): Task arguments supplied by the model.
         """
-        log.debug(f"'{tool_name}' agent calling tool with kwargs: {kwargs}")
+        log.debug(f"agent calling {tool_name} with kwargs: {kwargs}")
+
+        fixed_kwargs = copy.deepcopy(tool["norfab"].get("kwargs", {}))
 
         # get service name
-        tool_defined_service = tool["norfab"].get("service")
-        llm_requested_service = kwargs.pop("service", None)
-        service = tool_defined_service or llm_requested_service
+        service = tool["norfab"].get("service") or kwargs.pop("service", None)
         if not service:
             raise RuntimeError(f"No service name provided for '{tool_name}' tool call")
 
         # extract job data from LLM kwargs
-        job_data = tool["norfab"].get("kwargs", {}).pop("job_data", {})
+        job_data = fixed_kwargs.pop("job_data", {})
         if tool["norfab"].get("job_data"):
             for key in tool["norfab"]["job_data"]:
                 if key in kwargs:
                     job_data[key] = kwargs.pop(key)
 
         # merge arguments for NorFab task call
-        all_kwargs = {**kwargs, **tool["norfab"].get("kwargs", {})}
+        all_kwargs = {**kwargs, **fixed_kwargs}
         if job_data:
             all_kwargs["job_data"] = job_data
 
-        log.info(f"Agent running '{service}' service, task '{tool['norfab']['task']}'")
+        log.info(f"agent running '{service}' service, task '{tool['norfab']['task']}'")
 
         # run norfab task
         try:
@@ -252,44 +213,41 @@ def make_runnable(client: object, tool: dict, tool_name: str) -> Callable:
             )
         except Exception as exc:
             log.error(
-                f"NFAgent - tool call failed: service='{service}', task='{tool['norfab']['task']}', error='{exc}'",
+                f"agent - tool call failed: service='{service}', task='{tool['norfab']['task']}', error='{exc}'",
                 exc_info=True,
             )
             raise
 
         log.info(
-            f"Agent '{service}' service, task '{tool['norfab']['task']}' completed"
+            f"agent '{service}' service, task '{tool['norfab']['task']}' completed"
         )
 
         return ret
 
-    return RunnableLambda(run_norfab_task).with_types(
-        input_type=tool.get("input_schema", {})
-    )
+    return run_norfab_task
 
 
-def make_pydantic_model(schema, model_name):
-    schema.setdefault("type", "object")
-    config = GenerateConfig(formatters=[Formatter.RUFF_FORMAT, Formatter.RUFF_CHECK])
-    models = generate_dynamic_models(schema, config=config)
+def make_agent_inline_tools(client: object, tools: dict) -> list[StructuredTool]:
+    """Build named native tools from inline definitions.
 
-    return models["Model"]
+    Args:
+        client (object): NFPClient used to execute tasks.
+        tools (dict): Tool names mapped to definitions.
 
-
-def make_agent_inline_tools(client: object, tools: dict) -> List[langchain_tool]:
+    Returns:
+        list: LangChain tools using the supplied descriptions and schemas.
+    """
     ret = []
 
     for tool_name, tool in tools.items():
-        if isinstance(tool.get("input_schema"), dict):
-            tool["input_schema"] = make_pydantic_model(tool["input_schema"], tool_name)
         ret.append(
-            langchain_tool(
-                tool_name,
-                make_runnable(client, tool, tool_name),
+            StructuredTool.from_function(
+                name=tool_name,
+                func=make_runnable(client, tool, tool_name),
                 infer_schema=False,
                 parse_docstring=False,
                 description=tool["description"],
-                args_schema=tool.get("input_schema", {}),
+                args_schema={"type": "object", **tool.get("input_schema", {})},
             )
         )
 
@@ -310,6 +268,8 @@ async def _make_mcp_tools_async(mcp_servers: list) -> list:
     Returns:
         list: LangChain tools loaded from all configured MCP servers.
     """
+    from langchain_mcp_adapters.client import MultiServerMCPClient
+
     servers: dict = {}
     for s in mcp_servers:
         name = s["name"]
@@ -325,7 +285,7 @@ async def _make_mcp_tools_async(mcp_servers: list) -> list:
             servers[name] = {"transport": transport, "url": s["url"]}
         else:
             log.warning(
-                f"NFAgent - unknown MCP transport '{transport}' for server '{name}', skipping"
+                f"agent - unknown MCP transport '{transport}' for server '{name}', skipping"
             )
 
     if not servers:
@@ -385,7 +345,7 @@ def _split_text(text: str) -> list[str]:
     return chunks
 
 
-def _make_rag_tool(rag_cfg: dict, base_dir: str):
+def _make_rag_tool(rag_cfg: dict, base_dir: str) -> StructuredTool:
     """
     Build a LangChain retriever tool backed by fastembed embeddings and Qdrant.
 
@@ -399,6 +359,10 @@ def _make_rag_tool(rag_cfg: dict, base_dir: str):
     Returns:
         StructuredTool: LangChain tool that searches the Qdrant knowledge base.
     """
+    from fastembed import TextEmbedding
+    from qdrant_client import QdrantClient
+    from qdrant_client.models import Distance, PointStruct, VectorParams
+
     embed_model = rag_cfg.get("embed_model", "sentence-transformers/all-MiniLM-L6-v2")
     collection = rag_cfg.get("collection", "norfab")
     profile_name = rag_cfg.get("_profile", "default")
@@ -439,7 +403,7 @@ def _make_rag_tool(rag_cfg: dict, base_dir: str):
                             chunks.extend((fpath, c) for c in _split_text(text))
                         except Exception as exc:  # noqa: BLE001
                             log.warning(
-                                f"NFAgent - could not read RAG source {fpath}: {exc}"
+                                f"agent - could not read RAG source {fpath}: {exc}"
                             )
             elif os.path.isfile(src):
                 try:
@@ -447,9 +411,9 @@ def _make_rag_tool(rag_cfg: dict, base_dir: str):
                         text = fh.read()
                     chunks.extend((src, c) for c in _split_text(text))
                 except Exception as exc:  # noqa: BLE001
-                    log.warning(f"NFAgent - could not read RAG source {src}: {exc}")
+                    log.warning(f"agent - could not read RAG source {src}: {exc}")
             else:
-                log.warning(f"NFAgent - RAG source not found: {src}")
+                log.warning(f"agent - RAG source not found: {src}")
 
         if chunks:
             texts = [c[1] for c in chunks]
@@ -464,7 +428,7 @@ def _make_rag_tool(rag_cfg: dict, base_dir: str):
             ]
             qdrant.upsert(collection_name=collection, points=points)
             log.info(
-                f"NFAgent - indexed {len(chunks)} chunks into Qdrant collection '{collection}'"
+                f"agent - indexed {len(chunks)} chunks into Qdrant collection '{collection}'"
             )
 
     def search_knowledge_base(query: str) -> str:
@@ -478,9 +442,7 @@ def _make_rag_tool(rag_cfg: dict, base_dir: str):
         """
         service = "rag"
         task_name = "search_knowledge_base"
-        log.info(
-            f"NFAgent - tool call started: service='{service}', task='{task_name}'"
-        )
+        log.info(f"agent - tool call started: service='{service}', task='{task_name}'")
         try:
             query_vec = list(embedder.embed([query]))[0].tolist()
             results = qdrant.query_points(
@@ -490,7 +452,7 @@ def _make_rag_tool(rag_cfg: dict, base_dir: str):
             )
             hit_count = len(results.points or [])
             log.info(
-                f"NFAgent - tool call completed: service='{service}', task='{task_name}', hits={hit_count}"
+                f"agent - tool call completed: service='{service}', task='{task_name}', hits={hit_count}"
             )
             if not results.points:
                 return "No relevant information found."
@@ -500,7 +462,7 @@ def _make_rag_tool(rag_cfg: dict, base_dir: str):
             )
         except Exception as exc:  # noqa: BLE001
             log.error(
-                f"NFAgent - tool call failed: service='{service}', task='{task_name}', error='{exc}'",
+                f"agent - tool call failed: service='{service}', task='{task_name}', error='{exc}'",
                 exc_info=True,
             )
             return f"Error searching knowledge base: {exc}"
@@ -552,18 +514,18 @@ def _make_filesystem_tools() -> list:
         service = "filesystem"
         task_name = "read_file"
         log.info(
-            f"NFAgent - tool call started: service='{service}', task='{task_name}', path='{path}'"
+            f"agent - tool call started: service='{service}', task='{task_name}', path='{path}'"
         )
         try:
             safe = _safe_path(path)
         except PermissionError as exc:
             log.error(
-                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
+                f"agent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
             )
             return f"Error: {exc}"
         if not os.path.isfile(safe):
             log.error(
-                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='file not found'"
+                f"agent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='file not found'"
             )
             return f"Error: file not found: {path}"
         try:
@@ -571,12 +533,12 @@ def _make_filesystem_tools() -> list:
                 ret = fh.read()
         except Exception as exc:
             log.error(
-                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
+                f"agent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
             )
             return f"Error reading '{path}': {exc}"
 
         log.info(
-            f"NFAgent - tool call completed: service='{service}', task='{task_name}', path='{path}'"
+            f"agent - tool call completed: service='{service}', task='{task_name}', path='{path}'"
         )
         return ret
 
@@ -595,13 +557,13 @@ def _make_filesystem_tools() -> list:
         service = "filesystem"
         task_name = "write_file"
         log.info(
-            f"NFAgent - tool call started: service='{service}', task='{task_name}', path='{path}'"
+            f"agent - tool call started: service='{service}', task='{task_name}', path='{path}'"
         )
         try:
             safe = _safe_path(path)
         except PermissionError as exc:
             log.error(
-                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
+                f"agent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
             )
             return f"Error: {exc}"
         try:
@@ -613,12 +575,12 @@ def _make_filesystem_tools() -> list:
             ret = f"File written successfully: {path}"
         except Exception as exc:
             log.error(
-                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
+                f"agent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
             )
             return f"Error writing '{path}': {exc}"
 
         log.info(
-            f"NFAgent - tool call completed: service='{service}', task='{task_name}', path='{path}'"
+            f"agent - tool call completed: service='{service}', task='{task_name}', path='{path}'"
         )
         return ret
 
@@ -638,18 +600,18 @@ def _make_filesystem_tools() -> list:
         service = "filesystem"
         task_name = "edit_file"
         log.info(
-            f"NFAgent - tool call started: service='{service}', task='{task_name}', path='{path}'"
+            f"agent - tool call started: service='{service}', task='{task_name}', path='{path}'"
         )
         try:
             safe = _safe_path(path)
         except PermissionError as exc:
             log.error(
-                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
+                f"agent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
             )
             return f"Error: {exc}"
         if not os.path.isfile(safe):
             log.error(
-                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='file not found'"
+                f"agent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='file not found'"
             )
             return f"Error: file not found: {path}"
         try:
@@ -657,7 +619,7 @@ def _make_filesystem_tools() -> list:
                 original = fh.read()
             if old_text not in original:
                 log.error(
-                    f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='old_text not found'"
+                    f"agent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='old_text not found'"
                 )
                 return f"Error: old_text not found in '{path}'"
             updated = original.replace(old_text, new_text, 1)
@@ -666,12 +628,12 @@ def _make_filesystem_tools() -> list:
             ret = f"File edited successfully: {path}"
         except Exception as exc:
             log.error(
-                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
+                f"agent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
             )
             return f"Error editing '{path}': {exc}"
 
         log.info(
-            f"NFAgent - tool call completed: service='{service}', task='{task_name}', path='{path}'"
+            f"agent - tool call completed: service='{service}', task='{task_name}', path='{path}'"
         )
         return ret
 
@@ -690,18 +652,18 @@ def _make_filesystem_tools() -> list:
         service = "filesystem"
         task_name = "list_dir"
         log.info(
-            f"NFAgent - tool call started: service='{service}', task='{task_name}', path='{path}'"
+            f"agent - tool call started: service='{service}', task='{task_name}', path='{path}'"
         )
         try:
             safe = _safe_path(path)
         except PermissionError as exc:
             log.error(
-                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
+                f"agent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
             )
             return f"Error: {exc}"
         if not os.path.isdir(safe):
             log.error(
-                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='directory not found'"
+                f"agent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='directory not found'"
             )
             return f"Error: directory not found: {path}"
         try:
@@ -713,12 +675,12 @@ def _make_filesystem_tools() -> list:
             ret = "\n".join(lines) if lines else "(empty)"
         except Exception as exc:
             log.error(
-                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
+                f"agent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
             )
             return f"Error listing '{path}': {exc}"
 
         log.info(
-            f"NFAgent - tool call completed: service='{service}', task='{task_name}', path='{path}'"
+            f"agent - tool call completed: service='{service}', task='{task_name}', path='{path}'"
         )
         return ret
 
@@ -753,24 +715,6 @@ def _make_filesystem_tools() -> list:
 
 
 # ------------------------------------------------------------------------------------------
-# AGENT CONFIG LOADING FUNCTIONS
-# ------------------------------------------------------------------------------------------
-
-
-def load_agent_cfg_from_yaml_file(filename: str) -> dict:
-    if os.path.isfile(filename):
-        try:
-            with open(filename, encoding="utf-8") as fh:
-                return yaml.safe_load(fh.read())
-        except Exception:
-            log.error(
-                f"NFAgent - failed to load configuration from YAML file: {filename}",
-                exc_info=True,
-            )
-    return {}
-
-
-# ------------------------------------------------------------------------------------------
 # Default System Prompt
 # ------------------------------------------------------------------------------------------
 
@@ -782,9 +726,9 @@ Your primary responsibilities:
 
 1. NETWORK PROVISIONING
    Use nornir service tasks to push configuration changes to network devices:
-   - `nornir_cfg` — deploy structured configuration (Jinja2 templates or raw config).
-   - `nornir_cli` — run show or exec commands on one or many devices.
-   - `nornir_task` — execute arbitrary Nornir task plugins for advanced automation.
+   - `service_nornir__task_cfg` — deploy structured configuration.
+   - `service_nornir__task_cli` — run show or exec commands on network devices.
+   - `service_nornir__task_task` — execute Nornir task plugins.
    Always confirm the target scope (device, group, or all workers) before applying
    changes. Prefer dry-run or diff mode when available.
 
@@ -798,7 +742,7 @@ Your primary responsibilities:
    Use the NetBox `get_devices` task to look up authoritative device information:
    - Resolve hostnames, management IPs, roles, sites, platforms, and tags.
    - Use NetBox data to scope automation targets and validate change requests.
-   Never assume device details — always query NetBox when Netbox service is available.   
+   Never assume device details — query Netbox when its service is available.
 
 GENERAL GUIDELINES
 - Always choose the most specific tool available. 
@@ -818,110 +762,54 @@ GENERAL GUIDELINES
 
 
 class NFAgent:
-    """
-    Agentic AI companion built into the NorFab client.
+    """Shared model and native tool backend for client and worker agents.
 
-    Wraps a LangGraph ReAct agent that can call NorFab services as tools,
-    connect to external MCP servers, and optionally use a RAG knowledge base.
-
-    The agent graph is built lazily on the first call to :meth:`invoke` or
-    :meth:`stream` so there is zero overhead when the agent is not used.
-
-    Activated via ``NFPClient.get_agent(profile="default")``. Install dependencies::
-
-        pip install norfab[clientagent]
-
-    Supported LLM providers:
-        openai, anthropic, ollama, groq, mistral, openrouter, google, bedrock
-
-    OpenRouter uses ``ChatOpenAI`` with a custom ``base_url`` — no extra package
-    needed beyond ``langchain-openai``.
-
-    Sample ``inventory.yaml`` configuration:
-
-        client:
-          agent_profiles:
-            default:
-              llm:
-                provider: openrouter
-                model: anthropic/claude-3.5-sonnet
-                api_key: "${OPENROUTER_API_KEY}"
-                temperature: 0.0
-              tools:
-                norfab_services: true
-                filesystem: true
-              mcp:
-                enabled: false
-                servers:
-                  - name: fastmcp
-                    transport: streamable-http
-                    url: http://localhost:8001/mcp/
-                  - name: filesystem
-                    transport: stdio
-                    command: npx
-                    args: ["@modelcontextprotocol/server-filesystem", "/tmp"]
-              rag:
-                enabled: false
-                embed_model: sentence-transformers/all-MiniLM-L6-v2
-                collection: norfab
-                sources: []
-                top_k: 4
-              memory:
-                enabled: false
-                backend: buffer   # buffer | sqlite
-              system_prompt: |
-                You are a network automation assistant with access to NorFab services.
+    Builds the graph during construction. Conversation history is held in memory
+    by default; each instance has its own default thread. Client profiles are
+    resolved by ``NFPClient.get_agent``; workers supply parsed YAML definitions.
+    Set ``memory: {enabled: true, backend: sqlite}`` to keep history on disk.
+    Clients close their cached agents automatically; direct callers must close
+    the agent when finished. ``thread_id`` identifies the active conversation.
 
     Args:
-        client: :class:`~norfab.core.client.NFPClient` instance.
-        profile (str): Agent profile name from the inventory. Defaults to ``"default"``.
+        client: NFPClient used to discover and execute NorFab tasks.
+        config (dict): Agent definition with ``llm``, optional ``system_prompt``
+            and ``tools``. Native task discovery defaults to enabled; filesystem,
+            MCP and RAG tools require explicit configuration. Copied on entry.
+        profile (str): Instance label used for profile-specific storage.
+            Defaults to ``"default"``.
+
+    Raises:
+        ValueError: Tool names are duplicated or the LLM provider is unsupported.
+        ImportError: A configured provider or optional feature is not installed.
 
     Example:
-
         agent = client.get_agent(profile="default")
-
-        # single-turn
-        answer = agent.invoke("Show me all interfaces with errors on R1")
-
-        # streaming tokens
-        for token in agent.stream("Summarise nornir service tasks"):
-            print(token, end="", flush=True)
-
-        # multi-turn conversation (requires memory.enabled: true in profile)
-        agent.invoke("List all nornir workers", thread_id="session-1")
-        agent.invoke("Now run cli on all of them", thread_id="session-1")
+        answer = agent.invoke("Check interfaces on r1")
+        agent.invoke("Summarize the errors", thread_id="review")
     """
 
-    def __init__(self, client: object, profile: str = "default") -> None:
+    def __init__(
+        self,
+        client: object,
+        config: dict,
+        profile: str = "default",
+    ) -> None:
         self.client = client
         self.profile = profile
         self.tools = []
         self._agent = None
-        self._thread_id = str(
-            uuid.uuid4()
-        )  # unique thread per instance for continuous chat
-        client_cfg = getattr(client.inventory, "client", {}) or {}
-        self.profiles = client_cfg.get("agent_profiles", {})
-        default_cfg = self.profiles.get("default", {})
-        if profile not in self.profiles:
-            raise ValueError(
-                f"Agent profile '{profile}' not found in inventory. "
-                f"Define it under client->agent_profiles->{profile} in inventory.yaml"
-            )
-        cfg = self.profiles[profile]
-        if "from_yaml_file" in cfg:
-            cfg = load_agent_cfg_from_yaml_file(cfg.pop("from_yaml_file"))
-
-        if profile != "default" and default_cfg:
-            self._cfg = copy.deepcopy(default_cfg)
-            merge_recursively(self._cfg, cfg)
-        else:
-            self._cfg = cfg
-
-        self._build()
+        self.thread_id = str(uuid.uuid4())
+        self._memory_connection = None
+        self._cfg = copy.deepcopy(config)
+        try:
+            self._build()
+        except Exception:
+            self.close()
+            raise
 
     def _build(self) -> None:
-        """Build the LangGraph ReAct agent graph (runs once on first use)."""
+        """Build the agent graph during construction."""
         cfg = self._cfg
         llm_cfg = cfg.get("llm", {})
         tools_cfg = cfg.get("tools", {})
@@ -933,60 +821,64 @@ class NFAgent:
         # Auto-generate LangChain tools from discovered NorFab services
         if tools_cfg.pop("norfab_services", True):
             log.info(
-                f"NFAgent - discovering NorFab service tools for profile '{self.profile}'"
+                f"agent - discovering NorFab service tools for profile '{self.profile}'"
             )
             norfab_tools = _make_norfab_tools(self.client)
             self.tools.extend(norfab_tools)
-            log.info(f"NFAgent - discovered {len(norfab_tools)} NorFab service tools")
+            log.info(f"agent - discovered {len(norfab_tools)} NorFab service tools")
 
         # Add built-in filesystem tools
-        fs_cfg = tools_cfg.pop("filesystem", True)
+        fs_cfg = tools_cfg.pop("filesystem", False)
         if fs_cfg is True or (isinstance(fs_cfg, dict) and fs_cfg.get("enabled", True)):
             fs_tools = _make_filesystem_tools()
             self.tools.extend(fs_tools)
-            log.info(f"NFAgent - added {len(fs_tools)} built-in filesystem tools")
+            log.info(f"agent - added {len(fs_tools)} built-in filesystem tools")
 
         if tools_cfg:
-            log.info(f"NFAgent - building tools from profile '{self.profile}'")
+            log.info(f"agent - building tools from profile '{self.profile}'")
             self.tools.extend(make_agent_inline_tools(self.client, tools_cfg))
 
         # Load tools from external MCP servers
         if mcp_cfg.get("enabled") and mcp_cfg.get("servers"):
-            log.info(f"NFAgent - loading MCP tools for profile '{self.profile}'")
+            log.info(f"agent - loading MCP tools for profile '{self.profile}'")
             mcp_tools = _make_mcp_tools(mcp_cfg["servers"])
             self.tools.extend(mcp_tools)
-            log.info(f"NFAgent - loaded {len(mcp_tools)} MCP tools")
+            log.info(f"agent - loaded {len(mcp_tools)} MCP tools")
 
         # Add RAG retriever tool
         if rag_cfg.get("enabled"):
-            log.info(f"NFAgent - setting up RAG retriever for profile '{self.profile}'")
+            log.info(f"agent - setting up RAG retriever for profile '{self.profile}'")
             rag_cfg["_profile"] = self.profile
             rag_tool = _make_rag_tool(rag_cfg, self.client.inventory.base_dir)
             self.tools.append(rag_tool)
-            log.info("NFAgent - RAG retriever tool ready")
+            log.info("agent - RAG retriever tool ready")
+
+        names = [tool.name for tool in self.tools]
+        if len(names) != len(set(names)):
+            raise ValueError("duplicate agent tool names")
 
         llm = _make_llm(llm_cfg)
 
         # Conversation memory — always enable at least an in-memory checkpointer
         # so every agent instance supports continuous multi-turn chat by default.
         if memory_cfg.get("enabled") and memory_cfg.get("backend") == "sqlite":
-            db_path = os.path.join(
-                self.client.inventory.base_dir,
-                "__norfab__",
-                "files",
-                "client",
-                self.client.name,
-                f"agent_{self.profile}.db",
+            from langgraph.checkpoint.sqlite import SqliteSaver
+
+            os.makedirs(self.client.base_dir, exist_ok=True)
+            self._memory_connection = sqlite3.connect(
+                os.path.join(self.client.base_dir, f"agent_{self.profile}.db"),
+                check_same_thread=False,
             )
-            checkpointer = SqliteSaver.from_conn_string(db_path)
+            self._checkpointer = SqliteSaver(self._memory_connection)
         else:
-            checkpointer = MemorySaver()
+            self._checkpointer = MemorySaver()
 
         self._agent = create_agent(
+            name=cfg.get("name", self.profile),
             model=llm,
             tools=self.tools,
             system_prompt=system_prompt,
-            checkpointer=checkpointer,
+            checkpointer=self._checkpointer,
         )
 
     def _run_config(self, thread_id: str | None) -> dict:
@@ -998,36 +890,126 @@ class NFAgent:
         Returns:
             dict: LangGraph config dict with ``thread_id`` set.
         """
-        return {"configurable": {"thread_id": thread_id or self._thread_id}}
+        return {"configurable": {"thread_id": thread_id or self.thread_id}}
+
+    def close(self) -> None:
+        """Close the owned conversation database. Repeated calls are harmless."""
+        if self._memory_connection is not None:
+            self._memory_connection.close()
+            self._memory_connection = None
+
+    def list_conversations(self, limit: int | None = 20) -> list[dict]:
+        """List recent conversations for this agent's client and profile.
+
+        Args:
+            limit (int | None): Maximum conversations returned, or None for all.
+                Defaults to 20.
+
+        Returns:
+            list[dict]: Thread ID, last checkpoint timestamp and first user message
+                as a title, newest first. Empty conversations are omitted.
+        """
+        conversations = {}
+        for checkpoint in self._checkpointer.list(None):
+            config = checkpoint.config["configurable"]
+            thread_id = config["thread_id"]
+            if config.get("checkpoint_ns") or thread_id in conversations:
+                continue
+            messages = checkpoint.checkpoint["channel_values"].get("messages", [])
+            if not messages:
+                continue
+            conversations[thread_id] = {
+                "thread_id": thread_id,
+                "updated_at": checkpoint.checkpoint["ts"],
+                "title": next((m.text[:80] for m in messages if m.type == "human"), ""),
+            }
+        return sorted(
+            conversations.values(), key=lambda row: row["updated_at"], reverse=True
+        )[:limit]
+
+    def resume(self, thread_id: str) -> None:
+        """Select an existing conversation for subsequent invoke/stream calls.
+
+        Args:
+            thread_id (str): Conversation ID returned by ``list_conversations``.
+
+        Raises:
+            ValueError: The conversation has no saved messages in this profile.
+        """
+        if not thread_id or not self._agent.get_state(
+            self._run_config(thread_id)
+        ).values.get("messages"):
+            raise ValueError(f"conversation '{thread_id}' not found")
+        self.thread_id = thread_id
+
+    def rename(self, thread_id: str) -> None:
+        """Move the current conversation to a human-readable thread ID.
+
+        Args:
+            thread_id (str): New, nonempty conversation ID.
+
+        Raises:
+            ValueError: The ID is empty or already belongs to another thread.
+
+        Notes:
+            Preserves current conversation state, but not older checkpoints.
+            Rename only while the conversation is idle.
+        """
+        thread_id = thread_id.strip()
+        if not thread_id:
+            raise ValueError("conversation name cannot be empty")
+        if thread_id == self.thread_id:
+            return
+        config = self._run_config(thread_id)
+        if self._checkpointer.get_tuple(config):
+            raise ValueError(f"conversation '{thread_id}' already exists")
+        state = self._agent.get_state(self._run_config(None))
+        if state.values:
+            self._agent.update_state(config, state.values, as_node="model")
+            self._checkpointer.delete_thread(self.thread_id)
+        self.thread_id = thread_id
 
     def reset(self) -> None:
         """
         Start a fresh conversation by rotating the instance thread ID.
 
-        All subsequent calls to :meth:`invoke` and :meth:`stream` will begin
-        a new conversation with no memory of previous exchanges.
+        Subsequent calls to :meth:`invoke` and :meth:`stream` without an explicit
+        thread ID begin a new conversation. Existing history remains available
+        through :meth:`resume` or an explicit thread ID.
         """
-        self._thread_id = str(uuid.uuid4())
-        log.debug(f"NFAgent - conversation reset, new thread_id: {self._thread_id}")
+        self.thread_id = str(uuid.uuid4())
+        log.debug(f"agent - conversation reset, new thread_id: {self.thread_id}")
 
-    def invoke(self, message: str, thread_id: str = None) -> str:
+    def invoke(
+        self,
+        message: str,
+        thread_id: str = None,
+        verbose_result: bool = False,
+        callbacks: list[BaseCallbackHandler] | None = None,
+    ) -> str | dict:
         """
         Run the agent with a user message and return the final response.
 
         Args:
             message (str): User message or instructions for the agent.
             thread_id (str, optional): Conversation thread ID enabling multi-turn
-                memory when ``memory.enabled`` is ``true`` in the profile config.
+                history. Omit to use the instance conversation.
+            verbose_result (bool): Return the full graph payload instead of final
+                message content. Defaults to false.
+            callbacks (list[BaseCallbackHandler] | None): Optional progress
+                listeners for this invocation only. Defaults to None.
 
         Returns:
-            str: Agent's final response text.
+            str | dict: Final response content, or full payload when verbose.
         """
+        config = self._run_config(thread_id)
+        config["callbacks"] = callbacks
         result = self._agent.invoke(
             {"messages": [{"role": "user", "content": message}]},
-            config=self._run_config(thread_id),
+            config=config,
         )
 
-        return result["messages"][-1].content
+        return result if verbose_result else result["messages"][-1].text
 
     def stream(self, message: str, thread_id: str = None) -> Iterator[str]:
         """
@@ -1045,8 +1027,16 @@ class NFAgent:
             config=self._run_config(thread_id),
             stream_mode="messages",
         ):
-            if chunk and hasattr(chunk[0], "content") and chunk[0].content:
-                yield chunk[0].content
+            if chunk and chunk[0].text:
+                yield chunk[0].text
 
     def list_tools(self, name: str = "*") -> list:
+        """List tools matching a name pattern.
+
+        Args:
+            name (str): Tool name glob pattern. Defaults to ``"*"``.
+
+        Returns:
+            list: Tool names and descriptions.
+        """
         return [{t.name: t.description} for t in self.tools if fnmatch(t.name, name)]

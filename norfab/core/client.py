@@ -1,3 +1,4 @@
+import copy
 import glob
 import hashlib
 import logging
@@ -18,9 +19,10 @@ from urllib.parse import unquote
 from uuid import uuid4  # random uuid
 
 import orjson
+import yaml
 import zmq
 
-from norfab.core.inventory import NorFabInventory
+from norfab.core.inventory import NorFabInventory, merge_recursively
 from norfab.models import InputResponseModel, Result
 from norfab.utils.markdown_results import markdown_results
 
@@ -1450,7 +1452,6 @@ class NFPClient(object):
     broker_public_key_file = None
     public_keys_dir = None
     private_keys_dir = None
-    agents = {}
 
     def __init__(
         self,
@@ -1460,6 +1461,7 @@ class NFPClient(object):
         exit_event: Optional[threading.Event] = None,
     ) -> None:
         self.inventory = inventory
+        self.agents = {}
         self.name = name
         self.zmq_name = self.name
         self.broker = broker
@@ -2398,7 +2400,7 @@ class NFPClient(object):
         """
         Return an NFAgent bound to this client for agentic AI interactions.
 
-        The agent is built lazily on first call to ``invoke`` or ``stream``.
+        The agent is built when first requested and cached by profile.
         Configuration is read from ``inventory.yaml`` under
         ``client -> agent_profiles -> <profile>``.
 
@@ -2412,23 +2414,29 @@ class NFPClient(object):
         Raises:
             ImportError: If ``norfab[clientagent]`` dependencies are not installed.
             ValueError: If the requested profile is not found in the inventory.
+            FileNotFoundError: If a profile YAML file does not exist.
+            yaml.YAMLError: If a profile file contains invalid YAML.
 
         Example::
 
             agent = client.get_agent(profile="default")
             answer = agent.invoke("Show me interfaces with errors on all routers")
         """
-        try:
-            from norfab.core.agent import NFAgent
-        except ImportError:
-            log.error(
-                "Agent dependencies not installed. Run: pip install norfab[clientagent]",
-                exc_info=True,
-            )
-            return None
+        from norfab.core.agent import NFAgent
 
         if profile not in self.agents:
-            self.agents[profile] = NFAgent(client=self, profile=profile)
+            profiles = (self.inventory.client or {}).get("agent_profiles", {})
+            if profile not in profiles:
+                raise ValueError(f"agent profile '{profile}' not found in inventory")
+            config = copy.deepcopy(profiles[profile])
+            if "from_yaml_file" in config:
+                with open(config["from_yaml_file"], encoding="utf-8") as definition:
+                    config = yaml.safe_load(definition)
+            if profile != "default" and profiles.get("default"):
+                defaults = copy.deepcopy(profiles["default"])
+                merge_recursively(defaults, config)
+                config = defaults
+            self.agents[profile] = NFAgent(self, config, profile=profile)
 
         return self.agents[profile]
 
@@ -2442,6 +2450,9 @@ class NFPClient(object):
         """
         if self.ctx.closed:
             return
+        for agent in self.agents.values():
+            agent.close()
+        self.agents.clear()
         log.info(f"{self.name} - client interrupt received, killing client")
         self.destroy_event.set()
         self.dispatcher_event.set()

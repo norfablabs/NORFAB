@@ -3,58 +3,118 @@ tags:
   - agent
 ---
 
-# Agent Service Chat Task
+# Invoke an Agent
 
 > task api name: `invoke`
 
-Invokes an Agent worker with user instructions. The task is commonly used as an interactive chat surface, but the API task name is `invoke`.
+Give an agent a network question or a check to perform. The default `NorFab`
+agent can call tasks from running services. A custom definition supplies a
+repeatable prompt and selected tools; see
+[worker configuration and definitions](services_agent_service_inventory.md).
 
-Select the built-in `NorFab` agent or supply an `nf://` or `git://` YAML definition
-as `name`. See [inventory and definitions](services_agent_service_inventory.md).
-Each call starts a fresh conversation; there is no conversation thread setting.
+Each call starts a fresh conversation. Include the device scope, expected state
+and evidence you want in every request. Use the
+[client agent](../../clients/clients_agent.md) for ongoing chat.
 
 ## Output
 
-By default, returns the final agent response text. With `verbose_result=True`, returns the full agent invocation payload.
+The default result is the agent's final answer. Python calls return it under
+`result` for each agent worker, alongside `failed` and `errors`.
 
-## Examples
+For example, these are the relevant fields of a successful response; the wording
+of the answer varies with the model and task results:
+
+```json
+{
+  "agent-worker-1": {
+    "result": "r1: one interface is down. Review Ethernet2 and its peer.",
+    "failed": false,
+    "errors": []
+  }
+}
+```
+
+Request `verbose_result=True` to include the conversation and tool results when
+you need to inspect the evidence behind an answer.
+
+## Check network state
 
 === "CLI"
 
-    Ask the default agent a question:
-
     ```bash
-    nf# agent invoke instructions "Summarize the current NorFab inventory"
-    ```
-
-    Invoke a custom agent:
-
-    ```bash
-    nf# agent invoke name nf://agents/interface_check.yaml instructions "Check interfaces on r1"
+    nf# agent invoke workers agent-worker-1 instructions "Check interfaces on r1. List down interfaces and error counters. Include the commands used and any checks that could not be completed."
     ```
 
 === "Python"
-
-    Context manager:
 
     ```python
     from norfab.core.nfapi import NorFab
 
     with NorFab(inventory="./inventory.yaml") as nf:
         client = nf.make_client()
-
-        result = client.run_job(
+        results = client.run_job(
             service="agent",
             task="invoke",
-            workers="any",
+            workers="agent-worker-1",
             kwargs={
-                "instructions": "Summarize the current NorFab inventory",
+                "instructions": (
+                    "Check interfaces on r1. List down interfaces and error "
+                    "counters. Include the commands used and any checks that "
+                    "could not be completed."
+                ),
             },
         )
-        print(result)
+        for worker, response in results.items():
+            if response["failed"]:
+                print(worker, response["errors"])
+            else:
+                print(worker, response["result"])
     ```
 
-    Direct lifecycle with a named agent:
+Interface examples require a running Nornir service with `r1` in its inventory.
+A completed agent request does not mean every network check passed: read the
+findings and any reported task failures in the answer.
+
+## Follow progress
+
+Workers send progress events while the model responds and tools run. These show
+activity and tool names, without exposing model reasoning or full tool data.
+
+=== "CLI"
+
+    Progress is displayed by default:
+
+    ```bash
+    nf# agent invoke workers agent-worker-1 instructions "Check interfaces on r1" progress true
+    ```
+
+=== "Python"
+
+    Use the client from the previous example to read events as they arrive:
+
+    ```python
+    future = client.submit_job(
+        service="agent",
+        task="invoke",
+        workers="agent-worker-1",
+        kwargs={"instructions": "Check interfaces on r1", "progress": True},
+    )
+    for event in future.events():
+        print(event["message"])
+    print(future.result())
+    ```
+
+## Run a focused agent
+
+This uses the [interface-check definition](services_agent_service_inventory.md#custom-agent-definitions).
+
+=== "CLI"
+
+    ```bash
+    nf# agent invoke workers agent-worker-1 name nf://agents/interface_check.yaml instructions "Check interfaces on r1 and r2. Report only problems and their evidence."
+    ```
+
+=== "Python"
 
     ```python
     from norfab.core.nfapi import NorFab
@@ -63,42 +123,55 @@ By default, returns the final agent response text. With `verbose_result=True`, r
     try:
         nf.start()
         client = nf.make_client()
-
-        result = client.run_job(
+        results = client.run_job(
             service="agent",
             task="invoke",
-            workers="any",
+            workers="agent-worker-1",
             kwargs={
-                "name": "NorFab",
-                "instructions": "Check whether any workers are unhealthy",
-                "verbose_result": True,
+                "name": "nf://agents/interface_check.yaml",
+                "instructions": (
+                    "Check interfaces on r1 and r2. Report only problems "
+                    "and their evidence."
+                ),
             },
         )
-        print(result)
+        for worker, response in results.items():
+            print(worker, response["result"])
     finally:
         nf.destroy()
     ```
 
-## NORFAB Agent Chat Command Shell Reference
+## Inspect tool results
 
-NorFab shell supports these command options for Agent `invoke` task:
+=== "CLI"
+
+    ```bash
+    nf# agent invoke workers agent-worker-1 verbose-result instructions "Check interfaces on r1 and include the evidence."
+    ```
+
+=== "Python"
+
+    ```python
+    results = client.run_job(
+        service="agent",
+        task="invoke",
+        workers="agent-worker-1",
+        kwargs={
+            "instructions": "Check interfaces on r1 and include the evidence.",
+            "verbose_result": True,
+        },
+    )
+    for response in results.values():
+        print(response["result"])
+    ```
+
+Use the `client` created in the examples above. `workers` selects the agent host;
+network devices are selected through your instructions and the tools it calls.
+
+## Task Command Shell Reference
 
 ```bash
-nf# man tree agent
-root
-└── agent:    AI Agent service
-    ├── timeout:    Job timeout
-    ├── workers:    Filter worker to target, default 'all'
-    ├── show:    Show Agent service parameters
-    │   ├── inventory:    show agent inventory data
-    │   ├── version:    show agent service version report
-    │   └── status:    show agent status
-    ├── invoke:    Invoke an agent to chat or run a task
-    │   ├── instructions:    Provide instructions
-    │   ├── name:    Agent name to interact with
-    │   └── progress:    Emit execution progress, default 'True'
-    └── progress:    Emit execution progress, default 'True'
-nf#
+nf# man tree agent invoke
 ```
 
 ## Python API Reference

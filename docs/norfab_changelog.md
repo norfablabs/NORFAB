@@ -3,30 +3,32 @@
 ## FEATURES
 
 1. Added Nornir [`gnmi_get`](workers/nornir/services_nornir_service_tasks_gnmi_get.md) with host filtering, structured processors, and NFCLI `nornir gnmi get`, including `openconfig-system`, `openconfig-interfaces`, `openconfig-lldp`, and `openconfig-platform` getters.
-
 2. Added Nornir [`gnmi_set`](workers/nornir/services_nornir_service_tasks_gnmi_set.md) and NFCLI `nornir gnmi set` for combined configuration updates, replacements, and deletions using JSON object payloads.
-
 3. Added Nornir [`gnmi_delete`](workers/nornir/services_nornir_service_tasks_gnmi_delete.md) and NFCLI `nornir gnmi delete` for dedicated configuration path deletion, with prefix and target support.
-
 4. Added Nornir [`gnmi_get_capabilities`](workers/nornir/services_nornir_service_tasks_gnmi_get_capabilities.md) and NFCLI `nornir gnmi get-capabilities` to discover advertised models, encodings, and gNMI version.
 
 ## BUGS
 
-1. Netbox Markdown design deployment preserves the final newline in YAML context block scalars when rendering Jinja templates.
+1. Client-agent chat selects its profile and initial thread before the first message, so `/resume` works immediately on entry, using Picle's chat lifecycle hooks.
+2. Netbox Markdown design deployment preserves the final newline in YAML context block scalars when rendering Jinja templates.
+3. Agent definitions retain explicit null arguments and task arguments named `service`. Missing local profile files now report an error, and model content blocks are returned as readable text.
+4. Pinned Picle to 0.13.1 so fresh installations and Docker test images include the chat interface required by client agents.
 
 ## ENHANCEMENTS
 
-1. gNMI Get, Set, and Delete now accept `nf://` JSON/YAML files for operation payloads and path lists.
-
-
-1. Netbox Markdown designs now accept standalone Jinja statements, expressions, and comments inside `yaml design` fences. These blocks appear after metadata and before collections, allowing shared variables and logic.
-2. Markdown design deployment renders YAML and CSV context blocks, including Jinja loops, and Markdown table cells using only supplied task context.
+1. Use `/rename <name>` in client-agent chat to give the current conversation a readable thread ID and resume it by that name.
+2. Client-agent chat keeps its multiline editor visible while Picle displays a thinking spinner and tool activity above it, with profile and thread information in the footer. Use `progress false` to hide activity. Worker agents send the same activity as job progress events.
+3. Client agents can save conversation history with SQLite and resume it after restarting. Use `/resume` in client-agent chat to list conversations and `/resume <thread-id>` to continue one.
+4. gNMI Get, Set, and Delete now accept `nf://` JSON/YAML files for operation payloads and path lists.
+5. Netbox Markdown designs now accept standalone Jinja statements, expressions, and comments inside `yaml design` fences. These blocks appear after metadata and before collections, allowing shared variables and logic.
+6. Markdown design deployment renders YAML and CSV context blocks, including Jinja loops, and Markdown table cells using only supplied task context.
 
 ## CHANGES
 
 1. Netbox Markdown design parsing is now a method used by `design_deploy`. The separate `parse_markdown_design` task and its API models are removed. Use Markdown file URLs with `dry_run_render=True` to preview.
 2. Markdown design files passed to Netbox `design_deploy` no longer support `json context.KEY` or `text context.KEY` fences. Use `yaml context.KEY` with a YAML mapping or a `|` block scalar instead.
 3. Netbox Markdown design documentation is now part of the [design deployment guide](workers/netbox/services_netbox_service_tasks_design_deploy.md#markdown-designs). Markdown deployment tests are grouped in `TestMarkdownDesignDeploy` in `test_designs.py`.
+4. Client and worker agents now share one core backend. The default worker agent can execute discovered NorFab tasks directly; custom YAML definitions use the same prompt/tool format. Filesystem tools now require explicit enablement.
 
 ---
 

@@ -202,7 +202,7 @@ nav:
     - Overview: workers/agent/services_agent_service.md
     - Inventory: workers/agent/services_agent_service_inventory.md
     - Tasks:
-      - Chat: workers/agent/services_agent_service_tasks_chat.md
+      - Invoke: workers/agent/services_agent_service_tasks_chat.md
   - FastAPI:
     - Overview: workers/fastapi/services_fastapi_service.md
     - Inventory: workers/fastapi/services_fastapi_service_inventory.md
@@ -284,6 +284,7 @@ nav:
   - Known Issues: development/bug_hunt.md
   - Architecture Design Records:
     - Index: development/adr/index.md
+    - Shared Agent Backend: development/adr/adr_shared_agent_backend.md
     - Packaged Python Service Plugins: development/adr/adr_service_plugin_module.md
     - Client Completion Events and Socket Wake-Up: development/adr/adr_client_event_completion.md
     - File Sharing Git Remotes: development/adr/adr_extensible_data_sources_and_git_sync.md

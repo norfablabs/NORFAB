@@ -13,7 +13,6 @@ client:
   agent_profiles:
     default:
       llm:
-        profile_name: testAgent1
         provider: openrouter
         api_key: '{{ env.get("OPENROUTER_API_KEY") }}'
         model: openrouter/free

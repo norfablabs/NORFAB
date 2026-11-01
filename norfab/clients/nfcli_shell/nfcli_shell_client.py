@@ -497,7 +497,9 @@ class NorFabShell(BaseModel):
         None, description="AI Agent service"
     )
     client_agent: client_agent_picle_shell.ClientAgentCommands = Field(
-        None, description="Invoke client agent", alias="client-agent"
+        None,
+        description="Invoke client agent",
+        alias="client-agent",
     )
     fastapi: fastapi_picle_shell.FastAPIServiceCommands = Field(
         None, description="FastAPI service"

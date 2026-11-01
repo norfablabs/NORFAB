@@ -1,18 +1,13 @@
 import importlib.metadata
 import logging
 import sys
-from typing import Callable, List, Union
 
 import yaml
-from datamodel_code_generator import Formatter, GenerateConfig, generate_dynamic_models
-from langchain.agents import create_agent
-from langchain.tools import tool as langchain_tool
-from langchain_core.runnables import RunnableLambda
 
+from norfab.core.agent import AgentProgress, NFAgent
 from norfab.core.worker import Job, NFPWorker, Task
 from norfab.models import Result
 
-from . import norfab_agent
 from .agent_models import (
     GetInventoryInput,
     GetInventoryResult,
@@ -43,21 +38,6 @@ class AgentWorker(NFPWorker):
         init_done_event: An event to set when the worker has finished initializing.
         log_level (str): The logging level of this worker. Defaults to "WARNING".
 
-    Attributes:
-        agent_inventory: The inventory loaded from the broker.
-        llm_model (str): The language model to be used. Defaults to "llama3.1:8b".
-        llm_temperature (float): The temperature setting for the language model. Defaults to 0.5.
-        llm_base_url (str): The base URL for the language model. Defaults to "http://127.0.0.1:11434".
-        llm_flavour (str): The flavour of the language model. Defaults to "ollama".
-        llm: The language model instance.
-
-    Methods:
-        worker_exit(): Placeholder method for worker exit logic.
-        get_version(): Produces a report of the versions of Python packages.
-        get_inventory(): Returns the agent's inventory.
-        get_status(): Returns the status of the worker.
-        _chat_ollama(user_input, template=None) -> str: Handles the chat interaction with the Ollama LLM.
-        chat(user_input, template=None) -> str: Handles the chat interaction with the user by processing the input through a language model.
     """
 
     def __init__(
@@ -74,147 +54,12 @@ class AgentWorker(NFPWorker):
 
         # get inventory from broker
         self.agent_inventory = self.load_inventory()
-        self.llms = {}
 
         self.init_done_event.set()
-        log.info(f"{self.name} - Started")
+        log.info(f"worker {self.name} started")
 
     def worker_exit(self) -> None:
         pass
-
-    def get_llm(self, model: str, provider: str = None, **kwargs: object) -> object:
-        """
-        Retrieve or create an LLM instance.
-
-        Args:
-            model (str | None): Name of the model to obtain.
-            provider (str): Model provider name, e.g. "ollama".
-            kwargs (dict): Any additional model parameters supported by LangChain.
-
-        Returns:
-            object | None: The LLM instance (e.g. ChatOllama)
-        """
-        model_data = {"model": model, **kwargs}
-
-        # instantiate llm object
-        if model in self.llms:
-            llm = self.llms[model]
-        elif provider == "ollama":
-            from langchain_ollama import ChatOllama
-
-            llm = ChatOllama(**model_data)
-        elif provider == "groq":
-            from langchain_groq import ChatGroq
-
-            llm = ChatGroq(**model_data)
-        else:
-            log.error(f"Unsupported LLM provider '{provider}'")
-            return None
-
-        # store LLM for future references
-        self.llms.setdefault(model, llm)
-
-        return llm
-
-    def make_runnable(self, job: Job, tool: dict, tool_name: str) -> Callable:
-        def run_norfab_task(kwargs: dict) -> dict:
-            """
-            Args:
-                kwargs (dict): arguments passed on by LLM
-            """
-            job.event(f"'{tool_name}' agent calling tool")
-            log.debug(f"'{tool_name}' agent calling tool with kwargs: {kwargs}")
-
-            # get service name
-            tool_defined_service = tool["norfab"].get("service")
-            llm_requested_service = kwargs.pop("service", None)
-            service = tool_defined_service or llm_requested_service
-            if not service:
-                raise RuntimeError(
-                    f"No service name provided for '{tool_name}' tool call"
-                )
-
-            # extract job data from LLM kwargs
-            job_data = tool["norfab"].get("kwargs", {}).pop("job_data", {})
-            if tool["norfab"].get("job_data"):
-                for key in tool["norfab"]["job_data"]:
-                    if key in kwargs:
-                        job_data[key] = kwargs.pop(key)
-
-            # merge arguments for NorFab task call
-            all_kwargs = {**kwargs, **tool["norfab"].get("kwargs", {})}
-            if job_data:
-                all_kwargs["job_data"] = job_data
-
-            # run norfab task
-            ret = self.client.run_job(
-                service=service,
-                task=tool["norfab"]["task"],
-                kwargs=all_kwargs,
-            )
-
-            job.event(f"'{tool_name}' call completed, agent processing results")
-
-            return ret
-
-        return RunnableLambda(run_norfab_task).with_types(
-            input_type=tool.get("input_schema", {})
-        )
-
-    def make_pydantic_model(self, schema, model_name):
-        schema.setdefault("type", "object")
-        config = GenerateConfig(
-            formatters=[Formatter.RUFF_FORMAT, Formatter.RUFF_CHECK]
-        )
-        models = generate_dynamic_models(schema, config=config)
-
-        return models["Model"]
-
-    def make_tools(self, job: Job, tools: dict) -> List[langchain_tool]:
-        ret = []
-
-        for tool_name, tool in tools.items():
-            if isinstance(tool.get("input_schema"), dict):
-                tool["input_schema"] = self.make_pydantic_model(
-                    tool["input_schema"], tool_name
-                )
-            ret.append(
-                langchain_tool(
-                    tool_name,
-                    self.make_runnable(job, tool, tool_name),
-                    infer_schema=False,
-                    parse_docstring=False,
-                    description=tool["description"],
-                    args_schema=tool.get("input_schema", {}),
-                )
-            )
-
-        return ret
-
-    def get_agent(self, job: Job, agent: str = "NorFab") -> Union[dict, None]:
-        if agent == "NorFab":
-            if not self.agent_inventory.get("default_llm"):
-                raise RuntimeError(
-                    "Failed to make NorFab agent, no 'default_llm' defined in inventory"
-                )
-            return {
-                "name": norfab_agent.name,
-                "system_prompt": norfab_agent.system_prompt,
-                "tools": self.make_tools(job, norfab_agent.tools),
-                "llm": self.agent_inventory["default_llm"],
-            }
-        elif self.is_url(agent):
-            agent_definition = self.fetch_file(agent, raise_on_fail=True, read=True)
-            agent_data = yaml.safe_load(agent_definition)
-            return {
-                "name": agent_data["name"],
-                "system_prompt": agent_data["system_prompt"],
-                "tools": self.make_tools(job, agent_data.get("tools", {})),
-                "llm": agent_data.get("llm", {}) or self.agent_inventory["default_llm"],
-            }
-        else:
-            log.error(f"Unsupported agent type '{agent}'")
-            return None
 
     @Task(
         input=GetVersionInput,
@@ -332,10 +177,10 @@ class AgentWorker(NFPWorker):
         Args:
             job (Job): Job context used to report execution progress.
             instructions (str): Request sent to the agent.
-            name (str): ``NorFab`` for the built-in task-discovery agent, or an
+            name (str): ``NorFab`` for native access to discovered NorFab tasks, or an
                 ``nf://`` or ``git://`` URL to a YAML agent definition. Custom
-                definitions require ``name`` and ``system_prompt`` and may supply
-                ``tools`` and ``llm``. Defaults to ``NorFab``.
+                definitions may supply ``name``, ``system_prompt``, ``tools``
+                and ``llm`` using the shared core agent format. Defaults to ``NorFab``.
             verbose_result (bool): Return the full agent invocation payload when
                 true; otherwise return the final response content. Defaults to false.
 
@@ -344,30 +189,29 @@ class AgentWorker(NFPWorker):
                 Each invocation starts a fresh conversation without stored history.
 
         Raises:
-            RuntimeError: The built-in agent has no configured ``default_llm``.
             FileNotFoundError: The custom definition cannot be fetched.
-            KeyError: A required definition or fallback model setting is missing.
+            KeyError: Neither the definition nor inventory supplies an LLM.
+            ValueError: The definition has duplicate tools or an unsupported provider.
+            ImportError: A configured provider or optional feature is not installed.
         """
-        ret = Result()
-        log.info(f"{self.name} - Invoke: Processing instructions with '{name}' agent")
         job.event(f"getting {name} agent ready")
+        if name == "NorFab":
+            config = {"llm": self.agent_inventory["default_llm"]}
+        else:
+            config = yaml.safe_load(
+                self.fetch_file(name, raise_on_fail=True, read=True)
+            )
+            if not config.get("llm"):
+                config["llm"] = self.agent_inventory["default_llm"]
 
-        agent_data = self.get_agent(job, name)
-
-        agent_instance = create_agent(
-            name=agent_data["name"],
-            model=self.get_llm(**agent_data["llm"]),
-            system_prompt=agent_data["system_prompt"],
-            tools=agent_data["tools"],
-        )
-
-        job.event(f"{name} agent thinking")
-
-        ret.result = agent_instance.invoke(
-            {"messages": [{"role": "user", "content": instructions}]}
-        )
-
-        if verbose_result is False:
-            ret.result = ret.result["messages"][-1].content
-
-        return ret
+        agent = NFAgent(self.client, config)
+        try:
+            return Result(
+                result=agent.invoke(
+                    instructions,
+                    verbose_result=verbose_result,
+                    callbacks=[AgentProgress(job.event)],
+                )
+            )
+        finally:
+            agent.close()
