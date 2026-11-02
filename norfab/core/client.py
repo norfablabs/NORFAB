@@ -2409,10 +2409,10 @@ class NFPClient(object):
                 Defaults to ``"default"``.
 
         Returns:
-            NFAgent: Configured agent instance ready to call.
+            NFAgent: Configured agent instance.
 
         Raises:
-            ImportError: If ``norfab[clientagent]`` dependencies are not installed.
+            ImportError: A configured provider or optional feature is not installed.
             ValueError: If the requested profile is not found in the inventory.
             FileNotFoundError: If a profile YAML file does not exist.
             yaml.YAMLError: If a profile file contains invalid YAML.

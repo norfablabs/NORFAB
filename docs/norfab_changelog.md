@@ -1,3 +1,16 @@
+# 0.26.1 (draft)
+
+## BUGS
+
+1. Worker `list_tasks` now honors `name` when `brief=True`.
+2. NorFab starts without optional agent dependencies. Agent invocation returns installation guidance when these libraries are unavailable.
+
+## ENHANCEMENTS
+
+1. NFCLI `man tasks` shows descriptions by default, names with `brief`, and full schemas with `details`. Added service and task-name completion.
+
+---
+
 # 0.26.0
 
 ## FEATURES

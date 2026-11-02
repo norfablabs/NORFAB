@@ -4,6 +4,7 @@ import sys
 
 import yaml
 
+from norfab.core import agent as core_agent
 from norfab.core.agent import AgentProgress, NFAgent
 from norfab.core.worker import Job, NFPWorker, Task
 from norfab.models import Result
@@ -187,6 +188,7 @@ class AgentWorker(NFPWorker):
         Returns:
             Result: Final response content or the full invocation payload.
                 Each invocation starts a fresh conversation without stored history.
+                Failed result if core agent dependencies are missing.
 
         Raises:
             FileNotFoundError: The custom definition cannot be fetched.
@@ -194,6 +196,8 @@ class AgentWorker(NFPWorker):
             ValueError: The definition has duplicate tools or an unsupported provider.
             ImportError: A configured provider or optional feature is not installed.
         """
+        if not core_agent.HAS_LIBS:
+            return Result(failed=True, errors=[core_agent.DEPENDENCY_ERROR])
         job.event(f"getting {name} agent ready")
         if name == "NorFab":
             config = {"llm": self.agent_inventory["default_llm"]}

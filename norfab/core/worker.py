@@ -2748,12 +2748,13 @@ class NFPWorker:
 
         Args:
             name (str, optional): The name of a specific task to retrieve
-            brief (bool, optional): If True, returns only the list of task names
+            brief (bool, optional): If True, returns only task names, filtered
+                by name when provided. Defaults to False.
 
         Returns:
             Results returned controlled by this logic:
 
-                - If brief is True returns a list of task names
+                - If brief is True returns task names, filtered by name if provided
                 - If name is provided returns list with single item - OpenAPI schema of the specified task
                 - Otherwise returns a list of schemas for all tasks
 
@@ -2761,12 +2762,12 @@ class NFPWorker:
             KeyError: If a specific task name is provided but not registered in NORFAB_WORKER_TASKS.
         """
         ret = Result()
-        if brief:
-            ret.result = list(sorted(NORFAB_WORKER_TASKS.keys()))
-        elif name:
+        if name:
             if name not in NORFAB_WORKER_TASKS:
                 raise KeyError(f"{name} - task not registered")
-            ret.result = [NORFAB_WORKER_TASKS[name]["schema"]]
+            ret.result = [name] if brief else [NORFAB_WORKER_TASKS[name]["schema"]]
+        elif brief:
+            ret.result = list(sorted(NORFAB_WORKER_TASKS.keys()))
         else:
             ret.result = [t["schema"] for t in NORFAB_WORKER_TASKS.values()]
         return ret

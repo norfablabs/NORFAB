@@ -11,6 +11,9 @@ an Agent service worker is not required.
 pip install "norfab[clientagent,nfcli]"
 ```
 
+Agent dependencies are optional. NorFab starts without them; agent invocation
+returns installation guidance when they are unavailable.
+
 Choose a model that supports tool calls. For the example below, run the model on
 an Ollama server reachable from your client. Add this to your existing inventory:
 

@@ -20,6 +20,23 @@ configuration mode apply only to this function.
 
 NORFAB CLI build using [PICLE package](https://github.com/dmulyalin/picle).
 
+## Discover service tasks
+
+`man tasks` shows nested service ? task ? description summaries. Use `brief` for names only or `details` for complete task schemas,
+including arguments, results, and integration metadata. The two flags cannot
+be enabled together. Use `service` and `name` to filter any output mode.
+
+```bash
+nf# man tasks
+nf# man tasks brief
+nf# man tasks service nornir name get_version
+nf# man tasks service nornir name get_version details
+```
+
+Service and task names support completion from connected workers. Task-name
+completion queries all services because the current Picle version does not
+pass the selected service to completion methods.
+
 ## Local environment file
 
 At startup, NFCLI uses NFAPI to detect a `.env` file in the directory that

@@ -539,7 +539,15 @@ class ManTasks(BaseModel):
     service: StrictStr = Field(None, description="Service name to show tasks for")
     name: StrictStr = Field(None, description="Name of the service task to show")
     brief: StrictBool = Field(
-        None, description="Only show tasks names", json_schema_extra={"presence": True}
+        None,
+        description="Only show service and task names",
+        json_schema_extra={"presence": True},
+    )
+
+    details: StrictBool = Field(
+        None,
+        description="Show complete task details",
+        json_schema_extra={"presence": True},
     )
 
     class PicleConfig:
@@ -547,10 +555,34 @@ class ManTasks(BaseModel):
         outputter = Outputters.outputter_nested
 
     @staticmethod
-    def run(**kwargs: object):
-        service = kwargs.pop("service", "all")
+    def source_service() -> list[str]:
+        results = NFCLIENT.run_job(
+            "all", "list_tasks", workers="any", timeout=60, kwargs={"brief": True}
+        )
+        return sorted({r["service"] for r in results.values() if not r["failed"]})
 
-        result = run_future_job(
+    @staticmethod
+    def source_name() -> list[str]:
+        results = NFCLIENT.run_job(
+            "all",
+            "list_tasks",
+            workers="any",
+            timeout=60,
+            kwargs={"brief": True},
+        )
+        return sorted(
+            {name for r in results.values() if not r["failed"] for name in r["result"]}
+        )
+
+    @staticmethod
+    def run(**kwargs: object) -> dict:
+        service = kwargs.pop("service", "all")
+        brief = kwargs.pop("brief", False)
+        details = kwargs.pop("details", False)
+        if brief and details:
+            raise ValueError("brief and details cannot be used together")
+
+        result = NFCLIENT.run_job(
             service,
             "list_tasks",
             workers="any",
@@ -560,9 +592,21 @@ class ManTasks(BaseModel):
         ret = {}
         for worker, wresult in result.items():
             if wresult["failed"]:
+                log.error(
+                    "worker '%s' list_tasks failed: %s", worker, wresult.get("errors")
+                )
                 continue
             key = f"{wresult['service']}-service:{kwargs.get('name', 'all-tasks')}"
-            ret[key] = wresult["result"]
+            if details:
+                ret[key] = wresult["result"]
+            elif brief:
+                ret[key] = sorted(task["name"] for task in wresult["result"])
+            else:
+                tasks = {}
+                for task in sorted(wresult["result"], key=lambda task: task["name"]):
+                    description = (task.get("description") or "").strip()
+                    tasks[task["name"]] = " ".join(description.split("\n\n", 1)[0].split())
+                ret[wresult["service"]] = tasks
         return ret
 
 
@@ -599,7 +643,7 @@ def mount_shell_plugins(shell: App, inventory: object) -> None:
     shell.model_mount(
         path=["man", "tasks"],
         model=ManTasks,
-        description="SHow NorFab services tasks documentation",
+        description="Show NorFab service task documentation",
     )
 
 

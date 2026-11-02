@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import concurrent.futures
 import copy
@@ -9,11 +11,22 @@ import uuid
 from fnmatch import fnmatch
 from typing import Callable, Iterator
 
-from langchain.agents import create_agent
-from langchain_core.callbacks import BaseCallbackHandler
-from langchain_core.language_models import BaseChatModel
-from langchain_core.tools import StructuredTool
-from langgraph.checkpoint.memory import MemorySaver
+try:
+    from langchain.agents import create_agent
+    from langchain_core.callbacks import BaseCallbackHandler
+    from langchain_core.language_models import BaseChatModel
+    from langchain_core.tools import StructuredTool
+    from langgraph.checkpoint.memory import MemorySaver
+
+    HAS_LIBS = True
+except ImportError:
+    HAS_LIBS = False
+    BaseCallbackHandler = object
+
+DEPENDENCY_ERROR = (
+    'agent dependencies are unavailable; run pip install "norfab[clientagent]" '
+    '(client) or pip install "norfab[agentservice]" (worker)'
+)
 
 log = logging.getLogger(__name__)
 
@@ -802,6 +815,8 @@ class NFAgent:
         self.thread_id = str(uuid.uuid4())
         self._memory_connection = None
         self._cfg = copy.deepcopy(config)
+        if not HAS_LIBS:
+            return
         try:
             self._build()
         except Exception:
@@ -1002,6 +1017,8 @@ class NFAgent:
         Returns:
             str | dict: Final response content, or full payload when verbose.
         """
+        if not HAS_LIBS:
+            return DEPENDENCY_ERROR
         config = self._run_config(thread_id)
         config["callbacks"] = callbacks
         result = self._agent.invoke(
