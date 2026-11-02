@@ -57,6 +57,43 @@ class TestManTasks:
             "all", "list_tasks", workers="any", timeout=60, kwargs={"brief": True}
         )
 
+    def test_completion_cache(
+        self, monkeypatch: pytest.MonkeyPatch, capsys: Any
+    ) -> None:
+        client = Mock()
+        client.run_job.return_value = {
+            "worker": {"service": "nornir", "failed": False, "result": ["get_version"]}
+        }
+        monkeypatch.setattr(shell, "NFCLIENT", client)
+        app = App(shell.NorFabShell)
+        shell.mount_shell_plugins(app, SimpleNamespace(plugins={}))
+        clock = Mock(return_value=100.0)
+        monkeypatch.setattr("picle.picle.time.monotonic", clock)
+
+        def complete(line: str) -> list[str]:
+            return [
+                item.strip()
+                for item in app.completedefault("", line, len(line), len(line))
+            ]
+
+        assert "get_version" in complete("man tasks service nornir name ")
+        client.run_job.assert_called_once_with(
+            "nornir", "list_tasks", workers="any", timeout=60, kwargs={"brief": True}
+        )
+        complete("man tasks service nornir name ")
+        app.onecmd("man tasks service nornir name ?")
+        assert client.run_job.call_count == 1
+        assert "get_version" in capsys.readouterr().out
+        complete("man tasks name ")
+        assert client.run_job.call_args.args[0] == "all"
+        assert client.run_job.call_count == 2
+        complete("man tasks service ")
+        complete("man tasks service ")
+        assert client.run_job.call_count == 3
+        clock.return_value = 111.0
+        complete("man tasks service nornir name ")
+        assert client.run_job.call_count == 4
+
     def test_details(self, monkeypatch: pytest.MonkeyPatch) -> None:
         schema = {
             "name": "echo",

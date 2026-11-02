@@ -536,8 +536,16 @@ class NorFabShell(BaseModel):
 
 
 class ManTasks(BaseModel):
-    service: StrictStr = Field(None, description="Service name to show tasks for")
-    name: StrictStr = Field(None, description="Name of the service task to show")
+    service: StrictStr = Field(
+        None,
+        description="Service name to show tasks for",
+        json_schema_extra={"source_cache_ttl": 10},
+    )
+    name: StrictStr = Field(
+        None,
+        description="Name of the service task to show",
+        json_schema_extra={"source_cache_ttl": 10},
+    )
     brief: StrictBool = Field(
         None,
         description="Only show service and task names",
@@ -562,9 +570,9 @@ class ManTasks(BaseModel):
         return sorted({r["service"] for r in results.values() if not r["failed"]})
 
     @staticmethod
-    def source_name() -> list[str]:
+    def source_name(service: Union[str, None] = None) -> list[str]:
         results = NFCLIENT.run_job(
-            "all",
+            service or "all",
             "list_tasks",
             workers="any",
             timeout=60,
@@ -604,8 +612,7 @@ class ManTasks(BaseModel):
             else:
                 tasks = {}
                 for task in sorted(wresult["result"], key=lambda task: task["name"]):
-                    description = (task.get("description") or "").strip()
-                    tasks[task["name"]] = " ".join(description.split("\n\n", 1)[0].split())
+                    tasks[task["name"]] = (task.get("description") or "").strip()
                 ret[wresult["service"]] = tasks
         return ret
 

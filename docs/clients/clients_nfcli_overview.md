@@ -33,9 +33,9 @@ nf# man tasks service nornir name get_version
 nf# man tasks service nornir name get_version details
 ```
 
-Service and task names support completion from connected workers. Task-name
-completion queries all services because the current Picle version does not
-pass the selected service to completion methods.
+Service and task names support completion from connected workers, cached for
+10 seconds. Task-name completion uses the selected service, or all services
+when none is supplied.
 
 ## Local environment file
 

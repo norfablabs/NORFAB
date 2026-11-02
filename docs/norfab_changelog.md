@@ -7,7 +7,11 @@
 
 ## ENHANCEMENTS
 
-1. NFCLI `man tasks` shows descriptions by default, names with `brief`, and full schemas with `details`. Added service and task-name completion.
+1. NFCLI `man tasks` shows descriptions by default, names with `brief`, and full schemas with `details`. Service-aware task completion and service completion are cached for 10 seconds using Picle 0.13.2.
+
+## CHANGES
+
+1. Removed the unused Windows `pyreadline3` dependency; NFCLI uses Picle?s `prompt_toolkit` input.
 
 ---
 
