@@ -14,10 +14,7 @@ from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 class WorkflowRunShell(
     ClientRunJobArgs, RunInput, use_enum_values=True, populate_by_name=True
 ):
-    workflow: Union[None, StrictStr] = Field(
-        None,
-        description="Workflow to run",
-    )
+    workflow: Union[None, StrictStr] = Field(None, description="Workflow to run")
 
     class PicleConfig:
         subshell = True

@@ -31,7 +31,11 @@ class NorFabJobsShellCommands(BaseModel):
     )
     last: StrictInt = Field(10, description="Return last N jobs")
     statuses: List[JobStatus] = Field(None, description="Return jobs by status")
-    task: StrictStr = Field(None, description="Task name to return jobs for")
+    task: StrictStr = Field(
+        None,
+        description="Task name to return jobs for",
+        json_schema_extra={"source_cache_ttl": 10},
+    )
     uuid: StrictStr = Field(None, description="Job UUID to return")
     details: StrictBool = Field(
         None,
@@ -85,9 +89,38 @@ class NorFabJobsShellCommands(BaseModel):
             )
 
     @staticmethod
-    def source_workers_completed() -> list:
+    def source_uuid(
+        service: str = None,
+        task: str = None,
+        workers_completed: Union[str, List[str], None] = None,
+    ) -> list:
+        if isinstance(workers_completed, str):
+            workers_completed = [workers_completed]
+        jobs = builtins.NFCLIENT.job_db.fetch_jobs(
+            service=service, task=task, workers_completed=workers_completed, last=100
+        )
+        return sorted({job["uuid"] for job in jobs})
+
+    @staticmethod
+    def source_task(service: str = "all") -> list:
+        results = builtins.NFCLIENT.run_job(
+            service or "all", "list_tasks", workers="any", kwargs={"brief": True}
+        )
+        return sorted(
+            {
+                task
+                for result in (results or {}).values()
+                if not result["failed"]
+                for task in (result["result"] or [])
+            }
+        )
+
+    @staticmethod
+    def source_workers_completed(service: str = "all") -> list:
         NFCLIENT = builtins.NFCLIENT
-        reply = NFCLIENT.mmi("mmi.service.broker", "show_workers")
+        reply = NFCLIENT.mmi(
+            "mmi.service.broker", "show_workers", kwargs={"service": service or "all"}
+        )
         return [i["name"] for i in reply["results"]]
 
     @staticmethod

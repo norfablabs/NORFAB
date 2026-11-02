@@ -33,7 +33,7 @@ nf# man tasks service nornir name get_version
 nf# man tasks service nornir name get_version details
 ```
 
-Service and task names support completion from connected workers, cached for
+Service names complete from live worker responses; task names are cached for
 10 seconds. Task-name completion uses the selected service, or all services
 when none is supplied.
 
@@ -83,3 +83,11 @@ it can negatively impact it.
 
 
 
+
+## Context-aware completion
+
+Worker suggestions in job and logging commands respect the selected service.
+Nornir hosts, Containerlab labs, FakeNOS networks, and FileSharing remote names
+complete from the selected workers. Job commands also complete task names and
+recent job UUIDs. Operational and config/file suggestions stay live. Task names and installed
+TTP getter names are cached for 10 seconds.

@@ -45,7 +45,9 @@ class NornirFileCopyShell(
     populate_by_name=True,
 ):
     source_file: StrictStr = Field(
-        ..., description="Source file to copy", alias="source-file"
+        ...,
+        description="Source file to copy",
+        alias="source-file",
     )
     plugin: NrFileCopyPlugins = Field(None, description="Connection plugin parameters")
 

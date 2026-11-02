@@ -31,7 +31,7 @@ class TestManTasks:
         expected = (
             {"dummy-service:all-tasks": ["echo"]}
             if brief
-            else {"dummy": {"echo": "Echo a value."}}
+            else {"dummy": {"echo": schema["description"]}}
         )
         assert shell.ManTasks.run(brief=brief) == expected
 
@@ -89,10 +89,10 @@ class TestManTasks:
         assert client.run_job.call_count == 2
         complete("man tasks service ")
         complete("man tasks service ")
-        assert client.run_job.call_count == 3
+        assert client.run_job.call_count == 4
         clock.return_value = 111.0
         complete("man tasks service nornir name ")
-        assert client.run_job.call_count == 4
+        assert client.run_job.call_count == 5
 
     def test_details(self, monkeypatch: pytest.MonkeyPatch) -> None:
         schema = {

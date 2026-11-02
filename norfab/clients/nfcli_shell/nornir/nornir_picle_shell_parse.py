@@ -103,6 +103,11 @@ class TTPParseModel(
     use_enum_values=True,
     populate_by_name=True,
 ):
+    get: Union[None, StrictStr] = Field(
+        None,
+        description="TTP templates getter name to load",
+        json_schema_extra={"source_cache_ttl": 10},
+    )
     commands: Union[StrictStr, List[StrictStr]] = Field(
         None,
         description="List of commands to collect form devices",
@@ -163,7 +168,10 @@ class TextFSMParseModel(
     use_enum_values=True,
     populate_by_name=True,
 ):
-    template: StrictStr = Field(None, description="Path to a TextFSM template file")
+    template: StrictStr = Field(
+        None,
+        description="Path to a TextFSM template file",
+    )
     commands: Union[StrictStr, List[StrictStr]] = Field(
         None,
         description="List of commands to parse form devices",

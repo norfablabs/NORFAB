@@ -91,7 +91,9 @@ class NornirCliShell(
         None, description="Enter exec mode", json_schema_extra={"presence": True}
     )
     job_data: Optional[StrictStr] = Field(
-        None, description="Path to YAML file with job data", alias="job-data"
+        None,
+        description="Path to YAML file with job data",
+        alias="job-data",
     )
 
     @staticmethod

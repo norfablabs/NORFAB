@@ -1,6 +1,6 @@
 import builtins
 import logging
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import BaseModel, Field, StrictBool, StrictStr
@@ -16,7 +16,23 @@ from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 log = logging.getLogger(__name__)
 
 
-class RemotesModel(ClientRunJobArgs):
+class RemoteNameCompletion(ClientRunJobArgs):
+    @staticmethod
+    def source_name(workers: Union[str, list[str], None] = None) -> list[str]:
+        results = builtins.NFCLIENT.run_job(
+            "filesharing", "get_remotes", workers=workers or "all"
+        )
+        return sorted(
+            {
+                remote["name"]
+                for result in (results or {}).values()
+                if not result["failed"]
+                for remote in (result["result"] or [])
+            }
+        )
+
+
+class RemotesModel(RemoteNameCompletion):
     """Show configured File Sharing remotes.
 
     ``brief`` flattens remotes from the selected workers into a compact table.
@@ -115,7 +131,10 @@ class RemotesModel(ClientRunJobArgs):
 
 
 class ListFilesModel(ListFilesInput, use_enum_values=True, populate_by_name=True):
-    url: StrictStr = Field("nf://", description="Directory to list content for")
+    url: StrictStr = Field(
+        "nf://",
+        description="Directory to list content for",
+    )
 
     @staticmethod
     def source_url(choice: str = None) -> list:
@@ -272,7 +291,7 @@ class CreateGitRemoteModel(CreateRemoteGitInput, ClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
 
-class CloneGitRemoteModel(RemoteNameInput, ClientRunJobArgs):
+class CloneGitRemoteModel(RemoteNameInput, RemoteNameCompletion):
     """Synchronize a registered Git remote and make its mount available."""
 
     @staticmethod
@@ -299,7 +318,7 @@ class CloneGitRemoteModel(RemoteNameInput, ClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
 
-class DeleteGitRemoteModel(RemoteNameInput, ClientRunJobArgs):
+class DeleteGitRemoteModel(RemoteNameInput, RemoteNameCompletion):
     """Delete and unregister a Git remote from File Sharing workers."""
 
     @staticmethod

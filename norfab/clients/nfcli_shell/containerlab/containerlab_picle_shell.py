@@ -1,7 +1,7 @@
 import builtins
 import logging
 import os
-from typing import Any
+from typing import Union, Any
 
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
@@ -36,6 +36,7 @@ log = logging.getLogger(__name__)
 class DeployCommand(
     ClientRunJobArgs, DeployInput, use_enum_values=True, populate_by_name=True
 ):
+
     @staticmethod
     def source_topology(choice: str = None) -> list:
         return ClientRunJobArgs.walk_norfab_files(choice)
@@ -76,12 +77,18 @@ class DestroyCommand(
     ClientRunJobArgs, DestroyLabInput, use_enum_values=True, populate_by_name=True
 ):
     @staticmethod
-    def source_lab_name() -> list:
-        ret = []
-        result = builtins.NFCLIENT.run_job("containerlab", "get_running_labs")
-        for wname, wres in result.items():
-            ret.extend(wres["result"])
-        return ret
+    def source_lab_name(workers: Union[str, list[str], None] = None) -> list:
+        results = builtins.NFCLIENT.run_job(
+            "containerlab", "get_running_labs", workers=workers or "all"
+        )
+        return sorted(
+            {
+                name
+                for result in (results or {}).values()
+                if not result["failed"]
+                for name in (result["result"] or [])
+            }
+        )
 
     @staticmethod
     def run(*args: object, **kwargs: object):
@@ -119,12 +126,18 @@ class RestartCommand(
     ClientRunJobArgs, RestartLabInput, use_enum_values=True, populate_by_name=True
 ):
     @staticmethod
-    def source_lab_name() -> list:
-        ret = []
-        result = builtins.NFCLIENT.run_job("containerlab", "get_running_labs")
-        for wname, wres in result.items():
-            ret.extend(wres["result"])
-        return ret
+    def source_lab_name(workers: Union[str, list[str], None] = None) -> list:
+        results = builtins.NFCLIENT.run_job(
+            "containerlab", "get_running_labs", workers=workers or "all"
+        )
+        return sorted(
+            {
+                name
+                for result in (results or {}).values()
+                if not result["failed"]
+                for name in (result["result"] or [])
+            }
+        )
 
     @staticmethod
     def run(*args: object, **kwargs: object):
@@ -162,12 +175,18 @@ class SaveCommand(
     ClientRunJobArgs, SaveInput, use_enum_values=True, populate_by_name=True
 ):
     @staticmethod
-    def source_lab_name() -> list:
-        ret = []
-        result = builtins.NFCLIENT.run_job("containerlab", "get_running_labs")
-        for wname, wres in result.items():
-            ret.extend(wres["result"])
-        return ret
+    def source_lab_name(workers: Union[str, list[str], None] = None) -> list:
+        results = builtins.NFCLIENT.run_job(
+            "containerlab", "get_running_labs", workers=workers or "all"
+        )
+        return sorted(
+            {
+                name
+                for result in (results or {}).values()
+                if not result["failed"]
+                for name in (result["result"] or [])
+            }
+        )
 
     @staticmethod
     def run(*args: object, **kwargs: object):
@@ -208,12 +227,18 @@ class GetNornirInventoryCommand(
     populate_by_name=True,
 ):
     @staticmethod
-    def source_lab_name() -> list:
-        ret = []
-        result = builtins.NFCLIENT.run_job("containerlab", "get_running_labs")
-        for wname, wres in result.items():
-            ret.extend(wres["result"])
-        return ret
+    def source_lab_name(workers: Union[str, list[str], None] = None) -> list:
+        results = builtins.NFCLIENT.run_job(
+            "containerlab", "get_running_labs", workers=workers or "all"
+        )
+        return sorted(
+            {
+                name
+                for result in (results or {}).values()
+                if not result["failed"]
+                for name in (result["result"] or [])
+            }
+        )
 
     @staticmethod
     def run(*args: object, **kwargs: object):
@@ -258,12 +283,18 @@ class ShowContainers(
     ClientRunJobArgs, InspectInput, use_enum_values=True, populate_by_name=True
 ):
     @staticmethod
-    def source_lab_name() -> list:
-        ret = []
-        result = builtins.NFCLIENT.run_job("containerlab", "get_running_labs")
-        for wname, wres in result.items():
-            ret.extend(wres["result"])
-        return ret
+    def source_lab_name(workers: Union[str, list[str], None] = None) -> list:
+        results = builtins.NFCLIENT.run_job(
+            "containerlab", "get_running_labs", workers=workers or "all"
+        )
+        return sorted(
+            {
+                name
+                for result in (results or {}).values()
+                if not result["failed"]
+                for name in (result["result"] or [])
+            }
+        )
 
     @staticmethod
     def run(*args: object, **kwargs: object):

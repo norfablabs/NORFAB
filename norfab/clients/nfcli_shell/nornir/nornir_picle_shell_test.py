@@ -33,9 +33,14 @@ class NornirTestShell(
     use_enum_values=True,
     populate_by_name=True,
 ):
-    suite: StrictStr = Field(..., description="Nornir suite nf://path/to/file.py")
+    suite: StrictStr = Field(
+        ...,
+        description="Nornir suite nf://path/to/file.py",
+    )
     job_data: Optional[StrictStr] = Field(
-        None, description="Path to YAML file with job data", alias="job-data"
+        None,
+        description="Path to YAML file with job data",
+        alias="job-data",
     )
     table: Union[EnumTableTypes, Dict, StrictBool] = Field(
         "brief",

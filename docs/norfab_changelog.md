@@ -7,11 +7,19 @@
 
 ## ENHANCEMENTS
 
-1. NFCLI `man tasks` shows descriptions by default, names with `brief`, and full schemas with `details`. Service-aware task completion and service completion are cached for 10 seconds using Picle 0.13.2.
+1. NFCLI `man tasks` shows descriptions by default, names with `brief`, and full schemas with `details`. Task-name completion is service-aware and cached for 10 seconds; service completion stays live.
+2. Nornir host-name completion now uses selected workers and returns sorted, unique names.
+3. `show norfab workers jobs summary` and `details` complete workers by service and job UUIDs by service and workers; `summary` also completes task names.
+4. `show norfab client jobs` completes task names and recent job UUIDs; completed-worker suggestions respect the selected service.
+5. `show norfab logging` filters worker suggestions by service.
+6. Containerlab lab-name completion for destroy, restart, save, show containers, get-nornir-inventory, and deploy-netbox uses selected workers; Nornir Containerlab inventory import uses `clab-workers`.
+7. FakeNOS network completion for show, stop, restart, and get-nornir-inventory uses selected workers.
+8. FileSharing remotes, Git clone-remote, and delete-remote complete registered remote names from selected workers.
+9. Config and file completion stays live to reflect added or removed files. Installed TTP getter names are cached for 10 seconds.
 
 ## CHANGES
 
-1. Removed the unused Windows `pyreadline3` dependency; NFCLI uses Picle?s `prompt_toolkit` input.
+1. Removed the unused Windows `pyreadline3` dependency; NFCLI uses Picle's `prompt_toolkit` input.
 
 ---
 

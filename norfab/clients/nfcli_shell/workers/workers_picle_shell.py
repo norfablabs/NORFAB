@@ -164,7 +164,44 @@ class ShowWorkersVersion(ClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
 
-class ListWorkersJobsModel(ClientRunJobArgs):
+class WorkerJobCompletion(ClientRunJobArgs):
+    @staticmethod
+    def source_task(
+        service: str = "all", workers: Union[str, list[str]] = "any"
+    ) -> list:
+        results = builtins.NFCLIENT.run_job(
+            service or "all", "list_tasks", workers=workers, kwargs={"brief": True}
+        )
+        return sorted(
+            {
+                task
+                for result in (results or {}).values()
+                if not result["failed"]
+                for task in (result["result"] or [])
+            }
+        )
+
+    @staticmethod
+    def source_uuid(
+        service: str = "all", workers: Union[str, list[str]] = "all", task: str = None
+    ) -> list:
+        results = builtins.NFCLIENT.run_job(
+            service or "all",
+            "job_list",
+            workers=workers,
+            kwargs={"task": task, "last": 100},
+        )
+        return sorted(
+            {
+                job["uuid"]
+                for result in (results or {}).values()
+                if not result["failed"]
+                for job in (result["result"] or [])
+            }
+        )
+
+
+class ListWorkersJobsModel(WorkerJobCompletion):
     workers: StrictStr = Field("all", description="Workers to return jobs for")
     service: StrictStr = Field("all", description="Service name to return jobs for")
     last: StrictInt = Field(
@@ -178,7 +215,11 @@ class ListWorkersJobsModel(ClientRunJobArgs):
     )
     client: StrictStr = Field(None, description="Client name to return jobs for")
     uuid: StrictStr = Field(None, description="Job UUID to return")
-    task: StrictStr = Field(None, description="Task name to return jobs for")
+    task: StrictStr = Field(
+        None,
+        description="Task name to return jobs for",
+        json_schema_extra={"source_cache_ttl": 10},
+    )
 
     @staticmethod
     def source_client() -> list:
@@ -195,10 +236,10 @@ class ListWorkersJobsModel(ClientRunJobArgs):
         return ["all"] + services
 
     @staticmethod
-    def source_workers() -> list:
+    def source_workers(service: str = "all") -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi(
-            "mmi.service.broker", "show_workers", kwargs={"service": "all"}
+            "mmi.service.broker", "show_workers", kwargs={"service": service or "all"}
         )
         workers = [i["name"] for i in reply["results"]]
 
@@ -241,7 +282,7 @@ class ListWorkersJobsModel(ClientRunJobArgs):
         outputter = Outputters.outputter_rich_table
 
 
-class WorkersJobDetailsModel(ClientRunJobArgs):
+class WorkersJobDetailsModel(WorkerJobCompletion):
     uuid: StrictStr = Field(..., description="Job UUID")
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "all", description="Workers to return jobs for"
@@ -265,10 +306,10 @@ class WorkersJobDetailsModel(ClientRunJobArgs):
         return ["all"] + services
 
     @staticmethod
-    def source_workers() -> list:
+    def source_workers(service: str = "all") -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi(
-            "mmi.service.broker", "show_workers", kwargs={"service": "all"}
+            "mmi.service.broker", "show_workers", kwargs={"service": service or "all"}
         )
         workers = [i["name"] for i in reply["results"]]
 

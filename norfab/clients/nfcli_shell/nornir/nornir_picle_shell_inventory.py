@@ -293,12 +293,18 @@ class InventoryLoadContainerlabModel(
         return ["all", "any"] + workers
 
     @staticmethod
-    def source_lab_name() -> list:
-        ret = []
-        result = builtins.NFCLIENT.run_job("containerlab", "get_running_labs")
-        for wname, wres in result.items():
-            ret.extend(wres["result"])
-        return ret
+    def source_lab_name(clab_workers: Union[str, list[str], None] = None) -> list:
+        results = builtins.NFCLIENT.run_job(
+            "containerlab", "get_running_labs", workers=clab_workers or "all"
+        )
+        return sorted(
+            {
+                name
+                for result in (results or {}).values()
+                if not result["failed"]
+                for name in (result["result"] or [])
+            }
+        )
 
     @staticmethod
     def source_clab_workers() -> list:

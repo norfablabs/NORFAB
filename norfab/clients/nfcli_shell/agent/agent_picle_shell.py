@@ -76,7 +76,10 @@ class AgentShowCommandsModel(BaseModel):
 
 class AgentInvoke(ClientRunJobArgs):
     instructions: StrictStr = Field(None, description="Provide instructions")
-    name: StrictStr = Field(None, description="Agent name to interact with")
+    name: StrictStr = Field(
+        None,
+        description="Agent name to interact with",
+    )
     progress: Optional[StrictBool] = Field(
         True,
         description="Emit execution progress",

@@ -305,9 +305,11 @@ class ShowNorfabLoggingModel(BaseModel):
         outputter = Outputters.outputter_pprint
 
     @staticmethod
-    def source_workers() -> list:
+    def source_workers(service: str = "all") -> list:
         nfclient = getattr(builtins, "NFCLIENT", NFCLIENT)
-        reply = nfclient.mmi("mmi.service.broker", "show_workers")
+        reply = nfclient.mmi(
+            "mmi.service.broker", "show_workers", kwargs={"service": service or "all"}
+        )
         return ["all"] + [worker["name"] for worker in reply["results"]]
 
     @staticmethod
@@ -539,7 +541,6 @@ class ManTasks(BaseModel):
     service: StrictStr = Field(
         None,
         description="Service name to show tasks for",
-        json_schema_extra={"source_cache_ttl": 10},
     )
     name: StrictStr = Field(
         None,

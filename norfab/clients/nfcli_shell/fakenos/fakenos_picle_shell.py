@@ -1,5 +1,5 @@
 import builtins
-from typing import Any
+from typing import Any, Union
 
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
@@ -58,12 +58,18 @@ class FakeNOSShowNetworksCommand(
         outputter = Outputters.outputter_yaml
 
     @staticmethod
-    def source_network() -> list:
-        ret = []
-        response = builtins.NFCLIENT.run_job("fakenos", "inspect_networks")
-        for wname, wres in response.items():
-            ret.extend(wres["result"])
-        return ret
+    def source_network(workers: Union[str, list[str], None] = None) -> list:
+        results = builtins.NFCLIENT.run_job(
+            "fakenos", "inspect_networks", workers=workers or "all"
+        )
+        return sorted(
+            {
+                name
+                for result in (results or {}).values()
+                if not result["failed"]
+                for name in (result["result"] or [])
+            }
+        )
 
     @staticmethod
     def run(*args: object, **kwargs: object):
@@ -161,12 +167,18 @@ class FakeNOSStopCommand(
         outputter = Outputters.outputter_nested
 
     @staticmethod
-    def source_network() -> list:
-        ret = []
-        response = builtins.NFCLIENT.run_job("fakenos", "inspect_networks")
-        for wname, wres in response.items():
-            ret.extend(wres["result"])
-        return ret
+    def source_network(workers: Union[str, list[str], None] = None) -> list:
+        results = builtins.NFCLIENT.run_job(
+            "fakenos", "inspect_networks", workers=workers or "all"
+        )
+        return sorted(
+            {
+                name
+                for result in (results or {}).values()
+                if not result["failed"]
+                for name in (result["result"] or [])
+            }
+        )
 
     @staticmethod
     def run(*args: object, **kwargs: object):
@@ -197,12 +209,18 @@ class FakeNOSRestartCommand(
         outputter = Outputters.outputter_nested
 
     @staticmethod
-    def source_network() -> list:
-        ret = []
-        response = builtins.NFCLIENT.run_job("fakenos", "inspect_networks")
-        for wname, wres in response.items():
-            ret.extend(wres["result"])
-        return ret
+    def source_network(workers: Union[str, list[str], None] = None) -> list:
+        results = builtins.NFCLIENT.run_job(
+            "fakenos", "inspect_networks", workers=workers or "all"
+        )
+        return sorted(
+            {
+                name
+                for result in (results or {}).values()
+                if not result["failed"]
+                for name in (result["result"] or [])
+            }
+        )
 
     @staticmethod
     def run(*args: object, **kwargs: object):
@@ -237,12 +255,18 @@ class GetFakeNOSNornirInventoryCommand(
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def source_network() -> list:
-        ret = []
-        response = builtins.NFCLIENT.run_job("fakenos", "inspect_networks")
-        for wname, wres in response.items():
-            ret.extend(wres["result"])
-        return ret
+    def source_network(workers: Union[str, list[str], None] = None) -> list:
+        results = builtins.NFCLIENT.run_job(
+            "fakenos", "inspect_networks", workers=workers or "all"
+        )
+        return sorted(
+            {
+                name
+                for result in (results or {}).values()
+                if not result["failed"]
+                for name in (result["result"] or [])
+            }
+        )
 
     @staticmethod
     def run(*args: object, **kwargs: object):

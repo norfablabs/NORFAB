@@ -264,19 +264,22 @@ class NorniHostsFilters(BaseModel):
         return ["all", "any"] + [w["name"] for w in reply]
 
     @staticmethod
-    def source_hosts() -> list:
-        ret = set()
-        result = builtins.NFCLIENT.run_job("nornir", "get_nornir_hosts")
-        result = log_error_or_result(result)
-        # result is a dict keyed by worker name with lists of hosts values
-        for worker, result in result.items():
-            for host in result:
-                ret.add(host)
-        return list(ret)
+    def source_hosts(workers: Union[str, list[str], None] = None) -> list:
+        results = builtins.NFCLIENT.run_job(
+            "nornir", "get_nornir_hosts", workers=workers or "all"
+        )
+        return sorted(
+            {
+                host
+                for result in (results or {}).values()
+                if not result["failed"]
+                for host in (result["result"] or [])
+            }
+        )
 
     @staticmethod
-    def source_FL() -> list:
-        return NorniHostsFilters.source_hosts()
+    def source_FL(workers: Union[str, list[str], None] = None) -> list:
+        return NorniHostsFilters.source_hosts(workers=workers)
 
     @staticmethod
     def get_nornir_hosts(**kwargs: object):

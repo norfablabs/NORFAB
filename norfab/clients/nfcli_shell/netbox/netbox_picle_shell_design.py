@@ -13,6 +13,7 @@ class DesignDeployShell(
     use_enum_values=True,
     populate_by_name=True,
 ):
+
     @staticmethod
     def source_design(choice: str = None) -> list:
         return ClientRunJobArgs.walk_norfab_files(choice)
