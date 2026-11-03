@@ -1,19 +1,13 @@
 [project]
 name = "norfab"
-
-[tool.poetry]
-name = "norfab"
 version = "0.26.2"
 description = "Network Automations Fabric [NorFab] - communication networks automations"
-authors = ["Denis Mulyalin <d.mulyalin@gmail.com>"]
-maintainers = ["Denis Mulyalin <d.mulyalin@gmail.com>"]
-license = "Apache-2.0 license"
+requires-python = ">=3.10,<3.15"
+authors = [{name = "Denis Mulyalin", email = "d.mulyalin@gmail.com"}]
+maintainers = [{name = "Denis Mulyalin", email = "d.mulyalin@gmail.com"}]
+license = "Apache-2.0"
 readme = "README.md"
-homepage = "https://github.com/norfablabs/NORFAB"
-repository = "https://github.com/norfablabs/NORFAB"
-documentation = "https://docs.norfablabs.com"
 keywords = ["Network", "Automation", "DevOps"]
-exclude = ["**/node_modules/**"]
 classifiers = [
     "Topic :: Utilities",
     "Programming Language :: Python :: 3.10",
@@ -21,112 +15,206 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
-    "License :: OSI Approved :: Apache Software License",
     "Operating System :: POSIX :: Linux",
     "Operating System :: Microsoft :: Windows",
 ]
+dependencies = [
+    "pyyaml==6.0.3",
+    "pyzmq==27.2.0",
+    "psutil==7.2.2",
+    "tornado==6.5.10",
+    "jinja2==3.1.6",
+    "pydantic==2.14.1",
+    "mdutils==1.8.1",
+    "orjson==3.13.0",
+    "python-dotenv==1.2.4",
+    "gitpython==3.2.1",
+]
 
-[tool.poetry.dependencies]
-# Core Libs
-python = ">=3.10,<3.15"
-pyyaml = "6.0.3"
-pyzmq = "27.2.0"
-psutil = "7.2.2"
-tornado = "6.5.10"
-jinja2 = "3.1.6"
-pydantic = "2.14.1"
-mdutils = "1.8.1"
-orjson = "3.13.0"
-python-dotenv = "1.2.4"
-gitpython = "3.2.1"
+[project.urls]
+Homepage = "https://github.com/norfablabs/NORFAB"
+Repository = "https://github.com/norfablabs/NORFAB"
+Documentation = "https://docs.norfablabs.com"
 
-# PICLE NFCLI Shell Dependencies
-picle = { version = "0.13.2", optional = true }
-rich = { version = "15.0.0", optional = true }
-tabulate = { version = "0.10.0", optional = true }
-prompt_toolkit = { version = "3.0.53", optional = true }
+[project.scripts]
+nfcli = "norfab.utils.nfcli:nfcli"
 
-# Nornir Service Dependencies
-nornir = { version = "3.6.0", optional = true }
-nornir-salt = { version = "0.23.*", optional = true }
-cerberus = { version = "1.3.8", optional = true }
-jmespath = { version = "1.1.0", optional = true }
-napalm = { version = "5.2.0", optional = true }
-ncclient = { version = "0.7.0", optional = true }
-netmiko = { version = "4.8.0", optional = true }
-nornir-napalm = { version = "0.6.0", optional = true }
-nornir-netmiko = { version = "1.0.1", optional = true }
-nornir-scrapli = { version = "2026.10.13", optional = true }
-ntc-templates = { version = "9.3.0", optional = true }
-paramiko = { version = "<=4.0.0", optional = true }
-pygnmi = { version = "0.8.15", optional = true }
-puresnmp = { version = "2.0.1", optional = true, extras = ['crypto'] }
-requests = { version = "2.34.2", optional = true }
-scrapli = { version = "2026.2.20", optional = true }
-scrapli-community = { version = "2025.1.30", optional = true }
-scrapli-netconf = { version = "2026.1.12", optional = true }
-ttp = { version = "0.10.1", optional = true }
-ttp-templates = { version = ">=0.6.0", optional = true }
-xmltodict = { version = "1.0.4", optional = true }
-lxml = { version = "6.1.3", optional = true }
-textfsm = { version = "2.1.0", optional = true }
-textual = { version = "8.2.8", optional = true }
-N2G = { version = "0.3.3", optional = true }
-dnspython = { version = "2.8.0", optional = true }
-pythonping = { version = "1.1.4", optional = true }
-mcp = { version = "1.30.0", optional = true }
+[project.optional-dependencies]
+nfcli = [
+    "picle==0.13.2",
+    "rich==15.0.0",
+    "tabulate==0.10.0",
+    "prompt_toolkit==3.0.53",
+    "pydantic==2.14.1",
+]
+nornirservice = [
+    "nornir==3.6.0",
+    "nornir-salt==0.23.*",
+    "cerberus==1.3.8",
+    "jmespath==1.1.0",
+    "napalm==5.2.0",
+    "ncclient==0.7.0",
+    "netmiko==4.8.0",
+    "nornir-napalm==0.6.0",
+    "nornir-netmiko==1.0.1",
+    "nornir-scrapli==2026.10.13",
+    "ntc-templates==9.3.0",
+    "paramiko<=4.0.0",
+    "pygnmi==0.8.15",
+    "puresnmp[crypto]==2.0.1",
+    "requests==2.34.2",
+    "scrapli==2026.2.20",
+    "scrapli-community==2025.1.30",
+    "scrapli-netconf==2026.1.12",
+    "ttp==0.10.1",
+    "ttp-templates>=0.6.0",
+    "xmltodict==1.0.4",
+    "lxml==6.1.3",
+    "textfsm==2.1.0",
+    "N2G==0.3.3",
+    "dnspython==2.8.0",
+    "pythonping==1.1.4",
+    "tabulate==0.10.0",
+    "pydantic==2.14.1",
+]
+netboxservice = [
+    "requests==2.34.2",
+    "pynetbox==7.8.0",
+    "diskcache==5.6.3",
+    "httpx==0.28.1",
+    "datamodel-code-generator==0.85.0",
+    "deepdiff==9.1.0",
+    "markdown-it-py==4.2.0",
+]
+fastapiservice = [
+    "fastapi[standard]==0.143.3",
+    "uvicorn==0.54.0",
+    "python-multipart==0.0.32",
+    "diskcache==5.6.3",
+]
+robot = [
+    "robotframework==7.5",
+]
+agentservice = [
+    "langchain==1.4.6",
+    "langchain-core==1.6.12",
+    "langgraph==1.2.16",
+    "langchain-community==0.4.2",
+    "langchain-ollama==1.1.0",
+    "ollama==0.6.3",
+]
+clientagent = [
+    "langchain==1.4.6",
+    "langgraph==1.2.16",
+    "langchain-core==1.6.12",
+    "langchain-openai==1.7.2",
+    "langchain-anthropic==1.7.6",
+    "langchain-ollama==1.1.0",
+    "langchain-mcp-adapters==0.3.2",
+    "fastembed==0.9.0",
+    "qdrant-client==1.19.1",
+    "langgraph-checkpoint-sqlite==3.1.2",
+]
+fastmcpservice = [
+    "mcp==1.30.0",
+    "diskcache==5.6.3",
+]
+fakenosservice = [
+    "fakenos==1.2.1; python_version >= \"3.11\" and python_version < \"3.13\"",
+]
+# Retained as a compatibility alias; File Sharing dependencies are now core.
+filesharingservice = []
+full = [
+    "picle==0.13.2",
+    "rich==15.0.0",
+    "tabulate==0.10.0",
+    "prompt_toolkit==3.0.53",
+    "pydantic==2.14.1",
+    "nornir==3.6.0",
+    "nornir-salt==0.23.*",
+    "cerberus==1.3.8",
+    "jmespath==1.1.0",
+    "napalm==5.2.0",
+    "ncclient==0.7.0",
+    "netmiko==4.8.0",
+    "nornir-napalm==0.6.0",
+    "nornir-netmiko==1.0.1",
+    "nornir-scrapli==2026.10.13",
+    "ntc-templates==9.3.0",
+    "paramiko<=4.0.0",
+    "pygnmi==0.8.15",
+    "puresnmp[crypto]==2.0.1",
+    "requests==2.34.2",
+    "scrapli==2026.2.20",
+    "scrapli-community==2025.1.30",
+    "scrapli-netconf==2026.1.12",
+    "ttp==0.10.1",
+    "ttp-templates>=0.6.0",
+    "xmltodict==1.0.4",
+    "lxml==6.1.3",
+    "textfsm==2.1.0",
+    "N2G==0.3.3",
+    "dnspython==2.8.0",
+    "pythonping==1.1.4",
+    "pynetbox==7.8.0",
+    "diskcache==5.6.3",
+    "httpx==0.28.1",
+    "datamodel-code-generator==0.85.0",
+    "deepdiff==9.1.0",
+    "markdown-it-py==4.2.0",
+    "fastapi[standard]==0.143.3",
+    "uvicorn==0.54.0",
+    "python-multipart==0.0.32",
+    "robotframework==7.5",
+    "langchain==1.4.6",
+    "langchain-community==0.4.2",
+    "langchain-ollama==1.1.0",
+    "langchain-core==1.6.12",
+    "langchain-openai==1.7.2",
+    "langchain-anthropic==1.7.6",
+    "langchain-mcp-adapters==0.3.2",
+    "langgraph==1.2.16",
+    "fastembed==0.9.0",
+    "qdrant-client==1.19.1",
+    "langgraph-checkpoint-sqlite==3.1.2",
+    "ollama==0.6.3",
+    "mcp==1.30.0",
+    "fakenos==1.2.1; python_version >= \"3.11\" and python_version < \"3.13\"",
+    "textual==8.2.8",
+]
+tui = [
+    "textual==8.2.8",
+]
+docs = [
+    "mkdocs==1.6.1",
+    "mkdocs-material==9.7.7",
+    "mkdocs-material-extensions==1.3.1",
+    "mkdocstrings[python]==1.0.6",
+    "pygments==2.21.0",
+    "pymdown-extensions==11.0.1",
+]
 
-# Robot Client Dependencies
-robotframework = { version = "7.5", optional = true }
-
-# Agent Service Dependencies
-langchain = { version = "1.4.6", optional = true }
-langchain-core = { version = "1.6.12", optional = true }
-langchain-community = { version = "0.4.2", optional = true }
-langchain-ollama = { version = "1.1.0", optional = true }
-langchain-openai = { version = "1.7.2", optional = true }
-langchain-anthropic = { version = "1.7.6", optional = true }
-langchain-mcp-adapters = { version = "0.3.2", optional = true }
-langgraph = { version = "1.2.16", optional = true }
-ollama = { version = "0.6.3", optional = true }
-fastembed = { version = "0.9.0", optional = true }
-qdrant-client = { version = "1.19.1", optional = true }
-datamodel-code-generator = { version = "0.85.0", optional = true }
-langgraph-checkpoint-sqlite = { version = "3.1.2", optional = true }
-
-# Netbox Service Dependencies
-diskcache = { version = "5.6.3", optional = true }
-pynetbox = { version = "7.8.0", optional = true }
-httpx = { version = "0.28.1", optional = true }
-deepdiff = { version = "9.1.0", optional = true }
-markdown-it-py = { version = "4.2.0", optional = true }
-
-# FastAPI Service Dependencies
-fastapi = { version = "0.143.3", optional = true, extras = ["standard"] }
-uvicorn = { version = "0.54.0", optional = true }
-python-multipart = { version = "0.0.32", optional = true }
-
-# FakeNOS Service Dependencies
-fakenos = { version = "1.2.1", optional = true, python = ">=3.11,<3.13" }
-
-# docs dependencies
-mkdocs = { version = "1.6.1", optional = true }
-mkdocs-material = { version = "9.7.7", optional = true }
-mkdocs-material-extensions = { version = "1.3.1", optional = true }
-mkdocstrings = { version = "1.0.6", extras = ["python"], optional = true }
-pygments = { version = "2.21.0", optional = true }
-pymdown-extensions = { version = "11.0.1", optional = true }
-
-[tool.poetry.group.dev.dependencies]
-black = "26.*"
-invoke = "3.*"
-pytest = "9.*"
-ruff = "0.16.*"
-vulture = "2.*"
+[dependency-groups]
+dev = [
+    "black==26.*",
+    "invoke==3.*",
+    "pytest==9.*",
+    "ruff==0.16.*",
+    "vulture==2.*",
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+exclude = ["**/node_modules/**"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["norfab"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/norfab", "/README.md", "/pyproject.toml"]
 
 [project.entry-points."norfab.workers"]
 "nornir" = "norfab.workers.nornir_worker.nornir_worker:NornirWorker"
@@ -138,164 +226,6 @@ build-backend = "poetry.core.masonry.api"
 "fastmcp" = "norfab.workers.fastmcp_worker.fastmcp_worker:FastMCPWorker"
 "filesharing" = "norfab.workers.filesharing_worker.filesharing_worker:FileSharingWorker"
 "fakenos" = "norfab.workers.fakenos_worker.fakenos_worker:FakeNOSWorker"
-
-[tool.poetry.scripts]
-nfcli = 'norfab.utils.nfcli:nfcli'
-
-[tool.poetry.extras]
-nfcli = [
-    "picle",
-    "rich",
-    "tabulate",
-    "prompt_toolkit",
-    "pydantic",
-]
-nornirservice = [
-    "nornir",
-    "nornir-salt",
-    "cerberus",
-    "jmespath",
-    "napalm",
-    "ncclient",
-    "netmiko",
-    "nornir-napalm",
-    "nornir-netmiko",
-    "nornir-scrapli",
-    "ntc-templates",
-    "paramiko",
-    "pygnmi",
-    "puresnmp",
-    "requests",
-    "scrapli",
-    "scrapli-community",
-    "scrapli-netconf",
-    "ttp",
-    "ttp-templates",
-    "xmltodict",
-    "lxml",
-    "textfsm",
-    "N2G",
-    "dnspython",
-    "pythonping",
-    "tabulate",
-    "pydantic",
-]
-netboxservice = [
-    "requests",
-    "pynetbox",
-    "diskcache",
-    "httpx",
-    "datamodel-code-generator",
-    "deepdiff",
-    "markdown-it-py"
-]
-fastapiservice = [
-    "fastapi",
-    "uvicorn",
-    "python-multipart",
-    "diskcache"
-]
-robot = [
-    "robotframework"
-]
-agentservice = [
-    "langchain",
-    "langchain-core",
-    "langgraph",
-    "langchain-community",
-    "langchain-ollama",
-    "ollama"
-]
-clientagent = [
-    "langchain",
-    "langgraph",
-    "langchain-core",
-    "langchain-openai",
-    "langchain-anthropic",
-    "langchain-ollama",
-    "langchain-mcp-adapters",
-    "fastembed",
-    "qdrant-client",
-    "langgraph-checkpoint-sqlite"
-]
-fastmcpservice = [
-    "mcp",
-    "diskcache"
-]
-fakenosservice = [
-    "fakenos"
-]
-# Retained as a compatibility alias; File Sharing dependencies are now core.
-filesharingservice = []
-full = [
-    "picle",
-    "rich",
-    "tabulate",
-    "prompt_toolkit",
-    "pydantic",
-    "nornir",
-    "nornir-salt",
-    "cerberus",
-    "jmespath",
-    "napalm",
-    "ncclient",
-    "netmiko",
-    "nornir-napalm",
-    "nornir-netmiko",
-    "nornir-scrapli",
-    "ntc-templates",
-    "paramiko",
-    "pygnmi",
-    "puresnmp",
-    "requests",
-    "scrapli",
-    "scrapli-community",
-    "scrapli-netconf",
-    "ttp",
-    "ttp-templates",
-    "xmltodict",
-    "lxml",
-    "textfsm",
-    "N2G",
-    "dnspython",
-    "pythonping",
-    "pynetbox",
-    "diskcache",
-    "httpx",
-    "datamodel-code-generator",
-    "deepdiff",
-    "markdown-it-py",
-    "fastapi",
-    "uvicorn",
-    "python-multipart",
-    "robotframework",
-    "langchain",
-    "langchain-community",
-    "langchain-ollama",
-    "langchain-core",
-    "langchain-openai",
-    "langchain-anthropic",
-    "langchain-mcp-adapters",
-    "langgraph",
-    "fastembed",
-    "qdrant-client",
-    "langgraph-checkpoint-sqlite",
-    "ollama",
-    "mcp",
-    "fakenos",
-    "textual"
-]
-tui = [
-    "textual"
-]
-docs = [
-    "mkdocs",
-    "mkdocs-material",
-    "mkdocs-material-extensions",
-    "mkdocstrings",
-    "pygments",
-    "pymdown-extensions",
-]
 
 [tool.ruff.lint]
 ignore = [
@@ -314,98 +244,3 @@ min_confidence = 60
 
 [tool.pytest.ini_options]
 junit_family = "xunit2"
-markers = [
-    "core: NORFAB core component tests",
-    "nornir: Nornir service tests",
-    "netbox: NetBox service tests",
-    "containerlab: Containerlab service tests",
-    "fakenos: FakeNOS service tests",
-    "fastapi: FastAPI service tests",
-    "fastmcp: FastMCP service tests",
-    "filesharing: FileSharing service tests",
-    "filesharing_git: File Sharing authenticated Git remote tests",
-    "filesharing_get_remotes: FileSharing get_remotes task tests",
-    "filesharing_create_remote_git: FileSharing create_remote_git task tests",
-    "filesharing_delete_remote_git: FileSharing delete_remote_git task tests",
-    "filesharing_git_clone: FileSharing git_clone task tests",
-    "filesharing_resolve_git_url: FileSharing resolve_git_url task tests",
-    "workflow: Workflow service tests",
-    "dummy: dummy plugin service tests",
-    "clientagent: Client agent tests",
-    "nfcli: NFCLI shell client tests",
-    "nornir_cfg: Nornir cfg task tests",
-    "nornir_cli: Nornir CLI task tests",
-    "nornir_fakenos: Tests that use FakeNOS-backed devices through Nornir",
-    "nornir_file_copy: Nornir file_copy task tests",
-    "nornir_network: Nornir network task tests",
-    "nornir_parse: Nornir parse task tests",
-    "nornir_runtime_inventory: Nornir runtime_inventory task tests",
-    "nornir_netconf: Nornir NETCONF task tests",
-    "nornir_gnmi: Nornir gNMI task tests",
-    "nornir_snmp: Nornir snmp task tests",
-    "nornir_task: Nornir task task tests",
-    "nornir_test: Nornir test task tests",
-    "netbox_cache_clear: NetBox cache_clear task tests",
-    "netbox_cache_get: NetBox cache_get task tests",
-    "netbox_cache_list: NetBox cache_list task tests",
-    "netbox_check_device_sync: NetBox check_device_sync task tests",
-    "netbox_create_bgp_peering: NetBox create_bgp_peering task tests",
-    "netbox_create_asn: NetBox create_asn task tests",
-    "netbox_design_deploy: NetBox design_deploy task tests",
-    "netbox_create_device_interfaces: NetBox create_device_interfaces task tests",
-    "netbox_move_ip: NetBox move_ip task tests",
-    "netbox_create_ip: NetBox create_ip task tests",
-    "netbox_create_ip_bulk: NetBox create_ip_bulk task tests",
-    "netbox_create_prefix: NetBox create_prefix task tests",
-    "netbox_create_vlan: NetBox create_vlan task tests",
-    "netbox_crud: NetBox CRUD task tests",
-    "netbox_crud_create: NetBox crud_create task tests",
-    "netbox_crud_delete: NetBox crud_delete task tests",
-    "netbox_crud_get_changelogs: NetBox crud_get_changelogs task tests",
-    "netbox_crud_list_objects: NetBox crud_list_objects task tests",
-    "netbox_crud_read: NetBox crud_read task tests",
-    "netbox_crud_search: NetBox crud_search task tests",
-    "netbox_crud_update: NetBox crud_update task tests",
-    "netbox_get_bgp_peerings: NetBox get_bgp_peerings task tests",
-    "netbox_get_circuits: NetBox get_circuits task tests",
-    "netbox_get_connections: NetBox get_connections task tests",
-    "netbox_get_containerlab_inventory: NetBox get_containerlab_inventory task tests",
-    "netbox_get_devices: NetBox get_devices task tests",
-    "netbox_get_interfaces: NetBox get_interfaces task tests",
-    "netbox_get_nornir_inventory: NetBox get_nornir_inventory task tests",
-    "netbox_get_topology: NetBox get_topology task tests",
-    "netbox_graphql: NetBox graphql task tests",
-    "netbox_sync_all: NetBox sync_all task tests",
-    "netbox_sync_bgp_asn: NetBox sync_bgp_asn task tests",
-    "netbox_sync_bgp_community: NetBox sync_bgp_community task tests",
-    "netbox_sync_bgp_peerings: NetBox sync_bgp_peerings task tests",
-    "netbox_sync_device_interfaces: NetBox sync_device_interfaces task tests",
-    "netbox_sync_vlans: NetBox sync_vlans task tests",
-    "netbox_sync_vrrp: NetBox sync_vrrp task tests",
-    "netbox_sync_vrfs: NetBox sync_vrfs task tests",
-    "netbox_sync_device_inventory: NetBox sync_device_inventory task tests",
-    "netbox_sync_device_ip: NetBox sync_device_ip task tests",
-    "netbox_sync_device_prefixes: NetBox sync_device_prefixes task tests",
-    "netbox_sync_mac_addresses: NetBox sync_mac_addresses task tests",
-    "netbox_update_bgp_peering: NetBox update_bgp_peering task tests",
-    "netbox_update_interfaces_description: NetBox update_interfaces_description task tests",
-    "containerlab_deploy: Containerlab deploy task tests",
-    "containerlab_deploy_netbox: Containerlab deploy_netbox task tests",
-    "containerlab_get_nornir_inventory: Containerlab get_nornir_inventory task tests",
-    "containerlab_inspect: Containerlab inspect task tests",
-    "containerlab_restart_lab: Containerlab restart_lab task tests",
-    "containerlab_save: Containerlab save task tests",
-    "fakenos_get_nornir_inventory: FakeNOS get_nornir_inventory task tests",
-    "fakenos_auto_start: FakeNOS inventory auto_start tests",
-    "fakenos_inspect_networks: FakeNOS inspect_networks task tests",
-    "fakenos_restart: FakeNOS restart task tests",
-    "fakenos_start: FakeNOS start task tests",
-    "fakenos_stop: FakeNOS stop task tests",
-    "fastmcp_get_prompts: FastMCP get_prompts task tests",
-    "fastmcp_get_tools: FastMCP get_tools task tests",
-    "filesharing_fetch_file: FileSharing fetch_file task tests",
-    "filesharing_file_details: FileSharing file_details task tests",
-    "filesharing_list_files: FileSharing list_files task tests",
-    "filesharing_walk: FileSharing walk task tests",
-    "workflow_run: Workflow run task tests",
-]

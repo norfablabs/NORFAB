@@ -31,3 +31,5 @@ playwright-report/
 test-results/
 tests/nf_tests_inventory/agents/common.yaml
 tests/nf_tests_inventory/norfab-gitsync-test-public/
+
+.venv/

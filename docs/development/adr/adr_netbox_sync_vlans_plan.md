@@ -810,17 +810,17 @@ Focused commands:
 
 ```bash
 cd tests
-poetry run pytest -s -v services/netbox/test_vlans.py
-poetry run pytest -m netbox_sync_vlans
-poetry run pytest -m nfcli
+uv run pytest -s -v services/netbox/test_vlans.py
+uv run pytest -m netbox_sync_vlans
+uv run pytest -m nfcli
 ```
 
 Static and documentation verification:
 
 ```bash
-poetry run python -m compileall -q norfab/workers/netbox_worker norfab/clients/nfcli_shell/netbox
-poetry run ruff check norfab/workers/netbox_worker/vlan_tasks.py norfab/workers/netbox_worker/netbox_models.py norfab/clients/nfcli_shell/netbox/netbox_picle_shell_sync_vlans.py tests/services/netbox/test_vlans.py
-poetry run mkdocs build
+uv run python -m compileall -q norfab/workers/netbox_worker norfab/clients/nfcli_shell/netbox
+uv run ruff check norfab/workers/netbox_worker/vlan_tasks.py norfab/workers/netbox_worker/netbox_models.py norfab/clients/nfcli_shell/netbox/netbox_picle_shell_sync_vlans.py tests/services/netbox/test_vlans.py
+uv run mkdocs build
 ```
 
 Do not leave new `__pycache__` artifacts after verification.

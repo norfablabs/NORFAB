@@ -650,7 +650,7 @@ NFWeb needs an existing broker and the workers used by the selected applications
 Start those processes separately, then run from the repository root:
 
 ```bash
-poetry run nfcli --inventory tests/nf_tests_inventory/inventory.yaml --web-ui
+uv run nfcli --inventory tests/nf_tests_inventory/inventory.yaml --web-ui
 ```
 
 NFWeb binds to `0.0.0.0:9005` by default and normally opens a URL containing the
@@ -693,7 +693,7 @@ WebSocket; do not assume that a working HTTP proxy proves WebSocket upgrades wor
 Run focused checks from the repository root:
 
 ```bash
-poetry run pytest tests/clients/nfweb -q
+uv run pytest tests/clients/nfweb -q
 ```
 
 For frontend changes:
@@ -712,19 +712,18 @@ for a diagnostic build; production builds omit them by default.
 Before publishing a Python package, run the repository packaging workflow:
 
 ```bash
-poetry run inv package-build
+uv run inv package-build
 ```
 
 This compiles the NFWeb frontend, removes the generated `frontend/node_modules`
-directory so Poetry does not spend time scanning it, and then builds the wheel and
-source distribution. It runs `npm ci` first when dependencies are not installed.
+directory, and then builds the wheel and source distribution. It runs `npm ci` first when dependencies are not installed.
 Use the ordinary `npm run build` during frontend development because it keeps the
 dependencies available for subsequent builds and tests.
 
 For documentation changes:
 
 ```bash
-poetry run inv docs-build
+uv run inv docs-build
 ```
 
 Also run the smallest relevant repository check for shared code changes. For

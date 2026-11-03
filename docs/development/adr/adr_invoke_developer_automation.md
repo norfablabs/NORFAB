@@ -4,6 +4,12 @@
 
 Implemented. Approved and completed on 2026-08-22.
 
+Dependency management amendment (2026-11-03): uv replaces Poetry. Use
+`uv sync --extra docs`, `uv run inv`, and `uv build`; development tools now live
+in `[dependency-groups].dev` with resolutions recorded in `uv.lock`. Commands
+below use the current uv equivalents. See the
+[current setup guide](../testing/norfab_testing_framework.md#set-up-the-development-environment).
+
 Implementation amendment: at the maintainer's request, individual
 `docker-tests-<suite>` tasks report but ignore pytest container return codes.
 `docker-tests-all` retains and aggregates those codes so it can still summarize
@@ -55,25 +61,25 @@ code detection, and the Docker Compose test runners already located in
 The intended command interface is:
 
 ```bash
-poetry run inv --list
-poetry run inv docs-build
-poetry run inv docs-serve
-poetry run inv lint
-poetry run inv dead-code
-poetry run inv checks
-poetry run inv docker-tests-build
-poetry run inv docker-tests-core
-poetry run inv docker-tests-nornir
-poetry run inv docker-tests-netbox
-poetry run inv docker-tests-all
-poetry run inv docker-tests-distributed
+uv run inv --list
+uv run inv docs-build
+uv run inv docs-serve
+uv run inv lint
+uv run inv dead-code
+uv run inv checks
+uv run inv docker-tests-build
+uv run inv docker-tests-core
+uv run inv docker-tests-nornir
+uv run inv docker-tests-netbox
+uv run inv docker-tests-all
+uv run inv docker-tests-distributed
 ```
 
 Use `docker-tests-*` as the canonical task family. Add singular
 `docker-test-*` aliases for individual suites so commands such as
-`poetry run inv docker-test-nornir` also work.
+`uv run inv docker-test-nornir` also work.
 
-Invoke will be an orchestration layer, not a replacement for Poetry, pytest,
+Invoke will be an orchestration layer, not a replacement for uv, pytest,
 MkDocs, Ruff, Black, Vulture, or Docker Compose. Each task will call the
 underlying tool and capture its real exit status for reporting or aggregation.
 
@@ -123,7 +129,7 @@ future matrix orchestration a stable developer-facing entry point.
 - Provide short, discoverable, cross-platform commands from the repository
   root.
 - Keep raw tool commands available for debugging.
-- Make documented lint and check commands reproducible from Poetry's locked
+- Make documented lint and check commands reproducible from uv's locked
   environment.
 - Add Vulture to static checks, run it, and record its initial findings without
   changing or suppressing the reported code in this change.
@@ -143,7 +149,7 @@ future matrix orchestration a stable developer-facing entry point.
 
 - Do not fix code reported by Vulture in this change.
 - Do not hide Vulture findings with a broad exclusion or generated whitelist.
-- Do not replace Poetry dependency management.
+- Keep dependency management in uv.
 - Do not rewrite pytest fixtures or test behavior. Relocating a test into the
   conventional suite tree is allowed when needed for automatic discovery.
 - Do not implement the parallel matrix scheduler from the earlier Docker
@@ -156,7 +162,7 @@ future matrix orchestration a stable developer-facing entry point.
 
 ## Dependency and Configuration Changes
 
-Update `pyproject.toml` and `poetry.lock` as follows:
+Update `pyproject.toml` and `uv.lock` as follows:
 
 - add `invoke` to the development dependency group;
 - add `vulture` to the development dependency group;
@@ -168,7 +174,7 @@ Update `pyproject.toml` and `poetry.lock` as follows:
 The documented setup command for all developer tasks will be:
 
 ```bash
-poetry install -E docs
+uv sync --extra docs
 ```
 
 Add a narrow `[tool.vulture]` configuration to `pyproject.toml`. Its initial
@@ -270,12 +276,12 @@ Support these task options:
 Examples:
 
 ```bash
-poetry run inv docker-tests-core
-poetry run inv docker-test-nornir --selector=tests/services/nornir/test_worker.py
-poetry run inv docker-tests-nornir --keyword=test_list_tasks --pytest-args="-x -s"
-poetry run inv docker-tests-netbox --marker="netbox and netbox_get_devices"
-poetry run inv docker-tests-core --python-version=3.13 --build
-poetry run inv docker-tests-netbox --parallel-runs=2
+uv run inv docker-tests-core
+uv run inv docker-test-nornir --selector=tests/services/nornir/test_worker.py
+uv run inv docker-tests-nornir --keyword=test_list_tasks --pytest-args="-x -s"
+uv run inv docker-tests-netbox --marker="netbox and netbox_get_devices"
+uv run inv docker-tests-core --python-version=3.13 --build
+uv run inv docker-tests-netbox --parallel-runs=2
 ```
 
 ### File-Level Parallel Runs
@@ -397,7 +403,7 @@ making private-key distribution a side effect of every Docker test command.
 
 Update `CLAUDE.md` to:
 
-- use `poetry install -E docs` for the complete developer environment;
+- use `uv sync --extra docs` for the complete developer environment;
 - add the Invoke command list and explain `inv --list`;
 - retain raw pytest, Ruff, Black, MkDocs, and Compose commands as diagnostic
   escape hatches;
@@ -424,9 +430,9 @@ This avoids another dependency but leaves path handling, suite-to-service
 mapping, certificate preparation, argument pass-through, and aggregate status
 reporting duplicated in documentation or developer shell history.
 
-### Use Poetry Scripts
+### Use Project Scripts
 
-Poetry scripts are appropriate for installed application entry points. They
+Project scripts (`[project.scripts]`) are appropriate for installed application entry points. They
 are less suitable for a family of repository-only tasks with dependencies,
 options, lifecycle cleanup, and discoverable aliases.
 
@@ -454,7 +460,7 @@ reviewed work.
 
 After approval:
 
-1. Add Invoke, Vulture, and Ruff to the Poetry development group and refresh
+1. Add Invoke, Vulture, and Ruff to the uv development group and refresh
    the lock file.
 2. Add Vulture configuration and root-level `tasks.py` with documentation and
    static-check tasks.
@@ -477,8 +483,8 @@ After approval:
 
 ## Acceptance Criteria
 
-- A fresh development install with the docs extra exposes `poetry run inv`.
-- `poetry run inv --list` shows every documented task and alias.
+- A fresh development install with the docs extra exposes `uv run inv`.
+- `uv run inv --list` shows every documented task and alias.
 - Documentation and static-check tasks work from the repository root and a
   nested directory.
 - `checks` never edits files and includes Vulture.

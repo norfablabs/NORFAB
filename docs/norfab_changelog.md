@@ -1,3 +1,11 @@
+# 0.26.3 (draft)
+
+## ENHANCEMENTS
+
+1. Project development now uses uv. Docker images continue installing dependencies with pip. Use `uv sync` and `uv run` in place of Poetry; published package extras and entry points are unchanged.
+
+---
+
 # 0.26.2
 
 ## ENHANCEMENTS

@@ -13,17 +13,17 @@ precedence over service `.env` files.
 From the repository root, use Invoke for normal development runs:
 
 ```bash
-poetry run inv docker-tests-config
-poetry run inv docker-tests-build
-poetry run inv docker-tests-core
-poetry run inv docker-tests-nornir
-poetry run inv docker-tests-netbox --parallel-runs=2
-poetry run inv docker-tests-all
-poetry run inv docker-tests-distributed
-poetry run inv docker-profile-idle
+uv run inv docker-tests-config
+uv run inv docker-tests-build
+uv run inv docker-tests-core
+uv run inv docker-tests-nornir
+uv run inv docker-tests-netbox --parallel-runs=2
+uv run inv docker-tests-all
+uv run inv docker-tests-distributed
+uv run inv docker-profile-idle
 ```
 
-Run `poetry run inv --help docker-tests-nornir` for test selector, marker,
+Run `uv run inv --help docker-tests-nornir` for test selector, marker,
 keyword, image build, Python-version, and file-parallel options. Direct Compose
 commands below remain useful for troubleshooting.
 
@@ -35,9 +35,9 @@ default directory.
 NetBox also has one Invoke runner per `test_*.py` file. For example:
 
 ```bash
-poetry run inv docker-tests-netbox-devices
-poetry run inv docker-tests-netbox-bgp
-poetry run inv docker-tests-netbox-crud
+uv run inv docker-tests-netbox-devices
+uv run inv docker-tests-netbox-bgp
+uv run inv docker-tests-netbox-crud
 ```
 
 These are dynamic `docker compose run` invocations, not duplicate services in
@@ -77,7 +77,7 @@ canonical inventory there, excluding runtime data and Python caches. Its logs
 and JUnit artifacts live in that copy's `__norfab__` directory; report discovery
 includes them automatically. Per-file runs use the same layout within each
 shard. Before running FileSharing directly with Compose, run
-`poetry run inv docker-tests-prepare` to refresh its inventory copy.
+`uv run inv docker-tests-prepare` to refresh its inventory copy.
 
 ```text
 docker/norfab-docker-tests/
@@ -240,13 +240,13 @@ excludes the first 30 seconds as warm-up, then reports whether the post-warm-up
 measurements are stable:
 
 ```bash
-poetry run inv docker-profile-idle
-poetry run inv docker-profile-idle --duration=120 --interval=2
+uv run inv docker-profile-idle
+uv run inv docker-profile-idle --duration=120 --interval=2
 ```
 
 The default limits are 10% average CPU, 20% p95 CPU, 32 MiB memory growth, and
 10 MiB block-write growth. All limits are configurable; use
-`poetry run inv --help docker-profile-idle` for the complete option list. Add
+`uv run inv --help docker-profile-idle` for the complete option list. Add
 `--fail-unstable` when threshold violations should fail automation. Samples are
 written to `idle-norfab/__norfab__/artifacts/idle-profile.csv`, and the profiling
 container is removed after every run, including interrupted or failed runs.
@@ -255,7 +255,7 @@ To repeat `parse_ttp(get="vrrp")` against two local FakeNOS devices and record
 broker, Nornir worker, and client file descriptor counts, run:
 
 ```bash
-poetry run inv docker-profile-fds --duration=120
+uv run inv docker-profile-fds --duration=120
 ```
 
 This uses a separate `fd-profile-norfab` service so the idle measurements retain
@@ -332,9 +332,9 @@ Add `--parallel-runs=N` to any individual Invoke suite task to discover its
 containers running concurrently:
 
 ```bash
-poetry run inv docker-tests-netbox --parallel-runs=2
-poetry run inv docker-tests-nornir --parallel-runs=2
-poetry run inv docker-tests-nfcli --parallel-runs=2
+uv run inv docker-tests-netbox --parallel-runs=2
+uv run inv docker-tests-nornir --parallel-runs=2
+uv run inv docker-tests-nfcli --parallel-runs=2
 ```
 
 Invoke derives suite roots from `tests/services/<suite>`,
@@ -437,7 +437,7 @@ broker runtime folder. The broker public key value is also stored in
 inventories render that value into `broker.shared_key`. The broker private key
 is not mounted into worker or client containers.
 
-`poetry run inv docker-tests-distributed` checks the cached public certificate
+`uv run inv docker-tests-distributed` checks the cached public certificate
 for the `distributed-core-tests` client before startup. If it differs from the
 checked-in broker public certificate, rerun with `--force-certificates`. Only
 the two explicitly named client-runtime public-key files are replaced; the

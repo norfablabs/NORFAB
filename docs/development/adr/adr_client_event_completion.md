@@ -172,9 +172,9 @@ both Windows and Linux; report any platform not exercised.
 
 Local Windows / Python 3.13, following the testing framework:
 
-- `poetry run pytest core -q -k 'not load_inventory_from_dictionary'`:
+- `uv run pytest core -q -k 'not load_inventory_from_dictionary'`:
   152 passed, 1 skipped, 1 deselected.
-- `poetry run pytest services/filesharing -q`: 71 passed, using both FileSharing workers.
+- `uv run pytest services/filesharing -q`: 71 passed, using both FileSharing workers.
 - Black checks and `git diff --check` passed. Ruff reported no new findings
   compared with HEAD; existing annotation findings remain.
 
@@ -187,7 +187,7 @@ from the completed core run. Linux was not exercised in this initial Part 1 run.
 Local Windows / Python 3.13:
 
 - Native `socket.socketpair()` readiness was verified with the ZeroMQ poller.
-- `poetry run pytest core services/filesharing -q -k 'not load_inventory_from_dictionary'`:
+- `uv run pytest core services/filesharing -q -k 'not load_inventory_from_dictionary'`:
   226 passed, 1 skipped, 1 deselected, using both FileSharing workers.
 - Checks cover idle sends, multiple producers, more than two outgoing batches,
   incoming broker replies, a full notification buffer, external exit, and repeated shutdown.

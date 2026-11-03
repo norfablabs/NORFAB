@@ -1,6 +1,6 @@
 """Repository development tasks.
 
-Run ``poetry run inv --list`` to discover commands. Paths are anchored to this
+Run ``uv run inv --list`` to discover commands. Paths are anchored to this
 file so tasks behave the same way from the repository root or a subdirectory.
 """
 
@@ -331,7 +331,7 @@ def package_build(_context):
     _run([npm, "--prefix", NFWEB_FRONTEND_DIR, "run", "build"])
     shutil.rmtree(NFWEB_NODE_MODULES_DIR)
     print(f"Removed generated dependencies: {NFWEB_NODE_MODULES_DIR}", flush=True)
-    _run(["poetry", "build"])
+    _run(["uv", "build"])
 
 
 @task(name="format")

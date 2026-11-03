@@ -54,6 +54,10 @@ docker compose -f docker/norfab-docker-dev/docker-compose.yaml \
 The printed path should be under
 `/usr/local/lib/pythonX.Y/site-packages/norfab`.
 
+The image installs published dependencies with pip. To install dependencies
+from the checkout, use the
+[test environment](testing/norfab_testing_framework.md#docker-test-environment).
+
 ## Apply code changes
 
 Python source changes are immediately visible inside the container, but the

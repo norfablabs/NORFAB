@@ -1,5 +1,38 @@
 # NORFAB Testing Framework
 
+## Set up the development environment
+
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then run
+these commands from the repository root:
+
+```bash
+uv sync --locked --python 3.12 --extra full --extra docs
+uv run inv --list
+```
+
+uv creates a local `.venv`; shell activation is optional when using `uv run`.
+Python 3.12 supports all service extras, including FakeNOS (Python 3.11-3.12).
+For core development only, use `uv sync --locked`; add `--extra <name>` for
+individual services or `--extra docs` for documentation tools. Development tools
+are installed by default.
+
+When migrating an existing checkout, stop using its Poetry environment and run
+`uv sync` to create the uv environment. Run commands with `uv run` and select
+extras with `uv sync --extra <name>`.
+
+Dependencies and extras are declared in `pyproject.toml`; commit `uv.lock` after
+changing them. Use `uv add <package>`, `uv add --dev <tool>`, or
+`uv add --optional <extra> <package>`. Run `uv lock` after editing dependencies
+manually. `uv sync --locked` checks that the lockfile matches the project.
+To update a pinned dependency, change its version in `pyproject.toml` and run
+`uv lock`; `uv lock --upgrade` refreshes transitive dependencies within the
+existing constraints.
+
+Docker images install dependencies with pip. The test image installs the
+checkout with the `full` extra and pytest; runtime images install from PyPI.
+Docker installs do not use `uv.lock`. Rebuild test images after changing project
+dependencies.
+
 ## TL;DR
 
 For local debugging, run pytest from `tests/` with the required services available:
@@ -8,18 +41,18 @@ For local debugging, run pytest from `tests/` with the required services availab
 # Enter the test root so relative pytest paths resolve.
 cd tests
 # Run the Nornir worker tests locally.
-poetry run pytest services/nornir/test_worker.py
+uv run pytest services/nornir/test_worker.py
 ```
 
 For isolated Docker runs, return to the repository root and use Invoke:
 
 ```bash
 # Build the Docker images used by the test suites.
-poetry run inv docker-tests-build
+uv run inv docker-tests-build
 # Run only the Nornir suite in Docker.
-poetry run inv docker-tests-nornir
+uv run inv docker-tests-nornir
 # Run all regular suites and write one consolidated report.
-poetry run inv docker-tests-all
+uv run inv docker-tests-all
 ```
 
 Choose a suite run or the all-suites run. Invoke prints `Docker test report: <path>`; open that file under `docker/norfab-docker-tests/reports/` for the final result.
@@ -28,19 +61,19 @@ Choose a suite run or the all-suites run. Invoke prints `Docker test report: <pa
 
 Tests follow the code layout: `tests/core/`, `tests/services/<service>/`, `tests/clients/`, and `tests/nfcli/`. Shared fixtures are in `tests/conftest.py`; integration test inventory is in `tests/nf_tests_inventory/`. NetBox test helpers are in `tests/services/netbox/common.py`, with seed data in `tests/netbox_data.py`.
 
-Run pytest through Poetry from `tests/`:
+Run pytest through uv from `tests/`:
 
 ```bash
 # Enter the test root so relative pytest paths resolve.
 cd tests
 # Run the full Nornir test directory.
-poetry run pytest services/nornir
+uv run pytest services/nornir
 # Run one NetBox test class.
-poetry run pytest services/netbox/test_interfaces.py::TestGetInterfaces
+uv run pytest services/netbox/test_interfaces.py::TestGetInterfaces
 # Run only NetBox get_interfaces tests.
-poetry run pytest services/netbox -m "netbox and netbox_get_interfaces"
+uv run pytest services/netbox -m "netbox and netbox_get_interfaces"
 # Run NFCLI tests with printed output and individual test names.
-poetry run pytest nfcli -s -v
+uv run pytest nfcli -s -v
 ```
 
 Use a directory, file, class, or method path to narrow collection; use `-m` for registered service or task markers. Local integration tests start NorFab through fixtures and need their configured external services. Local pytest shows its results in the terminal and does not create an Invoke Markdown report.
@@ -147,7 +180,7 @@ Use a directory, file, class, or method path to narrow collection; use `-m` for 
 - Use integration tests through the public client interface and the `nfclient` fixture whenever possible. Exercise real services and assert observable results.
 - Keep each test small and focused on one behavior. Use only the setup, data, and assertions needed to verify it.
 - Prefer extending related tests for new behavior when they remain focused. Create a dedicated test when existing tests cover unrelated behavior.
-- Group tests in `Test...` classes. Put service markers on test files and register new task markers in `pyproject.toml`.
+- Group tests in `Test...` classes. Put service markers on test files and register new task markers in `pytest_configure` in `tests/conftest.py`.
 - Keep test data explicit, clean up only data created by the test, and make cleanup safe after partial failures. Reuse shared seed records for read-only references; create owned records for mutations.
 
 ### NetBox test data ownership
@@ -160,32 +193,32 @@ Invoke runs pytest in isolated Docker Compose containers using the shared test i
 
 ```bash
 # List all available Invoke commands.
-poetry run inv --list
+uv run inv --list
 
 # Check the Docker Compose test configuration without starting containers.
-poetry run inv docker-tests-config
+uv run inv docker-tests-config
 # Build images for every test suite.
-poetry run inv docker-tests-build
+uv run inv docker-tests-build
 
 # Build only the Nornir test image.
-poetry run inv docker-tests-build --suite=nornir
+uv run inv docker-tests-build --suite=nornir
 # Rebuild the Nornir image before running its suite.
-poetry run inv docker-tests-nornir --build
+uv run inv docker-tests-nornir --build
 
 # Run all tests in the Nornir suite.
-poetry run inv docker-tests-nornir
+uv run inv docker-tests-nornir
 # Run one Nornir test file in the suite container.
-poetry run inv docker-tests-nornir --selector=tests/services/nornir/test_worker.py
+uv run inv docker-tests-nornir --selector=tests/services/nornir/test_worker.py
 # Run only NetBox get_devices tests.
-poetry run inv docker-tests-netbox --marker="netbox and netbox_get_devices"
+uv run inv docker-tests-netbox --marker="netbox and netbox_get_devices"
 
 # Run the NetBox CRUD file in a dedicated container.
-poetry run inv docker-tests-netbox-crud
+uv run inv docker-tests-netbox-crud
 # Run Nornir files in separate containers, at most two concurrently.
-poetry run inv docker-tests-nornir --parallel-runs=2
+uv run inv docker-tests-nornir --parallel-runs=2
 ```
 
-Suite names are `core`, `nornir`, `netbox`, `fakenos`, `containerlab`, `workflow`, `agent`, `fastmcp`, `fastapi`, `filesharing`, `dummy`, and `nfcli`. `docker-tests-all` runs the regular suites concurrently; run `docker-tests-containerlab` separately. The distributed topology uses `docker-tests-distributed`. The default suite run collects its test directory and applies its service marker. `--selector` accepts a directory, file, or pytest node ID; `--marker`, `--keyword`, and `--pytest-args` narrow the run. The default NetBox suite runs each `test_*.py` file in a dedicated container. See `poetry run inv --help docker-tests-nornir` for all options.
+Suite names are `core`, `nornir`, `netbox`, `fakenos`, `containerlab`, `workflow`, `agent`, `fastmcp`, `fastapi`, `filesharing`, `dummy`, and `nfcli`. `docker-tests-all` runs the regular suites concurrently; run `docker-tests-containerlab` separately. The distributed topology uses `docker-tests-distributed`. The default suite run collects its test directory and applies its service marker. `--selector` accepts a directory, file, or pytest node ID; `--marker`, `--keyword`, and `--pytest-args` narrow the run. The default NetBox suite runs each `test_*.py` file in a dedicated container. See `uv run inv --help docker-tests-nornir` for all options.
 
 ### Run Compose directly
 

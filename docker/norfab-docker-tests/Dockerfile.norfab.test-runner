@@ -27,7 +27,7 @@ RUN apt-get update && \
 
 WORKDIR /build-src
 
-COPY pyproject.toml poetry.lock README.md ./
+COPY pyproject.toml README.md ./
 COPY norfab ./norfab
 
 # Install dependencies from this checkout, then pytest as the test runner.

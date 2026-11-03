@@ -58,18 +58,18 @@ Follow the [documentation style guide](docs/development/documentation_style_guid
 
 ## Development Commands
 
-Use Poetry and Invoke from the repository root. List available tasks with `poetry run inv --list`.
+Use uv and Invoke from the repository root. Set up with `uv sync --locked --python 3.12 --extra full --extra docs` (Python 3.12 for all services). List available tasks with `uv run inv --list`.
 
 ```bash
-poetry run inv checks             # Non-mutating Black, Ruff, and Vulture checks
-poetry run inv format             # Format with Black
-poetry run inv lint               # Run Ruff
-poetry run inv dead-code          # Report dead code without suppression or auto-fixes
-poetry run inv docs-build
-poetry run inv docs-serve
-poetry run inv docker-tests-build
-poetry run inv docker-tests-core
-poetry run inv docker-tests-all
+uv run inv checks             # Non-mutating Black, Ruff, and Vulture checks
+uv run inv format             # Format with Black
+uv run inv lint               # Run Ruff
+uv run inv dead-code          # Report dead code without suppression or auto-fixes
+uv run inv docs-build
+uv run inv docs-serve
+uv run inv docker-tests-build
+uv run inv docker-tests-core
+uv run inv docker-tests-all
 ```
 
 ## Task-Specific Guides

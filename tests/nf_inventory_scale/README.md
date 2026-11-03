@@ -26,7 +26,7 @@ FakeNOS startup dependency.
 Start NFWeb from the repository root:
 
 ```shell
-poetry run nfcli -i tests/nf_inventory_scale/inventory.yaml --web-ui
+uv run nfcli -i tests/nf_inventory_scale/inventory.yaml --web-ui
 ```
 
 The first environment start fetches approximately 16 MB across 100 NOS profiles

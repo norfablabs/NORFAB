@@ -5,7 +5,7 @@ FROM python:${PYTHON_VERSION}-slim-trixie
 RUN apt-get update && \
     apt-get install --no-install-recommends -y openssh-client && \
     apt-get clean && \
-    pip install --no-cache-dir pip setuptools wheel poetry --upgrade
+    pip install --no-cache-dir pip setuptools wheel --upgrade
 
 RUN pip install --no-cache-dir norfab --upgrade && \
     pip install --no-cache-dir norfab[nornirservice] --upgrade
