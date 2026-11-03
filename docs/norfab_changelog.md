@@ -1,5 +1,9 @@
 # 0.26.2 (Unreleased)
 
+## ENHANCEMENTS
+
+1. Workers send stored compressed job results directly to clients, reducing network traffic and avoiding decompression on workers. Clients decode results before processing them.
+
 ## BUGS
 
 1. NetBox `design_deploy` handles ASNs immediately after devices, allowing ASN custom fields to reference devices created by the same design.

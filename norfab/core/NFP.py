@@ -37,6 +37,10 @@ PUT = b"0x10"
 # NORFAB Protocol MMI commands, as strings
 MMI = b"0x11"
 
+# Final job responses carry the stored result envelope after an encoding prefix.
+PAYLOAD_ZLIB_PREFIX = b"NFP-RESULT-ZLIB:"
+PAYLOAD_JSON_PREFIX = b"NFP-RESULT-JSON:"
+
 commands = [
     b"OPEN",
     b"READY",

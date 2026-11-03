@@ -872,7 +872,17 @@ def zmq_send_recv(client: object) -> None:
             continue
 
         try:
-            payload = orjson.loads(msg[6])
+            data = msg[6]
+            if data.startswith(NFP.PAYLOAD_ZLIB_PREFIX):
+                payload = orjson.loads(
+                    zlib.decompress(memoryview(data)[len(NFP.PAYLOAD_ZLIB_PREFIX) :])
+                )["result"]
+            elif data.startswith(NFP.PAYLOAD_JSON_PREFIX):
+                payload = orjson.loads(memoryview(data)[len(NFP.PAYLOAD_JSON_PREFIX) :])[
+                    "result"
+                ]
+            else:
+                payload = orjson.loads(data)
         except Exception as e:
             client.monitoring.record_receive_failure()
             log.error(

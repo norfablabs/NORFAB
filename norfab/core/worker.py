@@ -1048,6 +1048,7 @@ class JobDatabase:
         uuid: str,
         include_result: bool = False,
         include_events: bool = False,
+        decompress_result: bool = True,
     ) -> dict:
         """
         Get comprehensive job information including status, execution data, and optionally result data and events.
@@ -1056,6 +1057,7 @@ class JobDatabase:
             uuid (str): Job UUID.
             include_result (bool): If True, include result_data in the response. Defaults to False.
             include_events (bool): If True, include job events. Defaults to False.
+            decompress_result (bool): If False, return result_data without decompressing it.
 
         Returns:
             dict: Job information with the following fields:
@@ -1071,7 +1073,8 @@ class JobDatabase:
                 - timeout: Job timeout
 
             If include_result=True, also includes:
-                - result_data: Result data dictionary (if available)
+                - result_data: Result data dictionary, or stored bytes when
+                  decompress_result=False (if available)
 
             If include_events=True, also includes:
                 - job_events: List of event dictionaries
@@ -1116,7 +1119,7 @@ class JobDatabase:
             result["kwargs"] = self._decompress_data(row["kwargs"]).get("kwargs", {})
 
             # Include result data if requested
-            if include_result and row["result_data"]:
+            if include_result and decompress_result and row["result_data"]:
                 result["result_data"] = self._decompress_data(row["result_data"])
 
             # Include events if requested
@@ -1402,7 +1405,9 @@ def _get(worker, get_queue, destroy_event) -> None:
 
     This function handles GET requests intelligently based on job status:
     - If job is PENDING or STARTED: Returns current status with timestamps
-    - If job is COMPLETED or FAILED: Returns full job results
+    - If job is COMPLETED or FAILED: Returns the stored result envelope unchanged,
+      prefixed with its JSON or zlib encoding. Task failures use transport status
+      200, with failure details inside the result.
     - If job is not found: Returns 404 error
 
     Args:
@@ -1425,7 +1430,9 @@ def _get(worker, get_queue, destroy_event) -> None:
             "uuid": uuid_str,
             "service": worker.service.decode("utf-8"),
         }
-        job_info = worker.db.get_job_info(uuid_str, include_result=True)
+        job_info = worker.db.get_job_info(
+            uuid_str, include_result=True, decompress_result=False
+        )
 
         if job_info is None:
             # Job not found
@@ -1443,16 +1450,18 @@ def _get(worker, get_queue, destroy_event) -> None:
             if running_job and running_job.pending_input_request:
                 payload["input_request"] = running_job.pending_input_request
         elif job_info["status"] in ("COMPLETED", "FAILED"):
-            result_dict = job_info.get("result_data")
-            status = result_dict.get("status_code", "200").encode("utf-8")
-            payload = result_dict["result"]
+            status = b"200"
+            prefix = NFP.PAYLOAD_JSON_PREFIX
+            if worker.db.jobs_compress:
+                prefix = NFP.PAYLOAD_ZLIB_PREFIX
+            payload = prefix + job_info["result_data"]
         else:
             # Unknown status
             status = b"500"
             payload["status"] = f"UNKNOWN STATUS: {job_info['status']}"
 
         reply.append(status)
-        reply.append(orjson.dumps(payload))
+        reply.append(payload if isinstance(payload, bytes) else orjson.dumps(payload))
         worker.send_to_broker(NFP.RESPONSE, reply)
         get_queue.task_done()
 
