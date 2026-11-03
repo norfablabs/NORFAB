@@ -80,7 +80,7 @@ nornirservice = [
 netboxservice = [
     "requests==2.34.2",
     "pynetbox==7.8.0",
-    "diskcache==5.6.3",
+    "diskcache-community==5.8.2",
     "httpx==0.28.1",
     "datamodel-code-generator==0.85.0",
     "deepdiff==9.1.0",
@@ -90,7 +90,7 @@ fastapiservice = [
     "fastapi[standard]==0.143.3",
     "uvicorn==0.54.0",
     "python-multipart==0.0.32",
-    "diskcache==5.6.3",
+    "diskcache-community==5.8.2",
 ]
 robot = [
     "robotframework==7.5",
@@ -117,7 +117,7 @@ clientagent = [
 ]
 fastmcpservice = [
     "mcp==1.30.0",
-    "diskcache==5.6.3",
+    "diskcache-community==5.8.2",
 ]
 fakenosservice = [
     "fakenos==1.2.1; python_version >= \"3.11\" and python_version < \"3.13\"",
@@ -157,7 +157,7 @@ full = [
     "dnspython==2.8.0",
     "pythonping==1.1.4",
     "pynetbox==7.8.0",
-    "diskcache==5.6.3",
+    "diskcache-community==5.8.2",
     "httpx==0.28.1",
     "datamodel-code-generator==0.85.0",
     "deepdiff==9.1.0",

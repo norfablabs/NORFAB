@@ -918,12 +918,12 @@ wheels = [
 ]
 
 [[package]]
-name = "diskcache"
-version = "5.6.3"
+name = "diskcache-community"
+version = "5.8.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/3f/21/1c1ffc1a039ddcc459db43cc108658f32c57d271d7289a2794e401d0fdb6/diskcache-5.6.3.tar.gz", hash = "sha256:2c3a3fa2743d8535d832ec61c2054a1641f41775aa7c556758a109941e33e4fc", size = 67916, upload-time = "2023-08-31T06:12:00.316Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0d/f4/35b9ad1bc1637d5680e739f9891f01951af16e34c6be2d4d94f37f390bcc/diskcache_community-5.8.2.tar.gz", hash = "sha256:440b558c4841688c05f11c28bf21a18662a3f2f5f90afc0a1f0d277cd7e90403", size = 130095, upload-time = "2026-11-02T22:33:05.946Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3f/27/4570e78fc0bf5ea0ca45eb1de3818a23787af9b390c0b0a0033a1b8236f9/diskcache-5.6.3-py3-none-any.whl", hash = "sha256:5e31b2d5fbad117cc363ebaf6b689474db18a1f6438bc82358b024abd4c2ca19", size = 45550, upload-time = "2023-08-31T06:11:58.822Z" },
+    { url = "https://files.pythonhosted.org/packages/1f/da/1205bee8c006c896475f7c8aa629ca9f7ce0ff1f6b233f2bb2e72b59248e/diskcache_community-5.8.2-py3-none-any.whl", hash = "sha256:1e079c4eb12672cd432029929a8b338ef855d737bc51324edb098d36dfd2f632", size = 78990, upload-time = "2026-11-02T22:33:04.625Z" },
 ]
 
 [[package]]
@@ -3485,20 +3485,20 @@ fakenosservice = [
     { name = "fakenos", marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
 ]
 fastapiservice = [
-    { name = "diskcache" },
+    { name = "diskcache-community" },
     { name = "fastapi", extra = ["standard"] },
     { name = "python-multipart" },
     { name = "uvicorn" },
 ]
 fastmcpservice = [
-    { name = "diskcache" },
+    { name = "diskcache-community" },
     { name = "mcp" },
 ]
 full = [
     { name = "cerberus" },
     { name = "datamodel-code-generator" },
     { name = "deepdiff" },
-    { name = "diskcache" },
+    { name = "diskcache-community" },
     { name = "dnspython" },
     { name = "fakenos", marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
     { name = "fastapi", extra = ["standard"] },
@@ -3555,7 +3555,7 @@ full = [
 netboxservice = [
     { name = "datamodel-code-generator" },
     { name = "deepdiff" },
-    { name = "diskcache" },
+    { name = "diskcache-community" },
     { name = "httpx" },
     { name = "markdown-it-py" },
     { name = "pynetbox" },
@@ -3622,10 +3622,10 @@ requires-dist = [
     { name = "datamodel-code-generator", marker = "extra == 'netboxservice'", specifier = "==0.85.0" },
     { name = "deepdiff", marker = "extra == 'full'", specifier = "==9.1.0" },
     { name = "deepdiff", marker = "extra == 'netboxservice'", specifier = "==9.1.0" },
-    { name = "diskcache", marker = "extra == 'fastapiservice'", specifier = "==5.6.3" },
-    { name = "diskcache", marker = "extra == 'fastmcpservice'", specifier = "==5.6.3" },
-    { name = "diskcache", marker = "extra == 'full'", specifier = "==5.6.3" },
-    { name = "diskcache", marker = "extra == 'netboxservice'", specifier = "==5.6.3" },
+    { name = "diskcache-community", marker = "extra == 'fastapiservice'", specifier = "==5.8.2" },
+    { name = "diskcache-community", marker = "extra == 'fastmcpservice'", specifier = "==5.8.2" },
+    { name = "diskcache-community", marker = "extra == 'full'", specifier = "==5.8.2" },
+    { name = "diskcache-community", marker = "extra == 'netboxservice'", specifier = "==5.8.2" },
     { name = "dnspython", marker = "extra == 'full'", specifier = "==2.8.0" },
     { name = "dnspython", marker = "extra == 'nornirservice'", specifier = "==2.8.0" },
     { name = "fakenos", marker = "python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'fakenosservice'", specifier = "==1.2.1" },
