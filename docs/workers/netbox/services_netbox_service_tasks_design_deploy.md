@@ -199,14 +199,14 @@ Each design section contains a list of object records. The rows show the order i
 | 10 | `roles` | `netbox.ipam.roles` | `name` | - |
 | 11 | `rirs` | `netbox.ipam.rirs` | `name` | - |
 | 12 | `asn_ranges` | `netbox.ipam.asn_ranges` | `name` | Ranges are not site-scoped. |
-| 13 | `asns` | `netbox.ipam.asns` | `asn` | Explicit numbers are matched globally. `create_asn` allocates from a named range. Supports `sites` and `role`. |
-| 14 | `vlan_groups` | `netbox.ipam.vlan_groups` | `name` | Scope by rack, location, site, site group, region, cluster, or cluster group. |
-| 15 | `vlans` | `netbox.ipam.vlans` | `group`, `vid` | VLANs with a specified ID require both fields. Existing VLANs gain new tags and custom-field list items. `create_vlan` allocates a VID. Direct VLAN `site` is unsupported. |
-| 16 | `route_targets` | `netbox.ipam.route_targets` | `name` | VRF and L2VPN references can inline target dictionaries. |
-| 17 | `vrfs` | `netbox.ipam.vrfs` | `name`, `rd` | Import/export route targets accept named definitions or query filters. Existing target lists gain missing targets. |
-| 18 | `l2vpns` | `netbox.vpn.l2vpns` | `name` | Import/export route targets accept named definitions or query filters. Existing target lists gain missing targets. Nested terminations are flattened. Named VLAN terminations also populate `vlans`. |
-| 19 | `prefixes` | `netbox.ipam.prefixes` | `prefix`, `vrf` | Explicit prefixes can select location, site, site group, or region scope, and refer to a VLAN by `{group, vid}`. Existing prefixes gain new tags and custom-field list items. `create_prefix` supports site scope and VLAN association through `vlan` (VID) plus `vlan_group` (name). |
-| 20 | `devices` | `netbox.dcim.devices` | `name`. `tenant` disambiguates duplicate names | Nested components are flattened before writes. |
+| 13 | `vlan_groups` | `netbox.ipam.vlan_groups` | `name` | Scope by rack, location, site, site group, region, cluster, or cluster group. |
+| 14 | `vlans` | `netbox.ipam.vlans` | `group`, `vid` | VLANs with a specified ID require both fields. Existing VLANs gain new tags and custom-field list items. `create_vlan` allocates a VID. Direct VLAN `site` is unsupported. |
+| 15 | `route_targets` | `netbox.ipam.route_targets` | `name` | VRF and L2VPN references can inline target dictionaries. |
+| 16 | `vrfs` | `netbox.ipam.vrfs` | `name`, `rd` | Import/export route targets accept named definitions or query filters. Existing target lists gain missing targets. |
+| 17 | `l2vpns` | `netbox.vpn.l2vpns` | `name` | Import/export route targets accept named definitions or query filters. Existing target lists gain missing targets. Nested terminations are flattened. Named VLAN terminations also populate `vlans`. |
+| 18 | `prefixes` | `netbox.ipam.prefixes` | `prefix`, `vrf` | Explicit prefixes can select location, site, site group, or region scope, and refer to a VLAN by `{group, vid}`. Existing prefixes gain new tags and custom-field list items. `create_prefix` supports site scope and VLAN association through `vlan` (VID) plus `vlan_group` (name). |
+| 19 | `devices` | `netbox.dcim.devices` | `name`. `tenant` disambiguates duplicate names | Nested components are flattened before writes. |
+| 20 | `asns` | `netbox.ipam.asns` | `asn` | Explicit numbers are matched globally. `create_asn` allocates from a named range. Supports `sites` and `role`. |
 | 21 | `interfaces` | `netbox.dcim.interfaces` | `device`, `name` | Independent interfaces are written before those with `parent`, `lag`, or `bridge`. |
 | 22 | `l2vpn_terminations` | `netbox.vpn.l2vpn_terminations` | Attached interface or VLAN | Attachments require `l2vpn` and either `device` with `interface`, or VLAN `group` with `vid`. An attachment already used by another L2VPN is rejected. |
 | 23 | `power_ports` | `netbox.dcim.power_ports` | `device`, `name` | Nested connection is flattened. |

@@ -15,7 +15,7 @@ FastAPI service supports bearer token REST API authentication. To handle tokens 
 |---|---:|---|
 | `username` | Required for create and username-scoped delete/list | User name associated with one or more bearer tokens. |
 | `token` | Required for check and token-scoped delete | Bearer token value. If omitted on create, the worker generates one. |
-| `expire` | No | Token expiration time in seconds. If omitted, the token does not expire. |
+| `expire` | No | Token expiration time in seconds. If omitted, uses inventory `auth_bearer.token_ttl`. By default, tokens do not expire. |
 | `workers` | No | FastAPI workers to target. Defaults to all workers. |
 
 ## Output
@@ -38,7 +38,7 @@ Create, delete, and check tasks return booleans per worker. List tasks return st
         nf#
         ```
 
-        `expire` is optional and indicates token expiration time in seconds. If no `expire` argument is provided, the token does not expire. Multiple tokens can be stored for any given user.
+        `expire` sets the token expiration time in seconds. If omitted, the worker uses inventory `auth_bearer.token_ttl`. Tokens do not expire when this setting is absent or `null`. Multiple tokens can be stored for any given user.
 
         List stored tokens for a specific user:
 

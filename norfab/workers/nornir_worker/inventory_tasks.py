@@ -446,8 +446,10 @@ class InventoryTasks:
             }
             if isinstance(load_netbox, dict):
                 kwargs.update(load_netbox)
-            kwargs["branch"] = load_netbox_branch
-            kwargs["instance"] = load_netbox_instance
+            if load_netbox_branch is not None:
+                kwargs["branch"] = load_netbox_branch
+            if load_netbox_instance is not None:
+                kwargs["instance"] = load_netbox_instance
             kwargs.pop("filters", None)
             kwargs["devices"] = list(inventory["hosts"])
             timeout = max(10, kwargs.pop("timeout", 100))

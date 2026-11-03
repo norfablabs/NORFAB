@@ -28,7 +28,7 @@ Sample FasAPI worker inventory definition
 ``` yaml title="fastapi/fastapi-worker-1.yaml"
 service: fastapi
 auth_bearer:
-  token_ttl: None
+  token_ttl: null
 
 # below parameters passed onto app = FastAPI(**fastapi_inventory) 
 # https://fastapi.tiangolo.com/reference/fastapi/#fastapi.FastAPI

@@ -1,3 +1,14 @@
+# 0.26.2 (Unreleased)
+
+## BUGS
+
+1. NetBox `design_deploy` handles ASNs immediately after devices, allowing ASN custom fields to reference devices created by the same design.
+2. NFCLI job lookup logs an error and returns an empty list when the requested UUID is not found.
+3. NFCLI `netbox create ip bulk` accepts an omitted interface list without crashing.
+4. Containerlab inventory import preserves NetBox branch and instance settings in `load_netbox` when separate overrides are omitted.
+
+---
+
 # 0.26.1
 
 ## BUGS

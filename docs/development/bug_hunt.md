@@ -224,14 +224,6 @@ Each entry distinguishes reproduced behavior from static code-path evidence. Sev
 - **Evidence:** actual temporary Git repository probe: initial cloned, injected copy OSError failed, retry unchanged, published text old instead of new.
 - **Proposed fix:** compare fetched SHA against last successfully published revision; update that revision only after swap succeeds. Retry failed publication even when checkout unchanged.
 
-### 58. Containerlab enrichment discards dictionary branch and instance
-
-- **Severity:** High when branch selects staging inventory; wrong branch/instance read.
-- **Location:** `norfab/workers/nornir_worker/inventory_tasks.py:446-450`.
-- **Trigger:** `nornir_inventory_load_containerlab(load_netbox={"branch":"review","instance":"secondary"})` without separate override args. kwargs.update retains options then unconditional assignments replace both with None. Docstring explicitly promises dictionary values when overrides omitted.
-- **Evidence:** probe captured forwarded kwargs branch=None,instance=None.
-- **Proposed fix:** apply separate branch/instance overrides only when supplied.
-
 ### 59. Nornir inventory reload crashes when Netbox is not configured
 
 - **Severity:** Medium; public task cannot be used on a worker with no netbox setting (or False/null).
@@ -362,22 +354,6 @@ Each entry distinguishes reproduced behavior from static code-path evidence. Sev
 - **Proposed fix:** Keep per-library-instance state and clear it in a `finally` block around each job keyword. Add a Robot integration case with a failing keyword followed by another keyword that should use default targeting.
 - **Evidence:** Code-path inspection of all three job keywords and global state cleanup. No Robot suite run.
 
-### 42. NFCLI `create ip bulk` crashes when the optional interface list is omitted
-
-- **Severity:** Medium for a documented optional CLI argument.
-- **Location:** `norfab/clients/nfcli_shell/netbox/netbox_picle_shell_create_ip_bulk.py:35-40,66-79`.
-- **Trigger:** Run the bulk IP command without `interface-list`. The model declares `interface_list` optional with default `None`, but `CreateIpBulk.run` evaluates `"[" in kwargs["interface_list"]` unconditionally. If the key is absent it raises `KeyError`; if present as `None` it raises `TypeError`, before submitting any job.
-- **Proposed fix:** Parse JSON only when `interface_list` is a string. Keep the optional argument absent or `None` when not supplied. Add a public shell command test for bulk IP allocation without an interface list.
-- **Evidence:** Model and command-path inspection. No NetBox job run.
-
-### 66. NFCLI job lookup crashes for an unknown UUID
-
-- **Severity:** Low.
-- **Location:** `norfab/clients/nfcli_shell/norfab_jobs_shell.py:63-75`; nullable DB contract `norfab/core/client.py:432-449`.
-- **Trigger:** `show jobs uuid <missing-uuid>` without details. `get_job` returns None, command makes `[None]`, then indexes `j["uuid"]`.
-- **Evidence:** Isolated call of public `NorFabJobsShellCommands.run(uuid='missing')` with mock public client DB returning None reproduces `TypeError: 'NoneType' object is not subscriptable` at line 75.
-- **Proposed fix:** Return an empty list or explicit job-not-found message before projecting rows; test missing and present IDs.
-
 ### 67. FastAPI token listing crashes with verbose results or a failed worker
 
 - **Severity:** Medium.
@@ -492,22 +468,6 @@ Each entry distinguishes reproduced behavior from static code-path evidence. Sev
 - **Trigger:** Copy policy rejecting nornir tasks cfg_deploy and cfg_rollback. Neither is a public Nornir task; actual configuration task is cfg. Default policy action is allow, so cfg remains exposed despite the example claiming to block destructive tasks. The allow-specific example also does not expose the intended cfg task.
 - **Evidence:** norfab/workers/fastmcp_worker/fastmcp_worker.py:87-105 exact task glob matching and default allow; norfab/workers/nornir_worker/cfg_task.py:92 def cfg; no cfg_deploy/cfg_rollback definitions in current workers.
 - **Proposed fix:** Replace stale names with actual task names (cfg, plus any intentionally restricted tasks such as netconf edits/gNMI/SNMP mutations). Explain the example scope and verify policy with actual discovery names.
-
-### 76. FastAPI inventory example makes default bearer token creation fail
-
-- **Severity:** Medium.
-- **Location:** docs/workers/fastapi/services_fastapi_service_inventory.md:30-31.
-- **Trigger:** Copy auth_bearer.token_ttl: None and create a token without explicit expire. YAML parses None as a string, not null; bearer_token_store forwards it to diskcache expire. diskcache raises TypeError when adding float current time to string.
-- **Evidence:** norfab/workers/fastapi_worker/fastapi_worker.py:531-546 reads configured TTL unchanged. Reproduction in isolated TemporaryDirectory using yaml.safe_load and diskcache.Cache printed parsed value 'None' (str) and TypeError unsupported operand type(s) for +: 'float' and 'str'. No fabric or external service required.
-- **Proposed fix:** Use token_ttl: null. Add inventory validation for positive integer/null at the boundary if improving implementation later.
-
-### 77. FastAPI token docs promise no expiry even when a default TTL is configured
-
-- **Severity:** Low.
-- **Location:** docs/workers/fastapi/services_fastapi_service_task_auth.md:18,41; docs/workers/fastapi/services_fastapi_service.md:89.
-- **Trigger:** Configure auth_bearer.token_ttl, then follow documented claim that omitting expire creates a nonexpiring token. Implementation applies configured TTL, so automation credentials unexpectedly expire relative to documented behavior.
-- **Evidence:** bearer_token_store at norfab/workers/fastapi_worker/fastapi_worker.py:531-534; own docstring correctly describes inventory fallback.
-- **Proposed fix:** Say omitted expire uses configured token_ttl; token is nonexpiring only if both are unset/null.
 
 ### 78. Installation guide promises FakeNOS on unsupported Python 3.10
 

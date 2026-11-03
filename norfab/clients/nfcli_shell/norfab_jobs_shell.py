@@ -1,4 +1,5 @@
 import builtins
+import logging
 from enum import Enum
 from typing import Any, List, Union
 
@@ -10,6 +11,8 @@ from pydantic import (
     StrictInt,
     StrictStr,
 )
+
+log = logging.getLogger(__name__)
 
 
 class JobStatus(str, Enum):
@@ -66,7 +69,11 @@ class NorFabJobsShellCommands(BaseModel):
 
         if uuid:
             jobs = NFCLIENT.job_db.get_job(uuid)
-            jobs = [jobs]
+            if jobs is None:
+                log.error("job '%s' not found", uuid)
+                jobs = []
+            else:
+                jobs = [jobs]
         else:
             jobs = NFCLIENT.job_db.fetch_jobs(**kwargs)
 

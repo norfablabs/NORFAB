@@ -86,7 +86,7 @@ nf#fastapi auth create-token username foo token 4565t4yjn56h534gh35h543h5h45h4h4
 nf#
 ```
 
-`expire` argument is optional and indicates token expiration time in seconds, if no `expire` argument provided token does not expire. Multiple tokens can be stored for any given user.
+`expire` sets the token expiration time in seconds. If omitted, the worker uses inventory `auth_bearer.token_ttl`. Tokens do not expire when this setting is absent or `null`. Multiple tokens can be stored for any given user.
 
 Refer to [auth tasks documentation](services_fastapi_service_task_auth.md) for further details on how to work with FastAPI tokens.
 

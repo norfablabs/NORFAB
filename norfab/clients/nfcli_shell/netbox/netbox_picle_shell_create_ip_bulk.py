@@ -57,12 +57,12 @@ class CreateIpBulk(
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
-        print(kwargs)
+        interface_list = kwargs.get("interface_list") or ""
 
         if "{" in kwargs["prefix"] and "}" in kwargs["prefix"]:
             kwargs["prefix"] = json.loads(kwargs["prefix"])
-        if "[" in kwargs["interface_list"] and "]" in kwargs["interface_list"]:
-            kwargs["interface_list"] = json.loads(kwargs["interface_list"])
+        if "[" in interface_list and "]" in interface_list:
+            kwargs["interface_list"] = json.loads(interface_list)
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
