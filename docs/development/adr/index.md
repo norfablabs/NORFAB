@@ -4,6 +4,7 @@ These documents record design decisions and development work. Statuses below ref
 
 | Document | Recorded status |
 | --- | --- |
+| [ADR - Service-Owned Configuration Graph and Reconciliation](adr_service_owned_configuration_graph.md) | Draft |
 | [ADR - Shared Core Backend for Client and Worker Agents](adr_shared_agent_backend.md) | Implemented (MVP) |
 | [ADR - File Sharing Git Remotes](adr_extensible_data_sources_and_git_sync.md) | Accepted |
 | [ADR - Lightweight Generic File Transfer](adr_generic_file_transfer.md) | Accepted |

@@ -284,6 +284,7 @@ nav:
   - Known Issues: development/bug_hunt.md
   - Architecture Design Records:
     - Index: development/adr/index.md
+    - Service-Owned Configuration Graph: development/adr/adr_service_owned_configuration_graph.md
     - Shared Agent Backend: development/adr/adr_shared_agent_backend.md
     - Packaged Python Service Plugins: development/adr/adr_service_plugin_module.md
     - Client Completion Events and Socket Wake-Up: development/adr/adr_client_event_completion.md
