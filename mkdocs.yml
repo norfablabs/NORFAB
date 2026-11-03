@@ -309,6 +309,7 @@ nav:
     - NFAPI Client First Startup: development/adr/adr_nfapi_client_first_startup.md
     - MCP Task Prompt Plan: development/adr/adr_mcp_task_prompts_plan.md
     - Norfab AAA Security Architecture: development/adr/adr_norfab_aaa_security_architecture.md
+    - Username and Password Application Login: development/adr/adr_norfab_username_password_login.md
     - Norfab Logging Isolation: development/adr/adr_norfab_logging_isolation.md
     - Invoke Developer Automation: development/adr/adr_invoke_developer_automation.md
     - NFWeb Platform and First 3D Topology: development/adr/adr_web_ui_topology_architecture.md

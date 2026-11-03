@@ -1,6 +1,6 @@
 # Active bug hunt
 
-Reviewed against the working tree on 1 November 2026. Only current, actionable behavioral defects and documentation discrepancies are listed. Existing finding IDs are preserved; gaps identify removed findings. New findings start at 45. No production code or tracked tests were changed.
+Reviewed against the working tree on 1 November 2026, with additional core findings and evidence merged on 3 November 2026. Findings list current, actionable behavioral defects and documentation discrepancies; separate sections record code reduction opportunities and unmeasured performance candidates. Existing finding IDs are preserved; gaps identify removed findings. The additional core findings start at 79. No production code or tracked tests were changed.
 
 Each entry distinguishes reproduced behavior from static code-path evidence. Severity reflects the stated trigger, not an unconditional impact. External Netbox, network-device, Containerlab and Robot integration scenarios were not run. This is a broad audit, not proof that unlisted paths are bug-free.
 
@@ -9,10 +9,10 @@ Each entry distinguishes reproduced behavior from static code-path evidence. Sev
 ### 7. `delete_fetched_files` can delete outside its cache directory
 
 - **Severity:** High. A caller of the public client method can accidentally remove unrelated local files or directories.
-- **Location:** `norfab/core/client.py:1835-1873`.
+- **Location:** `norfab/core/client.py:1845-1883`; exposed as a worker task at `norfab/core/worker.py:2785`.
 - **Trigger:** Pass an absolute path or a path beginning with `..` as `filepath`. `os.path.join(files_folder, filepath)` accepts both; the absolute path replaces `files_folder`, and `..` escapes it. The method then calls `os.remove` or `shutil.rmtree` on glob matches without checking that their resolved paths remain under `fetchedfiles`.
-- **Proposed fix:** Resolve the cache root and every matched path and reject any match whose `os.path.commonpath` is not the cache root. Validate the supplied pattern before glob expansion as well. Apply the same containment approach already used by `fetch_file` in fetch_file. Add a public-client test using a temporary sibling file that must remain intact after an escaping pattern.
-- **Evidence:** Code-path inspection and a non-destructive Python check showing that `os.path.join` preserves `..` and replaces the base for absolute paths. I did not call the deletion method.
+- **Proposed fix:** Resolve the cache root and every matched path, require strict containment below the root, and account for symlinks/junctions. Validate the supplied pattern before glob expansion as well. Add a public-client test using a temporary sibling file that must remain intact after an escaping pattern.
+- **Evidence:** An isolated call to the actual deletion method with an absolute path outside the cache reached `os.remove`. Deletion was mocked; the temporary sibling file remained intact.
 
 ### 12. Task input validation discards Pydantic's converted values
 
@@ -113,7 +113,7 @@ Each entry distinguishes reproduced behavior from static code-path evidence. Sev
 ### 54. Completed job futures and unconsumed events accumulate for the entire client lifetime
 
 - **Severity:** Medium for long-running clients.
-- **Location:** `norfab/core/client.py:682,699,1383-1386,2338,2463-2464`.
+- **Location:** `norfab/core/client.py:690,702,1393-1396,2348`.
 - **Trigger:** Repeated run_job calls, including normal polling dashboards, retain every future in client.job_futures. Each future retains its final result snapshot and unbounded event queue even when the caller never requests events. Dispatcher scans all retained futures every iteration, so memory and idle scanning cost grow with total historical jobs.
 - **Evidence:** Complete reference search found insertion and reads but no eviction/removal path; events are always queued. No load test run.
 - **Proposed fix:** Remove completed futures from the client's active registry while allowing caller-held handles to remain usable, and define bounded retention for unconsumed events.
@@ -121,10 +121,74 @@ Each entry distinguishes reproduced behavior from static code-path evidence. Sev
 ### 55. Worker result reads do not enforce the submitting client's ownership
 
 - **Severity:** High for confidentiality between fabric clients.
-- **Location:** `norfab/core/worker.py:1420-1456` (contrast PUT ownership check at `:1304-1306`).
+- **Location:** `norfab/core/worker.py:1433-1465,2538-2614` (contrast PUT ownership check at `:1309-1310`).
 - **Trigger:** A different connected client sends GET for a known job UUID. _get retrieves solely by UUID and returns persisted results to the requester without comparing job_info.client_address. Result payloads can contain configuration or secrets. UUID knowledge is required; this is not a claim that UUIDs can be guessed.
-- **Evidence:** Complete GET lookup/routing path inspected; ownership is persisted in the job record but unused here.
-- **Proposed fix:** Require requester ownership before returning state/results and cover cross-client reads through the public protocol.
+- **Evidence:** An isolated call to the actual GET loop returned transport 200 and the owner's saved result to a different client. Static inspection also found no caller ownership checks in `job_details` or `job_list`.
+- **Proposed fix:** Require requester ownership before returning state/results or listing jobs and cover cross-client reads through the public protocol. For application login, persist a broker-authenticated principal rather than trusting a routing identity; distinguish administrator access explicitly.
+
+### 79. CURVE connections do not establish application identity or worker trust
+
+- **Severity:** High when reachable peers are not fully trusted; blocks secure multiuser application login.
+- **Location:** `norfab/core/broker.py:259,286,403,638,710,976,1006`.
+- **Trigger:** A reachable peer with the broker public key connects using its own CURVE key. The broker accepts every key, selects client/worker handling from the message header, and accepts worker names/services from READY. No application identity or permission check protects task dispatch, MMI, or inventory. ROUTER_HANDOVER also accepts reconnects using an existing routing identity.
+- **Evidence:** Complete authentication and dispatch paths inspected; no live impersonation attempted. This is compatible with a trusted-peer deployment model, but does not isolate users or authenticate worker roles.
+- **Proposed fix:** Authenticate users and machines separately and enforce permissions before routing. The application login design is recorded in the proposed [username and password login ADR](adr/adr_norfab_username_password_login.md).
+
+### 80. An incomplete READY registration can crash the broker
+
+- **Severity:** High.
+- **Location:** `norfab/core/broker.py:433,489,638-646`.
+- **Trigger:** A worker sends READY without its service frame. `require_worker` inserts a worker before parsing finishes. The receive handler catches IndexError, but the worker remains without `keepaliver`; the next `purge_workers` raises AttributeError outside that handler and ends mediation.
+- **Evidence:** Isolated calls to the actual broker methods reproduced the registration error followed by the purge crash.
+- **Proposed fix:** Validate the full command frame shape before registration and publish only a fully initialized worker. Ensure failed initialization leaves no registry entry.
+
+### 81. A malformed POST can kill the worker's request thread
+
+- **Severity:** High.
+- **Location:** `norfab/core/worker.py:1347-1355`.
+- **Trigger:** Invalid JSON, a non-object JSON value, or short request frames fail before `_post` enters its exception handler. The sole POST consumer exits while the worker continues advertising heartbeats; subsequent jobs accumulate without execution.
+- **Evidence:** Invalid JSON escaped an isolated call to the actual POST loop as JSONDecodeError.
+- **Proposed fix:** Validate framing and payload shape at the boundary, contain errors per request, and put `task_done` in finally. Return a correlated error where routing frames are usable. Check other receive handlers for equivalent uncaught parsing errors.
+
+### 82. Fast acknowledgements can regress jobs to SUBMITTING
+
+- **Severity:** High when completion events are missed.
+- **Location:** `norfab/core/client.py:1268-1275,1318,263-285`.
+- **Trigger:** The receiver processes broker 202 or worker 201 after POST is enqueued but before the dispatcher stores SUBMITTING. That later write overwrites DISPATCHED/STARTED. Periodic GET excludes SUBMITTING, so a missed completion event leaves the job waiting until expiry despite an available worker result.
+- **Evidence:** An isolated response delivered during the send call changed the job to DISPATCHED, then the dispatcher regressed it to SUBMITTING.
+- **Proposed fix:** Atomically claim NEW -> SUBMITTING before enqueueing, use conditional subsequent transitions, and handle enqueue failure explicitly. Locking individual SQL statements does not resolve the ordering problem.
+
+### 83. Full outbound queues silently drop critical messages
+
+- **Severity:** Medium under queue saturation.
+- **Location:** `norfab/core/client.py:1268,1715-1724`; `norfab/core/worker.py:1926-1935`.
+- **Trigger:** Both send methods catch queue.Full, log, and return normally. A dropped POST still becomes SUBMITTING without retry; dropped PUT/STREAM chunks can stall file transfers, and worker responses/events can also be lost.
+- **Evidence:** An isolated call with a full client queue rejected POST without raising or reporting failure to its caller. Worker behavior established by the equivalent code path.
+- **Proposed fix:** Use explicit backpressure or an enqueue failure outcome and keep unsent jobs retryable. Distinguish retryable polls/notifications from job creation and binary chunks. Make duplicate POST acceptance idempotent before retrying submissions; the current INSERT rejects duplicate UUIDs without returning the existing acknowledgement/result.
+
+### 84. Worker restart strands claimed jobs
+
+- **Severity:** Medium after worker process death.
+- **Location:** `norfab/core/worker.py:962-987,1709,3058-3073`.
+- **Trigger:** A claimed job is persisted as STARTED, but worker startup does not reconcile STARTED or WAITING_CLIENT_INPUT records left by process death. The scheduler only selects PENDING jobs, so interrupted jobs remain stuck.
+- **Evidence:** Closing and reopening the actual worker database after a claim preserved STARTED and returned no schedulable job. Full process-kill recovery was not exercised.
+- **Proposed fix:** Finalize interrupted jobs with an explicit failure unless the task is explicitly safe to resume/retry. Do not automatically rerun potentially destructive network operations. Test death during execution and input waits.
+
+### 85. Worker executor backlog is unbounded and prematurely marked STARTED
+
+- **Severity:** Medium for large backlogs; can substantially delay shutdown.
+- **Location:** `norfab/core/worker.py:962,3054-3073`.
+- **Trigger:** The scheduler drains PENDING rows into ThreadPoolExecutor without waiting for execution capacity. `max_concurrent_jobs` limits executing threads, but submitted futures queue without a bound and all claimed rows become STARTED. Discarded futures hide exceptions outside the task handler. Executor context exit waits for submitted work, including queued jobs.
+- **Evidence:** Scheduler, claim, and executor lifecycle paths inspected; no load benchmark run.
+- **Proposed fix:** Keep backlog in SQLite, claim only when a slot is free, observe submitted futures, and define shutdown behavior for queued/running jobs. Python threads cannot forcibly cancel arbitrary executing tasks.
+
+### 86. Task-declared failures count as completed jobs
+
+- **Severity:** Medium for job history and monitoring accuracy.
+- **Location:** `norfab/core/worker.py:2993,3022,2812`.
+- **Trigger:** A task returns `Result(failed=True)` without raising. The executor sets `job_failed=False`, stores COMPLETED, logs successful completion, and omits the failure from failed-job counts.
+- **Evidence:** An isolated registered task returning a failed Result was persisted as COMPLETED by the actual executor method.
+- **Proposed fix:** Derive persisted outcome from the returned failure flag as well as exceptions. Preserve transport 200 for retrieving saved results if that is the public contract; keep transport and execution outcomes distinct.
 
 ## Workers
 
@@ -477,7 +541,31 @@ Each entry distinguishes reproduced behavior from static code-path evidence. Sev
 - **Evidence:** Explicit dependency Python marker and extras mapping in pyproject.toml:111,227-229.
 - **Proposed fix:** State Python 3.11–3.12 for this service; distinguish from core Python support.
 
+## Code reduction opportunities
+
+1. `norfab/core/broker.py:754–812`: normalize the target once, select candidates once, then intersect with service membership (except the explicit `all` service). This removes duplicated JSON/list parsing and addresses finding 46: an explicit worker name/list currently selects globally even for another service. Cross-service selection was reproduced. Restricting routing by service is also a prerequisite for service-scoped permissions.
+2. `norfab/core/client.py:1658`, `norfab/core/broker.py:520`, `norfab/core/worker.py:1887`: message-builder branches for POST/GET/PUT/MMI repeat the same framing. Their corresponding builders in `norfab/core/NFP.py` are identical within each direction. Prefer one canonical builder per envelope shape with command validation; preserve wire format and public methods. Leave distinct READY/heartbeat/event envelopes explicit.
+3. `norfab/core/worker.py:990–1035`: completion/failure persistence repeats the same UPDATE shape. A small internal finish operation accepting outcome would clarify the `Result.failed` decision in finding 86 and error fallback. Avoid a generic database framework.
+4. Both databases have similar thread-local connection/transaction setup. First fix connection ownership and shutdown semantics; only share a small connection utility if it actually removes duplication. `close()` currently closes only the calling thread's connection despite the worker docstring saying all connections. No immediate resource-leak claim is made because thread exit may release other connections.
+5. Remove stale API descriptions when changing these areas: the client class docstring lists absent post/get/get_iter methods; worker socket-loop documentation lists DELETE handling without a consumer. Keep task docstrings and lowercase log/event conventions accurate.
+
+## Performance candidates and measurements
+
+No throughput or latency improvement has been benchmarked. Prioritize findings 83, 85, and 54 before micro-optimizations.
+
+| Candidate | Evidence in code | Measure before changing |
+| --- | --- | --- |
+| Avoid database reads per binary chunk | `norfab/core/client.py:1182` calls get_job for every stream frame, hydrating/decompressing arguments and results | Large-file throughput, receiver CPU, SQL calls per MB; use transfer state for immutable fields while preserving terminal-state checks |
+| Narrow poll/event database reads | `_get` loads/decompresses args and kwargs even for status/result polling; handle_event hydrates a complete client job | Poll cost versus large arguments/results; use a narrow query where it materially reduces work |
+| Avoid full payload formatting/logging | `norfab/core/client.py:1711`, `norfab/core/worker.py:1922`, `norfab/core/broker.py:394`, `norfab/core/broker.py:834` eagerly interpolate entire messages, including binary chunks | CPU/allocation profile with DEBUG disabled/enabled; lazy logging and frame-size summaries also reduce secret exposure |
+| Schedule broker maintenance by deadline | `send_due_keepalives` and `purge_workers` scan all workers per broker iteration; dispatch performs another purge | Broker CPU/p95 routing latency versus worker count; a bounded maintenance cadence may suffice before a heap/timer design |
+| Match SQLite indexes to actual queries | Worker selection filters status and orders created_at; client polling filters status/poll age and orders creation | EXPLAIN QUERY PLAN and representative database sizes; consider composite indexes only when they change the plan and win against write overhead |
+| Avoid MMI requeue spinning | `norfab/core/client.py:1798–1816` repeatedly takes and requeues unrelated UUID replies | CPU and fairness under concurrent MMI, late replies, and timeouts; route responses to pending requests by UUID |
+
 ## Validation and coverage
+
+- Additional core review on 3 November 2026: nine isolated probes confirmed incomplete READY/purge failure, wrong-service routing, malformed POST escape, stranded STARTED jobs after database reopen, escaping file deletion (mocked), acknowledgement state regression, task-failure misclassification, cross-client GET access, and silent outbound POST rejection. Temporary state was local; no live hostile traffic or destructive deletion was used.
+- Additional check: `poetry run pytest tests/core/test_worker_jobs_stats.py -q --override-ini cache_dir=private/pytest-cache` — **1 passed**. Full integration/load tests were not run for this core review. The temporary review report and probe script were removed after their findings were merged here.
 
 - Core inventory tests: **24 passed**. NFAPI lifecycle/logging tests: **16 passed, 1 deselected** (shared-service fixture excluded). Tests ran through Poetry, with the testing guide's `tests/` working directory and `--confcutdir=core` for isolation.
 - Isolated NFWeb Python suite: **46 passed, 6 failed**. Five failures are missing `process.threads` in monitoring fixtures (28); the sixth is the FakeNOS IPv6 getter fixture mismatch listed above. Command: `poetry run pytest -q tests/clients/nfweb --confcutdir=tests/clients/nfweb --disable-warnings --tb=short`.

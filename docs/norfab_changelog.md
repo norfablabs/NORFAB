@@ -1,4 +1,4 @@
-# 0.26.2 (Unreleased)
+# 0.26.2
 
 ## ENHANCEMENTS
 

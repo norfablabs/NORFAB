@@ -26,6 +26,7 @@ These documents record design decisions and development work. Statuses below ref
 | [ADR: NFWeb Browser Terminal](adr_nfweb_browser_terminal_application.md) | Not stated |
 | [ADR: NFWeb Scale-Test Environment](adr_nfweb_scale_test_environment.md) | Not stated |
 | [ADR - Norfab AAA and Encrypted Transport Architecture](adr_norfab_aaa_security_architecture.md) | Proposed |
+| [ADR - NorFab Username and Password Application Login](adr_norfab_username_password_login.md) | Proposed |
 | [ADR - Docker-Based Parallel Testing Framework](adr_norfab_docker_parallel_testing.md) | Proposed |
 | [ADR - NorFab Future-Based Interactive Client](adr_norfab_interactive_client.md) | Proposed |
 | [ADR - NorFab Library Logging and Per-Process Log Files](adr_norfab_logging_isolation.md) | Accepted |
