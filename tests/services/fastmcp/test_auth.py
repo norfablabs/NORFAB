@@ -2,7 +2,7 @@ import asyncio
 from datetime import datetime
 
 import pytest
-from diskcache import FanoutCache
+from diskcache_community import FanoutCache
 
 from norfab.workers.fastmcp_worker.fastmcp_worker import DiskcacheBearerTokenVerifier
 

@@ -13,7 +13,7 @@ from typing import Any, Iterator, Optional
 
 import orjson
 import uvicorn
-from diskcache import FanoutCache
+from diskcache_community import FanoutCache, SafeDisk
 from mcp import types
 from mcp.server.auth.provider import AccessToken
 from mcp.server.auth.settings import AuthSettings
@@ -553,6 +553,7 @@ class FastMCPWorker(NFPWorker):
             shards=4,
             timeout=1,  # 1 second
             size_limit=1073741824,  #  1 GigaByte
+            disk=SafeDisk.with_options(on_error="miss"),
         )
 
     def worker_exit(self) -> None:
