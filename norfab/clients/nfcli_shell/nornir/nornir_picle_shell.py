@@ -6,23 +6,19 @@ from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
     Field,
+    StrictBool,
     StrictStr,
 )
 
 from norfab.workers.nornir_worker.nornir_models import (
     GetInventoryInput,
-    GetNornirHostsInput,
     RefreshNornirInput,
 )
 
 from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 from .nornir_picle_shell_cfg import NornirCfgShell
 from .nornir_picle_shell_cli import NornirCliShell
-from .nornir_picle_shell_common import (
-    NorniHostsFilters,
-    TabulateTableModel,
-    tabulate_worker_results,
-)
+from .nornir_picle_shell_common import NorniHostsFilters
 from .nornir_picle_shell_diagram import NornirDiagramShell
 from .nornir_picle_shell_file_copy import NornirFileCopyShell
 from .nornir_picle_shell_gnmi import NornirGnmiShell
@@ -43,60 +39,63 @@ log = logging.getLogger(__name__)
 
 
 class NornirShowHostsModel(
-    GetNornirHostsInput,
     NorniHostsFilters,
-    TabulateTableModel,
     ClientRunJobArgs,
+    extra="forbid",
     use_enum_values=True,
     populate_by_name=True,
 ):
+    brief: StrictBool = Field(
+        False,
+        description="Show host lists grouped by worker",
+        json_schema_extra={"presence": True},
+    )
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def run(*args: object, **kwargs: object):
-        # extract Tabulate arguments
-        table = kwargs.pop("table", {})  # tabulate
-        headers = kwargs.pop("headers", "keys")  # tabulate
-        headers_exclude = kwargs.pop("headers_exclude", [])  # tabulate
-        sortby = kwargs.pop("sortby", "host")  # tabulate
-        reverse = kwargs.pop("reverse", False)  # tabulate
+    def run(*args: object, **kwargs: object) -> Any:
+        brief = kwargs.pop("brief", False)
+        verbose_result = kwargs.setdefault("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
+        kwargs["details"] = not brief
 
-        # run task
         result = NorniHostsFilters.get_nornir_hosts(**kwargs)
-
         if nowait:
             return result, Outputters.outputter_nested
 
-        # form table results
-        if table:
-            if table is True or table == "brief":
-                table = {"tablefmt": "grid", "showindex": True}
-            table_result = {}
-            for w_name, w_res in result.items():
-                if isinstance(w_res, list):
-                    table_result[w_name] = [{"host": item} for item in w_res]
-                elif isinstance(w_res, dict):
-                    table_result[w_name] = [
-                        {"host": host, **host_data} for host, host_data in w_res.items()
-                    ]
-                else:
-                    return result
-            ret = tabulate_worker_results(
-                result=table_result,
-                table=table,
-                headers=headers,
-                headers_exclude=headers_exclude,
-                sortby=sortby,
-                reverse=reverse,
-            )
-        else:
-            ret = result
+        if brief or verbose_result or not isinstance(result, dict):
+            return result
 
-        return ret
+        rows = []
+        for worker, hosts in result.items():
+            if not isinstance(hosts, dict) or any(
+                not isinstance(data, dict) for data in hosts.values()
+            ):
+                return result
+            rows.extend(
+                {"host": host, **data, "worker": worker} for host, data in hosts.items()
+            )
+        rows.sort(key=lambda row: row["host"])
+        rows = [{"index": index, **row} for index, row in enumerate(rows, start=1)]
+        return (
+            rows,
+            Outputters.outputter_rich_table,
+            {
+                "headers": [
+                    "index",
+                    "worker",
+                    "host",
+                    "platform",
+                    "hostname",
+                    "port",
+                    "groups",
+                    "username",
+                ],
+            },
+        )
 
 
 class ShowWatchDogModel(NorniHostsFilters):

@@ -11,7 +11,7 @@ from pydantic import (
     StrictStr,
 )
 
-from ..common import log_error_or_result, run_future_job
+from ..common import log_error_or_result
 
 # ---------------------------------------------------------------------------------------------
 # COMMON FUNCTIONS
@@ -287,7 +287,7 @@ class NorniHostsFilters(BaseModel):
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result")
 
-        result = run_future_job(
+        result = builtins.NFCLIENT.run_job(
             "nornir",
             "get_nornir_hosts",
             workers=workers,

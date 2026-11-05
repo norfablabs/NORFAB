@@ -1362,11 +1362,13 @@ class NetboxIpTasks:
                 for ip_data in (intf_data.get("ipv4_addresses") or []) + (
                     intf_data.get("ipv6_addresses") or []
                 ):
-                    ip = ip_data["ip"]
                     parsed_ip_role = ip_data.get("ip_address_role") or None
                     if parsed_ip_role in ("vrrp", "glbp", "hsrp", "carp"):
                         continue
-                    host_address = ipaddress.ip_interface(str(ip)).ip
+                    # Normalize IPv6 spellings for NetBox matching
+                    ip = ipaddress.ip_interface(str(ip_data["ip"]))
+                    host_address = ip.ip  # Host address object without the prefix length.
+                    ip = str(ip)
                     if filter_prefix_net and host_address not in filter_prefix_net:
                         continue
                     if filter_by_ip and not fnmatch.fnmatch(
