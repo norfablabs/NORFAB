@@ -7,13 +7,11 @@ This is a design contract, not an already available API.
 
 | Public task | Backend verb | NFCLI command | Payload |
 | --- | --- | --- | --- |
-| http_get | get | nornir http get | none |
-| http_post | post | nornir http post | json or data |
-| http_put | put | nornir http put | json or data |
-| http_patch | patch | nornir http patch | json or data |
-| http_delete | delete | nornir http delete | none |
-| http_head | head | nornir http head | none |
-| http_options | options | nornir http options | none |
+| restconf_get | get | nornir restconf get | none |
+| restconf_post | post | nornir restconf post | json or data |
+| restconf_put | put | nornir restconf put | json or data |
+| restconf_patch | patch | nornir restconf patch | json or data |
+| restconf_delete | delete | nornir restconf delete | none |
 
 Public task names fix the operation; callers do not supply method or plugin. _run_http is internal.
 Each task accepts the relevant fields in ../data-model.md and returns HttpResult.
@@ -23,7 +21,7 @@ Each task accepts the relevant fields in ../data-model.md and returns HttpResult
 ```python
 result = nfclient.run_job(
     "nornir",
-    "http_get",
+    "restconf_get",
     workers="nornir-worker-1",
     kwargs={
         "FL": ["ceos-spine-1", "ceos-spine-2"],
@@ -42,7 +40,7 @@ with the same absolute URL sends two independent operations to that URL.
 ```python
 result = nfclient.run_job(
     "nornir",
-    "http_patch",
+    "restconf_patch",
     workers="nornir-worker-1",
     kwargs={
         "FL": ["ceos-spine-1"],
@@ -60,14 +58,14 @@ context helpers can contact other services; tests must use only their declared o
 ## Shell
 
 ```text
-nf# nornir http get FL ceos-spine-1 url openconfig-system:system/state/hostname request-timeout 10
-nf# nornir http patch FL ceos-spine-1 url <owned-resource> json nf://http/owned-resource-patch.json.j2
+nf# nornir restconf get FL ceos-spine-1 url openconfig-system:system/state/hostname request-timeout 10
+nf# nornir restconf patch FL ceos-spine-1 url <owned-resource> json nf://http/owned-resource-patch.json.j2
 ```
 
 Shell request-timeout maps to request_timeout. Existing timeout remains job waiting, workers
 selects workers, and nowait/verbose-result keep existing shell semantics. Shell classes inherit
-operation inputs and only override fields that need JSON/list parsing. Register one NornirHttpShell
-subshell with seven operation commands and existing output/piping behavior.
+operation inputs and only override fields that need JSON/list parsing. Register one NornirRestconfShell
+subshell with five operation commands and existing output/piping behavior.
 
 ## Results and Failures
 
@@ -91,8 +89,9 @@ ResultSerializer contracts. HEAD and successful empty responses can return an em
 Errors follow existing Nornir result conventions and identify failed hosts; no new error taxonomy.
 One host failure does not erase another host result. No-match performs no request or template fetch.
 
-HTTP execution does not retry, including when the worker normally uses RetryRunner. No retry machinery is introduced. Redirects remain backend HTTP behavior and are not a retry guarantee.
-Finite request_timeout is connect/read inactivity timeout, not a total job wall-clock deadline.
+NorFab adds no retry loop and uses the configured Nornir runner exactly as NETCONF does.
+RetryRunner and existing run_* controls determine retries. request_timeout is HTTP connect/read
+waiting, distinct from job timeout.
 
 ## Inventory and Request Precedence
 

@@ -135,6 +135,11 @@ nav:
       - gNMI Get: workers/nornir/services_nornir_service_tasks_gnmi_get.md
       - gNMI Get Capabilities: workers/nornir/services_nornir_service_tasks_gnmi_get_capabilities.md
       - gNMI Set: workers/nornir/services_nornir_service_tasks_gnmi_set.md
+      - RESTCONF GET: workers/nornir/services_nornir_service_tasks_restconf_get.md
+      - RESTCONF POST: workers/nornir/services_nornir_service_tasks_restconf_post.md
+      - RESTCONF PUT: workers/nornir/services_nornir_service_tasks_restconf_put.md
+      - RESTCONF PATCH: workers/nornir/services_nornir_service_tasks_restconf_patch.md
+      - RESTCONF DELETE: workers/nornir/services_nornir_service_tasks_restconf_delete.md
       - NETCONF Cancel Commit: workers/nornir/services_nornir_service_tasks_netconf_cancel_commit.md
       - NETCONF Commit Configuration: workers/nornir/services_nornir_service_tasks_netconf_commit.md
       - NETCONF Copy Configuration: workers/nornir/services_nornir_service_tasks_netconf_copy_config.md
@@ -322,6 +327,6 @@ nav:
     - Nornir Create Hosts from NetBox Devices: development/adr/adr_nornir_create_hosts_from_netbox_devices.md
     - Single-Owner ZeroMQ Socket I/O: development/adr/adr_norfab_single_owner_zeromq_socket_io.md
   - Testing:
-    - NORFAB Testing Framework: development/testing/norfab_testing_framework.md
+    - NORFAB Developing and Testing Framework: development/norfab_developing_and_testing_framework.md
 
 - Contact Us: norfab_help_with_norfab.md

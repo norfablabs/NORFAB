@@ -54,6 +54,7 @@ def pytest_configure(config: pytest.Config) -> None:
         "nornir_parse: Nornir parse task tests",
         "nornir_runtime_inventory: Nornir runtime_inventory task tests",
         "nornir_netconf: Nornir NETCONF task tests",
+        "nornir_restconf: Nornir RESTCONF task tests",
         "nornir_gnmi: Nornir gNMI task tests",
         "nornir_snmp: Nornir snmp task tests",
         "nornir_task: Nornir task task tests",

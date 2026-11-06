@@ -8,5 +8,36 @@ management security
 management api restconf
    transport https default
       ssl profile restconf
+
+ip access-list lab-control-plane
+   10 permit ip any any
+
+system control-plane
+   ip access-group lab-control-plane in
+
+do write
+{% elif host.platform == "cisco_ios" %}
+ip domain lookup
+ip name-server vrf clab-mgmt 1.1.1.1
+ntp server vrf clab-mgmt time.cloudflare.com
+
+crypto key generate rsa general-keys label RESTCONF-KEY modulus 2048
+
+crypto pki trustpoint RESTCONF-TP
+ enrollment selfsigned
+ subject-name CN={{ host.name }}
+ revocation-check none
+ rsakeypair RESTCONF-KEY
+ exit
+
+! Enroll interactively and accept the self-signed certificate prompts.
+! crypto pki enroll RESTCONF-TP
+
+ip http authentication local
+no ip http secure-server
+ip http secure-trustpoint RESTCONF-TP
+ip http secure-server
+restconf
+
 do write
 {% endif %}

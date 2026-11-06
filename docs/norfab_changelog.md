@@ -1,5 +1,9 @@
 # 0.26.3 (draft)
 
+## FEATURES
+
+1. Added Nornir RESTCONF GET, POST, PUT, PATCH and DELETE tasks with OpenConfig interfaces, LLDP and system getters, inline/nf:// payload templates and CLI, Python, FastAPI and MCP usage guides.
+
 ## BUGS
 
 1. Netbox `sync_device_ip` normalizes live IP addresses before matching existing records, preventing equivalent IPv6 spellings from being treated as new addresses.
@@ -7,10 +11,9 @@
 ## CHANGES
 
 1. Project development now uses uv. Docker images continue installing dependencies with pip. Use `uv sync` and `uv run` in place of Poetry; published package extras and entry points are unchanged.
+2. Feature development now follows Spec Kit specifications, plans and tasks under `docs/development/specs/` instead of feature ADRs, with [installation and workflow instructions](development/norfab_developing_and_testing_framework.md#develop-features-with-spec-kit). ADRs remain for separate architecture decisions.
+3. NFCLI `show nornir hosts` displays a detailed Rich table by default. Use `brief` for host lists grouped by worker; the `details` and `table` options are removed from this command.
 
-## ENHANCEMENTS
-
-1. NFCLI `show nornir hosts` displays a detailed Rich table by default. Use `brief` for host lists grouped by worker; the `details` and `table` options are removed from this command.
 
 ---
 

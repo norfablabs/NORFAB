@@ -354,3 +354,109 @@ The port and encryption settings must match the device's gNMI service.
     For an encrypted Junos service, use `insecure: false` and `path_cert` as in
     the With Encryption tab. Keep `no_qos_marking: true`.
 
+
+## RESTCONF connection inventory
+
+Configure RESTCONF tasks using `connection_options.http`. Username and password inherit
+from the host or its groups. Set the HTTP port explicitly when the host's main port is SSH.
+
+=== "Arista EOS"
+
+    Configure the HTTP connection in Nornir inventory:
+
+    ```yaml
+    connection_options:
+      http:
+        port: 6020
+        extras:
+          transport: https
+          verify: true
+          base_url: restconf/data
+          timeout: 10
+          headers:
+            Accept: application/yang-data+json
+            Content-Type: application/yang-data+json
+    ```
+
+    Enable RESTCONF over HTTPS on the device. This example generates a self-signed
+    certificate for a lab. An existing certificate and SSL profile can also be used.
+
+    ```text
+    configure terminal
+    security pki certificate generate self-signed restconf.crt key restconf.key generate rsa 2048 parameters common-name restconf
+    management security
+       ssl profile restconf
+          certificate restconf.crt key restconf.key
+       exit
+    exit
+    management api restconf
+       transport https default
+          ssl profile restconf
+    end
+    show management api restconf
+    ```
+
+    Verify that the server is running on port `6020` in the VRF containing the management
+    interface. The control-plane ACL must permit TCP `6020`. Enabling RESTCONF does not automatically add an ACL rule.
+
+=== "Cisco IOS XE"
+
+    Configure the HTTP connection in Nornir inventory:
+
+    ```yaml
+    connection_options:
+      http:
+        port: 443
+        extras:
+          transport: https
+          verify: true
+          base_url: restconf/data
+          timeout: 10
+          headers:
+            Accept: application/yang-data+json
+            Content-Type: application/yang-data+json
+    ```
+
+    Enable RESTCONF over HTTPS on the device. This lab example creates a dedicated
+    RSA key and self-signed certificate. An existing certificate and matching key
+    can also be used. Replace the certificate name with your device hostname.
+
+    ```text
+    configure terminal
+    crypto key generate rsa general-keys label RESTCONF-KEY modulus 2048
+    crypto pki trustpoint RESTCONF-TP
+     enrollment selfsigned
+     subject-name CN=router1.example.com
+     revocation-check none
+     rsakeypair RESTCONF-KEY
+     exit
+    crypto pki enroll RESTCONF-TP
+    ```
+
+    Answer the enrollment prompts to generate the self-signed certificate, then enable
+    HTTPS using that trustpoint. This example uses an existing local user account.
+    If the device uses AAA, retain the appropriate authentication policy.
+
+    ```text
+    ip http authentication local
+    no ip http secure-server
+    ip http secure-trustpoint RESTCONF-TP
+    ip http secure-server
+    restconf
+    end
+    write memory
+    show ip http server secure status
+    show crypto pki certificates RESTCONF-TP
+    ```
+
+    Ensure the device clock is correct and TCP `443` is reachable. If HTTPS reports
+    `private key not found`, the selected certificate needs its matching private key.
+    A certificate marked Available alone does not confirm that the key is present.
+    Setting `verify: false` does not fix a missing server private key.
+
+Set `verify` to a CA bundle path when the device certificate requires a private CA.
+A self-signed lab may use `verify: false`. Use a published host port when connecting
+through a container host. Common HTTP settings can also be defined in a group.
+
+`timeout` controls HTTP connect/read waiting, in seconds or as a connect/read pair.
+It is separate from the CLI timeout for waiting on the NorFab job.

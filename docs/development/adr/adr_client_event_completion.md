@@ -136,7 +136,7 @@ Implement separately, after Part 1 passes its integration checks.
 
 ## Validation
 
-Follow `docs/development/testing/norfab_testing_framework.md`. Extend existing tests in
+Follow `docs/development/norfab_developing_and_testing_framework.md`. Extend existing tests in
 `tests/core/test_client.py` and existing dummy-service task fixtures only where
 needed. Use real broker and worker processes, without mocking network handling.
 

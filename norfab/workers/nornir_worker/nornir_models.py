@@ -2436,3 +2436,169 @@ class GnmiResult(NornirSerializedResult):
         {},
         description="Per-host gNMI operation replies or serialized records",
     )
+
+
+# --------------------------------------------------------------------------
+# RESTCONF TASK MODELS
+# --------------------------------------------------------------------------
+
+
+class RestconfGetInput(
+    NornirCommonArgs,
+    NornirTextProcessorArgs,
+    NornirXmlProcessorArgs,
+    NornirStructuredProcessorArgs,
+    NornirTestsProcessorArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    url: Union[None, StrictStr] = Field(
+        None, description="Literal RESTCONF resource or absolute URL"
+    )
+    headers: Union[None, dict[StrictStr, StrictStr]] = Field(
+        None, description="HTTP headers replacing inventory headers"
+    )
+    params: Union[None, dict[StrictStr, Any]] = Field(
+        None, description="HTTP query parameters"
+    )
+    openconfig_interfaces: StrictBool = Field(
+        False,
+        alias="openconfig-interfaces",
+        description="Retrieve OpenConfig interfaces configuration and state",
+        json_schema_extra={"presence": True},
+    )
+
+    openconfig_lldp: StrictBool = Field(
+        False,
+        alias="openconfig-lldp",
+        description="Retrieve the OpenConfig LLDP subtree",
+        json_schema_extra={"presence": True},
+    )
+    openconfig_system: StrictBool = Field(
+        False,
+        alias="openconfig-system",
+        description="Retrieve the OpenConfig system subtree",
+        json_schema_extra={"presence": True},
+    )
+
+    @model_validator(mode="after")
+    def validate_getter(self) -> "RestconfGetInput":
+        if (
+            sum(
+                [
+                    self.openconfig_interfaces,
+                    self.openconfig_lldp,
+                    self.openconfig_system,
+                    self.url is not None,
+                ]
+            )
+            > 1
+        ):
+            raise ValueError("predefined getters and url are mutually exclusive")
+        return self
+
+
+class RestconfPutInput(
+    NornirCommonArgs,
+    NornirTextProcessorArgs,
+    NornirXmlProcessorArgs,
+    NornirStructuredProcessorArgs,
+    NornirTestsProcessorArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    url: Union[None, StrictStr] = Field(
+        None, description="Literal RESTCONF resource or absolute URL"
+    )
+    headers: Union[None, dict[StrictStr, StrictStr]] = Field(
+        None, description="HTTP headers replacing inventory headers"
+    )
+    params: Union[None, dict[StrictStr, Any]] = Field(
+        None, description="HTTP query parameters"
+    )
+
+    data: Union[None, StrictStr] = Field(
+        None, description="Raw payload or inline/nf:// template"
+    )
+    job_data: Any = Field(
+        None, alias="job-data", description="Template context or YAML data URL"
+    )
+
+
+class RestconfPatchInput(
+    NornirCommonArgs,
+    NornirTextProcessorArgs,
+    NornirXmlProcessorArgs,
+    NornirStructuredProcessorArgs,
+    NornirTestsProcessorArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    url: Union[None, StrictStr] = Field(
+        None, description="Literal RESTCONF resource or absolute URL"
+    )
+    headers: Union[None, dict[StrictStr, StrictStr]] = Field(
+        None, description="HTTP headers replacing inventory headers"
+    )
+    params: Union[None, dict[StrictStr, Any]] = Field(
+        None, description="HTTP query parameters"
+    )
+
+    data: Union[None, StrictStr] = Field(
+        None, description="Raw payload or inline/nf:// template"
+    )
+    job_data: Any = Field(
+        None, alias="job-data", description="Template context or YAML data URL"
+    )
+
+
+class RestconfDeleteInput(
+    NornirCommonArgs,
+    NornirTextProcessorArgs,
+    NornirXmlProcessorArgs,
+    NornirStructuredProcessorArgs,
+    NornirTestsProcessorArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    url: Union[None, StrictStr] = Field(
+        None, description="Literal RESTCONF resource or absolute URL"
+    )
+    headers: Union[None, dict[StrictStr, StrictStr]] = Field(
+        None, description="HTTP headers replacing inventory headers"
+    )
+    params: Union[None, dict[StrictStr, Any]] = Field(
+        None, description="HTTP query parameters"
+    )
+
+
+class RestconfPostInput(
+    NornirCommonArgs,
+    NornirTextProcessorArgs,
+    NornirXmlProcessorArgs,
+    NornirStructuredProcessorArgs,
+    NornirTestsProcessorArgs,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    url: Union[None, StrictStr] = Field(
+        None, description="Literal RESTCONF resource or absolute URL"
+    )
+    headers: Union[None, dict[StrictStr, StrictStr]] = Field(
+        None, description="HTTP headers replacing inventory headers"
+    )
+    params: Union[None, dict[StrictStr, Any]] = Field(
+        None, description="HTTP query parameters"
+    )
+
+    data: Union[None, StrictStr] = Field(
+        None, description="Raw payload or inline/nf:// template"
+    )
+    job_data: Any = Field(
+        None, alias="job-data", description="Template context or YAML data URL"
+    )

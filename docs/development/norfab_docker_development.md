@@ -56,7 +56,7 @@ The printed path should be under
 
 The image installs published dependencies with pip. To install dependencies
 from the checkout, use the
-[test environment](testing/norfab_testing_framework.md#docker-test-environment).
+[test environment](norfab_developing_and_testing_framework.md#docker-test-environment).
 
 ## Apply code changes
 

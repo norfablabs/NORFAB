@@ -8,7 +8,7 @@ Dependency management amendment (2026-11-03): uv replaces Poetry. Use
 `uv sync --extra docs`, `uv run inv`, and `uv build`; development tools now live
 in `[dependency-groups].dev` with resolutions recorded in `uv.lock`. Commands
 below use the current uv equivalents. See the
-[current setup guide](../testing/norfab_testing_framework.md#set-up-the-development-environment).
+[current setup guide](../norfab_developing_and_testing_framework.md#set-up-the-development-environment).
 
 Implementation amendment: at the maintainer's request, individual
 `docker-tests-<suite>` tasks report but ignore pytest container return codes.

@@ -95,7 +95,7 @@ The repository already has useful building blocks:
 - service-oriented test folders under `tests/services/<service>`;
 - Docker role images under `docker/norfab-docker-build`;
 - Docker development Compose under `docker/norfab-docker-dev`;
-- documented test conventions in `docs/development/testing/norfab_testing_framework.md`;
+- documented test conventions in `docs/development/norfab_developing_and_testing_framework.md`;
 - Python support declared as 3.10 through 3.14.
 
 The new framework should use those pieces instead of replacing the test suite.

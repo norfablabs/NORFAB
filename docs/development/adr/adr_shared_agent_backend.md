@@ -204,7 +204,7 @@ Acceptance checks should cover:
   optional features do not require their packages.
 
 Prefer integration through the public client, following the
-[testing guide](../testing/norfab_testing_framework.md) and
+[testing guide](../norfab_developing_and_testing_framework.md) and
 `AGENTS.md`. Extend the current client test and add focused
 worker tests. Use local task fixtures; no Netbox data is needed.
 

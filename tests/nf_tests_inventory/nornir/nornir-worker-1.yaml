@@ -12,6 +12,8 @@ hosts:
         - loopback0
         - ethernet1
     connection_options:
+      http:
+        port: 6030
       scrapli_netconf:
         port: 8300
         extras:
@@ -50,6 +52,8 @@ hosts:
       interfaces:
         - ethernet1
     connection_options:
+      http:
+        port: 6031
       scrapli_netconf:
         port: 8301
         extras:
@@ -78,12 +82,3 @@ hosts:
         
 groups: {}
 defaults: {}
-        
-        
-# netbox:
-#   instance: prod
-#   interfaces: True
-#   ip_addresses: True
-#   inventory_items: True
-#   nbdata: True
-#   primary_ip: "ipv4"

@@ -4,7 +4,11 @@
 
 **Created**: 2026-11-06
 
-Accepted for planning; not implemented.
+Implemented; core public-client integration tests pass. See quickstart.md for validation limits.
+
+OpenConfig interfaces getter (2026-11-07): implemented and integration-tested on both
+cEOS spines. LLDP and system getters are also implemented. BGP remains a deferred proposal.
+The BGP projection still requires validation on both cEOS spines.
 
 **Input**: Design Nornir RESTCONF tasks using nornir-salt's requests-backed http_call,
 following netconf_task.py's shared runner and exposed operation pattern. Configure HTTP
@@ -14,20 +18,21 @@ connections in inventory and query RESTCONF on ceos-spine-1 and ceos-spine-2.
 
 ### Session 2026-11-07
 
-- Public tasks are restconf_get, restconf_put, restconf_patch, and restconf_delete.
-  These replace the earlier http_* naming and seven-operation scope. POST, HEAD, and OPTIONS
-  are outside this feature. Backend http_call and the http inventory connection remain unchanged.
+- Public tasks are restconf_get, restconf_post, restconf_put, restconf_patch, and restconf_delete.
+  These replace the earlier http_* naming and seven-operation scope. HEAD and OPTIONS
+  are outside this feature; POST was added on 2026-11-07. Backend http_call and the http inventory connection remain unchanged.
 
 ### Session 2026-11-06
 
-- Q: Should RESTCONF tasks retry requests after failures? → A: No retries in RESTCONF tasks at all;
+- Q: Should RESTCONF tasks retry requests after failures? → A: No task-owned retries;
   NorFab RESTCONF tasks must not implement or manage retrying for any operation.
 
 - Q: Should resource paths and payloads support per-host rendering? → A: Payloads support
   per-host Jinja2 rendering and nf:// template-file downloads; resource paths remain literal.
 
 - Q: Should the first version offer named resource shortcuts? → A: Explicit RESTCONF resource
-  paths and payloads only; no named resource shortcuts.
+  paths and payloads only; no named resource shortcuts. The proposed OpenConfig
+  getters extension below revises this scope for GET only.
 
 - Q: How should users invoke operations? ? A: Separate public restconf_get, restconf_put,
   restconf_patch, and restconf_delete tasks sharing one internal runner, as revised on 2026-11-07.
@@ -44,7 +49,7 @@ Initial acceptance uses a few short public-client tests, one behavior per test. 
 expected values and plain payloads; repeat values rather than extract shared data or builders.
 Result variables and ownership-safe cleanup are permitted. No JSON null-body support is required.
 Do not test Requests defaults/override behavior or build edge-case matrices. Retain basic failure
-visibility and the no-retry contract without adding a retry implementation.
+visibility without adding retry logic to NorFab; normal Nornir runner retries apply.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -131,7 +136,7 @@ invalid endpoint; verify the healthy result survives and the other host is marke
 - Relative paths with leading/trailing slashes; absolute base URLs; missing endpoint settings;
   omitted URL follows backend root/base-URL behavior and does not imply a device-specific getter.
 - Invalid credentials, unreachable ports, self-signed certificates, timeouts, and HTTP 4xx/5xx;
-  failed requests are reported without automatic repetition.
+  failed requests follow the configured Nornir runner policy.
 - Valid JSON scalars/lists, malformed JSON, text/XML and 204 responses.
 - Distinct host ports behind one lab hostname; inherited settings must not route both to one spine.
 - No matching hosts and mixed host failures; device errors must not become successful empty data.
@@ -143,9 +148,9 @@ invalid endpoint; verify the healthy result survives and the other host is marke
 
 ### Functional Requirements
 
-- **FR-001**: Expose a Nornir `restconf` operation family with GET, PUT, PATCH, and DELETE
-  operations, using public task names restconf_get, restconf_put, restconf_patch, and restconf_delete.
-  POST, HEAD, OPTIONS, and public http_* aliases are outside this feature.
+- **FR-001**: Expose a Nornir `restconf` operation family with GET, POST, PUT, PATCH, and DELETE
+  operations, using public task names restconf_get, restconf_post, restconf_put, restconf_patch, and restconf_delete.
+  HEAD, OPTIONS, and public http_* aliases are outside this feature.
 - **FR-002**: Follow the existing NETCONF pattern: exposed operation tasks share one internal
   call/run path, rather than implement separate execution pipelines for every verb. Use the
   requests-backed nornir-salt `http_call` and its `http` inventory connection; no alternative
@@ -155,16 +160,16 @@ invalid endpoint; verify the healthy result survives and the other host is marke
   and headers from host/group/default inventory without altering other connection settings.
 - **FR-004**: Accept relative resources and absolute HTTP(S) URLs with the backend's documented
   resolution rules; reject unresolvable requests as failures rather than silently selecting a target.
-  The first version accepts explicit resource paths and payloads only, with no named getters or
-  vendor/YANG resource shortcuts.
+  Explicit resource paths remain supported. The proposed GET-only OpenConfig selectors
+  are specified in FR-017 through FR-020 below.
 - **FR-005**: Accept explicit request parameters, headers, JSON or data payloads, authentication,
   certificate verification, and request timeouts supported by the backend. Preserve backend
   precedence, response decoding, and HTTP-error behavior; document relevant limitations.
 - **FR-016**: RESTCONF tasks must not implement retry loops, retry options, or operation-specific
   retry policies for any HTTP verb. They must not initiate a retry after a failed or timed-out
-  request. Planning must verify that the execution path does not automatically repeat failed
-  HTTP operations; failures are returned to the caller.
-- **FR-015**: PUT and PATCH payloads must support per-host Jinja2 rendering from inline
+  request. Use the configured Nornir runner exactly as NETCONF does; RetryRunner may retry operations
+  according to existing inventory/run_* settings. NorFab must not replace the runner or add retries.
+- **FR-015**: POST, PUT and PATCH payloads must support per-host Jinja2 rendering from inline
   templates or nf:// template files, following existing NETCONF template-context and job_data
   conventions. Resource paths must remain literal. Template download or rendering failures must
   remain visible failures, must not send an unrendered payload, and must not leave temporary
@@ -179,7 +184,7 @@ invalid endpoint; verify the healthy result survives and the other host is marke
 - **FR-009**: Provide explicit task models and accurate Google-style docstrings under existing
   conventions, maintaining task/shell defaults and public compatibility. Existing unrelated
   Nornir tasks and interfaces must retain their behavior.
-- **FR-010**: Provide NFCLI `nornir restconf get/put/patch/delete` operation commands and Python public-client usage following existing
+- **FR-010**: Provide NFCLI `nornir restconf get/post/put/patch/delete` operation commands and Python public-client usage following existing
   conventions. Any automatically exposed service metadata must distinguish read and mutation
   operations; the outer service transport method is distinct from the device HTTP verb.
 - **FR-011**: Verify real RESTCONF retrieval through the public client on both named spines,
@@ -215,7 +220,7 @@ invalid endpoint; verify the healthy result survives and the other host is marke
 
 - **SC-001**: One operator submission retrieves verified, distinct operational data from both
   ceos-spine-1 and ceos-spine-2 using inventory-held connection details and one relative resource.
-- **SC-002**: All four RESTCONF operations are exposed with the correct fixed verb through the shared
+- **SC-002**: All five RESTCONF operations are exposed with the correct fixed verb through the shared
   runner; a simple supported mutation check confirms read-back and owned cleanup. Separate
   end-to-end tests for every HTTP verb are not required for initial delivery.
 - **SC-003**: Filtering checks contact exactly the selected devices, including zero for no match.
@@ -228,7 +233,7 @@ invalid endpoint; verify the healthy result survives and the other host is marke
 
 - This invocation produces design artifacts only; source, inventory, device configuration, and
   tests are not changed or executed. Planning will resolve argument models for the agreed task names.
-- The initial scope is RESTCONF GET, PUT, PATCH, and DELETE, not a RESTCONF datastore
+- The initial scope is RESTCONF GET, POST, PUT, PATCH, and DELETE, not a RESTCONF datastore
   transaction engine, automatic YANG discovery, vendor getters, streaming, or a new session backend.
 - No generic public dispatcher beyond the operation family is required; the common runner is
   internal, matching the supplied NETCONF pattern. Payloads support per-host Jinja2 rendering
@@ -238,7 +243,7 @@ invalid endpoint; verify the healthy result survives and the other host is marke
   eAPI, gNMI, and NETCONF but no explicit RESTCONF enablement. Planning must establish image support
   and the required lab setup; existing eAPI access does not fulfill SC-001. If unsupported, report
   the prerequisite failure and obtain an explicit lab/scope decision instead of substituting devices.
-- All four verbs are exposed, but individual RESTCONF endpoints need not support every verb.
+- All five verbs are exposed, but individual RESTCONF endpoints need not support every verb.
   Resource paths and mutation fixtures are confirmed during planning before changing device data.
 - Certificate verification follows backend defaults unless explicitly configured otherwise.
   Any lab self-signed exception is scoped and documented rather than a global production default.
@@ -256,3 +261,39 @@ These sources establish user-requested integration constraints, not additional i
 The wrapper's named http function is the relevant precedent; the supplied line fragment displays
 a different function in the retrieved revision. Planning must check the repository's installed
 backend version before relying on current upstream behavior.
+
+Implementation clarification (2026-11-07): use the existing configured Nornir runner exactly
+as NETCONF. No with_runner override or task-owned retry handling; inventory runner settings apply.
+
+Payload clarification: all RESTCONF task interfaces accept data only (raw text, including JSON
+text, or inline/nf:// Jinja2 templates). The json/json_ task arguments are removed; no JSON
+encoding/decoding layer is added by NorFab for request bodies.
+
+## Proposed Extension: OpenConfig GET Getters
+
+Status: interfaces-only delivery authorized and implemented on 2026-11-07.
+LLDP and system are now implemented. BGP remains proposed and unimplemented. The requirements below
+describe the broader proposal. The current delivery includes openconfig_interfaces, openconfig_lldp and openconfig_system.
+It selects openconfig-interfaces:interfaces and is mutually exclusive with url.
+Existing operations remain implemented.
+
+- **FR-017**: Add openconfig_interfaces, openconfig_lldp, openconfig_system and
+  openconfig_bgp boolean selectors to restconf_get, default false, with NETCONF-style
+  hyphenated CLI aliases. Permit at most one getter or explicit URL.
+- **FR-018**: Map interfaces, LLDP and system to their top-level OpenConfig containers.
+  BGP must cover network instances without assumed VRF or protocol names. Verify
+  the proposed fields projection in plan.md on both cEOS spines before implementation.
+- **FR-019**: Validate selection at the input boundary. Keep getters GET-only.
+  Preserve existing explicit URL and omitted-URL behavior, headers and parameters.
+  Reserve fields for the BGP projection and reject caller-supplied fields for BGP.
+  Do not mutate caller arguments.
+- **FR-020**: Reuse the existing runner and raw per-host get result shape. Preserve
+  failures for unsupported models or projection support. No discovery loops,
+  fallback queries, normalization, or local pruning. BGP may include large RIB data.
+
+Acceptance: each getter returns its documented subtree through the public client
+on ceos-spine-1 and ceos-spine-2. Existing URL reads still work. Selectors do not
+appear in write schemas. Invalid selection fails before device I/O.
+
+Implementation approach, resource mappings, risks, tests and references are in
+[the merged getter plan](plan.md).

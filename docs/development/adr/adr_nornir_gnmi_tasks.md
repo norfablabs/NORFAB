@@ -112,7 +112,7 @@ gRPC support.
 
 - [SNMP design](adr_nornir_snmp_tasks.md)
 - [Task model guide](../tasks_pydantic_models_guide.md)
-- [Testing guide](../testing/norfab_testing_framework.md)
+- [Testing guide](../norfab_developing_and_testing_framework.md)
 - [Nornir-Salt source](https://github.com/dmulyalin/nornir-salt/blob/0.23.0/nornir_salt/plugins/tasks/pygnmi_call.py)
   (published reference; implementation details above checked against installed 0.23.6).
 - [pygnmi source](https://github.com/akarneliuk/pygnmi/blob/0.8.15/pygnmi/client.py)

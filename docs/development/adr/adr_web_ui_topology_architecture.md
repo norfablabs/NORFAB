@@ -414,7 +414,7 @@ Costs:
 - [NFWeb developer guide](../nfweb_developer_guide.md)
 - [ADR: NFWeb Scale-Test Environment](adr_nfweb_scale_test_environment.md)
 - [NFWeb topology user guide](../../clients/clients_nfweb_topology.md)
-- [NORFAB testing framework](../testing/norfab_testing_framework.md)
+- [NORFAB testing framework](../norfab_developing_and_testing_framework.md)
 - [Vite production build](https://vite.dev/guide/build)
 - [Mantine React components](https://mantine.dev/)
 - [Vasturiano 3D Force Graph](https://github.com/vasturiano/3d-force-graph)

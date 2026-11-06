@@ -50,6 +50,7 @@ from .nornir_models import (
     RefreshNornirResult,
 )
 from .parse_task import ParseTask
+from .restconf_task import RestconfTask
 from .snmp_task import SnmpTask
 from .task_task import TaskTask
 from .test_task import TestTask
@@ -388,6 +389,7 @@ class NornirWorker(
     ParseTask,
     FileCopyTask,
     NetconfTask,
+    RestconfTask,
     SnmpTask,
     GnmiTasks,
 ):

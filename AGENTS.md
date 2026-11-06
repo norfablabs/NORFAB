@@ -33,7 +33,7 @@ Workers extend `NFPWorker`; `@task` exposes methods to clients. Worker plugins a
 
 ## Testing
 
-Follow [NORFAB Testing Framework](docs/development/testing/norfab_testing_framework.md) when writing or running tests:
+Follow [NORFAB Developing and Testing Framework](docs/development/norfab_developing_and_testing_framework.md) when writing or running tests:
 
 - Always use integration tests through the public client interface when possible, integeation tests are preferred
 - Keep tests small and focused. Extend related tests; add a dedicated test when existing tests are unrelated.

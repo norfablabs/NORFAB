@@ -26,6 +26,7 @@ from .nornir_picle_shell_inventory import NornirInventoryShell
 from .nornir_picle_shell_netconf import NornirNetconfShell
 from .nornir_picle_shell_network import NornirNetworkShell
 from .nornir_picle_shell_parse import NornirParseShell
+from .nornir_picle_shell_restconf import NornirRestconfShell
 from .nornir_picle_shell_snmp import NornirSnmpShell
 from .nornir_picle_shell_task import NornirTaskShell
 from .nornir_picle_shell_test import NornirTestShell
@@ -345,6 +346,9 @@ class NornirServiceCommands(BaseModel):
         None, description="Work with Nornir inventory"
     )
     refresh: RefreshNornirModel = Field(None, description="Refresh inventory")
+    restconf: NornirRestconfShell = Field(
+        None, description="Manage devices using RESTCONF"
+    )
     netconf: NornirNetconfShell = Field(
         None, description="Manage devices using NETCONF"
     )

@@ -386,7 +386,7 @@ child processes create their own `NFPClient`, never inherit live sockets.
 5. **Validate the fleet:** concurrent profiles within one worker, multiple workers,
    delegation, restart persistence, owner failure and interruption while busy.
 
-Follow the [testing framework](../testing/norfab_testing_framework.md), using
+Follow the [testing framework](../norfab_developing_and_testing_framework.md), using
 fake model responses and dummy tasks for repeatable tests. Acceptance requires:
 
 - One-command invocation and resumable chat with the correct named agent.

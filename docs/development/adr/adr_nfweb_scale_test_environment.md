@@ -334,6 +334,6 @@ Costs:
 
 - [ADR: NFWeb Local Application Platform and 3D Topology Architecture](adr_web_ui_topology_architecture.md)
 - [NFWeb developer guide](../nfweb_developer_guide.md)
-- [NORFAB testing framework](../testing/norfab_testing_framework.md)
+- [NORFAB testing framework](../norfab_developing_and_testing_framework.md)
 - [NFWeb topology user guide](../../clients/clients_nfweb_topology.md)
 - [ttp_templates platform fixtures](https://github.com/dmulyalin/ttp_templates/tree/master/test/platform)

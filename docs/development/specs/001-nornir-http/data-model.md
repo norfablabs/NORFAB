@@ -4,17 +4,14 @@ All models live in norfab/workers/nornir_worker/nornir_models.py. Use strict sca
 Union[None,T], direct defaults, descriptions, use_enum_values=True and populate_by_name=True.
 No database entities are introduced.
 
-## HttpCommonArgs
+## RestconfGetInput
 
-Compose NornirHostsFilters with existing structured/text/XML/tests processor mixins as applicable.
-Do not inherit NornirCommonArgs, which exposes retry controls. Define extra="forbid".
-Explicitly carry needed result/file processor controls from NornirCommonArgs without refactoring
-that shared model: on_failed=False, to_dict=True, add_details=False, progress=True,
-run_num_workers=20 (positive integer), tf=None, tf_skip_failed=False, diff=None, diff_last=1.
-Retain existing processor field semantics; unused processor fields must not become request kwargs.
-Reject all retry/reconnect/connector-specific arguments rather than accepting ignored options.
+Reuse NornirCommonArgs plus existing text/XML/structured/tests processor mixins. Retain their
+aliases, defaults and runner controls; do not copy shared fields. Public RESTCONF-specific fields
+are url, request_timeout, headers, params and verify, with backend options passed through.
+Nornir owns retry behavior. NorFab consumes common options through existing utilities.
 
-## HttpRequestArgs
+## HTTP Request Options
 
 | Field | Shape/default | Meaning |
 | --- | --- | --- |
@@ -35,23 +32,20 @@ or transport adapter objects are accepted over the job protocol. Reuse existing 
 
 ## Operation Models
 
-HttpGetInput, HttpHeadInput, HttpOptionsInput, HttpDeleteInput use common request fields.
-HttpPostInput, HttpPutInput, HttpPatchInput additionally expose:
+RestconfGetInput, RestconfDeleteInput use common request fields.
+RestconfPostInput, RestconfPutInput, RestconfPatchInput explicitly declare:
 
-- json_: nullable JsonValue, alias json. Structured JSON passes as-is; string input is a JSON
-  document/template or nf:// file reference, rendered then decoded. Initial RESTCONF use focuses on object/array payloads; no special scalar encoding interface is required.
-- data: nullable strict string for raw text/XML/patch documents or inline/nf:// templates.
-- job_data: existing JSON-compatible context value or supported data-file URL.
+- data: nullable strict string containing the request body or inline/nf:// Jinja2 template.
+- job_data: existing JSON-compatible template context or supported data-file URL.
 
-Reject simultaneous non-null json and data. No mandatory nonempty payload: empty-body operations
-are allowed. None means no JSON body; explicit JSON null bodies are not required. Define shell field overrides only to parse JSON
-or other CLI string forms; inherit all unchanged fields.
+There is no json/json_ payload field. JSON bodies are text supplied through data, with Content-Type
+set in HTTP inventory. Existing template utilities render the text without request JSON decoding.
 
-## HttpResult
+## NornirSerializedResult
 
 Inherit NornirSerializedResult or use a named HttpResult with its same result payload shape.
 result is dict keyed by host or list records depending on to_dict. Backend subtask keys are
-get/post/put/patch/delete/head/options. Nested response payload is arbitrary JsonValue or text.
+get/post/put/patch/delete. Nested response payload is arbitrary JsonValue or text.
 add_details preserves standard Nornir fields. No new response status/header envelope.
 No-match returns existing status no_match and empty result in the requested serialization form.
 

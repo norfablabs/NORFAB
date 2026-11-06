@@ -35,7 +35,7 @@ Each test MUST cover one behavior; do not pack unrelated scenarios together or m
 Inputs, expected values, arguments, and plain payloads MUST be inline. Do not extract shared data
 variables, constants, builders, or helpers to avoid repetition: simplicity MUST prevail over DRY.
 Local result/resource variables needed for assertions and safe cleanup are allowed. Reuse existing
-infrastructure fixtures. Follow the [testing guide](../../docs/development/testing/norfab_testing_framework.md)
+infrastructure fixtures. Follow the [testing guide](../../docs/development/norfab_developing_and_testing_framework.md)
 for execution, classes, and markers; these explicit simplicity rules govern initial test scope.
 
 Mutating Netbox tests MUST own distinct records/address space and clean up only their own data,
@@ -43,26 +43,34 @@ including after partial failure. Shared seeds may be read-only. Maintain the
 [Netbox manifest](../../tests/netbox_data_manifest.json) only for Netbox records/address space,
 not files or caches; tests using no Netbox data need no entry.
 
-### IV. Accurate Documentation and Operational Messages
+### IV. Concise, Audience-Focused Documentation
 
-Before writing or updating documentation, identify its primary audience: users or developers.
-Language, examples, and depth MUST suit that audience. User-facing documentation MUST focus on
-how to use a feature, what to use it for, and why to choose it. Implementation details MUST be
-omitted unless essential to using the feature or understanding a limitation; keep any necessary
-details minimal. Developer documentation may explain implementation, contracts, and design
-rationale needed to maintain or extend the project.
-
-Follow the [documentation guide](../../docs/development/documentation_style_guide.md). Keep user
-instructions concise and verified against actual behavior. Google-style task docstrings MUST
-cover arguments, results, behavior, limitations, and errors. Task pages omit Inputs and end with
-the API reference. Correct spelling in changed text/names. Logs and job.event messages MUST start
-lowercase; use severity for event severity.
-
-Every new feature and every change to existing code MUST have a short, one-line numbered entry
-in [norfab_changelog.md](../../docs/norfab_changelog.md), under the latest release marked `(draft)`.
-If none exists, create the next bugfix release by incrementing the latest release's patch version
-and mark its heading `(draft)`. Use the appropriate section: FEATURES, BUGS, ENHANCEMENTS, or another
-established category. Describe the concrete change concisely, without implementation walkthroughs.
+- Read the [documentation guide](../../docs/development/documentation_style_guide.md), related
+  task pages, implementation, models, and shell commands before writing. Verify examples and links.
+- Identify the audience. User guides MUST explain what the task does, why/when to use it, and
+  how to use it. Omit internal details unless essential. Overviews describe the task, not examples;
+  avoid test terminology such as "resources you own". Developer docs may explain implementation.
+- Prose MUST use periods instead of semicolons and plain ASCII hyphens (`-`) instead of en/em
+  dashes. Preserve punctuation required by code, commands, URLs, and identifiers.
+- Each task MUST have its own page: purpose, output, examples, essential notes, command reference,
+  then Python API reference last. No Inputs section. Keep prose short and task-specific.
+- Examples MUST use CLI, Python, FastAPI, and MCP Markdown tabs. Follow existing pages:
+  multiline `client.run_job(...)` for Python; `nf#` commands for CLI; Python `requests` AND `curl`
+  for FastAPI; natural-language prompts naming the NorFab service/task tool for MCP, never raw
+  protocol payloads or internal tool identifiers. Show supported interfaces only; state limitations.
+- Command references MUST use dotted paths: `nf# man tree nornir.restconf.get`. Check names,
+  arguments, payloads, output shapes, and code-fence languages against actual behavior.
+- Google-style task docstrings MUST cover every argument, result, behavior, limitation, and error.
+  Fix spelling in changed text/names. Logs and `job.event` messages start lowercase; use `severity`.
+- Every feature or existing-code change MUST have a short numbered one-line note in
+  [the changelog](../../docs/norfab_changelog.md), under the latest `(draft)` release and appropriate
+  FEATURES/BUGS/ENHANCEMENTS category. If no draft exists, create the next patch release marked
+  `(draft)`. Follow existing release patterns. Leave published releases unchanged.
+- Classify release notes against previously released functionality. FEATURES covers new capabilities.
+  CHANGES covers changes to existing released features or workflows. BUGS covers fixes and
+  ENHANCEMENTS covers improvements to existing functionality. Refinements made while developing
+  a new unreleased feature MUST be folded into its FEATURES entry, not logged as separate changes,
+  fixes, or enhancements. Describe the delivered result, not its development history.
 
 ### V. Preserve Architecture and Honest State
 
@@ -110,6 +118,6 @@ rules unless replacement is explicitly authorized; surface conflicts rather than
 Review every change for compliance and evidence. Dependent workflows read this constitution live.
 
 Use MAJOR for incompatible removals/redefinitions, MINOR for expanded principles, PATCH for wording
-without semantic change. Version 3.2.0 requires documentation tailored to its primary user or developer audience.
+without semantic change. Version 3.6.0 classifies release notes against previously released functionality.
 
-**Version**: 3.2.0 | **Ratified**: 2026-11-06 | **Last Amended**: 2026-11-06
+**Version**: 3.6.0 | **Ratified**: 2026-11-06 | **Last Amended**: 2026-11-07

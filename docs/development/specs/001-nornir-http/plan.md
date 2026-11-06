@@ -4,7 +4,7 @@
 
 ## Summary
 
-Add http_get, http_post, http_put, http_patch, http_delete, http_head and http_options as thin
+Add restconf_get, restconf_post, restconf_put, restconf_patch and restconf_delete as thin
 public methods around one direct shared runner following NETCONF. Use existing nornir-salt
 http_call, HTTP inventory settings, filtering, processors, serialization, templates and watchdog.
 No new HTTP backend, session manager, rendering adapter, cache-lock layer or test server.
@@ -22,7 +22,7 @@ Surgical changes and reuse are mandatory. Ask confirmation before specifically u
 to existing application code. New task/model/shell files follow existing service patterns.
 Initial tests are short public-client core checks with inline values, one behavior per test;
 no shared test-data helpers or edge-case matrices. Preserve ownership and cleanup.
-Real RESTCONF readiness on both spines remains BLOCKED until verified; do not substitute eAPI.
+Real RESTCONF readiness on both spines verified on 2026-11-07; core integration reads pass.
 
 ## Project Structure
 
@@ -42,10 +42,9 @@ connection lock and temporary per-host payload convention, keeping preparation, 
 cleanup together under the lock. Remove temporary state in finally, including after failure.
 Do not add a per-host execution adapter or concurrent renderer/cache synchronization.
 
-For HTTP only use a filtered Nornir clone with core ThreadedRunner so configured RetryRunner
-cannot repeat requests. Do not change the shared runner, add retry loops or retry policy options.
-Reuse existing model/filter/processor mixins; narrowly omit/reject unsupported retry controls.
-Avoid a broad common-model refactor or copying fields without checking reuse opportunities.
+Use the configured Nornir runner exactly as NETCONF does: filter, add processors, then nr.run.
+Do not replace the runner or introduce retry handling. Reuse NornirCommonArgs and existing
+processor mixins; runner behavior remains controlled by inventory and existing run_* arguments.
 
 Public methods fix the backend verb. POST/PUT/PATCH accept JSON or raw text, including inline
 Jinja or nf:// templates; reject simultaneous bodies at the model boundary. Parse rendered JSON
@@ -75,6 +74,108 @@ fixture server, exhaustive failure matrix, Requests-default testing or diagnosti
 
 ## Risks and Readiness
 
-Both spine RESTCONF endpoints must be verified; existing probes did not establish reachability.
+Both spine RESTCONF endpoints returned HTTP 200 with their distinct hostnames.
 Protect only owned mutation resources. Unsupported device verbs remain documented limitations.
-No simplification authorizes changes to existing shared code or a waiver of the no-retry rule.
+No simplification authorizes changes to existing shared code or task-owned retry logic.
+
+Implementation clarification (2026-11-07): use the existing configured Nornir runner exactly
+as NETCONF. No with_runner override or task-owned retry handling; inventory runner settings apply.
+
+
+## RESTCONF OpenConfig Getters - Review and Plan
+
+Date: 2026-11-07. Status: proposed. Not implemented or device-validated.
+
+## Review findings
+
+- `netconf_get` exposes explicit boolean getters and resolves them before calling
+  `_run_netconf`. `NetconfGetInput` validates mutually exclusive selections.
+- `restconf_get` already delegates to `_run_restconf`. Add selection directly in
+  this method and retain its configured Nornir runner, processors, serialization,
+  HTTP inventory connection, and normal error handling.
+- `RestconfGetShell` inherits `RestconfGetInput`. New fields and CLI aliases should
+  flow through without additional commands or registration.
+- `RestconfPutInput` currently inherits `RestconfGetInput`. It must declare its
+  existing arguments explicitly so GET-only getters do not appear on PUT.
+- OpenConfig BGP is nested under network instances and protocol list entries.
+  A guessed default VRF or protocol name would restrict results incorrectly.
+
+## Proposed public contract
+
+Extend `restconf_get` with these explicit `StrictBool` model fields, default false,
+and matching method arguments. Use the same hyphen aliases and presence metadata
+as NETCONF getters.
+
+| Argument | Resource relative to inventory base_url |
+| --- | --- |
+| `openconfig_interfaces` | `openconfig-interfaces:interfaces` |
+| `openconfig_lldp` | `openconfig-lldp:lldp` |
+| `openconfig_system` | `openconfig-system:system` |
+| `openconfig_bgp` | `openconfig-network-instance:network-instances` with the projection below |
+
+For BGP, propose `params['fields'] = 'network-instance/protocols/protocol/bgp'`.
+This is a server-side projection across network instances, not a wildcard URL.
+Confirm the projection and returned namespace structure on both cEOS spines
+before committing to it. BGP output retains the network-instance/protocol
+envelope and may include large RIB data.
+
+Allow at most one getter or explicit `url`. With no getter, preserve current GET
+behavior, including omitted URL. Continue accepting explicit `params` and `headers`.
+For BGP, reserve `fields` for its projection and reject a caller-supplied `fields`
+entry at the input boundary rather than silently overwriting it. Other query
+parameters retain their existing behavior. Do not mutate caller dictionaries.
+
+Return existing raw per-host `get` payloads. Do not normalize vendor data or hide
+HTTP failures. Model availability and optional RESTCONF `fields` support depend
+on the device. If a device does not support the BGP projection, expose the error.
+Do not add discovery requests, broad-query fallback, or local data pruning.
+
+## Small implementation changes
+
+1. Verify the four raw resource requests through `nfclient.run_job` against
+   `ceos-spine-1` and `ceos-spine-2`. Verify the BGP projection first, with BGP
+   already configured. Record actual response keys and errors. Do not configure
+   devices as part of this review. If unsupported, revisit BGP scope explicitly.
+2. Update `nornir_models.py`: make PUT's existing arguments explicit, add four
+   GET fields, and one NETCONF-style selection validator. Validate the BGP
+   `fields` conflict there. Keep validation out of the runner.
+3. Update `restconf_task.py`: add explicit getter arguments and docstrings,
+   select the resource in a short direct block, add BGP projection when selected,
+   and call `_run_restconf` once. No new helper, task, dependency, or runner change.
+4. Extend `TestRestconfGet` in `tests/services/nornir/test_restconf.py` with four
+   small public-client tests, one per getter. Inline all input and expectations.
+   Each checks both spines, success, and a meaningful model-specific value or
+   structure. Use existing `nornir` and `nornir_restconf` marks. Keep the existing
+   explicit URL test as the regression check. No edge-case matrix or HTTP library
+   tests. Check PUT's exposed schema and CLI help during focused validation.
+5. Update the existing RESTCONF GET guide with a short getter description and
+   consistent CLI, Python, FastAPI, and MCP examples. Document model support,
+   mutual exclusion, and BGP scope. Update the feature's Spec Kit artifacts to
+   reflect agreed requirements before implementation. Fold the capability into
+   the existing draft RESTCONF FEATURES note if RESTCONF remains unreleased.
+
+Acceptance: each selector requests its documented subtree, explicit URLs still
+work, GET-only fields do not leak into PUT, and failures remain visible.
+Run focused RESTCONF tests, focused formatting/lint checks, and the docs build.
+Before implementation, obtain confirmation for the specific existing application
+code edits required by constitution principle I. This review changes no code.
+
+## Sources
+
+- Existing `netconf_get`, `NetconfGetInput`, `restconf_get`, `RestconfGetInput`,
+  `RestconfPutInput`, and `RestconfGetShell` in this checkout.
+- [RESTCONF resource identifiers](https://www.rfc-editor.org/rfc/rfc8040.html#section-3.5.3).
+- [RESTCONF fields projection and capability](https://www.rfc-editor.org/rfc/rfc8040.html#section-4.8.3).
+- [OpenConfig network-instance model, including BGP grouping](https://github.com/openconfig/public/blob/master/release/models/network-instance/openconfig-network-instance.yang).
+
+## Interfaces-only delivery - 2026-11-07
+
+The authorized first increment implements only openconfig_interfaces. Select its
+resource through the module-level RESTCONF_GETTERS dictionary and NETCONF-style
+selection loop in restconf_get, with boundary validation in RestconfGetInput
+and the existing runner unchanged. PUT declares its existing fields explicitly
+to keep the GET selector out of write schemas. LLDP, system and BGP remain deferred.
+One public-client test verifies Management0 in both spine replies.
+
+LLDP and system follow the same dictionary/selection loop with their top-level
+OpenConfig resources. One getter or URL is allowed. BGP remains deferred.

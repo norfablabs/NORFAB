@@ -1,4 +1,4 @@
-# NORFAB Testing Framework
+# NORFAB Developing and Testing Framework
 
 ## Set up the development environment
 
@@ -32,6 +32,99 @@ Docker images install dependencies with pip. The test image installs the
 checkout with the `full` extra and pytest; runtime images install from PyPI.
 Docker installs do not use `uv.lock`. Rebuild test images after changing project
 dependencies.
+
+## Develop features with Spec Kit
+
+Use [Spec Kit](https://github.com/github/spec-kit) to agree on feature behavior,
+plan small changes, and implement them with public-client integration tests.
+
+### Install Spec Kit
+
+Install the Specify CLI with uv, then check available integrations:
+
+```bash
+uv tool install specify-cli
+specify check
+```
+
+NorFab already includes `.specify/` configuration and Codex skills under
+`.agents/skills/`. Open the repository in your coding agent to use them.
+Initialization is only needed when setting up Spec Kit in a repository without
+this configuration. For Codex with PowerShell scripts:
+
+```powershell
+specify init --here --integration codex --integration-options="--skills" --script ps
+```
+
+See the [upstream installation guide](https://github.github.io/spec-kit/installation.html)
+for other integrations and installation options.
+
+### Follow the feature workflow
+
+Run each prompt separately in the agent chat. Review its result before proceeding.
+Replace the feature description with the behavior you want to build.
+
+Maintain the constitution when project rules change. It does not need to be
+regenerated for every feature:
+
+```text
+$speckit-constitution
+Derive project principles from AGENTS.md and its linked guides.
+Preserve existing rules. Keep temporary working notes under private/.
+Store durable feature artifacts under docs/development/specs/<NNN-feature-name>/.
+```
+
+Define the feature and resolve missing requirements:
+
+```text
+$speckit-specify
+Describe the feature's user-visible behavior, scope, and acceptance criteria:
+<describe the feature here>
+Store its artifacts under docs/development/specs/<NNN-feature-name>/.
+```
+
+```text
+$speckit-clarify
+Resolve missing requirements before planning.
+```
+
+Plan the implementation and break it into small changes:
+
+```text
+$speckit-plan
+Design the implementation using NorFab's existing worker and client patterns.
+Prefer simple, direct changes and reuse existing methods and utilities.
+```
+
+```text
+$speckit-tasks
+Break the plan into small changes with simple public-client integration tests.
+```
+
+Review consistency, resolve reported issues, then implement:
+
+```text
+$speckit-analyze
+Check consistency across the specification, plan, and tasks.
+```
+
+```text
+$speckit-implement
+Implement and validate the agreed tasks.
+```
+
+### Keep feature artifacts together
+
+Use the next sequential number and a descriptive feature name. Keep `spec.md`,
+`plan.md`, `research.md`, `data-model.md`, `quickstart.md`, `contracts/`,
+`checklists/requirements.md`, and generated `tasks.md` together under
+`docs/development/specs/<NNN-feature-name>/`. Keep the specification and checklist
+separate. Set `feature_directory` in `.specify/feature.json` to that folder and
+link its `spec.md` from `mkdocs.yml`.
+
+Record acceptance and implementation status separately. Acceptance does not mean
+the feature is implemented. Use `private/` for temporary notes and review reports.
+ADRs record separate architecture decisions.
 
 ## TL;DR
 

@@ -41,6 +41,8 @@ hosts:
     password: admin
     port: 2207
     connection_options:
+      http:
+        port: 4407
       pygnmi:
         port: 6037
         extras:
