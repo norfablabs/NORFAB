@@ -276,6 +276,8 @@ nav:
       - ROBOT Client API: api_ref/clients/api_reference_clients_robot_client.md
 
 - Development:
+  - Feature Specifications:
+    - Nornir HTTP and RESTCONF Tasks: development/specs/001-nornir-http/spec.md
   - NFWeb Developer Guide: development/nfweb_developer_guide.md
   - Docker Development: development/norfab_docker_development.md
   - Documentation Style Guide: development/documentation_style_guide.md

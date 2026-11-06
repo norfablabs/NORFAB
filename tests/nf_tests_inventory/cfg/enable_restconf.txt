@@ -1,0 +1,12 @@
+{% if host.platform == "arista_eos" %}
+security pki certificate generate self-signed restconf.crt key restconf.key generate rsa 2048 parameters common-name restconf
+
+management security
+   ssl profile restconf
+      certificate restconf.crt key restconf.key
+
+management api restconf
+   transport https default
+      ssl profile restconf
+do write
+{% endif %}

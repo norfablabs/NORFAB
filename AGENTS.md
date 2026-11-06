@@ -1,4 +1,4 @@
-﻿# AGENTS.md - NorFab Repository Guide
+# AGENTS.md - NorFab Repository Guide
 
 ## Working Rules
 
@@ -9,7 +9,9 @@
 - Keep task Google-style docstrings accurate. Document every argument, the result, important behavior, limitations, and relevant errors.
 - Start logging and `job.event` messages with lowercase letters. Use `severity` for event severity.
 - Fix spelling mistakes in docstrings, comments, and variable names you change.
-- Store agent-generated plans, task lists, review reports, and temporary working notes only under `private/`, which is excluded from Git. Never create separate repository folders such as `tasks/`, `plans/`, or `reports/` for these artifacts, even when a skill suggests those locations.
+- Store temporary ad hoc plans, review reports, and working notes under ignored `private/`. Durable Spec Kit artifacts follow the feature layout below; do not create unrelated root-level `tasks/`, `plans/`, or `reports/` folders.
+
+- Store all Spec Kit feature artifacts together under `docs/development/specs/<NNN-feature-name>/`: `spec.md`, `plan.md`, `research.md`, `data-model.md`, `quickstart.md`, `contracts/`, `checklists/requirements.md`, and `tasks.md` when generated. Keep the specification and quality checklist separate. Set `.specify/feature.json` `feature_directory` to this folder and use the standard artifact paths. Link the feature design/specification (`spec.md`) from `mkdocs.yml`. State acceptance and implementation status explicitly; acceptance does not imply implementation. Use ADRs for separate architecture decisions, not as substitutes for Spec Kit feature artifacts.
 
 ## Repository Map
 
