@@ -3,6 +3,9 @@
 [![PyPI versions][pypi-pyversion-badge]][pypi-pyversion-link]
 [![GitHub Discussion][github-discussions-badge]][github-discussions-link]
 [![Code style: black][black-badge]][black-link]
+[![uv][uv-badge]][uv-link]
+[![Ruff][ruff-badge]][ruff-link]
+[![Spec Kit][speckit-badge]][speckit-link]
 
 ![logo](docs/images/logo.jpg)
 
@@ -76,3 +79,9 @@ to surpass its limitations.
 [pepy-downloads-badge]:        https://pepy.tech/badge/norfab
 [pypi-latest-release-badge]:   https://img.shields.io/pypi/v/norfab.svg
 [pypi-latest-release-link]:    https://pypi.python.org/pypi/norfab
+[uv-badge]:                   https://img.shields.io/badge/managed%20with-uv-DE5FE9?logo=uv
+[uv-link]:                    https://docs.astral.sh/uv/
+[ruff-badge]:                 https://img.shields.io/badge/linting-Ruff-D7FF64?logo=ruff
+[ruff-link]:                  https://docs.astral.sh/ruff/
+[speckit-badge]:              https://img.shields.io/badge/spec--driven-Spec%20Kit-blue
+[speckit-link]:               https://github.com/github/spec-kit
