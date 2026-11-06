@@ -7,6 +7,9 @@
 [![Ruff][ruff-badge]][ruff-link]
 [![Spec Kit][speckit-badge]][speckit-link]
 [![Documentation][docs-badge]][docs-link]
+[![pytest][pytest-badge]][pytest-link]
+[![Docker Hub][docker-badge]][docker-link]
+[![Sponsor][sponsor-badge]][sponsor-link]
 
 ![logo](docs/images/logo.jpg)
 
@@ -89,3 +92,11 @@ to surpass its limitations.
 
 [docs-badge]:                 https://img.shields.io/badge/docs-NorFab-blue?logo=readthedocs
 [docs-link]:                  https://docs.norfablabs.com
+
+[pytest-badge]:               https://img.shields.io/badge/tested%20with-pytest-0A9EDC?logo=pytest
+[pytest-link]:                https://docs.pytest.org/
+[docker-badge]:               https://img.shields.io/docker/pulls/dmulyalin/norfab?logo=docker&label=Docker%20Hub%20pulls
+[docker-link]:                https://hub.docker.com/r/dmulyalin/norfab/tags
+
+[sponsor-badge]:              https://img.shields.io/badge/Sponsor-NorFab-EA4AAA?logo=githubsponsors
+[sponsor-link]:               https://github.com/sponsors/norfablabs
