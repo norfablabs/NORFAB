@@ -15,6 +15,10 @@
 3. NFCLI `show nornir hosts` displays a detailed Rich table by default. Use `brief` for host lists grouped by worker; the `details` and `table` options are removed from this command.
 
 
+## CHANGES
+
+1. Netbox, FastAPI and FastMCP workers use `diskcache-community` instead of `diskcache` (CVE-2025-69872) and read their caches through `SafeDisk`.
+
 ---
 
 # 0.26.2
