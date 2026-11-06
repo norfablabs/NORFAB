@@ -6,6 +6,7 @@
 [![uv][uv-badge]][uv-link]
 [![Ruff][ruff-badge]][ruff-link]
 [![Spec Kit][speckit-badge]][speckit-link]
+[![Documentation][docs-badge]][docs-link]
 
 ![logo](docs/images/logo.jpg)
 
@@ -85,3 +86,6 @@ to surpass its limitations.
 [ruff-link]:                  https://docs.astral.sh/ruff/
 [speckit-badge]:              https://img.shields.io/badge/spec--driven-Spec%20Kit-blue
 [speckit-link]:               https://github.com/github/spec-kit
+
+[docs-badge]:                 https://img.shields.io/badge/docs-NorFab-blue?logo=readthedocs
+[docs-link]:                  https://docs.norfablabs.com
