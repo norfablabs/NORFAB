@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Annotated, Any, Dict, List, Optional, Union
 
 import uvicorn
-from diskcache import FanoutCache
+from diskcache_community import FanoutCache, SafeDisk
 from fastapi import Body, Depends, FastAPI, HTTPException, Request
 from fastapi.openapi.utils import get_openapi
 from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer
@@ -347,6 +347,7 @@ class FastAPIWorker(NFPWorker):
             shards=4,
             timeout=1,  # 1 second
             size_limit=1073741824,  #  1 GigaByte
+            disk=SafeDisk.with_options(on_error="miss"),
         )
 
     def fastapi_start(self) -> None:

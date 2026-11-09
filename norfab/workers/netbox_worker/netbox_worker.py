@@ -11,7 +11,7 @@ from typing import Any, List, Union
 import pynetbox
 import requests
 from deepdiff import DeepDiff
-from diskcache import FanoutCache
+from diskcache_community import FanoutCache, SafeDisk
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from urllib3.util.retry import Retry
@@ -262,7 +262,7 @@ class NetboxWorker(
             "requests": "",
             "python": sys.version.split(" ")[0],
             "platform": sys.platform,
-            "diskcache": "",
+            "diskcache-community": "",
             "deepdiff": "",
             "netbox_version": self.nb_version,
         }
@@ -617,6 +617,7 @@ class NetboxWorker(
             shards=4,
             timeout=1,  # 1 second
             size_limit=1073741824,  #  GigaByte
+            disk=SafeDisk.with_options(on_error="miss"),
         )
 
     def make_diff(
