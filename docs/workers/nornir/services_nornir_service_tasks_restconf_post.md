@@ -100,7 +100,7 @@ its Content-Type in HTTP inventory. Resource paths are not rendered.
 ## Notes
 
 Configure the device endpoint, credentials, TLS verification, HTTP timeout and default headers in
-[HTTP inventory](services_nornir_service_inventory.md#restconf-connections). Relative resource
+[HTTP inventory](services_nornir_service_inventory.md#restconf-connection-inventory). Relative resource
 paths use its RESTCONF base URL. Use `params` for query parameters and `headers` when a request
 needs different headers; supplied headers replace the inventory mapping.
 

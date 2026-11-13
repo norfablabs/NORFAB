@@ -216,4 +216,4 @@ Before finishing a documentation change:
 
 Keep the homepage, feature catalogue, project overview pages, changelog, contact page, and tags at the documentation root. Keep shared assets in `images/`, `stylesheets/`, and `javascripts/`.
 
-When moving pages, update `mkdocs.yml`, relative links, image paths, and repository references. Record missing documentation in [Documentation backlog](documentation_backlog.md) instead of publishing pages containing only `TBD`. Index entries without an explicit status must say that the status is not stated; do not infer completion from a filename.
+When moving pages, update `mkdocs.yml`, relative links, image paths, and repository references. Avoid publishing pages containing only `TBD`. Index entries without an explicit status must say that the status is not stated; do not infer completion from a filename.

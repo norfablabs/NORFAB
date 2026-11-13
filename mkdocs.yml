@@ -291,7 +291,6 @@ nav:
   - Docker Development: development/norfab_docker_development.md
   - Documentation Style Guide: development/documentation_style_guide.md
   - Task Pydantic Models Guide: development/tasks_pydantic_models_guide.md
-  - Documentation Backlog: development/documentation_backlog.md
   - Known Issues: development/bug_hunt.md
   - Architecture Design Records:
     - Index: development/adr/index.md

@@ -1,6 +1,6 @@
 !!! note "Incomplete reference"
 
-    This reference contains unfinished sections marked `TBD`. See the [documentation backlog](../../development/documentation_backlog.md).
+    This reference contains unfinished sections marked `TBD`.
 
 # NORFAB Protocol
 

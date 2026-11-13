@@ -253,7 +253,7 @@ invalid endpoint; verify the healthy result survives and the other host is marke
 
 These sources establish user-requested integration constraints, not additional implementation work:
 
-- [Existing NETCONF task pattern](../../../../norfab/workers/nornir_worker/netconf_task.py).
+- [Existing NETCONF task pattern](https://github.com/norfablabs/NORFAB/blob/master/norfab/workers/nornir_worker/netconf_task.py).
 - [HTTP plugin source](https://github.com/dmulyalin/nornir-salt/blob/master/nornir_salt/plugins/tasks/http_call.py).
 - [Salt-Nornir HTTP wrapper precedent](https://github.com/dmulyalin/salt-nornir/blob/3145c11d1907ab5b9f8ed4a87de3b371bc51d7a8/salt_nornir/modules/nornir_proxy_execution_module.py#L2451-L2489).
 - [cEOS inventory example](https://salt-nornir.readthedocs.io/en/latest/Pillar%20and%20Inventory%20Examples.html#arista-ceos).
