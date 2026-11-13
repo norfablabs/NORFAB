@@ -52,6 +52,7 @@ Read and maintain [tests/netbox_data_manifest.json](tests/netbox_data_manifest.j
 Follow the [documentation style guide](docs/development/documentation_style_guide.md).
 
 - Document only what users need; place updates in relevant sections and keep the Python API reference last.
+- Avoid "scalar" in documentation. Use "single-value field", a concrete type, or an example, following the documentation style guide.
 - Keep documentation short and concise. Write user-facing pages around what users need to do, with essential steps, examples, and limitations. Omit internal implementation details, repeated explanations, and walkthroughs of self-explanatory prompts.
 - Do not add an Inputs section to service task pages. The Python API reference renders arguments from the task's Google-style docstring.
 - Record user-facing changes in [the changelog](docs/norfab_changelog.md) and relevant task or developer documentation.

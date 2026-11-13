@@ -81,6 +81,29 @@ For YAML text or a file URL, put `design_input_schema` and `jinja_functions` bef
 
     The loader parses only the initial YAML lines containing `design_input_schema`, `jinja_functions`, `custom_functions`, comments, and indented lines. It stops at the first other top-level line. This portion of document must be valid YAML on its own: keep Jinja2 expressions and top-level template directives out of it, and put `design_input_schema` and `jinja_functions` before any object collection. Use **one YAML document**. Do not insert `---` between metadata and collections. A schema or Jinja2 function declared after a collection will not be available before rendering.
 
+## Deployment caveats
+
+- **Deployment changes existing data.** Matching objects are updated with the
+  supplied fields, even if they were created manually or by another design.
+  Review object identities and relationships before applying a design.
+- **IP assignments can move.** For example, if an ordinary IP record exists on
+  `router-1 Ethernet1` and the design explicitly assigns that same address and
+  VRF to `router-2 Ethernet2`, deployment can move the existing record to the new
+  interface. It does not preserve the old assignment merely because it already
+  exists. VIP and anycast addresses have separate handling for shared assignments.
+- **Updates follow each object's rules.** Supplied single-value fields and context-data
+  dictionaries replace existing values. Supported lists, such as tags and tagged
+  VLANs, gain members rather than removing existing ones. This is not a complete
+  reconciliation of every Netbox field. Existing BGP sessions are left unchanged,
+  and already-cabled ports cannot be moved to another cable.
+- **Removing YAML does not remove objects.** Objects omitted from later designs
+  remain in Netbox. Repeated deployment send updates without calculating
+  a diff.
+- **Check the target and preview first.** Without `branch`, writes affect main
+  data. Use `dry_run: true` before an authorized deployment, but remember it does
+  not create planned prerequisites or reserve allocations. Failures can leave
+  earlier changes applied. There is no automatic rollback.
+
 ## Design input schema
 
 `design_input_schema` validates the supplied `context` before Jinja2 renders the design. Use inline JSON Schema or an `nf://` / `git://` Python file defining a Pydantic `DesignInput` model. The validated context is available as `context` in the template.
@@ -237,7 +260,7 @@ devices:
     config_template: branch-router
 ```
 
-When updating an existing record, design handlers add requested tags and custom-field list values without removing existing members. They also add VRF and L2VPN route targets, interface tagged VLANs, and config-context scope lists. Config-context `sites` and `tenants` accept name lists. Other scope lists use NetBox IDs. Scalar custom fields replace their old values. VLAN-group `vid_ranges`, local context data, and config-context `data` retain replacement behavior. Named object and multiobject custom-field values are resolved to NetBox IDs before writes.
+When updating an existing record, design handlers add requested tags and custom-field list values without removing existing members. They also add VRF and L2VPN route targets, interface tagged VLANs, and config-context scope lists. Config-context `sites` and `tenants` accept name lists. Other scope lists use NetBox IDs. Single-value custom fields replace their old values. VLAN-group `vid_ranges`, local context data, and config-context `data` retain replacement behavior. Named object and multiobject custom-field values are resolved to NetBox IDs before writes.
 
 
 
@@ -554,13 +577,13 @@ ip_addresses:
 
 ## Custom fields
 
-Put a `custom_fields` dictionary on an object record. Its keys are Netbox custom-field names, not labels. Definitions must already exist and be enabled for that object type. The design passes values through to Netbox, which validates their types and choices. Updates PATCH supplied values without clearing omitted custom fields. Use `null` to clear a nullable scalar field.
+Put a `custom_fields` dictionary on an object record. Its keys are Netbox custom-field names, not labels. Definitions must already exist and be enabled for that object type. The design passes values through to Netbox, which validates their types and choices. Updates PATCH supplied values without clearing omitted custom fields. Use `null` to clear a single-value field that allows null.
 
 When updating an ASN, a design adds new sites and tags without removing existing
 ones. When updating a VLAN or prefix, it adds new tags. For these objects, if both the
 existing and supplied values of a custom field are lists, the design adds only
 new items. Supplying `[]` leaves an existing list unchanged. For custom fields,
-`null` clears the value, and a new scalar value replaces the old one.
+`null` clears the value, and a supplied single value replaces the old one.
 
 Object and multiobject custom fields accept numeric Netbox IDs or string
 references. The field's related object type determines how strings are matched:
@@ -2255,7 +2278,7 @@ tables supply data. Other text and unmarked examples are ignored. Preview with
 
     Use `yaml context.KEY`, `csv context.KEY`, or a marked Markdown table. Each
     key must be unique and top-level. YAML preserves types. CSV/table cells stay
-    strings. Use YAML `|` scalars for multiline text. JSON and text fences are
+    strings. Use YAML `|` blocks for multiline text. JSON and text fences are
     unsupported.
 
     ````markdown
@@ -2455,7 +2478,7 @@ Errors identify the collection that stopped deployment. Earlier collections are 
 ## Notes
 
 - A dry run does not create prerequisites, so it cannot fully resolve references to objects proposed earlier in the same design.
-- Explicit ASN, VLAN, and prefix records can supply object and multiobject custom-field references by string reference or ID, using the matching fields described in [Custom fields](#custom-fields). String references must identify exactly one existing object when that record is processed. Updates add multiobject references and other list values without removing current values. Scalar and `null` values replace them. Custom-field definitions must already exist in NetBox.
+- Explicit ASN, VLAN, and prefix records can supply object and multiobject custom-field references by string reference or ID, using the matching fields described in [Custom fields](#custom-fields). String references must identify exactly one existing object when that record is processed. Updates add multiobject references and other list values without removing current values. Single values and `null` replace existing values. Custom-field definitions must already exist in NetBox.
 - Check that named parents, device types, sites, interfaces, and allocation pools exist or are created earlier in the design order.
 - Jinja filters, input models, and custom functions execute Python inside the worker. Use trusted files.
 - See the [ACME design example](https://github.com/norfablabs/NORFAB/blob/main/tests/nf_tests_inventory/netbox/designs/acme_branch_network_design_v1.yaml) for a full nested design.

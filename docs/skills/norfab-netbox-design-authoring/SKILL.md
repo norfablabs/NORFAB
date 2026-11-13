@@ -8,6 +8,14 @@ description: Author and review NorFab Netbox YAML/Jinja2 designs for design_depl
 Produce reviewable YAML and its input context. Deploy only when requested.
 This models Netbox data. Applying device configuration is separate.
 
+## Deployment caveats
+
+- Matching objects can be updated even if another design or person created them.
+- Explicitly assigning an existing ordinary IP to another interface can move it.
+- Supplied single-value fields and context data replace existing values. Supported lists gain members.
+- Omitted objects remain. Existing BGP sessions are not updated, and already-cabled ports cannot be recabled.
+- Without a branch, writes affect main data. Preview first. Failures do not roll back earlier writes.
+
 ## Follow the core rules
 
 The design MUST be as simple, linear, and minimal as possible while meeting all
