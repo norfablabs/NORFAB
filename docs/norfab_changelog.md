@@ -2,7 +2,8 @@
 
 ## ENHANCEMENTS
 
-1. Netbox `design_deploy` accepts interface names as strings for `parent`, `lag`, and `bridge`, alongside existing dictionary references.
+1. Netbox `sync_vlans` accepts `preserve_name=True` to retain existing NetBox VLAN names while synchronizing descriptions and memberships.
+2. Netbox `design_deploy` accepts interface names as strings for `parent`, `lag`, and `bridge`, alongside existing dictionary references.
 
 ## FEATURES
 

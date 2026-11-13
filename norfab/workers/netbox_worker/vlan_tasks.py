@@ -538,6 +538,7 @@ class NetboxVlansTasks:
         filter_by_vlan_ids: Union[None, list[str]] = None,
         preserve_description: Union[None, bool] = None,
         batch_size: int = 1000,
+        preserve_name: bool = False,
         **kwargs: Any,
     ) -> Result:
         """Synchronize live VLAN attributes and interface memberships with NetBox.
@@ -570,6 +571,11 @@ class NetboxVlansTasks:
             preserve_description: Description preservation policy. ``None`` preserves
                 NetBox text when the live description is empty, ``True`` always
                 preserves NetBox text, and ``False`` always uses live text.
+            batch_size: Maximum number of objects per bulk write.
+            preserve_name: Keep existing NetBox VLAN names when ``True``.
+                Defaults to ``False`` to use descriptive live names. New VLANs
+                always use live names; generated ``VLAN<VID>`` live names never
+                replace existing NetBox names.
             **kwargs: Nornir FFun host filters.
 
         Returns:
@@ -939,10 +945,10 @@ class NetboxVlansTasks:
                     else:
                         target["untagged_vlan"] = vlan_reference
 
-        # Keep a descriptive NetBox name when live data only supplies VLAN<VID>.
+        # Preserve NetBox names when requested or live data only supplies VLAN<VID>.
         for scope, vid in vlan_objects:
             live_name = vlan_live[scope][vid]["name"]
-            if live_name.upper() == f"VLAN{vid}".upper():
+            if preserve_name or live_name.upper() == f"VLAN{vid}".upper():
                 vlan_live[scope][vid]["name"] = vlan_current[scope][vid]["name"]
 
         # NetBox requires VLAN names to be unique within their group or site.

@@ -1,6 +1,6 @@
 from collections.abc import Iterator
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, Union
 from unittest.mock import Mock
 
 import orjson
@@ -400,12 +400,20 @@ class TestSyncVlanMemberships:
         assert actions["update"] == {}
         assert actions["in_sync"] == [50]
 
-    def test_descriptive_live_name_overrides_netbox_name(self) -> None:
+    @pytest.mark.parametrize("preserve_name", [False, True])
+    def test_descriptive_live_name_overrides_netbox_name(
+        self, preserve_name: bool
+    ) -> None:
         result, _, _, _ = self._run(
             {"leaf-1": [self._live(name="Live user access")]},
             vlans=[self._vlan(50, name="NetBox user access")],
+            preserve_name=preserve_name,
         )
 
+        if preserve_name:
+            assert result.result["vlans"]["site:lab"]["update"] == {}
+            assert result.result["vlans"]["site:lab"]["in_sync"] == [50]
+            return
         changes = result.result["vlans"]["site:lab"]["update"]["50"]
         assert changes["name"] == {
             "old_value": "NetBox user access",
@@ -1272,6 +1280,47 @@ class TestSyncVlans:
             assert actions["created"] == []
             assert actions["updated"] == []
             assert actions["in_sync"] == [190, 191]
+
+    @pytest.mark.parametrize("preserve_name", [None, False, True])
+    def test_live_sync_name_preservation(
+        self, nfclient: Any, preserve_name: Union[None, bool]
+    ) -> None:
+        self.nb.ipam.vlans.create(
+            vid=120,
+            name="NetBox managed name",
+            description="stale description",
+            site=self.site.id,
+        )
+        kwargs = {"filter_by_vlan_ids": ["120"], "preserve_description": False}
+        if preserve_name is not None:
+            kwargs["preserve_name"] = preserve_name
+
+        preview = self._sync(nfclient, [self.DEVICE_2], dry_run=True, **kwargs)
+        for result in self._successful_results(preview):
+            changes = result["diff"]["vlans"][self._site_scope()]["update"]["120"]
+            assert ("name" in changes) is (not preserve_name)
+            assert "description" in changes
+        assert self._site_vlan(120).name == "NetBox managed name"
+        assert self._site_vlan(120).description == "stale description"
+
+        response = self._sync(nfclient, [self.DEVICE_2], **kwargs)
+        self._successful_results(response)
+        vlan = self._site_vlan(120)
+        assert vlan.name == (
+            "NetBox managed name" if preserve_name else "TEST_L2_TRUNK_A"
+        )
+        assert vlan.description == ""
+
+        interface = self.nb.dcim.interfaces.get(
+            device=self.DEVICE_2, name="Port-Channel32"
+        )
+        assert interface.untagged_vlan.id == vlan.id
+
+        repeated = self._sync(nfclient, [self.DEVICE_2], **kwargs)
+        for result in self._successful_results(repeated):
+            actions = result["result"]["vlans"][self._site_scope()]
+            assert actions["updated"] == []
+            assert actions["in_sync"] == [120]
 
     def test_live_sync_description_preservation_modes(self, nfclient: Any) -> None:
         self.nb.ipam.vlans.create(

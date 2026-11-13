@@ -69,9 +69,10 @@ When updating a service task page:
 
 ## Headings
 
+- Start every word in a heading with a capital letter, including short words such as "And", "Of", and "The". Preserve the spelling of code identifiers and acronyms.
 - Use `#` once per page.
 - Use `##` for major sections and `###` for subsections.
-- Keep headings action-oriented for How-to pages (e.g. “Run tests”, “Generate inventory”).
+- Keep headings action-oriented for How-to pages (e.g. “Run Tests”, “Generate Inventory”).
 
 ## Code blocks
 

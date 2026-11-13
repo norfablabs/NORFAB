@@ -2967,6 +2967,12 @@ class SyncVlansInput(
         ),
         alias="preserve-description",
     )
+    preserve_name: StrictBool = Field(
+        False,
+        description="Keep existing NetBox VLAN names; new VLANs use live names",
+        alias="preserve-name",
+        json_schema_extra={"presence": True},
+    )
 
     @model_validator(mode="after")
     def validate_sync_vlans(self) -> "SyncVlansInput":

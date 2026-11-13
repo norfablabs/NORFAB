@@ -515,6 +515,17 @@
     },
     "test_vlans.py::TestSyncVlans": {
       "mode": "main_mutating",
+      "name_preservation_test": {
+        "test": "test_live_sync_name_preservation",
+        "site": "NORFAB-LAB",
+        "device": "fn-ceos-lf-2",
+        "vlan_id": 120,
+        "initial_name": "NetBox managed name",
+        "initial_description": "stale description",
+        "usage": "For omitted, false, and true preserve_name values, create site VLAN 120, preview changes, then sync and repeat. Keep the initial name when true or rename it to TEST_L2_TRUNK_A otherwise. Clear the description and verify Port-Channel32 uses this VLAN as its untagged VLAN. Sync may also update mode and memberships on the class-owned Ethernet5 interface.",
+        "ownership": "Uses VLAN 120 and interfaces already reserved by this class. Adds no separate records or address space.",
+        "cleanup": "The class fixture deletes the site VLAN and restores mode and VLAN memberships on its four reserved interfaces after each parameter case, including failures."
+      },
       "interfaces": [
         "fn-ceos-lf-1:Port-Channel31",
         "fn-ceos-lf-1:Ethernet5",
