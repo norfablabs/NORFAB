@@ -669,6 +669,13 @@
       "tenants": ["norfab-test_create_bgp_peering_single", "norfab-test_create_bgp_peering_bulk"],
       "coverage": "Existing single and bulk creation tests assign an owned tenant; bulk also verifies omitted tenant. Fixture deletes only sessions assigned to its tenant and the tenant it created."
     },
+    "test_designs.py::TestDesignDeploy::test_interface_references": {
+      "mode": "main_mutating",
+      "read_only_devices": ["fceos4"],
+      "interfaces": ["fceos4:NORFAB-DESIGN-LINK-<12 hex run suffix>-<eth|po|br|sub1|sub2|eth1|eth2|eth3|eth4>"],
+      "ownership": "Owns nine uniquely named interfaces on seeded fceos4. One nested design covers string and dictionary parent, LAG, and bridge references, including an explicit device, on creation and repeat deployment. Supplies only the existing device name, leaving its attributes unchanged.",
+      "cleanup": "Checks for name collisions before writing. Finally deletes only this run's exact interface names on fceos4 in reverse definition order, dependents before targets, including after partial failures. Retains the seeded device."
+    },
     "test_designs.py::TestDesignDeploy::test_device_config_template_reference": {
       "mode": "main_mutating",
       "devices": ["norfab-design-config-template-<12 hex run suffix>"],

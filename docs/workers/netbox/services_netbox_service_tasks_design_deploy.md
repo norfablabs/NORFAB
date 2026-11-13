@@ -973,7 +973,7 @@ Device records may contain `interfaces`, `bgp_peerings`, `power_ports`, `console
         interfaces:
           Port-Channel1: {type: lag}
           Ethernet1: {type: 10gbase-x-sfpp, lag: {name: Port-Channel1}}
-          Ethernet2.100: {type: virtual, parent: {name: Ethernet2}}
+          Ethernet2.100: {type: virtual, parent: Ethernet2}
           Ethernet2: {type: 10gbase-x-sfpp}
     ```
 

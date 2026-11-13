@@ -28,6 +28,78 @@ pytestmark = [pytest.mark.netbox, pytest.mark.netbox_design_deploy]
 
 class TestDesignDeploy:
 
+    def test_interface_references(self, nfclient: Any) -> None:
+        """Resolve string and dictionary parent, LAG, and bridge references."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        prefix = f"NORFAB-DESIGN-LINK-{uuid4().hex[:12]}"
+        design = {
+            "devices": [
+                {
+                    "name": "fceos4",
+                    "interfaces": {
+                        f"{prefix}-eth": {"type": "1000base-t"},
+                        f"{prefix}-po": {"type": "lag"},
+                        f"{prefix}-br": {"type": "bridge"},
+                        f"{prefix}-sub1": {
+                            "type": "virtual",
+                            "parent": f"{prefix}-eth",
+                        },
+                        f"{prefix}-sub2": {
+                            "type": "virtual",
+                            "parent": {"name": f"{prefix}-eth"},
+                        },
+                        f"{prefix}-eth1": {"type": "1000base-t", "lag": f"{prefix}-po"},
+                        f"{prefix}-eth2": {
+                            "type": "1000base-t",
+                            "lag": {"name": f"{prefix}-po"},
+                        },
+                        f"{prefix}-eth3": {
+                            "type": "1000base-t",
+                            "bridge": f"{prefix}-br",
+                        },
+                        f"{prefix}-eth4": {
+                            "type": "1000base-t",
+                            "bridge": {"device": "fceos4", "name": f"{prefix}-br"},
+                        },
+                    },
+                }
+            ]
+        }
+        interfaces = design["devices"][0]["interfaces"]
+        assert not list(
+            nb.dcim.interfaces.filter(device="fceos4", name=list(interfaces))
+        )
+        try:
+            for _ in range(2):
+                response = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={"design": design},
+                )
+                assert response
+                for result in response.values():
+                    assert not result["failed"], result
+                actual = {
+                    item.name.removeprefix(prefix + "-"): item
+                    for item in nb.dcim.interfaces.filter(
+                        device="fceos4", name=list(interfaces)
+                    )
+                }
+                assert len(actual) == len(interfaces)
+                assert actual["sub1"].parent.id == actual["eth"].id
+                assert actual["sub2"].parent.id == actual["eth"].id
+                assert actual["eth1"].lag.id == actual["po"].id
+                assert actual["eth2"].lag.id == actual["po"].id
+                assert actual["eth3"].bridge.id == actual["br"].id
+                assert actual["eth4"].bridge.id == actual["br"].id
+        finally:
+            # Insertion order puts targets first; delete dependents first.
+            for name in reversed(interfaces):
+                item = nb.dcim.interfaces.get(device="fceos4", name=name)
+                if item:
+                    item.delete()
+
     def test_device_config_template_reference(self, nfclient: Any) -> None:
         """Resolve a seeded template by name or ID on one owned device."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)

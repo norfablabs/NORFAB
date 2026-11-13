@@ -81,10 +81,11 @@ supported lookup. Fixed addresses must come from an agreed addressing plan.
   point-to-point masks, the task can resolve the local IP and derive the peer IP
   after allocation. Do not embed guessed addresses. `create_reverse` controls
   BGP sessions, whereas `create_peer_ip` controls IP allocation; they are separate.
-- `create_asn` reuses an ASN by description within its named range. It is not a
-  Jinja2 function or a general reference expression: BGP `local_as` and
-  `remote_as` currently require numbers. Use agreed numeric ASNs consistently
-  unless a documented mechanism resolves the allocated ASN at deployment time.
+- Use `create_asn` to allocate an ASN from a named range. Keep its description
+  unchanged to reuse the same ASN on later deployments. You can also use it
+  directly under a BGP peering's `local_as` or `remote_as` field. For each side,
+  choose either allocation with `create_asn` or lookup with `local_as_query` or
+  `remote_as_query`.
 
 For example, under an existing device's `interfaces`, this loopback definition
 uses a previously defined site-scoped pool with the IPAM role `LOOPBACKS`:
@@ -193,7 +194,7 @@ Adapt the arguments to the discovered tool's schema and the design's input schem
 ## Review and verify
 
 - Check object identities, reference formats, plugin requirements, and allocation pools against the target environment. Existing matching objects will be updated, even if another design originally created them.
-- Check both BGP endpoints and ASNs. New peerings default to reverse-session creation. Use `create_reverse: false` when defining each direction yourself.
+- Check both BGP endpoints and ASNs. Designs create only the specified direction by default, including peerings nested under devices or interfaces. Set `create_reverse: true` to create the reverse session too. Keep it false when defining each direction yourself. The standalone `create_bgp_peering` task defaults to creating both directions.
 - Check that allocation filters select the intended pools and that consumers do not assume particular next-available values. Keep peer IP allocation on one endpoint per cable.
 - Review custom Python files as executable worker code. Respect `dry_run` and do not embed credentials.
 - If authorized to execute, start with a dry run. It does not create prerequisites, so unresolved planned objects are not proof that the actual deployment will fail. A dry run is not a security boundary for custom functions.

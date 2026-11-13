@@ -2117,6 +2117,8 @@ def process_interfaces(
 
     Independent parents are written before interfaces using parent, LAG, or
     bridge links. VLAN IDs and parent IDs come from the deployment cache.
+    Parent, LAG, and bridge strings reference interfaces on the same device;
+    dictionaries supply a name and optionally an explicit device.
     A dependent interface cannot itself be the parent of another interface
     created in the same deployment; that would require a further pass.
 
@@ -2227,6 +2229,8 @@ def process_interfaces(
                 for field in ("parent", "lag", "bridge"):
                     if field in source:
                         reference = source[field]
+                        if isinstance(reference, str):
+                            reference = {"name": reference}
                         payload[field] = interface_cache[
                             (reference.get("device", device), reference["name"])
                         ].id

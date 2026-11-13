@@ -7,7 +7,7 @@ This guide defines lightweight conventions for NORFAB documentation. The goal is
 Before writing, identify the primary audience: users or developers. Tailor wording, examples,
 and detail to that audience. User guides MUST explain what the feature does, when/why to use it,
 and how to use it. Omit implementation details unless essential to usage or a limitation.
-Developer guides may explain architecture, contracts, and maintenance decisions.
+Developer guides may explain architecture, interfaces, and maintenance decisions.
 
 Overviews MUST describe the task and its purpose before examples. Keep device names, example
 resources, and walkthrough instructions in Examples. Avoid test terminology such as "test-owned"
@@ -55,6 +55,7 @@ When updating a service task page:
 
 ## Writing style
 
+- Never use "contract" or "contracts" in prose or headings. Use "documentation", "reference", "interface", "arguments", or "behavior" to describe what you mean. Preserve literal file paths and code identifiers.
 - Before adding user-facing content, check whether users need it to use a feature, interpret results, or understand a limitation. Omit internal implementation details and routine fixes that do not help with these goals; task pages do not need an entry for every code change.
 - Prefer short sentences and active voice.
 - Use periods to end sentences. Do not use semicolons to separate sentences or clauses.
@@ -211,7 +212,7 @@ Before finishing a documentation change:
 - `customization/`: hooks and service plugin guides.
 - `development/adr/`: architecture decision records, with an index recording their stated status.
 - `development/testing/`: testing framework documentation.
-- `development/specs/<NNN-feature-name>/`: durable Spec Kit feature specifications, plans, tasks, contracts, and checklists.
+- `development/specs/<NNN-feature-name>/`: durable Spec Kit feature specifications, plans, tasks, interface definitions, and checklists.
 
 Keep the homepage, feature catalogue, project overview pages, changelog, contact page, and tags at the documentation root. Keep shared assets in `images/`, `stylesheets/`, and `javascripts/`.
 
