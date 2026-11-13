@@ -3240,6 +3240,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#deployment-caveats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment caveats
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#design-input-schema" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -8377,6 +8388,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#deployment-caveats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment caveats
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#design-input-schema" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -8806,6 +8828,29 @@
 <p class="admonition-title">Keep pre-render metadata at the start</p>
 <p>The loader parses only the initial YAML lines containing <code>design_input_schema</code>, <code>jinja_functions</code>, <code>custom_functions</code>, comments, and indented lines. It stops at the first other top-level line. This portion of document must be valid YAML on its own: keep Jinja2 expressions and top-level template directives out of it, and put <code>design_input_schema</code> and <code>jinja_functions</code> before any object collection. Use <strong>one YAML document</strong>. Do not insert <code>---</code> between metadata and collections. A schema or Jinja2 function declared after a collection will not be available before rendering.</p>
 </div>
+<h2 id="deployment-caveats">Deployment caveats<a class="headerlink" href="#deployment-caveats" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Deployment changes existing data.</strong> Matching objects are updated with the
+  supplied fields, even if they were created manually or by another design.
+  Review object identities and relationships before applying a design.</li>
+<li><strong>IP assignments can move.</strong> For example, if an ordinary IP record exists on
+  <code>router-1 Ethernet1</code> and the design explicitly assigns that same address and
+  VRF to <code>router-2 Ethernet2</code>, deployment can move the existing record to the new
+  interface. It does not preserve the old assignment merely because it already
+  exists. VIP and anycast addresses have separate handling for shared assignments.</li>
+<li><strong>Updates follow each object's rules.</strong> Supplied single-value fields and context-data
+  dictionaries replace existing values. Supported lists, such as tags and tagged
+  VLANs, gain members rather than removing existing ones. This is not a complete
+  reconciliation of every Netbox field. Existing BGP sessions are left unchanged,
+  and already-cabled ports cannot be moved to another cable.</li>
+<li><strong>Removing YAML does not remove objects.</strong> Objects omitted from later designs
+  remain in Netbox. Repeated deployment send updates without calculating
+  a diff.</li>
+<li><strong>Check the target and preview first.</strong> Without <code>branch</code>, writes affect main
+  data. Use <code>dry_run: true</code> before an authorized deployment, but remember it does
+  not create planned prerequisites or reserve allocations. Failures can leave
+  earlier changes applied. There is no automatic rollback.</li>
+</ul>
 <h2 id="design-input-schema">Design input schema<a class="headerlink" href="#design-input-schema" title="Permanent link">¤</a></h2>
 <p><code>design_input_schema</code> validates the supplied <code>context</code> before Jinja2 renders the design. Use inline JSON Schema or an <code>nf://</code> / <code>git://</code> Python file defining a Pydantic <code>DesignInput</code> model. The validated context is available as <code>context</code> in the template.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Inline schema</label><label for="__tabbed_2_2">Pydantic Model-based design</label></div>
@@ -9169,7 +9214,7 @@
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-router-1</span>
 <span class="w">    </span><span class="nt">config_template</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-router</span>
 </code></pre></div>
-<p>When updating an existing record, design handlers add requested tags and custom-field list values without removing existing members. They also add VRF and L2VPN route targets, interface tagged VLANs, and config-context scope lists. Config-context <code>sites</code> and <code>tenants</code> accept name lists. Other scope lists use NetBox IDs. Scalar custom fields replace their old values. VLAN-group <code>vid_ranges</code>, local context data, and config-context <code>data</code> retain replacement behavior. Named object and multiobject custom-field values are resolved to NetBox IDs before writes.</p>
+<p>When updating an existing record, design handlers add requested tags and custom-field list values without removing existing members. They also add VRF and L2VPN route targets, interface tagged VLANs, and config-context scope lists. Config-context <code>sites</code> and <code>tenants</code> accept name lists. Other scope lists use NetBox IDs. Single-value custom fields replace their old values. VLAN-group <code>vid_ranges</code>, local context data, and config-context <code>data</code> retain replacement behavior. Named object and multiobject custom-field values are resolved to NetBox IDs before writes.</p>
 <h2 id="supported-design-verbs">Supported design verbs<a class="headerlink" href="#supported-design-verbs" title="Permanent link">¤</a></h2>
 <p>Design verbs are YAML keys that request an operation, such as querying existing
 objects, allocating resources, or calling custom Python. Each verb is supported
@@ -9484,12 +9529,12 @@ report the same available ASN.</p>
 <span class="w">      </span><span class="nt">is_primary</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
 <h2 id="custom-fields">Custom fields<a class="headerlink" href="#custom-fields" title="Permanent link">¤</a></h2>
-<p>Put a <code>custom_fields</code> dictionary on an object record. Its keys are Netbox custom-field names, not labels. Definitions must already exist and be enabled for that object type. The design passes values through to Netbox, which validates their types and choices. Updates PATCH supplied values without clearing omitted custom fields. Use <code>null</code> to clear a nullable scalar field.</p>
+<p>Put a <code>custom_fields</code> dictionary on an object record. Its keys are Netbox custom-field names, not labels. Definitions must already exist and be enabled for that object type. The design passes values through to Netbox, which validates their types and choices. Updates PATCH supplied values without clearing omitted custom fields. Use <code>null</code> to clear a single-value field that allows null.</p>
 <p>When updating an ASN, a design adds new sites and tags without removing existing
 ones. When updating a VLAN or prefix, it adds new tags. For these objects, if both the
 existing and supplied values of a custom field are lists, the design adds only
 new items. Supplying <code>[]</code> leaves an existing list unchanged. For custom fields,
-<code>null</code> clears the value, and a new scalar value replaces the old one.</p>
+<code>null</code> clears the value, and a supplied single value replaces the old one.</p>
 <p>Object and multiobject custom fields accept numeric Netbox IDs or string
 references. The field's related object type determines how strings are matched:</p>
 <table>
@@ -11072,7 +11117,7 @@ Relative includes resolve from the Markdown file's directory.</p>
 <div class="tabbed-block">
 <p>Use <code>yaml context.KEY</code>, <code>csv context.KEY</code>, or a marked Markdown table. Each
 key must be unique and top-level. YAML preserves types. CSV/table cells stay
-strings. Use YAML <code>|</code> scalars for multiline text. JSON and text fences are
+strings. Use YAML <code>|</code> blocks for multiline text. JSON and text fences are
 unsupported.</p>
 <div class="highlight"><pre><span></span><code><span class="sb">```yaml</span><span class="w"> </span>context.settings
 <span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
@@ -11245,7 +11290,7 @@ and any errors.
 <h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">¤</a></h2>
 <ul>
 <li>A dry run does not create prerequisites, so it cannot fully resolve references to objects proposed earlier in the same design.</li>
-<li>Explicit ASN, VLAN, and prefix records can supply object and multiobject custom-field references by string reference or ID, using the matching fields described in <a href="#custom-fields">Custom fields</a>. String references must identify exactly one existing object when that record is processed. Updates add multiobject references and other list values without removing current values. Scalar and <code>null</code> values replace them. Custom-field definitions must already exist in NetBox.</li>
+<li>Explicit ASN, VLAN, and prefix records can supply object and multiobject custom-field references by string reference or ID, using the matching fields described in <a href="#custom-fields">Custom fields</a>. String references must identify exactly one existing object when that record is processed. Updates add multiobject references and other list values without removing current values. Single values and <code>null</code> replace existing values. Custom-field definitions must already exist in NetBox.</li>
 <li>Check that named parents, device types, sites, interfaces, and allocation pools exist or are created earlier in the design order.</li>
 <li>Jinja filters, input models, and custom functions execute Python inside the worker. Use trusted files.</li>
 <li>See the <a href="https://github.com/norfablabs/NORFAB/blob/main/tests/nf_tests_inventory/netbox/designs/acme_branch_network_design_v1.yaml">ACME design example</a> for a full nested design.</li>

@@ -787,6 +787,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#deployment-caveats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment caveats
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#follow-the-core-rules" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -8202,6 +8213,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#deployment-caveats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment caveats
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#follow-the-core-rules" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -8384,6 +8406,14 @@
 <h1 id="author-a-norfab-netbox-design">Author a NorFab Netbox design<a class="headerlink" href="#author-a-norfab-netbox-design" title="Permanent link">¤</a></h1>
 <p>Produce reviewable YAML and its input context. Deploy only when requested.
 This models Netbox data. Applying device configuration is separate.</p>
+<h2 id="deployment-caveats">Deployment caveats<a class="headerlink" href="#deployment-caveats" title="Permanent link">¤</a></h2>
+<ul>
+<li>Matching objects can be updated even if another design or person created them.</li>
+<li>Explicitly assigning an existing ordinary IP to another interface can move it.</li>
+<li>Supplied single-value fields and context data replace existing values. Supported lists gain members.</li>
+<li>Omitted objects remain. Existing BGP sessions are not updated, and already-cabled ports cannot be recabled.</li>
+<li>Without a branch, writes affect main data. Preview first. Failures do not roll back earlier writes.</li>
+</ul>
 <h2 id="follow-the-core-rules">Follow the core rules<a class="headerlink" href="#follow-the-core-rules" title="Permanent link">¤</a></h2>
 <p>The design MUST be as simple, linear, and minimal as possible while meeting all
 requirements. Keep it readable from top to bottom without tracing template abstractions.</p>
