@@ -46,7 +46,7 @@ class TaskMCPResultGuardrail(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     description: StrictStr = ""
-    type: Literal["limit", "replace", "regex"]
+    type: Literal["limit", "characters_limit", "replace", "regex"]
     limit: Union[StrictInt, None] = None
     match: Union[StrictStr, list[StrictStr], None] = None
     replace: Union[StrictStr, None] = None
@@ -55,7 +55,7 @@ class TaskMCPResultGuardrail(BaseModel):
     @model_validator(mode="after")
     def validate_rule(self) -> "TaskMCPResultGuardrail":
         fields = self.model_fields_set
-        if self.type == "limit":
+        if self.type in {"limit", "characters_limit"}:
             if fields & {"match", "replace"}:
                 raise ValueError("Limit result guardrail has unsupported fields")
             if self.limit is None or self.limit <= 0:

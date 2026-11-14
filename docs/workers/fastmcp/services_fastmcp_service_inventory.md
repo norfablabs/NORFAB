@@ -372,6 +372,7 @@ rules enabled.
 | Type | Required keys | Behavior |
 |---|---|---|
 | `limit` | `limit` (positive byte count) | Measures the compact JSON aggregate. If exceeded, returns one bounded base result containing `message` and the existing job UUID. |
+| `characters_limit` | `limit` (positive character count) | Measures `len(str(combined_result))` across all workers. If exceeded, returns `result: null`, `failed: false`, and one `errors` entry. |
 | `replace` | `match`, `replace` | Recursively replaces matching string values below each worker's `result` and `diff`. |
 | `regex` | `match` | Recursively detects matching string values below `result` and `diff` and replaces only the affected worker field with `message`. |
 
@@ -388,3 +389,19 @@ complete aggregate counts toward a `limit`.
 Effective result guardrails are included by `get_tools`, `show fastmcp tools`
 when detailed tool data is requested, and `show fastmcp guardrails` under the
 `result_guardrails` section for each matching tool.
+
+By default, FastMCP applies wildcard replacement rules and a `characters_limit`
+of `32768` after configured result rules, without changing the inventory. Replacement rules use `REDACTED` for
+labelled passwords, secrets, tokens and credential keys; authentication headers
+and cookies; connection URL credentials; common network configuration secrets;
+private-key blocks, password hashes and recognizable service tokens.
+
+Replacement scans string values in `result` and `diff`, including nested values.
+It does not identify an arbitrary secret solely from its dictionary key, decode
+encoded payloads, or guarantee detection of every secret. Public keys, ordinary
+identifiers and unlabelled hashes are intentionally preserved.
+
+Set `tools.disable_builtin_guardrails: true` to skip these defaults and
+task-authored defaults. Your inventory rules still apply. Custom inventory
+rules run before the appended defaults. To replace the default limit, disable
+defaults and configure your own `characters_limit` and replacement rules.

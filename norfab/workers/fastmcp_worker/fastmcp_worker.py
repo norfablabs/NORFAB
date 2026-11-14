@@ -58,6 +58,76 @@ SERVICE = "fastmcp"
 log = logging.getLogger(__name__)
 
 
+# Qualified labels avoid treating every public key, identifier, or digest as a secret.
+CREDENTIAL_LABEL = (
+    r"(?:[a-z0-9]+[_-])*"
+    r"(?:(?:password|passwd|pwd)(?:[_-]?(?:confirmation|confirm|hash))?|"
+    r"passphrase|passcode|psk|secret|token|credentials?|"
+    r"(?:admin|db|database|key)[_-]?pass|ansible[_-](?:ssh|become)[_-]pass|"
+    r"(?:access|refresh|id|auth|bearer|session|csrf|xsrf|oauth|jwt)[_-]?token|"
+    r"(?:client|consumer|app|shared|chap)[_-]?secret|chap[_-]?password|"
+    r"(?:api|auth|authentication|service|account|access|secret|private|shared|"
+    r"signing|encryption|client|session|ssl|tls|fernet|hmac|privacy)[_-]?key(?:[_-]?id)?|"
+    r"session[_-]?id|snmp[_-]?community(?:[_-]?string)?)"
+)
+
+# Defaults use the same inventory rules and execution path as custom guardrails.
+BUILTIN_RESULT_GUARDRAILS = [
+    {
+        "service": "*",
+        "task": "*",
+        "type": "replace",
+        "description": "Redact labelled credentials, HTTP authentication, URLs, and network secrets.",
+        "match": [
+            # HTTP headers can contain multiple credentials, so withhold the whole value.
+            r"(?im)^([ \t]*(?:proxy-authorization|authorization|cookie|set-cookie)[ \t]*:[ \t]*)[^\r\n]+",
+            r"""(?i)(\b(?:proxy[-_]?)?authorization["']?[ \t]*[:=][ \t]*["']?)(?:Bearer|Basic)[ \t]+[^\s,"';}]+""",
+            # Connection strings and query parameters retain their non-secret parts.
+            r"(?i)(\b[a-z][a-z0-9+.-]*://[^/\s:@]*:)[^@/\s]+(?=@)",
+            r"""(?i)([?&](?:password|passwd|pwd|token|access_token|refresh_token|id_token|api[_-]?key|client_secret|secret|signature|sig|x-amz-signature|x-amz-security-token)=)[^&#\s"']+""",
+            # Network configuration encryption/type markers are not the password itself.
+            r"(?im)^([^\r\n]*?\b(?:password|secret|key|shared-key)[ \t]+(?:[0-9]|md5|sha|sha1|sha256|sha384|sha512|pbkdf2|cipher|irreversible-cipher)[ \t]+)\S+",
+            r"(?im)^([ \t]*(?:snmp-server[ \t]+community|set[ \t]+snmp[ \t]+community|snmp-agent[ \t]+community[ \t]+(?:read|write))[ \t]+(?:(?:[0-9]|cipher|irreversible-cipher)[ \t]+)?)\S+",
+            r"(?im)^([ \t]*(?:radius-server[ \t]+key|tacacs-server[ \t]+key|radius-server[ \t]+shared-key|hwtacacs-server[ \t]+shared-key|crypto[ \t]+isakmp[ \t]+key)[ \t]+(?:(?:[0-9]|cipher|irreversible-cipher)[ \t]+)?)\S+",
+            r"(?im)^([ \t]*snmp-server[ \t]+user\b[^\r\n]*?\bauth[ \t]+\S+[ \t]+)\S+",
+            r"(?im)^([ \t]*snmp-server[ \t]+user\b[^\r\n]*?\bpriv[ \t]+\S+(?:[ \t]+(?:128|192|256))?[ \t]+)\S+",
+            # SQL accounts, XML configuration, and Docker-style base64 auth fields.
+            r"""(?i)(\bidentified[ \t]+by[ \t]+["'])(?:\\.|[^"'\\\r\n])+""",
+            rf"(?i)(<(?:[a-z0-9_.-]+:)?{CREDENTIAL_LABEL}(?:[ \t][^>]*)?>)[^<]+(?=</)",
+            r"""(?i)(\bauth["']?[ \t]*[:=][ \t]*["']?)[A-Za-z0-9+/]{12,}={0,2}""",
+            # JSON/YAML/env/CLI labels: quoted values may contain spaces and escapes.
+            rf"""(?i)(\b(?:{CREDENTIAL_LABEL}|(?:proxy[-_]?)?authorization|(?:set[-_]?)?cookie)\b["'`]?[ \t]*(?:[:=][ \t]*|[ \t]+)(?:N|@)?(["'`]))(?!\[?REDACTED\b)(?:\\.|(?!\2)[^\\\r\n])+""",
+            rf"""(?i)(\b{CREDENTIAL_LABEL}\b["'`]?[ \t]*(?:[:=][ \t]*|[ \t]+))(?!\[?REDACTED\b|(?:N|@)["']|(?:[0-9]|md5|sha|sha1|sha256|sha384|sha512|pbkdf2|cipher|irreversible-cipher)[ \t])[^\s,"'`;}}\]]+""",
+        ],
+        "replace": r"\1REDACTED",
+    },
+    {
+        "service": "*",
+        "task": "*",
+        "type": "replace",
+        "description": "Redact recognizable private keys, password hashes, and service tokens.",
+        "match": [
+            r"(?s)-----BEGIN ((?:[A-Z0-9]+ )*PRIVATE KEY(?: BLOCK)?)-----.*?-----END \1-----",
+            r"\$(?:[156]|2[aby]|y)\$[^\s:'\";]{8,}",
+            r"\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{82,}|glpat-[A-Za-z0-9_-]{20,}|npm_[A-Za-z0-9]{36,})\b",
+            r"\b(?:xox[baprs]-[A-Za-z0-9-]{10,}|xapp-[A-Za-z0-9-]{20,})\b",
+            r"\b(?:sk-[A-Za-z0-9_-]{20,}|[sr]k_live_[A-Za-z0-9]{16,})\b",
+            r"\b(?:(?:AKIA|ASIA|ABIA|ACCA)[A-Z2-7]{16}|AIza[A-Za-z0-9_-]{35})\b",
+            r"\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}={0,2}(?![A-Za-z0-9_-])",
+        ],
+        "replace": "REDACTED",
+    },
+    {
+        "service": "*",
+        "task": "*",
+        "type": "characters_limit",
+        "limit": 32768,
+        "description": "Limit the combined MCP result to 32768 characters.",
+        "message": "result omitted because the combined result exceeds 32768 characters. Configure a tools.result_guardrails characters_limit rule or set tools.disable_builtin_guardrails to true.",
+    },
+]
+
+
 class DiskcacheBearerTokenVerifier:
     """
     MCP bearer token verifier backed by the worker diskcache token database.
@@ -230,12 +300,16 @@ def apply_task_result_guardrails(
     task_name: str,
     raw_result: dict[str, Any] | None,
     result_guardrails: list[dict[str, Any]],
+    disable_builtin_guardrails: bool = False,
 ) -> dict[str, Any] | None:
-    """Apply ordered result guardrails to one deep MCP delivery copy."""
+    """Apply ordered rules and enabled defaults to one deep MCP delivery copy."""
     if raw_result is None:
         return None
 
     delivery_result = copy.deepcopy(raw_result)
+    if not disable_builtin_guardrails:
+        # Append defaults without changing tool metadata or the loaded inventory.
+        result_guardrails = result_guardrails + BUILTIN_RESULT_GUARDRAILS
 
     for guardrail in result_guardrails:
         guardrail_type = guardrail["type"]
@@ -254,6 +328,23 @@ def apply_task_result_guardrails(
             )
             log.warning(message)
             return Result(result=message, failed=False, juuid=juuid).model_dump()
+
+        elif guardrail_type == "characters_limit":
+            serialized_size = len(str(delivery_result))
+            limit = guardrail["limit"]
+            if serialized_size <= limit:
+                continue
+
+            worker_result = next(iter(delivery_result.values()), {})
+            juuid = worker_result.get("juuid")
+            message = guardrail.get("message") or (
+                f"result omitted for tool '{tool_name}' because its size of "
+                f"{serialized_size} characters exceeded the limit of {limit} characters."
+            )
+            log.warning(message)
+            return Result(
+                result=None, errors=[message], failed=False, juuid=juuid
+            ).model_dump()
 
         elif guardrail_type == "replace":
             match_values = guardrail["match"]
@@ -1112,6 +1203,9 @@ class FastMCPWorker(NFPWorker):
                 task_name,
                 raw_result,
                 tool_data.get("result_guardrails", []),
+                disable_builtin_guardrails=self.fastmcp_inventory.get("tools", {}).get(
+                    "disable_builtin_guardrails", False
+                ),
             )
 
         @self.app._mcp_server.list_prompts()

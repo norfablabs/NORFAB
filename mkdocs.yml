@@ -287,7 +287,6 @@ nav:
   - Feature Specifications:
     - Nornir HTTP and RESTCONF Tasks: development/specs/001-nornir-http/spec.md
     - NorFab State Service (NSS): development/specs/002-service-configuration-graph/spec.md
-    - FastMCP Server Guardrails Enhancements: development/specs/003-fastmcp-server-guardrails/spec.md
   - NFWeb Developer Guide: development/nfweb_developer_guide.md
   - Docker Development: development/norfab_docker_development.md
   - Documentation Style Guide: development/documentation_style_guide.md

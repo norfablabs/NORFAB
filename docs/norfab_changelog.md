@@ -5,6 +5,8 @@
 1. Netbox `sync_vlans` accepts `preserve_name=True` to retain existing NetBox VLAN names while synchronizing descriptions and memberships.
 2. Netbox `design_deploy` accepts interface names as strings for `parent`, `lag`, and `bridge`, alongside existing dictionary references.
 
+3. FastMCP adds `characters_limit` result rules and default credential replacement and character-limit rules, controlled by `disable_builtin_guardrails`.
+
 ## FEATURES
 
 1. Added Nornir RESTCONF GET, POST, PUT, PATCH and DELETE tasks with OpenConfig interfaces, LLDP and system getters, inline/nf:// payload templates and CLI, Python, FastAPI and MCP usage guides.
