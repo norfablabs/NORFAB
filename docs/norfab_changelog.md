@@ -4,13 +4,13 @@
 
 1. Netbox `sync_vlans` accepts `preserve_name=True` to retain existing NetBox VLAN names while synchronizing descriptions and memberships.
 2. Netbox `design_deploy` accepts interface names as strings for `parent`, `lag`, and `bridge`, alongside existing dictionary references.
-
-3. FastMCP adds `characters_limit` result rules and default credential replacement and character-limit rules, controlled by `disable_builtin_guardrails`.
+3. FastMCP adds `characters_limit` result rules and default credential replacement and a 100000-character result limit, controlled by `disable_builtin_guardrails`.
 
 ## FEATURES
 
 1. Added Nornir RESTCONF GET, POST, PUT, PATCH and DELETE tasks with OpenConfig interfaces, LLDP and system getters, inline/nf:// payload templates and CLI, Python, FastAPI and MCP usage guides.
-
+2. Added to FastMCP input guardrails support for `action: request_approval` through MCP client elicitation before job submission; `reject` remains the default action. Input rejections and approval refusals return results keyed by the FastMCP worker name.
+ 
 ## BUGS
 
 1. Netbox `sync_device_ip` normalizes live IP addresses before matching existing records, preventing equivalent IPv6 spellings from being treated as new addresses.
@@ -21,7 +21,7 @@
 2. Feature development now follows Spec Kit specifications, plans and tasks under `docs/development/specs/` instead of feature ADRs, with [installation and workflow instructions](development/norfab_developing_and_testing_framework.md#develop-features-with-spec-kit). ADRs remain for separate architecture decisions.
 3. NFCLI `show nornir hosts` displays a detailed Rich table by default. Use `brief` for host lists grouped by worker; the `details` and `table` options are removed from this command.
 4. Added a portable Claude Code skill for [Netbox design authoring](skills/norfab-netbox-design-authoring/SKILL.md) under the documentation's Skills section, with allocation guidance and deployment verification steps.
-
+5. Added a dedicated [FastMCP Guardrails guide](workers/fastmcp/services_fastmcp_service_guardrails.md) with configuration examples, approval requirements, and result protection limits.
 
 ---
 

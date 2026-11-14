@@ -41,6 +41,12 @@ pip install norfab[fastmcpservice]
 > [!NOTE]
 > There is no dependency on name-twin [FastMCP project](https://github.com/PrefectHQ/fastmcp) that uses similar name and Python API, `mcp` library above is the only dependency.
 
+## Guardrails
+
+Use [FastMCP Guardrails](services_fastmcp_service_guardrails.md) to reject unsafe
+tool calls, request operator approval, redact sensitive output, and limit
+response size. Configure these controls in the FastMCP worker inventory.
+
 ## FastMCP Service Tasks
 
 FastMCP Service supports a small set of tasks to manage MCP exposure.

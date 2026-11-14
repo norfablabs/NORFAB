@@ -1,4 +1,5 @@
 import asyncio
+import json
 import threading
 from types import SimpleNamespace
 from unittest.mock import Mock
@@ -6,7 +7,7 @@ from unittest.mock import Mock
 import pytest
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
-from mcp.shared.exceptions import McpError
+from mcp.types import ElicitResult
 from pydantic import ValidationError
 
 from norfab.workers.fastmcp_worker.fastmcp_models import TaskMCPGuardrail
@@ -153,40 +154,231 @@ class TestFastMCPGuardrails:
         ]
 
     @pytest.mark.parametrize(
-        "command, message",
+        "commands, message",
         [
-            ("reload", "reboot, reload, or restart command"),
-            ("conf t", "configuration mode command"),
-            ("delete flash:test.txt", "destructive or state-changing command"),
-            ("bash", "shell mode command"),
-            ("boot system flash:image.bin", "OS/image/package operation command"),
-            ("ssh admin@192.0.2.1", "outbound session command"),
+            (["reload"], "reboot, reload, or restart command"),
+            (["conf t"], "configuration mode command"),
+            (["show version", "conf t"], "configuration mode command"),
+            (["delete flash:test.txt"], "destructive or state-changing command"),
+            (["bash"], "shell mode command"),
+            (["boot system flash:image.bin"], "OS/image/package operation command"),
+            (["ssh admin@192.0.2.1"], "outbound session command"),
         ],
     )
-    def test_cli_rejects_unsafe_command_integration(
-        self, nfclient, mcp_url, command, message
-    ):
+    def test_call_cli_rejects_guardrails(self, nfclient, mcp_url, commands, message):
         ensure_tool_discovered(self, nfclient, "nornir", "cli")
 
         async def run_test():
             async with streamable_http_client(mcp_url) as (read, write, _):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
-                    try:
-                        result = await session.call_tool(
-                            "service_nornir__task_cli",
-                            arguments={
-                                "commands": [command],
-                                "FL": ["ceos-spine-1"],
-                                "dry_run": True,
-                            },
-                        )
-                    except McpError as exc:
-                        response = str(exc)
-                    else:
-                        assert result.isError
-                        response = result.content[0].text
-
-                    assert message in response
+                    response = await session.call_tool(
+                        "service_nornir__task_cli",
+                        arguments={
+                            "commands": commands,
+                            "FL": ["ceos-spine-1"],
+                            "dry_run": True,
+                        },
+                    )
+                    assert not response.isError
+                    result = json.loads(response.content[0].text)
+                    assert set(result) == {"fastmcp-worker-1"}
+                    result = result["fastmcp-worker-1"]
+                    assert result["service"] == "fastmcp"
+                    assert result["result"] == {}
+                    assert result["failed"] is False
+                    assert len(result["errors"]) == 1
+                    assert message in result["errors"][0]
 
         asyncio.run(run_test())
+
+    @pytest.mark.parametrize(
+        "config, message",
+        [
+            (["reload"], "reboot, reload, or restart command"),
+            (["do show version"], "operational command in configuration input"),
+            (["delete flash:test.txt"], "delete or erase command"),
+            (["ssh admin@192.0.2.1"], "outbound session command"),
+        ],
+    )
+    def test_call_cfg_rejects_guardrails(self, nfclient, mcp_url, config, message):
+        ensure_tool_discovered(self, nfclient, "nornir", "cfg")
+
+        async def run_test():
+            tool_name = "service_nornir__task_cfg"
+            kwargs = {"config": config, "FC": "spine", "dry_run": True}
+            async with streamable_http_client(mcp_url) as (
+                read_stream,
+                write_stream,
+                _,
+            ):
+                async with ClientSession(read_stream, write_stream) as session:
+                    await session.initialize()
+                    response = await session.call_tool(tool_name, arguments=kwargs)
+                    assert not response.isError
+                    result = json.loads(response.content[0].text)
+                    assert set(result) == {"fastmcp-worker-1"}
+                    result = result["fastmcp-worker-1"]
+                    assert result["service"] == "fastmcp"
+                    assert result["result"] == {}
+                    assert result["failed"] is False
+                    assert len(result["errors"]) == 1
+                    assert message in result["errors"][0]
+
+        asyncio.run(run_test())
+
+    @pytest.mark.parametrize(
+        "command, expected",
+        [
+            ("password hunter42", "password REDACTED"),
+            ("secret 5 $6$salt$syntheticpasswordhash", "secret 5 REDACTED"),
+            ('"password": "hunter 42"', '"password": "REDACTED"'),
+            ("DB_PASSWORD=hunter42", "DB_PASSWORD=REDACTED"),
+            ("clientSecret: hunter42", "clientSecret: REDACTED"),
+            ("api_key=hunter42", "api_key=REDACTED"),
+            ("access_token=hunter42", "access_token=REDACTED"),
+            ("Authorization: Bearer hunter42", "Authorization: REDACTED"),
+            ("Cookie: session=hunter42", "Cookie: REDACTED"),
+            ("https://user:hunter42@example.com", "https://user:REDACTED@example.com"),
+            (
+                "https://example.com/?token=hunter42",
+                "https://example.com/?token=REDACTED",
+            ),
+            ("snmp-server community hunter42 RO", "snmp-server community REDACTED RO"),
+            ("radius-server key 7 hunter42", "radius-server key 7 REDACTED"),
+            ("<password>hunter42</password>", "<password>REDACTED</password>"),
+            ("ghp_" + "a" * 36, "REDACTED"),
+            ("sk-proj-" + "a" * 30, "REDACTED"),
+            (
+                "-----BEGIN PRIVATE KEY-----\nsecretbody\n-----END PRIVATE KEY-----",
+                "REDACTED",
+            ),
+            ("public_key=example", "public_key=example"),
+            ("client_id=example", "client_id=example"),
+            ("token_count=100", "token_count=100"),
+            ("password REDACTED", "password REDACTED"),
+        ],
+    )
+    def test_default_result_redaction_integration(
+        self, nfclient, mcp_url, command, expected
+    ):
+        ensure_tool_discovered(self, nfclient, "nornir", "task")
+
+        async def run_test():
+            async with streamable_http_client(mcp_url) as (read, write, _):
+                async with ClientSession(read, write) as session:
+                    await session.initialize()
+                    response = await session.call_tool(
+                        "service_nornir__task_task",
+                        arguments={
+                            "plugin": "nornir_salt.plugins.tasks.nr_test",
+                            "commands": [command],
+                            "FL": ["ceos-spine-1"],
+                        },
+                    )
+                    assert not response.isError
+                    result = json.loads(response.content[0].text)
+                    assert result["nornir-worker-1"]["failed"] is False
+                    assert result["nornir-worker-1"]["result"]["ceos-spine-1"] == {
+                        "nr_test": {"commands": [expected]}
+                    }
+
+        asyncio.run(run_test())
+
+    @pytest.mark.parametrize("size", [100, 100100])
+    def test_default_result_character_limit_integration(self, nfclient, mcp_url, size):
+        ensure_tool_discovered(self, nfclient, "nornir", "task")
+
+        async def run_test():
+            async with streamable_http_client(mcp_url) as (read, write, _):
+                async with ClientSession(read, write) as session:
+                    await session.initialize()
+                    response = await session.call_tool(
+                        "service_nornir__task_task",
+                        arguments={
+                            "plugin": "nornir_salt.plugins.tasks.nr_test",
+                            "commands": ["x" * size],
+                            "FL": ["ceos-spine-1"],
+                        },
+                    )
+                    assert not response.isError
+                    result = json.loads(response.content[0].text)
+                    if size > 100000:
+                        assert "nornir-worker-1" in result
+                        for worker_result in result.values():
+                            assert worker_result["service"] == "nornir"
+                            assert worker_result["result"] == {}
+                            assert worker_result["failed"] is False
+                            assert len(worker_result["errors"]) == 1
+                            assert "fastmcp-worker-1" in worker_result["errors"][0]
+                            assert "100000 characters" in worker_result["errors"][0]
+                            assert (
+                                "disable_builtin_guardrails"
+                                in worker_result["errors"][0]
+                            )
+                    else:
+                        assert result["nornir-worker-1"]["failed"] is False
+                        assert result["nornir-worker-1"]["result"]["ceos-spine-1"] == {
+                            "nr_test": {"commands": ["x" * size]}
+                        }
+
+        asyncio.run(run_test())
+
+    @pytest.mark.parametrize(
+        "action, approve", [("decline", False), ("accept", False), ("accept", True)]
+    )
+    def test_task_approval_integration(self, nfclient, mcp_url, action, approve):
+        ensure_tool_discovered(self, nfclient, "nornir", "task")
+        before = nfclient.run_job(
+            "nornir", "job_list", workers=["nornir-worker-1"], kwargs={"task": "task"}
+        )["nornir-worker-1"]["result"]
+        requests = []
+
+        async def elicit(context, params):
+            requests.append(params)
+            assert params.message == (
+                "service: nornir\ntask: task\nApprove this integration test task?"
+            )
+            assert params.requestedSchema["required"] == ["approve"]
+            return ElicitResult(
+                action=action,
+                content={"approve": approve} if action == "accept" else None,
+            )
+
+        async def run_test():
+            async with streamable_http_client(mcp_url) as (read, write, _):
+                async with ClientSession(
+                    read, write, elicitation_callback=elicit
+                ) as session:
+                    await session.initialize()
+                    response = await session.call_tool(
+                        "service_nornir__task_task",
+                        arguments={
+                            "plugin": "nornir_salt.plugins.tasks.nr_test",
+                            "commands": ["mcp-approval-test"],
+                            "FL": ["ceos-spine-1"],
+                        },
+                    )
+                    assert not response.isError
+                    return json.loads(response.content[0].text)
+
+        result = asyncio.run(run_test())
+        assert len(requests) == 1
+        after = nfclient.run_job(
+            "nornir", "job_list", workers=["nornir-worker-1"], kwargs={"task": "task"}
+        )["nornir-worker-1"]["result"]
+        if approve:
+            assert result["nornir-worker-1"]["failed"] is False
+            assert result["nornir-worker-1"]["result"]["ceos-spine-1"] == {
+                "nr_test": {"commands": ["mcp-approval-test"]}
+            }
+            assert len(after) == len(before) + 1
+        else:
+            assert set(result) == {"fastmcp-worker-1"}
+            result = result["fastmcp-worker-1"]
+            assert result["service"] == "fastmcp"
+            assert result["result"] == {}
+            assert result["failed"] is False
+            assert len(result["errors"]) == 1
+            assert "approval was not granted" in result["errors"][0]
+            assert after == before

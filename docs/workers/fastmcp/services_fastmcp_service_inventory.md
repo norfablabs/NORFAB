@@ -220,188 +220,34 @@ tools:
 
 ---
 
-## Tool Call Guardrails
+## Guardrails
 
-FastMCP guardrails reject specific MCP tool calls by inspecting the call
-arguments before the NorFab job is dispatched. They are useful for allowing a
-flexible task such as `nornir.cli` while blocking unsafe command values.
-
-Guardrails do not replace `tools.policy`. Policy decides whether a task is
-published and callable. Guardrails decide whether one specific call to an
-allowed task is acceptable.
-
-Task authors can define default guardrails in task MCP metadata. FastMCP
-inventory can add deployment-specific guardrails under `tools.guardrails`.
-Built-in task guardrails are enabled by default.
+Use `tools.guardrails` to reject matching tool calls or request approval before
+submission. Use `tools.result_guardrails` to replace, withhold, or limit returned
+output. Built-in protections include server-wide secret redaction and a 100000-character
+combined result limit, plus task-specific input and result rules where provided.
+Your inventory rules add to these defaults.
 
 ```yaml
 tools:
+  disable_builtin_guardrails: false
   guardrails:
     - service: nornir
-      task: cli
-      description: Reject commit confirmed commands through MCP.
-      field: commands
+      task: cfg
+      field: config
       type: contains
-      match: commit confirmed
-      message: "MCP guardrail rejected a commit confirmed command."
-```
-
-`tools.guardrails` is a list of guardrail entries.
-
-Set `tools.disable_builtin_guardrails: true` to ignore guardrails declared by
-tasks. Inventory-defined guardrails still apply:
-
-```yaml
-tools:
-  disable_builtin_guardrails: true
-  guardrails:
-    - service: nornir
-      task: cli
-      field: commands
-      type: regex
-      match: "(?i)^\\s*reload\\b.*"
-      message: "MCP guardrail rejected a reload command."
-```
-
-Inventory options:
-
-| Key | Type | Description |
-|---|---|---|
-| `disable_builtin_guardrails` | boolean | Optional flag under `tools`; defaults to `false` |
-
-Guardrail entry keys:
-
-| Key | Type | Description |
-|---|---|---|
-| `service` | string | Exact NorFab service name, for example `nornir` |
-| `task` | string | Exact NorFab task name, for example `cli` |
-| `description` | string | Optional human-readable explanation for operators |
-| `field` | string | Top-level tool argument field to inspect |
-| `type` | `contains` / `equals` / `regex` | Match strategy |
-| `match` | string or list of strings | Text value or regex value to match |
-| `message` | string | Optional client-facing rejection message |
-
-When `match` is a list, FastMCP rejects the call if any selected argument
-value matches any configured match value. `contains` and `equals` checks are
-always case-insensitive; regex checks use the flags declared in the regex
-value.
-
-!!! warning
-    Guardrails inspect only the inline MCP call arguments. They do not
-    download NorFab URLs or inspect content resolved later by service workers,
-    such as `nf://cli/commands.txt` files rendered by the Nornir worker at
-    runtime.
-
-Use NFCLI to inspect effective guardrails for a published task:
-
-```bash
-show fastmcp tools service nornir name *cli*
-```
-
-Example with several regex values:
-
-```yaml
-tools:
-  guardrails:
-    - service: nornir
-      task: cli
-      description: Reject CLI commands that enter configuration mode.
-      field: commands
-      type: regex
-      match:
-        - "(?i)^\\s*configure\\s+terminal\\b.*"
-        - "(?i)^\\s*configuration\\b.*"
-        - "(?i)^\\s*conf\\s+t\\b.*"
-      message: "MCP guardrail rejected a configuration mode command."
-```
-
-The Nornir `cli` task includes default MCP guardrails that reject `reboot` and
-related reload or restart commands, configuration-mode commands such as
-`configure terminal`, `configuration`, and `conf t`, and destructive or
-state-changing commands such as `commit`, `delete`, `clear`, and `debug`.
-It also rejects shell-mode commands such as `bash`, `shell`, `start shell`,
-`request system shell`, and `guestshell`, OS/image/package operations, and
-outbound session commands such as `ssh` and `telnet`.
-Its built-in result guardrails also redact common network-platform and Linux
-passwords, secrets, authentication keys, shadow hashes, and PEM private keys
-from MCP-delivered CLI output.
-The Nornir `cfg` task includes default MCP guardrails that reject operational
-command escapes in configuration input, such as `do ...` and `run ...`, plus
-reboot, reload, restart, delete, erase, zeroize, `ssh`, and `telnet` commands.
-
----
-
-## Task Result Guardrails
-
-FastMCP result guardrails inspect the aggregate result after the NorFab job has
-completed but before the result is returned to the MCP client. The raw result
-stored in the FastMCP client's job database is not changed. Configure
-deployment rules under `tools.result_guardrails`:
-
-```yaml
-tools:
+      match: commit
+      action: request_approval
+      message: Approve committing this configuration?
   result_guardrails:
-    - service: "*"
-      task: "*"
-      description: Keep MCP task results below 256 KiB.
-      type: limit
-      limit: 262144
-      message: The task result is too large to return through MCP.
-
-    - service: nornir
-      task: cli
-      description: Redact labelled passwords.
-      type: replace
-      match: "(?i)(password\\s*[=:]\\s*)\\S+"
-      replace: "\\1[REDACTED:PASSWORD]"
-
-    - service: "*"
-      task: "*"
-      description: Withhold known instruction-injection content.
-      type: regex
-      match: "(?i)ignore (all |the )?previous instructions"
-      message: Task result content was withheld for safety.
+    - service: '*'
+      task: '*'
+      type: characters_limit
+      limit: 16384
 ```
 
-Result guardrail selectors use glob (`fnmatch`) matching. Task-owned rules from
-`mcp.result_guardrails` run first in their declared order, followed by matching
-inventory rules in inventory order. `tools.disable_builtin_guardrails: true`
-disables both task-owned call and result guardrails while leaving inventory
-rules enabled.
+`disable_builtin_guardrails` defaults to `false`. Setting it to `true` disables
+built-in input and result rules while keeping inventory rules active.
 
-| Type | Required keys | Behavior |
-|---|---|---|
-| `limit` | `limit` (positive byte count) | Measures the compact JSON aggregate. If exceeded, returns one bounded base result containing `message` and the existing job UUID. |
-| `characters_limit` | `limit` (positive character count) | Measures `len(str(combined_result))` across all workers. If exceeded, returns `result: null`, `failed: false`, and one `errors` entry. |
-| `replace` | `match`, `replace` | Recursively replaces matching string values below each worker's `result` and `diff`. |
-| `regex` | `match` | Recursively detects matching string values below `result` and `diff` and replaces only the affected worker field with `message`. |
-
-Guardrails run once in authored order. A limit rule measures the delivery copy
-at the point where the rule appears. Dictionary keys and result metadata such as
-`errors`, `messages`, and `resources` are not regex-inspected, although the
-complete aggregate counts toward a `limit`.
-
-!!! warning
-    A job UUID locates the original database record; it is not an authorization
-    credential. Raw stored results have not been sanitized and may be large or
-    sensitive. Do not expose unrestricted raw-result retrieval to a model.
-
-Effective result guardrails are included by `get_tools`, `show fastmcp tools`
-when detailed tool data is requested, and `show fastmcp guardrails` under the
-`result_guardrails` section for each matching tool.
-
-By default, FastMCP applies wildcard replacement rules and a `characters_limit`
-of `32768` after configured result rules, without changing the inventory. Replacement rules use `REDACTED` for
-labelled passwords, secrets, tokens and credential keys; authentication headers
-and cookies; connection URL credentials; common network configuration secrets;
-private-key blocks, password hashes and recognizable service tokens.
-
-Replacement scans string values in `result` and `diff`, including nested values.
-It does not identify an arbitrary secret solely from its dictionary key, decode
-encoded payloads, or guarantee detection of every secret. Public keys, ordinary
-identifiers and unlabelled hashes are intentionally preserved.
-
-Set `tools.disable_builtin_guardrails: true` to skip these defaults and
-task-authored defaults. Your inventory rules still apply. Custom inventory
-rules run before the appended defaults. To replace the default limit, disable
-defaults and configure your own `characters_limit` and replacement rules.
+See [FastMCP Guardrails](services_fastmcp_service_guardrails.md) for matching
+options, approval requirements, default protections, rule order, and examples.

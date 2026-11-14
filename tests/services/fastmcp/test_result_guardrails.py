@@ -62,6 +62,7 @@ def apply(raw_result, guardrails):
         "cli",
         raw_result,
         guardrails,
+        worker_name="fastmcp-worker-1",
     )
 
 
@@ -327,14 +328,16 @@ class TestFastMCPResultGuardrailsUnit:
             [{"type": "limit", "limit": size - 1, "message": "Result is too large."}],
         )
 
-        assert delivered["result"] == "Result is too large."
+        assert set(delivered) == {"worker"}
+        delivered = delivered["worker"]
+        assert delivered["result"] == "fastmcp-worker-1: Result is too large."
         assert delivered["juuid"] == "00000000000000000000000000000001"
         assert delivered["failed"] is False
         assert delivered["diff"] is None
         assert delivered["errors"] == []
         assert delivered["messages"] == []
-        assert delivered["task"] is None
-        assert delivered["service"] is None
+        assert delivered["task"] == "cli"
+        assert delivered["service"] == "nornir"
 
     def test_limit_allows_results_at_the_exact_boundary(self):
         raw = {"worker": worker_result("small")}
@@ -360,7 +363,10 @@ class TestFastMCPResultGuardrailsUnit:
         assert (
             apply(raw, [limit, replace])["worker"]["result"] == "a larger replacement"
         )
-        assert apply(raw, [replace, limit])["result"] == "Result is too large."
+        assert (
+            apply(raw, [replace, limit])["worker"]["result"]
+            == "fastmcp-worker-1: Result is too large."
+        )
 
 
 class TestFastMCPResultGuardrailsIntegration:

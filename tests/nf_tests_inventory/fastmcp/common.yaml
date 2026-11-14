@@ -12,5 +12,16 @@ service: fastmcp
 #       tasks: ["*"]
 #       action: reject
 
+# Match only the approval integration test command.
+tools:
+  guardrails:
+    - service: nornir
+      task: task
+      field: commands
+      type: contains
+      match: mcp-approval-test
+      action: request_approval
+      message: Approve this integration test task?
+
 fastmcp: {}
 uvicorn: {}

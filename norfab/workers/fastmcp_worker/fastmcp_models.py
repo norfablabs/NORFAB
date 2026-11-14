@@ -21,6 +21,7 @@ from norfab.models import Result
 class TaskMCPGuardrail(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    action: Literal["reject", "request_approval"] = "reject"
     description: StrictStr = ""
     field: StrictStr = Field(..., min_length=1)
     type: Literal["contains", "equals", "regex"]
@@ -40,6 +41,12 @@ class TaskMCPGuardrail(BaseModel):
                 raise ValueError(f"Invalid guardrail regex match: {exc}") from exc
 
         return self
+
+
+class TaskMCPApproval(BaseModel):
+    """Explicit confirmation returned by the connected MCP client."""
+
+    approve: StrictBool
 
 
 class TaskMCPResultGuardrail(BaseModel):

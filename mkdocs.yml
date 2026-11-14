@@ -219,6 +219,7 @@ nav:
   - FastMCP:
     - Overview: workers/fastmcp/services_fastmcp_service.md
     - Inventory: workers/fastmcp/services_fastmcp_service_inventory.md
+    - Guardrails: workers/fastmcp/services_fastmcp_service_guardrails.md
     - Tasks:
       - Auth: workers/fastmcp/services_fastmcp_service_task_auth.md
       - Get Prompts: workers/fastmcp/services_fastmcp_service_task_get_prompts.md

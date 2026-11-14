@@ -1,3 +1,4 @@
+import asyncio
 import copy
 import importlib.metadata
 import logging
@@ -49,6 +50,7 @@ from .fastmcp_models import (
     GetToolsResult,
     GetVersionInput,
     GetVersionResult,
+    TaskMCPApproval,
     TaskMCPGuardrail,
     TaskMCPResultGuardrail,
 )
@@ -121,9 +123,9 @@ BUILTIN_RESULT_GUARDRAILS = [
         "service": "*",
         "task": "*",
         "type": "characters_limit",
-        "limit": 32768,
-        "description": "Limit the combined MCP result to 32768 characters.",
-        "message": "result omitted because the combined result exceeds 32768 characters. Configure a tools.result_guardrails characters_limit rule or set tools.disable_builtin_guardrails to true.",
+        "limit": 100000,
+        "description": "Limit the combined MCP result to 100000 characters.",
+        "message": "result omitted because the combined result exceeds 100000 characters. Configure a tools.result_guardrails characters_limit rule or set tools.disable_builtin_guardrails to true.",
     },
 ]
 
@@ -300,6 +302,7 @@ def apply_task_result_guardrails(
     task_name: str,
     raw_result: dict[str, Any] | None,
     result_guardrails: list[dict[str, Any]],
+    worker_name: str,
     disable_builtin_guardrails: bool = False,
 ) -> dict[str, Any] | None:
     """Apply ordered rules and enabled defaults to one deep MCP delivery copy."""
@@ -308,8 +311,15 @@ def apply_task_result_guardrails(
 
     delivery_result = copy.deepcopy(raw_result)
     if not disable_builtin_guardrails:
-        # Append defaults without changing tool metadata or the loaded inventory.
-        result_guardrails = result_guardrails + BUILTIN_RESULT_GUARDRAILS
+        # let a configured character limit replace the default
+        has_character_limit = any(
+            rule["type"] == "characters_limit" for rule in result_guardrails
+        )
+        result_guardrails = result_guardrails + [
+            rule
+            for rule in BUILTIN_RESULT_GUARDRAILS
+            if not has_character_limit or rule["type"] != "characters_limit"
+        ]
 
     for guardrail in result_guardrails:
         guardrail_type = guardrail["type"]
@@ -320,14 +330,22 @@ def apply_task_result_guardrails(
             if serialized_size <= limit:
                 continue
 
-            worker_result = next(iter(delivery_result.values()), {})
-            juuid = worker_result.get("juuid")
             message = guardrail.get("message") or (
                 f"Guardrail omitted the result for tool '{tool_name}' because its "
                 f"size of {serialized_size} bytes exceeded the limit of {limit} bytes."
             )
+            message = f"{worker_name}: {message}"
             log.warning(message)
-            return Result(result=message, failed=False, juuid=juuid).model_dump()
+            return {
+                responding_worker: Result(
+                    result=message,
+                    failed=False,
+                    juuid=worker_result.get("juuid"),
+                    task=worker_result.get("task"),
+                    service=worker_result.get("service"),
+                ).model_dump()
+                for responding_worker, worker_result in delivery_result.items()
+            }
 
         elif guardrail_type == "characters_limit":
             serialized_size = len(str(delivery_result))
@@ -335,16 +353,23 @@ def apply_task_result_guardrails(
             if serialized_size <= limit:
                 continue
 
-            worker_result = next(iter(delivery_result.values()), {})
-            juuid = worker_result.get("juuid")
             message = guardrail.get("message") or (
                 f"result omitted for tool '{tool_name}' because its size of "
                 f"{serialized_size} characters exceeded the limit of {limit} characters."
             )
+            message = f"{worker_name}: {message}"
             log.warning(message)
-            return Result(
-                result=None, errors=[message], failed=False, juuid=juuid
-            ).model_dump()
+            return {
+                responding_worker: Result(
+                    result={},
+                    errors=[message],
+                    failed=False,
+                    juuid=worker_result.get("juuid"),
+                    task=worker_result.get("task"),
+                    service=worker_result.get("service"),
+                ).model_dump()
+                for responding_worker, worker_result in delivery_result.items()
+            }
 
         elif guardrail_type == "replace":
             match_values = guardrail["match"]
@@ -407,10 +432,9 @@ def check_tool_call_guardrails(
     task_name: str,
     arguments: dict[str, Any],
     guardrails: list[dict[str, Any]],
-) -> None:
-    """
-    Reject a tool call when any configured guardrail matches its arguments.
-    """
+) -> list[dict[str, Any]]:
+    """Reject matching rejection rules and return matching approval rules."""
+    approvals = []
     for guardrail in guardrails:
         if guardrail["field"] not in arguments:
             continue
@@ -444,21 +468,29 @@ def check_tool_call_guardrails(
                 break
 
         if matched:
-            message = guardrail.get("message") or "MCP guardrail rejected the tool call"
-            log.warning(
-                f"Rejected MCP tool call '{tool_name}' by guardrail: "
-                f"service='{service}', task='{task_name}', "
-                f"field='{guardrail['field']}', type='{guardrail['type']}'"
-            )
-            raise McpError(
-                types.ErrorData(
-                    code=types.INVALID_PARAMS,
-                    message=(
-                        f"MCP tool call '{tool_name}' rejected by guardrail: "
-                        f"{message}"
-                    ),
+            action = guardrail.get("action", "reject")
+            if action == "reject":
+                message = (
+                    guardrail.get("message") or "MCP guardrail rejected the tool call"
                 )
-            )
+                log.warning(
+                    f"Rejected MCP tool call '{tool_name}' by guardrail: "
+                    f"service='{service}', task='{task_name}', "
+                    f"field='{guardrail['field']}', type='{guardrail['type']}'"
+                )
+                raise McpError(
+                    types.ErrorData(
+                        code=types.INVALID_PARAMS,
+                        message=(
+                            f"MCP tool call '{tool_name}' rejected by guardrail: "
+                            f"{message}"
+                        ),
+                    )
+                )
+            elif action == "request_approval":
+                approvals.append(guardrail)
+
+    return approvals
 
 
 def service_tasks_discovery(
@@ -1179,30 +1211,93 @@ class FastMCPWorker(NFPWorker):
 
             service, task_name = self.get_allowed_task_call(name)
             tool_data = self.norfab_services_tasks[service][name]
-            check_tool_call_guardrails(
-                name,
-                service,
-                task_name,
-                arguments,
-                tool_data.get("guardrails", []),
-            )
+            try:
+                approvals = check_tool_call_guardrails(
+                    name,
+                    service,
+                    task_name,
+                    arguments,
+                    tool_data.get("guardrails", []),
+                )
+            except McpError as exc:
+                # A rejected call has no service job; report from the local worker.
+                return {
+                    self.name: Result(
+                        result={},
+                        errors=[exc.error.message],
+                        failed=False,
+                        task=task_name,
+                        service=SERVICE,
+                    ).model_dump()
+                }
+
+            if approvals:
+                try:
+                    ctx = self.app.get_context()
+                    for guardrail in approvals:
+                        # Only identify the operation; task arguments may contain secrets.
+                        response = await asyncio.wait_for(
+                            ctx.elicit(
+                                message=(
+                                    f"service: {service}\ntask: {task_name}\n"
+                                    f"{guardrail.get('message') or 'Approve this task?'}"
+                                ),
+                                schema=TaskMCPApproval,
+                            ),
+                            timeout=120,
+                        )
+                        if (
+                            response.action != "accept"
+                            or response.data.approve is not True
+                        ):
+                            raise ValueError("approval was not granted")
+                except Exception as exc:
+                    message = f"task approval failed: {exc or type(exc).__name__}"
+                    log.error(message)
+                    # No service job exists yet, so report under this MCP worker.
+                    return {
+                        self.name: Result(
+                            result={},
+                            errors=[message],
+                            failed=False,
+                            task=task_name,
+                            service=SERVICE,
+                        ).model_dump()
+                    }
 
             log.info(
                 f"Calling NorFab service '{service}' task '{task_name}' with arguments: '{arguments}'"
             )
 
-            raw_result = self.client.run_job(
-                service=service,
-                task=task_name,
-                kwargs=arguments,
-                workers="all",
-            )
+            try:
+                raw_result = await asyncio.to_thread(
+                    self.client.run_job,
+                    service=service,
+                    task=task_name,
+                    kwargs=arguments,
+                    workers="all",
+                )
+                if raw_result is None:
+                    raise RuntimeError("NorFab client returned no result")
+            except Exception as exc:
+                message = f"tool execution failed: {exc}"
+                log.error(message)
+                return {
+                    self.name: Result(
+                        result={},
+                        errors=[message],
+                        failed=True,
+                        task=task_name,
+                        service=SERVICE,
+                    ).model_dump()
+                }
             return apply_task_result_guardrails(
                 name,
                 service,
                 task_name,
                 raw_result,
                 tool_data.get("result_guardrails", []),
+                worker_name=self.name,
                 disable_builtin_guardrails=self.fastmcp_inventory.get("tools", {}).get(
                     "disable_builtin_guardrails", False
                 ),
