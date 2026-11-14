@@ -209,37 +209,43 @@ retrying.
 ## Task Command Shell Reference
 
 ```bash
-nf# man tree netbox.sync.vlans
+nf#man tree netbox.sync.vlans
 
-netbox.sync.vlans
-|-- devices
-|-- instance
-|-- dry-run
-|-- with-approval
-|-- timeout
-|-- branch
-|-- vlan-group
-|-- vlan-map
-|-- require-vlan-group
-|-- vlan-ids
-|-- interface-map
-|-- preserve-name
-|-- preserve-description
-|-- batch-size
-|-- FO
-|-- FB
-|-- FH
-|-- FC
-|-- FR
-|-- FG
-|-- FP
-|-- FL
-|-- FM
-|-- FX
-|-- FN
-|-- workers
-|-- verbose-result
-`-- nowait
+R - required field, M - supports multiline input, D - dynamic key
+
+root
+└── netbox:    Netbox service
+    └── sync:    Sync Netbox data
+        └── vlans:    Sync live VLAN configuration with NetBox
+            ├── instance:    Netbox instance name to target
+            ├── dry-run:    Calculate the VLAN diff without writing to NetBox, default 'False'
+            ├── branch:    NetBox branching plugin branch name to use
+            ├── batch-size:    Number of objects per NetBox bulk request, default '1000'
+            ├── FO:    Filter hosts using Filter Object
+            ├── FB:    Filter hosts by name using Glob Patterns
+            ├── FH:    Filter hosts by hostname
+            ├── FC:    Filter hosts containment of pattern in name
+            ├── FR:    Filter hosts by name using Regular Expressions
+            ├── FG:    Filter hosts by group
+            ├── FP:    Filter hosts by hostname using IP Prefix
+            ├── FL:    Filter hosts by names list
+            ├── FM:    Filter hosts by platform
+            ├── FX:    Filter hosts excluding them by name
+            ├── FN:    Negate the match
+            ├── devices:    List of NetBox devices to collect VLANs from
+            ├── timeout:    Job timeout
+            ├── with-approval:    Preview VLAN changes and ask for review before writing to NetBox, default 'False'
+            ├── vlan-group:    Exact group name for live VLANs not matched by vlan-map
+            ├── vlan-map:    Ordered VLAN and interface membership mapping rules or nf:// YAML file reference
+            ├── interface-map:    Interface name mapping rules shared with interface sync
+            ├── require-vlan-group:    Require every live VLAN to resolve to a VLAN group, default 'False'
+            ├── vlan-ids:    VLAN IDs or inclusive ranges to reconcile
+            ├── preserve-description:    Preserve existing NetBox descriptions always (true), only when live text is empty (null), or never (false)
+            ├── preserve-name:    Keep existing NetBox VLAN names; new VLANs use live names, default 'False'
+            ├── workers:    Filter worker to target, default 'any'
+            ├── verbose-result:    Control output details, default 'False'
+            └── nowait:    Do not wait for job to complete, default 'False'
+nf#
 ```
 
 ## Python API Reference
