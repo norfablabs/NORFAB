@@ -9,7 +9,7 @@ hosts:
       - eos_params
     connection_options:
       http:
-        port: 6032
+        port: 6022
       scrapli_netconf:
         port: 8302
       napalm:
@@ -36,7 +36,7 @@ hosts:
       - eos_params
     connection_options:
       http:
-        port: 6033
+        port: 6023
       scrapli_netconf:
         port: 8303
       napalm:
@@ -63,7 +63,7 @@ hosts:
       - eos_params
     connection_options:
       http:
-        port: 6034
+        port: 6024
       scrapli_netconf:
         port: 8304
       napalm:

@@ -13,7 +13,7 @@ hosts:
         - ethernet1
     connection_options:
       http:
-        port: 6030
+        port: 6020
       scrapli_netconf:
         port: 8300
         extras:
@@ -53,7 +53,7 @@ hosts:
         - ethernet1
     connection_options:
       http:
-        port: 6031
+        port: 6021
       scrapli_netconf:
         port: 8301
         extras:
