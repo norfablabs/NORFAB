@@ -489,7 +489,13 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
                 its host list and return extended per-network dicts.  When
                 ``False`` return only the list of network names.
         """
-        ret = Result()
+        ret = Result(result={} if details else [])
+
+        if network and network not in self.networks:
+            ret.messages = [f"FakeNOS network '{network}' is not running"]
+            ret.status = "no_match"
+            ret.failed = True
+            return ret
 
         names = [network] if network else list(self.networks)
 

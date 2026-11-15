@@ -103,6 +103,23 @@ class TestInspectNetworks:
                 len(data["result"]["net1"]["hosts"]) > 0
             ), f"{worker_name} net1 has no hosts"
 
+    def test_inspect_networks_missing_specific_network(self, nfclient):
+        _stop_all_networks(nfclient)
+
+        for details, expected_result in ((True, {}), (False, [])):
+            ret = nfclient.run_job(
+                "fakenos",
+                "inspect_networks",
+                kwargs={"network": "missing", "details": details},
+            )
+            pprint.pprint(ret)
+
+            for worker_name, data in ret.items():
+                assert data["failed"] is True, f"{worker_name} did not flag missing network"
+                assert data["status"] == "no_match"
+                assert data["result"] == expected_result
+                assert data["messages"] == ["FakeNOS network 'missing' is not running"]
+
     def test_inspect_networks_empty(self, nfclient):
         _stop_all_networks(nfclient)
 
