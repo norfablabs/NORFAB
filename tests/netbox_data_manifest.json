@@ -81,6 +81,7 @@
       "CID3"
     ],
     "prefixes": [
+      "198.19.64.0/20 (global; persistent ACME design allocation pool)",
       "10.0.0.0/24",
       "198.19.236.0/24 (global; Nornir template IP allocation tests)",
       "10.0.2.0/24",
@@ -95,6 +96,11 @@
     ]
   },
   "tests": {
+    "test_designs.py::persistent_acme_allocation_pool": {
+      "persistent_prefix": "198.19.64.0/20 (global; description NORFAB ACME DESIGN ALLOCATION POOL; tests/netbox_data.py)",
+      "ownership": "Reserved exclusively for ACME design allocation tests. Seed population creates the parent. Design tests read it without updating its attributes and allocate only their owned child prefixes.",
+      "cleanup": "Design tests must retain the seeded parent and clean up only child prefixes and addresses they create. The seed-data prefix lifecycle owns creation and removal of the parent."
+    },
     "test_designs.py::TestMarkdownDesignDeploy::test_deploy_markdown_in_branch": {
       "mode": "branch_feature",
       "branches": ["norfab-markdown-<12 hex run suffix>"],
@@ -725,9 +731,18 @@
       "device_role": "NORFAB DESIGN ID ROLE",
       "coverage": "Owns and cleans up all records. Creates duplicate names in different tenants; verifies tenant selection, ambiguity with omitted or unmatched tenant, unique-name site and tenant updates, and updates without site preserving the current site."
     },
+    "test_designs.py::TestDesignDeploy::test_allocated_asn_sites_and_role": {
+      "mode": "main_mutating",
+      "asns": [4200999604, 4200999605],
+      "asn_range": "NORFAB DESIGN ALLOCATION RANGE",
+      "rir": "NORFAB DESIGN ALLOCATION RIR",
+      "role": "NORFAB DESIGN ALLOCATION ROLE",
+      "site": "NORFAB DESIGN ALLOCATION SITE",
+      "ownership": "Owns and cleans up these records, including after partial failure. Distinct from simple collections and legacy 4200999600-4200999601 records. Pre-existing records cause failure before writes."
+    },
     "test_designs.py::TestDesignDeploy::test_acme_design": {
       "peering_asn_wrapper": "acme-branch-rtr-1-to-acme-branch-agg-2 allocates or reuses ACME allocated branch ASN for local_as. Existing query examples remain intact.",
-      "mode": "branch_feature",
+      "mode": "main_mutating",
       "route_target_queries": "VRF and L2VPN import lists select the design-owned 4200650001:100 target by name.",
       "inline_l2vpn_vlan": {
         "group": "NORFAB ACME TEST VLANS",
@@ -740,14 +755,22 @@
       ],
       "ip_prefixes": [
         "192.0.2.0/24",
-        "198.19.224.0/20"
+        "198.19.64.0/24",
+        "198.19.65.0/24",
+        "198.19.230.0/24 (ACME BRANCH VRF)",
+        "198.51.100.0/30",
+        "198.51.100.4/31"
       ],
+      "read_only_parent": "198.19.64.0/20 (global; persistent seed retained with unchanged attributes)",
+      "fhrp_groups": ["ACME USER GATEWAY", "ACME MANAGEMENT GATEWAY"],
+      "cleanup": "Owns the ACME-named objects and allocated child prefixes/IPs. Excludes the persistent parent from prefix guards and deletion. Removes only named ACME FHRP groups and their assignments by actual record IDs. Retains the Nornir and VRRP seed pools and read-only seed IPs.",
       "read_only_seed_ips": [
         "198.19.243.10/32",
         "198.19.243.11/32"
       ]
     },
     "test_designs.py::TestDesignDeploy::test_simple_collections": {
+      "asn_range": "NORFAB DESIGN COLLECTIONS ASN RANGE (64512-64520)",
       "route_targets": [
         "64512:99123"
       ],

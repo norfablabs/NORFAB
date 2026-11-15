@@ -541,7 +541,7 @@ class TestDesignDeploy:
             "norfab-design-role-custom" if explicit_slug else "norfab-design-role-slug"
         )
         if nb.dcim.device_roles.get(slug=slug):
-            pytest.skip("role slug test record already exists")
+            pytest.fail("role slug test record already exists")
         role = nb.dcim.device_roles.create({"name": name, "slug": slug})
         record = {"name": name.lower()}
         if explicit_slug:
@@ -652,7 +652,7 @@ class TestDesignDeploy:
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
         name = "NORFAB DESIGN BGP DRY RUN PEERS"
         if nb.plugins.bgp.peer_group.get(name=name):
-            pytest.skip("dry-run peer group already exists")
+            pytest.fail("dry-run peer group already exists")
         response = nfclient.run_job(
             "netbox",
             "design_deploy",
@@ -677,7 +677,7 @@ class TestDesignDeploy:
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
         device_name = "norfab-design-missing-local-context-device"
         if nb.dcim.devices.get(name=device_name):
-            pytest.skip("missing local-context test device already exists")
+            pytest.fail("missing local-context test device already exists")
         local_data = (
             {"custom_function": "calculate_acme_device_context", "profile": "test"}
             if function_backed
@@ -871,7 +871,7 @@ class TestDesignDeploy:
             or any(nb.extras.tags.get(name=name) for name in tag_names)
             or any(nb.dcim.sites.get(name=name) for name in site_names)
         ):
-            pytest.skip("design VLAN array test objects already exist")
+            pytest.fail("design VLAN array test objects already exist")
 
         try:
             nb.ipam.vlan_groups.create(
@@ -988,7 +988,7 @@ class TestDesignDeploy:
             or any(nb.extras.tags.get(name=name) for name in tag_names)
             or any(nb.dcim.sites.get(name=name) for name in site_names)
         ):
-            pytest.skip("design prefix array test objects already exist")
+            pytest.fail("design prefix array test objects already exist")
 
         prefix_id = None
         try:
@@ -1101,7 +1101,7 @@ class TestDesignDeploy:
             or nb.ipam.route_targets.get(name=target_name)
             or nb.ipam.route_targets.get(name=added_target_name)
         ):
-            pytest.skip("L2VPN test objects already exist")
+            pytest.fail("L2VPN test objects already exist")
         design = {
             "vlan_groups": [{"name": group_name}],
             "vlans": [
@@ -1211,11 +1211,11 @@ class TestDesignDeploy:
         if nb.extras.custom_fields.get(
             name="norfab_design_cf"
         ) or nb.extras.custom_fields.get(name="norfab_design_keep"):
-            pytest.skip("Custom-field test definitions already exist")
+            pytest.fail("Custom-field test definitions already exist")
         if list(nb.ipam.prefixes.filter(within_include="198.19.247.0/24")) or list(
             nb.ipam.ip_addresses.filter(parent="198.19.247.0/24")
         ):
-            pytest.skip("Custom-field test pool already exists")
+            pytest.fail("Custom-field test pool already exists")
         definitions = []
         try:
             invalid = nfclient.run_job(
@@ -1334,7 +1334,7 @@ class TestDesignDeploy:
         """Match a community by value alone or by value and description."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
         if list(nb.plugins.bgp.community.filter(value="65199:61999")):
-            pytest.skip("Community test value already exists")
+            pytest.fail("Community test value already exists")
         try:
             for records, count in (
                 ([{"value": "65199:61999", "description": "NORFAB FIRST"}], 1),
@@ -1403,7 +1403,7 @@ class TestDesignDeploy:
             nb.ipam.vlan_groups.get(name=group_name)
             for group_name in group_names.values()
         ):
-            pytest.skip("VLAN group scope test objects already exist in Netbox")
+            pytest.fail("VLAN group scope test objects already exist in Netbox")
 
         created = []
         try:
@@ -1524,7 +1524,7 @@ class TestDesignDeploy:
         if nb.extras.config_contexts.get(name=context_name) or any(
             nb.tenancy.tenants.get(name=name) for name in tenant_names
         ):
-            pytest.skip("tenant context test records already exist")
+            pytest.fail("tenant context test records already exist")
         try:
             for names in ([tenant_names[0]], [tenant_names[1]]):
                 response = nfclient.run_job(
@@ -1589,7 +1589,7 @@ class TestDesignDeploy:
             if endpoint.name == "interfaces":
                 continue
             if list(endpoint.filter(**filters)):
-                pytest.skip("context test objects already exist")
+                pytest.fail("context test objects already exist")
         design = {
             "custom_functions": {
                 "calculate_acme_device_context": "nf://netbox/designs/calculate_acme_device_context.py"
@@ -1799,7 +1799,7 @@ class TestDesignDeploy:
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
         device = nb.dcim.devices.get(name="ceos1")
         if not device:
-            pytest.skip("ceos1 fixture required")
+            pytest.fail("ceos1 fixture required")
         group_name = "NORFAB DESIGN CACHE VLANS"
         interface_name = "NORFAB-CACHE-INTERFACE"
         prefix_value = "198.19.244.0/24"
@@ -1808,7 +1808,7 @@ class TestDesignDeploy:
             or nb.dcim.interfaces.get(device_id=device.id, name=interface_name)
             or nb.ipam.prefixes.get(prefix=prefix_value)
         ):
-            pytest.skip("VLAN reference test objects already exist")
+            pytest.fail("VLAN reference test objects already exist")
         try:
             group = nb.ipam.vlan_groups.create(
                 {"name": group_name, "slug": "norfab-design-cache-vlans"}
@@ -1866,7 +1866,7 @@ class TestDesignDeploy:
             "198.19.245.13/32",
         ]
         if list(nb.ipam.prefixes.filter(prefix=prefixes)):
-            pytest.skip("prefix scope test addresses already exist")
+            pytest.fail("prefix scope test addresses already exist")
         if any(
             (
                 nb.dcim.regions.get(name="NORFAB DESIGN SCOPE REGION"),
@@ -1875,7 +1875,7 @@ class TestDesignDeploy:
                 nb.dcim.locations.get(name="NORFAB DESIGN SCOPE LOCATION"),
             )
         ):
-            pytest.skip("prefix scope test prerequisites already exist")
+            pytest.fail("prefix scope test prerequisites already exist")
         try:
             region = nb.dcim.regions.create(
                 {
@@ -1980,7 +1980,7 @@ class TestDesignDeploy:
             or any(nb.dcim.sites.get(name=name) for name in site_names)
             or any(nb.extras.tags.get(name=name) for name in tag_names)
         ):
-            pytest.skip("design ASN array test objects already exist")
+            pytest.fail("design ASN array test objects already exist")
 
         try:
             rir = nb.ipam.rirs.create(
@@ -2106,34 +2106,34 @@ class TestDesignDeploy:
         """Allocate an ASN, attach its site and role, then reuse it."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
         objects = [
-            (nb.ipam.asns, {"asn": [4200999600, 4200999601]}),
-            (nb.ipam.asn_ranges, {"name": "NORFAB DESIGN ASN RANGE"}),
-            (nb.ipam.roles, {"name": "NORFAB DESIGN ASN ROLE"}),
-            (nb.ipam.rirs, {"name": "NORFAB DESIGN ASN RIR"}),
-            (nb.dcim.sites, {"name": "NORFAB DESIGN ASN SITE"}),
+            (nb.ipam.asns, {"asn": [4200999604, 4200999605]}),
+            (nb.ipam.asn_ranges, {"name": "NORFAB DESIGN ALLOCATION RANGE"}),
+            (nb.ipam.roles, {"name": "NORFAB DESIGN ALLOCATION ROLE"}),
+            (nb.ipam.rirs, {"name": "NORFAB DESIGN ALLOCATION RIR"}),
+            (nb.dcim.sites, {"name": "NORFAB DESIGN ALLOCATION SITE"}),
         ]
         for endpoint, filters in objects:
             if list(endpoint.filter(**filters)):
-                pytest.skip(f"ASN test object already exists: {filters}")
+                pytest.fail(f"ASN test object already exists: {filters}")
         design = {
-            "sites": [{"name": "NORFAB DESIGN ASN SITE"}],
-            "roles": [{"name": "NORFAB DESIGN ASN ROLE"}],
-            "rirs": [{"name": "NORFAB DESIGN ASN RIR"}],
+            "sites": [{"name": "NORFAB DESIGN ALLOCATION SITE"}],
+            "roles": [{"name": "NORFAB DESIGN ALLOCATION ROLE"}],
+            "rirs": [{"name": "NORFAB DESIGN ALLOCATION RIR"}],
             "asn_ranges": [
                 {
-                    "name": "NORFAB DESIGN ASN RANGE",
-                    "rir": "NORFAB DESIGN ASN RIR",
-                    "start": 4200999600,
-                    "end": 4200999601,
+                    "name": "NORFAB DESIGN ALLOCATION RANGE",
+                    "rir": "NORFAB DESIGN ALLOCATION RIR",
+                    "start": 4200999604,
+                    "end": 4200999605,
                 }
             ],
             "asns": [
                 {
                     "create_asn": {
-                        "asn_range": "NORFAB DESIGN ASN RANGE",
+                        "asn_range": "NORFAB DESIGN ALLOCATION RANGE",
                         "description": "NORFAB DESIGN ALLOCATED ASN",
-                        "sites": ["NORFAB DESIGN ASN SITE"],
-                        "role": "NORFAB DESIGN ASN ROLE",
+                        "sites": ["NORFAB DESIGN ALLOCATION SITE"],
+                        "role": "NORFAB DESIGN ALLOCATION ROLE",
                     }
                 }
             ],
@@ -2145,9 +2145,11 @@ class TestDesignDeploy:
                 )
                 for result in reply.values():
                     assert not result["failed"], result
-                asn = nb.ipam.asns.get(asn=4200999600)
-                assert asn.role.name == "NORFAB DESIGN ASN ROLE"
-                assert [site.name for site in asn.sites] == ["NORFAB DESIGN ASN SITE"]
+                asn = nb.ipam.asns.get(asn=4200999604)
+                assert asn.role.name == "NORFAB DESIGN ALLOCATION ROLE"
+                assert [site.name for site in asn.sites] == [
+                    "NORFAB DESIGN ALLOCATION SITE"
+                ]
         finally:
             for endpoint, filters in objects:
                 for record in endpoint.filter(**filters):
@@ -2172,7 +2174,7 @@ class TestDesignDeploy:
         ]
         for endpoint, filters in objects:
             if list(endpoint.filter(**filters)):
-                pytest.skip(f"identity test object already exists: {filters}")
+                pytest.fail(f"identity test object already exists: {filters}")
         design = {
             "tenants": [
                 {"name": "NORFAB DESIGN ID TENANT"},
@@ -2287,10 +2289,10 @@ class TestDesignDeploy:
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
         device = nb.dcim.devices.get(name="ceos1")
         if not device:
-            pytest.skip("ceos1 fixture required")
+            pytest.fail("ceos1 fixture required")
         names = ["NORFAB-CABLE-A", "NORFAB-CABLE-B"]
         if list(nb.dcim.interfaces.filter(device="ceos1", name=names)):
-            pytest.skip("cable fixtures already exist")
+            pytest.fail("cable fixtures already exist")
         design = {
             "interfaces": [
                 {
@@ -2345,7 +2347,7 @@ class TestDesignDeploy:
             or nb.dcim.device_types.get(model="NORFAB DESIGN PORT TYPE")
             or nb.dcim.manufacturers.get(name="NORFAB DESIGN PORT MANUFACTURER")
         ):
-            pytest.skip("design port test objects already exist")
+            pytest.fail("design port test objects already exist")
         design = {
             "manufacturers": [{"name": "NORFAB DESIGN PORT MANUFACTURER"}],
             "device_types": [
@@ -2463,7 +2465,12 @@ class TestDesignDeploy:
     def test_acme_design(self, nfclient: Any, deployments: int) -> None:
         """Deploy the complete ACME example from scratch and clean all owned data."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
-        context = {"site": "NORFAB ACME TEST", "parent_prefix": "198.19.224.0/20"}
+        context = {"site": "NORFAB ACME TEST", "parent_prefix": "198.19.64.0/20"}
+        pool = nb.ipam.prefixes.get(prefix=context["parent_prefix"], vrf_id="null")
+        assert (
+            pool
+        ), "persistent ACME allocation pool is missing. Populate Netbox seed prefixes first"
+        pool_before = pool.serialize()
         # Independent expectations, with dependent interfaces first for cleanup.
         expected_interfaces = {
             "acme-branch-rtr-1": [
@@ -2537,9 +2544,9 @@ class TestDesignDeploy:
             120: "ACME MANAGEMENT",
         }
         expected_prefixes = [
-            "198.19.224.0/20",
-            "198.19.224.0/24",
-            "198.19.225.0/24",
+            "198.19.64.0/20",
+            "198.19.64.0/24",
+            "198.19.65.0/24",
             "198.19.230.0/24",
             "192.0.2.0/24",
             "198.51.100.0/30",
@@ -2615,13 +2622,17 @@ class TestDesignDeploy:
                 {"name": expected_peerings},
             ),
             (nb.vpn.l2vpns, {"name": "ACME BRANCH EVPN"}),
-            (nb.ipam.ip_addresses, {"parent": "198.19.224.0/20"}),
+            (nb.ipam.ip_addresses, {"parent": "198.19.64.0/20"}),
+            (
+                nb.ipam.ip_addresses,
+                {"address": "198.19.230.1/24"},
+            ),
             (nb.ipam.ip_addresses, {"parent": "192.0.2.0/24"}),
             (nb.ipam.ip_addresses, {"parent": "198.51.100.0/30"}),
             (nb.ipam.ip_addresses, {"parent": "198.51.100.4/31"}),
             (nb.dcim.interfaces, {"device": device_names}),
             (nb.dcim.devices, {"name": device_names}),
-            (nb.ipam.prefixes, {"within_include": "198.19.224.0/20"}),
+            (nb.ipam.prefixes, {"within": "198.19.64.0/20"}),
             (
                 nb.ipam.prefixes,
                 {
@@ -2629,6 +2640,7 @@ class TestDesignDeploy:
                         "192.0.2.0/24",
                         "198.51.100.0/30",
                         "198.51.100.4/31",
+                        "198.19.230.0/24",
                     ]
                 },
             ),
@@ -2701,11 +2713,15 @@ class TestDesignDeploy:
             if endpoint.name == "interfaces":
                 continue  # Device names are checked below.
             if list(endpoint.filter(**filters)):
-                pytest.skip(
+                pytest.fail(
                     f"ACME objects already exist; refusing to change them: {filters}"
                 )
-        if list(nb.ipam.fhrp_groups.filter(group_id=[10, 20])):
-            pytest.skip("VRRP group IDs 10 or 20 already exist")
+        if list(
+            nb.ipam.fhrp_groups.filter(
+                name=["ACME USER GATEWAY", "ACME MANAGEMENT GATEWAY"]
+            )
+        ) or list(nb.ipam.fhrp_groups.filter(group_id=[10, 20])):
+            pytest.fail("ACME VRRP names or group IDs 10/20 already exist")
         try:
             previous_ids = None
             previous_allocated_asns = None
@@ -2816,8 +2832,7 @@ class TestDesignDeploy:
                 assert termination_vlan.tenant.name == "ACME"
                 assert termination_vlan.role.name == "ACME-BRANCH-LAN"
                 assert (
-                    termination_vlan.custom_fields["norfab_acme_site"]
-                    == context["site"]
+                    termination_vlan.custom_fields["norfab_acme_site"]["id"] == site_id
                 )
                 vpn = nb.vpn.l2vpns.get(name="ACME BRANCH EVPN")
                 assert vpn.type.value == "vxlan"
@@ -2944,7 +2959,7 @@ class TestDesignDeploy:
                         item.name
                         for item in nb.dcim.interfaces.filter(device=device_name)
                     ) == sorted(names), device_name
-                assert len(current_ids[7]) == 9
+                assert len(current_ids[8]) == 9
                 assert len(list(nb.ipam.vlans.filter(group_id=group.id))) == 4
                 assert {
                     vlan.vid: vlan.name
@@ -2968,8 +2983,21 @@ class TestDesignDeploy:
                     assert nb.ipam.ip_addresses.get(
                         description=description
                     ), description
-                assert len(list(nb.ipam.fhrp_groups.filter(group_id=[10, 20]))) == 2
-                fhrp_groups = list(nb.ipam.fhrp_groups.filter(group_id=[10, 20]))
+                assert (
+                    len(
+                        list(
+                            nb.ipam.fhrp_groups.filter(
+                                name=["ACME USER GATEWAY", "ACME MANAGEMENT GATEWAY"]
+                            )
+                        )
+                    )
+                    == 2
+                )
+                fhrp_groups = list(
+                    nb.ipam.fhrp_groups.filter(
+                        name=["ACME USER GATEWAY", "ACME MANAGEMENT GATEWAY"]
+                    )
+                )
                 assert (
                     sum(
                         len(
@@ -3063,7 +3091,9 @@ class TestDesignDeploy:
                 if device and device.primary_ip4:
                     device.primary_ip4 = None
                     device.save()
-            for group in nb.ipam.fhrp_groups.filter(group_id=[10, 20]):
+            for group in nb.ipam.fhrp_groups.filter(
+                name=["ACME USER GATEWAY", "ACME MANAGEMENT GATEWAY"]
+            ):
                 for assignment in nb.ipam.fhrp_group_assignments.filter(
                     group_id=group.id
                 ):
@@ -3071,7 +3101,9 @@ class TestDesignDeploy:
             for endpoint, filters in objects:
                 try:
                     if endpoint.name == "interfaces":
-                        for group in nb.ipam.fhrp_groups.filter(group_id=[10, 20]):
+                        for group in nb.ipam.fhrp_groups.filter(
+                            name=["ACME USER GATEWAY", "ACME MANAGEMENT GATEWAY"]
+                        ):
                             group.delete()
                         for device_name in device_names:
                             device = nb.dcim.devices.get(name=device_name)
@@ -3108,6 +3140,8 @@ class TestDesignDeploy:
                     continue
                 assert not list(endpoint.filter(**filters)), filters
 
+            assert nb.ipam.prefixes.get(pool.id).serialize() == pool_before
+
     def test_bgp_peering_asn_allocations(self, nfclient: Any) -> None:
         """Allocate local/remote ASNs in a design and reuse them on repeat runs."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
@@ -3121,9 +3155,9 @@ class TestDesignDeploy:
             (nb.ipam.rirs, {"name": "NORFAB DESIGN PEERING ASN RIR"}),
         ]
         if any(list(endpoint.filter(**filters)) for endpoint, filters in objects):
-            pytest.skip("peering ASN allocation test records already exist")
+            pytest.fail("peering ASN allocation test records already exist")
         if not nb.dcim.devices.get(name="ceos1"):
-            pytest.skip("seed device ceos1 is required")
+            pytest.fail("seed device ceos1 is required")
         try:
             rir = nb.ipam.rirs.create(
                 {
@@ -3213,7 +3247,7 @@ class TestDesignDeploy:
         """Derive a session name and leave its existing fields unchanged."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
         if not nb.dcim.devices.get(name="ceos1"):
-            pytest.skip("ceos1 fixture is required")
+            pytest.fail("ceos1 fixture is required")
         session_name = "ceos1_default_198.19.246.2"
         objects = [
             (nb.plugins.bgp.session, {"name": session_name}),
@@ -3239,7 +3273,7 @@ class TestDesignDeploy:
         ]
         for endpoint, filters in objects:
             if list(endpoint.filter(**filters)):
-                pytest.skip(f"BGP design fixture already exists: {filters}")
+                pytest.fail(f"BGP design fixture already exists: {filters}")
         design = {
             "rirs": [{"name": "NORFAB DESIGN BGP RIR", "is_private": True}],
             "asns": [{"asn": 4200999246, "rir": "NORFAB DESIGN BGP RIR"}],
@@ -3326,7 +3360,7 @@ class TestDesignDeploy:
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
         names = ["NORFAB CUSTOM BASE", "NORFAB CUSTOM TENANT"]
         if list(nb.tenancy.tenants.filter(name=names)):
-            pytest.skip("custom design fixtures already exist")
+            pytest.fail("custom design fixtures already exist")
         design = """custom_functions:
   custom_create_tenant: nf://netbox/designs/custom_create_tenant.py
 tenants:
@@ -3379,7 +3413,7 @@ tenants:
         ]
         for endpoint, filters in objects:
             if list(endpoint.filter(**filters)):
-                pytest.skip(f"design fixture already exists: {filters}")
+                pytest.fail(f"design fixture already exists: {filters}")
         design = {
             "rirs": [
                 {
@@ -3527,7 +3561,7 @@ tenants:
         ]
         design["asn_ranges"] = [
             {
-                "name": "NORFAB DESIGN ASN RANGE",
+                "name": "NORFAB DESIGN COLLECTIONS ASN RANGE",
                 "rir": "NORFAB DESIGN RIR",
                 "start": 64512,
                 "end": 64520,
@@ -3558,7 +3592,7 @@ tenants:
             (nb.plugins.bgp.routing_policy, {"name": "NORFAB DESIGN EXPORT"}),
             (nb.dcim.racks, {"name": "NORFAB DESIGN RACK"}),
             (nb.dcim.rack_roles, {"name": "NORFAB DESIGN RACK ROLE"}),
-            (nb.ipam.asn_ranges, {"name": "NORFAB DESIGN ASN RANGE"}),
+            (nb.ipam.asn_ranges, {"name": "NORFAB DESIGN COLLECTIONS ASN RANGE"}),
             (nb.ipam.vlan_groups, {"name": "NORFAB DESIGN VLAN GROUP"}),
             (nb.ipam.vrfs, {"name": "NORFAB DESIGN VRF"}),
             (nb.ipam.route_targets, {"name": "64512:99123"}),
@@ -3572,7 +3606,7 @@ tenants:
             (nb.ipam.rirs, {"name": "NORFAB DESIGN RIR"}),
         ]
         if any(endpoint.get(**filters) for endpoint, filters in objects):
-            pytest.skip("Design test objects already exist in NetBox")
+            pytest.fail("Design test objects already exist in NetBox")
         try:
             for action in ("created", "updated"):
                 if action == "updated":
@@ -3613,7 +3647,7 @@ tenants:
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
         name = "norfab-design-single-document"
         if nb.tenancy.tenants.get(name=name):
-            pytest.skip("Design test tenant already exists in NetBox")
+            pytest.fail("Design test tenant already exists in NetBox")
         design = """design_input_schema:
   type: object
   additionalProperties: false
@@ -3735,7 +3769,7 @@ tenants:
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
         name = "norfab-design-invalid-tenant"
         if nb.tenancy.tenants.get(name=name):
-            pytest.skip("Design test tenant already exists in NetBox")
+            pytest.fail("Design test tenant already exists in NetBox")
         try:
             response = nfclient.run_job(
                 "netbox",
@@ -3776,7 +3810,7 @@ tenants:
         }
         names = [tenant["name"] for tenant in design["tenants"]]
         if any(nb.tenancy.tenants.get(name=name) for name in names):
-            pytest.skip("Design test tenants already exist in NetBox")
+            pytest.fail("Design test tenants already exist in NetBox")
         try:
             for expected_action in ("created", "updated"):
                 response = nfclient.run_job(
@@ -3826,7 +3860,7 @@ tenants:
         }
         names = [tenant["name"] for tenant in design["tenants"]]
         if any(nb.tenancy.tenants.get(name=name) for name in names):
-            pytest.skip("Design test tenants already exist in NetBox")
+            pytest.fail("Design test tenants already exist in NetBox")
         try:
             nb.tenancy.tenants.create(
                 {"name": names[0], "slug": names[0], "description": "old"}
@@ -4241,7 +4275,7 @@ class TestMarkdownDesignDeploy:
     def test_acme_file(self, nfclient: Any) -> None:
         context = {
             "site": "NORFAB ACME TEST",
-            "parent_prefix": "198.19.224.0/20",
+            "parent_prefix": "198.19.64.0/20",
             "vlans": [
                 {"name": "USERS", "vid": 100, "enabled": True},
                 {"name": "MANAGEMENT", "vid": 200, "enabled": False},

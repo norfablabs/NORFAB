@@ -131,13 +131,11 @@ asns:
       asn_range: ACME BRANCH ALLOCATED ASNS
       description: ACME allocated branch ASN
       tenant: ACME
-      role: ACME-BRANCH-LAN
       sites: ["{{ context.site }}"]
   - create_asn:
       asn_range: ACME BRANCH ALLOCATED ASNS
       description: ACME allocated aggregation ASN
       tenant: ACME
-      role: ACME-BRANCH-LAN
       sites: ["{{ context.site }}"]
 
 bgp_communities:
@@ -212,11 +210,8 @@ l2vpns:
       - device: acme-branch-rtr-1
         interface: Ethernet2.100
 
+# The parent allocation pool must already exist in Netbox.
 prefixes:
-  - prefix: "{{ context.parent_prefix }}"
-    tenant: ACME
-    description: "ACME {{ context.site }} allocation pool"
-    status: active
   - prefix: 198.51.100.0/30
     tenant: ACME
     description: ACME upstream peering subnet
@@ -424,7 +419,9 @@ devices:
         local_interface: Ethernet4
         local_as: 4200650001
         remote_as_query: {site: "{{ context.site | lower | replace(' ', '-') }}", role: ACME UPSTREAM ASN}
-        peer_group: ACME UPSTREAM PEERS
+        peer_group:
+          name: ACME UPSTREAM PEERS
+          description: ACME external upstream sessions
         import_policies:
           - name: ACME IMPORT
             description: ACME branch import policy

@@ -75,7 +75,7 @@ NORFAB ACME TEST
 ```
 
 ```yaml context.parent_prefix
-"198.19.224.0/20"
+"198.19.64.0/20"
 ```
 
 ### Service VLAN schedule (YAML)
@@ -329,13 +329,11 @@ asns:
       asn_range: ACME BRANCH ALLOCATED ASNS
       description: ACME allocated branch ASN
       tenant: ACME
-      role: ACME-BRANCH-LAN
       sites: ["{{ context.site }}"]
   - create_asn:
       asn_range: ACME BRANCH ALLOCATED ASNS
       description: ACME allocated aggregation ASN
       tenant: ACME
-      role: ACME-BRANCH-LAN
       sites: ["{{ context.site }}"]
 
 ```
@@ -463,14 +461,10 @@ l2vpns:
 
 ## Prefixes
 
-The parent pool supplies dynamically allocated user and loopback prefixes. Fixed management and transit subnets remain explicit; the example addresses are reserved for lab use.
+The parent pool must already exist in Netbox. The test seed provides `198.19.64.0/20` for dynamically allocated user and loopback prefixes. The design leaves that parent unchanged. Fixed management and transit subnets remain explicit. The example addresses are reserved for lab use.
 
 ```yaml design
 prefixes:
-  - prefix: "{{ context.parent_prefix }}"
-    tenant: ACME
-    description: "ACME {{ context.site }} allocation pool"
-    status: active
   - prefix: 198.51.100.0/30
     tenant: ACME
     description: ACME upstream peering subnet
@@ -705,7 +699,9 @@ devices:
         local_interface: Ethernet4
         local_as: 4200650001
         remote_as_query: {site: "{{ context.site | lower | replace(' ', '-') }}", role: ACME UPSTREAM ASN}
-        peer_group: ACME UPSTREAM PEERS
+        peer_group:
+          name: ACME UPSTREAM PEERS
+          description: ACME external upstream sessions
         import_policies:
           - name: ACME IMPORT
             description: ACME branch import policy
