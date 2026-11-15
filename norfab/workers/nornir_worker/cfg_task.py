@@ -33,6 +33,7 @@ MCP_GUARDRAILS = [
         "type": "regex",
         "match": [
             r"(?im)^\s*(reboot|reload|restart)\b.*",
+            r"(?im);[ \t]*(reboot|reload|restart)\b.*",
             r"(?im)^\s*request\s+system\s+(reboot|power-off)\b.*",
             r"(?im)^\s*admin\s+reboot\b.*",
         ],

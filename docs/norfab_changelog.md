@@ -8,6 +8,10 @@
 
 1. Enhanced FakeNOS `inspect_networks` to return a controlled `no_match` result with an explicit message when a specifically requested network is not running, instead of exposing an internal `KeyError`. Detailed queries return `{}` and summary queries return `[]`; focused coverage covers both modes.
 
+## BUGS
+
+1. FastMCP Nornir CLI and configuration guardrails reject reboot/reload/restart commands after a semicolon; built-in server result redaction also covers IOS `key-string` values.
+
 ---
 
 # 0.26.3

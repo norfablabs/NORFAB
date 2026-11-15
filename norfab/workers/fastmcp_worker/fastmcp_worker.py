@@ -89,6 +89,7 @@ BUILTIN_RESULT_GUARDRAILS = [
             r"""(?i)([?&](?:password|passwd|pwd|token|access_token|refresh_token|id_token|api[_-]?key|client_secret|secret|signature|sig|x-amz-signature|x-amz-security-token)=)[^&#\s"']+""",
             # Network configuration encryption/type markers are not the password itself.
             r"(?im)^([^\r\n]*?\b(?:password|secret|key|shared-key)[ \t]+(?:[0-9]|md5|sha|sha1|sha256|sha384|sha512|pbkdf2|cipher|irreversible-cipher)[ \t]+)\S+",
+            r"(?im)^([ \t]*key-string[ \t]+(?:[0-9][ \t]+)?)\S+",
             r"(?im)^([ \t]*(?:snmp-server[ \t]+community|set[ \t]+snmp[ \t]+community|snmp-agent[ \t]+community[ \t]+(?:read|write))[ \t]+(?:(?:[0-9]|cipher|irreversible-cipher)[ \t]+)?)\S+",
             r"(?im)^([ \t]*(?:radius-server[ \t]+key|tacacs-server[ \t]+key|radius-server[ \t]+shared-key|hwtacacs-server[ \t]+shared-key|crypto[ \t]+isakmp[ \t]+key)[ \t]+(?:(?:[0-9]|cipher|irreversible-cipher)[ \t]+)?)\S+",
             r"(?im)^([ \t]*snmp-server[ \t]+user\b[^\r\n]*?\bauth[ \t]+\S+[ \t]+)\S+",
