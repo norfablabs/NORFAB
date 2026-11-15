@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#0263-draft" class="md-skip">
+        <a href="#0263" class="md-skip">
           Skip to content
         </a>
       
@@ -4397,6 +4397,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../workers/fastmcp/services_fastmcp_service_guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -4406,10 +4434,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_8_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_8_4" >
         
           
-          <label class="md-nav__link" for="__nav_5_8_3" id="__nav_5_8_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5_8_4" id="__nav_5_8_4_label" tabindex="0">
             
   
   
@@ -4427,8 +4455,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_8_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_8_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_8_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -8149,25 +8177,31 @@
   
 
 
-<h1 id="0263-draft">0.26.3 (draft)<a class="headerlink" href="#0263-draft" title="Permanent link">¤</a></h1>
+<h1 id="0263">0.26.3<a class="headerlink" href="#0263" title="Permanent link">¤</a></h1>
 <h2 id="enhancements">ENHANCEMENTS<a class="headerlink" href="#enhancements" title="Permanent link">¤</a></h2>
 <ol>
+<li>Netbox <code>sync_vlans</code> accepts <code>preserve_name=True</code> to retain existing NetBox VLAN names while synchronizing descriptions and memberships.</li>
 <li>Netbox <code>design_deploy</code> accepts interface names as strings for <code>parent</code>, <code>lag</code>, and <code>bridge</code>, alongside existing dictionary references.</li>
+<li>FastMCP adds <code>characters_limit</code> result rules and default credential replacement and a 100000-character result limit, controlled by <code>disable_builtin_guardrails</code>.</li>
 </ol>
 <h2 id="features">FEATURES<a class="headerlink" href="#features" title="Permanent link">¤</a></h2>
 <ol>
 <li>Added Nornir RESTCONF GET, POST, PUT, PATCH and DELETE tasks with OpenConfig interfaces, LLDP and system getters, inline/nf:// payload templates and CLI, Python, FastAPI and MCP usage guides.</li>
+<li>Added to FastMCP input guardrails support for <code>action: request_approval</code> through MCP client elicitation before job submission; <code>reject</code> remains the default action. Input rejections and approval refusals return results keyed by the FastMCP worker name.</li>
 </ol>
 <h2 id="bugs">BUGS<a class="headerlink" href="#bugs" title="Permanent link">¤</a></h2>
 <ol>
+<li>Core dictionary-inventory tests use the local broker's generated certificate so they start correctly in fresh Docker runtime directories.</li>
 <li>Netbox <code>sync_device_ip</code> normalizes live IP addresses before matching existing records, preventing equivalent IPv6 spellings from being treated as new addresses.</li>
 </ol>
 <h2 id="changes">CHANGES<a class="headerlink" href="#changes" title="Permanent link">¤</a></h2>
 <ol>
+<li>Docker test commands replace <code>--parallel-runs</code> with <code>--max-containers</code> (default 100), limiting configured containers across the entire invocation. Base runs now use isolated <code>groups/base/runs/&lt;id&gt;/</code> runtime directories.</li>
 <li>Project development now uses uv. Docker images continue installing dependencies with pip. Use <code>uv sync</code> and <code>uv run</code> in place of Poetry; published package extras and entry points are unchanged.</li>
 <li>Feature development now follows Spec Kit specifications, plans and tasks under <code>docs/development/specs/</code> instead of feature ADRs, with <a href="../development/norfab_developing_and_testing_framework/#develop-features-with-spec-kit">installation and workflow instructions</a>. ADRs remain for separate architecture decisions.</li>
 <li>NFCLI <code>show nornir hosts</code> displays a detailed Rich table by default. Use <code>brief</code> for host lists grouped by worker; the <code>details</code> and <code>table</code> options are removed from this command.</li>
 <li>Added a portable Claude Code skill for <a href="../skills/norfab-netbox-design-authoring/SKILL/">Netbox design authoring</a> under the documentation's Skills section, with allocation guidance and deployment verification steps.</li>
+<li>Added a dedicated <a href="../workers/fastmcp/services_fastmcp_service_guardrails/">FastMCP Guardrails guide</a> with configuration examples, approval requirements, and result protection limits.</li>
 </ol>
 <hr />
 <h1 id="0262">0.26.2<a class="headerlink" href="#0262" title="Permanent link">¤</a></h1>

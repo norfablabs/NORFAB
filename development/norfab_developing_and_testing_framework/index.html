@@ -4397,6 +4397,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../workers/fastmcp/services_fastmcp_service_guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -4406,10 +4434,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_8_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_8_4" >
         
           
-          <label class="md-nav__link" for="__nav_5_8_3" id="__nav_5_8_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5_8_4" id="__nav_5_8_4_label" tabindex="0">
             
   
   
@@ -4427,8 +4455,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_8_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_8_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_8_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -8999,8 +9027,11 @@ uv<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>
 <span class="c1"># Rebuild the Nornir image before running its suite.</span>
 uv<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-nornir<span class="w"> </span>--build
 
-<span class="c1"># Run all tests in the Nornir suite.</span>
+<span class="c1"># Run Nornir tests except the three protocol groups.</span>
 uv<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-nornir
+uv<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-nornir-gnmi
+uv<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-nornir-netconf
+uv<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-nornir-restconf
 <span class="c1"># Run one Nornir test file in the suite container.</span>
 uv<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-nornir<span class="w"> </span>--selector<span class="o">=</span>tests/services/nornir/test_worker.py
 <span class="c1"># Run only NetBox get_devices tests.</span>
@@ -9008,10 +9039,20 @@ uv<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>
 
 <span class="c1"># Run the NetBox CRUD file in a dedicated container.</span>
 uv<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-netbox-crud
-<span class="c1"># Run Nornir files in separate containers, at most two concurrently.</span>
-uv<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-nornir<span class="w"> </span>--parallel-runs<span class="o">=</span><span class="m">2</span>
+<span class="c1"># Run configured containers, at most two concurrently across all services.</span>
+uv<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-all<span class="w"> </span>--max-containers<span class="o">=</span><span class="m">2</span>
 </code></pre></div>
-<p>Suite names are <code>core</code>, <code>nornir</code>, <code>netbox</code>, <code>fakenos</code>, <code>containerlab</code>, <code>workflow</code>, <code>agent</code>, <code>fastmcp</code>, <code>fastapi</code>, <code>filesharing</code>, <code>dummy</code>, and <code>nfcli</code>. <code>docker-tests-all</code> runs the regular suites concurrently; run <code>docker-tests-containerlab</code> separately. The distributed topology uses <code>docker-tests-distributed</code>. The default suite run collects its test directory and applies its service marker. <code>--selector</code> accepts a directory, file, or pytest node ID; <code>--marker</code>, <code>--keyword</code>, and <code>--pytest-args</code> narrow the run. The default NetBox suite runs each <code>test_*.py</code> file in a dedicated container. See <code>uv run inv --help docker-tests-nornir</code> for all options.</p>
+<p>Suite names are <code>core</code>, <code>nornir</code>, <code>netbox</code>, <code>fakenos</code>, <code>containerlab</code>, <code>workflow</code>, <code>agent</code>, <code>fastmcp</code>, <code>fastapi</code>, <code>filesharing</code>, <code>dummy</code>, and <code>nfcli</code>. <code>docker-tests-all</code> runs the regular suites concurrently; run <code>docker-tests-containerlab</code> separately. The distributed topology uses <code>docker-tests-distributed</code>. The default suite run collects its test directory and applies its service marker. <code>--selector</code> accepts a directory, file, or pytest node ID; <code>--marker</code>, <code>--keyword</code>, and <code>--pytest-args</code> narrow the run. The default Netbox suite runs its configured marker groups in dedicated containers. See <code>uv run inv --help docker-tests-nornir</code> for all options.</p>
+<p>Container selection is configured in <code>tasks.py</code> through <code>SUITES[service]["containers"]</code>:
+keys name containers and values are pytest marker expressions. <code>base</code> uses the
+suite command. Other keys create dedicated commands. Without <code>base</code>, the suite
+command runs all groups. <code>docker-tests-all</code> includes every configured group.
+Nornir's base excludes gNMI, NETCONF, and RESTCONF. Netbox uses existing task markers for its groups. Worker and shared helper tests use
+<code>netbox_worker</code> and run in the worker group. All groups collect only their service directory.
+<code>--marker</code> overrides the expression. An explicit selector on the suite command
+uses the service marker by default. <code>--max-containers=N</code> limits active configured containers (default 100).
+The all-suites limit is global across services. Use 1 for sequential execution.
+The per-file <code>--parallel-runs</code> option has been removed.</p>
 <h3 id="run-compose-directly">Run Compose directly<a class="headerlink" href="#run-compose-directly" title="Permanent link">¤</a></h3>
 <p>From <code>docker/norfab-docker-tests/</code>, you can build and run a Compose service without Invoke:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Enter the Docker test environment directory.</span>
@@ -9030,7 +9071,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w">
 <li>The summary table shows passed, failed, errors, skipped, duration, and suite status.</li>
 <li><code>Failed tests by service</code> provides expandable lists of failed/error test names below the summary. Expand a service to quickly find its failing tests.</li>
 <li><code>Failures and report problems</code> shows failing tests and error details.</li>
-<li><code>JUnit artifacts</code> lists XML files produced by that run. JUnit files and worker logs are under the suite's ignored <code>docker/norfab-docker-tests/&lt;compose-service&gt;/__norfab__/</code> tree; NetBox group and file-parallel runs use <code>groups/</code> and <code>parallel/</code> subdirectories.</li>
+<li><code>JUnit artifacts</code> lists XML files produced by that run. Invoke JUnit files and worker logs are under <code>docker/norfab-docker-tests/&lt;compose-service&gt;/groups/&lt;group&gt;/runs/&lt;id&gt;/</code>, including base runs.</li>
 <li><code>NO REPORT</code> means no JUnit file was produced; <code>INVALID REPORT</code> means the XML could not be parsed. Check the container output and runtime logs.</li>
 </ul>
 <p>Individual suite and NetBox file tasks report failures but do not return a failing Invoke status. Always check their report. <code>docker-tests-all</code> returns a nonzero status if a suite fails. Reports use only JUnit files created or updated during that run.</p>

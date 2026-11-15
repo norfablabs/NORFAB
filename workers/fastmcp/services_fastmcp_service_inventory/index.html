@@ -18,7 +18,7 @@
         <link rel="prev" href="../services_fastmcp_service/">
       
       
-        <link rel="next" href="../services_fastmcp_service_task_auth/">
+        <link rel="next" href="../services_fastmcp_service_guardrails/">
       
       
         
@@ -4456,21 +4456,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#tool-call-guardrails" class="md-nav__link">
+  <a href="#guardrails" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Tool Call Guardrails
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#task-result-guardrails" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Task Result Guardrails
+        Guardrails
       
     </span>
   </a>
@@ -4492,6 +4481,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../services_fastmcp_service_guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -4501,10 +4518,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_8_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_8_4" >
         
           
-          <label class="md-nav__link" for="__nav_5_8_3" id="__nav_5_8_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5_8_4" id="__nav_5_8_4_label" tabindex="0">
             
   
   
@@ -4522,8 +4539,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_8_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_8_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_8_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -8110,21 +8127,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#tool-call-guardrails" class="md-nav__link">
+  <a href="#guardrails" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Tool Call Guardrails
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#task-result-guardrails" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Task Result Guardrails
+        Guardrails
       
     </span>
   </a>
@@ -8374,217 +8380,32 @@ command or the <code>get_tools</code> API call. Published prompts can be inspect
 with <code>show fastmcp prompts</code> or <code>get_prompts</code>.</p>
 </div>
 <hr />
-<h2 id="tool-call-guardrails">Tool Call Guardrails<a class="headerlink" href="#tool-call-guardrails" title="Permanent link">¤</a></h2>
-<p>FastMCP guardrails reject specific MCP tool calls by inspecting the call
-arguments before the NorFab job is dispatched. They are useful for allowing a
-flexible task such as <code>nornir.cli</code> while blocking unsafe command values.</p>
-<p>Guardrails do not replace <code>tools.policy</code>. Policy decides whether a task is
-published and callable. Guardrails decide whether one specific call to an
-allowed task is acceptable.</p>
-<p>Task authors can define default guardrails in task MCP metadata. FastMCP
-inventory can add deployment-specific guardrails under <code>tools.guardrails</code>.
-Built-in task guardrails are enabled by default.</p>
+<h2 id="guardrails">Guardrails<a class="headerlink" href="#guardrails" title="Permanent link">¤</a></h2>
+<p>Use <code>tools.guardrails</code> to reject matching tool calls or request approval before
+submission. Use <code>tools.result_guardrails</code> to replace, withhold, or limit returned
+output. Built-in protections include server-wide secret redaction and a 100000-character
+combined result limit, plus task-specific input and result rules where provided.
+Your inventory rules add to these defaults.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">tools</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">disable_builtin_guardrails</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">  </span><span class="nt">guardrails</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir</span>
-<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cli</span>
-<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Reject commit confirmed commands through MCP.</span>
-<span class="w">      </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">commands</span>
+<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cfg</span>
+<span class="w">      </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config</span>
 <span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">contains</span>
-<span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">commit confirmed</span>
-<span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">"MCP</span><span class="nv"> </span><span class="s">guardrail</span><span class="nv"> </span><span class="s">rejected</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">commit</span><span class="nv"> </span><span class="s">confirmed</span><span class="nv"> </span><span class="s">command."</span>
-</code></pre></div>
-<p><code>tools.guardrails</code> is a list of guardrail entries.</p>
-<p>Set <code>tools.disable_builtin_guardrails: true</code> to ignore guardrails declared by
-tasks. Inventory-defined guardrails still apply:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">tools</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">disable_builtin_guardrails</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">  </span><span class="nt">guardrails</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir</span>
-<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cli</span>
-<span class="w">      </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">commands</span>
-<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">regex</span>
-<span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">"(?i)^\\s*reload\\b.*"</span>
-<span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">"MCP</span><span class="nv"> </span><span class="s">guardrail</span><span class="nv"> </span><span class="s">rejected</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">reload</span><span class="nv"> </span><span class="s">command."</span>
-</code></pre></div>
-<p>Inventory options:</p>
-<table>
-<thead>
-<tr>
-<th>Key</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>disable_builtin_guardrails</code></td>
-<td>boolean</td>
-<td>Optional flag under <code>tools</code>; defaults to <code>false</code></td>
-</tr>
-</tbody>
-</table>
-<p>Guardrail entry keys:</p>
-<table>
-<thead>
-<tr>
-<th>Key</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>service</code></td>
-<td>string</td>
-<td>Exact NorFab service name, for example <code>nornir</code></td>
-</tr>
-<tr>
-<td><code>task</code></td>
-<td>string</td>
-<td>Exact NorFab task name, for example <code>cli</code></td>
-</tr>
-<tr>
-<td><code>description</code></td>
-<td>string</td>
-<td>Optional human-readable explanation for operators</td>
-</tr>
-<tr>
-<td><code>field</code></td>
-<td>string</td>
-<td>Top-level tool argument field to inspect</td>
-</tr>
-<tr>
-<td><code>type</code></td>
-<td><code>contains</code> / <code>equals</code> / <code>regex</code></td>
-<td>Match strategy</td>
-</tr>
-<tr>
-<td><code>match</code></td>
-<td>string or list of strings</td>
-<td>Text value or regex value to match</td>
-</tr>
-<tr>
-<td><code>message</code></td>
-<td>string</td>
-<td>Optional client-facing rejection message</td>
-</tr>
-</tbody>
-</table>
-<p>When <code>match</code> is a list, FastMCP rejects the call if any selected argument
-value matches any configured match value. <code>contains</code> and <code>equals</code> checks are
-always case-insensitive; regex checks use the flags declared in the regex
-value.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Guardrails inspect only the inline MCP call arguments. They do not
-download NorFab URLs or inspect content resolved later by service workers,
-such as <code>nf://cli/commands.txt</code> files rendered by the Nornir worker at
-runtime.</p>
-</div>
-<p>Use NFCLI to inspect effective guardrails for a published task:</p>
-<div class="highlight"><pre><span></span><code>show<span class="w"> </span>fastmcp<span class="w"> </span>tools<span class="w"> </span>service<span class="w"> </span>nornir<span class="w"> </span>name<span class="w"> </span>*cli*
-</code></pre></div>
-<p>Example with several regex values:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">tools</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">guardrails</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir</span>
-<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cli</span>
-<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Reject CLI commands that enter configuration mode.</span>
-<span class="w">      </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">commands</span>
-<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">regex</span>
-<span class="w">      </span><span class="nt">match</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"(?i)^\\s*configure\\s+terminal\\b.*"</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"(?i)^\\s*configuration\\b.*"</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"(?i)^\\s*conf\\s+t\\b.*"</span>
-<span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">"MCP</span><span class="nv"> </span><span class="s">guardrail</span><span class="nv"> </span><span class="s">rejected</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">configuration</span><span class="nv"> </span><span class="s">mode</span><span class="nv"> </span><span class="s">command."</span>
-</code></pre></div>
-<p>The Nornir <code>cli</code> task includes default MCP guardrails that reject <code>reboot</code> and
-related reload or restart commands, configuration-mode commands such as
-<code>configure terminal</code>, <code>configuration</code>, and <code>conf t</code>, and destructive or
-state-changing commands such as <code>commit</code>, <code>delete</code>, <code>clear</code>, and <code>debug</code>.
-It also rejects shell-mode commands such as <code>bash</code>, <code>shell</code>, <code>start shell</code>,
-<code>request system shell</code>, and <code>guestshell</code>, OS/image/package operations, and
-outbound session commands such as <code>ssh</code> and <code>telnet</code>.
-Its built-in result guardrails also redact common network-platform and Linux
-passwords, secrets, authentication keys, shadow hashes, and PEM private keys
-from MCP-delivered CLI output.
-The Nornir <code>cfg</code> task includes default MCP guardrails that reject operational
-command escapes in configuration input, such as <code>do ...</code> and <code>run ...</code>, plus
-reboot, reload, restart, delete, erase, zeroize, <code>ssh</code>, and <code>telnet</code> commands.</p>
-<hr />
-<h2 id="task-result-guardrails">Task Result Guardrails<a class="headerlink" href="#task-result-guardrails" title="Permanent link">¤</a></h2>
-<p>FastMCP result guardrails inspect the aggregate result after the NorFab job has
-completed but before the result is returned to the MCP client. The raw result
-stored in the FastMCP client's job database is not changed. Configure
-deployment rules under <code>tools.result_guardrails</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">tools</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">commit</span>
+<span class="w">      </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">request_approval</span>
+<span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Approve committing this configuration?</span>
 <span class="w">  </span><span class="nt">result_guardrails</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">"*"</span>
-<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="s">"*"</span>
-<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Keep MCP task results below 256 KiB.</span>
-<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">limit</span>
-<span class="w">      </span><span class="nt">limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">262144</span>
-<span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">The task result is too large to return through MCP.</span>
-
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir</span>
-<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cli</span>
-<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Redact labelled passwords.</span>
-<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">replace</span>
-<span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">"(?i)(password\\s*[=:]\\s*)\\S+"</span>
-<span class="w">      </span><span class="nt">replace</span><span class="p">:</span><span class="w"> </span><span class="s">"\\1[REDACTED:PASSWORD]"</span>
-
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">"*"</span>
-<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="s">"*"</span>
-<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Withhold known instruction-injection content.</span>
-<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">regex</span>
-<span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">"(?i)ignore</span><span class="nv"> </span><span class="s">(all</span><span class="nv"> </span><span class="s">|the</span><span class="nv"> </span><span class="s">)?previous</span><span class="nv"> </span><span class="s">instructions"</span>
-<span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Task result content was withheld for safety.</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">'*'</span>
+<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="s">'*'</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">characters_limit</span>
+<span class="w">      </span><span class="nt">limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>
 </code></pre></div>
-<p>Result guardrail selectors use glob (<code>fnmatch</code>) matching. Task-owned rules from
-<code>mcp.result_guardrails</code> run first in their declared order, followed by matching
-inventory rules in inventory order. <code>tools.disable_builtin_guardrails: true</code>
-disables both task-owned call and result guardrails while leaving inventory
-rules enabled.</p>
-<table>
-<thead>
-<tr>
-<th>Type</th>
-<th>Required keys</th>
-<th>Behavior</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>limit</code></td>
-<td><code>limit</code> (positive byte count)</td>
-<td>Measures the compact JSON aggregate. If exceeded, returns one bounded base result containing <code>message</code> and the existing job UUID.</td>
-</tr>
-<tr>
-<td><code>replace</code></td>
-<td><code>match</code>, <code>replace</code></td>
-<td>Recursively replaces matching string values below each worker's <code>result</code> and <code>diff</code>.</td>
-</tr>
-<tr>
-<td><code>regex</code></td>
-<td><code>match</code></td>
-<td>Recursively detects matching string values below <code>result</code> and <code>diff</code> and replaces only the affected worker field with <code>message</code>.</td>
-</tr>
-</tbody>
-</table>
-<p>Guardrails run once in authored order. A limit rule measures the delivery copy
-at the point where the rule appears. Dictionary keys and result metadata such as
-<code>errors</code>, <code>messages</code>, and <code>resources</code> are not regex-inspected, although the
-complete aggregate counts toward a <code>limit</code>.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>A job UUID locates the original database record; it is not an authorization
-credential. Raw stored results have not been sanitized and may be large or
-sensitive. Do not expose unrestricted raw-result retrieval to a model.</p>
-</div>
-<p>Effective result guardrails are included by <code>get_tools</code>, <code>show fastmcp tools</code>
-when detailed tool data is requested, and <code>show fastmcp guardrails</code> under the
-<code>result_guardrails</code> section for each matching tool.</p>
+<p><code>disable_builtin_guardrails</code> defaults to <code>false</code>. Setting it to <code>true</code> disables
+built-in input and result rules while keeping inventory rules active.</p>
+<p>See <a href="../services_fastmcp_service_guardrails/">FastMCP Guardrails</a> for matching
+options, approval requirements, default protections, rule order, and examples.</p>
 
 
 
@@ -8631,13 +8452,13 @@ when detailed tool data is requested, and <code>show fastmcp guardrails</code> u
         
         
           
-          <a href="../services_fastmcp_service_task_auth/" class="md-footer__link md-footer__link--next" aria-label="Next: Auth">
+          <a href="../services_fastmcp_service_guardrails/" class="md-footer__link md-footer__link--next" aria-label="Next: Guardrails">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Auth
+                Guardrails
               </div>
             </div>
             <div class="md-footer__button md-icon">
