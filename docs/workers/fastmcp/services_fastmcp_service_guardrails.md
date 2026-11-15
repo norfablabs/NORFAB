@@ -150,9 +150,10 @@ Approval cannot override a rejection from another rule.
 
 Nornir `cli` includes protections without any inventory configuration:
 
-- Before submission, reject restart commands, configuration-mode commands,
-  `commit`, destructive operations, shell access, software changes, and outbound
-  `ssh` or `telnet` sessions.
+- Before submission, reject restart commands, including a reboot/reload/restart
+  command following a semicolon, configuration-mode commands, `commit`,
+  destructive operations, shell access, software changes, and outbound `ssh` or
+  `telnet` sessions.
 - Before returning output, redact device passwords, SNMP communities,
   RADIUS/TACACS keys, authentication keys, HTTP credentials, Linux password
   hashes, and private-key contents.
@@ -162,7 +163,8 @@ as `username admin secret 5 example-secret` becomes
 `username admin secret 5 REDACTED`.
 
 Nornir `cfg` has different rules, including rejection of operational command
-escapes and selected destructive commands. Check a task's rules before adding
+escapes and selected destructive commands. Like `cli`, it rejects reboot, reload,
+or restart commands following a semicolon. Check a task's rules before adding
 approval: an inventory rule requesting approval for `cli` command `reload`
 cannot override its built-in rejection.
 
@@ -179,8 +181,8 @@ protections:
 
 - Replace common labelled passwords, secrets, tokens, and credential keys with
   `REDACTED`. Coverage includes authentication headers and cookies, connection
-  URL credentials, common network secrets, private-key blocks, password hashes,
-  and recognizable service tokens.
+  URL credentials, common network secrets (including IOS `key-string` values),
+  private-key blocks, password hashes, and recognizable service tokens.
 - Limit the combined response across all workers to **100000 characters**.
   An oversized response is omitted, rather than truncated. It returns
   an entry for each responding worker with `result: {}`, `failed: false`,
