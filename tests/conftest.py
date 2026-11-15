@@ -59,6 +59,7 @@ def pytest_configure(config: pytest.Config) -> None:
         "nornir_snmp: Nornir snmp task tests",
         "nornir_task: Nornir task task tests",
         "nornir_test: Nornir test task tests",
+        "netbox_worker: Netbox worker and shared helper tests",
         "netbox_cache_clear: NetBox cache_clear task tests",
         "netbox_cache_get: NetBox cache_get task tests",
         "netbox_cache_list: NetBox cache_list task tests",
@@ -195,7 +196,6 @@ def nfclient_dict_inventory():
     data = {
         "broker": {
             "endpoint": "tcp://127.0.0.1:7777",
-            "shared_key": "D>[[2]NH9#dN5?!o5DtibYYvV)ev?oRl}#P[>(q3",
         },
         "topology": {"broker": True, "workers": ["nornir-worker-1", "nornir-worker-2"]},
         "workers": {

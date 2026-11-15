@@ -263,6 +263,7 @@ class TestGetNornirInventory:
                     ), f"{worker}:{device}:{peering} not all peerings data returned"
 
 
+@pytest.mark.netbox_worker
 class TestInventoryPatternMap:
     def test_rejects_nested_inventory_map_wrapper(self):
         with pytest.raises(ValidationError):
@@ -293,6 +294,7 @@ class TestInventoryPatternMap:
             )
 
 
+@pytest.mark.netbox_worker
 class TestDeviceInventoryRecords:
     def test_validates_inventory_records(self):
         records = DeviceInventoryRecords.model_validate(
@@ -343,6 +345,7 @@ class TestDeviceInventoryRecords:
             DeviceInventoryRecords.model_validate(records)
 
 
+@pytest.mark.netbox_worker
 class TestSyncDeviceInventoryInput:
     def test_accepts_inventory_parse_template_alias(self):
         data = SyncDeviceInventoryInput.model_validate(
@@ -365,6 +368,7 @@ class TestSyncDeviceInventoryInput:
             SyncDeviceInventoryInput.model_validate({field: "A9K-*"})
 
 
+@pytest.mark.netbox_worker
 class TestSyncAllInput:
     def test_accepts_sync_kwargs_dictionary(self):
         sync_kwargs = {
@@ -389,6 +393,7 @@ class TestSyncAllInput:
         assert data.sync_kwargs == "nf://netbox/sync_all_kwargs.yaml"
 
 
+@pytest.mark.netbox_worker
 class TestInventoryRecordFilters:
     MODULE = {
         "slot": "module 0/RSP0/CPU0",

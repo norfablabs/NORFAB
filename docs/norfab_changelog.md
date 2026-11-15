@@ -13,9 +13,13 @@
  
 ## BUGS
 
+1. Core dictionary-inventory tests use the local broker's generated certificate so they start correctly in fresh Docker runtime directories.
+
 1. Netbox `sync_device_ip` normalizes live IP addresses before matching existing records, preventing equivalent IPv6 spellings from being treated as new addresses.
 
 ## CHANGES
+
+1. Docker test commands replace `--parallel-runs` with `--max-containers` (default 100), limiting configured containers across the entire invocation. Base runs now use isolated `groups/base/runs/<id>/` runtime directories.
 
 1. Project development now uses uv. Docker images continue installing dependencies with pip. Use `uv sync` and `uv run` in place of Poetry; published package extras and entry points are unchanged.
 2. Feature development now follows Spec Kit specifications, plans and tasks under `docs/development/specs/` instead of feature ADRs, with [installation and workflow instructions](development/norfab_developing_and_testing_framework.md#develop-features-with-spec-kit). ADRs remain for separate architecture decisions.

@@ -43,6 +43,7 @@ except ModuleNotFoundError as exc:
 pytestmark = pytest.mark.netbox
 
 
+@pytest.mark.netbox_worker
 @pytest.mark.parametrize(
     ("diff", "expected"),
     [
@@ -64,6 +65,7 @@ def test_sync_diff_has_changes(diff: dict, expected: bool) -> None:
     assert sync_diff_has_changes(diff) is expected
 
 
+@pytest.mark.netbox_worker
 def test_sync_diff_has_changes_can_ignore_deletions() -> None:
     diff = {"device": {"create": [], "update": {}, "delete": ["Loopback99"]}}
 
@@ -71,6 +73,7 @@ def test_sync_diff_has_changes_can_ignore_deletions() -> None:
     assert sync_diff_has_changes(diff, ignore_deletions=True) is False
 
 
+@pytest.mark.netbox_worker
 @pytest.mark.parametrize(
     "model, required_data",
     [
@@ -100,6 +103,7 @@ def test_bulk_sync_batch_size_models(model: Any, required_data: dict) -> None:
             model.model_validate({**required_data, "batch-size": value})
 
 
+@pytest.mark.netbox_worker
 def test_sync_action_summary_supports_string_and_integer_identifiers() -> None:
     summary = netbox_models.SyncActionSummary(
         created=["Ethernet1"],
@@ -116,6 +120,7 @@ def test_sync_action_summary_supports_string_and_integer_identifiers() -> None:
     }
 
 
+@pytest.mark.netbox_worker
 @pytest.mark.parametrize(
     "model",
     [
@@ -146,6 +151,7 @@ def test_sync_result_models_accept_typed_live_action_maps(model: Any) -> None:
     }
 
 
+@pytest.mark.netbox_worker
 def test_pynetbox_session_uses_retry_adapter() -> None:
     worker = object.__new__(NetboxWorker)
     worker.netbox_retry = Retry(total=0)
@@ -163,6 +169,7 @@ def test_pynetbox_session_uses_retry_adapter() -> None:
     assert "POST" not in RETRYABLE_HTTP_METHODS
 
 
+@pytest.mark.netbox_worker
 def test_netbox_inventory_timeout_and_retry_model() -> None:
     config = netbox_models.NetboxConfigModel.model_validate(
         {
@@ -180,6 +187,7 @@ def test_netbox_inventory_timeout_and_retry_model() -> None:
     assert config.netbox_retry_backoff == 1.5
 
 
+@pytest.mark.netbox_worker
 class TestSyncAllOrchestration:
     TASKS = [
         ("sync_device_inventory", {"device-1": {}}),
@@ -630,6 +638,7 @@ sync_device_interfaces:
         assert set(result.result["device-1"]) == (set(self.RESULT_CATEGORIES.values()))
 
 
+@pytest.mark.netbox_worker
 class TestSyncResourcesFailed:
     DEVICE = "cisco_ios_xr1"
     VLAN_DEVICE = "failed-nornir-device"

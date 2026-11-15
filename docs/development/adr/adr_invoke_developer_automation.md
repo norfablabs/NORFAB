@@ -2,6 +2,16 @@
 
 ## Status
 
+Runner simplification (2026-11-15): suite and named-group commands share one
+task factory and isolated-container runner. Base invocations also use unique
+`groups/base/runs/<id>/` runtimes. Selection and aggregation rules are preserved.
+
+Concurrency amendment (2026-11-15): `--max-containers=N` replaces
+`--parallel-runs`, with a default of 100. One shared scheduler limits configured
+containers across all services in an invocation. Per-file discovery and its
+pytest collection hooks are removed. All file-parallel descriptions below are
+historical and superseded by this amendment.
+
 Implemented. Approved and completed on 2026-08-22.
 
 Dependency management amendment (2026-11-03): uv replaces Poetry. Use
@@ -45,6 +55,13 @@ single NetBox Compose service image with `docker compose run`; no duplicate
 Compose services are defined. Each invocation has a descriptive container
 name and its own runtime and JUnit artifact directory. The aggregate NetBox
 and all-suites tasks fan out through the same file runners.
+
+Marker-container amendment (2026-11-15): `SUITES` defines the Compose service,
+collection directory, fallback marker, and named container marker expressions.
+The former Netbox group helpers now accept any suite. `base` selects the suite
+command's container. Suites without `base` aggregate their named containers.
+The all-suites runner includes every configured container. Netbox uses existing task markers. Its worker group uses `netbox_worker` for worker and shared helper tests. Nornir separates gNMI, NETCONF, and RESTCONF.
+Configured containers run through one shared concurrency-limited scheduler.
 
 ## Date
 

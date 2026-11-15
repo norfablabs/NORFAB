@@ -17,14 +17,14 @@ uv run inv docker-tests-config
 uv run inv docker-tests-build
 uv run inv docker-tests-core
 uv run inv docker-tests-nornir
-uv run inv docker-tests-netbox --parallel-runs=2
+uv run inv docker-tests-netbox --max-containers=2
 uv run inv docker-tests-all
 uv run inv docker-tests-distributed
 uv run inv docker-profile-idle
 ```
 
 Run `uv run inv --help docker-tests-nornir` for test selector, marker,
-keyword, image build, Python-version, and file-parallel options. Direct Compose
+keyword, image build, Python-version, and container concurrency options. Direct Compose
 commands below remain useful for troubleshooting.
 
 By default, each Invoke suite task passes its conventional test directory to
@@ -32,7 +32,7 @@ pytest before applying the suite marker. This avoids importing unrelated test
 modules and worker task decorators. An explicit `--selector` replaces that
 default directory.
 
-NetBox also has one Invoke runner per `test_*.py` file. For example:
+Netbox has marker-selected Invoke runners for its task groups. For example:
 
 ```bash
 uv run inv docker-tests-netbox-devices
@@ -44,7 +44,41 @@ These are dynamic `docker compose run` invocations, not duplicate services in
 `compose.yaml`. Each gets a descriptive
 `norfab-tests-netbox-<file>-<run-id>` container name plus isolated logs and
 JUnit output under `netbox-service-tests/groups/<file>/`. Running
-`docker-tests-netbox` or `docker-tests-all` starts every NetBox file runner.
+`docker-tests-netbox` or `docker-tests-all` starts every Netbox group.
+Groups use task markers. The `worker` group uses `netbox_worker` for worker
+and shared helper tests.
+
+Configure runners in the `SUITES` dictionary in `tasks.py`. Each entry defines
+`service`, `tests` (the collection directory), `marker` (the override fallback),
+and `containers` mapping names to pytest marker expressions. `include_in_all`
+defaults to true. All containers collect the service directory before filtering.
+
+```python
+"containers": {
+    "base": "nornir and not (nornir_gnmi or nornir_netconf or nornir_restconf)",
+    "gnmi": "nornir and nornir_gnmi",
+    "netconf": "nornir and nornir_netconf",
+    "restconf": "nornir and nornir_restconf",
+},
+```
+
+`docker-tests-nornir` runs `base`. Use `docker-tests-nornir-gnmi`,
+`docker-tests-nornir-netconf`, or `docker-tests-nornir-restconf` for a protocol.
+Without `base`, the suite command runs all configured containers, as for Netbox.
+`docker-tests-all` runs every configured container for each included suite.
+All Invoke test runtimes and JUnit files use
+`<compose-service>/groups/<group>/runs/<id>/`, including `base` runs.
+Single-container reports use that invocation's exact JUnit file.
+Direct Compose commands keep their existing defaults.
+
+`--marker` overrides the selected expression. An explicit `--selector` on the
+base suite command uses the service marker unless `--marker` is also supplied.
+Dedicated group commands retain their group marker with a selector. Keywords
+and extra pytest arguments further filter the selection.
+
+`--max-containers=N` limits active test containers for one invocation (default
+100). `docker-tests-all` shares that limit across every service. Use 1 for
+sequential execution. The limit does not change the configured test selection.
 
 Individual suite tasks print but ignore a non-zero pytest container status so
 the command can remain part of an interactive workflow. `docker-tests-all`
@@ -55,7 +89,7 @@ their dedicated Invoke tasks explicitly when needed.
 Every Docker test invocation creates a timestamped Markdown summary in
 `docker/norfab-docker-tests/reports/`, including runs narrowed by selectors,
 markers, keywords, extra pytest arguments, dedicated NetBox file tasks, or
-per-file parallelism. The summary includes counts, durations, failures,
+container concurrency. The summary includes counts, durations, failures,
 missing/invalid JUnit warnings, and paths to artifacts created or updated
 during that run. The all-suites command produces one consolidated report.
 Below the summary, expand a service under `Failed tests by service` to see
@@ -75,8 +109,7 @@ FileSharing instead mounts `filesharing-service-tests/__norfab__/inventory` as
 the entire inventory, with no separate runtime overlay. Invoke copies the
 canonical inventory there, excluding runtime data and Python caches. Its logs
 and JUnit artifacts live in that copy's `__norfab__` directory; report discovery
-includes them automatically. Per-file runs use the same layout within each
-shard. Before running FileSharing directly with Compose, run
+includes them automatically. Grouped runs use the same layout within each runtime. Before running FileSharing directly with Compose, run
 `uv run inv docker-tests-prepare` to refresh its inventory copy.
 
 ```text
@@ -325,28 +358,21 @@ or tests-local paths like `services/nornir/test_task.py`.
 For `distributed-client`, selectors use the mounted client-local path, such as
 `core/test_client.py`.
 
-## Parallel Test Files
+## Limit Concurrent Containers
 
-Add `--parallel-runs=N` to any individual Invoke suite task to discover its
-`test_*.py` files and run one container per file, with no more than `N`
-containers running concurrently:
+Use `--max-containers=N` on suite commands or `docker-tests-all` to cap active
+configured containers. The default is 100. This is a global limit for each
+invocation, including across services in `docker-tests-all`.
 
 ```bash
-uv run inv docker-tests-netbox --parallel-runs=2
-uv run inv docker-tests-nornir --parallel-runs=2
-uv run inv docker-tests-nfcli --parallel-runs=2
+uv run inv docker-tests-netbox --max-containers=2
+uv run inv docker-tests-all --max-containers=4
+uv run inv docker-tests-all --max-containers=1
 ```
 
-Invoke derives suite roots from `tests/services/<suite>`,
-`tests/clients/<suite>`, or `tests/<suite>`. A directory supplied with
-`--selector` becomes the discovery root; a selected test file creates one
-isolated container. Pytest node IDs are supported only without
-`--parallel-runs=N`.
-
-Each file overrides the service's writable runtime mount and JUnit destination
-without adding another Compose service. The image is built once before startup
-when `--build` is used. Container output can interleave, followed by an Invoke
-summary with each file's status.
+A suite with only its base container still runs one container. Named group
+commands run one container. Selectors and marker overrides remain supported.
+The previous per-file `--parallel-runs` option has been removed.
 
 ## Runtime Output
 

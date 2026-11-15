@@ -108,10 +108,12 @@ class TestMoveIP:
                 port.delete()
 
 
+@pytest.mark.netbox_worker
 def test_resolve_ip_role_without_interface_name() -> None:
     assert resolve_ip_role("192.0.2.1/24", None, []) is None
 
 
+@pytest.mark.netbox_worker
 def test_resolve_ip_role_anycast_without_interface_name() -> None:
     anycast_nets = [ipaddress.ip_network("192.0.2.0/24")]
 

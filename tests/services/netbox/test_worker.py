@@ -2,7 +2,7 @@ import pprint
 
 import pytest
 
-pytestmark = pytest.mark.netbox
+pytestmark = [pytest.mark.netbox, pytest.mark.netbox_worker]
 
 
 class TestNetboxWorker:

@@ -298,8 +298,11 @@ uv run inv docker-tests-build --suite=nornir
 # Rebuild the Nornir image before running its suite.
 uv run inv docker-tests-nornir --build
 
-# Run all tests in the Nornir suite.
+# Run Nornir tests except the three protocol groups.
 uv run inv docker-tests-nornir
+uv run inv docker-tests-nornir-gnmi
+uv run inv docker-tests-nornir-netconf
+uv run inv docker-tests-nornir-restconf
 # Run one Nornir test file in the suite container.
 uv run inv docker-tests-nornir --selector=tests/services/nornir/test_worker.py
 # Run only NetBox get_devices tests.
@@ -307,11 +310,22 @@ uv run inv docker-tests-netbox --marker="netbox and netbox_get_devices"
 
 # Run the NetBox CRUD file in a dedicated container.
 uv run inv docker-tests-netbox-crud
-# Run Nornir files in separate containers, at most two concurrently.
-uv run inv docker-tests-nornir --parallel-runs=2
+# Run configured containers, at most two concurrently across all services.
+uv run inv docker-tests-all --max-containers=2
 ```
 
-Suite names are `core`, `nornir`, `netbox`, `fakenos`, `containerlab`, `workflow`, `agent`, `fastmcp`, `fastapi`, `filesharing`, `dummy`, and `nfcli`. `docker-tests-all` runs the regular suites concurrently; run `docker-tests-containerlab` separately. The distributed topology uses `docker-tests-distributed`. The default suite run collects its test directory and applies its service marker. `--selector` accepts a directory, file, or pytest node ID; `--marker`, `--keyword`, and `--pytest-args` narrow the run. The default NetBox suite runs each `test_*.py` file in a dedicated container. See `uv run inv --help docker-tests-nornir` for all options.
+Suite names are `core`, `nornir`, `netbox`, `fakenos`, `containerlab`, `workflow`, `agent`, `fastmcp`, `fastapi`, `filesharing`, `dummy`, and `nfcli`. `docker-tests-all` runs the regular suites concurrently; run `docker-tests-containerlab` separately. The distributed topology uses `docker-tests-distributed`. The default suite run collects its test directory and applies its service marker. `--selector` accepts a directory, file, or pytest node ID; `--marker`, `--keyword`, and `--pytest-args` narrow the run. The default Netbox suite runs its configured marker groups in dedicated containers. See `uv run inv --help docker-tests-nornir` for all options.
+
+Container selection is configured in `tasks.py` through `SUITES[service]["containers"]`:
+keys name containers and values are pytest marker expressions. `base` uses the
+suite command. Other keys create dedicated commands. Without `base`, the suite
+command runs all groups. `docker-tests-all` includes every configured group.
+Nornir's base excludes gNMI, NETCONF, and RESTCONF. Netbox uses existing task markers for its groups. Worker and shared helper tests use
+`netbox_worker` and run in the worker group. All groups collect only their service directory.
+`--marker` overrides the expression. An explicit selector on the suite command
+uses the service marker by default. `--max-containers=N` limits active configured containers (default 100).
+The all-suites limit is global across services. Use 1 for sequential execution.
+The per-file `--parallel-runs` option has been removed.
 
 ### Run Compose directly
 
@@ -337,7 +351,7 @@ Each Invoke test run prints the path of its timestamped Markdown report in `dock
 - The summary table shows passed, failed, errors, skipped, duration, and suite status.
 - `Failed tests by service` provides expandable lists of failed/error test names below the summary. Expand a service to quickly find its failing tests.
 - `Failures and report problems` shows failing tests and error details.
-- `JUnit artifacts` lists XML files produced by that run. JUnit files and worker logs are under the suite's ignored `docker/norfab-docker-tests/<compose-service>/__norfab__/` tree; NetBox group and file-parallel runs use `groups/` and `parallel/` subdirectories.
+- `JUnit artifacts` lists XML files produced by that run. Invoke JUnit files and worker logs are under `docker/norfab-docker-tests/<compose-service>/groups/<group>/runs/<id>/`, including base runs.
 - `NO REPORT` means no JUnit file was produced; `INVALID REPORT` means the XML could not be parsed. Check the container output and runtime logs.
 
 Individual suite and NetBox file tasks report failures but do not return a failing Invoke status. Always check their report. `docker-tests-all` returns a nonzero status if a suite fails. Reports use only JUnit files created or updated during that run.

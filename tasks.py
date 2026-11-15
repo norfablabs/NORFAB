@@ -69,37 +69,151 @@ CLIENT_BROKER_PUBLIC_KEYS = (
     / "broker.key",
 )
 
-# Public Invoke suite name -> (Docker Compose service, default pytest marker).
-# This single mapping drives task registration, aliases, image builds, and the
-# all-suites runner.
+# One suite entry defines its Compose runner and marker-selected containers.
 SUITES = {
-    "core": ("core-tests", "core"),
-    "nornir": ("nornir-service-tests", "nornir"),
-    "netbox": ("netbox-service-tests", "netbox"),
-    "fakenos": ("fakenos-service-tests", "fakenos"),
-    "containerlab": ("containerlab-service-tests", "containerlab"),
-    "workflow": ("workflow-service-tests", "workflow"),
-    "agent": ("agent-tests", "clientagent"),
-    "fastmcp": ("fastmcp-service-tests", "fastmcp"),
-    "fastapi": ("fastapi-service-tests", "fastapi"),
-    "filesharing": ("filesharing-service-tests", "filesharing"),
-    "dummy": ("dummy-service-tests", "dummy"),
-    "nfcli": ("nfcli-tests", "nfcli"),
+    "core": {
+        "service": "core-tests",
+        "tests": "tests/core",
+        "marker": "core",
+        "containers": {
+            "base": "core",
+        },
+    },
+    "nornir": {
+        "service": "nornir-service-tests",
+        "tests": "tests/services/nornir",
+        "marker": "nornir",
+        "containers": {
+            "base": "nornir and not (nornir_gnmi or nornir_netconf or nornir_restconf)",
+            "gnmi": "nornir and nornir_gnmi",
+            "netconf": "nornir and nornir_netconf",
+            "restconf": "nornir and nornir_restconf",
+        },
+    },
+    "netbox": {
+        "service": "netbox-service-tests",
+        "tests": "tests/services/netbox",
+        "marker": "netbox",
+        "containers": {
+            "bgp": (
+                "netbox and (netbox_create_bgp_peering or netbox_get_bgp_peerings or "
+                "netbox_sync_bgp_peerings or netbox_update_bgp_peering)"
+            ),
+            "bgp_asn": "netbox and (netbox_create_asn or netbox_sync_bgp_asn)",
+            "bgp_community": "netbox and netbox_sync_bgp_community",
+            "cache": (
+                "netbox and (netbox_cache_clear or netbox_cache_get or netbox_cache_list)"
+            ),
+            "circuits": "netbox and netbox_get_circuits",
+            "connections": (
+                "netbox and (netbox_get_connections or netbox_get_topology)"
+            ),
+            "containerlab": "netbox and netbox_get_containerlab_inventory",
+            "crud": "netbox and netbox_crud",
+            "designs": "netbox and netbox_design_deploy",
+            "devices": "netbox and netbox_get_devices",
+            "fhrp": "netbox and netbox_sync_vrrp",
+            "graphql": "netbox and netbox_graphql",
+            "interfaces": (
+                "netbox and (netbox_create_device_interfaces or netbox_get_interfaces or "
+                "netbox_sync_device_interfaces or netbox_update_interfaces_description)"
+            ),
+            "inventory": (
+                "netbox and (netbox_get_nornir_inventory or netbox_sync_device_inventory)"
+            ),
+            "ipam": (
+                "netbox and (netbox_create_ip or netbox_create_ip_bulk or netbox_create_prefix "
+                "or netbox_move_ip or netbox_sync_device_ip or netbox_sync_device_prefixes)"
+            ),
+            "sync": (
+                "netbox and (netbox_check_device_sync or netbox_sync_all or "
+                "netbox_sync_mac_addresses)"
+            ),
+            "vlans": "netbox and (netbox_create_vlan or netbox_sync_vlans)",
+            "vrfs": "netbox and netbox_sync_vrfs",
+            "worker": "netbox and netbox_worker",
+        },
+    },
+    "fakenos": {
+        "service": "fakenos-service-tests",
+        "tests": "tests/services/fakenos",
+        "marker": "fakenos",
+        "containers": {
+            "base": "fakenos",
+        },
+    },
+    "containerlab": {
+        "service": "containerlab-service-tests",
+        "tests": "tests/services/containerlab",
+        "marker": "containerlab",
+        "containers": {
+            "base": "containerlab",
+        },
+        "include_in_all": False,
+    },
+    "workflow": {
+        "service": "workflow-service-tests",
+        "tests": "tests/services/workflow",
+        "marker": "workflow",
+        "containers": {
+            "base": "workflow",
+        },
+    },
+    "agent": {
+        "service": "agent-tests",
+        "tests": "tests/clients/agent",
+        "marker": "clientagent",
+        "containers": {
+            "base": "clientagent",
+        },
+    },
+    "fastmcp": {
+        "service": "fastmcp-service-tests",
+        "tests": "tests/services/fastmcp",
+        "marker": "fastmcp",
+        "containers": {
+            "base": "fastmcp",
+        },
+    },
+    "fastapi": {
+        "service": "fastapi-service-tests",
+        "tests": "tests/services/fastapi",
+        "marker": "fastapi",
+        "containers": {
+            "base": "fastapi",
+        },
+    },
+    "filesharing": {
+        "service": "filesharing-service-tests",
+        "tests": "tests/services/filesharing",
+        "marker": "filesharing",
+        "containers": {
+            "base": "filesharing",
+        },
+    },
+    "dummy": {
+        "service": "dummy-service-tests",
+        "tests": "tests/services/dummy",
+        "marker": "dummy",
+        "containers": {
+            "base": "dummy",
+        },
+    },
+    "nfcli": {
+        "service": "nfcli-tests",
+        "tests": "tests/nfcli",
+        "marker": "nfcli",
+        "containers": {
+            "base": "nfcli",
+        },
+    },
 }
 
-# The aggregate starts the regular pytest runners concurrently. Containerlab
-# has host-level networking/runtime requirements and remains an explicit task;
-# the idle profiler and distributed topology are separate Compose workflows
-# and are intentionally not represented in SUITES.
-ALL_SUITES = tuple(suite for suite in SUITES if suite != "containerlab")
+# Special-purpose topologies and profilers remain separate commands.
+ALL_SUITES = tuple(
+    suite for suite, settings in SUITES.items() if settings.get("include_in_all", True)
+)
 DOCKER_REPORTS_DIR = DOCKER_DIR / "reports"
-
-# NetBox is large enough to warrant one dedicated container per test module.
-# Group names intentionally match filenames so task names stay predictable.
-NETBOX_TEST_GROUPS = {
-    path.stem.removeprefix("test_"): path.relative_to(ROOT).as_posix()
-    for path in sorted((ROOT / "tests" / "services" / "netbox").glob("test_*.py"))
-}
 
 
 def _run(args, *, env=None, check=True):
@@ -222,9 +336,9 @@ def _percentile(values, percentile):
     return ordered[max(0, math.ceil(percentile * len(ordered)) - 1)]
 
 
-def _prepare_runtime(service, shard=None):
+def _prepare_runtime(service, shard=None, *, directory=None):
     """Prepare a suite runtime, copying inventory for FileSharing's single mount."""
-    runtime = DOCKER_DIR / service
+    runtime = directory if directory is not None else DOCKER_DIR / service
     runtime = runtime / "parallel" / shard if shard else runtime
     runtime = runtime / "__norfab__"
     if service == "filesharing-service-tests":
@@ -242,39 +356,8 @@ def _prepare_runtime(service, shard=None):
 
 
 def _suite_test_root(suite):
-    """Find a suite test root from the repository's directory conventions."""
-    candidates = (
-        ROOT / "tests" / "services" / suite,
-        ROOT / "tests" / "clients" / suite,
-        ROOT / "tests" / suite,
-    )
-    for candidate in candidates:
-        if candidate.is_dir():
-            return candidate
-    raise ValueError(f"No test directory found for suite {suite!r}")
-
-
-def _discover_test_files(suite, selector=""):
-    """Discover ``test_*.py`` below a suite root or selected directory."""
-    if "::" in selector:
-        raise ValueError("--parallel-runs does not support pytest node IDs")
-    selected = ROOT / selector if selector else _suite_test_root(suite)
-    if selector and not selected.exists():
-        selected = ROOT / "tests" / selector
-    selected = selected.resolve()
-    tests_root = (ROOT / "tests").resolve()
-    if selected != tests_root and tests_root not in selected.parents:
-        raise ValueError(f"Parallel test selection is outside {tests_root}")
-    if selected.is_file():
-        if not selected.match("test_*.py"):
-            raise ValueError(f"Parallel test selection is not a test file: {selected}")
-        return selected.parent, [selected]
-    if not selected.is_dir():
-        raise ValueError(f"Parallel test selection does not exist: {selected}")
-    test_files = sorted(selected.rglob("test_*.py"))
-    if not test_files:
-        raise ValueError(f"No test_*.py files found below {selected}")
-    return selected, test_files
+    """Return the configured collection root for a Docker suite."""
+    return ROOT / SUITES[suite]["tests"]
 
 
 def _prepare_distributed_certificate(force=False):
@@ -373,185 +456,94 @@ def checks(context):
         raise RuntimeError(f"Checks failed: {', '.join(failures)}")
 
 
-def _run_suite(
+def _run_test_group(
     suite,
+    group="base",
+    build=False,
+    python_version="",
+    *,
     selector="",
     marker="",
     keyword="",
     pytest_args="",
-    build=False,
-    python_version="",
-    runtime=None,
-    junit_name="",
-    container_name="",
 ):
-    """Run one mapped pytest suite in Compose and return its exit status."""
-    service, default_marker = SUITES[suite]
-    runtime = runtime or _prepare_runtime(service)
-    # Restrict collection before applying the marker. Collecting the entire
-    # tests tree imports unrelated worker modules whose task decorators share
-    # a process-global registry that Linux worker processes can inherit.
-    selector = selector or _suite_test_root(suite).relative_to(ROOT).as_posix()
-    args = _compose() + ["run", "--rm"]
-    if container_name:
-        args += ["--name", container_name]
+    """Run a suite selection in an isolated container and return status/JUnit.
+
+    A base selection may use the suite marker when no base group is configured.
+    Explicit markers and selectors override the configured selection.
+    """
+    settings = SUITES[suite]
+    service = settings["service"]
+    marker = marker or settings["containers"].get(group, settings["marker"])
+    run_id = uuid4().hex[:8]
+    runtime = _prepare_runtime(
+        service, directory=DOCKER_DIR / service / "groups" / group / "runs" / run_id
+    )
+    junit_file = runtime / "artifacts" / f"{group}-junit.xml"
+    mount_source = runtime.parent if suite == "filesharing" else runtime
+    mount_target = "/workspace/tests/nf_tests_inventory"
+    if suite != "filesharing":
+        mount_target += "/__norfab__"
+    args = _compose() + [
+        "run",
+        "--rm",
+        "--name",
+        f"norfab-tests-{suite}-{group}-{run_id}",
+    ]
     if build:
         args.append("--build")
-    if junit_name:
-        mount_source = runtime.parent if suite == "filesharing" else runtime
-        mount_target = "/workspace/tests/nf_tests_inventory"
-        if suite != "filesharing":
-            mount_target += "/__norfab__"
-        args += [
-            "--volume",
-            f"{mount_source.resolve()}:{mount_target}",
-            "--env",
-            "PYTEST_JUNIT_XML="
-            f"/workspace/tests/nf_tests_inventory/__norfab__/artifacts/{junit_name}",
-        ]
-    # Arguments after the service replace its Compose `command`, so always add
-    # a marker explicitly to avoid accidentally running the entire repository.
-    args += [service, "-m", marker or default_marker]
-    args.append(selector)
+    args += [
+        "--volume",
+        f"{mount_source.resolve()}:{mount_target}",
+        "--env",
+        "PYTEST_JUNIT_XML="
+        f"/workspace/tests/nf_tests_inventory/__norfab__/artifacts/{junit_file.name}",
+        service,
+        "-m",
+        marker,
+        selector or settings["tests"],
+    ]
     if keyword:
         args += ["-k", keyword]
     if pytest_args:
         args += shlex.split(pytest_args)
-    return _run(args, env=_environment(python_version), check=False)
+    return _run(args, env=_environment(python_version), check=False), junit_file
 
 
-def _run_suite_parallel(
-    suite,
-    selector="",
-    marker="",
-    keyword="",
-    pytest_args="",
-    build=False,
-    python_version="",
-    parallel_runs=1,
-):
-    """Run discovered test files with at most ``parallel_runs`` containers."""
-    if parallel_runs < 1:
-        raise ValueError("--parallel-runs must be a positive integer")
-    service, _default_marker = SUITES[suite]
-    test_root, test_files = _discover_test_files(suite, selector)
-    if build:
-        _run(
-            _compose() + ["build", service],
-            env=_environment(python_version),
-        )
+def _run_test_groups(groups, max_containers=100, python_version=""):
+    """Run configured (suite, group) pairs with one global concurrency limit.
 
-    def run_file(test_file):
-        relative_file = test_file.relative_to(test_root)
-        runtime = _prepare_runtime(service, relative_file.with_suffix(""))
-        test_selector = test_file.relative_to(ROOT).as_posix()
-        return test_selector, _run_suite(
+    Returns:
+        List of (suite, group, exit status, JUnit path) results in input order.
+
+    Raises:
+        ValueError: The limit is not positive or no groups were supplied.
+    """
+    if max_containers < 1:
+        raise ValueError("--max-containers must be a positive integer")
+    if not groups:
+        raise ValueError("No test containers configured")
+
+    def run_group(item):
+        suite, group = item
+        return (
             suite,
-            test_selector,
-            marker,
-            keyword,
-            pytest_args,
-            False,
-            python_version,
-            runtime,
-            f"{test_file.stem}-junit.xml",
+            group,
+            *_run_test_group(suite, group, python_version=python_version),
         )
 
-    max_workers = min(parallel_runs, len(test_files))
     print(
-        f"Running {len(test_files)} {suite} test containers, "
-        f"at most {max_workers} at a time",
+        f"Running {len(groups)} test containers, at most {max_containers} at a time",
         flush=True,
     )
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        results = list(executor.map(run_file, test_files))
+    with ThreadPoolExecutor(max_workers=min(max_containers, len(groups))) as executor:
+        results = list(executor.map(run_group, groups))
 
-    print(f"Docker suite {suite} parallel results:")
-    for test_file, return_code in results:
-        status = "passed" if return_code == 0 else f"status {return_code} (ignored)"
-        print(f"  {test_file}: {status}")
-    return max((return_code for _test_file, return_code in results), default=0)
-
-
-def _run_netbox_group(group, build=False, python_version=""):
-    """Run one named NetBox task group in a dedicated Compose container."""
-    if group not in NETBOX_TEST_GROUPS:
-        raise ValueError(
-            f"Unknown NetBox test group {group!r}; choose from "
-            f"{', '.join(NETBOX_TEST_GROUPS)}"
-        )
-    service = SUITES["netbox"][0]
-    if build:
-        _run(_compose() + ["build", service], env=_environment(python_version))
-    run_id = uuid4().hex[:8]
-    runtime = DOCKER_DIR / service / "groups" / group / "runs" / run_id / "__norfab__"
-    (runtime / "artifacts").mkdir(parents=True, exist_ok=True)
-    container_name = f"norfab-tests-netbox-{group}-{run_id}"
-    return_code = _run_suite(
-        "netbox",
-        selector=NETBOX_TEST_GROUPS[group],
-        marker="netbox",
-        python_version=python_version,
-        runtime=runtime,
-        junit_name=f"{group}-junit.xml",
-        container_name=container_name,
-    )
-    return return_code, runtime / "artifacts" / f"{group}-junit.xml"
-
-
-def _run_netbox_groups(build=False, python_version=""):
-    """Run each NetBox test file in its own concurrent Compose container."""
-    service = SUITES["netbox"][0]
-    if build:
-        _run(_compose() + ["build", service], env=_environment(python_version))
-
-    def run_group(group):
-        return group, *_run_netbox_group(group, python_version=python_version)
-
-    print(
-        f"Running {len(NETBOX_TEST_GROUPS)} NetBox test-file containers concurrently",
-        flush=True,
-    )
-    with ThreadPoolExecutor(max_workers=len(NETBOX_TEST_GROUPS)) as executor:
-        results = list(executor.map(run_group, NETBOX_TEST_GROUPS))
-
-    print("NetBox test-file results:")
-    for group, return_code, _junit_file in results:
+    print("Docker container results:")
+    for suite, group, return_code, _junit_file in results:
         status = "passed" if return_code == 0 else f"failed (status {return_code})"
-        print(f"  {group}: {status}")
-    return max((return_code for _group, return_code, _junit_file in results), default=0)
-
-
-def _netbox_group_task(group):
-    """Create an Invoke task for one NetBox test-module Docker runner."""
-
-    @task(
-        help={
-            "build": "Rebuild for dependency updates, NorFab code edits need no rebuild.",
-            "python_version": "Docker runner Python version.",
-        }
-    )
-    def run(_context, build=False, python_version=""):
-        started_at = datetime.now().astimezone()
-        previous_junit = _junit_snapshot()
-        return_code, junit_file = _run_netbox_group(group, build, python_version)
-        _write_docker_test_report(
-            [("netbox", return_code)],
-            previous_junit,
-            started_at,
-            python_version,
-            report_name=f"docker-tests-netbox-{group}",
-            invocation={"Selector": NETBOX_TEST_GROUPS[group]},
-            expected_junit={"netbox": junit_file},
-        )
-        if return_code:
-            print(
-                f"Docker NetBox group {group} exited with status "
-                f"{return_code} (ignored)"
-            )
-
-    run.__doc__ = f"Run test_{group}.py in a dedicated NetBox container."
-    return run
+        print(f"  {suite}/{group}: {status}")
+    return results
 
 
 def _junit_snapshot():
@@ -590,7 +582,7 @@ def _write_docker_test_report(
     report_suites = tuple(suite for suite, _return_code in results)
     report_data = {}
     for suite, return_code in results:
-        service = SUITES[suite][0]
+        service = SUITES[suite]["service"]
         junit_files = []
         candidates = (
             [expected_junit[suite]]
@@ -809,13 +801,13 @@ def _write_docker_test_report(
     return report_path
 
 
-def _suite_task(suite):
-    """Create an Invoke task and singular alias for one entry in ``SUITES``."""
+def _suite_task(suite, group=None):
+    """Create a suite or named-group task with shared options and reporting."""
 
     # A task factory keeps every Docker suite's options and behavior identical
     # without maintaining a near-duplicate function for each service.
     @task(
-        aliases=(f"docker-test-{suite}",),
+        aliases=(f"docker-test-{suite}",) if group is None else (),
         help={
             "selector": "Test path, directory, or node ID.",
             "marker": "Override the suite's pytest marker.",
@@ -823,7 +815,7 @@ def _suite_task(suite):
             "pytest_args": "Additional quoted pytest arguments.",
             "build": "Rebuild for dependency updates, NorFab code edits need no rebuild.",
             "python_version": "Docker runner Python version.",
-            "parallel_runs": "Maximum concurrent per-file test containers.",
+            "max_containers": "Maximum concurrent test containers (default 100).",
         },
     )
     def run(
@@ -834,44 +826,64 @@ def _suite_task(suite):
         pytest_args="",
         build=False,
         python_version="",
-        parallel_runs=0,
+        max_containers=100,
     ):
         # Individual tasks are intended for interactive use, so report test
         # failures without turning them into an Invoke traceback.
+        if max_containers < 1:
+            raise ValueError("--max-containers must be a positive integer")
         started_at = datetime.now().astimezone()
         previous_junit = _junit_snapshot()
-        if suite == "netbox" and not any(
-            (selector, marker, keyword, pytest_args, parallel_runs)
+        marker = marker or (
+            SUITES[suite]["containers"][group]
+            if group is not None
+            else (
+                SUITES[suite]["marker"]
+                if selector
+                else SUITES[suite]["containers"].get("base", "")
+            )
+        )
+        expected_junit = None
+        if (
+            group is None
+            and "base" not in SUITES[suite]["containers"]
+            and not any((selector, marker, keyword, pytest_args))
         ):
-            return_code = _run_netbox_groups(build, python_version)
-        elif parallel_runs:
-            return_code = _run_suite_parallel(
+            if build:
+                _run(
+                    _compose() + ["build", SUITES[suite]["service"]],
+                    env=_environment(python_version),
+                )
+            groups = [(suite, group) for group in SUITES[suite]["containers"]]
+            group_results = _run_test_groups(groups, max_containers, python_version)
+            return_code = max(result[2] for result in group_results)
+        else:
+            return_code, junit_file = _run_test_group(
                 suite,
-                selector,
-                marker,
-                keyword,
-                pytest_args,
+                group or "base",
                 build,
                 python_version,
-                parallel_runs,
+                selector=selector,
+                marker=marker,
+                keyword=keyword,
+                pytest_args=pytest_args,
             )
-        else:
-            return_code = _run_suite(
-                suite, selector, marker, keyword, pytest_args, build, python_version
-            )
+            expected_junit = {suite: junit_file}
         _write_docker_test_report(
             [(suite, return_code)],
             previous_junit,
             started_at,
             python_version,
-            report_name=f"docker-tests-{suite}",
+            report_name=f"docker-tests-{suite}"
+            + (f"-{group}" if group is not None else ""),
+            expected_junit=expected_junit,
             invocation={
                 "Selector": selector
                 or _suite_test_root(suite).relative_to(ROOT).as_posix(),
-                "Marker": marker or SUITES[suite][1],
+                "Marker": marker or SUITES[suite]["marker"],
                 "Keyword": keyword,
                 "Pytest arguments": pytest_args,
-                "Parallel runs": parallel_runs,
+                "Max containers": max_containers,
             },
         )
         if return_code:
@@ -887,8 +899,8 @@ def _suite_task(suite):
 )
 def docker_tests_prepare(_context, force_certificates=False):
     """Create runtime directories and validate both Compose files."""
-    for service, _marker in SUITES.values():
-        _prepare_runtime(service)
+    for settings in SUITES.values():
+        _prepare_runtime(settings["service"])
     for compose_file in (COMPOSE_FILE, DISTRIBUTED_FILE):
         _run(_compose(compose_file) + ["config", "--quiet"])
     _prepare_distributed_certificate(force_certificates)
@@ -910,7 +922,11 @@ def docker_tests_build(_context, suite="", python_version=""):
     """
     if suite and suite not in SUITES:
         raise ValueError(f"Unknown suite {suite!r}; choose from {', '.join(SUITES)}")
-    services = [SUITES[suite][0]] if suite else [item[0] for item in SUITES.values()]
+    services = (
+        [SUITES[suite]["service"]]
+        if suite
+        else [item["service"] for item in SUITES.values()]
+    )
     _run(_compose() + ["build", *services], env=_environment(python_version))
 
 
@@ -919,51 +935,52 @@ def docker_tests_build(_context, suite="", python_version=""):
     help={
         "build": "Rebuild for dependency updates, NorFab code edits need no rebuild.",
         "python_version": "Docker runner Python version.",
-        "parallel_runs": "Maximum concurrent per-file test containers.",
+        "max_containers": "Maximum concurrent test containers (default 100).",
     },
 )
 def docker_tests_all(
     _context,
     build=False,
     python_version="",
-    parallel_runs=0,
+    max_containers=100,
 ):
     """Run Docker suites concurrently, excluding special-purpose runners."""
+    if max_containers < 1:
+        raise ValueError("--max-containers must be a positive integer")
     started_at = datetime.now().astimezone()
     previous_junit = _junit_snapshot()
     if build:
-        services = [SUITES[suite][0] for suite in ALL_SUITES]
+        services = [SUITES[suite]["service"] for suite in ALL_SUITES]
         _run(_compose() + ["build", *services], env=_environment(python_version))
 
-    def run_suite(suite):
-        if suite == "netbox" and not parallel_runs:
-            return_code = _run_netbox_groups(python_version=python_version)
-        elif parallel_runs:
-            return_code = _run_suite_parallel(
-                suite,
-                python_version=python_version,
-                parallel_runs=parallel_runs,
-            )
-        else:
-            return_code = _run_suite(suite, python_version=python_version)
-        return suite, return_code
-
-    # Unlike individual suite tasks, the aggregate retains each status and
-    # ultimately fails so it remains suitable for a full validation run.
-    print(
-        f"Running {len(ALL_SUITES)} Docker test suites concurrently: "
-        f"{', '.join(ALL_SUITES)}",
-        flush=True,
-    )
-    with ThreadPoolExecutor(max_workers=len(ALL_SUITES)) as executor:
-        results = list(executor.map(run_suite, ALL_SUITES))
+    groups = [
+        (suite, group) for suite in ALL_SUITES for group in SUITES[suite]["containers"]
+    ]
+    group_results = _run_test_groups(groups, max_containers, python_version)
+    results = [
+        (
+            suite,
+            max(
+                status
+                for name, _group, status, _junit in group_results
+                if name == suite
+            ),
+        )
+        for suite in ALL_SUITES
+    ]
 
     failures = [suite for suite, return_code in results if return_code]
     print("Docker all-suites results:")
     for suite, return_code in results:
         status = "passed" if return_code == 0 else f"failed (status {return_code})"
         print(f"  {suite}: {status}")
-    _write_docker_test_report(results, previous_junit, started_at, python_version)
+    _write_docker_test_report(
+        results,
+        previous_junit,
+        started_at,
+        python_version,
+        invocation={"Max containers": max_containers},
+    )
     if failures:
         raise RuntimeError(f"Docker test suites failed: {', '.join(failures)}")
 
@@ -1209,13 +1226,13 @@ for suite_name in SUITES:
         name=f"docker-tests-{suite_name}",
     )
 
-# Register task-level NetBox runners such as
-# ``docker-tests-netbox-sync-bgp-peerings``. They reuse the Compose service
-# image but run in explicitly named, dedicated containers and runtime folders.
-for group_name in NETBOX_TEST_GROUPS:
-    namespace.add_task(
-        _netbox_group_task(group_name),
-        name=f"docker-tests-netbox-{group_name}",
-    )
+# Register named containers; base uses the existing suite command.
+for suite_name, settings in SUITES.items():
+    for group_name in settings["containers"]:
+        if group_name != "base":
+            namespace.add_task(
+                _suite_task(suite_name, group_name),
+                name=f"docker-tests-{suite_name}-{group_name}",
+            )
 
 ns = namespace
