@@ -3,6 +3,7 @@
 ## FEATURES
 
 1. Netbox `design_deploy` loads named context values from `nf://` and `git://` YAML files declared in YAML or Markdown designs, with task input overriding Markdown context and file defaults.
+2. Added a [draft specification for broker event subscriptions](development/specs/004-broker-event-subscriptions/spec.md), covering filtered worker lifecycle notifications and lease management. The capability is not implemented.
 
 ## ENHANCEMENTS
 
