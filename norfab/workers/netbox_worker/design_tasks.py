@@ -4124,7 +4124,8 @@ class NetboxDesignTasks:
 
         - Mark design blocks with ``yaml design``. Other examples and prose are ignored.
         - Repeated collections are joined in document order. Records are not deduplicated.
-        - Metadata can appear anywhere: schema, custom functions, then Jinja functions.
+        - Metadata can appear anywhere: schema, context files, custom functions,
+          then Jinja functions. Context files are loaded later by deployment.
         - Headerless blocks containing ``{%``, ``{{`` or ``{#`` follow metadata in
           document order, before collections. Each must be valid Jinja on its own.
         - Indent list items and multiline values. Inline collections are unsupported.
@@ -4144,7 +4145,7 @@ class NetboxDesignTasks:
                 and Markdown cell results remain strings. Context definitions
                 overridden by a supplied top-level key are not rendered.
                 Document context, schema defaults, standalone Jinja variables and
-                custom Jinja functions are unavailable to cells.
+                custom Jinja functions and file-backed values are unavailable to cells.
 
         Returns:
             Dictionary with ``design`` source text and a separate ``context`` dictionary.
@@ -4159,6 +4160,7 @@ class NetboxDesignTasks:
         job.check_timeout()
         metadata_keys = (
             "design_input_schema",
+            "context",
             "custom_functions",
             "jinja_functions",
         )
@@ -4356,7 +4358,7 @@ class NetboxDesignTasks:
         each group in its declared order.
 
         Updates add tags, custom-field list entries, and the supported native
-        relationship lists. Scalar fields and context-data dictionaries replace
+        relationship lists. Single-value fields and context-data dictionaries replace
         their current values. Object custom-field names resolve to NetBox IDs.
 
         Args:
@@ -4369,7 +4371,11 @@ class NetboxDesignTasks:
                 New devices default to planned status; omitted status preserves
                 existing device status.
             context: Jinja2 variables, optionally checked by design_input_schema.
-                Explicit values override Markdown context by top-level key.
+                Explicit values override Markdown context, which overrides YAML
+                files declared in the design's top-level context mapping.
+                Each nf:// or git:// .yaml/.yml file is loaded without Jinja2
+                rendering and assigned as a complete value under its key.
+                All declared files must load even when their keys are overridden.
             instance: NetBox instance name; defaults to the worker's instance.
             dry_run: Return planned writes without changing NetBox.
             branch: NetBox Branching plugin branch name.
@@ -4404,6 +4410,7 @@ class NetboxDesignTasks:
                 context = yaml.safe_load(context) or {}
             if not isinstance(context, dict):
                 raise TypeError("Design context must be a YAML mapping")
+            markdown_context = {}
 
             design_url = (
                 design if isinstance(design, str) and self.is_url(design) else None
@@ -4413,6 +4420,7 @@ class NetboxDesignTasks:
                 metadata = DesignDocument.model_validate(
                     {
                         "design_input_schema": design.get("design_input_schema"),
+                        "context": design.get("context", {}),
                         "jinja_functions": design.get("jinja_functions", {}),
                     }
                 )
@@ -4431,7 +4439,7 @@ class NetboxDesignTasks:
                         job=job, markdown=source, context=context
                     )
                     source = parsed["design"]
-                    context = {**parsed["context"], **context}
+                    markdown_context = parsed["context"]
                 metadata_lines = []
                 for line in source.splitlines():
                     if (
@@ -4441,6 +4449,7 @@ class NetboxDesignTasks:
                             (
                                 "#",
                                 "design_input_schema:",
+                                "context:",
                                 "jinja_functions:",
                                 "custom_functions:",
                             )
@@ -4457,6 +4466,13 @@ class NetboxDesignTasks:
 
             input_schema = metadata.design_input_schema
             jinja_functions = metadata.jinja_functions
+            design_context = {}
+            for name, url in metadata.context.items():
+                job.check_timeout()
+                design_context[name] = yaml.safe_load(
+                    self.fetch_file(url, raise_on_fail=True)
+                )
+            context = {**design_context, **markdown_context, **context}
 
             if input_schema:
                 if isinstance(input_schema, str):

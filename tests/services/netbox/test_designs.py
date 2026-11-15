@@ -28,6 +28,104 @@ pytestmark = [pytest.mark.netbox, pytest.mark.netbox_design_deploy]
 
 class TestDesignDeploy:
 
+    def test_context_file_yaml(self, nfclient: Any) -> None:
+        """Load context from a checked-in YAML file."""
+        response = nfclient.run_job(
+            "netbox",
+            "design_deploy",
+            workers="any",
+            kwargs={
+                "design": "nf://netbox/designs/context_files/design.yaml",
+                "dry_run_render": True,
+            },
+        )
+        assert response
+        for result in response.values():
+            assert not result["failed"], result
+            assert yaml.safe_load(result["result"])["tenants"] == [{"name": "BRISBANE"}]
+
+    @pytest.mark.parametrize(
+        "filename,expected",
+        [
+            ("defaults.yaml", {"site": "BRISBANE"}),
+            ("list.yaml", [10, 20]),
+            ("string.yaml", "{{ context.site }}"),
+            ("number.yaml", 0),
+            ("boolean.yaml", False),
+            ("null.yaml", None),
+            ("empty.yaml", None),
+        ],
+    )
+    def test_context_file_values(
+        self, nfclient: Any, filename: str, expected: Any
+    ) -> None:
+        """Assign the complete YAML value without rendering its strings."""
+        response = nfclient.run_job(
+            "netbox",
+            "design_deploy",
+            workers="any",
+            kwargs={
+                "design": "design_input_schema:\n  type: object\n  required: [defaults]\n  properties:\n    defaults: {}\n"
+                f"context:\n  defaults: nf://netbox/designs/context_files/{filename}\ntenants: {{{{ context.defaults | tojson }}}}\n",
+                "dry_run_render": True,
+            },
+        )
+        assert response
+        for result in response.values():
+            assert not result["failed"], result
+            assert yaml.safe_load(result["result"])["tenants"] == expected
+
+    @pytest.mark.parametrize(
+        "declaration,error",
+        [
+            ("[]", "context"),
+            ('{"": "nf://defaults.yaml"}', "context"),
+            ('{defaults: "http://example.com/defaults.yaml"}', "context"),
+            ('{defaults: "nf://defaults.json"}', "context"),
+            (
+                '{defaults: "nf://netbox/designs/missing-context-file.yaml"}',
+                "missing-context-file.yaml",
+            ),
+        ],
+    )
+    def test_context_file_errors(
+        self, nfclient: Any, declaration: str, error: str
+    ) -> None:
+        """Validate and load sources even when task input replaces their key."""
+        response = nfclient.run_job(
+            "netbox",
+            "design_deploy",
+            workers="any",
+            kwargs={
+                "design": f"context: {declaration}\ntenants: []\n",
+                "context": {"defaults": "override"},
+                "dry_run_render": True,
+            },
+        )
+        assert response
+        for result in response.values():
+            assert result["failed"], result
+            assert error in str(result["errors"]), result
+
+    def test_context_file_invalid_yaml(self, nfclient: Any) -> None:
+        response = nfclient.run_job(
+            "netbox",
+            "design_deploy",
+            workers="any",
+            kwargs={
+                "design": {
+                    "context": {
+                        "defaults": "nf://netbox/designs/context_files/invalid.yml"
+                    }
+                },
+                "dry_run_render": True,
+            },
+        )
+        assert response
+        for result in response.values():
+            assert result["failed"], result
+            assert "while parsing" in str(result["errors"]), result
+
     def test_interface_references(self, nfclient: Any) -> None:
         """Resolve string and dictionary parent, LAG, and bridge references."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
@@ -3770,6 +3868,38 @@ def preview_markdown(nfclient: Any, markdown: str, context: dict | None = None) 
 
 
 class TestMarkdownDesignDeploy:
+    @pytest.mark.parametrize(
+        "task_context,expected",
+        [
+            ({}, {"site": "MARKDOWN"}),
+            ({"defaults": {"site": "TASK"}}, {"site": "TASK"}),
+        ],
+    )
+    def test_context_file_precedence(
+        self, nfclient: Any, task_context: dict, expected: dict
+    ) -> None:
+        """Markdown and task values replace whole file-backed keys."""
+        root = Path(nfclient.inventory.base_dir) / "netbox" / "designs"
+        with TemporaryDirectory(prefix="context-precedence-", dir=root) as directory:
+            folder = Path(directory)
+            (folder / "defaults.yml").write_text(
+                "site: FILE\nextra: file-only\n", encoding="utf-8"
+            )
+            (folder / "untouched.yaml").write_text("retained", encoding="utf-8")
+            response = preview_markdown(
+                nfclient,
+                f"```yaml design\ncontext:\n  defaults: nf://netbox/designs/{folder.name}/defaults.yml\n  untouched: nf://netbox/designs/{folder.name}/untouched.yaml\n```\n"
+                "```yaml context.defaults\nsite: MARKDOWN\n```\n"
+                "```yaml design\ntenants:\n  - defaults: {{ context.defaults | tojson }}\n    untouched: {{ context.untouched | tojson }}\n```\n",
+                task_context,
+            )
+            assert response
+            for result in response.values():
+                assert not result["failed"], result
+                assert yaml.safe_load(result["result"])["tenants"] == [
+                    {"defaults": expected, "untouched": "retained"}
+                ]
+
     def test_deploy_markdown_in_branch(self, nfclient: Any) -> None:
         """Deploy a Markdown file in an owned branch and delete the branch afterwards."""
         name = f"norfab-markdown-{uuid4().hex[:12]}"

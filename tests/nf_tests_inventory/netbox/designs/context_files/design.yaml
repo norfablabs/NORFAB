@@ -1,0 +1,4 @@
+context:
+  defaults: nf://netbox/designs/context_files/defaults.yaml
+tenants:
+  - name: {{ context.defaults.site | tojson }}

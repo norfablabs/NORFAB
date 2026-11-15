@@ -66,20 +66,21 @@ NDDM designs are additive and idempotent. Deployment creates missing objects and
 
 For an agent-oriented authoring workflow, see [Author a Netbox design with an agent](../../tutorials/norfab_netbox_design_authoring.md).
 
-A design is one YAML document with object collections such as `sites` and `devices`. It can also contain three optional control sections:
+A design is one YAML document with object collections such as `sites` and `devices`. It can also contain four optional control sections:
 
 | Section | Purpose |
 | --- | --- |
 | `design_input_schema` | Validate values supplied through `context` before rendering. |
+| `context` | Load YAML files into named template context values. |
 | `jinja_functions` | Load Python functions for use while Jinja2 renders the YAML. |
 | `custom_functions` | Load Python functions called later, during collection deployment. |
 | Remaining top-level keys | Define lists of Netbox objects dictionaries to create or update, such as `sites`, `devices`, and `ip_addresses`. See [supported Netbox objects and deployment order](#netbox-objects-and-deployment-order). |
 
-For YAML text or a file URL, put `design_input_schema` and `jinja_functions` before the first object collection. The loader reads only that initial metadata block to validate context and register Jinja2 functions **before** rendering the full document. `custom_functions` is loaded after rendering and does not have this placement requirement.
+For YAML text or a file URL, put `context`, `design_input_schema` and `jinja_functions` before the first object collection. The loader reads only that initial metadata block to load and validate context and register Jinja2 functions **before** rendering the full document. `custom_functions` is loaded after rendering and does not have this placement requirement.
 
 !!! warning "Keep pre-render metadata at the start"
 
-    The loader parses only the initial YAML lines containing `design_input_schema`, `jinja_functions`, `custom_functions`, comments, and indented lines. It stops at the first other top-level line. This portion of document must be valid YAML on its own: keep Jinja2 expressions and top-level template directives out of it, and put `design_input_schema` and `jinja_functions` before any object collection. Use **one YAML document**. Do not insert `---` between metadata and collections. A schema or Jinja2 function declared after a collection will not be available before rendering.
+    The loader parses only the initial YAML lines containing `context`, `design_input_schema`, `jinja_functions`, `custom_functions`, comments, and indented lines. It stops at the first other top-level line. This portion of document must be valid YAML on its own: keep Jinja2 expressions and top-level template directives out of it, and put `context`, `design_input_schema` and `jinja_functions` before any object collection. Use **one YAML document**. Do not insert `---` between metadata and collections. Metadata declared after a collection will not be available before rendering.
 
 ## Deployment caveats
 
@@ -103,6 +104,49 @@ For YAML text or a file URL, put `design_input_schema` and `jinja_functions` bef
   data. Use `dry_run: true` before an authorized deployment, but remember it does
   not create planned prerequisites or reserve allocations. Failures can leave
   earlier changes applied. There is no automatic rollback.
+
+## File-Backed Context
+
+Declare YAML data sources in the top-level `context` mapping, before the first
+collection. Each complete parsed value becomes `context.<key>`. Sources must use
+`nf://` or `git://` URLs ending in `.yaml` or `.yml`. Invalid declarations fail
+design validation. Every file is loaded, including values later replaced by task
+input. Missing files and invalid YAML fail preparation before deployment.
+
+```yaml
+context:
+  defaults: nf://netbox/data/defaults.yaml
+  links: git://design-data/links.yml
+sites:
+  - name: {{ context.defaults.site | tojson }}
+```
+
+For example, `defaults.yaml` can contain `site: BRISBANE`. A file may contain a
+dictionary, list, string, number, boolean, or null. Empty YAML produces null.
+File contents are not Jinja2-rendered and dictionary values are not expanded into
+sibling context keys.
+
+Task input overrides Markdown context, which overrides file-backed context.
+Replacement applies to whole top-level keys without nested merging. Input-schema
+validation runs on the combined context afterward. This metadata does not update
+Netbox `config_context` or device `local_context_data` by itself.
+
+In Markdown, put the declaration in a `yaml design` fence:
+
+````markdown
+```yaml design
+context:
+  defaults: nf://netbox/data/defaults.yaml
+```
+
+```yaml design
+sites:
+  - name: {{ context.defaults.site | tojson }}
+```
+````
+
+Existing Markdown context blocks still render using only explicit task input.
+They cannot read file-backed values.
 
 ## Design input schema
 
@@ -2269,7 +2313,7 @@ tables supply data. Other text and unmarked examples are ignored. Preview with
     ```
     ````
 
-    Assembly order is schema, custom functions, Jinja functions, standalone Jinja
+    Assembly order is schema, context files, custom functions, Jinja functions, standalone Jinja
     blocks, then collections. Put each metadata key in one block. Standalone
     Jinja blocks retain document order and must each contain complete syntax.
     Relative includes resolve from the Markdown file's directory.

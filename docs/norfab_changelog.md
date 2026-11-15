@@ -1,5 +1,9 @@
 # 0.26.4 (draft)
 
+## FEATURES
+
+1. Netbox `design_deploy` loads named context values from `nf://` and `git://` YAML files declared in YAML or Markdown designs, with task input overriding Markdown context and file defaults.
+
 ## ENHANCEMENTS
 
 1. Enhanced FakeNOS `inspect_networks` to return a controlled `no_match` result with an explicit message when a specifically requested network is not running, instead of exposing an internal `KeyError`. Detailed queries return `{}` and summary queries return `[]`; focused coverage covers both modes.

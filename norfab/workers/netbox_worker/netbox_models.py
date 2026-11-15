@@ -791,6 +791,9 @@ class DesignDocument(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     design_input_schema: Union[str, dict, None] = None
+    context: dict[StrictStr, StrictStr] = Field(
+        default={}, description="YAML file URLs keyed by template context name"
+    )
     jinja_functions: dict[str, str] = Field(default={})
     custom_functions: dict[str, str] = Field(default={})
     tenants: list[dict[str, Any]] = Field(default=[])
@@ -833,6 +836,15 @@ class DesignDocument(BaseModel):
 
     @model_validator(mode="after")
     def validate_design_allocations(self) -> "DesignDocument":
+        for name, url in self.context.items():
+            if (
+                not name
+                or not url.startswith(("nf://", "git://"))
+                or not url.endswith((".yaml", ".yml"))
+            ):
+                raise ValueError(
+                    f"context.{name} must have a non-empty key and an nf:// or git:// YAML file URL (.yaml or .yml)"
+                )
         for record in self.vlan_groups:
             if "custom_function" in record:
                 continue
