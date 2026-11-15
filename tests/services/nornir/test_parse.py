@@ -674,6 +674,24 @@ def combine(data):
             for host in results["result"]:
                 assert "spine" in host, f"{worker} returned unexpected host '{host}'"
 
+        results = ret["nornir-worker-1"]
+        assert set(results["result"]) == {"ceos-spine-1", "ceos-spine-2"}
+
+    def test_nornir_parse_textfsm_single_host_filter(self, nfclient: NFPClient) -> None:
+        ret = nfclient.run_job(
+            "nornir",
+            "parse_textfsm",
+            workers=["nornir-worker-1"],
+            kwargs={
+                "on_failed": True,
+                "commands": "show hostname",
+                "FL": ["ceos-spine-1"],
+            },
+        )
+        results = ret["nornir-worker-1"]
+        assert results["failed"] is False
+        assert set(results["result"]) == {"ceos-spine-1"}
+
     def test_nornir_parse_textfsm_no_matching_hosts(self, nfclient):
         ret = nfclient.run_job(
             "nornir",

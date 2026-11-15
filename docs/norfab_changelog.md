@@ -12,6 +12,7 @@
 ## BUGS
 
 1. FastMCP Nornir CLI and configuration guardrails reject reboot/reload/restart commands after a semicolon; built-in server result redaction also covers IOS `key-string` values.
+2. Nornir `parse_textfsm` forwards host filters to the CLI collection task so parsed results stay within the requested host scope.
 
 ---
 
