@@ -2,6 +2,10 @@ import pprint
 from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
+
+from norfab.clients.nfcli_shell.nornir.nornir_picle_shell_cli import NorniCliInput
+from norfab.workers.nornir_worker.nornir_models import CliInput
 
 pytestmark = [
     pytest.mark.nornir,
@@ -35,6 +39,27 @@ def _assert_cli_details(details):
 
 
 class TestNornirCli:
+    @pytest.mark.parametrize("model", [CliInput, NorniCliInput])
+    @pytest.mark.parametrize(
+        ("field", "minimum", "alias"),
+        [
+            ("repeat", 1, "repeat"),
+            ("repeat_interval", 0, "repeat-interval"),
+            ("return_last", 1, "return-last"),
+        ],
+    )
+    def test_repeat_options_enforce_minimums(self, model, field, minimum, alias):
+        model.model_validate({"commands": "show clock", field: minimum})
+
+        with pytest.raises(ValidationError):
+            model.model_validate({"commands": "show clock", field: minimum - 1})
+
+        schema_field = model.model_json_schema()["properties"][alias]
+        integer_schema = next(
+            item for item in schema_field["anyOf"] if item.get("type") == "integer"
+        )
+        assert integer_schema["minimum"] == minimum
+
     @pytest.mark.nornir_fakenos
     def test_commands_stop_after_nonexistent_host_failure(self, nfclient):
         host_name = "non-existent-host"

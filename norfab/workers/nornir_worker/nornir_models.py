@@ -652,7 +652,8 @@ class NrCliPluginNetmiko(
     )
     repeat: Union[None, StrictInt] = Field(
         None,
-        description="Number of times to repeat commands",
+        ge=1,
+        description="Number of times to repeat commands (minimum 1)",
     )
     stop_pattern: Union[None, StrictStr] = Field(
         None,
@@ -661,12 +662,14 @@ class NrCliPluginNetmiko(
     )
     repeat_interval: Union[None, StrictInt] = Field(
         None,
-        description="Time in seconds to wait between command repeats",
+        ge=0,
+        description="Time in seconds to wait between command repeats (minimum 0)",
         alias="repeat-interval",
     )
     return_last: Union[None, StrictInt] = Field(
         None,
-        description="Number of last command outputs to return",
+        ge=1,
+        description="Number of last command outputs to return (minimum 1)",
         alias="return-last",
     )
 
@@ -707,7 +710,8 @@ class NrCliPluginScrapli(
     )
     repeat: Union[None, StrictInt] = Field(
         None,
-        description="Number of times to repeat commands",
+        ge=1,
+        description="Number of times to repeat commands (minimum 1)",
     )
     stop_pattern: Union[None, StrictStr] = Field(
         None,
@@ -716,12 +720,14 @@ class NrCliPluginScrapli(
     )
     repeat_interval: Union[None, StrictInt] = Field(
         None,
-        description="Time in seconds to wait between command repeats",
+        ge=0,
+        description="Time in seconds to wait between command repeats (minimum 0)",
         alias="repeat-interval",
     )
     return_last: Union[None, StrictInt] = Field(
         None,
-        description="Number of last command outputs to return",
+        ge=1,
+        description="Number of last command outputs to return (minimum 1)",
         alias="return-last",
     )
 
