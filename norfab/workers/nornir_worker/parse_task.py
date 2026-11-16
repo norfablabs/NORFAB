@@ -124,6 +124,7 @@ class ParseTask:
             Result containing per-host TextFSM parsed output.
         """
         ret = Result(task=f"{self.name}:parse_textfsm", result={} if to_dict else [])
+        filters = {key: value for key, value in kwargs.items() if key in FFun_functions}
 
         filtered_nornir, ret = self.filter_hosts_and_validate(kwargs, ret)
         if ret.status == "no_match":
@@ -141,6 +142,7 @@ class ParseTask:
             add_details=add_details,
             use_textfsm=True,
             textfsm_template=template,
+            **filters,
             **kwargs,
         )
         ret.result = result.result
