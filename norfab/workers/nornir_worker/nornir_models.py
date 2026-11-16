@@ -626,7 +626,8 @@ class NrCliPluginNetmiko(
     )
     interval: Union[None, StrictInt] = Field(
         None,
-        description="Interval in seconds between sending commands",
+        ge=0,
+        description="Interval in seconds between sending commands (minimum 0)",
     )
     use_ps: Union[None, StrictBool] = Field(
         None,
@@ -695,7 +696,8 @@ class NrCliPluginScrapli(
     )
     interval: Union[None, StrictInt] = Field(
         None,
-        description="Interval in seconds between sending commands",
+        ge=0,
+        description="Interval in seconds between sending commands (minimum 0)",
     )
     split_lines: Union[None, StrictBool] = Field(
         None,
@@ -737,7 +739,8 @@ class NrCliPluginNapalm(
 ):
     interval: Union[None, StrictInt] = Field(
         None,
-        description="Interval in seconds between sending commands",
+        ge=0,
+        description="Interval in seconds between sending commands (minimum 0)",
     )
     split_lines: Union[None, StrictBool] = Field(
         None,

@@ -40,6 +40,18 @@ def _assert_cli_details(details):
 
 class TestNornirCli:
     @pytest.mark.parametrize("model", [CliInput, NorniCliInput])
+    def test_command_interval_rejects_negative_and_accepts_zero(self, model):
+        model.model_validate({"commands": "show clock", "interval": 0})
+
+        with pytest.raises(ValidationError):
+            model.model_validate({"commands": "show clock", "interval": -1})
+
+        schema_field = model.model_json_schema()["properties"]["interval"]
+        integer_schema = next(
+            item for item in schema_field["anyOf"] if item.get("type") == "integer"
+        )
+        assert integer_schema["minimum"] == 0
+        
     @pytest.mark.parametrize(
         ("field", "minimum", "alias"),
         [
