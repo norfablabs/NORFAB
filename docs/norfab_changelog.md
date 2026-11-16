@@ -11,7 +11,8 @@
 
 ## BUGS
 
-1. FastMCP Nornir CLI and configuration guardrails reject reboot/reload/restart commands after a semicolon; built-in server result redaction also covers IOS `key-string` values.
+1. Nornir CLI input validation rejects negative inter-command intervals before sending commands; zero remains valid.
+2. FastMCP Nornir CLI and configuration guardrails reject reboot/reload/restart commands after a semicolon; built-in server result redaction also covers IOS `key-string` values.
 
 ---
 
