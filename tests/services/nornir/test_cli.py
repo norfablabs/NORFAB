@@ -51,6 +51,26 @@ class TestNornirCli:
             item for item in schema_field["anyOf"] if item.get("type") == "integer"
         )
         assert integer_schema["minimum"] == 0
+        
+    @pytest.mark.parametrize(
+        ("field", "minimum", "alias"),
+        [
+            ("repeat", 1, "repeat"),
+            ("repeat_interval", 0, "repeat-interval"),
+            ("return_last", 1, "return-last"),
+        ],
+    )
+    def test_repeat_options_enforce_minimums(self, model, field, minimum, alias):
+        model.model_validate({"commands": "show clock", field: minimum})
+
+        with pytest.raises(ValidationError):
+            model.model_validate({"commands": "show clock", field: minimum - 1})
+
+        schema_field = model.model_json_schema()["properties"][alias]
+        integer_schema = next(
+            item for item in schema_field["anyOf"] if item.get("type") == "integer"
+        )
+        assert integer_schema["minimum"] == minimum
 
     @pytest.mark.nornir_fakenos
     def test_commands_stop_after_nonexistent_host_failure(self, nfclient):
