@@ -14,6 +14,7 @@
 2. FastMCP Nornir CLI and configuration guardrails reject reboot/reload/restart commands after a semicolon; built-in server result redaction also covers IOS `key-string` values.
 3. Nornir `parse_textfsm` forwards host filters to the CLI collection task so parsed results stay within the requested host scope.
 4. Netbox `design_deploy` loads Jinja functions regardless of function metadata order in Markdown designs, preserving the order of trailing Jinja statements and allowing single-line Jinja comments between metadata entries.
+5. Fixed `nf://` file tab completion for `sync-kwargs` in NFCLI `netbox check-sync devices` and `netbox sync-all devices`.
 
 ---
 

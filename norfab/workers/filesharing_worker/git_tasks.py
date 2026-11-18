@@ -435,12 +435,12 @@ class GitTasks:
             remote["status"] = "cloned" if changed else "unchanged"
         except Exception as exc:
             remote["status"] = "failed"
-            error = f"{type(exc).__name__}: remote synchronization failed"
+            error = f"{type(exc).__name__}: remote synchronization failed, exception: {exc}"
             msg = (
                 f"{self.name} - Git remote '{name}' synchronization failed with "
                 f"{type(exc).__name__}"
             )
-            log.error(msg)
+            log.error(msg, exc_info=True)
             if job is not None:
                 job.event(msg, severity="ERROR")
         finally:

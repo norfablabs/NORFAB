@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field, StrictStr
 
 from norfab.workers.netbox_worker.netbox_models import CheckDeviceSyncInput
 
-from ..common import log_error_or_result, run_future_job
+from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 from ..nornir.nornir_picle_shell_common import NorniHostsFilters
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
@@ -31,6 +31,10 @@ class CheckSyncDevicesShell(
         None,
         description="List of NetBox devices to check sync state for",
     )
+
+    @staticmethod
+    def source_sync_kwargs(choice: str = None) -> list:
+        return ClientRunJobArgs.walk_norfab_files(choice)
 
     @staticmethod
     def run(**kwargs: object):
