@@ -1413,12 +1413,7 @@ class NetboxDevicesTasks:
             if vlan_result.errors:
                 ret.errors.extend(vlan_result.errors)
             for device in devices:
-                device_diff = {
-                    "vlans": vlan_result.diff.get("vlans", {}),
-                    "interfaces": vlan_result.diff.get("interfaces", {}).get(
-                        device, {}
-                    ),
-                }
+                device_diff = vlan_result.diff.get(device, {})
                 ret.result[device]["vlans"] = not sync_diff_has_changes(
                     device_diff, ignore_deletions=ignore_deletions
                 )
@@ -1611,7 +1606,7 @@ class NetboxDevicesTasks:
                     "inventory":     {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]},
                     "vlans":         {
                         "vlans": {"<scope>": {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]}},
-                        "interfaces": {"<device>": {"created": [], "updated": [...], "deleted": [], "in_sync": [...]}},
+                        "interfaces": {"created": [], "updated": [...], "deleted": [], "in_sync": [...]},
                     },
                     "prefixes":      {"created": [...], "updated": [...], "in_sync": [...]},
                     "vrfs":          {
@@ -1924,13 +1919,9 @@ class NetboxDevicesTasks:
                 job.event("sync all stopped because VLAN sync failed", severity="ERROR")
                 return ret
             for device in devices:
-                device_interfaces = {}
-                if device in vlan_result.result["interfaces"]:
-                    device_interfaces[device] = vlan_result.result["interfaces"][device]
-                ret.result[device]["vlans"] = {
-                    "vlans": vlan_result.result["vlans"],
-                    "interfaces": device_interfaces,
-                }
+                ret.result[device]["vlans"] = vlan_result.result.get(
+                    device, {"vlans": {}, "interfaces": {}}
+                )
             for device in devices:
                 if device in vlan_result.resources_failed:
                     ret.result[device]["vlans"] = False

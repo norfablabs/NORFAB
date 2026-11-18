@@ -7,6 +7,7 @@
 ## ENHANCEMENTS
 
 1. Enhanced FakeNOS `inspect_networks` to return a controlled `no_match` result with an explicit message when a specifically requested network is not running, instead of exposing an internal `KeyError`. Detailed queries return `{}` and summary queries return `[]`; focused coverage covers both modes.
+2. Netbox `sync_vlans` returns per-device results and diffs. `sync_all` consumes them and `check_device_sync` evaluates VLAN drift per device.
 
 ## BUGS
 

@@ -87,7 +87,7 @@ A category is considered in sync when the corresponding dry-run reports no pendi
 
 - No data is written to NetBox.
 - `Result.diff` contains the raw dry-run detail from each enabled sub-task.
-- Prefix, global VLAN, BGP community, and route-target drift affects every selected device; interface VLAN and VRRP drift is assessed per device.
+- Prefix, BGP community, and route-target drift affects every selected device; VLAN and VRRP drift is assessed per device.
 - Device names can be supplied directly or resolved from Nornir filters.
 
 ## Examples

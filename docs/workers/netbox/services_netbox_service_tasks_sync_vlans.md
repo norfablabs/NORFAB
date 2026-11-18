@@ -12,28 +12,27 @@ first if their interfaces are missing.
 
 ## Output
 
-Each worker returns VLAN actions under `result.vlans`, grouped by scope such
-as `group:CAMPUS`, `site:HQ`, or `global`. Interface actions appear under
-`result.interfaces`, grouped by device and interface name.
+Each worker returns results by device. VLAN actions appear under
+`result[device].vlans`, grouped by scope such as `group:CAMPUS`, `site:HQ`,
+or `global`. Interface actions appear directly under `result[device].interfaces`.
 
-A dry run lists `create`, `update`, `delete`, and `in_sync` actions. VLAN
-`create_details` shows names and descriptions for proposed creations. Updates
+A dry run lists `create`, `update`, `delete`, and `in_sync` actions. Updates
 show `old_value` and `new_value` for each changed field.
 
 After applying changes, `result` lists completed actions. For example:
 
 ```json
 {
-  "vlans": {
-    "group:CAMPUS": {
-      "created": [100],
-      "updated": [110],
-      "deleted": [],
-      "in_sync": [120]
-    }
-  },
-  "interfaces": {
-    "leaf-1": {
+  "leaf-1": {
+    "vlans": {
+      "group:CAMPUS": {
+        "created": [100],
+        "updated": [110],
+        "deleted": [],
+        "in_sync": [120]
+      }
+    },
+    "interfaces": {
       "created": [],
       "updated": ["Ethernet5"],
       "deleted": [],

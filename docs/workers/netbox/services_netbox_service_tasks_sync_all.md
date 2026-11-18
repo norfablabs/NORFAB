@@ -109,7 +109,7 @@ at the `sync_all` level rather than repeating them inside a task dictionary.
 
 Both coordinated tasks include inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities, and BGP peerings. Every selected device has all nine category keys. Disabled categories are `None`; failed categories are `False`. Sync results contain child task summaries or dry-run previews, while checks return booleans for drift state. The `diff` dictionary retains child dry-run details under the same category keys, with `None` for unexecuted checks or stages. MAC synchronization is available through its standalone task.
 
-The result structure aggregates the outcomes of all nine subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox. VLAN, prefix, and VRF results describe shared NetBox objects, so the same shared result is included under each selected device. The VLAN category retains separate object and `interfaces` sections. The VRF category retains separate `vrfs`, `route_targets`, `routing_policies`, and `interfaces` sections. Each `interfaces` section contains only the current device.
+The result structure aggregates the outcomes of all nine subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox. Prefix and VRF results describe shared NetBox objects, so the same shared result is included under each selected device. The VLAN category contains only the current device's VLAN actions by scope and interface actions. The VRF category retains separate `vrfs`, `route_targets`, `routing_policies`, and `interfaces` sections. Each `interfaces` section contains only the current device.
 
 ```python
 {
@@ -132,12 +132,10 @@ The result structure aggregates the outcomes of all nine subordinate sync tasks.
                     },
                 },
                 "interfaces": {
-                    "ceos-spine-1": {
-                        "create": [],
-                        "update": { ... },
-                        "delete": [],
-                        "in_sync": [ ... ],
-                    },
+                    "create": [],
+                    "update": { ... },
+                    "delete": [],
+                    "in_sync": [ ... ],
                 },
             },
             "prefixes": {

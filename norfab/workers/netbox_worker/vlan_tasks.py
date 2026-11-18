@@ -20,7 +20,6 @@ from .netbox_models import (
     SyncActionSummary,
     SyncVlansInput,
     SyncVlansResult,
-    SyncVlansResultPayload,
     VlanMapRule,
 )
 from .netbox_worker_utilities import (
@@ -579,15 +578,15 @@ class NetboxVlansTasks:
             **kwargs: Nornir FFun host filters.
 
         Returns:
-            Result: VLAN actions keyed by scope and interface actions keyed by device.
+            Result: Per-device VLAN actions by scope and interface actions.
         """
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:sync_vlans",
-            result=SyncVlansResultPayload().model_dump(),
+            result={},
             resources=[instance],
             dry_run=dry_run,
-            diff={"vlans": {}, "interfaces": {}},
+            diff={},
         )
 
         message = f"starting VLAN sync using NetBox instance '{instance}'"
@@ -725,6 +724,12 @@ class NetboxVlansTasks:
             ret.failed = True
             return ret
 
+        device_vlan_ids = {device: {} for device in live_by_device}
+        # Keep empty results for devices whose live data contains no applicable VLANs.
+        for device in live_by_device:
+            ret.result[device] = {"vlans": {}, "interfaces": {}}
+            ret.diff[device] = {"vlans": {}, "interfaces": {}}
+
         # Produce one record per device and VID while preserving parser order.
         live_vlans = []
         interface_names_by_device = {}
@@ -854,6 +859,8 @@ class NetboxVlansTasks:
                 ret.errors.append(message)
                 continue
             scope = resolved["scope"]
+            # Track every contributor before shared VLAN observations are merged.
+            device_vlan_ids[device].setdefault(scope, set()).add(vid)
             scope_payloads[scope] = resolved["scope_payload"]
             key = (scope, vid)
             if key not in name_sources:
@@ -1036,14 +1043,26 @@ class NetboxVlansTasks:
             updates = {}
             for vid, changes in actions["update"].items():
                 updates[str(vid)] = changes
-            create_details = {}
-            for vid in actions["create"]:
-                create_details[str(vid)] = vlan_live[scope][vid]
-            vlan_preview[scope] = {
-                **actions,
-                "update": updates,
-                "create_details": create_details,
-            }
+            vlan_preview[scope] = {**actions, "update": updates}
+            # Split the scope-wide diff by each device's observed VLAN IDs to report sync status per device.
+            for device, scopes in device_vlan_ids.items():
+                if scope not in scopes:
+                    continue
+                vids = scopes[scope]
+                ret.diff[device]["vlans"][scope] = {
+                    "create": [vid for vid in actions["create"] if vid in vids],
+                    "update": {
+                        vid: value for vid, value in updates.items() if int(vid) in vids
+                    },
+                    "delete": [],
+                    "in_sync": [vid for vid in actions["in_sync"] if vid in vids],
+                }
+                ret.result[device]["vlans"][scope] = {
+                    "created": [],
+                    "updated": [],
+                    "deleted": [],
+                    "in_sync": ret.diff[device]["vlans"][scope]["in_sync"],
+                }
 
         # Build interface state only for interfaces referenced by live VLAN data.
         netbox_interfaces = []
@@ -1141,8 +1160,11 @@ class NetboxVlansTasks:
         log.info(message)
         interface_diff = self.make_diff(interface_live, interface_current)
         preview = {"vlans": vlan_preview, "interfaces": interface_diff}
-        ret.diff = preview
-        ret.result = preview
+        for device, actions in interface_diff.items():
+            ret.diff[device]["interfaces"] = actions
+            ret.result[device]["interfaces"] = SyncActionSummary(
+                in_sync=actions["in_sync"]
+            ).model_dump()
         create_count = sum(len(actions["create"]) for actions in vlan_diff.values())
         vlan_update_count = sum(
             len(actions["update"]) for actions in vlan_diff.values()
@@ -1157,28 +1179,18 @@ class NetboxVlansTasks:
         job.event(message)
         log.info(message)
         if dry_run:
+            ret.result = ret.diff
             message = "dry-run requested, returning VLAN sync diff without changes"
             job.event(message)
             log.info(message)
             return ret
 
-        vlan_result = {
-            scope: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
-            for scope, actions in vlan_diff.items()
-        }
-        interface_result = {
-            device: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
-            for device, actions in interface_diff.items()
-        }
-        ret.result = SyncVlansResultPayload(
-            vlans=vlan_result, interfaces=interface_result
-        ).model_dump()
         if not sync_diff_has_changes(preview):
             job.event("no VLAN sync changes required")
             return ret
         if with_approval and not review_sync_task_result(job, "vlan sync", preview):
             ret.status = "skipped"
-            ret.result = preview
+            ret.result = ret.diff
             ret.dry_run = True
             ret.messages.append("review declined; changes were not applied")
             return ret
@@ -1219,7 +1231,10 @@ class NetboxVlansTasks:
                     scope, vid = key
                     vlan_objects[key] = vlan
                     vlan_id_by_reference[f"{scope}/{vid}"] = vlan.id
-                    ret.result["vlans"][scope]["created"].append(vid)
+                    # Report the shared creation for every contributor without repeating writes.
+                    for device, scopes in device_vlan_ids.items():
+                        if vid in scopes.get(scope, ()):
+                            ret.result[device]["vlans"][scope]["created"].append(vid)
             message = f"created {len(create_items)} VLAN(s)"
             job.event(message)
             log.info(message)
@@ -1255,8 +1270,11 @@ class NetboxVlansTasks:
                     ret.errors.append(message)
                     ret.failed = True
                     return ret
+                # Preserve completed updates in each device's result if a later batch fails.
                 for (scope, vid), _ in batch:
-                    ret.result["vlans"][scope]["updated"].append(vid)
+                    for device, scopes in device_vlan_ids.items():
+                        if vid in scopes.get(scope, ()):
+                            ret.result[device]["vlans"][scope]["updated"].append(vid)
             message = f"updated {len(vlan_updates)} VLAN object(s)"
             job.event(message)
             log.info(message)
@@ -1301,7 +1319,7 @@ class NetboxVlansTasks:
                     ret.failed = True
                     return ret
                 for (device, name), _ in batch:
-                    ret.result["interfaces"][device]["updated"].append(name)
+                    ret.result[device]["interfaces"]["updated"].append(name)
             message = (
                 f"updated VLAN membership on {len(interface_updates)} interface(s)"
             )

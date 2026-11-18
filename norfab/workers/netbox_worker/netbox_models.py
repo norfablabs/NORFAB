@@ -3007,16 +3007,16 @@ class SyncVlansInput(
 
 
 class SyncVlansResultPayload(BaseModel):
-    """Applied VLAN and related interface synchronization actions."""
+    """VLAN and interface actions for one device."""
 
-    vlans: Dict[StrictStr, SyncActionSummary] = Field(default_factory=dict)
-    interfaces: Dict[StrictStr, SyncActionSummary] = Field(default_factory=dict)
+    vlans: Dict[StrictStr, Any] = Field(default_factory=dict)
+    interfaces: Dict[StrictStr, Any] = Field(default_factory=dict)
 
 
 class SyncVlansResult(Result):
-    result: Union[SyncVlansResultPayload, Dict[StrictStr, Any]] = Field(
-        default_factory=SyncVlansResultPayload,
-        description="VLAN actions by NetBox scope and interface actions by device",
+    result: Dict[StrictStr, SyncVlansResultPayload] = Field(
+        {},
+        description="Device names mapped to VLAN actions by scope and interface actions",
     )
 
 

@@ -205,8 +205,8 @@ class TestSyncAllOrchestration:
         (
             "sync_vlans",
             {
-                "vlans": {"site:test": {}},
-                "interfaces": {"device-1": {}, "other-device": {}},
+                "device-1": {"vlans": {"site:test": {}}, "interfaces": {}},
+                "other-device": {"vlans": {}, "interfaces": {}},
             },
         ),
         ("sync_device_ip", {"device-1": {}}),
@@ -260,7 +260,7 @@ class TestSyncAllOrchestration:
         assert calls == [task_name for task_name, _ in self.TASKS]
         assert result.result["device-1"]["vlans"] == {
             "vlans": {"site:test": {}},
-            "interfaces": {"device-1": {}},
+            "interfaces": {},
         }
         assert result.result["device-1"]["vrfs"] == {
             "vrfs": {},
@@ -1711,7 +1711,7 @@ class TestSyncAll:
                         f"{worker}:{device}:{category} result should be a dict, "
                         f"got {type(device_data[category])}"
                     )
-                assert set(device_data["vlans"]["interfaces"]) <= {device}
+                assert set(device_data["vlans"]) == {"vlans", "interfaces"}
 
     def test_sync_all_dry_run_no_writes(self, nfclient):
         """dry_run=True must not write any sync-all stage changes."""
