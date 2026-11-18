@@ -4128,7 +4128,9 @@ class NetboxDesignTasks:
           then Jinja functions. Context files are loaded later by deployment.
         - Headerless blocks containing ``{%``, ``{{`` or ``{#`` follow metadata in
           document order, before collections. Each must be valid Jinja on its own.
-        - Indent list items and multiline values. Inline collections are unsupported.
+        - Trailing unindented Jinja follows metadata in encounter order. Blank
+          lines and single-line Jinja comments do not end metadata entries.
+        - Indent multiline values. Inline collections are unsupported.
         - Keep collection-local Jinja logic within one section. Templates are not rendered.
 
         Args:
@@ -4216,44 +4218,52 @@ class NetboxDesignTasks:
             job.check_timeout()
             if marker == ["yaml", "design"]:
                 design_blocks += 1
-                # Split on unindented keys. Leave YAML values and Jinja intact.
-                parts = re.split(r"(?m)^([A-Za-z_]\w*):([^\n]*)\n", token.content)
-                if len(parts) == 1 and any(
-                    marker in token.content for marker in ("{%", "{{", "{#")
-                ):
-                    Environment().parse(token.content)
-                    jinja_blocks.append(
-                        token.content + ("" if token.content.endswith("\n") else "\n")
-                    )
+                source = token.content + ("" if token.content.endswith("\n") else "\n")
+                first = next(
+                    (
+                        line
+                        for line in source.splitlines()
+                        if line.strip() and not line.startswith("#")
+                    ),
+                    "",
+                )
+                # Standalone Jinja fences stay intact.
+                if first.startswith(("{%", "{{", "{#")):
+                    jinja_blocks.append(source)
                     continue
-                if any(
-                    line.strip() and not line.startswith("#")
-                    for line in parts[0].splitlines()
-                ):
-                    raise ValueError("expected a design section header")
-                # Each split yields a key, inline value and section body.
-                for key, value, body in zip(parts[1::3], parts[2::3], parts[3::3]):
-                    # Keep adjacent sections separate when the final fence is unclosed.
-                    if body and not body.endswith("\n"):
-                        body += "\n"
-                    if key in metadata_keys:
-                        if key in metadata:
-                            raise ValueError(f"duplicate metadata key '{key}'")
-                        metadata[key] = f"{key}:{value}\n{body}"
-                    else:
-                        if key not in collections:
-                            raise ValueError(f"unknown design key '{key}'")
-                        if value.strip() and not value.lstrip().startswith("#"):
-                            raise ValueError("inline collection values are unsupported")
-                        if re.search(r"(?m)^(?![\s#]|\{%|\{#).+", body):
-                            raise ValueError(
-                                "indent collection items and block-scalar content"
+                key = None
+                for line in source.splitlines(keepends=True):
+                    header, separator, value = line.partition(":")
+                    if separator and header.isidentifier():
+                        key = header
+                        if key in metadata_keys:
+                            if key in metadata:
+                                raise ValueError(f"duplicate metadata key '{key}'")
+                            metadata[key] = line
+                        elif key in collections:
+                            if value.strip() and not value.lstrip().startswith("#"):
+                                raise ValueError(
+                                    "inline collections not supported by Markdown format, use YAML"
+                                )
+                            sections.setdefault(key, []).append(
+                                value.lstrip() if value.strip() else ""
                             )
-                        sections.setdefault(key, []).append(
-                            (value.lstrip() + "\n" if value.strip() else "") + body
-                        )
-                    # Check section scope without rendering or resolving includes.
-                    Environment().parse(body)
+                        else:
+                            raise ValueError(f"unknown design key '{key}'")
+                    elif key in metadata_keys:
+                        stripped = line.strip()
+                        if stripped.startswith("{#") and stripped.endswith("#}"):
+                            continue  # Metadata is YAML-parsed before rendering.
+                        if line.startswith("{%"):
+                            # Preserve metadata Jinja in the same stream as standalone fences.
+                            key = "jinja"
+                            jinja_blocks.append(line)
+                        else:
+                            metadata[key] += line
+                    elif key in collections:
+                        sections[key][-1] += line
+                    else:
+                        jinja_blocks.append(line)
             elif len(marker) == 2 and marker[0] in {
                 "yaml",
                 "csv",

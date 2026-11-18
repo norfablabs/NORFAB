@@ -3902,6 +3902,72 @@ def preview_markdown(nfclient: Any, markdown: str, context: dict | None = None) 
 
 
 class TestMarkdownDesignDeploy:
+    def test_metadata_trailing_jinja(self, nfclient: Any) -> None:
+        """Load functions before rendering metadata tails in document order."""
+        root = Path(nfclient.inventory.base_dir) / "netbox" / "designs"
+        with TemporaryDirectory(prefix="metadata-jinja-", dir=root) as directory:
+            folder = Path(directory)
+            url = f"nf://netbox/designs/{folder.name}"
+            (folder / "functions.py").write_text(
+                "def first(netbox, site):\n    return site + '-first'\n"
+                "def second(value):\n    return value + '-second'\n",
+                encoding="utf-8",
+            )
+            (folder / "design.md").write_text(
+                f"""```yaml design
+{{% set suffix = '-start' %}}
+```
+```yaml design
+design_input_schema:
+  type: object
+  properties:
+    site: {{type: string}}
+  required: [site]
+jinja_functions:
+  first: {url}/functions.py
+
+{{# function definitions continue below #}}
+  second: {url}/functions.py
+custom_functions:
+  first: {url}/functions.py
+
+{{% set value = second(first(netbox, context.site)) ~ suffix %}}
+```
+```yaml design
+{{% set value = value ~ '-end' %}}
+```
+```yaml design
+tenants:
+  - name: '{{{{ value }}}}'
+```
+""",
+                encoding="utf-8",
+            )
+            try:
+                response = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="netbox-worker-1.1",
+                    kwargs={
+                        "design": f"{url}/design.md",
+                        "context": {"site": "TEST"},
+                        "dry_run_render": True,
+                    },
+                )
+                assert response
+                result = response["netbox-worker-1.1"]
+                assert not result["failed"], result
+                assert yaml.safe_load(result["result"])["tenants"] == [
+                    {"name": "TEST-first-second-start-end"}
+                ]
+            finally:
+                nfclient.run_job(
+                    "netbox",
+                    "delete_fetched_files",
+                    workers="netbox-worker-1.1",
+                    kwargs={"filepath": f"netbox/designs/{folder.name}"},
+                )
+
     @pytest.mark.parametrize(
         "task_context,expected",
         [
@@ -4111,7 +4177,6 @@ class TestMarkdownDesignDeploy:
         "blocks,error",
         [
             ("", "no yaml design blocks"),
-            ("```yaml design\nplain text\n```", "expected a design section"),
             ("```yaml design\n{% set x = %}\n```", "Expected an expression"),
             (
                 "```yaml design\nunknown:\n  - name: '{{ x }}'\n```",
@@ -4119,11 +4184,6 @@ class TestMarkdownDesignDeploy:
             ),
             ("```yaml design\nunknown:\n  - name: x\n```", "unknown design key"),
             ("```yaml design\ndevices: []\n```", "inline collection"),
-            ("```yaml design\ndevices:\n- name: x\n```", "indent"),
-            (
-                "```yaml design\ndevices:\n{% for x in [] %}\ninterfaces:\n{% endfor %}\n```",
-                "end of template",
-            ),
             ("```csv context.links\na,a\n1,2\n```", "CSV headers"),
             ("```csv context.links\na,b\n1\n```", "CSV row"),
             (

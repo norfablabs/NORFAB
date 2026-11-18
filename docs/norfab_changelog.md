@@ -3,7 +3,6 @@
 ## FEATURES
 
 1. Netbox `design_deploy` loads named context values from `nf://` and `git://` YAML files declared in YAML or Markdown designs, with task input overriding Markdown context and file defaults.
-2. Added a [draft specification for broker event subscriptions](development/specs/004-broker-event-subscriptions/spec.md), covering filtered worker lifecycle notifications and lease management. The capability is not implemented.
 
 ## ENHANCEMENTS
 
@@ -14,6 +13,7 @@
 1. Nornir CLI input validation enforces `repeat >= 1`, `return_last >= 1` when set, and `repeat_interval >= 0`, rejecting invalid values before command execution. Nornir CLI input validation rejects negative inter-command intervals before sending commands; zero remains valid.
 2. FastMCP Nornir CLI and configuration guardrails reject reboot/reload/restart commands after a semicolon; built-in server result redaction also covers IOS `key-string` values.
 3. Nornir `parse_textfsm` forwards host filters to the CLI collection task so parsed results stay within the requested host scope.
+4. Netbox `design_deploy` loads Jinja functions regardless of function metadata order in Markdown designs, preserving the order of trailing Jinja statements and allowing single-line Jinja comments between metadata entries.
 
 ---
 
