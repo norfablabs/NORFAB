@@ -1,6 +1,6 @@
 [project]
 name = "norfab"
-version = "0.26.3"
+version = "0.26.4"
 description = "Network Automations Fabric [NorFab] - communication networks automations"
 requires-python = ">=3.10,<3.15"
 authors = [{name = "Denis Mulyalin", email = "d.mulyalin@gmail.com"}]
