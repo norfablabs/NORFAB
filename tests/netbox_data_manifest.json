@@ -449,7 +449,7 @@
       "notes": "Reads the listed devices without creating or changing NetBox records."
     },
     "test_sync.py::TestSyncAll": {
-      "notes": "Integration calls disable BGP community writes to preserve data ownership.",
+      "notes": "Live integration calls disable BGP community and ASN writes to preserve data ownership.",
       "mode": "main_mutating",
       "cleanup": "Delete only records assigned to this class's original spine devices, plus the exact owned VRRP VIP/group for 10.3.250.1/32.",
       "devices": [
@@ -474,7 +474,9 @@
       "prefixes": [
         "10.85.251.1/32",
         "10.85.252.1/32",
-        "10.185.0.0/31"
+        "10.185.0.0/31",
+        "10.85.250.250/32",
+        "10.85.15.32/30"
       ],
       "cleanup": "Delete only exact prefixes, IPs, interface, and VRF created by this class."
     },
@@ -576,6 +578,7 @@
       ]
     },
     "test_bgp_asn.py::TestSyncBgpAsn": {
+      "coverage": "Standalone per-device ASN results and coordinated ASN-only sync/check calls use the same class-owned ASNs, including shared remote ASN attribution and one-device description drift.",
       "mode": "main_mutating",
       "devices": [
         "fn-ceos-lf-1",
@@ -596,6 +599,7 @@
         "fn-ceos-lf-2"
       ],
       "unreachable_device": "fn-bgp-community-unreachable",
+      "route_targets": ["65000:200", "65000:999"],
       "communities": [
         "65000:100",
         "65000:300",

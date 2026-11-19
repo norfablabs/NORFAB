@@ -15,12 +15,10 @@ class TestSyncBgpCommunity:
     DEVICES = ["fn-ceos-lf-1", "fn-ceos-lf-2"]
     ROUTE_TARGET_VALUES = {"65000:200", "65000:999"}
     COMMUNITY_VALUES = {"65000:100", "65000:300", "65000:999"}
-    COMMUNITY_KEYS = [
-        "65000:100::BLUE_EXPORT",
-        "65000:100::CUSTOMER_EXPORT",
-        "65000:300::ORIGIN_SITE",
-        "65000:300::SITE_ORIGIN",
-    ]
+    COMMUNITY_KEYS = {
+        "fn-ceos-lf-1": ["65000:100::BLUE_EXPORT", "65000:300::SITE_ORIGIN"],
+        "fn-ceos-lf-2": ["65000:100::CUSTOMER_EXPORT", "65000:300::ORIGIN_SITE"],
+    }
 
     @pytest.fixture(autouse=True)
     def cleanup_test_communities(self, nfclient: Any) -> Iterator[None]:
@@ -109,16 +107,18 @@ class TestSyncBgpCommunity:
             nfclient, dry_run=True, device_custom_field="community_devices"
         )
         for result in self._successful_results(response):
-            assert result["result"]["route_targets"]["create"] == ["65000:200"]
-            assert result["result"]["communities"]["create"] == self.COMMUNITY_KEYS
+            for device, actions in result["result"].items():
+                assert actions["route_targets"]["create"] == ["65000:200"]
+                assert actions["communities"]["create"] == self.COMMUNITY_KEYS[device]
         assert self.nb.ipam.route_targets.get(name="65000:200") is None
 
         response = self._sync(
             nfclient, device_custom_field="community_devices", batch_size=1
         )
         for result in self._successful_results(response):
-            assert result["result"]["route_targets"]["created"] == ["65000:200"]
-            assert result["result"]["communities"]["created"] == self.COMMUNITY_KEYS
+            for device, actions in result["result"].items():
+                assert actions["route_targets"]["created"] == ["65000:200"]
+                assert actions["communities"]["created"] == self.COMMUNITY_KEYS[device]
 
         route_target = self.nb.ipam.route_targets.get(name="65000:200")
         blue_export = self._community_by_description("65000:100", "BLUE_EXPORT")
@@ -154,8 +154,49 @@ class TestSyncBgpCommunity:
 
         response = self._sync(nfclient, device_custom_field="community_devices")
         for result in self._successful_results(response):
-            assert result["result"]["route_targets"]["in_sync"] == ["65000:200"]
-            assert result["result"]["communities"]["in_sync"] == self.COMMUNITY_KEYS
+            for device, actions in result["result"].items():
+                assert actions["route_targets"]["in_sync"] == ["65000:200"]
+                assert actions["communities"]["in_sync"] == self.COMMUNITY_KEYS[device]
+
+        assert len(list(self.nb.ipam.route_targets.filter(name="65000:200"))) == 1
+        blue_export.custom_fields["community_name"] = ""
+        blue_export.save()
+        checks = nfclient.run_job(
+            "netbox",
+            "check_device_sync",
+            workers="any",
+            kwargs={
+                "devices": self.DEVICES,
+                "check_inventory": False,
+                "check_interfaces": False,
+                "check_vrfs": False,
+                "check_vlans": False,
+                "check_prefixes": False,
+                "check_ip_addresses": False,
+                "check_vrrp": False,
+                "check_bgp_asns": False,
+                "check_bgp_peerings": False,
+                "sync_kwargs": {
+                    "sync_bgp_community": {"device_custom_field": "community_devices"}
+                },
+            },
+        )
+        for result in self._successful_results(checks):
+            assert result["result"][self.DEVICES[0]]["bgp_communities"] is False
+            assert result["result"][self.DEVICES[0]]["in_sync"] is False
+            assert result["result"][self.DEVICES[1]]["bgp_communities"] is True
+            assert result["result"][self.DEVICES[1]]["in_sync"] is True
+            assert set(
+                result["diff"]["bgp_communities"][self.DEVICES[0]]["communities"][
+                    "update"
+                ]
+            ) == {"65000:100::BLUE_EXPORT"}
+            assert (
+                result["diff"]["bgp_communities"][self.DEVICES[1]]["communities"][
+                    "update"
+                ]
+                == {}
+            )
 
     def test_custom_field_name_and_no_deletions(self, nfclient: Any) -> None:
         self.nb.ipam.route_targets.create(
@@ -182,10 +223,11 @@ class TestSyncBgpCommunity:
             device_custom_field="community_devices",
         )
         for result in self._successful_results(response):
-            assert result["result"]["route_targets"]["updated"] == ["65000:200"]
-            assert result["result"]["communities"]["updated"] == self.COMMUNITY_KEYS
-            assert result["diff"]["route_targets"]["delete"] == []
-            assert result["diff"]["communities"]["delete"] == []
+            for device, actions in result["result"].items():
+                assert actions["route_targets"]["updated"] == ["65000:200"]
+                assert actions["communities"]["updated"] == self.COMMUNITY_KEYS[device]
+                assert result["diff"][device]["route_targets"]["delete"] == []
+                assert result["diff"][device]["communities"]["delete"] == []
 
         route_target = self.nb.ipam.route_targets.get(name="65000:200")
         assert route_target.custom_fields["community_aliases"] == (
@@ -216,7 +258,8 @@ class TestSyncBgpCommunity:
         )
 
         for result in self._successful_results(response):
-            assert result["result"]["route_targets"]["updated"] == ["65000:200"]
+            for device, actions in result["result"].items():
+                assert actions["route_targets"]["updated"] == ["65000:200"]
 
         route_target = self.nb.ipam.route_targets.get(name="65000:200")
         assert route_target.custom_fields["community_name"] == (
@@ -229,8 +272,9 @@ class TestSyncBgpCommunity:
             device_custom_field="community_devices",
         )
         for result in self._successful_results(response):
-            assert result["result"]["route_targets"]["in_sync"] == ["65000:200"]
-            assert result["result"]["communities"]["in_sync"] == self.COMMUNITY_KEYS
+            for device, actions in result["result"].items():
+                assert actions["route_targets"]["in_sync"] == ["65000:200"]
+                assert actions["communities"]["in_sync"] == self.COMMUNITY_KEYS[device]
 
     def test_custom_field_sync_can_be_disabled(self, nfclient: Any) -> None:
         response = self._sync(
@@ -239,8 +283,9 @@ class TestSyncBgpCommunity:
             device_custom_field="community_devices",
         )
         for result in self._successful_results(response):
-            assert result["result"]["route_targets"]["created"] == ["65000:200"]
-            assert result["result"]["communities"]["created"] == self.COMMUNITY_KEYS
+            for device, actions in result["result"].items():
+                assert actions["route_targets"]["created"] == ["65000:200"]
+                assert actions["communities"]["created"] == self.COMMUNITY_KEYS[device]
 
         route_target = self.nb.ipam.route_targets.get(name="65000:200")
         blue_export = self._community_by_description("65000:100", "BLUE_EXPORT")
@@ -255,8 +300,9 @@ class TestSyncBgpCommunity:
             device_custom_field="community_devices",
         )
         for result in self._successful_results(response):
-            assert result["result"]["route_targets"]["in_sync"] == ["65000:200"]
-            assert result["result"]["communities"]["in_sync"] == self.COMMUNITY_KEYS
+            for device, actions in result["result"].items():
+                assert actions["route_targets"]["in_sync"] == ["65000:200"]
+                assert actions["communities"]["in_sync"] == self.COMMUNITY_KEYS[device]
 
     def test_nornir_filter_resolution(self, nfclient: Any) -> None:
         response = self._sync(
@@ -266,8 +312,9 @@ class TestSyncBgpCommunity:
             device_custom_field="community_devices",
         )
         for result in self._successful_results(response):
-            assert result["result"]["route_targets"]["created"] == ["65000:200"]
-            assert result["result"]["communities"]["created"] == self.COMMUNITY_KEYS
+            for device, actions in result["result"].items():
+                assert actions["route_targets"]["created"] == ["65000:200"]
+                assert actions["communities"]["created"] == self.COMMUNITY_KEYS[device]
 
     def test_non_colon_community_values_are_skipped(self, nfclient: Any) -> None:
         response = self._sync(
@@ -278,9 +325,10 @@ class TestSyncBgpCommunity:
         )
 
         for result in self._successful_results(response):
-            assert result["result"]["route_targets"]["create"] == []
-            assert result["result"]["communities"]["create"] == []
-            assert self.nb.plugins.bgp.community.get(value="no-export") is None
+            for device, actions in result["result"].items():
+                assert actions["route_targets"]["create"] == []
+                assert actions["communities"]["create"] == []
+                assert self.nb.plugins.bgp.community.get(value="no-export") is None
 
     def test_custom_device_field_name(self, nfclient: Any) -> None:
         self._sync(
@@ -320,7 +368,8 @@ class TestSyncBgpCommunity:
         response = self._sync(nfclient, device_custom_field="does_not_exist")
 
         for result in self._successful_results(response):
-            assert result["result"]["route_targets"]["created"] == ["65000:200"]
+            for device, actions in result["result"].items():
+                assert actions["route_targets"]["created"] == ["65000:200"]
 
     def test_resources_failed_are_reported(self, nfclient: Any) -> None:
         failed_device = "fn-bgp-community-unreachable"
@@ -337,8 +386,10 @@ class TestSyncBgpCommunity:
                 for error in result["errors"]
             )
             assert result["failed"] is False
-            assert result["result"]["route_targets"]["created"] == ["65000:200"]
-            assert result["result"]["communities"]["created"] == [
+            assert result["result"]["fn-ceos-lf-1"]["route_targets"]["created"] == [
+                "65000:200"
+            ]
+            assert result["result"]["fn-ceos-lf-1"]["communities"]["created"] == [
                 "65000:100::BLUE_EXPORT",
                 "65000:300::SITE_ORIGIN",
             ]

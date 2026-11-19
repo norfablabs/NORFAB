@@ -113,24 +113,31 @@ plan remains available in the top-level `diff` field.
 
 ## Output
 
-Results are separated into `route_targets` and `communities` scopes. The
+Results and diffs are keyed by device, with `route_targets` and `communities`
+scopes. Shared keys appear under each reporting device. The
 `communities` scope is omitted when the NetBox BGP plugin is unavailable.
 
 Dry-run output uses `create`, `update`, `delete`, and `in_sync` actions:
 
 ```json
 {
-  "route_targets": {
-    "create": ["65000:200"],
-    "update": {},
-    "delete": [],
-    "in_sync": []
-  },
-  "communities": {
-    "create": ["65000:100::BLUE_EXPORT"],
-    "update": {},
-    "delete": [],
-    "in_sync": []
+  "edge-1": {
+    "route_targets": {
+      "create": [
+        "65000:200"
+      ],
+      "update": {},
+      "delete": [],
+      "in_sync": []
+    },
+    "communities": {
+      "create": [
+        "65000:100::BLUE_EXPORT"
+      ],
+      "update": {},
+      "delete": [],
+      "in_sync": []
+    }
   }
 }
 ```
@@ -139,17 +146,23 @@ Live-run output uses `created`, `updated`, `deleted`, and `in_sync`:
 
 ```json
 {
-  "route_targets": {
-    "created": ["65000:200"],
-    "updated": [],
-    "deleted": [],
-    "in_sync": []
-  },
-  "communities": {
-    "created": ["65000:100::BLUE_EXPORT"],
-    "updated": [],
-    "deleted": [],
-    "in_sync": []
+  "edge-1": {
+    "route_targets": {
+      "created": [
+        "65000:200"
+      ],
+      "updated": [],
+      "deleted": [],
+      "in_sync": []
+    },
+    "communities": {
+      "created": [
+        "65000:100::BLUE_EXPORT"
+      ],
+      "updated": [],
+      "deleted": [],
+      "in_sync": []
+    }
   }
 }
 ```

@@ -1516,6 +1516,12 @@ class CheckDeviceSyncInput(
         json_schema_extra={"presence": True},
         alias="check-ip-addresses",
     )
+    check_bgp_asns: StrictBool = Field(
+        True,
+        description="Check BGP ASN sync state",
+        json_schema_extra={"presence": True},
+        alias="check-bgp-asns",
+    )
     check_bgp_peerings: StrictBool = Field(
         True,
         description="Check BGP peering sync state",
@@ -2496,9 +2502,9 @@ class SyncDeviceIpResult(Result):
 
 
 class SyncDevicePrefixesResult(Result):
-    result: Union[SyncActionSummary, dict[StrictStr, Any]] = Field(
-        default_factory=SyncActionSummary,
-        description="Global prefix synchronization action lists",
+    result: Union[SyncActionSummaryMap, dict[StrictStr, Any]] = Field(
+        default_factory=SyncActionSummaryMap,
+        description="Prefix synchronization action lists keyed by device name",
     )
 
 
@@ -3169,21 +3175,18 @@ class SyncVrfsInput(
 
 
 class SyncVrfsResultPayload(BaseModel):
-    """Applied VRF synchronization actions."""
+    """VRF synchronization actions for one device."""
 
-    vrfs: SyncActionSummary = Field(default_factory=SyncActionSummary)
-    route_targets: SyncActionSummary = Field(default_factory=SyncActionSummary)
-    routing_policies: SyncActionSummary = Field(default_factory=SyncActionSummary)
-    interfaces: Dict[StrictStr, SyncActionSummary] = Field(default_factory=dict)
+    vrfs: Dict[StrictStr, Any] = Field(default_factory=dict)
+    route_targets: Dict[StrictStr, Any] = Field(default_factory=dict)
+    routing_policies: Dict[StrictStr, Any] = Field(default_factory=dict)
+    interfaces: Dict[StrictStr, Any] = Field(default_factory=dict)
 
 
 class SyncVrfsResult(Result):
-    result: Union[SyncVrfsResultPayload, Dict[StrictStr, Any]] = Field(
-        default_factory=SyncVrfsResultPayload,
-        description=(
-            "Applied VRF, route-target, routing-policy, and interface assignment "
-            "actions, or an untyped dry-run diff"
-        ),
+    result: Dict[StrictStr, SyncVrfsResultPayload] = Field(
+        default_factory=dict,
+        description="Device names mapped to VRF, route-target, routing-policy, and interface actions",
     )
 
 
@@ -3290,9 +3293,9 @@ class SyncBgpAsnInput(
 
 
 class SyncBgpAsnResult(Result):
-    result: Union[SyncActionSummaryMap, Dict[StrictStr, Any]] = Field(
-        default_factory=SyncActionSummaryMap,
-        description="BGP ASN synchronization actions keyed by global scope",
+    result: Dict[StrictStr, Dict[StrictStr, Any]] = Field(
+        default_factory=dict,
+        description="BGP ASN synchronization actions keyed by device name",
     )
 
 
@@ -3343,9 +3346,9 @@ class SyncBgpCommunityInput(
 
 
 class SyncBgpCommunityResult(Result):
-    result: Union[SyncActionSummaryMap, Dict[StrictStr, Any]] = Field(
-        default_factory=SyncActionSummaryMap,
-        description="BGP community synchronization actions keyed by NetBox model",
+    result: Dict[StrictStr, Dict[StrictStr, Dict[StrictStr, Any]]] = Field(
+        default_factory=dict,
+        description="Device names mapped to route-target and BGP community actions",
     )
 
 

@@ -1211,19 +1211,20 @@ class NetboxDevicesTasks:
         check_vrrp: bool = True,
         ignore_deletions: bool = False,
         sync_kwargs: Union[None, dict, str] = None,
+        check_bgp_asns: bool = True,
         **kwargs: Any,
     ) -> Result:
         """
         Check if NetBox device data is in sync with live device data.
 
         Calls the inventory, interface, VRF, VLAN, prefix, IP address, BGP
-        peering, BGP community, and VRRP synchronizers in dry-run mode and produces
+        ASN, peering, BGP community, and VRRP synchronizers in dry-run mode and produces
         a per-device report.
 
         ``Result.diff`` contains the full dry-run detail from each sub-task, keyed by
         sub-task name (``inventory``, ``interfaces``, ``vrfs``, ``vlans``,
         ``prefixes``, ``ip_addresses``, ``bgp_peerings``, ``bgp_communities``,
-        ``vrrp``).
+        ``vrrp``, ``bgp_asns``).
 
         Args:
             job: NorFab Job object.
@@ -1237,6 +1238,7 @@ class NetboxDevicesTasks:
             check_vlans (bool): Check VLAN and interface assignment sync state.
             check_prefixes (bool): Check prefix sync state. Defaults to True.
             check_ip_addresses (bool): Check IP address sync state. Defaults to True.
+            check_bgp_asns (bool): Check BGP ASN sync state. Defaults to True.
             check_bgp_peerings (bool): Check BGP peering sync state. Defaults to True.
             check_bgp_communities (bool): Check BGP community sync state. Defaults to True.
             check_vrrp (bool): Check VRRP sync state. Defaults to True.
@@ -1246,7 +1248,7 @@ class NetboxDevicesTasks:
                 ``nf://`` YAML file containing that dictionary. Supported keys
                 are ``sync_device_inventory``, ``sync_device_interfaces``,
                 ``sync_vrfs``, ``sync_vlans``, ``sync_device_prefixes``,
-                ``sync_device_ip``, ``sync_vrrp``, ``sync_bgp_community``, and
+                ``sync_device_ip``, ``sync_vrrp``, ``sync_bgp_community``, ``sync_bgp_asn``, and
                 ``sync_bgp_peerings``.
             **kwargs: Nornir host filter arguments (e.g. ``FL``, ``FC``, ``FB``).
 
@@ -1266,6 +1268,7 @@ class NetboxDevicesTasks:
                         "vlans":         True | False | None,
                         "prefixes":      True | False | None,
                         "ip_addresses":  True | False | None,
+                        "bgp_asns": True | False | None,
                         "bgp_peerings":  True | False | None,
                         "bgp_communities": True | False | None,
                         "vrrp":          True | False | None,
@@ -1318,6 +1321,7 @@ class NetboxDevicesTasks:
             "ip_addresses",
             "vrrp",
             "bgp_communities",
+            "bgp_asns",
             "bgp_peerings",
         )
         ret.diff = dict.fromkeys(categories)
@@ -1383,15 +1387,8 @@ class NetboxDevicesTasks:
             )
             if vrf_result.errors:
                 ret.errors.extend(vrf_result.errors)
-            global_vrf_diff = {
-                section: vrf_result.diff.get(section, {})
-                for section in ("vrfs", "route_targets", "routing_policies")
-            }
             for device in devices:
-                device_diff = {
-                    **global_vrf_diff,
-                    "interfaces": vrf_result.diff.get("interfaces", {}).get(device, {}),
-                }
+                device_diff = vrf_result.diff.get(device, {})
                 ret.result[device]["vrfs"] = not sync_diff_has_changes(
                     device_diff, ignore_deletions=ignore_deletions
                 )
@@ -1434,11 +1431,11 @@ class NetboxDevicesTasks:
             )
             if prefix_result.errors:
                 ret.errors.extend(prefix_result.errors)
-            prefixes_in_sync = not sync_diff_has_changes(
-                prefix_result.diff, ignore_deletions=ignore_deletions
-            )
             for device in devices:
-                ret.result[device]["prefixes"] = prefixes_in_sync
+                ret.result[device]["prefixes"] = not sync_diff_has_changes(
+                    prefix_result.diff.get(device, {}),
+                    ignore_deletions=ignore_deletions,
+                )
             ret.diff["prefixes"] = prefix_result.diff
             check_results["prefixes"] = prefix_result
 
@@ -1484,27 +1481,26 @@ class NetboxDevicesTasks:
             ret.diff["vrrp"] = vrrp_result.diff
             check_results["vrrp"] = vrrp_result
 
-        # --- check BGP communities ---
-        if check_bgp_communities:
-            job.event("checking BGP community sync state")
-            community_result = self.sync_bgp_community(
+        # --- check BGP ASNs before peerings ---
+        if check_bgp_asns:
+            job.event("checking BGP ASN sync state")
+            asn_result = self.sync_bgp_asn(
                 job=job,
                 instance=instance,
                 dry_run=True,
                 timeout=timeout,
                 devices=list(devices),
                 branch=branch,
-                **(sync_kwargs.get("sync_bgp_community") or {}),
+                **(sync_kwargs.get("sync_bgp_asn") or {}),
             )
-            if community_result.errors:
-                ret.errors.extend(community_result.errors)
-            communities_in_sync = not sync_diff_has_changes(
-                community_result.diff, ignore_deletions=ignore_deletions
-            )
+            ret.errors.extend(asn_result.errors)
             for device in devices:
-                ret.result[device]["bgp_communities"] = communities_in_sync
-            ret.diff["bgp_communities"] = community_result.diff
-            check_results["bgp_communities"] = community_result
+                if device in asn_result.diff:
+                    ret.result[device]["bgp_asns"] = not sync_diff_has_changes(
+                        asn_result.diff[device], ignore_deletions=ignore_deletions
+                    )
+            ret.diff["bgp_asns"] = asn_result.diff
+            check_results["bgp_asns"] = asn_result
 
         # --- check BGP peerings ---
         if check_bgp_peerings:
@@ -1526,6 +1522,28 @@ class NetboxDevicesTasks:
                 )
             ret.diff["bgp_peerings"] = bgp_result.diff
             check_results["bgp_peerings"] = bgp_result
+
+        # --- check BGP communities ---
+        if check_bgp_communities:
+            job.event("checking BGP community sync state")
+            community_result = self.sync_bgp_community(
+                job=job,
+                instance=instance,
+                dry_run=True,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+                **(sync_kwargs.get("sync_bgp_community") or {}),
+            )
+            if community_result.errors:
+                ret.errors.extend(community_result.errors)
+            for device in devices:
+                ret.result[device]["bgp_communities"] = not sync_diff_has_changes(
+                    community_result.diff.get(device, {}),
+                    ignore_deletions=ignore_deletions,
+                )
+            ret.diff["bgp_communities"] = community_result.diff
+            check_results["bgp_communities"] = community_result
 
         for category, child_result in check_results.items():
             ret.failed = ret.failed or child_result.failed
@@ -1550,6 +1568,7 @@ class NetboxDevicesTasks:
             "ip_addresses": check_ip_addresses,
             "vrrp": check_vrrp,
             "bgp_communities": check_bgp_communities,
+            "bgp_asns": check_bgp_asns,
             "bgp_peerings": check_bgp_peerings,
         }
         for device, device_data in ret.result.items():
@@ -1619,6 +1638,7 @@ class NetboxDevicesTasks:
                     "ip_addresses":  {"created": [...], "updated": [...], "in_sync": [...]},
                     "vrrp":          {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]},
                     "bgp_communities": {"route_targets": {...}, "communities": {...}},
+                    "bgp_asns": {"created": [...], "updated": [...], "deleted": [], "in_sync": [...]},
                     "bgp_peerings":  {"create": [...],  "update": {...},  "delete": [...],  "in_sync": [...]},
                 }
             }
@@ -1638,7 +1658,7 @@ class NetboxDevicesTasks:
             **kwargs: Nornir host filter arguments (e.g. ``FL``, ``FC``, ``FB``).
 
         Returns:
-            Result: Per-device results with all nine category keys. Successful
+            Result: Per-device results with all ten category keys. Successful
             sections contain child task results, including previews in dry-run
             mode; failed sections are False and skipped or unexecuted sections
             are None. Diff contains child diffs keyed by category, with None for
@@ -1686,6 +1706,7 @@ class NetboxDevicesTasks:
             "ip_addresses",
             "vrrp",
             "bgp_communities",
+            "bgp_asns",
             "bgp_peerings",
         )
         ret.diff = dict.fromkeys(categories)
@@ -1774,7 +1795,9 @@ class NetboxDevicesTasks:
                 )
                 return ret
             for device in devices:
-                ret.result[device]["prefixes"] = prefix_result.result
+                ret.result[device]["prefixes"] = prefix_result.result.get(
+                    device, {"created": [], "updated": [], "deleted": [], "in_sync": []}
+                )
             for device in devices:
                 if device in prefix_result.resources_failed:
                     ret.result[device]["prefixes"] = False
@@ -1866,15 +1889,15 @@ class NetboxDevicesTasks:
                 job.event("sync all stopped because VRF sync failed", severity="ERROR")
                 return ret
             for device in devices:
-                device_interfaces = {}
-                if device in vrf_result.result["interfaces"]:
-                    device_interfaces[device] = vrf_result.result["interfaces"][device]
-                ret.result[device]["vrfs"] = {
-                    "vrfs": vrf_result.result["vrfs"],
-                    "route_targets": vrf_result.result["route_targets"],
-                    "routing_policies": vrf_result.result["routing_policies"],
-                    "interfaces": device_interfaces,
-                }
+                ret.result[device]["vrfs"] = vrf_result.result.get(
+                    device,
+                    {
+                        "vrfs": {},
+                        "route_targets": {},
+                        "routing_policies": {},
+                        "interfaces": {},
+                    },
+                )
             for device in devices:
                 if device in vrf_result.resources_failed:
                     ret.result[device]["vrfs"] = False
@@ -2029,12 +2052,12 @@ class NetboxDevicesTasks:
                 job.event("sync all stopped because VRRP review was declined")
                 return ret
 
-        # --- sync BGP communities ---
-        if sync_kwargs.get("sync_bgp_community") is False:
-            job.event("skipping BGP community sync")
+        # --- sync BGP ASNs ---
+        if sync_kwargs.get("sync_bgp_asn") is False:
+            job.event("skipping BGP ASN sync")
         else:
-            job.event("syncing BGP communities")
-            community_result = self.sync_bgp_community(
+            job.event("syncing BGP ASNs")
+            asn_result = self.sync_bgp_asn(
                 job=job,
                 instance=instance,
                 dry_run=dry_run,
@@ -2042,41 +2065,33 @@ class NetboxDevicesTasks:
                 devices=list(devices),
                 branch=branch,
                 with_approval=with_approval,
-                **(sync_kwargs.get("sync_bgp_community") or {}),
+                **(sync_kwargs.get("sync_bgp_asn") or {}),
             )
-            if community_result.errors:
-                job.event(
-                    "bgp community sync completed with errors", severity="WARNING"
-                )
-                ret.errors.extend(community_result.errors)
-            ret.diff["bgp_communities"] = community_result.diff
+            if asn_result.errors:
+                job.event("bgp ASN sync completed with errors", severity="WARNING")
+                ret.errors.extend(asn_result.errors)
+            ret.diff["bgp_asns"] = asn_result.diff
             ret.resources_failed = sorted(
-                set(ret.resources_failed) | set(community_result.resources_failed)
+                set(ret.resources_failed) | set(asn_result.resources_failed)
             )
-            if community_result.failed and not community_result.resources_failed:
-                for device in devices:
-                    ret.result[device]["bgp_communities"] = False
+            for device in devices:
+                # Keep successful device results when only some resources failed.
+                ret.result[device]["bgp_asns"] = (
+                    False
+                    if device in asn_result.resources_failed
+                    or (asn_result.failed and not asn_result.resources_failed)
+                    else asn_result.result.get(device, {})
+                )
+            if asn_result.failed:
                 ret.failed = True
                 job.event(
-                    "sync all stopped because BGP community sync failed",
-                    severity="ERROR",
+                    "sync all stopped because BGP ASN sync failed", severity="ERROR"
                 )
                 return ret
-            for device in devices:
-                ret.result[device]["bgp_communities"] = community_result.result
-            for device in devices:
-                if device in community_result.resources_failed:
-                    ret.result[device]["bgp_communities"] = False
-            if community_result.failed:
-                ret.failed = True
-                job.event(
-                    "sync all stopped because a sync stage failed", severity="ERROR"
-                )
-                return ret
-            if community_result.status == "skipped" and community_result.dry_run:
+            if asn_result.status == "skipped" and asn_result.dry_run:
                 ret.status = "skipped"
                 ret.dry_run = True
-                job.event("sync all stopped because BGP community review was declined")
+                job.event("sync all stopped because BGP ASN review was declined")
                 return ret
 
         # --- sync BGP peerings ---
@@ -2124,6 +2139,58 @@ class NetboxDevicesTasks:
                 ret.status = "skipped"
                 ret.dry_run = True
                 job.event("sync all stopped because BGP peerings review was declined")
+                return ret
+
+        # --- sync BGP communities ---
+        if sync_kwargs.get("sync_bgp_community") is False:
+            job.event("skipping BGP community sync")
+        else:
+            job.event("syncing BGP communities")
+            community_result = self.sync_bgp_community(
+                job=job,
+                instance=instance,
+                dry_run=dry_run,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+                with_approval=with_approval,
+                **(sync_kwargs.get("sync_bgp_community") or {}),
+            )
+            if community_result.errors:
+                job.event(
+                    "bgp community sync completed with errors", severity="WARNING"
+                )
+                ret.errors.extend(community_result.errors)
+            ret.diff["bgp_communities"] = community_result.diff
+            ret.resources_failed = sorted(
+                set(ret.resources_failed) | set(community_result.resources_failed)
+            )
+            if community_result.failed and not community_result.resources_failed:
+                for device in devices:
+                    ret.result[device]["bgp_communities"] = False
+                ret.failed = True
+                job.event(
+                    "sync all stopped because BGP community sync failed",
+                    severity="ERROR",
+                )
+                return ret
+            for device in devices:
+                ret.result[device]["bgp_communities"] = community_result.result.get(
+                    device, {}
+                )
+            for device in devices:
+                if device in community_result.resources_failed:
+                    ret.result[device]["bgp_communities"] = False
+            if community_result.failed:
+                ret.failed = True
+                job.event(
+                    "sync all stopped because a sync stage failed", severity="ERROR"
+                )
+                return ret
+            if community_result.status == "skipped" and community_result.dry_run:
+                ret.status = "skipped"
+                ret.dry_run = True
+                job.event("sync all stopped because BGP community review was declined")
                 return ret
 
         log.info(f"{self.name} - Sync all complete for {len(ret.result)} device(s)")

@@ -209,43 +209,61 @@ is never removed.
 
 ## Output
 
-Results contain separate `vrfs`, `route_targets`, `routing_policies`, and
-`interfaces` sections.
+Results and diffs are keyed by device, with `vrfs`, `route_targets`,
+`routing_policies`, and `interfaces` sections. Shared VRF actions appear under
+every device observing that VRF.
 Dry-run returns the standard sync diff:
 
 ```json
 {
-  "vrfs": {
-    "create": ["TENANT_A"],
-    "update": {
-      "TENANT_B": {
-        "export_targets": {
-          "old_value": ["65000:999"],
-          "new_value": ["65000:999", "65000:202"]
+  "edge-a": {
+    "vrfs": {
+      "create": [
+        "TENANT_A"
+      ],
+      "update": {
+        "TENANT_B": {
+          "export_targets": {
+            "old_value": [
+              "65000:999"
+            ],
+            "new_value": [
+              "65000:999",
+              "65000:202"
+            ]
+          }
         }
-      }
+      },
+      "delete": [],
+      "in_sync": [
+        "CONTROL_PLANE"
+      ]
     },
-    "delete": [],
-    "in_sync": ["CONTROL_PLANE"]
-  },
-  "route_targets": {
-    "create": ["65000:201", "65000:202"],
-    "update": {},
-    "delete": [],
-    "in_sync": []
-  },
-  "routing_policies": {
-    "create": ["TENANT_A_IMPORT", "TENANT_A_EXPORT"],
-    "update": {},
-    "delete": [],
-    "in_sync": []
-  },
-  "interfaces": {
-    "edge-a": {
+    "route_targets": {
+      "create": [
+        "65000:201",
+        "65000:202"
+      ],
+      "update": {},
+      "delete": [],
+      "in_sync": []
+    },
+    "routing_policies": {
+      "create": [
+        "TENANT_A_IMPORT",
+        "TENANT_A_EXPORT"
+      ],
+      "update": {},
+      "delete": [],
+      "in_sync": []
+    },
+    "interfaces": {
       "create": [],
       "update": {},
       "delete": [],
-      "in_sync": ["Ethernet1.100"]
+      "in_sync": [
+        "Ethernet1.100"
+      ]
     }
   }
 }
@@ -256,28 +274,42 @@ the top-level `diff` field:
 
 ```json
 {
-  "vrfs": {
-    "created": ["TENANT_A"],
-    "updated": ["TENANT_B"],
-    "deleted": [],
-    "in_sync": ["CONTROL_PLANE"]
-  },
-  "route_targets": {
-    "created": ["65000:201", "65000:202"],
-    "updated": [],
-    "deleted": [],
-    "in_sync": []
-  },
-  "routing_policies": {
-    "created": ["TENANT_A_IMPORT", "TENANT_A_EXPORT"],
-    "updated": [],
-    "deleted": [],
-    "in_sync": []
-  },
-  "interfaces": {
-    "edge-a": {
+  "edge-a": {
+    "vrfs": {
+      "created": [
+        "TENANT_A"
+      ],
+      "updated": [
+        "TENANT_B"
+      ],
+      "deleted": [],
+      "in_sync": [
+        "CONTROL_PLANE"
+      ]
+    },
+    "route_targets": {
+      "created": [
+        "65000:201",
+        "65000:202"
+      ],
+      "updated": [],
+      "deleted": [],
+      "in_sync": []
+    },
+    "routing_policies": {
+      "created": [
+        "TENANT_A_IMPORT",
+        "TENANT_A_EXPORT"
+      ],
+      "updated": [],
+      "deleted": [],
+      "in_sync": []
+    },
+    "interfaces": {
       "created": [],
-      "updated": ["Ethernet1.201"],
+      "updated": [
+        "Ethernet1.201"
+      ],
       "deleted": [],
       "in_sync": []
     }

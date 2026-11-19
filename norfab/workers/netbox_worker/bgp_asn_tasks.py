@@ -9,8 +9,6 @@ from .netbox_models import (
     CreateBgpAsnInput,
     CreateBgpAsnResult,
     NetboxFastApiArgs,
-    SyncActionSummary,
-    SyncActionSummaryMap,
     SyncBgpAsnInput,
     SyncBgpAsnResult,
 )
@@ -282,13 +280,13 @@ class NetboxBgpAsnTasks:
             **kwargs: Nornir FFun host filters.
 
         Returns:
-            Result: Global ASN synchronization actions.
+            Result: Per-device ASN synchronization actions.
         """
         devices = list(devices or [])
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:sync_bgp_asn",
-            result=SyncActionSummaryMap().model_dump(),
+            result={},
             resources=[instance],
             dry_run=dry_run,
             diff={},
@@ -406,8 +404,11 @@ class NetboxBgpAsnTasks:
         )
 
         live_asns = {}
+        asn_devices = {}
         for asn in sorted(observations):
             records = sorted(observations[asn], key=lambda item: item["device"])
+            # Remote and local observations both contribute to this device's ASN results.
+            asn_devices[asn] = {record["device"] for record in records}
             live_asns[asn] = {
                 "description": next(
                     (
@@ -468,10 +469,8 @@ class NetboxBgpAsnTasks:
         in_sync = asn_diff["in_sync"]
         full_diff = {
             "global": {
-                "create": create_numbers,
+                **asn_diff,
                 "update": {str(asn): changes for asn, changes in update.items()},
-                "delete": [],
-                "in_sync": in_sync,
             }
         }
         job.event(
@@ -480,10 +479,25 @@ class NetboxBgpAsnTasks:
             f"{len(in_sync)} in sync"
         )
 
-        ret.diff = full_diff
-        ret.result = {"global": SyncActionSummary(in_sync=in_sync).model_dump()}
+        for device in devices:
+            ret.diff[device] = {
+                "create": [asn for asn in create_numbers if device in asn_devices[asn]],
+                "update": {
+                    str(asn): changes
+                    for asn, changes in update.items()
+                    if device in asn_devices[asn]
+                },
+                "delete": [],
+                "in_sync": [asn for asn in in_sync if device in asn_devices[asn]],
+            }
+            ret.result[device] = {
+                "created": [],
+                "updated": [],
+                "deleted": [],
+                "in_sync": ret.diff[device]["in_sync"],
+            }
         if dry_run:
-            ret.result = full_diff
+            ret.result = ret.diff
             ret.dry_run = True
             return ret
         if not sync_diff_has_changes(full_diff):
@@ -493,7 +507,7 @@ class NetboxBgpAsnTasks:
             job, "BGP ASN sync", full_diff
         ):
             ret.status = "skipped"
-            ret.result = full_diff
+            ret.result = ret.diff
             ret.dry_run = True
             ret.messages.append("review declined; changes were not applied")
             return ret
@@ -541,7 +555,9 @@ class NetboxBgpAsnTasks:
                     ret.errors.append(msg)
                     ret.failed = True
                     return ret
-                ret.result["global"]["created"].extend(asn for asn, _ in batch)
+                for asn, _ in batch:
+                    for device in asn_devices[asn]:
+                        ret.result[device]["created"].append(asn)
             job.event(f"created {len(create_items)} NetBox ASN(s)")
 
         update_payloads = []
@@ -573,13 +589,15 @@ class NetboxBgpAsnTasks:
                     ret.errors.append(msg)
                     ret.failed = True
                     return ret
-                ret.result["global"]["updated"].extend(asn for asn, _ in batch)
+                for asn, _ in batch:
+                    for device in asn_devices[asn]:
+                        ret.result[device]["updated"].append(asn)
             job.event(f"updated {len(update_payloads)} NetBox ASN(s)")
 
         job.event("bgp asn sync complete")
         log.info(
             f"{self.name} - Sync BGP ASNs complete: "
-            f"{len(ret.result['global']['created'])} created, "
+            f"{len(create_items)} created, "
             f"{len(update)} updated, {len(in_sync)} in sync"
         )
         return ret

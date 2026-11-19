@@ -27,22 +27,24 @@ synchronized before its source interface exists in NetBox.
 
 ## Output
 
-The result is global because the same prefix can be reported by several
-devices:
+Results are keyed by device. Shared prefixes appear under each reporting device:
 
 ```json
 {
-    "created": ["10.0.0.0/31"],
-    "updated": ["10.0.1.0/31"],
-    "in_sync": ["2001:db8::1/128"]
+    "ceos-spine-1": {
+        "created": ["10.0.0.0/31"],
+        "updated": ["10.0.1.0/31"],
+        "deleted": [],
+        "in_sync": ["2001:db8::1/128"]
+    }
 }
 ```
 
-The top-level `diff` field always contains a global reconciliation plan:
+The top-level `diff` field contains a reconciliation plan per device:
 
 ```json
 {
-    "global": {
+    "ceos-spine-1": {
         "create": [],
         "update": {},
         "delete": [],

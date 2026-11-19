@@ -1824,8 +1824,8 @@ class NetboxIpTasks:
             **kwargs: Nornir host filter arguments.
 
         Returns:
-            Result: Global ``created``, ``updated``, and ``in_sync`` prefix lists.
-                ``Result.diff`` contains a ``global`` reconciliation plan with
+            Result: Per-device ``created``, ``updated``, and ``in_sync`` prefix lists.
+                ``Result.diff`` contains a per-device reconciliation plan with
                 ``create``, ``update``, ``delete``, and ``in_sync`` actions;
                 ``delete`` is always empty because this task does not delete prefixes.
         """
@@ -1833,16 +1833,9 @@ class NetboxIpTasks:
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:sync_device_prefixes",
-            result=SyncActionSummary().model_dump(),
+            result={},
             resources=[instance],
-            diff={
-                "global": {
-                    "create": [],
-                    "update": {},
-                    "delete": [],
-                    "in_sync": [],
-                }
-            },
+            diff={},
             dry_run=dry_run,
         )
         nb = self._get_pynetbox(instance, branch=branch, job=job)
@@ -1876,6 +1869,15 @@ class NetboxIpTasks:
             ret.failed = True
             return ret
 
+        for device in devices:
+            ret.result[device] = {
+                "created": [],
+                "updated": [],
+                "deleted": [],
+                "in_sync": [],
+            }
+            ret.diff[device] = {"create": [], "update": {}, "delete": [], "in_sync": []}
+
         normalised_live_all = collect_live_interface_ip_data(
             client=self.client,
             job=job,
@@ -1899,6 +1901,7 @@ class NetboxIpTasks:
             else None
         )
         desired_prefixes = {}
+        prefix_devices = {}
         for device_name in sorted(normalised_live_all):
             if device_name not in nb_devices:
                 continue
@@ -1927,6 +1930,8 @@ class NetboxIpTasks:
                         continue
                     prefix = str(prefix_net)
                     key = prefix if ignore_vrf else (prefix, vrf_name)
+                    # Keep every contributor before shared prefixes are deduplicated.
+                    prefix_devices.setdefault(key, set()).add(device_name)
                     desired_prefixes.setdefault(
                         key,
                         {"prefix": prefix, "vrf": vrf_name, "site": site_id},
@@ -1944,7 +1949,6 @@ class NetboxIpTasks:
         )
         create_prefixes = {}
         update_prefixes = {}
-        update_prefixes_diff = {}
         for key, desired in desired_prefixes.items():
             matching = [
                 prefix
@@ -1962,6 +1966,8 @@ class NetboxIpTasks:
                         {"scope_type": "dcim.site", "scope_id": desired["site"]}
                     )
                 create_prefixes[key] = payload
+                for device in prefix_devices[key]:
+                    ret.diff[device]["create"].append(desired["prefix"])
                 continue
 
             current = min(matching, key=lambda prefix: prefix.id)
@@ -1976,55 +1982,52 @@ class NetboxIpTasks:
                     "scope_type": "dcim.site",
                     "scope_id": desired["site"],
                 }
-                update_prefixes_diff[key] = {
+                changes = {
                     "site": {
                         "old_value": current_site,
                         "new_value": desired["site"],
                     }
                 }
+                for device in prefix_devices[key]:
+                    ret.diff[device]["update"][desired["prefix"]] = changes
             else:
-                ret.result["in_sync"].append(desired["prefix"])
+                for device in prefix_devices[key]:
+                    ret.diff[device]["in_sync"].append(desired["prefix"])
 
-        ret.diff = {
-            "global": {
-                "create": sorted(
-                    {desired_prefixes[key]["prefix"] for key in create_prefixes}
-                ),
-                "update": {
-                    desired_prefixes[key]["prefix"]: update_prefixes_diff[key]
-                    for key in sorted(
-                        update_prefixes_diff,
-                        key=lambda item: desired_prefixes[item]["prefix"],
-                    )
-                },
-                "delete": [],
-                "in_sync": sorted(set(ret.result["in_sync"])),
-            }
-        }
-
-        preview = copy.deepcopy(ret.result)
-        preview["created"].extend(
-            desired_prefixes[key]["prefix"] for key in create_prefixes
-        )
-        preview["updated"].extend(
-            desired_prefixes[key]["prefix"] for key in update_prefixes
-        )
-        for action in preview:
-            preview[action] = sorted(set(preview[action]))
+        for device, actions in ret.diff.items():
+            for action in ("create", "in_sync"):
+                actions[action] = sorted(set(actions[action]))
+            actions["update"] = dict(sorted(actions["update"].items()))
+            ret.result[device]["created"] = actions["create"]
+            ret.result[device]["updated"] = list(actions["update"])
+            ret.result[device]["in_sync"] = actions["in_sync"]
         if dry_run:
-            ret.result = preview
             ret.dry_run = True
             return ret
         if not sync_diff_has_changes(ret.diff):
             job.event("no prefix sync changes required")
             return ret
         if with_approval:
-            if not review_sync_task_result(job, "prefix sync", preview):
+            # Review shared objects once, while returning each device's own preview.
+            approval_preview = {
+                action: sorted(
+                    {
+                        prefix
+                        for actions in ret.result.values()
+                        for prefix in actions[action]
+                    }
+                )
+                for action in ("created", "updated", "deleted", "in_sync")
+            }
+            if not review_sync_task_result(job, "prefix sync", approval_preview):
                 ret.status = "skipped"
-                ret.result = preview
                 ret.dry_run = True
                 ret.messages.append("review declined; changes were not applied")
                 return ret
+        # Preview actions are planned; live results must contain only completed writes.
+        for actions in ret.result.values():
+            actions["created"] = []
+            actions["updated"] = []
         vrf_ids = {}
         for key in list(create_prefixes):
             vrf_name = desired_prefixes[key]["vrf"]
@@ -2055,9 +2058,12 @@ class NetboxIpTasks:
                     log.error(msg)
                     job.event(msg, severity="ERROR")
                     return ret
-                ret.result["updated"].extend(
-                    desired_prefixes[key]["prefix"] for key, _ in batch
-                )
+                for key, _ in batch:
+                    # Report a completed shared write to all of its contributors.
+                    for device in prefix_devices[key]:
+                        ret.result[device]["updated"].append(
+                            desired_prefixes[key]["prefix"]
+                        )
             job.event(f"updated {len(update_prefixes)} prefix(es)")
         if create_prefixes:
             create_items = list(create_prefixes.items())
@@ -2077,13 +2083,16 @@ class NetboxIpTasks:
                     log.error(msg)
                     job.event(msg, severity="ERROR")
                     return ret
-                ret.result["created"].extend(
-                    desired_prefixes[key]["prefix"] for key, _ in batch
-                )
+                for key, _ in batch:
+                    for device in prefix_devices[key]:
+                        ret.result[device]["created"].append(
+                            desired_prefixes[key]["prefix"]
+                        )
             job.event(f"created {len(create_prefixes)} prefix(es)")
 
-        for action in ret.result:
-            ret.result[action] = sorted(set(ret.result[action]))
+        for actions in ret.result.values():
+            for action in actions:
+                actions[action] = sorted(set(actions[action]))
 
         job.event("device prefix sync complete")
         return ret

@@ -19,9 +19,10 @@ Checks whether NetBox data is in sync with live device state without writing to 
 - **vlans** — calls `sync_vlans(dry_run=True)` for VLANs and interface assignments
 - **prefixes** — calls `sync_device_prefixes(dry_run=True)`
 - **ip_addresses** — calls `sync_device_ip(dry_run=True)`
+- **vrrp** — calls `sync_vrrp(dry_run=True)`
+- **bgp_asns** - calls `sync_bgp_asn(dry_run=True)` before peerings
 - **bgp_peerings** — calls `sync_bgp_peerings(dry_run=True)`
 - **bgp_communities** — calls `sync_bgp_community(dry_run=True)` for route targets and BGP plugin communities
-- **vrrp** — calls `sync_vrrp(dry_run=True)`
 
 Each sub-check can be enabled or disabled independently.
 
@@ -30,7 +31,7 @@ Each sub-check can be enabled or disabled independently.
 Use `sync_kwargs` to configure how individual dry-run synchronizers calculate
 drift. Supported keys are `sync_device_inventory`, `sync_device_interfaces`,
 `sync_vrfs`, `sync_vlans`, `sync_device_prefixes`, `sync_device_ip`,
-`sync_vrrp`, `sync_bgp_community`, and `sync_bgp_peerings`. Values are keyword
+`sync_vrrp`, `sync_bgp_community`, `sync_bgp_asn`, and `sync_bgp_peerings`. Values are keyword
 argument dictionaries accepted by the corresponding task. Keep `instance`,
 `timeout`, `devices`, `branch`, and `dry_run` at the `check_device_sync` level;
 all subordinate tasks are always called with `dry_run=True`.
@@ -47,9 +48,14 @@ sync_bgp_peerings:
   status: active
 ```
 
+BGP ASN checking runs before peerings, followed by communities. All three are
+enabled by default. Set
+`check_bgp_asns=False` to disable it. Dry-run checks need no RIR and report
+missing ASNs as drift.
+
 ## Output
 
-Both coordinated tasks include inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities, and BGP peerings. Every selected device has all nine category keys. Disabled categories are `None`; failed categories are `False`. Sync results contain child task summaries or dry-run previews, while checks return booleans for drift state. The `diff` dictionary retains child dry-run details under the same category keys, with `None` for unexecuted checks or stages. MAC synchronization is available through its standalone task.
+Both coordinated tasks include inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities, BGP ASNs, and BGP peerings. Every selected device has all ten category keys. Disabled categories are `None`; failed categories are `False`. Sync results contain child task summaries or dry-run previews, while checks return booleans for drift state. The `diff` dictionary retains child dry-run details under the same category keys, with `None` for unexecuted checks or stages. MAC synchronization is available through its standalone task.
 
 ```python
 {
@@ -62,6 +68,7 @@ Both coordinated tasks include inventory, prefixes, interfaces, VRFs, VLANs, IP 
             "vlans": False,
             "prefixes": True,
             "ip_addresses": True,
+            "bgp_asns": True,
             "bgp_peerings": True,
             "bgp_communities": True,
             "vrrp": True,
@@ -74,6 +81,7 @@ Both coordinated tasks include inventory, prefixes, interfaces, VRFs, VLANs, IP 
         "vlans": {},
         "prefixes": {},
         "ip_addresses": {},
+        "bgp_asns": {},
         "bgp_peerings": {},
         "bgp_communities": {},
         "vrrp": {},
@@ -87,7 +95,7 @@ A category is considered in sync when the corresponding dry-run reports no pendi
 
 - No data is written to NetBox.
 - `Result.diff` contains the raw dry-run detail from each enabled sub-task.
-- Prefix, BGP community, and route-target drift affects every selected device; VLAN and VRRP drift is assessed per device.
+- Prefix, VRF, VLAN, VRRP, BGP ASN, and BGP community drift is assessed per device. Shared objects affect their reporting devices.
 - Device names can be supplied directly or resolved from Nornir filters.
 
 ## Examples
@@ -103,7 +111,7 @@ A category is considered in sync when the corresponding dry-run reports no pendi
     Check only interface and IP address sync:
 
     ```bash
-    nf#netbox check-sync devices devices ceos-leaf-1 check-inventory false check-vrfs false check-vlans false check-prefixes false check-bgp-peerings false check-bgp-communities false check-vrrp false
+    nf#netbox check-sync devices devices ceos-leaf-1 check-inventory false check-vrfs false check-vlans false check-prefixes false check-bgp-asns false check-bgp-peerings false check-bgp-communities false check-vrrp false
     ```
 
     Resolve devices using a Nornir group filter:
@@ -168,6 +176,7 @@ A category is considered in sync when the corresponding dry-run reports no pendi
                 "check_vrfs": False,
                 "check_vlans": False,
                 "check_prefixes": False,
+                "check_bgp_asns": False,
                 "check_bgp_peerings": False,
                 "check_bgp_communities": False,
                 "check_vrrp": False,
@@ -209,6 +218,7 @@ root
             ├── check-vlans:    Check VLAN and interface assignment sync state, default 'True'
             ├── check-prefixes:    Check prefix sync state, default 'True'
             ├── check-ip-addresses:    Check IP addresses sync state, default 'True'
+            ├── check-bgp-asns:    Check BGP ASN sync state, default 'True'
             ├── check-bgp-peerings:    Check BGP peerings sync state, default 'True'
             ├── check-bgp-communities:    Check BGP communities sync state, default 'True'
             ├── check-vrrp:    Check VRRP sync state, default 'True'

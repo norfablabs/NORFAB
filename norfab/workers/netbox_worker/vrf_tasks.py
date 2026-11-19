@@ -10,10 +10,8 @@ from norfab.models import Result
 from .netbox_models import (
     InterfaceMapRule,
     NetboxFastApiArgs,
-    SyncActionSummary,
     SyncVrfsInput,
     SyncVrfsResult,
-    SyncVrfsResultPayload,
 )
 from .netbox_worker_utilities import (
     apply_description_policy,
@@ -90,7 +88,7 @@ class NetboxVrfsTasks:
             **kwargs: Nornir FFun host filters.
 
         Returns:
-            Result: VRF, route-target, routing-policy, and interface assignment actions.
+            Result: Per-device VRF, route-target, routing-policy, and interface actions.
         """
         # Normalize task inputs before resolving the selected NetBox devices.
         devices = list(devices or [])
@@ -105,15 +103,10 @@ class NetboxVrfsTasks:
         ]
         ret = Result(
             task=f"{self.name}:sync_vrfs",
-            result=SyncVrfsResultPayload().model_dump(),
+            result={},
             resources=[instance],
             dry_run=dry_run,
-            diff={
-                "vrfs": {},
-                "route_targets": {},
-                "routing_policies": {},
-                "interfaces": {},
-            },
+            diff={},
         )
 
         msg = (
@@ -152,9 +145,6 @@ class NetboxVrfsTasks:
         if not devices:
             ret.failed = True
             return ret
-        ret.result["interfaces"] = {
-            device_name: SyncActionSummary().model_dump() for device_name in devices
-        }
 
         if not nb.extras.custom_fields.get(name=device_custom_field):
             device_custom_field = None
@@ -258,6 +248,7 @@ class NetboxVrfsTasks:
         # Build the global desired VRF state and a separate interface assignment
         # index. Sorting observations makes description precedence deterministic.
         live_vrfs = {}
+        device_vrfs = {device: set() for device in devices}
         interface_targets = {}
         for vrf_name in sorted(observations):
             records = sorted(observations[vrf_name], key=lambda item: item["device"])
@@ -299,6 +290,7 @@ class NetboxVrfsTasks:
                 )
             for record in records:
                 device_name = record["device"]
+                device_vrfs[device_name].add(vrf_name)
                 device_type = str(nb_devices[device_name].device_type.model)
                 for live_name in record["interfaces"]:
                     interface_name = map_interface_name(
@@ -453,6 +445,44 @@ class NetboxVrfsTasks:
             "in_sync": [],
         }
 
+        full_diff = {
+            "vrfs": vrf_diff,
+            "route_targets": route_target_diff,
+            "routing_policies": policy_diff,
+        }
+        # Keep only each device's observed VRFs and their shared dependencies.
+        for device, vrfs in device_vrfs.items():
+            targets = set()
+            policies = set()
+            for vrf in vrfs:
+                desired = live_vrfs[vrf]
+                targets.update(desired["import_targets"])
+                targets.update(desired["export_targets"])
+                for field in policy_fields.values():
+                    policies.update(desired[field])
+            ret.diff[device] = {
+                "vrfs": {
+                    "create": [name for name in vrf_diff["create"] if name in vrfs],
+                    "update": {
+                        name: value
+                        for name, value in vrf_diff["update"].items()
+                        if name in vrfs
+                    },
+                    "delete": [],
+                    "in_sync": [name for name in vrf_diff["in_sync"] if name in vrfs],
+                },
+                "route_targets": {
+                    **route_target_diff,
+                    "create": [
+                        name for name in missing_route_targets if name in targets
+                    ],
+                },
+                "routing_policies": {
+                    **policy_diff,
+                    "create": [name for name in missing_policies if name in policies],
+                },
+            }
+
         # Fetch the cross-product of referenced devices and names in one request,
         # then retain exact (device, interface) matches for assignment comparison.
         interface_objects = {}
@@ -495,15 +525,7 @@ class NetboxVrfsTasks:
         # Interface identity is scoped by device. A different current VRF becomes
         # a normal update, while an equal assignment is reported as in sync.
         interface_diff = self.make_diff(interface_live, interface_current)
-        ret.result["vrfs"]["in_sync"] = in_sync
-        for device_name, actions in interface_diff.items():
-            ret.result["interfaces"][device_name]["in_sync"] = actions["in_sync"]
-        full_diff = {
-            "vrfs": vrf_diff,
-            "route_targets": route_target_diff,
-            "routing_policies": policy_diff,
-            "interfaces": interface_diff,
-        }
+        full_diff["interfaces"] = interface_diff
         msg = (
             "vrf sync diff complete: "
             f"{len(create_names)} create, {len(update)} update, "
@@ -512,9 +534,21 @@ class NetboxVrfsTasks:
         job.event(msg)
         log.info(f"Sync VRFs: {msg}")
 
-        ret.diff = full_diff
+        for device, device_diff in ret.diff.items():
+            device_diff["interfaces"] = interface_diff.get(
+                device, {"create": [], "update": {}, "delete": [], "in_sync": []}
+            )
+            ret.result[device] = {
+                section: {
+                    "created": [],
+                    "updated": [],
+                    "deleted": [],
+                    "in_sync": actions["in_sync"],
+                }
+                for section, actions in device_diff.items()
+            }
         if dry_run:
-            ret.result = full_diff
+            ret.result = ret.diff
             ret.dry_run = True
             return ret
         if not sync_diff_has_changes(full_diff):
@@ -524,7 +558,7 @@ class NetboxVrfsTasks:
             return ret
         if with_approval and not review_sync_task_result(job, "VRF sync", full_diff):
             ret.status = "skipped"
-            ret.result = full_diff
+            ret.result = ret.diff
             ret.dry_run = True
             ret.messages.append("review declined; changes were not applied")
             msg = "vrf sync approval declined"
@@ -554,7 +588,12 @@ class NetboxVrfsTasks:
                     return ret
                 for target in created_targets:
                     object_cache[("route_target", target.name)] = target
-                    ret.result["route_targets"]["created"].append(target.name)
+                    # Report the completed shared write for every device that uses it.
+                    for device, device_diff in ret.diff.items():
+                        if target.name in device_diff["route_targets"]["create"]:
+                            ret.result[device]["route_targets"]["created"].append(
+                                target.name
+                            )
         if missing_policies:
             policy_payloads = [{"name": name} for name in missing_policies]
             total_batches = (len(policy_payloads) + batch_size - 1) // batch_size
@@ -575,7 +614,11 @@ class NetboxVrfsTasks:
                     return ret
                 for policy in created_policies:
                     object_cache[("routing_policy", policy.name)] = policy
-                    ret.result["routing_policies"]["created"].append(policy.name)
+                    for device, device_diff in ret.diff.items():
+                        if policy.name in device_diff["routing_policies"]["create"]:
+                            ret.result[device]["routing_policies"]["created"].append(
+                                policy.name
+                            )
 
         create_payloads = []
         for vrf_name in create_names:
@@ -622,7 +665,9 @@ class NetboxVrfsTasks:
                     return ret
                 for vrf in created_vrfs:
                     object_cache[("vrf", vrf.name)] = vrf
-                    ret.result["vrfs"]["created"].append(vrf.name)
+                    for device, device_diff in ret.diff.items():
+                        if vrf.name in device_diff["vrfs"]["create"]:
+                            ret.result[device]["vrfs"]["created"].append(vrf.name)
 
         update_payloads = []
         for vrf_name in sorted(update):
@@ -661,7 +706,10 @@ class NetboxVrfsTasks:
                     ret.errors.append(msg)
                     ret.failed = True
                     return ret
-                ret.result["vrfs"]["updated"].extend(name for name, _ in batch)
+                for name, _ in batch:
+                    for device, device_diff in ret.diff.items():
+                        if name in device_diff["vrfs"]["update"]:
+                            ret.result[device]["vrfs"]["updated"].append(name)
 
         # Assign only interfaces classified as updates; matching assignments have
         # already been retained in the result's in_sync lists.
@@ -696,7 +744,7 @@ class NetboxVrfsTasks:
                     ret.failed = True
                     return ret
                 for (device_name, interface_name), _ in batch:
-                    ret.result["interfaces"][device_name]["updated"].append(
+                    ret.result[device_name]["interfaces"]["updated"].append(
                         interface_name
                     )
         msg = (

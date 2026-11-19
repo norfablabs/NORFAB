@@ -644,14 +644,14 @@ class TestSyncBgpAsn:
     def test_dry_run_apply_and_idempotency(self, nfclient: Any) -> None:
         dry_run = self._sync(nfclient, dry_run=True)
         for result in self._successful_results(dry_run):
-            assert set(result["result"]["global"]["create"]) == self.DEVICE_1_ASNS
-            assert result["result"]["global"]["update"] == {}
-            assert result["result"]["global"]["delete"] == []
+            assert set(result["result"][self.DEVICE_1]["create"]) == self.DEVICE_1_ASNS
+            assert result["result"][self.DEVICE_1]["update"] == {}
+            assert result["result"][self.DEVICE_1]["delete"] == []
         assert self.nb.ipam.asns.get(asn=4200000200) is None
 
         first_sync = self._sync(nfclient, rir=self.RIR, batch_size=1)
         for result in self._successful_results(first_sync):
-            assert set(result["result"]["global"]["created"]) == self.DEVICE_1_ASNS
+            assert set(result["result"][self.DEVICE_1]["created"]) == self.DEVICE_1_ASNS
 
         transit = self.nb.ipam.asns.get(asn=4200000200)
         device = self.nb.dcim.devices.get(name=self.DEVICE_1)
@@ -662,9 +662,9 @@ class TestSyncBgpAsn:
 
         second_sync = self._sync(nfclient, rir=self.RIR)
         for result in self._successful_results(second_sync):
-            assert result["result"]["global"]["created"] == []
-            assert result["result"]["global"]["updated"] == []
-            assert set(result["result"]["global"]["in_sync"]) == self.DEVICE_1_ASNS
+            assert result["result"][self.DEVICE_1]["created"] == []
+            assert result["result"][self.DEVICE_1]["updated"] == []
+            assert set(result["result"][self.DEVICE_1]["in_sync"]) == self.DEVICE_1_ASNS
 
     def test_without_rir_updates_existing_and_skips_creation(
         self, nfclient: Any
@@ -686,8 +686,8 @@ class TestSyncBgpAsn:
         response = self._sync(nfclient)
 
         for result in self._successful_results(response, allow_errors=True):
-            assert result["result"]["global"]["created"] == []
-            assert result["result"]["global"]["updated"] == [4200000101]
+            assert result["result"][self.DEVICE_1]["created"] == []
+            assert result["result"][self.DEVICE_1]["updated"] == [4200000101]
             assert any("no RIR provided" in error for error in result["errors"])
         transit = self.nb.ipam.asns.get(asn=4200000200)
         local_asn = self.nb.ipam.asns.get(asn=4200000101)
@@ -713,7 +713,7 @@ class TestSyncBgpAsn:
         response = self._sync(nfclient, preserve_description=False)
 
         for result in self._successful_results(response, allow_errors=True):
-            assert result["result"]["global"]["updated"] == [4200000200]
+            assert result["result"][self.DEVICE_1]["updated"] == [4200000200]
             assert any("no RIR provided" in error for error in result["errors"])
         transit = self.nb.ipam.asns.get(asn=4200000200)
         assert transit.description == "TRANSIT"
@@ -723,9 +723,10 @@ class TestSyncBgpAsn:
             nfclient, devices=[self.DEVICE_1, self.DEVICE_2], rir=self.RIR
         )
 
-        expected_asns = self.DEVICE_1_ASNS | self.DEVICE_2_ASNS
         for result in self._successful_results(response):
-            assert set(result["result"]["global"]["created"]) == expected_asns
+            assert set(result["result"]) == {self.DEVICE_1, self.DEVICE_2}
+            assert set(result["result"][self.DEVICE_1]["created"]) == self.DEVICE_1_ASNS
+            assert set(result["result"][self.DEVICE_2]["created"]) == self.DEVICE_2_ASNS
         transit = self.nb.ipam.asns.get(asn=4200000200)
         assert transit.description == "TRANSIT"
         assert self._custom_field_device_ids(transit, "devices") == set()
@@ -738,6 +739,77 @@ class TestSyncBgpAsn:
         assert self.nb.ipam.asns.get(asn=4200000301).description == "CUSTOMER_A"
         assert self.nb.ipam.asns.get(asn=4200000302).description == "CUSTOMER_B"
 
+        assert len(list(self.nb.ipam.asns.filter(asn=4200000200))) == 1
+        coordinated = nfclient.run_job(
+            "netbox",
+            "sync_all",
+            workers="any",
+            kwargs={
+                "devices": [self.DEVICE_1, self.DEVICE_2],
+                "sync_kwargs": {
+                    **{
+                        task: False
+                        for task in (
+                            "sync_device_inventory",
+                            "sync_device_prefixes",
+                            "sync_device_interfaces",
+                            "sync_vrfs",
+                            "sync_vlans",
+                            "sync_device_ip",
+                            "sync_vrrp",
+                            "sync_bgp_community",
+                            "sync_bgp_peerings",
+                        )
+                    },
+                    "sync_bgp_asn": {"rir": self.RIR},
+                },
+            },
+        )
+        for result in self._successful_results(coordinated):
+            assert (
+                set(result["result"][self.DEVICE_1]["bgp_asns"]["in_sync"])
+                == self.DEVICE_1_ASNS
+            )
+            assert (
+                set(result["result"][self.DEVICE_2]["bgp_asns"]["in_sync"])
+                == self.DEVICE_2_ASNS
+            )
+            assert result["result"][self.DEVICE_1]["bgp_peerings"] is None
+        local = self.nb.ipam.asns.get(asn=4200000101)
+        local.description = "changed"
+        local.save()
+        checks = nfclient.run_job(
+            "netbox",
+            "check_device_sync",
+            workers="any",
+            kwargs={
+                "devices": [self.DEVICE_1, self.DEVICE_2],
+                **{
+                    f"check_{category}": False
+                    for category in (
+                        "inventory",
+                        "interfaces",
+                        "vrfs",
+                        "vlans",
+                        "prefixes",
+                        "ip_addresses",
+                        "vrrp",
+                        "bgp_communities",
+                        "bgp_peerings",
+                    )
+                },
+                "sync_kwargs": {"sync_bgp_asn": {"preserve_description": False}},
+            },
+        )
+        for result in self._successful_results(checks):
+            assert result["result"][self.DEVICE_1]["bgp_asns"] is False
+            assert result["result"][self.DEVICE_2]["bgp_asns"] is True
+            assert result["result"][self.DEVICE_1]["in_sync"] is False
+            assert result["result"][self.DEVICE_2]["in_sync"] is True
+            assert set(result["diff"]["bgp_asns"][self.DEVICE_1]["update"]) == {
+                "4200000101"
+            }
+
     def test_custom_device_field_and_range_filter(self, nfclient: Any) -> None:
         response = self._sync(
             nfclient,
@@ -747,7 +819,7 @@ class TestSyncBgpAsn:
         )
 
         for result in self._successful_results(response):
-            assert result["result"]["global"]["created"] == [4200000301]
+            assert result["result"][self.DEVICE_1]["created"] == [4200000301]
         customer = self.nb.ipam.asns.get(asn=4200000301)
         assert self._custom_field_device_ids(customer, "asn_devices") == set()
         assert self.nb.ipam.asns.get(asn=4200000101) is None
@@ -759,7 +831,7 @@ class TestSyncBgpAsn:
         )
 
         for result in self._successful_results(response):
-            assert set(result["result"]["global"]["created"]) == self.DEVICE_1_ASNS
+            assert set(result["result"][self.DEVICE_1]["created"]) == self.DEVICE_1_ASNS
         transit = self.nb.ipam.asns.get(asn=4200000200)
         assert "does_not_exist" not in transit.custom_fields
 
@@ -767,9 +839,8 @@ class TestSyncBgpAsn:
         response = self._sync(nfclient, devices=[], FR="fn-ceos-lf-[12]", rir=self.RIR)
 
         for result in self._successful_results(response):
-            assert set(result["result"]["global"]["created"]) == (
-                self.DEVICE_1_ASNS | self.DEVICE_2_ASNS
-            )
+            assert set(result["result"][self.DEVICE_1]["created"]) == self.DEVICE_1_ASNS
+            assert set(result["result"][self.DEVICE_2]["created"]) == self.DEVICE_2_ASNS
 
     def test_unmatched_netbox_asn_is_not_deleted(self, nfclient: Any) -> None:
         rir = self.nb.ipam.rirs.get(name=self.RIR)
@@ -778,6 +849,6 @@ class TestSyncBgpAsn:
         response = self._sync(nfclient, rir=self.RIR)
 
         for result in self._successful_results(response):
-            assert result["result"]["global"]["deleted"] == []
-            assert result["diff"]["global"]["delete"] == []
+            assert result["result"][self.DEVICE_1]["deleted"] == []
+            assert result["diff"][self.DEVICE_1]["delete"] == []
         assert self.nb.ipam.asns.get(asn=4200000999) is not None

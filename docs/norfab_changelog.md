@@ -1,3 +1,15 @@
+# 0.26.5 (Draft)
+
+## BUGS
+
+1. Fixed Netbox `check_device_sync` reporting VLAN, VRF, prefix, or BGP community drift for unrelated devices in the same batch. The corresponding sync tasks and `sync_bgp_asn` return results and diffs keyed by device, and `sync_all` selects each device's own actions. Callers reading these task results must select the device before accessing actions.
+
+## ENHANCEMENTS
+
+1. Netbox `sync_all` and `check_device_sync` run BGP ASN synchronization before peerings, followed by communities. Results include `bgp_asns`; use `check_bgp_asns=False` to disable ASN checking or `sync_kwargs={"sync_bgp_asn": False}` to skip the sync stage. Creating missing ASNs requires the ASN stage's `rir` argument.
+
+---
+
 # 0.26.4
 
 ## FEATURES
@@ -7,7 +19,6 @@
 ## ENHANCEMENTS
 
 1. Enhanced FakeNOS `inspect_networks` to return a controlled `no_match` result with an explicit message when a specifically requested network is not running, instead of exposing an internal `KeyError`. Detailed queries return `{}` and summary queries return `[]`; focused coverage covers both modes.
-2. Netbox `sync_vlans` returns per-device results and diffs. `sync_all` consumes them and `check_device_sync` evaluates VLAN drift per device.
 
 ## BUGS
 

@@ -17,16 +17,22 @@ fixed sequence:
 5. **vlans** — calls `sync_vlans`
 6. **ip_addresses** — calls `sync_device_ip`
 7. **vrrp** — calls `sync_vrrp`
-8. **bgp_communities** - calls `sync_bgp_community`
+8. **bgp_asns** - calls `sync_bgp_asn`
 9. **bgp_peerings** — calls `sync_bgp_peerings`
+10. **bgp_communities** - calls `sync_bgp_community`
 
 ## How It Works
 
-The `sync_all` task orchestrates nine subordinate sync tasks in sequence. Each task collects live device data,
+The `sync_all` task orchestrates ten subordinate sync tasks in sequence. Each task collects live device data,
 compares it against NetBox state, and applies reconciliation operations. When `dry_run=True`, all tasks preview changes
 without writing. When `with_approval=True`, each stage waits for user confirmation before applying changes.
 If VLAN synchronization fails, `sync_all` returns immediately and does not run
-IP address, VRRP, BGP community, or BGP peering synchronization.
+IP address, VRRP, BGP community, BGP ASN, or BGP peering synchronization.
+
+ASN synchronization runs immediately before peerings. Creating missing ASNs
+requires an existing RIR in `sync_kwargs["sync_bgp_asn"]["rir"]`. Without it,
+existing ASNs can still be updated, but missing ASN creation is skipped. Use
+`sync_kwargs={"sync_bgp_asn": False}` to skip the ASN stage.
 
 ## Execution Modes
 
@@ -83,6 +89,9 @@ sync_device_ip:
 sync_vrrp:
   name_template: "{{ device }}-{{ interface }}-vrrp-{{ group_id }}"
 
+sync_bgp_asn:
+  rir: Private
+
 sync_bgp_peerings:
   process_deletions: true
   status: active
@@ -91,7 +100,7 @@ sync_bgp_peerings:
 
 The supported keys are `sync_device_inventory`, `sync_vlans`,
 `sync_device_prefixes`, `sync_vrfs`, `sync_device_interfaces`,
-`sync_bgp_community`, `sync_device_ip`, `sync_vrrp`, and `sync_bgp_peerings`. Refer to each
+`sync_bgp_community`, `sync_bgp_asn`, `sync_device_ip`, `sync_vrrp`, and `sync_bgp_peerings`. Refer to each
 task's documentation for its accepted arguments. Missing keys run with the
 subordinate task's defaults. Set a key to `false` to skip that task and continue
 with the next stage:
@@ -107,9 +116,9 @@ at the `sync_all` level rather than repeating them inside a task dictionary.
 
 ## Output
 
-Both coordinated tasks include inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities, and BGP peerings. Every selected device has all nine category keys. Disabled categories are `None`; failed categories are `False`. Sync results contain child task summaries or dry-run previews, while checks return booleans for drift state. The `diff` dictionary retains child dry-run details under the same category keys, with `None` for unexecuted checks or stages. MAC synchronization is available through its standalone task.
+Both coordinated tasks include inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities, BGP ASNs, and BGP peerings. Every selected device has all ten category keys. Disabled categories are `None`; failed categories are `False`. Sync results contain child task summaries or dry-run previews, while checks return booleans for drift state. The `diff` dictionary retains child dry-run details under the same category keys, with `None` for unexecuted checks or stages. MAC synchronization is available through its standalone task.
 
-The result structure aggregates the outcomes of all nine subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox. Prefix and VRF results describe shared NetBox objects, so the same shared result is included under each selected device. The VLAN category contains only the current device's VLAN actions by scope and interface actions. The VRF category retains separate `vrfs`, `route_targets`, `routing_policies`, and `interfaces` sections. Each `interfaces` section contains only the current device.
+The result structure aggregates the outcomes of all ten subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox. Prefix results contain only prefixes reported by the current device. The VLAN category contains only the current device's VLAN actions by scope and interface actions. The VRF category retains separate `vrfs`, `route_targets`, `routing_policies`, and `interfaces` sections. VRF actions are reported only for devices observing the VRF. Interface actions are directly under `interfaces`.
 
 ```python
 {
@@ -163,12 +172,10 @@ The result structure aggregates the outcomes of all nine subordinate sync tasks.
                     "in_sync": [],
                 },
                 "interfaces": {
-                    "ceos-spine-1": {
-                        "create": [],
-                        "update": { ... },
-                        "delete": [],
-                        "in_sync": [ ... ],
-                    },
+                    "create": [],
+                    "update": { ... },
+                    "delete": [],
+                    "in_sync": [ ... ],
                 },
             },
             "interfaces": {
@@ -189,6 +196,7 @@ The result structure aggregates the outcomes of all nine subordinate sync tasks.
                 "deleted": [ ... ],
                 "in_sync": [ ... ],
             },
+            "bgp_asns": {"created": [ ... ], "updated": [ ... ], "deleted": [], "in_sync": [ ... ]},
             "bgp_peerings": {
                 "create":  { ... },
                 "update":  { ... },
@@ -208,7 +216,7 @@ When `dry_run=True` the same structure is returned but no changes are written to
 
 === "CLI"
 
-    Preview all nine sync categories:
+    Preview all ten sync categories:
 
     ```
     nf#netbox sync all devices ceos-spine-1 ceos-spine-2 dry-run
@@ -275,7 +283,7 @@ nf# man tree netbox.sync.all
 root
 └── netbox:    Netbox service
     └── sync:    Sync Netbox data
-        └── all:    Sync inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities and BGP peerings
+        └── all:    Sync inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities, BGP ASNs and BGP peerings
             ├── timeout:    Job timeout
             ├── workers:    Filter worker to target, default 'any'
             ├── verbose-result:    Control output details, default 'False'

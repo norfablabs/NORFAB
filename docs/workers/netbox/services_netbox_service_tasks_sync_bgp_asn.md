@@ -36,9 +36,23 @@ Newly created ASNs still receive the parsed live description when available.
 
 ## Output
 
-Results are grouped under `global` and contain `created`, `updated`, `deleted`,
+Results are keyed by reporting device and contain `created`, `updated`, `deleted`,
 and `in_sync` ASN lists. Dry-run output uses `create`, `update`, `delete`, and
 `in_sync`. The `delete` list is always empty.
+Local and remote ASNs appear under each device observing them. Shared ASNs are
+written once. Device custom-field associations still include only local ASNs.
+
+```json
+{
+  "edge-1": {
+    "created": [65001],
+    "updated": [],
+    "deleted": [],
+    "in_sync": [65002]
+  }
+}
+```
+
 
 ## Bulk Request Batching
 

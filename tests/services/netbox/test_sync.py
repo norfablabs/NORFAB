@@ -135,20 +135,20 @@ def test_sync_action_summary_supports_string_and_integer_identifiers() -> None:
     ],
 )
 def test_sync_result_models_accept_typed_live_action_maps(model: Any) -> None:
-    result = model.model_validate(
-        {
-            "result": {
-                "scope": netbox_models.SyncActionSummary().model_dump(),
-            }
-        }
-    )
-
-    assert result.result.root["scope"].model_dump() == {
-        "created": [],
-        "updated": [],
-        "deleted": [],
-        "in_sync": [],
-    }
+    actions = netbox_models.SyncActionSummary().model_dump()
+    payload = {"scope": actions}
+    if model is netbox_models.SyncBgpAsnResult:
+        payload = {"device-1": actions}
+    elif model is netbox_models.SyncBgpCommunityResult:
+        payload = {"device-1": {"communities": actions}}
+    result = model.model_validate({"result": payload})
+    if model is netbox_models.SyncBgpAsnResult:
+        actual = result.result["device-1"]
+    elif model is netbox_models.SyncBgpCommunityResult:
+        actual = result.result["device-1"]["communities"]
+    else:
+        actual = result.result.root["scope"].model_dump()
+    assert actual == actions
 
 
 @pytest.mark.netbox_worker
@@ -191,15 +191,29 @@ def test_netbox_inventory_timeout_and_retry_model() -> None:
 class TestSyncAllOrchestration:
     TASKS = [
         ("sync_device_inventory", {"device-1": {}}),
-        ("sync_device_prefixes", {"created": [], "updated": [], "in_sync": []}),
+        (
+            "sync_device_prefixes",
+            {
+                "device-1": {"created": [], "updated": [], "in_sync": []},
+                "other-device": {},
+            },
+        ),
         ("sync_device_interfaces", {"device-1": {}}),
         (
             "sync_vrfs",
             {
-                "vrfs": {},
-                "route_targets": {},
-                "routing_policies": {},
-                "interfaces": {"device-1": {}, "other-device": {}},
+                "device-1": {
+                    "vrfs": {},
+                    "route_targets": {},
+                    "routing_policies": {},
+                    "interfaces": {},
+                },
+                "other-device": {
+                    "vrfs": {},
+                    "route_targets": {},
+                    "routing_policies": {},
+                    "interfaces": {},
+                },
             },
         ),
         (
@@ -211,8 +225,12 @@ class TestSyncAllOrchestration:
         ),
         ("sync_device_ip", {"device-1": {}}),
         ("sync_vrrp", {"device-1": {}}),
-        ("sync_bgp_community", {"route_targets": {}, "communities": {}}),
+        ("sync_bgp_asn", {"device-1": {}}),
         ("sync_bgp_peerings", {"device-1": {}}),
+        (
+            "sync_bgp_community",
+            {"device-1": {"route_targets": {}, "communities": {}}, "other-device": {}},
+        ),
     ]
     RESULT_CATEGORIES = {
         "sync_device_inventory": "inventory",
@@ -223,6 +241,7 @@ class TestSyncAllOrchestration:
         "sync_device_ip": "ip_addresses",
         "sync_vrrp": "vrrp",
         "sync_bgp_community": "bgp_communities",
+        "sync_bgp_asn": "bgp_asns",
         "sync_bgp_peerings": "bgp_peerings",
     }
 
@@ -238,7 +257,8 @@ class TestSyncAllOrchestration:
                 worker,
                 task_name,
                 lambda _task_name=task_name, _result=task_result, **kwargs: (
-                    calls.append(_task_name) or Result(task=_task_name, result=_result)
+                    calls.append(_task_name)
+                    or Result(task=_task_name, result=_result, diff={"device-1": {}})
                 ),
             )
         return worker
@@ -258,6 +278,31 @@ class TestSyncAllOrchestration:
         )
 
         assert calls == [task_name for task_name, _ in self.TASKS]
+        check_calls = []
+        NetboxDevicesTasks.check_device_sync(
+            self._worker(check_calls),
+            self._job(),
+            devices=["device-1"],
+            **{
+                f"check_{category}": category
+                in ("bgp_asns", "bgp_peerings", "bgp_communities")
+                for category in self.RESULT_CATEGORIES.values()
+            },
+        )
+        assert check_calls == [
+            "sync_bgp_asn",
+            "sync_bgp_peerings",
+            "sync_bgp_community",
+        ]
+        assert result.result["device-1"]["bgp_communities"] == {
+            "route_targets": {},
+            "communities": {},
+        }
+        assert result.result["device-1"]["prefixes"] == {
+            "created": [],
+            "updated": [],
+            "in_sync": [],
+        }
         assert result.result["device-1"]["vlans"] == {
             "vlans": {"site:test": {}},
             "interfaces": {},
@@ -266,7 +311,7 @@ class TestSyncAllOrchestration:
             "vrfs": {},
             "route_targets": {},
             "routing_policies": {},
-            "interfaces": {"device-1": {}},
+            "interfaces": {},
         }
 
     def test_check_sync_keeps_routing_policy_plan(self) -> None:
@@ -281,17 +326,20 @@ class TestSyncAllOrchestration:
             "routing_policies": {"create": ["RPL1"]},
             "interfaces": {},
         }
-        worker.sync_vrfs = lambda **kwargs: Result(task="sync_vrfs", diff=vrf_plan)
+        worker.sync_vrfs = lambda **kwargs: Result(
+            task="sync_vrfs", diff={"device-1": vrf_plan, "device-2": {}}
+        )
 
         result = NetboxDevicesTasks.check_device_sync(
             worker,
             self._job(),
-            devices=["device-1"],
+            devices=["device-1", "device-2"],
             check_inventory=False,
             check_interfaces=False,
             check_vlans=False,
             check_prefixes=False,
             check_ip_addresses=False,
+            check_bgp_asns=False,
             check_bgp_peerings=False,
             check_bgp_communities=False,
             check_vrrp=False,
@@ -302,7 +350,9 @@ class TestSyncAllOrchestration:
             "vrfs": False,
             "in_sync": False,
         }
-        assert result.diff["vrfs"]["routing_policies"]["create"] == ["RPL1"]
+        assert result.result["device-2"]["vrfs"] is True
+        assert result.result["device-2"]["in_sync"] is True
+        assert result.diff["vrfs"]["device-1"]["routing_policies"]["create"] == ["RPL1"]
 
     def test_check_sync_detects_route_target_plan(self) -> None:
         worker = self._worker([])
@@ -312,17 +362,20 @@ class TestSyncAllOrchestration:
             "routing_policies": {"create": [], "update": {}, "delete": []},
             "interfaces": {},
         }
-        worker.sync_vrfs = lambda **kwargs: Result(task="sync_vrfs", diff=vrf_plan)
+        worker.sync_vrfs = lambda **kwargs: Result(
+            task="sync_vrfs", diff={"device-1": vrf_plan, "device-2": {}}
+        )
 
         result = NetboxDevicesTasks.check_device_sync(
             worker,
             self._job(),
-            devices=["device-1"],
+            devices=["device-1", "device-2"],
             check_inventory=False,
             check_interfaces=False,
             check_vlans=False,
             check_prefixes=False,
             check_ip_addresses=False,
+            check_bgp_asns=False,
             check_bgp_peerings=False,
             check_bgp_communities=False,
             check_vrrp=False,
@@ -333,7 +386,9 @@ class TestSyncAllOrchestration:
             "vrfs": False,
             "in_sync": False,
         }
-        assert result.diff["vrfs"]["route_targets"]["create"] == ["65000:1"]
+        assert result.result["device-2"]["vrfs"] is True
+        assert result.result["device-2"]["in_sync"] is True
+        assert result.diff["vrfs"]["device-1"]["route_targets"]["create"] == ["65000:1"]
 
     @pytest.mark.parametrize(
         "ignore_deletions,create,expected",
@@ -364,6 +419,7 @@ class TestSyncAllOrchestration:
             check_vlans=False,
             check_prefixes=False,
             check_ip_addresses=False,
+            check_bgp_asns=False,
             check_bgp_peerings=False,
             check_bgp_communities=False,
             check_vrrp=False,
@@ -394,19 +450,20 @@ class TestSyncAllOrchestration:
             },
         }
         worker.sync_bgp_community = lambda **kwargs: Result(
-            task="sync_bgp_community", diff=community_plan
+            task="sync_bgp_community", diff={"device-1": community_plan, "device-2": {}}
         )
 
         result = NetboxDevicesTasks.check_device_sync(
             worker,
             self._job(),
-            devices=["device-1"],
+            devices=["device-1", "device-2"],
             check_inventory=False,
             check_interfaces=False,
             check_vrfs=False,
             check_vlans=False,
             check_prefixes=False,
             check_ip_addresses=False,
+            check_bgp_asns=False,
             check_bgp_peerings=False,
             check_vrrp=False,
         )
@@ -416,7 +473,9 @@ class TestSyncAllOrchestration:
             "bgp_communities": False,
             "in_sync": False,
         }
-        assert result.diff["bgp_communities"] == community_plan
+        assert result.result["device-2"]["bgp_communities"] is True
+        assert result.result["device-2"]["in_sync"] is True
+        assert result.diff["bgp_communities"]["device-1"] == community_plan
 
     def test_check_sync_detects_per_device_vrrp_plan(self) -> None:
         worker = self._worker([])
@@ -446,6 +505,7 @@ class TestSyncAllOrchestration:
             check_vlans=False,
             check_prefixes=False,
             check_ip_addresses=False,
+            check_bgp_asns=False,
             check_bgp_peerings=False,
             check_bgp_communities=False,
         )
@@ -486,6 +546,7 @@ class TestSyncAllOrchestration:
             check_vlans=False,
             check_prefixes=False,
             check_ip_addresses=False,
+            check_bgp_asns=False,
             check_bgp_peerings=False,
             check_bgp_communities=False,
             sync_kwargs={
@@ -522,6 +583,7 @@ sync_device_interfaces:
             check_vlans=False,
             check_prefixes=False,
             check_ip_addresses=False,
+            check_bgp_asns=False,
             check_bgp_peerings=False,
             check_bgp_communities=False,
             check_vrrp=False,
@@ -549,7 +611,9 @@ sync_device_interfaces:
 
     def test_dry_run_preserves_child_data(self) -> None:
         worker = self._worker([])
-        preview = {"route_targets": {"create": ["65000:1"]}, "communities": {}}
+        preview = {
+            "device-1": {"route_targets": {"create": ["65000:1"]}, "communities": {}}
+        }
 
         def sync_communities(**kwargs: Any) -> Result:
             assert kwargs["dry_run"] is True
@@ -559,7 +623,7 @@ sync_device_interfaces:
         result = NetboxDevicesTasks.sync_all(
             worker, self._job(), devices=["device-1"], dry_run=True
         )
-        assert result.result["device-1"]["bgp_communities"] == preview
+        assert result.result["device-1"]["bgp_communities"] == preview["device-1"]
         assert result.diff["bgp_communities"] == preview
         assert set(result.diff) == set(self.RESULT_CATEGORIES.values())
 
@@ -1311,6 +1375,7 @@ class TestCheckDeviceSync:
         "vlans",
         "prefixes",
         "ip_addresses",
+        "bgp_asns",
         "bgp_peerings",
         "bgp_communities",
         "vrrp",
@@ -1401,6 +1466,7 @@ class TestCheckDeviceSync:
                 "check_vlans": False,
                 "check_prefixes": False,
                 "check_ip_addresses": False,
+                "check_bgp_asns": False,
                 "check_bgp_peerings": False,
                 "check_bgp_communities": False,
                 "check_vrrp": False,
@@ -1440,6 +1506,7 @@ class TestCheckDeviceSync:
                 "check_vlans": False,
                 "check_prefixes": False,
                 "check_ip_addresses": True,
+                "check_bgp_asns": False,
                 "check_bgp_peerings": False,
                 "check_bgp_communities": False,
                 "check_vrrp": False,
@@ -1479,6 +1546,7 @@ class TestCheckDeviceSync:
                 "check_vlans": False,
                 "check_prefixes": False,
                 "check_ip_addresses": False,
+                "check_bgp_asns": False,
                 "check_bgp_peerings": False,
                 "check_bgp_communities": False,
                 "check_vrrp": False,
@@ -1538,7 +1606,7 @@ class TestCheckDeviceSync:
 
 @pytest.mark.netbox_sync_all
 class TestSyncAll:
-    """Verify sync_all calls all nine sync tasks in sequence.
+    """Verify sync_all calls all ten sync tasks in sequence.
 
     Each test performs a full cleanup before and after via setup_method/teardown_method
     and uses out-of-band pynetbox queries to verify NetBox state directly.
@@ -1553,6 +1621,7 @@ class TestSyncAll:
         "bgp_communities",
         "ip_addresses",
         "vrrp",
+        "bgp_asns",
         "bgp_peerings",
     }
     NETBOX_SERIALS = {
@@ -1659,10 +1728,12 @@ class TestSyncAll:
         """Run sync_all and return the result dict."""
         extra_kwargs.setdefault("sync_kwargs", {"sync_vrfs": False})
         sync_kwargs = extra_kwargs["sync_kwargs"]
+        if isinstance(sync_kwargs, dict):
+            sync_kwargs = {"sync_bgp_asn": False, **sync_kwargs}
         extra_kwargs["sync_kwargs"] = (
             sync_kwargs
             if extra_kwargs.get("dry_run")
-            else {"sync_bgp_community": False, **sync_kwargs}
+            else {"sync_bgp_asn": False, "sync_bgp_community": False, **sync_kwargs}
         )
         return nfclient.run_job(
             "netbox",
@@ -1704,7 +1775,7 @@ class TestSyncAll:
                     f"{self.ALL_CATEGORIES - device_data.keys()}"
                 )
                 for category in self.ALL_CATEGORIES:
-                    if category == "vrfs":
+                    if category in ("vrfs", "bgp_asns"):
                         assert device_data[category] is None
                         continue
                     assert isinstance(device_data[category], dict), (

@@ -187,15 +187,15 @@ class TestSyncDevicePrefixes:
 
         for worker, result in ret.items():
             assert not result["failed"], f"{worker} failed - {result}"
-            assert result["result"] == {
+            assert result["result"][self.DEVICE] == {
                 "created": [self.PREFIX_ONLY_PREFIX],
                 "updated": [],
                 "deleted": [],
                 "in_sync": [],
             }
-            assert set(result["diff"]["global"]) == self.DIFF_KEYS
-            assert result["diff"]["global"]["create"] == [self.PREFIX_ONLY_PREFIX]
-            assert result["diff"]["global"]["delete"] == []
+            assert set(result["diff"][self.DEVICE]) == self.DIFF_KEYS
+            assert result["diff"][self.DEVICE]["create"] == [self.PREFIX_ONLY_PREFIX]
+            assert result["diff"][self.DEVICE]["delete"] == []
 
         nb = get_pynetbox(nfclient)
         assert nb.ipam.prefixes.get(prefix=self.PREFIX_ONLY_PREFIX) is not None
@@ -219,9 +219,9 @@ class TestSyncDevicePrefixes:
 
         for worker, result in ret.items():
             assert not result["failed"], f"{worker} failed - {result}"
-            assert result["result"]["created"] == [self.PREFIX_ONLY_PREFIX]
-            assert set(result["diff"]["global"]) == self.DIFF_KEYS
-            assert result["diff"]["global"]["create"] == [self.PREFIX_ONLY_PREFIX]
+            assert result["result"][self.DEVICE]["created"] == [self.PREFIX_ONLY_PREFIX]
+            assert set(result["diff"][self.DEVICE]) == self.DIFF_KEYS
+            assert result["diff"][self.DEVICE]["create"] == [self.PREFIX_ONLY_PREFIX]
         assert (
             get_pynetbox(nfclient).ipam.prefixes.get(prefix=self.PREFIX_ONLY_PREFIX)
             is None
@@ -239,13 +239,13 @@ class TestSyncDevicePrefixes:
 
         for worker, result in ret.items():
             assert not result["failed"], f"{worker} failed - {result}"
-            assert result["result"] == {
+            assert result["result"][self.DEVICE] == {
                 "created": [],
                 "updated": [],
                 "deleted": [],
                 "in_sync": [],
             }
-            assert result["diff"]["global"] == {
+            assert result["diff"][self.DEVICE] == {
                 "create": [],
                 "update": {},
                 "delete": [],
@@ -270,10 +270,10 @@ class TestSyncDevicePrefixes:
 
         for worker, result in included.items():
             assert not result["failed"], f"{worker} failed - {result}"
-            assert result["result"]["created"] == [self.ROUTED_PREFIX]
+            assert result["result"][self.DEVICE]["created"] == [self.ROUTED_PREFIX]
         for worker, result in excluded.items():
             assert not result["failed"], f"{worker} failed - {result}"
-            assert result["result"] == {
+            assert result["result"][self.DEVICE] == {
                 "created": [],
                 "updated": [],
                 "deleted": [],
@@ -297,16 +297,53 @@ class TestSyncDevicePrefixes:
         pprint.pprint(ret)
         for worker, result in ret.items():
             assert not result["failed"], f"{worker} failed - {result}"
-            assert result["result"]["created"] == []
-            assert result["result"]["updated"] == []
-            assert result["result"]["deleted"] == []
-            assert result["result"]["in_sync"] == [self.PREFIX_ONLY_PREFIX]
-            assert result["diff"]["global"] == {
+            assert result["result"][self.DEVICE]["created"] == []
+            assert result["result"][self.DEVICE]["updated"] == []
+            assert result["result"][self.DEVICE]["deleted"] == []
+            assert result["result"][self.DEVICE]["in_sync"] == [self.PREFIX_ONLY_PREFIX]
+            assert result["diff"][self.DEVICE] == {
                 "create": [],
                 "update": {},
                 "delete": [],
                 "in_sync": [self.PREFIX_ONLY_PREFIX],
             }
+
+        nb = get_pynetbox(nfclient)
+        nb.ipam.prefixes.get(prefix=self.PREFIX_ONLY_PREFIX).delete()
+        nb.ipam.prefixes.create(prefix=self.ANYCAST_PREFIX)
+        checks = nfclient.run_job(
+            "netbox",
+            "check_device_sync",
+            workers="any",
+            kwargs={
+                "devices": [self.DEVICE, "fn-prefix-sp-2"],
+                "check_inventory": False,
+                "check_interfaces": False,
+                "check_vrfs": False,
+                "check_vlans": False,
+                "check_ip_addresses": False,
+                "check_vrrp": False,
+                "check_bgp_asns": False,
+                "check_bgp_peerings": False,
+                "check_bgp_communities": False,
+                "sync_kwargs": {
+                    "sync_device_prefixes": {
+                        "filter_by_name": "Loopback25[01]",
+                        "filter_by_prefix": "10.85.250.0/23",
+                    }
+                },
+            },
+        )
+        for result in checks.values():
+            assert not result["failed"], result
+            assert result["result"][self.DEVICE]["prefixes"] is False
+            assert result["result"][self.DEVICE]["in_sync"] is False
+            assert result["result"]["fn-prefix-sp-2"]["prefixes"] is True
+            assert result["result"]["fn-prefix-sp-2"]["in_sync"] is True
+            assert result["diff"]["prefixes"][self.DEVICE]["create"] == [
+                self.PREFIX_ONLY_PREFIX
+            ]
+            assert result["diff"]["prefixes"]["fn-prefix-sp-2"]["create"] == []
 
     def test_ignore_vrf_reuses_prefix_in_other_vrf(self, nfclient):
         nb = get_pynetbox(nfclient)
@@ -324,7 +361,9 @@ class TestSyncDevicePrefixes:
         pprint.pprint(ret)
         for worker, result in ret.items():
             assert not result["failed"], f"{worker} failed - {result}"
-            assert result["result"]["in_sync"] == [self.CONTROL_PLANE_PREFIX]
+            assert result["result"][self.DEVICE]["in_sync"] == [
+                self.CONTROL_PLANE_PREFIX
+            ]
 
         prefixes = list(nb.ipam.prefixes.filter(prefix=self.CONTROL_PLANE_PREFIX))
         assert len(prefixes) == 1
@@ -348,7 +387,9 @@ class TestSyncDevicePrefixes:
         pprint.pprint(ret)
         for worker, result in ret.items():
             assert not result["failed"], f"{worker} failed - {result}"
-            assert result["result"]["created"] == [self.CONTROL_PLANE_PREFIX]
+            assert result["result"][self.DEVICE]["created"] == [
+                self.CONTROL_PLANE_PREFIX
+            ]
 
         prefixes = list(nb.ipam.prefixes.filter(prefix=self.CONTROL_PLANE_PREFIX))
         by_vrf = {
@@ -367,7 +408,7 @@ class TestSyncDevicePrefixes:
         pprint.pprint(ret)
         for worker, result in ret.items():
             assert not result["failed"], f"{worker} failed - {result}"
-            assert result["result"]["created"] == [self.NEW_VRF_PREFIX]
+            assert result["result"][self.DEVICE]["created"] == [self.NEW_VRF_PREFIX]
 
         nb = get_pynetbox(nfclient)
         vrf = nb.ipam.vrfs.get(name=self.NEW_VRF)
@@ -388,8 +429,8 @@ class TestSyncDevicePrefixes:
         pprint.pprint(ret)
         for worker, result in ret.items():
             assert not result["failed"], f"{worker} failed - {result}"
-            assert result["result"]["updated"] == [self.PREFIX_ONLY_PREFIX]
-            assert self.PREFIX_ONLY_PREFIX in result["diff"]["global"]["update"]
+            assert result["result"][self.DEVICE]["updated"] == [self.PREFIX_ONLY_PREFIX]
+            assert self.PREFIX_ONLY_PREFIX in result["diff"][self.DEVICE]["update"]
 
         prefix = nb.ipam.prefixes.get(prefix=self.PREFIX_ONLY_PREFIX)
         assert prefix.scope.name == nb.dcim.devices.get(name=self.DEVICE).site.name
@@ -428,10 +469,13 @@ class TestSyncDevicePrefixes:
             pprint.pprint(ret)
             for worker, result in ret.items():
                 assert not result["failed"], f"{worker} failed - {result}"
-                assert result["result"]["created"] == [self.ANYCAST_PREFIX]
+                for device in ("fn-prefix-sp-1", "fn-prefix-sp-2"):
+                    assert result["result"][device]["created"] == [self.ANYCAST_PREFIX]
+                    assert result["diff"][device]["create"] == [self.ANYCAST_PREFIX]
 
             prefix = nb.ipam.prefixes.get(prefix=self.ANYCAST_PREFIX)
             assert prefix.scope.name == first_site.name
+            assert len(list(nb.ipam.prefixes.filter(prefix=self.ANYCAST_PREFIX))) == 1
         finally:
             first.update({"site": first_original_site})
             second.update(second_original_placement)
@@ -449,7 +493,9 @@ class TestSyncDevicePrefixes:
             pprint.pprint(ret)
             for worker, result in ret.items():
                 assert not result["failed"], f"{worker} failed - {result}"
-                assert result["result"]["created"] == [self.PREFIX_ONLY_PREFIX]
+                assert result["result"][self.DEVICE]["created"] == [
+                    self.PREFIX_ONLY_PREFIX
+                ]
 
             assert (
                 get_pynetbox(nfclient).ipam.prefixes.get(prefix=self.PREFIX_ONLY_PREFIX)

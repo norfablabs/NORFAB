@@ -6,8 +6,6 @@ from norfab.models import Result
 
 from .netbox_models import (
     NetboxFastApiArgs,
-    SyncActionSummary,
-    SyncActionSummaryMap,
     SyncBgpCommunityInput,
     SyncBgpCommunityResult,
 )
@@ -92,13 +90,13 @@ class NetboxBgpCommunityTasks:
             **kwargs: Nornir FFun host filters.
 
         Returns:
-            Result: Route-target and BGP community synchronization actions.
+            Result: Per-device route-target and BGP community synchronization actions.
         """
         devices = list(devices or [])
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:sync_bgp_community",
-            result=SyncActionSummaryMap().model_dump(),
+            result={},
             resources=[instance],
             dry_run=dry_run,
             diff={},
@@ -285,8 +283,16 @@ class NetboxBgpCommunityTasks:
         normalised_nb = {"route_targets": {}}
         nb_community_objects = {"route_targets": {}}
         community_key_data = {}
+        community_devices = {"route_targets": {}, "communities": {}}
+        for device in devices:
+            ret.result[device] = {}
+            ret.diff[device] = {}
 
         for sname, records in sorted(route_target_observations.items()):
+            # Track live contributors independently of merged Netbox device associations.
+            community_devices["route_targets"][sname] = {
+                record["device"] for record in records
+            }
             live_names = sorted(
                 {record["name"] for record in records if record["name"]}
             )
@@ -356,6 +362,9 @@ class NetboxBgpCommunityTasks:
 
             for record in bgp_community_observations:
                 sname = f"{record['value']}::{record['name'] or NO_COMMUNITY_NAME}"
+                community_devices["communities"].setdefault(sname, set()).add(
+                    record["device"]
+                )
                 community_key_data[sname] = {
                     "value": record["value"],
                     "name": record["name"],
@@ -497,6 +506,30 @@ class NetboxBgpCommunityTasks:
                 "delete": [],
                 "in_sync": sorted(actions["in_sync"]),
             }
+            # Attribute each batch action only to devices observing its exact live key.
+            actions = full_diff[scope]
+            owners = community_devices[scope]
+            for device in devices:
+                ret.diff[device][scope] = {
+                    "create": [
+                        name for name in actions["create"] if device in owners[name]
+                    ],
+                    "update": {
+                        name: value
+                        for name, value in actions["update"].items()
+                        if device in owners[name]
+                    },
+                    "delete": [],
+                    "in_sync": [
+                        name for name in actions["in_sync"] if device in owners[name]
+                    ],
+                }
+                ret.result[device][scope] = {
+                    "created": [],
+                    "updated": [],
+                    "deleted": [],
+                    "in_sync": ret.diff[device][scope]["in_sync"],
+                }
 
         create_count = sum(len(actions["create"]) for actions in full_diff.values())
         update_count = sum(len(actions["update"]) for actions in full_diff.values())
@@ -509,13 +542,8 @@ class NetboxBgpCommunityTasks:
         job.event(msg)
         log.info(f"{self.name} - {msg}")
 
-        ret.diff = full_diff
-        ret.result = {
-            scope: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
-            for scope, actions in full_diff.items()
-        }
         if dry_run:
-            ret.result = full_diff
+            ret.result = ret.diff
             ret.dry_run = True
             return ret
         if not sync_diff_has_changes(full_diff):
@@ -525,7 +553,7 @@ class NetboxBgpCommunityTasks:
             job, "BGP community sync", full_diff
         ):
             ret.status = "skipped"
-            ret.result = full_diff
+            ret.result = ret.diff
             ret.dry_run = True
             ret.messages.append("review declined; changes were not applied")
             return ret
@@ -559,7 +587,10 @@ class NetboxBgpCommunityTasks:
                     ret.errors.append(msg)
                     ret.failed = True
                     return ret
-                ret.result["route_targets"]["created"].extend(name for name, _ in batch)
+                # Report completed shared writes without duplicating Netbox requests.
+                for name, _ in batch:
+                    for device in community_devices["route_targets"][name]:
+                        ret.result[device]["route_targets"]["created"].append(name)
 
         update_items = [
             (
@@ -591,7 +622,9 @@ class NetboxBgpCommunityTasks:
                     ret.errors.append(msg)
                     ret.failed = True
                     return ret
-                ret.result["route_targets"]["updated"].extend(name for name, _ in batch)
+                for name, _ in batch:
+                    for device in community_devices["route_targets"][name]:
+                        ret.result[device]["route_targets"]["updated"].append(name)
 
         if has_bgp_plugin:
             create_snames = full_diff["communities"]["create"]
@@ -626,9 +659,9 @@ class NetboxBgpCommunityTasks:
                         ret.errors.append(msg)
                         ret.failed = True
                         return ret
-                    ret.result["communities"]["created"].extend(
-                        name for name, _ in batch
-                    )
+                    for name, _ in batch:
+                        for device in community_devices["communities"][name]:
+                            ret.result[device]["communities"]["created"].append(name)
 
             update_items = [
                 (
@@ -662,9 +695,9 @@ class NetboxBgpCommunityTasks:
                         ret.errors.append(msg)
                         ret.failed = True
                         return ret
-                    ret.result["communities"]["updated"].extend(
-                        name for name, _ in batch
-                    )
+                    for name, _ in batch:
+                        for device in community_devices["communities"][name]:
+                            ret.result[device]["communities"]["updated"].append(name)
 
         msg = (
             f"bgp community sync complete: {create_count} created, "
