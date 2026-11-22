@@ -219,8 +219,18 @@ class TestSyncAllOrchestration:
         (
             "sync_vlans",
             {
-                "device-1": {"vlans": {"site:test": {}}, "interfaces": {}},
-                "other-device": {"vlans": {}, "interfaces": {}},
+                "device-1": {
+                    "created": [],
+                    "updated": [],
+                    "deleted": [],
+                    "in_sync": ["site:test:50"],
+                },
+                "other-device": {
+                    "created": [],
+                    "updated": [],
+                    "deleted": [],
+                    "in_sync": [],
+                },
             },
         ),
         ("sync_device_ip", {"device-1": {}}),
@@ -258,7 +268,11 @@ class TestSyncAllOrchestration:
                 task_name,
                 lambda _task_name=task_name, _result=task_result, **kwargs: (
                     calls.append(_task_name)
-                    or Result(task=_task_name, result=_result, diff={"device-1": {}})
+                    or Result(
+                        task=_task_name,
+                        result=_result,
+                        diff={} if _task_name == "sync_vlans" else {"device-1": {}},
+                    )
                 ),
             )
         return worker
@@ -304,8 +318,10 @@ class TestSyncAllOrchestration:
             "in_sync": [],
         }
         assert result.result["device-1"]["vlans"] == {
-            "vlans": {"site:test": {}},
-            "interfaces": {},
+            "created": [],
+            "updated": [],
+            "deleted": [],
+            "in_sync": ["site:test:50"],
         }
         assert result.result["device-1"]["vrfs"] == {
             "vrfs": {},
@@ -1782,7 +1798,12 @@ class TestSyncAll:
                         f"{worker}:{device}:{category} result should be a dict, "
                         f"got {type(device_data[category])}"
                     )
-                assert set(device_data["vlans"]) == {"vlans", "interfaces"}
+                assert set(device_data["vlans"]) == {
+                    "created",
+                    "updated",
+                    "deleted",
+                    "in_sync",
+                }
 
     def test_sync_all_dry_run_no_writes(self, nfclient):
         """dry_run=True must not write any sync-all stage changes."""

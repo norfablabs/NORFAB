@@ -1,3 +1,16 @@
+# 0.26.6 (Draft)
+
+## BUGS
+
+1. Fixed Netbox `check_device_sync` marking matching devices out of sync when another device reports different attributes for a shared VLAN. 
+
+## CHANGES
+
+1. Netbox `sync_vlans` returns per-device `created`, `updated`, `deleted`, and `in_sync` lists containing only `scope:VID` VLAN references; interface membership changes report the affected VLANs as updated. Its per-device diff groups VLAN actions by scope and interface changes by interface name.
+2. Netbox `sync_vlans` combines tagged memberships when multiple live interface names map to the same NetBox interface.
+
+---
+
 # 0.26.5
 
 ## BUGS

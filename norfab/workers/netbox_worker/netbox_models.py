@@ -3012,17 +3012,10 @@ class SyncVlansInput(
         return self
 
 
-class SyncVlansResultPayload(BaseModel):
-    """VLAN and interface actions for one device."""
-
-    vlans: Dict[StrictStr, Any] = Field(default_factory=dict)
-    interfaces: Dict[StrictStr, Any] = Field(default_factory=dict)
-
-
 class SyncVlansResult(Result):
-    result: Dict[StrictStr, SyncVlansResultPayload] = Field(
-        {},
-        description="Device names mapped to VLAN actions by scope and interface actions",
+    result: Dict[StrictStr, SyncActionSummary] = Field(
+        default_factory=dict,
+        description="Per-device created, updated, deleted and in_sync VLAN references",
     )
 
 

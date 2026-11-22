@@ -118,7 +118,7 @@ at the `sync_all` level rather than repeating them inside a task dictionary.
 
 Both coordinated tasks include inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities, BGP ASNs, and BGP peerings. Every selected device has all ten category keys. Disabled categories are `None`; failed categories are `False`. Sync results contain child task summaries or dry-run previews, while checks return booleans for drift state. The `diff` dictionary retains child dry-run details under the same category keys, with `None` for unexecuted checks or stages. MAC synchronization is available through its standalone task.
 
-The result structure aggregates the outcomes of all ten subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox. Prefix results contain only prefixes reported by the current device. The VLAN category contains only the current device's VLAN actions by scope and interface actions. The VRF category retains separate `vrfs`, `route_targets`, `routing_policies`, and `interfaces` sections. VRF actions are reported only for devices observing the VRF. Interface actions are directly under `interfaces`.
+The result structure aggregates the outcomes of all ten subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox. Prefix results contain only prefixes reported by the current device. The VLAN category contains the current device's `created`, `updated`, `deleted`, and `in_sync` reference lists. The VRF category retains separate `vrfs`, `route_targets`, `routing_policies`, and `interfaces` sections. VRF actions are reported only for devices observing the VRF. Interface actions are directly under `interfaces`.
 
 ```python
 {
@@ -132,20 +132,10 @@ The result structure aggregates the outcomes of all ten subordinate sync tasks. 
                 "in_sync": [ ... ],
             },
             "vlans": {
-                "vlans": {
-                    "site:DC1": {
-                        "create": [ ... ],
-                        "update": { ... },
-                        "delete": [],
-                        "in_sync": [ ... ],
-                    },
-                },
-                "interfaces": {
-                    "create": [],
-                    "update": { ... },
-                    "delete": [],
-                    "in_sync": [ ... ],
-                },
+                "created": ["site:DC1:100"],
+                "updated": ["site:DC1:110"],
+                "deleted": [],
+                "in_sync": [],
             },
             "prefixes": {
                 "created": [ ... ],

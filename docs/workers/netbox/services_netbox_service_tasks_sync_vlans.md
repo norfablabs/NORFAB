@@ -12,40 +12,34 @@ first if their interfaces are missing.
 
 ## Output
 
-Each worker returns results by device. VLAN actions appear under
-`result[device].vlans`, grouped by scope such as `group:CAMPUS`, `site:HQ`,
-or `global`. Interface actions appear directly under `result[device].interfaces`.
-
-A dry run lists `create`, `update`, `delete`, and `in_sync` actions. Updates
-show `old_value` and `new_value` for each changed field.
-
-After applying changes, `result` lists completed actions. For example:
+Each worker returns `created`, `updated`, `deleted`, and `in_sync` lists per
+device. All references use `scope:VID`, such as `group:CAMPUS:100`. Membership
+changes place the affected VLAN in `updated`. A newly created VLAN can also appear
+in `updated` when its interface assignments change. A dry run reports planned
+actions; a live run reports completed actions.
 
 ```json
 {
   "leaf-1": {
-    "vlans": {
-      "group:CAMPUS": {
-        "created": [100],
-        "updated": [110],
-        "deleted": [],
-        "in_sync": [120]
-      }
-    },
-    "interfaces": {
-      "created": [],
-      "updated": ["Ethernet5"],
-      "deleted": [],
-      "in_sync": []
-    }
+    "created": ["group:CAMPUS:100"],
+    "updated": ["group:CAMPUS:100", "group:CAMPUS:110"],
+    "deleted": [],
+    "in_sync": ["group:CAMPUS:120"]
   }
 }
 ```
 
-The worker's `diff` retains the preview. Check `errors` for skipped VLANs,
-missing interfaces, and conflicting live data, even when the job completes.
-Membership-only changes appear under `interfaces`, not as VLAN updates.
-The task does not delete VLANs, so deletion lists remain empty.
+`diff[device].vlans[scope]` contains `create`, `update`, `delete`, and `in_sync`
+actions. VLAN updates are keyed by VID and show `old_value` and `new_value` for
+each field. `diff[device].interfaces` contains the same action keys, with updates
+keyed by interface name and showing previous and desired VLAN assignments.
+The diff retains this preview after writes are applied. Existing VLANs are matched
+by VID and scope independently of interface assignments.
+Check `errors` for skipped VLANs, missing interfaces, and conflicting live data.
+The task does not delete VLAN records, so `deleted` remains empty. Shared VLAN writes may appear under multiple contributing devices.
+
+Interface names mapped to the same NetBox interface contribute to one membership
+target; their tagged VLAN assignments are combined.
 
 ## Examples
 

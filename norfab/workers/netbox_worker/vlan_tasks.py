@@ -4,6 +4,7 @@ from collections.abc import Iterable
 from typing import Any, Union
 
 import yaml
+from deepdiff import DeepDiff
 from pydantic import TypeAdapter
 
 from norfab.core.worker import Job, Task
@@ -17,7 +18,6 @@ from .netbox_models import (
     CreateVlanResult,
     InterfaceMapRule,
     NetboxFastApiArgs,
-    SyncActionSummary,
     SyncVlansInput,
     SyncVlansResult,
     VlanMapRule,
@@ -28,7 +28,6 @@ from .netbox_worker_utilities import (
     merge_array_values,
     merge_resolved_custom_fields,
     review_sync_task_result,
-    sync_diff_has_changes,
 )
 
 log = logging.getLogger(__name__)
@@ -578,7 +577,8 @@ class NetboxVlansTasks:
             **kwargs: Nornir FFun host filters.
 
         Returns:
-            Result: Per-device VLAN actions by scope and interface actions.
+            Result: Per-device created, updated, deleted and in_sync references.
+                Diff contains per-device VLAN actions by scope and interface field changes.
         """
         instance = instance or self.default_instance
         ret = Result(
@@ -588,11 +588,11 @@ class NetboxVlansTasks:
             dry_run=dry_run,
             diff={},
         )
-
         message = f"starting VLAN sync using NetBox instance '{instance}'"
         job.event(message)
         log.info(message)
         nb = self._get_pynetbox(instance, branch=branch, job=job)
+        # Combine explicit devices and host filters without processing duplicates.
         selected_devices = set(devices or [])
         if kwargs:
             selected_devices.update(self.get_nornir_hosts(kwargs, timeout))
@@ -604,32 +604,11 @@ class NetboxVlansTasks:
             ret.errors.append(message)
             ret.failed = True
             return ret
-        # Resolve the requested devices once; later stages use this same object map.
-        netbox_devices = self.bulk_filter(
-            nb.dcim.devices,
-            name=devices,
-            fields="id,name,site,location,rack,device_type",
-        )
-        nb_devices = {str(device.name): device for device in netbox_devices}
-        for device in devices:
-            if device not in nb_devices:
-                message = f"device '{device}' not found in NetBox"
-                job.event(message, severity="ERROR")
-                log.error(message)
-                ret.errors.append(message)
-        if not nb_devices:
-            ret.failed = True
-            return ret
-        device_scopes = load_device_vlan_scopes(
-            nb_devices.values(), nb, self.bulk_filter
-        )
-        message = f"loaded VLAN scopes for {len(nb_devices)} NetBox device(s)"
-        job.event(message)
-        log.info(message)
+        # Prepare VID filters and mapping rules before collecting device data.
         selected_vids = set()
         for value in filter_by_vlan_ids or []:
             selected_vids.update(
-                int(vid) for vid in expand_alphanumeric_range(f"[{value}]")
+                (int(vid) for vid in expand_alphanumeric_range(f"[{value}]"))
             )
         try:
             if self.is_url(vlan_map):
@@ -648,42 +627,39 @@ class NetboxVlansTasks:
             ret.errors.append(message)
             ret.failed = True
             return ret
+        # Expand rule ranges once rather than for every VLAN match.
         interface_map = [dict(rule) for rule in interface_map or []]
-        # Expand rule VID ranges once and discard missing groups from later lookups.
         rules = []
         for rule in vlan_map or []:
             rule = dict(rule)
             expanded_vlan_ids = set()
             for value in rule.get("match_vlan_ids") or []:
                 expanded_vlan_ids.update(
-                    int(vid) for vid in expand_alphanumeric_range(f"[{value}]")
+                    (int(vid) for vid in expand_alphanumeric_range(f"[{value}]"))
                 )
             rule["expanded_vlan_ids"] = expanded_vlan_ids or None
             rules.append(rule)
-        configured_groups = {rule["set_vlan_group"] for rule in rules}
-        if vlan_group:
-            configured_groups.add(vlan_group)
-        group_records = []
-        if configured_groups:
-            group_records = self.bulk_filter(
-                nb.ipam.vlan_groups,
-                name=sorted(configured_groups),
-                fields="id,name,vid_ranges,scope_type,scope_id,scope",
-            )
-        groups_by_name = {str(group.name): group for group in group_records}
-        for name in sorted(configured_groups - groups_by_name.keys()):
-            message = f"vlan group '{name}' does not exist in NetBox"
-            job.event(message, severity="ERROR")
-            log.error(message)
-            ret.errors.append(message)
-        groups = {group.id: group for group in groups_by_name.values()}
-        message = (
-            f"validated {len(rules)} VLAN map rule(s) and loaded {len(groups)} group(s)"
-        )
-        job.event(message)
-        log.info(message)
 
-        # Collect all worker results before choosing names, mappings, and memberships.
+        # Load device context used to validate VLAN scopes.
+        netbox_devices = self.bulk_filter(
+            nb.dcim.devices,
+            name=devices,
+            fields="id,name,site,location,rack,device_type",
+        )
+        nb_devices = {str(device.name): device for device in netbox_devices}
+        for device in devices:
+            if device not in nb_devices:
+                message = f"device '{device}' not found in NetBox"
+                job.event(message, severity="ERROR")
+                log.error(message)
+                ret.errors.append(message)
+        if not nb_devices:
+            ret.failed = True
+            return ret
+        device_scopes = load_device_vlan_scopes(
+            nb_devices.values(), nb, self.bulk_filter
+        )
+        # Collect and normalize live VLANs before loading their NetBox matches.
         message = f"collecting live VLANs from {len(nb_devices)} device(s)"
         job.event(message)
         log.info(message)
@@ -701,10 +677,7 @@ class NetboxVlansTasks:
                 ret.resources_failed = sorted(
                     set(ret.resources_failed) | set(resources_failed)
                 )
-                message = (
-                    f"{worker} failed to fetch VLAN data from devices "
-                    f"{', '.join(sorted(resources_failed))}"
-                )
+                message = f"{worker} failed to fetch VLAN data from devices {', '.join(sorted(resources_failed))}"
                 job.event(message, severity="ERROR")
                 log.error(message)
                 ret.errors.append(message)
@@ -716,43 +689,24 @@ class NetboxVlansTasks:
                 continue
             for device, records in response["result"].items():
                 live_by_device.setdefault(device, []).extend(records)
-        if not live_by_device:
-            message = "no live VLAN data collected"
-            job.event(message, severity="ERROR")
-            log.error(message)
-            ret.errors.append(message)
-            ret.failed = True
-            return ret
-
-        device_vlan_ids = {device: {} for device in live_by_device}
-        # Keep empty results for devices whose live data contains no applicable VLANs.
-        for device in live_by_device:
-            ret.result[device] = {"vlans": {}, "interfaces": {}}
-            ret.diff[device] = {"vlans": {}, "interfaces": {}}
-
-        # Produce one record per device and VID while preserving parser order.
         live_vlans = []
         interface_names_by_device = {}
         for device, records in sorted(live_by_device.items()):
             device_model = str(nb_devices[device].device_type.model)
             interface_names = {}
+            # Merge duplicate parser records before choosing a scope.
             device_vlans = {}
             for record in records:
                 vid = record["vid"]
                 if selected_vids and vid not in selected_vids:
                     continue
-
                 for field in VLAN_MEMBERSHIP_FIELDS:
                     for live_interface in record[field]:
                         if live_interface in interface_names:
                             continue
                         interface_names[live_interface] = map_interface_name(
-                            live_interface,
-                            interface_map,
-                            device,
-                            device_model,
+                            live_interface, interface_map, device, device_model
                         )
-
                 name = record["name"].strip()
                 description = (record["description"] or "").strip()
                 vlan = device_vlans.setdefault(
@@ -771,81 +725,123 @@ class NetboxVlansTasks:
                     and name.casefold() != f"vlan{vid}".casefold()
                 ):
                     vlan["name"] = name
-                # Prefer useful text when duplicate records from one device differ.
-                if description and not vlan["description"]:
+                if description and (not vlan["description"]):
                     vlan["description"] = description
                 for field in VLAN_MEMBERSHIP_FIELDS:
                     for name in record[field]:
                         if name not in vlan[field]:
                             vlan[field].append(name)
-
+            # Match rules against the interface names used in NetBox.
             for vlan in device_vlans.values():
                 mapped_interfaces = []
                 for field in VLAN_MEMBERSHIP_FIELDS:
                     for name in vlan[field]:
                         mapped_interfaces.append(interface_names[name])
-                mapped = match_vlan_map(
-                    rules,
-                    vlan["vid"],
-                    vlan["name"],
-                    device,
-                    mapped_interfaces,
-                )
-                group_name = mapped or vlan_group
-                group = groups_by_name.get(group_name)
-                if group_name and group is None:
-                    continue
-                if require_vlan_group and not group_name:
-                    message = (
-                        f"skipping VLAN {vlan['vid']} from device '{device}': "
-                        "no VLAN group mapping found"
+                group_name = (
+                    match_vlan_map(
+                        rules, vlan["vid"], vlan["name"], device, mapped_interfaces
                     )
+                    or vlan_group
+                )
+                if require_vlan_group and (not group_name):
+                    message = f"skipping VLAN {vlan['vid']} from device '{device}': no VLAN group mapping found"
                     job.event(message, severity="ERROR")
                     log.error(message)
                     ret.errors.append(message)
                     continue
-                vlan["selected_group_id"] = group.id if group else None
+                vlan["selected_group_name"] = group_name
                 live_vlans.append(vlan)
             interface_names_by_device[device] = interface_names
-        message = (
-            f"normalized {len(live_vlans)} live VLAN record(s) from "
-            f"{len(live_by_device)} device(s)"
-        )
+        message = f"normalized {len(live_vlans)} live VLAN record(s) from {len(live_by_device)} device(s)"
         job.event(message)
         log.info(message)
-
-        # Fetch all same-VID candidates because scope, rather than name, selects identity.
+        # Load VLAN candidates, then all explicit and discovered groups together.
         vids = sorted({vlan["vid"] for vlan in live_vlans})
         candidates = []
         if vids:
             candidates = self.bulk_filter(
                 nb.ipam.vlans, vid=vids, fields="id,vid,name,description,site,group"
             )
-        candidate_group_ids = {vlan.group.id for vlan in candidates if vlan.group}
-        missing_groups = sorted(candidate_group_ids - groups.keys())
+        configured_groups = {rule["set_vlan_group"] for rule in rules}
+        if vlan_group:
+            configured_groups.add(vlan_group)
+        groups_by_name = {}
+        if configured_groups:
+            groups_by_name = {
+                str(group.name): group
+                for group in self.bulk_filter(
+                    nb.ipam.vlan_groups,
+                    name=sorted(configured_groups),
+                    fields="id,name,vid_ranges,scope_type,scope_id,scope",
+                )
+            }
+        for name in sorted(configured_groups - groups_by_name.keys()):
+            message = f"vlan group '{name}' does not exist in NetBox"
+            job.event(message, severity="ERROR")
+            log.error(message)
+            ret.errors.append(message)
+        groups = {group.id: group for group in groups_by_name.values()}
+        missing_groups = sorted(
+            {vlan.group.id for vlan in candidates if vlan.group} - groups.keys()
+        )
         if missing_groups:
-            candidate_groups = self.bulk_filter(
+            for group in self.bulk_filter(
                 nb.ipam.vlan_groups,
                 id=missing_groups,
                 fields="id,name,vid_ranges,scope_type,scope_id,scope",
-            )
-            for group in candidate_groups:
+            ):
                 groups[group.id] = group
+        if not live_by_device:
+            message = "no live VLAN data collected"
+            job.event(message, severity="ERROR")
+            log.error(message)
+            ret.errors.append(message)
+            ret.failed = True
+            return ret
+        live_vlans = [
+            vlan
+            for vlan in live_vlans
+            if not vlan["selected_group_name"]
+            or vlan["selected_group_name"] in groups_by_name
+        ]
+        for vlan in live_vlans:
+            group = groups_by_name.get(vlan.pop("selected_group_name"))
+            vlan["selected_group_id"] = group.id if group else None
 
-        # Resolve VLAN attributes and interface memberships from the same observations.
+        message = f"loaded {len(candidates)} NetBox VLAN candidate(s) and {len(groups)} VLAN group(s)"
+        job.event(message)
+        log.info(message)
+        # Resolve VLAN scopes and apply per-device preservation and shared-source rules.
+        contributors = {}
+        from_live = {
+            device: {"vlans": {}, "interfaces": {}} for device in live_by_device
+        }
+        from_netbox = {
+            device: {"vlans": {}, "interfaces": {}} for device in live_by_device
+        }
+        ret.diff = {
+            device: {
+                "vlans": {},
+                "interfaces": {"create": [], "update": {}, "delete": [], "in_sync": []},
+            }
+            for device in from_live
+        }
+        preview = {
+            device: {
+                action: set() for action in ("created", "updated", "deleted", "in_sync")
+            }
+            for device in from_live
+        }
+        completed_refs = {}
         scope_payloads = {}
-        vlan_live = {}
-        vlan_current = {}
-        vlan_objects = {}
-        name_sources = {}
-        description_sources = {}
+        vlan_records = {}
+        sources = {}
         interface_targets = {}
-        claimed_interfaces = {}
         for resolved in resolve_live_vlans(
             live_vlans, candidates, groups, device_scopes
         ):
-            observation, existing = resolved["live"], resolved["vlan"]
-            device, vid = observation["device_name"], observation["vid"]
+            observation, existing = (resolved["live"], resolved["vlan"])
+            device, vid = (observation["device_name"], observation["vid"])
             if resolved["error"]:
                 message = (
                     f"vlan {vid} from device '{device}' skipped: {resolved['error']}"
@@ -859,110 +855,82 @@ class NetboxVlansTasks:
                 ret.errors.append(message)
                 continue
             scope = resolved["scope"]
-            # Track every contributor before shared VLAN observations are merged.
-            device_vlan_ids[device].setdefault(scope, set()).add(vid)
+            contributors.setdefault((scope, vid), set()).add(device)
+            # Keep each device's values so shared VLANs do not mix their diffs.
+            desired = {
+                "name": observation["name"],
+                "description": observation["description"],
+            }
+            if existing is not None:
+                current = {
+                    "name": str(existing.name).strip(),
+                    "description": str(existing.description or "").strip(),
+                }
+                from_netbox[device]["vlans"][vid, scope] = current
+                if preserve_name or desired["name"].casefold() == f"vlan{vid}":
+                    desired["name"] = current["name"]
+                desired["description"] = apply_description_policy(
+                    desired["description"], current["description"], preserve_description
+                )
+            from_live[device]["vlans"][vid, scope] = desired
             scope_payloads[scope] = resolved["scope_payload"]
             key = (scope, vid)
-            if key not in name_sources:
-                name_sources[key] = (device, observation["name"])
-                description_sources[key] = (device, observation["description"])
-                vlan_live.setdefault(scope, {})[vid] = {
-                    "name": observation["name"],
-                    "description": observation["description"],
+            vlan_records[key] = existing
+            # Remember which device supplies each field when VLANs are shared.
+            if key not in sources:
+                sources[key] = {
+                    field: (device, observation[field])
+                    for field in ("name", "description")
                 }
-                if existing:
-                    vlan_objects[key] = existing
-                    vlan_current.setdefault(scope, {})[vid] = {
-                        "name": str(existing.name).strip(),
-                        "description": str(existing.description or "").strip(),
-                    }
-                    vlan_live[scope][vid]["description"] = apply_description_policy(
-                        observation["description"],
-                        vlan_current[scope][vid]["description"],
-                        preserve_description,
-                    )
-                else:
-                    vlan_current.setdefault(scope, {})
-            elif name_sources[key][1] != observation["name"]:
-                source_device, source_name = name_sources[key]
-                conflict_device, conflict_name = device, observation["name"]
+            else:
+                source_device, source_name = sources[key]["name"]
+                name = observation["name"]
                 automatic_name = f"VLAN{vid}".casefold()
-                source_is_automatic = source_name.casefold() == automatic_name
-                conflict_is_automatic = observation["name"].casefold() == automatic_name
-                # Replace an autogenerated source name with a descriptive one.
-                if source_is_automatic and not conflict_is_automatic:
-                    vlan_live[scope][vid]["name"] = observation["name"]
-                    name_sources[key] = (device, observation["name"])
-                    conflict_device, conflict_name = source_device, source_name
-                    source_device = device
-                # Only different descriptive names represent a genuine conflict.
-                if not source_is_automatic and not conflict_is_automatic:
-                    message = (
-                        f"{scope} VLAN {vid} source conflict (name): using VLAN name "
-                        f"'{vlan_live[scope][vid]['name']}' from device "
-                        f"'{source_device}'; conflicting device '{conflict_device}' "
-                        f"reports VLAN name '{conflict_name}'"
-                    )
+                if (
+                    source_name.casefold() == automatic_name
+                    and name.casefold() != automatic_name
+                ):
+                    sources[key]["name"] = (device, name)
+                elif (
+                    source_name != name
+                    and source_name.casefold() != automatic_name
+                    and name.casefold() != automatic_name
+                ):
+                    message = f"{scope} VLAN {vid} source conflict (name): using VLAN name '{source_name}' from device '{source_device}'; conflicting device '{device}' reports VLAN name '{name}'"
                     if message not in ret.errors:
                         job.event(message, severity="ERROR")
                         log.error(message)
                         ret.errors.append(message)
-            source_description = description_sources[key][1]
-            # Let the first non-empty device description replace an empty source.
-            if observation["description"] and not source_description:
-                description_sources[key] = (device, observation["description"])
-                netbox_description = (
-                    vlan_current.get(scope, {}).get(vid, {}).get("description", "")
-                )
-                vlan_live[scope][vid]["description"] = apply_description_policy(
-                    observation["description"],
-                    netbox_description,
-                    preserve_description,
-                )
-            # Empty descriptions are ignored; only differing useful text conflicts.
-            elif (
-                source_description
-                and observation["description"]
-                and source_description != observation["description"]
-            ):
-                source_device = description_sources[key][0]
-                message = (
-                    f"{scope} VLAN {vid} source conflict (description): using live "
-                    f"description from device '{source_device}'; conflicting device "
-                    f"'{device}' reports a different description"
-                )
-                if message not in ret.errors:
-                    job.event(message, severity="ERROR")
-                    log.error(message)
-                    ret.errors.append(message)
+                source_device, description = sources[key]["description"]
+                if observation["description"] and not description:
+                    sources[key]["description"] = (device, observation["description"])
+                elif (
+                    description
+                    and observation["description"]
+                    and description != observation["description"]
+                ):
+                    message = f"{scope} VLAN {vid} source conflict (description): using live description from device '{source_device}'; conflicting device '{device}' reports a different description"
+                    if message not in ret.errors:
+                        job.event(message, severity="ERROR")
+                        log.error(message)
+                        ret.errors.append(message)
             vlan_reference = f"{scope}/{vid}"
             for field in VLAN_MEMBERSHIP_FIELDS:
                 for live_interface in observation[field]:
                     interface = interface_names_by_device[device][live_interface]
-                    interface_key = (device, interface)
-                    owner = claimed_interfaces.setdefault(interface_key, live_interface)
-                    if owner != live_interface:
-                        continue
                     target = interface_targets.setdefault(
-                        interface_key,
+                        (device, interface),
                         {"tagged_vlans": set(), "untagged_vlan": None},
                     )
                     if field == "tagged_interfaces":
                         target["tagged_vlans"].add(vlan_reference)
                     else:
                         target["untagged_vlan"] = vlan_reference
-
-        # Preserve NetBox names when requested or live data only supplies VLAN<VID>.
-        for scope, vid in vlan_objects:
-            live_name = vlan_live[scope][vid]["name"]
-            if preserve_name or live_name.upper() == f"VLAN{vid}".upper():
-                vlan_live[scope][vid]["name"] = vlan_current[scope][vid]["name"]
-
-        # NetBox requires VLAN names to be unique within their group or site.
-        # Validate proposed creations and renames before sending a bulk write so
-        # one conflict does not reject every VLAN in the batch.
+        skipped_vlans = set()
+        # Catch name conflicts before one invalid VLAN can fail a whole batch.
         proposed_names = {
-            values["name"] for vlans in vlan_live.values() for values in vlans.values()
+            from_live[fields["name"][0]]["vlans"][vid, scope]["name"]
+            for (scope, vid), fields in sources.items()
         }
         name_matches = []
         if proposed_names:
@@ -971,111 +939,132 @@ class NetboxVlansTasks:
                 name=sorted(proposed_names),
                 fields="id,vid,name,site,group",
             )
-        for existing in name_matches:
-            if existing.group:
-                scope = f"group:{existing.group.name}"
-            elif existing.site:
-                scope = f"site:{existing.site.name}"
-            else:
-                scope = "global"
-            for vid, values in list(vlan_live.get(scope, {}).items()):
-                if values["name"] != str(existing.name):
-                    continue
-                current = vlan_current.get(scope, {}).get(vid)
-                if current and vlan_objects[(scope, vid)].id == existing.id:
-                    continue
-                action = "update" if current else "create"
-                if current:
-                    vlan_live[scope][vid] = dict(current)
-                else:
-                    del vlan_live[scope][vid]
-                    vlan_reference = f"{scope}/{vid}"
-                    for target in interface_targets.values():
-                        target["tagged_vlans"].discard(vlan_reference)
-                        if target["untagged_vlan"] == vlan_reference:
-                            target["untagged_vlan"] = None
-                message = (
-                    f"VLAN {vid} name '{values['name']}' overlaps with VLAN "
-                    f"{existing.vid} in scope '{scope}'; skipping VLAN {action}"
-                )
-                job.event(message, severity="ERROR")
-                log.error(message)
-                ret.errors.append(message)
-
-        # Also reject duplicate names among changes not yet present in NetBox.
-        for scope, vlans in vlan_live.items():
-            seen_names = {}
-            for vid, values in list(vlans.items()):
-                name = values["name"]
-                if name not in seen_names:
-                    seen_names[name] = vid
-                    continue
-                current = vlan_current.get(scope, {}).get(vid)
-                action = "update" if current else "create"
-                if current:
-                    vlans[vid] = dict(current)
-                    seen_names[current["name"]] = vid
-                else:
-                    del vlans[vid]
-                    vlan_reference = f"{scope}/{vid}"
-                    for target in interface_targets.values():
-                        target["tagged_vlans"].discard(vlan_reference)
-                        if target["untagged_vlan"] == vlan_reference:
-                            target["untagged_vlan"] = None
-                message = (
-                    f"vlan {vid} name '{name}' overlaps with VLAN "
-                    f"{seen_names[name]} in scope '{scope}'; skipping VLAN {action}"
-                )
-                job.event(message, severity="ERROR")
-                log.error(message)
-                ret.errors.append(message)
-
-        message = (
-            f"resolved {sum(len(vlans) for vlans in vlan_live.values())} VLAN(s) "
-            f"across {len(vlan_live)} NetBox scope(s)"
-        )
-        job.event(message)
-        log.info(message)
-
-        vlan_diff = self.make_diff(vlan_live, vlan_current)
-        vlan_preview = {}
-        for scope, actions in sorted(vlan_diff.items()):
-            updates = {}
-            for vid, changes in actions["update"].items():
-                updates[str(vid)] = changes
-            vlan_preview[scope] = {**actions, "update": updates}
-            # Split the scope-wide diff by each device's observed VLAN IDs to report sync status per device.
-            for device, scopes in device_vlan_ids.items():
-                if scope not in scopes:
-                    continue
-                vids = scopes[scope]
-                ret.diff[device]["vlans"][scope] = {
-                    "create": [vid for vid in actions["create"] if vid in vids],
-                    "update": {
-                        vid: value for vid, value in updates.items() if int(vid) in vids
-                    },
-                    "delete": [],
-                    "in_sync": [vid for vid in actions["in_sync"] if vid in vids],
-                }
-                ret.result[device]["vlans"][scope] = {
-                    "created": [],
-                    "updated": [],
-                    "deleted": [],
-                    "in_sync": ret.diff[device]["vlans"][scope]["in_sync"],
-                }
-
-        # Build interface state only for interfaces referenced by live VLAN data.
-        netbox_interfaces = []
-        if interface_targets:
-            target_devices = sorted({device for device, _ in interface_targets})
-            target_names = sorted({name for _, name in interface_targets})
-            target_device_ids = [nb_devices[device].id for device in target_devices]
-            netbox_interfaces = self.bulk_filter(
-                nb.dcim.interfaces,
-                device_id=target_device_ids,
-                name=target_names,
-                fields="id,name,device,mode,tagged_vlans,untagged_vlan",
+        names_in_netbox = {}
+        for vlan in name_matches:
+            scope = (
+                f"group:{vlan.group.name}"
+                if vlan.group
+                else f"site:{vlan.site.name}" if vlan.site else "global"
             )
+            names_in_netbox.setdefault((scope, str(vlan.name)), []).append(vlan)
+        seen_names = {}
+        for (scope, vid), fields in sources.items():
+            name = from_live[fields["name"][0]]["vlans"][vid, scope]["name"]
+            existing = vlan_records[scope, vid]
+            conflicts = [
+                vlan.vid
+                for vlan in names_in_netbox.get((scope, name), ())
+                if existing is None or vlan.id != existing.id
+            ]
+            conflict = conflicts[0] if conflicts else seen_names.get((scope, name))
+            if conflict is None:
+                seen_names[scope, name] = vid
+                continue
+            action = "update" if existing is not None else "create"
+            skipped_vlans.add((scope, vid))
+            if existing is not None:
+                seen_names[scope, str(existing.name).strip()] = vid
+            else:
+                # Remove assignments to VLANs whose creation was skipped.
+                reference = f"{scope}/{vid}"
+                for target in interface_targets.values():
+                    target["tagged_vlans"].discard(reference)
+                    if target["untagged_vlan"] == reference:
+                        target["untagged_vlan"] = None
+            label = "VLAN" if conflicts else "vlan"
+            message = f"{label} {vid} name '{name}' overlaps with VLAN {conflict} in scope '{scope}'; skipping VLAN {action}"
+            job.event(message, severity="ERROR")
+            log.error(message)
+            ret.errors.append(message)
+        # Exclude skipped changes from the diff used to plan writes.
+        for scope, vid in skipped_vlans:
+            for device in contributors[scope, vid]:
+                if (vid, scope) in from_netbox[device]["vlans"]:
+                    from_live[device]["vlans"][vid, scope] = from_netbox[device][
+                        "vlans"
+                    ][vid, scope]
+                else:
+                    from_live[device]["vlans"].pop((vid, scope), None)
+        # Compare all device VLANs before collecting shared NetBox writes.
+        vlan_diff = DeepDiff(
+            {device: data["vlans"] for device, data in from_netbox.items()},
+            {device: data["vlans"] for device, data in from_live.items()},
+            ignore_order=True,
+            view="tree",
+            threshold_to_diff_deeper=0,
+        )
+        changed_vlans = {
+            tuple(change.path(output_format="list")[:2])
+            for changes in vlan_diff.values()
+            for change in changes
+        }
+        # Report VLAN drift per device, even when devices share one NetBox VLAN.
+        for device in from_live:
+            ret.result[device] = {action: [] for action in preview[device]}
+            before = from_netbox[device]["vlans"]
+            after = from_live[device]["vlans"]
+            for vid, scope in sorted(before.keys() | after.keys()):
+                key = (vid, scope)
+                summary = ret.diff[device]["vlans"].setdefault(
+                    scope, {"create": [], "update": {}, "delete": [], "in_sync": []}
+                )
+                if key not in before:
+                    summary["create"].append(vid)
+                elif key not in after:
+                    summary["delete"].append(vid)
+                elif (device, key) in changed_vlans:
+                    summary["update"][str(vid)] = {
+                        field: {"old_value": before[key][field], "new_value": value}
+                        for field, value in after[key].items()
+                        if value != before[key][field]
+                    }
+                else:
+                    summary["in_sync"].append(vid)
+                    preview[device]["in_sync"].add(f"{scope}:{vid}")
+
+        # Deduplicate writes when several device diffs target the same VLAN.
+        creates, updates = {}, {}
+        for changes in vlan_diff.values():
+            for change in changes:
+                path = change.path(output_format="list")
+                device, (vid, scope) = path[:2]
+                if (vid, scope) not in from_live[device]["vlans"]:
+                    continue
+                existing = vlan_records[scope, vid]
+                if existing is None:
+                    creates[scope, vid] = {
+                        "vid": vid,
+                        **{
+                            field: from_live[source]["vlans"][vid, scope][field]
+                            for field, (source, _) in sources[scope, vid].items()
+                        },
+                        **scope_payloads[scope],
+                    }
+                else:
+                    # Read only the changed field from the device selected for that field.
+                    field = path[2]
+                    source, _ = sources[scope, vid][field]
+                    updates.setdefault((scope, vid), {"id": existing.id})[field] = (
+                        from_live[source]["vlans"][vid, scope][field]
+                    )
+        creates, updates = sorted(creates.items()), sorted(updates.items())
+        # Report each shared VLAN write under every device that contributed to it.
+        for action, items in (("created", creates), ("updated", updates)):
+            for (scope, vid), _ in items:
+                refs = [
+                    (device, action, f"{scope}:{vid}")
+                    for device in sorted(contributors[scope, vid])
+                ]
+                completed_refs[action, (scope, vid)] = refs
+                for device, _, label in refs:
+                    preview[device][action].add(label)
+
+        # Load interface assignments and preserve VLANs outside the selected filter.
+        netbox_interfaces = self.bulk_filter(
+            nb.dcim.interfaces,
+            device_id=sorted((device.id for device in nb_devices.values())),
+            fields="id,name,device,mode,tagged_vlans,untagged_vlan",
+        )
         interfaces = {}
         for interface in netbox_interfaces:
             key = (str(interface.device.name), str(interface.name))
@@ -1084,31 +1073,27 @@ class NetboxVlansTasks:
         message = f"loaded {len(interfaces)} NetBox interface(s) for VLAN membership"
         job.event(message)
         log.info(message)
-        valid_interface_keys = interface_targets.keys() & interfaces.keys()
-        missing_interfaces = interface_targets.keys() - valid_interface_keys
-        for device, name in sorted(missing_interfaces):
+        for device, name in sorted(interface_targets.keys() - interfaces.keys()):
             message = f"interface '{device}:{name}' not found in NetBox"
             job.event(message, severity="ERROR")
             log.error(message)
             ret.errors.append(message)
-
         assigned_vlan_ids = set()
-        for key in valid_interface_keys:
+        for key in interfaces:
             interface = interfaces[key]
-            assigned_vlan_ids.update(vlan.id for vlan in interface.tagged_vlans)
+            assigned_vlan_ids.update((vlan.id for vlan in interface.tagged_vlans))
             if interface.untagged_vlan:
                 assigned_vlan_ids.add(interface.untagged_vlan.id)
         membership_vlans = {vlan.id: vlan for vlan in candidates}
+        # Include assigned VLANs outside the filter so existing memberships survive.
         missing_vlan_ids = assigned_vlan_ids - membership_vlans.keys()
         if missing_vlan_ids:
-            assigned_vlans = self.bulk_filter(
+            for vlan in self.bulk_filter(
                 nb.ipam.vlans,
                 id=sorted(missing_vlan_ids),
-                fields="id,vid,site,group",
-            )
-            for vlan in assigned_vlans:
+                fields="id,vid,name,description,site,group",
+            ):
                 membership_vlans[vlan.id] = vlan
-
         vlan_id_by_reference = {}
         vlan_reference_by_id = {}
         for vlan in membership_vlans.values():
@@ -1121,26 +1106,28 @@ class NetboxVlansTasks:
             vlan_reference = f"{scope}/{vlan.vid}"
             vlan_id_by_reference[vlan_reference] = vlan.id
             vlan_reference_by_id[vlan.id] = vlan_reference
-
-        interface_live = {}
-        interface_current = {}
-        for device, name in sorted(valid_interface_keys):
-            interface = interfaces[(device, name)]
-            tagged_references = sorted(
-                vlan_reference_by_id[vlan.id] for vlan in interface.tagged_vlans
-            )
+        # Compare memberships separately from VLAN names and descriptions.
+        interface_states = {}
+        for device, name in sorted(interface_targets):
+            interface = interfaces.get((device, name))
             untagged_reference = None
-            if interface.untagged_vlan:
+            if interface and interface.untagged_vlan:
                 untagged_reference = vlan_reference_by_id[interface.untagged_vlan.id]
             current = {
-                "mode": interface.mode.value if interface.mode else None,
-                "tagged_vlans": tagged_references,
+                "mode": interface.mode.value if interface and interface.mode else None,
+                "tagged_vlans": sorted(
+                    (vlan_reference_by_id[vlan.id] for vlan in interface.tagged_vlans)
+                    if interface
+                    else ()
+                ),
                 "untagged_vlan": untagged_reference,
             }
-            target = interface_targets[(device, name)]
+            target = interface_targets[device, name]
+            # Add live tagged VLANs while retaining existing NetBox assignments.
             tagged_vlans = set(current["tagged_vlans"])
             tagged_vlans.update(target["tagged_vlans"])
             untagged_vlan = current["untagged_vlan"]
+            # Replace the native VLAN only when the device reports one.
             if target["untagged_vlan"] is not None:
                 untagged_vlan = target["untagged_vlan"]
             mode = current["mode"]
@@ -1148,183 +1135,164 @@ class NetboxVlansTasks:
                 mode = "tagged"
             elif untagged_vlan:
                 mode = "access"
-            interface_current.setdefault(device, {})[name] = current
-            interface_live.setdefault(device, {})[name] = {
+            desired = {
                 "mode": mode,
                 "tagged_vlans": sorted(tagged_vlans),
                 "untagged_vlan": untagged_vlan,
             }
-
-        message = "calculating VLAN and interface diffs"
-        job.event(message)
-        log.info(message)
-        interface_diff = self.make_diff(interface_live, interface_current)
-        preview = {"vlans": vlan_preview, "interfaces": interface_diff}
-        for device, actions in interface_diff.items():
-            ret.diff[device]["interfaces"] = actions
-            ret.result[device]["interfaces"] = SyncActionSummary(
-                in_sync=actions["in_sync"]
-            ).model_dump()
-        create_count = sum(len(actions["create"]) for actions in vlan_diff.values())
-        vlan_update_count = sum(
-            len(actions["update"]) for actions in vlan_diff.values()
+            interface_states[device, name] = (current, desired)
+            for snapshot, state in ((from_netbox, current), (from_live, desired)):
+                references = set(state["tagged_vlans"])
+                if state["untagged_vlan"]:
+                    references.add(state["untagged_vlan"])
+                # Include tagging and mode in each device/interface/VLAN/scope entry.
+                for reference in references:
+                    scope, vid = reference.rsplit("/", 1)
+                    snapshot[device]["interfaces"][name, int(vid), scope] = {
+                        "tagged": reference in state["tagged_vlans"],
+                        "untagged": reference == state["untagged_vlan"],
+                        "mode": state["mode"],
+                    }
+        interface_diff = DeepDiff(
+            {device: data["interfaces"] for device, data in from_netbox.items()},
+            {device: data["interfaces"] for device, data in from_live.items()},
+            ignore_order=True,
+            view="tree",
+            threshold_to_diff_deeper=0,
         )
-        interface_update_count = sum(
-            len(actions["update"]) for actions in interface_diff.values()
-        )
-        message = (
-            f"prepared {create_count} VLAN creation(s), {vlan_update_count} VLAN "
-            f"update(s), and {interface_update_count} interface update(s)"
-        )
+        changed_memberships = {
+            tuple(change.path(output_format="list")[:2])
+            for changes in interface_diff.values()
+            for change in changes
+        }
+        changed_interfaces = {
+            (device, identity[0]) for device, identity in changed_memberships
+        }
+        interface_updates = {}
+        for (device, name), (current, desired) in interface_states.items():
+            if (device, name) not in changed_interfaces:
+                ret.diff[device]["interfaces"]["in_sync"].append(name)
+                continue
+            # Format field changes only for interfaces selected by DeepDiff.
+            ret.diff[device]["interfaces"]["update"][name] = {
+                field: {"old_value": current[field], "new_value": value}
+                for field, value in desired.items()
+                if value != current[field]
+            }
+            if (device, name) in interfaces:
+                interface_updates[device, name] = desired
+        # Track membership actions to report when each interface write succeeds.
+        for device in from_live:
+            before = from_netbox[device]["interfaces"]
+            after = from_live[device]["interfaces"]
+            for key in sorted(before.keys() | after.keys()):
+                name, vid, scope = key
+                label = f"{scope}:{vid}"
+                if (
+                    key in before
+                    and key in after
+                    and (device, key) not in changed_memberships
+                ):
+                    preview[device]["in_sync"].add(label)
+                    continue
+                if (device, name) in interfaces:
+                    # Membership changes update VLAN usage, not the VLAN record's existence.
+                    preview[device]["updated"].add(label)
+                    completed_refs.setdefault(
+                        ("interfaces", (device, name)), []
+                    ).append((device, "updated", label))
+        # Finalize the preview before approval or any NetBox writes.
+        for device, actions in preview.items():
+            actions["in_sync"] -= (
+                actions["created"] | actions["updated"] | actions["deleted"]
+            )
+            ret.result[device]["in_sync"] = sorted(actions["in_sync"])
+        for actions in preview.values():
+            for action, values in actions.items():
+                actions[action] = sorted(values)
+        message = f"prepared {len(creates)} VLAN creation(s), {len(updates)} VLAN update(s), and {len(interface_updates)} interface update(s)"
         job.event(message)
         log.info(message)
         if dry_run:
-            ret.result = ret.diff
-            message = "dry-run requested, returning VLAN sync diff without changes"
+            message = "dry-run requested, returning VLAN sync preview without changes"
             job.event(message)
             log.info(message)
+            ret.result = preview
             return ret
-
-        if not sync_diff_has_changes(preview):
-            job.event("no VLAN sync changes required")
-            return ret
-        if with_approval and not review_sync_task_result(job, "vlan sync", preview):
-            ret.status = "skipped"
-            ret.result = ret.diff
-            ret.dry_run = True
-            ret.messages.append("review declined; changes were not applied")
-            return ret
-
-        # Complete all creations before any VLAN updates or interface writes.
-        create_items = []
-        for scope, actions in sorted(vlan_diff.items()):
-            for vid in actions["create"]:
-                create_items.append(
-                    (
-                        (scope, vid),
-                        {
-                            "vid": vid,
-                            "name": vlan_live[scope][vid]["name"],
-                            "description": vlan_live[scope][vid]["description"],
-                            **scope_payloads[scope],
-                        },
-                    )
-                )
-        if create_items:
-            total_batches = (len(create_items) + batch_size - 1) // batch_size
-            for batch_start in range(0, len(create_items), batch_size):
-                batch = create_items[batch_start : batch_start + batch_size]
-                batch_number = batch_start // batch_size + 1
-                message = f"creating VLAN batch {batch_number}/{total_batches} ({len(batch)} VLAN(s))"
+        if with_approval and any(
+            (
+                actions[action]
+                for actions in preview.values()
+                for action in ("created", "updated", "deleted")
+            )
+        ):
+            if not review_sync_task_result(job, "vlan sync", preview):
+                ret.status, ret.dry_run, ret.result = ("skipped", True, preview)
+                ret.messages.append("review declined; changes were not applied")
+                message = "vlan sync review declined; changes were not applied"
                 job.event(message)
                 log.info(message)
-                try:
-                    created = nb.ipam.vlans.create([payload for _, payload in batch])
-                except Exception as exc:
-                    message = f"failed to create VLAN batch {batch_number}/{total_batches}: {exc}"
-                    job.event(message, severity="ERROR")
-                    log.error(message)
-                    ret.errors.append(message)
-                    ret.failed = True
-                    return ret
-                for (key, _), vlan in zip(batch, created):
-                    scope, vid = key
-                    vlan_objects[key] = vlan
-                    vlan_id_by_reference[f"{scope}/{vid}"] = vlan.id
-                    # Report the shared creation for every contributor without repeating writes.
-                    for device, scopes in device_vlan_ids.items():
-                        if vid in scopes.get(scope, ()):
-                            ret.result[device]["vlans"][scope]["created"].append(vid)
-            message = f"created {len(create_items)} VLAN(s)"
-            job.event(message)
-            log.info(message)
-
-        vlan_updates = []
-        for scope, actions in sorted(vlan_diff.items()):
-            for vid, changes in actions["update"].items():
-                values = {}
-                for field in ("name", "description"):
-                    if field in changes:
-                        values[field] = vlan_live[scope][vid][field]
-                if values:
-                    vlan_updates.append(
+                return ret
+        # Create VLANs first so interface writes can use their new NetBox IDs.
+        for stage, endpoint in (
+            ("created", nb.ipam.vlans.create),
+            ("updated", nb.ipam.vlans.update),
+            ("interfaces", nb.dcim.interfaces.update),
+        ):
+            if stage == "created":
+                items = creates
+            elif stage == "updated":
+                items = updates
+            else:
+                items = []
+                for (device, name), desired in sorted(interface_updates.items()):
+                    items.append(
                         (
-                            (scope, vid),
-                            {"id": vlan_objects[(scope, vid)].id, **values},
+                            (device, name),
+                            {
+                                "id": interfaces[device, name].id,
+                                "mode": desired["mode"],
+                                "tagged_vlans": [
+                                    vlan_id_by_reference[ref]
+                                    for ref in desired["tagged_vlans"]
+                                ],
+                                "untagged_vlan": vlan_id_by_reference.get(
+                                    desired["untagged_vlan"]
+                                ),
+                            },
                         )
                     )
-        if vlan_updates:
-            total_batches = (len(vlan_updates) + batch_size - 1) // batch_size
-            for batch_start in range(0, len(vlan_updates), batch_size):
-                batch = vlan_updates[batch_start : batch_start + batch_size]
-                batch_number = batch_start // batch_size + 1
-                message = f"updating VLAN batch {batch_number}/{total_batches} ({len(batch)} VLAN(s))"
+            operation = {
+                "created": "VLAN creation",
+                "updated": "VLAN update",
+                "interfaces": "interface update",
+            }[stage]
+            total = (len(items) + batch_size - 1) // batch_size
+            # Batch writes across all devices, separately for each API operation.
+            for start in range(0, len(items), batch_size):
+                batch = items[start : start + batch_size]
+                message = f"applying {operation} batch {start // batch_size + 1}/{total} ({len(batch)} object(s))"
                 job.event(message)
                 log.info(message)
                 try:
-                    nb.ipam.vlans.update([payload for _, payload in batch])
+                    response = endpoint([payload for _, payload in batch])
                 except Exception as exc:
-                    message = f"failed to update VLAN batch {batch_number}/{total_batches}: {exc}"
-                    job.event(message, severity="ERROR")
-                    log.error(message)
+                    message = f"{message} failed: {exc}"
                     ret.errors.append(message)
                     ret.failed = True
-                    return ret
-                # Preserve completed updates in each device's result if a later batch fails.
-                for (scope, vid), _ in batch:
-                    for device, scopes in device_vlan_ids.items():
-                        if vid in scopes.get(scope, ()):
-                            ret.result[device]["vlans"][scope]["updated"].append(vid)
-            message = f"updated {len(vlan_updates)} VLAN object(s)"
-            job.event(message)
-            log.info(message)
-
-        interface_updates = []
-        for device, actions in sorted(interface_diff.items()):
-            for name in sorted(actions["update"]):
-                desired = interface_live[device][name]
-                tagged_vlan_ids = [
-                    vlan_id_by_reference[reference]
-                    for reference in desired["tagged_vlans"]
-                ]
-                untagged_vlan_id = None
-                if desired["untagged_vlan"]:
-                    untagged_vlan_id = vlan_id_by_reference[desired["untagged_vlan"]]
-                interface_updates.append(
-                    (
-                        (device, name),
-                        {
-                            "id": interfaces[(device, name)].id,
-                            "mode": desired["mode"],
-                            "tagged_vlans": tagged_vlan_ids,
-                            "untagged_vlan": untagged_vlan_id,
-                        },
-                    )
-                )
-        if interface_updates:
-            total_batches = (len(interface_updates) + batch_size - 1) // batch_size
-            for batch_start in range(0, len(interface_updates), batch_size):
-                batch = interface_updates[batch_start : batch_start + batch_size]
-                batch_number = batch_start // batch_size + 1
-                message = f"updating VLAN membership batch {batch_number}/{total_batches} ({len(batch)} interface(s))"
-                job.event(message)
-                log.info(message)
-                try:
-                    nb.dcim.interfaces.update([payload for _, payload in batch])
-                except Exception as exc:
-                    message = f"failed to update VLAN membership batch {batch_number}/{total_batches}: {exc}"
                     job.event(message, severity="ERROR")
                     log.error(message)
-                    ret.errors.append(message)
-                    ret.failed = True
                     return ret
-                for (device, name), _ in batch:
-                    ret.result[device]["interfaces"]["updated"].append(name)
-            message = (
-                f"updated VLAN membership on {len(interface_updates)} interface(s)"
-            )
-            job.event(message)
-            log.info(message)
+                if stage == "created":
+                    for ((scope, vid), _), vlan in zip(batch, response):
+                        vlan_id_by_reference[f"{scope}/{vid}"] = vlan.id
+                # Record completed actions only after the batch succeeds.
+                for key, _ in batch:
+                    for device, action, label in completed_refs[stage, key]:
+                        ret.result[device][action].append(label)
+        for actions in ret.result.values():
+            for action, values in actions.items():
+                actions[action] = sorted(set(values))
         message = "vlan sync complete"
         job.event(message)
         log.info(message)

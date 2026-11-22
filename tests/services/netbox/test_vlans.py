@@ -305,16 +305,26 @@ class TestSyncVlanMemberships:
             dry_run=False,
         )
         assert not result.failed and not result.errors
-        assert result.result["leaf-1"]["vlans"]["site:lab"]["created"] == [50]
-        assert result.result["leaf-1"]["interfaces"]["updated"] == ["Ethernet6"]
+        assert {
+            ref
+            for ref in result.result["leaf-1"]["created"]
+            if ref.startswith("site:lab:")
+        } == {"site:lab:50"}
+        assert result.result["leaf-1"]["updated"] == ["site:lab:50"]
+        assert result.result["leaf-1"]["deleted"] == []
+        assert result.result["leaf-1"]["in_sync"] == []
         nb.ipam.vlans.create.assert_called_once()
         assert nb.dcim.interfaces.update.call_args.args[0] == [
             {"id": 10, "tagged_vlans": [2000], "untagged_vlan": 2000, "mode": "tagged"}
         ]
         nb.dcim.interfaces.update.reset_mock()
         second = worker.sync_vlans(job, devices=["leaf-1"])
-        assert second.result["leaf-1"]["vlans"]["site:lab"]["in_sync"] == [50]
-        assert second.result["leaf-1"]["interfaces"]["in_sync"] == ["Ethernet6"]
+        assert {
+            ref
+            for ref in second.result["leaf-1"]["in_sync"]
+            if ref.startswith("site:lab:")
+        } == {"site:lab:50"}
+        assert second.result["leaf-1"]["updated"] == []
         nb.dcim.interfaces.update.assert_not_called()
         assert nb.dcim.sites.filter.call_args_list[0].kwargs == {
             "id": [1],
@@ -349,8 +359,16 @@ class TestSyncVlanMemberships:
         assert len(result.errors) == 1
         assert "vlan 51 name 'shared' overlaps with VLAN 50" in result.errors[0]
         if dry_run:
-            assert result.result["leaf-1"]["vlans"]["group:group-30"]["create"] == [50]
-            assert result.result["leaf-2"]["vlans"]["group:group-30"]["create"] == [52]
+            assert {
+                ref
+                for ref in result.result["leaf-1"]["created"]
+                if ref.startswith("group:group-30:")
+            } == {"group:group-30:50"}
+            assert {
+                ref
+                for ref in result.result["leaf-2"]["created"]
+                if ref.startswith("group:group-30:")
+            } == {"group:group-30:52"}
             nb.ipam.vlans.create.assert_not_called()
         else:
             assert [
@@ -371,7 +389,11 @@ class TestSyncVlanMemberships:
         )
 
         assert not result.failed and not result.errors
-        assert result.result["leaf-1"]["vlans"]["site:lab"]["created"] == [50, 51, 52]
+        assert {
+            ref
+            for ref in result.result["leaf-1"]["created"]
+            if ref.startswith("site:lab:")
+        } == {"site:lab:50", "site:lab:51", "site:lab:52"}
         assert [len(call.args[0]) for call in nb.ipam.vlans.create.call_args_list] == [
             2,
             1,
@@ -390,8 +412,16 @@ class TestSyncVlanMemberships:
 
         assert result.failed
         assert "batch 2/3" in result.errors[0]
-        assert result.result["leaf-1"]["vlans"]["site:lab"]["created"] == [50]
-        assert result.result["leaf-2"]["vlans"]["site:lab"]["created"] == [50]
+        assert {
+            ref
+            for ref in result.result["leaf-1"]["created"]
+            if ref.startswith("site:lab:")
+        } == {"site:lab:50"}
+        assert {
+            ref
+            for ref in result.result["leaf-2"]["created"]
+            if ref.startswith("site:lab:")
+        } == {"site:lab:50"}
         assert nb.ipam.vlans.create.call_count == 2
 
     @pytest.mark.parametrize("live_name", ["VLAN50", "vlan50", "VlAn50"])
@@ -401,9 +431,16 @@ class TestSyncVlanMemberships:
             vlans=[self._vlan(50, name="User access")],
         )
 
-        actions = result.result["leaf-1"]["vlans"]["site:lab"]
-        assert actions["update"] == {}
-        assert actions["in_sync"] == [50]
+        assert {
+            ref
+            for ref in result.result["leaf-1"]["updated"]
+            if ref.startswith("site:lab:")
+        } == set()
+        assert {
+            ref
+            for ref in result.result["leaf-1"]["in_sync"]
+            if ref.startswith("site:lab:")
+        } == {"site:lab:50"}
 
     @pytest.mark.parametrize("preserve_name", [False, True])
     def test_descriptive_live_name_overrides_netbox_name(
@@ -416,10 +453,18 @@ class TestSyncVlanMemberships:
         )
 
         if preserve_name:
-            assert result.result["leaf-1"]["vlans"]["site:lab"]["update"] == {}
-            assert result.result["leaf-1"]["vlans"]["site:lab"]["in_sync"] == [50]
+            assert {
+                ref
+                for ref in result.result["leaf-1"]["updated"]
+                if ref.startswith("site:lab:")
+            } == set()
+            assert {
+                ref
+                for ref in result.result["leaf-1"]["in_sync"]
+                if ref.startswith("site:lab:")
+            } == {"site:lab:50"}
             return
-        changes = result.result["leaf-1"]["vlans"]["site:lab"]["update"]["50"]
+        changes = result.diff["leaf-1"]["vlans"]["site:lab"]["update"]["50"]
         assert changes["name"] == {
             "old_value": "NetBox user access",
             "new_value": "Live user access",
@@ -434,8 +479,9 @@ class TestSyncVlanMemberships:
             vlans=[self._vlan(50, name="NetBox user access")],
         )
 
-        changes = result.result["leaf-1"]["vlans"]["site:lab"]["update"]["50"]
+        changes = result.diff["leaf-2"]["vlans"]["site:lab"]["update"]["50"]
         assert changes["name"]["new_value"] == "Live user access"
+        assert result.diff["leaf-1"]["vlans"]["site:lab"]["update"] == {}
         assert not result.errors
 
     @pytest.mark.parametrize(
@@ -456,8 +502,10 @@ class TestSyncVlanMemberships:
             vlans=[self._vlan(50, description="NetBox description")],
         )
 
-        changes = result.result["leaf-1"]["vlans"]["site:lab"]["update"]["50"]
+        device = "leaf-1" if leaf_1_description else "leaf-2"
+        changes = result.diff[device]["vlans"]["site:lab"]["update"]["50"]
         assert changes["description"]["new_value"] == "Live description"
+        assert all("description" in path for path in changes)
         assert not result.errors
 
     def test_membership_updates_are_additive(self) -> None:
@@ -474,10 +522,7 @@ class TestSyncVlanMemberships:
         assert not result.failed and not result.errors
         assert result.diff["leaf-1"]["interfaces"]["update"]["Ethernet5"][
             "tagged_vlans"
-        ] == {
-            "old_value": [],
-            "new_value": ["site:lab/50"],
-        }
+        ]["new_value"] == ["site:lab/50"]
         assert nb.dcim.interfaces.update.call_args.args[0] == [
             {
                 "id": 11,
@@ -499,12 +544,18 @@ class TestSyncVlanMemberships:
         )
         assert not result.failed and not result.errors
         assert result.diff["leaf-1"]["vlans"]["site:lab"]["create"] == [50]
+        assert (
+            result.diff["leaf-1"]["interfaces"]["update"]["Ethernet6"]["untagged_vlan"][
+                "new_value"
+            ]
+            == "site:lab/50"
+        )
         assert result.diff["leaf-1"]["interfaces"]["update"]["Ethernet6"][
             "untagged_vlan"
-        ] == {
-            "old_value": "site:lab/900",
-            "new_value": "site:lab/50",
-        }
+        ] == {"old_value": "site:lab/900", "new_value": "site:lab/50"}
+        assert result.result["leaf-1"]["created"] == ["site:lab:50"]
+        assert result.result["leaf-1"]["updated"] == ["site:lab:50", "site:lab:900"]
+        assert result.result["leaf-1"]["deleted"] == []
         payload = nb.dcim.interfaces.update.call_args.args[0][0]
         assert payload["untagged_vlan"] == 2001
         assert payload["tagged_vlans"] == [previous.id]
@@ -526,8 +577,16 @@ class TestSyncVlanMemberships:
             dry_run=False,
         )
         assert not result.failed and not result.errors
-        assert result.result["leaf-1"]["vlans"]["group:group-30"]["created"] == [50]
-        assert "group:group-40" not in result.result["leaf-1"]["vlans"]
+        assert {
+            ref
+            for ref in result.result["leaf-1"]["created"]
+            if ref.startswith("group:group-30:")
+        } == {"group:group-30:50"}
+        assert not any(
+            ref.startswith("group:group-40:")
+            for refs in result.result["leaf-1"].values()
+            for ref in refs
+        )
         assert nb.ipam.vlan_groups.filter.call_args_list[0].kwargs == {
             "name": ["group-30", "group-40"],
             "fields": "id,name,vid_ranges,scope_type,scope_id,scope",
@@ -557,7 +616,7 @@ class TestSyncVlanMemberships:
         ] == ["site:lab/50"]
         assert nb.dcim.interfaces.update.call_args.args[0][0]["tagged_vlans"] == [2000]
 
-    def test_interface_map_processes_first_name_when_mappings_collide(self) -> None:
+    def test_interface_map_combines_memberships_for_mapped_names(self) -> None:
         result, nb, _, _ = self._run(
             {
                 "leaf-1": [
@@ -578,9 +637,18 @@ class TestSyncVlanMemberships:
         )
 
         assert not result.failed and not result.errors
-        assert result.result["leaf-1"]["vlans"]["site:lab"]["created"] == [50, 102]
+        assert {
+            ref
+            for ref in result.result["leaf-1"]["created"]
+            if ref.startswith("site:lab:")
+        } == {"site:lab:50", "site:lab:102"}
         assert nb.dcim.interfaces.update.call_args.args[0] == [
-            {"id": 10, "tagged_vlans": [2000], "untagged_vlan": None, "mode": "tagged"}
+            {
+                "id": 10,
+                "tagged_vlans": [2001, 2000],
+                "untagged_vlan": None,
+                "mode": "tagged",
+            }
         ]
 
     def test_filtered_vlan_does_not_claim_mapped_interface(self) -> None:
@@ -605,7 +673,11 @@ class TestSyncVlanMemberships:
         )
 
         assert not result.failed and not result.errors
-        assert result.result["leaf-1"]["vlans"]["site:lab"]["created"] == [102]
+        assert {
+            ref
+            for ref in result.result["leaf-1"]["created"]
+            if ref.startswith("site:lab:")
+        } == {"site:lab:102"}
         assert nb.dcim.interfaces.update.call_args.args[0] == [
             {"id": 10, "tagged_vlans": [2000], "untagged_vlan": None, "mode": "tagged"}
         ]
@@ -635,7 +707,11 @@ class TestSyncVlanMemberships:
 
         assert not result.failed
         assert "outside VLAN group 'group-30' VID ranges" in result.errors[0]
-        assert result.result["leaf-1"]["vlans"]["site:lab"]["created"] == [102]
+        assert {
+            ref
+            for ref in result.result["leaf-1"]["created"]
+            if ref.startswith("site:lab:")
+        } == {"site:lab:102"}
         assert nb.dcim.interfaces.update.call_args.args[0] == [
             {"id": 10, "tagged_vlans": [2000], "untagged_vlan": None, "mode": "tagged"}
         ]
@@ -647,8 +723,16 @@ class TestSyncVlanMemberships:
             vlan_map=[{"set_vlan_group": "group-30", "match_interface_names": ["*"]}],
         )
         assert not result.failed and not result.errors
-        assert result.result["leaf-1"]["vlans"]["site:lab"]["create"] == [50]
-        assert "group:group-30" not in result.result["leaf-1"]["vlans"]
+        assert {
+            ref
+            for ref in result.result["leaf-1"]["created"]
+            if ref.startswith("site:lab:")
+        } == {"site:lab:50"}
+        assert not any(
+            ref.startswith("group:group-30:")
+            for refs in result.result["leaf-1"].values()
+            for ref in refs
+        )
         nb.ipam.vlans.create.assert_not_called()
 
     def test_shared_vlan_prefers_non_automatic_name_and_keeps_memberships(
@@ -706,13 +790,12 @@ class TestSyncVlanMemberships:
             with_approval=with_approval,
         )
         assert result.dry_run and not result.failed
-        assert result.result["leaf-1"]["vlans"]["site:lab"]["create"] == [50]
-        assert (
-            result.result["leaf-1"]["interfaces"]["update"]["Ethernet6"][
-                "untagged_vlan"
-            ]["new_value"]
-            == "site:lab/50"
-        )
+        assert {
+            ref
+            for ref in result.result["leaf-1"]["created"]
+            if ref.startswith("site:lab:")
+        } == {"site:lab:50"}
+        assert result.result["leaf-1"]["updated"] == ["site:lab:50"]
         assert job.request_input.call_count == int(with_approval)
         nb.ipam.vlans.create.assert_not_called()
         nb.ipam.vlans.update.assert_not_called()
@@ -723,8 +806,12 @@ class TestSyncVlanMemberships:
             {"leaf-1": [self._live(tagged=("Ethernet404",))]}, dry_run=False
         )
         assert not result.failed and "not found in NetBox" in result.errors[-1]
-        assert result.result["leaf-1"]["vlans"]["site:lab"]["created"] == [50]
-        assert result.result["leaf-1"]["interfaces"] == {}
+        assert {
+            ref
+            for ref in result.result["leaf-1"]["created"]
+            if ref.startswith("site:lab:")
+        } == {"site:lab:50"}
+        assert result.result["leaf-1"]["updated"] == []
         nb.dcim.interfaces.update.assert_not_called()
 
     def test_empty_memberships_preserve_netbox_assignments(self) -> None:
@@ -739,8 +826,12 @@ class TestSyncVlanMemberships:
             dry_run=False,
         )
         assert not result.failed and not result.errors
-        assert result.result["leaf-1"]["vlans"]["site:lab"]["in_sync"] == [50]
-        assert result.result["leaf-1"]["interfaces"] == {}
+        assert {
+            ref
+            for ref in result.result["leaf-1"]["in_sync"]
+            if ref.startswith("site:lab:")
+        } == {"site:lab:50"}
+        assert result.result["leaf-1"]["updated"] == []
         nb.dcim.interfaces.update.assert_not_called()
 
     def test_bulk_creation_failure_stops_all_later_writes(self) -> None:
@@ -757,8 +848,16 @@ class TestSyncVlanMemberships:
         nb.ipam.vlans.create.side_effect = RuntimeError("bulk creation failed")
         result = worker.sync_vlans(job, devices=["leaf-1"], vlan_map=rules)
         assert result.failed
-        assert result.result["leaf-1"]["vlans"]["group:group-30"]["created"] == []
-        assert result.result["leaf-1"]["vlans"]["group:group-40"]["created"] == []
+        assert {
+            ref
+            for ref in result.result["leaf-1"]["created"]
+            if ref.startswith("group:group-30:")
+        } == set()
+        assert {
+            ref
+            for ref in result.result["leaf-1"]["created"]
+            if ref.startswith("group:group-40:")
+        } == set()
         assert nb.ipam.vlans.create.call_count == 1
         nb.ipam.vlans.update.assert_not_called()
         nb.dcim.interfaces.update.assert_not_called()
@@ -767,10 +866,8 @@ class TestSyncVlanMemberships:
         groups = [TestVlanResolution._group(30), TestVlanResolution._group(40)]
         result, nb, _, _ = self._run(
             {
-                "leaf-1": [
-                    self._live(name="new-50"),
-                    self._live(102, name="new-102"),
-                ]
+                "leaf-1": [self._live(name="new-50")],
+                "leaf-2": [self._live(102, name="new-102")],
             },
             vlans=[
                 self._vlan(50, group=groups[0], name="old-50"),
@@ -1251,10 +1348,24 @@ class TestSyncVlans:
             filter_by_vlan_ids=vlan_filter,
         )
         for result in self._successful_results(dry_run):
-            actions = result["result"][self.DEVICE_1]["vlans"][self._site_scope()]
-            assert actions["create"] == [190, 191]
-            assert actions["update"] == {}
-            assert actions["delete"] == []
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_1]["created"]
+                if ref.startswith(f"{self._site_scope()}:")
+            } == {
+                f"{self._site_scope()}:190",
+                f"{self._site_scope()}:191",
+            }
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_1]["updated"]
+                if ref.startswith(f"{self._site_scope()}:")
+            } == set()
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_1]["deleted"]
+                if ref.startswith(f"{self._site_scope()}:")
+            } == set()
         assert self._site_vlan(190) is None
         assert self._site_vlan(191) is None
 
@@ -1264,12 +1375,14 @@ class TestSyncVlans:
             filter_by_vlan_ids=vlan_filter,
         )
         for result in self._successful_results(first_sync):
-            assert result["result"][self.DEVICE_1]["vlans"][self._site_scope()][
-                "created"
-            ] == [
-                190,
-                191,
-            ]
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_1]["created"]
+                if ref.startswith(f"{self._site_scope()}:")
+            } == {
+                f"{self._site_scope()}:190",
+                f"{self._site_scope()}:191",
+            }
 
         assert self._site_vlan(190).name == "TEST_SYNC_CONFLICT_L1"
         assert self._site_vlan(191).name == "TEST_SYNC_SHARED"
@@ -1280,10 +1393,24 @@ class TestSyncVlans:
             filter_by_vlan_ids=vlan_filter,
         )
         for result in self._successful_results(second_sync):
-            actions = result["result"][self.DEVICE_1]["vlans"][self._site_scope()]
-            assert actions["created"] == []
-            assert actions["updated"] == []
-            assert actions["in_sync"] == [190, 191]
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_1]["created"]
+                if ref.startswith(f"{self._site_scope()}:")
+            } == set()
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_1]["updated"]
+                if ref.startswith(f"{self._site_scope()}:")
+            } == set()
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_1]["in_sync"]
+                if ref.startswith(f"{self._site_scope()}:")
+            } == {
+                f"{self._site_scope()}:190",
+                f"{self._site_scope()}:191",
+            }
 
     @pytest.mark.parametrize("preserve_name", [None, False, True])
     def test_live_sync_name_preservation(
@@ -1324,9 +1451,16 @@ class TestSyncVlans:
 
         repeated = self._sync(nfclient, [self.DEVICE_2], **kwargs)
         for result in self._successful_results(repeated):
-            actions = result["result"][self.DEVICE_2]["vlans"][self._site_scope()]
-            assert actions["updated"] == []
-            assert actions["in_sync"] == [120]
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_2]["updated"]
+                if ref.startswith(f"{self._site_scope()}:")
+            } == set()
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_2]["in_sync"]
+                if ref.startswith(f"{self._site_scope()}:")
+            } == {f"{self._site_scope()}:120"}
 
     def test_live_sync_description_preservation_modes(self, nfclient: Any) -> None:
         self.nb.ipam.vlans.create(
@@ -1343,9 +1477,11 @@ class TestSyncVlans:
         )
 
         for result in self._successful_results(response):
-            assert result["result"][self.DEVICE_2]["vlans"][self._site_scope()][
-                "updated"
-            ] == [120]
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_2]["updated"]
+                if ref.startswith(f"{self._site_scope()}:")
+            } == {f"{self._site_scope()}:120"}
         vlan = self._site_vlan(120)
         assert vlan.name == "TEST_L2_TRUNK_A"
         assert vlan.description == "stale description"
@@ -1358,9 +1494,11 @@ class TestSyncVlans:
         )
 
         for result in self._successful_results(response):
-            assert result["result"][self.DEVICE_2]["vlans"][self._site_scope()][
-                "updated"
-            ] == [120]
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_2]["updated"]
+                if ref.startswith(f"{self._site_scope()}:")
+            } == {f"{self._site_scope()}:120"}
         vlan = self._site_vlan(120)
         assert vlan.description == ""
 
@@ -1385,10 +1523,12 @@ class TestSyncVlans:
                 "VLAN 210 is outside VLAN group" in error and self.GROUP_1_NAME in error
                 for error in result["errors"]
             )
-            group_actions = result["result"][self.DEVICE_1]["vlans"][
-                self._group_scope(self.group_1)
-            ]
-            assert group_actions["created"] == [110]
+
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_1]["created"]
+                if ref.startswith(f"{self._group_scope(self.group_1)}:")
+            } == {f"{self._group_scope(self.group_1)}:110"}
         assert self._group_vlan(self.group_1, 110).name == "TEST_L1_TRUNK_A"
         assert self._site_vlan(210) is None
         assert self._global_vlan(210).name == "TEST_L1_ACCESS"
@@ -1403,9 +1543,10 @@ class TestSyncVlans:
         )
 
         for result in self._successful_results(response):
-            assert (
-                self._group_scope(self.group_1)
-                in result["result"][self.DEVICE_1]["vlans"]
+            assert any(
+                ref.startswith(f"{self._group_scope(self.group_1)}:")
+                for refs in result["result"][self.DEVICE_1].values()
+                for ref in refs
             )
 
     @pytest.mark.parametrize("map_name", ["vlan_map", "interface_map"])
@@ -1434,16 +1575,20 @@ class TestSyncVlans:
         )
 
         for result in self._successful_results(response):
-            group_actions = result["result"][self.DEVICE_1]["vlans"][
-                self._group_scope(self.group_1)
-            ]
-            assert group_actions["created"] == [111]
-            assert result["result"][self.DEVICE_1]["vlans"]["global"]["in_sync"] == [
-                110
-            ]
-            assert result["diff"][self.DEVICE_1]["interfaces"]["update"][
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_1]["created"]
+                if ref.startswith(f"{self._group_scope(self.group_1)}:")
+            } == {f"{self._group_scope(self.group_1)}:111"}
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_1]["updated"]
+                if ref.startswith("global:")
+            } == {"global:110"}
+            changes = result["diff"][self.DEVICE_1]["interfaces"]["update"][
                 "Port-Channel31"
-            ]["tagged_vlans"]["new_value"] == [
+            ]
+            assert changes["tagged_vlans"]["new_value"] == [
                 "global/110",
                 f"group:{self.GROUP_1_NAME}/111",
             ]
@@ -1471,14 +1616,16 @@ class TestSyncVlans:
         )
 
         for result in self._successful_results(response):
-            group_1_actions = result["result"][self.DEVICE_1]["vlans"][
-                self._group_scope(self.group_1)
-            ]
-            group_2_actions = result["result"][self.DEVICE_1]["vlans"][
-                self._group_scope(self.group_2)
-            ]
-            assert group_1_actions["created"] == [110]
-            assert group_2_actions["created"] == [111]
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_1]["created"]
+                if ref.startswith(f"{self._group_scope(self.group_1)}:")
+            } == {f"{self._group_scope(self.group_1)}:110"}
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_1]["created"]
+                if ref.startswith(f"{self._group_scope(self.group_2)}:")
+            } == {f"{self._group_scope(self.group_2)}:111"}
         assert self._group_vlan(self.group_1, 110).name == "TEST_L1_TRUNK_A"
         assert self._group_vlan(self.group_2, 111).name == "TEST_L1_TRUNK_B"
 
@@ -1500,13 +1647,15 @@ class TestSyncVlans:
         )
 
         for result in self._successful_results(response):
-            group_1_actions = result["result"][self.DEVICE_1]["vlans"][
-                self._group_scope(self.group_1)
-            ]
-            assert group_1_actions["created"] == [110]
-            assert (
-                self._group_scope(self.group_2)
-                not in result["result"][self.DEVICE_1]["vlans"]
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_1]["created"]
+                if ref.startswith(f"{self._group_scope(self.group_1)}:")
+            } == {f"{self._group_scope(self.group_1)}:110"}
+            assert not any(
+                ref.startswith(f"{self._group_scope(self.group_2)}:")
+                for refs in result["result"][self.DEVICE_1].values()
+                for ref in refs
             )
         assert self._group_vlan(self.group_1, 110).name == "TEST_L1_TRUNK_A"
         assert self._group_vlan(self.group_2, 110) is None
@@ -1525,9 +1674,11 @@ class TestSyncVlans:
         )
 
         for result in self._successful_results(response):
-            assert result["result"][self.DEVICE_2]["vlans"]["global"]["in_sync"] == [
-                121
-            ]
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_2]["updated"]
+                if ref.startswith("global:")
+            } == {"global:121"}
             assert (
                 "global/121"
                 in result["diff"][self.DEVICE_2]["interfaces"]["update"][
@@ -1559,7 +1710,11 @@ class TestSyncVlans:
                 "VLAN 121" in error and "no VLAN group mapping found" in error
                 for error in result["errors"]
             )
-            assert self._site_scope() not in result["result"][self.DEVICE_2]["vlans"]
+            assert not any(
+                ref.startswith(f"{self._site_scope()}:")
+                for refs in result["result"][self.DEVICE_2].values()
+                for ref in refs
+            )
         assert self._site_vlan(121) is None
         assert self._group_vlan(self.group_1, 121) is None
 
@@ -1575,12 +1730,14 @@ class TestSyncVlans:
         assert response
         for worker, result in response.items():
             assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"][self.DEVICE_1]["vlans"][self._site_scope()][
-                "created"
-            ] == [
-                190,
-                191,
-            ]
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_1]["created"]
+                if ref.startswith(f"{self._site_scope()}:")
+            } == {
+                f"{self._site_scope()}:190",
+                f"{self._site_scope()}:191",
+            }
             conflict = next(
                 error
                 for error in result["errors"]
@@ -1597,6 +1754,40 @@ class TestSyncVlans:
             (190, "TEST_SYNC_CONFLICT_L1"),
             (191, "TEST_SYNC_SHARED"),
         ]
+
+        checks = nfclient.run_job(
+            "netbox",
+            "check_device_sync",
+            workers="any",
+            kwargs={
+                "devices": [self.DEVICE_1, self.DEVICE_2],
+                **{
+                    f"check_{category}": False
+                    for category in (
+                        "inventory",
+                        "interfaces",
+                        "vrfs",
+                        "prefixes",
+                        "ip_addresses",
+                        "bgp_asns",
+                        "bgp_peerings",
+                        "bgp_communities",
+                        "vrrp",
+                    )
+                },
+                "sync_kwargs": {"sync_vlans": {"filter_by_vlan_ids": ["190-191"]}},
+            },
+        )
+        assert checks
+        for worker, result in checks.items():
+            assert result["failed"] is False, f"{worker} failed: {result}"
+            assert result["result"][self.DEVICE_1]["vlans"] is True
+            assert result["result"][self.DEVICE_2]["vlans"] is False
+            changes = result["diff"]["vlans"][self.DEVICE_2]["vlans"][
+                self._site_scope()
+            ]["update"]["190"]["name"]
+            assert changes["old_value"] == "TEST_SYNC_CONFLICT_L1"
+            assert changes["new_value"] == "TEST_SYNC_CONFLICT_L2"
 
     def test_group_identity_reports_conflicting_names(self, nfclient: Any) -> None:
         response = self._sync(
@@ -1615,9 +1806,11 @@ class TestSyncVlans:
         assert response
         for worker, result in response.items():
             assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"][self.DEVICE_1]["vlans"][
-                self._group_scope(self.group_1)
-            ]["create"] == [190]
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_1]["created"]
+                if ref.startswith(f"{self._group_scope(self.group_1)}:")
+            } == {f"{self._group_scope(self.group_1)}:190"}
             conflict = next(
                 error
                 for error in result["errors"]
@@ -1642,13 +1835,21 @@ class TestSyncVlans:
         )
 
         for result in self._successful_results(response):
-            assert result["result"][self.DEVICE_1]["vlans"][
-                self._group_scope(self.group_1)
-            ]["created"] == [110]
-            assert result["result"][self.DEVICE_1]["vlans"][
-                self._group_scope(self.group_2)
-            ]["created"] == [210]
-            assert self._site_scope() not in result["result"][self.DEVICE_1]["vlans"]
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_1]["created"]
+                if ref.startswith(f"{self._group_scope(self.group_1)}:")
+            } == {f"{self._group_scope(self.group_1)}:110"}
+            assert {
+                ref
+                for ref in result["result"][self.DEVICE_1]["created"]
+                if ref.startswith(f"{self._group_scope(self.group_2)}:")
+            } == {f"{self._group_scope(self.group_2)}:210"}
+            assert not any(
+                ref.startswith(f"{self._site_scope()}:")
+                for refs in result["result"][self.DEVICE_1].values()
+                for ref in refs
+            )
         assert self._group_vlan(self.group_1, 110).name == "TEST_L1_TRUNK_A"
         assert self._group_vlan(self.group_2, 210).name == "TEST_L1_ACCESS"
         assert self._site_vlan(110) is None
@@ -1696,8 +1897,25 @@ class TestSyncVlans:
         )
 
         for result in self._successful_results(response):
-            assert result["result"] == {self.DEVICE_1: {"vlans": {}, "interfaces": {}}}
-            assert result["diff"] == {self.DEVICE_1: {"vlans": {}, "interfaces": {}}}
+            assert result["result"] == {
+                self.DEVICE_1: {
+                    "created": [],
+                    "updated": [],
+                    "deleted": [],
+                    "in_sync": [],
+                }
+            }
+            assert result["diff"] == {
+                self.DEVICE_1: {
+                    "vlans": {},
+                    "interfaces": {
+                        "create": [],
+                        "update": {},
+                        "delete": [],
+                        "in_sync": [],
+                    },
+                }
+            }
         assert self._site_vlan(199).name == "KEEP_ME"
 
     def test_device_compatible_group_scope_precedes_direct_site_vlan(
@@ -1736,24 +1954,20 @@ class TestSyncVlans:
             )
 
             for result in self._successful_results(response):
-                assert result["result"][self.DEVICE_1]["vlans"][
-                    self._group_scope(group)
-                ]["update"] == {
-                    "110": {
-                        "name": {
-                            "old_value": "STALE_GROUP_VLAN",
-                            "new_value": "TEST_L1_TRUNK_A",
-                        }
-                    }
+                assert result["diff"][self.DEVICE_1]["vlans"][f"group:{group_name}"][
+                    "update"
+                ]["110"]["name"] == {
+                    "old_value": "STALE_GROUP_VLAN",
+                    "new_value": "TEST_L1_TRUNK_A",
                 }
                 assert (
-                    result["result"][self.DEVICE_1]["interfaces"]["update"][
-                        "Port-Channel31"
-                    ]["untagged_vlan"]["new_value"]
-                    == f"group:{group_name}/110"
+                    f"group:{group_name}:110"
+                    in result["result"][self.DEVICE_1]["updated"]
                 )
-                assert (
-                    self._site_scope() not in result["result"][self.DEVICE_1]["vlans"]
+                assert not any(
+                    ref.startswith(f"{self._site_scope()}:")
+                    for refs in result["result"][self.DEVICE_1].values()
+                    for ref in refs
                 )
         finally:
             for vlan in list(self.nb.ipam.vlans.filter(group_id=group.id)):
@@ -1801,7 +2015,12 @@ class TestSyncVlans:
                     for error in result["errors"]
                 )
                 assert result["result"] == {
-                    self.DEVICE_1: {"vlans": {}, "interfaces": {}}
+                    self.DEVICE_1: {
+                        "created": [],
+                        "updated": [],
+                        "deleted": [],
+                        "in_sync": [],
+                    }
                 }
         finally:
             for vlan in list(self.nb.ipam.vlans.filter(group_id=group.id)):

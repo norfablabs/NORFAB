@@ -1410,9 +1410,8 @@ class NetboxDevicesTasks:
             if vlan_result.errors:
                 ret.errors.extend(vlan_result.errors)
             for device in devices:
-                device_diff = vlan_result.diff.get(device, {})
                 ret.result[device]["vlans"] = not sync_diff_has_changes(
-                    device_diff, ignore_deletions=ignore_deletions
+                    vlan_result.diff.get(device, {}), ignore_deletions=ignore_deletions
                 )
             ret.diff["vlans"] = vlan_result.diff
             check_results["vlans"] = vlan_result
@@ -1943,7 +1942,7 @@ class NetboxDevicesTasks:
                 return ret
             for device in devices:
                 ret.result[device]["vlans"] = vlan_result.result.get(
-                    device, {"vlans": {}, "interfaces": {}}
+                    device, {"created": [], "updated": [], "deleted": [], "in_sync": []}
                 )
             for device in devices:
                 if device in vlan_result.resources_failed:
