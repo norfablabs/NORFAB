@@ -6840,6 +6840,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/specs/003-design-context-files/spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Context File References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/specs/004-broker-event-subscriptions/spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broker Event Subscriptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/specs/005-nornir-test-workflows/spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir Test Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -8367,17 +8451,19 @@ update IP address records.</p>
 <p>NetBox interface presence is never checked. A prefix can therefore be
 synchronized before its source interface exists in NetBox.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
-<p>The result is global because the same prefix can be reported by several
-devices:</p>
+<p>Results are keyed by device. Shared prefixes appear under each reporting device:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">"created"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"10.0.0.0/31"</span><span class="p">],</span>
-<span class="w">    </span><span class="nt">"updated"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"10.0.1.0/31"</span><span class="p">],</span>
-<span class="w">    </span><span class="nt">"in_sync"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"2001:db8::1/128"</span><span class="p">]</span>
+<span class="w">    </span><span class="nt">"ceos-spine-1"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"created"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"10.0.0.0/31"</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">"updated"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"10.0.1.0/31"</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">"deleted"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">        </span><span class="nt">"in_sync"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"2001:db8::1/128"</span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>The top-level <code>diff</code> field always contains a global reconciliation plan:</p>
+<p>The top-level <code>diff</code> field contains a reconciliation plan per device:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">"global"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"ceos-spine-1"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">"create"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
 <span class="w">        </span><span class="nt">"update"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
 <span class="w">        </span><span class="nt">"delete"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
@@ -8791,8 +8877,8 @@ the site of the alphabetically first device reporting a prefix is used.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Global <code>created</code>, <code>updated</code>, and <code>in_sync</code> prefix lists.
-<code>Result.diff</code> contains a <code>global</code> reconciliation plan with
+                <p>Per-device <code>created</code>, <code>updated</code>, and <code>in_sync</code> prefix lists.
+<code>Result.diff</code> contains a per-device reconciliation plan with
 <code>create</code>, <code>update</code>, <code>delete</code>, and <code>in_sync</code> actions;
 <code>delete</code> is always empty because this task does not delete prefixes.</p>
               </div>
@@ -9123,7 +9209,16 @@ the site of the alphabetically first device reporting a prefix is used.</p>
 <span class="normal">2086</span>
 <span class="normal">2087</span>
 <span class="normal">2088</span>
-<span class="normal">2089</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">2089</span>
+<span class="normal">2090</span>
+<span class="normal">2091</span>
+<span class="normal">2092</span>
+<span class="normal">2093</span>
+<span class="normal">2094</span>
+<span class="normal">2095</span>
+<span class="normal">2096</span>
+<span class="normal">2097</span>
+<span class="normal">2098</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDevicePrefixesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDevicePrefixesResult</span><span class="p">,</span>
@@ -9180,8 +9275,8 @@ the site of the alphabetically first device reporting a prefix is used.</p>
 <span class="sd">        **kwargs: Nornir host filter arguments.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Result: Global ``created``, ``updated``, and ``in_sync`` prefix lists.</span>
-<span class="sd">            ``Result.diff`` contains a ``global`` reconciliation plan with</span>
+<span class="sd">        Result: Per-device ``created``, ``updated``, and ``in_sync`` prefix lists.</span>
+<span class="sd">            ``Result.diff`` contains a per-device reconciliation plan with</span>
 <span class="sd">            ``create``, ``update``, ``delete``, and ``in_sync`` actions;</span>
 <span class="sd">            ``delete`` is always empty because this task does not delete prefixes.</span>
 <span class="sd">    """</span>
@@ -9189,16 +9284,9 @@ the site of the alphabetically first device reporting a prefix is used.</p>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
         <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_device_prefixes"</span><span class="p">,</span>
-        <span class="n">result</span><span class="o">=</span><span class="n">SyncActionSummary</span><span class="p">()</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span>
+        <span class="n">result</span><span class="o">=</span><span class="p">{},</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
-        <span class="n">diff</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">"global"</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">"create"</span><span class="p">:</span> <span class="p">[],</span>
-                <span class="s2">"update"</span><span class="p">:</span> <span class="p">{},</span>
-                <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[],</span>
-                <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="p">}</span>
-        <span class="p">},</span>
+        <span class="n">diff</span><span class="o">=</span><span class="p">{},</span>
         <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
@@ -9232,6 +9320,15 @@ the site of the alphabetically first device reporting a prefix is used.</p>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
 
+    <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"created"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"updated"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"deleted"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="p">}</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="n">device</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"create"</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">"update"</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[]}</span>
+
     <span class="n">normalised_live_all</span> <span class="o">=</span> <span class="n">collect_live_interface_ip_data</span><span class="p">(</span>
         <span class="n">client</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span>
         <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
@@ -9255,6 +9352,7 @@ the site of the alphabetically first device reporting a prefix is used.</p>
         <span class="k">else</span> <span class="kc">None</span>
     <span class="p">)</span>
     <span class="n">desired_prefixes</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">prefix_devices</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">normalised_live_all</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">device_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_devices</span><span class="p">:</span>
             <span class="k">continue</span>
@@ -9283,6 +9381,8 @@ the site of the alphabetically first device reporting a prefix is used.</p>
                     <span class="k">continue</span>
                 <span class="n">prefix</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">prefix_net</span><span class="p">)</span>
                 <span class="n">key</span> <span class="o">=</span> <span class="n">prefix</span> <span class="k">if</span> <span class="n">ignore_vrf</span> <span class="k">else</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">vrf_name</span><span class="p">)</span>
+                <span class="c1"># Keep every contributor before shared prefixes are deduplicated.</span>
+                <span class="n">prefix_devices</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">device_name</span><span class="p">)</span>
                 <span class="n">desired_prefixes</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
                     <span class="n">key</span><span class="p">,</span>
                     <span class="p">{</span><span class="s2">"prefix"</span><span class="p">:</span> <span class="n">prefix</span><span class="p">,</span> <span class="s2">"vrf"</span><span class="p">:</span> <span class="n">vrf_name</span><span class="p">,</span> <span class="s2">"site"</span><span class="p">:</span> <span class="n">site_id</span><span class="p">},</span>
@@ -9300,7 +9400,6 @@ the site of the alphabetically first device reporting a prefix is used.</p>
     <span class="p">)</span>
     <span class="n">create_prefixes</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">update_prefixes</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">update_prefixes_diff</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">desired</span> <span class="ow">in</span> <span class="n">desired_prefixes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">matching</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">prefix</span>
@@ -9318,6 +9417,8 @@ the site of the alphabetically first device reporting a prefix is used.</p>
                     <span class="p">{</span><span class="s2">"scope_type"</span><span class="p">:</span> <span class="s2">"dcim.site"</span><span class="p">,</span> <span class="s2">"scope_id"</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">"site"</span><span class="p">]}</span>
                 <span class="p">)</span>
             <span class="n">create_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span>
+            <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">prefix_devices</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"create"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">desired</span><span class="p">[</span><span class="s2">"prefix"</span><span class="p">])</span>
             <span class="k">continue</span>
 
         <span class="n">current</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">matching</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">prefix</span><span class="p">:</span> <span class="n">prefix</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
@@ -9332,55 +9433,52 @@ the site of the alphabetically first device reporting a prefix is used.</p>
                 <span class="s2">"scope_type"</span><span class="p">:</span> <span class="s2">"dcim.site"</span><span class="p">,</span>
                 <span class="s2">"scope_id"</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">"site"</span><span class="p">],</span>
             <span class="p">}</span>
-            <span class="n">update_prefixes_diff</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">changes</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">"site"</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">"old_value"</span><span class="p">:</span> <span class="n">current_site</span><span class="p">,</span>
                     <span class="s2">"new_value"</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">"site"</span><span class="p">],</span>
                 <span class="p">}</span>
             <span class="p">}</span>
+            <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">prefix_devices</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"update"</span><span class="p">][</span><span class="n">desired</span><span class="p">[</span><span class="s2">"prefix"</span><span class="p">]]</span> <span class="o">=</span> <span class="n">changes</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"in_sync"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">desired</span><span class="p">[</span><span class="s2">"prefix"</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">prefix_devices</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"in_sync"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">desired</span><span class="p">[</span><span class="s2">"prefix"</span><span class="p">])</span>
 
-    <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">"global"</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">"create"</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span>
-                <span class="p">{</span><span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"prefix"</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">create_prefixes</span><span class="p">}</span>
-            <span class="p">),</span>
-            <span class="s2">"update"</span><span class="p">:</span> <span class="p">{</span>
-                <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"prefix"</span><span class="p">]:</span> <span class="n">update_prefixes_diff</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
-                    <span class="n">update_prefixes_diff</span><span class="p">,</span>
-                    <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">item</span><span class="p">][</span><span class="s2">"prefix"</span><span class="p">],</span>
-                <span class="p">)</span>
-            <span class="p">},</span>
-            <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">"in_sync"</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"in_sync"</span><span class="p">])),</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-
-    <span class="n">preview</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
-    <span class="n">preview</span><span class="p">[</span><span class="s2">"created"</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"prefix"</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">create_prefixes</span>
-    <span class="p">)</span>
-    <span class="n">preview</span><span class="p">[</span><span class="s2">"updated"</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"prefix"</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">update_prefixes</span>
-    <span class="p">)</span>
-    <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">preview</span><span class="p">:</span>
-        <span class="n">preview</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">preview</span><span class="p">[</span><span class="n">action</span><span class="p">]))</span>
+    <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"create"</span><span class="p">,</span> <span class="s2">"in_sync"</span><span class="p">):</span>
+            <span class="n">actions</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="n">action</span><span class="p">]))</span>
+        <span class="n">actions</span><span class="p">[</span><span class="s2">"update"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">"update"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"created"</span><span class="p">]</span> <span class="o">=</span> <span class="n">actions</span><span class="p">[</span><span class="s2">"create"</span><span class="p">]</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"updated"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">"update"</span><span class="p">])</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"in_sync"</span><span class="p">]</span> <span class="o">=</span> <span class="n">actions</span><span class="p">[</span><span class="s2">"in_sync"</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">preview</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">):</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"no prefix sync changes required"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="k">if</span> <span class="n">with_approval</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="s2">"prefix sync"</span><span class="p">,</span> <span class="n">preview</span><span class="p">):</span>
+        <span class="c1"># Review shared objects once, while returning each device's own preview.</span>
+        <span class="n">approval_preview</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">action</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="n">prefix</span>
+                    <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                    <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="n">action</span><span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"created"</span><span class="p">,</span> <span class="s2">"updated"</span><span class="p">,</span> <span class="s2">"deleted"</span><span class="p">,</span> <span class="s2">"in_sync"</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="s2">"prefix sync"</span><span class="p">,</span> <span class="n">approval_preview</span><span class="p">):</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"skipped"</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">preview</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"review declined; changes were not applied"</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
+    <span class="c1"># Preview actions are planned; live results must contain only completed writes.</span>
+    <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">actions</span><span class="p">[</span><span class="s2">"created"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">actions</span><span class="p">[</span><span class="s2">"updated"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">vrf_ids</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">create_prefixes</span><span class="p">):</span>
         <span class="n">vrf_name</span> <span class="o">=</span> <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"vrf"</span><span class="p">]</span>
@@ -9411,9 +9509,12 @@ the site of the alphabetically first device reporting a prefix is used.</p>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">ret</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"updated"</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"prefix"</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span>
-            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
+                <span class="c1"># Report a completed shared write to all of its contributors.</span>
+                <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">prefix_devices</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"updated"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"prefix"</span><span class="p">]</span>
+                    <span class="p">)</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"updated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update_prefixes</span><span class="p">)</span><span class="si">}</span><span class="s2"> prefix(es)"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">create_prefixes</span><span class="p">:</span>
         <span class="n">create_items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">create_prefixes</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
@@ -9433,13 +9534,16 @@ the site of the alphabetically first device reporting a prefix is used.</p>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">ret</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"created"</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"prefix"</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span>
-            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">prefix_devices</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"created"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">"prefix"</span><span class="p">]</span>
+                    <span class="p">)</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">create_prefixes</span><span class="p">)</span><span class="si">}</span><span class="s2"> prefix(es)"</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">action</span><span class="p">]))</span>
+    <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
+            <span class="n">actions</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="n">action</span><span class="p">]))</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"device prefix sync complete"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>

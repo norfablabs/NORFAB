@@ -3251,6 +3251,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#file-backed-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File-Backed Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#design-input-schema" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -7050,6 +7061,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/specs/003-design-context-files/spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Context File References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/specs/004-broker-event-subscriptions/spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broker Event Subscriptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/specs/005-nornir-test-workflows/spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir Test Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -8427,6 +8522,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#file-backed-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File-Backed Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#design-input-schema" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -8824,7 +8930,7 @@
 </div>
 </div>
 <p>For an agent-oriented authoring workflow, see <a href="../../../tutorials/norfab_netbox_design_authoring/">Author a Netbox design with an agent</a>.</p>
-<p>A design is one YAML document with object collections such as <code>sites</code> and <code>devices</code>. It can also contain three optional control sections:</p>
+<p>A design is one YAML document with object collections such as <code>sites</code> and <code>devices</code>. It can also contain four optional control sections:</p>
 <table>
 <thead>
 <tr>
@@ -8836,6 +8942,10 @@
 <tr>
 <td><code>design_input_schema</code></td>
 <td>Validate values supplied through <code>context</code> before rendering.</td>
+</tr>
+<tr>
+<td><code>context</code></td>
+<td>Load YAML files into named template context values.</td>
 </tr>
 <tr>
 <td><code>jinja_functions</code></td>
@@ -8851,10 +8961,10 @@
 </tr>
 </tbody>
 </table>
-<p>For YAML text or a file URL, put <code>design_input_schema</code> and <code>jinja_functions</code> before the first object collection. The loader reads only that initial metadata block to validate context and register Jinja2 functions <strong>before</strong> rendering the full document. <code>custom_functions</code> is loaded after rendering and does not have this placement requirement.</p>
+<p>For YAML text or a file URL, put <code>context</code>, <code>design_input_schema</code> and <code>jinja_functions</code> before the first object collection. The loader reads only that initial metadata block to load and validate context and register Jinja2 functions <strong>before</strong> rendering the full document. <code>custom_functions</code> is loaded after rendering and does not have this placement requirement.</p>
 <div class="admonition warning">
 <p class="admonition-title">Keep pre-render metadata at the start</p>
-<p>The loader parses only the initial YAML lines containing <code>design_input_schema</code>, <code>jinja_functions</code>, <code>custom_functions</code>, comments, and indented lines. It stops at the first other top-level line. This portion of document must be valid YAML on its own: keep Jinja2 expressions and top-level template directives out of it, and put <code>design_input_schema</code> and <code>jinja_functions</code> before any object collection. Use <strong>one YAML document</strong>. Do not insert <code>---</code> between metadata and collections. A schema or Jinja2 function declared after a collection will not be available before rendering.</p>
+<p>The loader parses only the initial YAML lines containing <code>context</code>, <code>design_input_schema</code>, <code>jinja_functions</code>, <code>custom_functions</code>, comments, and indented lines. It stops at the first other top-level line. This portion of document must be valid YAML on its own: keep Jinja2 expressions and top-level template directives out of it, and put <code>context</code>, <code>design_input_schema</code> and <code>jinja_functions</code> before any object collection. Use <strong>one YAML document</strong>. Do not insert <code>---</code> between metadata and collections. Metadata declared after a collection will not be available before rendering.</p>
 </div>
 <h2 id="deployment-caveats">Deployment caveats<a class="headerlink" href="#deployment-caveats" title="Permanent link">¤</a></h2>
 <ul>
@@ -8879,6 +8989,39 @@
   not create planned prerequisites or reserve allocations. Failures can leave
   earlier changes applied. There is no automatic rollback.</li>
 </ul>
+<h2 id="file-backed-context">File-Backed Context<a class="headerlink" href="#file-backed-context" title="Permanent link">¤</a></h2>
+<p>Declare YAML data sources in the top-level <code>context</code> mapping, before the first
+collection. Each complete parsed value becomes <code>context.&lt;key&gt;</code>. Sources must use
+<code>nf://</code> or <code>git://</code> URLs ending in <code>.yaml</code> or <code>.yml</code>. Invalid declarations fail
+design validation. Every file is loaded, including values later replaced by task
+input. Missing files and invalid YAML fail preparation before deployment.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">context</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">defaults</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nf://netbox/data/defaults.yaml</span>
+<span class="w">  </span><span class="nt">links</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git://design-data/links.yml</span>
+<span class="nt">sites</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">context.defaults.site | tojson</span><span class="w"> </span><span class="p p-Indicator">}}</span>
+</code></pre></div>
+<p>For example, <code>defaults.yaml</code> can contain <code>site: BRISBANE</code>. A file may contain a
+dictionary, list, string, number, boolean, or null. Empty YAML produces null.
+File contents are not Jinja2-rendered and dictionary values are not expanded into
+sibling context keys.</p>
+<p>Task input overrides Markdown context, which overrides file-backed context.
+Replacement applies to whole top-level keys without nested merging. Input-schema
+validation runs on the combined context afterward. This metadata does not update
+Netbox <code>config_context</code> or device <code>local_context_data</code> by itself.</p>
+<p>In Markdown, put the declaration in a <code>yaml design</code> fence:</p>
+<div class="highlight"><pre><span></span><code><span class="sb">```yaml</span><span class="w"> </span>design
+<span class="nt">context</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">defaults</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nf://netbox/data/defaults.yaml</span>
+<span class="sb">```</span>
+
+<span class="sb">```yaml</span><span class="w"> </span>design
+<span class="nt">sites</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">context.defaults.site | tojson</span><span class="w"> </span><span class="p p-Indicator">}}</span>
+<span class="sb">```</span>
+</code></pre></div>
+<p>Existing Markdown context blocks still render using only explicit task input.
+They cannot read file-backed values.</p>
 <h2 id="design-input-schema">Design input schema<a class="headerlink" href="#design-input-schema" title="Permanent link">¤</a></h2>
 <p><code>design_input_schema</code> validates the supplied <code>context</code> before Jinja2 renders the design. Use inline JSON Schema or an <code>nf://</code> / <code>git://</code> Python file defining a Pydantic <code>DesignInput</code> model. The validated context is available as <code>context</code> in the template.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Inline schema</label><label for="__tabbed_2_2">Pydantic Model-based design</label></div>
@@ -11137,7 +11280,7 @@ are unsupported.</p>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">prefix</span><span class="nv"> </span><span class="s">}}{{</span><span class="nv"> </span><span class="s">context.site</span><span class="nv"> </span><span class="s">}}"</span>
 <span class="sb">```</span>
 </code></pre></div>
-<p>Assembly order is schema, custom functions, Jinja functions, standalone Jinja
+<p>Assembly order is schema, context files, custom functions, Jinja functions, standalone Jinja
 blocks, then collections. Put each metadata key in one block. Standalone
 Jinja blocks retain document order and must each contain complete syntax.
 Relative includes resolve from the Markdown file's directory.</p>
@@ -11358,7 +11501,7 @@ nf#
 <p>Fetches Jinja and custom function files in separate batches, executing
 each group in its declared order.</p>
 <p>Updates add tags, custom-field list entries, and the supported native
-relationship lists. Scalar fields and context-data dictionaries replace
+relationship lists. Single-value fields and context-data dictionaries replace
 their current values. Object custom-field names resolve to NetBox IDs.</p>
 
 
@@ -11421,7 +11564,11 @@ existing device status.</p>
             <td>
               <div class="doc-md-description">
                 <p>Jinja2 variables, optionally checked by design_input_schema.
-Explicit values override Markdown context by top-level key.</p>
+Explicit values override Markdown context, which overrides YAML
+files declared in the design's top-level context mapping.
+Each nf:// or git:// .yaml/.yml file is loaded without Jinja2
+rendering and assigned as a complete value under its key.
+All declared files must load even when their keys are overridden.</p>
               </div>
             </td>
             <td>
@@ -11574,19 +11721,7 @@ functions still run.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\design_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">4329</span>
-<span class="normal">4330</span>
-<span class="normal">4331</span>
-<span class="normal">4332</span>
-<span class="normal">4333</span>
-<span class="normal">4334</span>
-<span class="normal">4335</span>
-<span class="normal">4336</span>
-<span class="normal">4337</span>
-<span class="normal">4338</span>
-<span class="normal">4339</span>
-<span class="normal">4340</span>
-<span class="normal">4341</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">4341</span>
 <span class="normal">4342</span>
 <span class="normal">4343</span>
 <span class="normal">4344</span>
@@ -11898,7 +12033,33 @@ functions still run.</p>
 <span class="normal">4650</span>
 <span class="normal">4651</span>
 <span class="normal">4652</span>
-<span class="normal">4653</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">4653</span>
+<span class="normal">4654</span>
+<span class="normal">4655</span>
+<span class="normal">4656</span>
+<span class="normal">4657</span>
+<span class="normal">4658</span>
+<span class="normal">4659</span>
+<span class="normal">4660</span>
+<span class="normal">4661</span>
+<span class="normal">4662</span>
+<span class="normal">4663</span>
+<span class="normal">4664</span>
+<span class="normal">4665</span>
+<span class="normal">4666</span>
+<span class="normal">4667</span>
+<span class="normal">4668</span>
+<span class="normal">4669</span>
+<span class="normal">4670</span>
+<span class="normal">4671</span>
+<span class="normal">4672</span>
+<span class="normal">4673</span>
+<span class="normal">4674</span>
+<span class="normal">4675</span>
+<span class="normal">4676</span>
+<span class="normal">4677</span>
+<span class="normal">4678</span>
+<span class="normal">4679</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">DesignDeployInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">DesignDeployResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -11928,7 +12089,7 @@ functions still run.</p>
 <span class="sd">    each group in its declared order.</span>
 
 <span class="sd">    Updates add tags, custom-field list entries, and the supported native</span>
-<span class="sd">    relationship lists. Scalar fields and context-data dictionaries replace</span>
+<span class="sd">    relationship lists. Single-value fields and context-data dictionaries replace</span>
 <span class="sd">    their current values. Object custom-field names resolve to NetBox IDs.</span>
 
 <span class="sd">    Args:</span>
@@ -11941,7 +12102,11 @@ functions still run.</p>
 <span class="sd">            New devices default to planned status; omitted status preserves</span>
 <span class="sd">            existing device status.</span>
 <span class="sd">        context: Jinja2 variables, optionally checked by design_input_schema.</span>
-<span class="sd">            Explicit values override Markdown context by top-level key.</span>
+<span class="sd">            Explicit values override Markdown context, which overrides YAML</span>
+<span class="sd">            files declared in the design's top-level context mapping.</span>
+<span class="sd">            Each nf:// or git:// .yaml/.yml file is loaded without Jinja2</span>
+<span class="sd">            rendering and assigned as a complete value under its key.</span>
+<span class="sd">            All declared files must load even when their keys are overridden.</span>
 <span class="sd">        instance: NetBox instance name; defaults to the worker's instance.</span>
 <span class="sd">        dry_run: Return planned writes without changing NetBox.</span>
 <span class="sd">        branch: NetBox Branching plugin branch name.</span>
@@ -11976,6 +12141,7 @@ functions still run.</p>
             <span class="n">context</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">context</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"Design context must be a YAML mapping"</span><span class="p">)</span>
+        <span class="n">markdown_context</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="n">design_url</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">design</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">design</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
@@ -11985,6 +12151,7 @@ functions still run.</p>
             <span class="n">metadata</span> <span class="o">=</span> <span class="n">DesignDocument</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span>
                 <span class="p">{</span>
                     <span class="s2">"design_input_schema"</span><span class="p">:</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"design_input_schema"</span><span class="p">),</span>
+                    <span class="s2">"context"</span><span class="p">:</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"context"</span><span class="p">,</span> <span class="p">{}),</span>
                     <span class="s2">"jinja_functions"</span><span class="p">:</span> <span class="n">design</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"jinja_functions"</span><span class="p">,</span> <span class="p">{}),</span>
                 <span class="p">}</span>
             <span class="p">)</span>
@@ -12003,7 +12170,7 @@ functions still run.</p>
                     <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">markdown</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span>
                 <span class="p">)</span>
                 <span class="n">source</span> <span class="o">=</span> <span class="n">parsed</span><span class="p">[</span><span class="s2">"design"</span><span class="p">]</span>
-                <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">parsed</span><span class="p">[</span><span class="s2">"context"</span><span class="p">],</span> <span class="o">**</span><span class="n">context</span><span class="p">}</span>
+                <span class="n">markdown_context</span> <span class="o">=</span> <span class="n">parsed</span><span class="p">[</span><span class="s2">"context"</span><span class="p">]</span>
             <span class="n">metadata_lines</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">source</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
                 <span class="k">if</span> <span class="p">(</span>
@@ -12013,6 +12180,7 @@ functions still run.</p>
                         <span class="p">(</span>
                             <span class="s2">"#"</span><span class="p">,</span>
                             <span class="s2">"design_input_schema:"</span><span class="p">,</span>
+                            <span class="s2">"context:"</span><span class="p">,</span>
                             <span class="s2">"jinja_functions:"</span><span class="p">,</span>
                             <span class="s2">"custom_functions:"</span><span class="p">,</span>
                         <span class="p">)</span>
@@ -12029,6 +12197,13 @@ functions still run.</p>
 
         <span class="n">input_schema</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">design_input_schema</span>
         <span class="n">jinja_functions</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">jinja_functions</span>
+        <span class="n">design_context</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">check_timeout</span><span class="p">()</span>
+            <span class="n">design_context</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">design_context</span><span class="p">,</span> <span class="o">**</span><span class="n">markdown_context</span><span class="p">,</span> <span class="o">**</span><span class="n">context</span><span class="p">}</span>
 
         <span class="k">if</span> <span class="n">input_schema</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_schema</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>

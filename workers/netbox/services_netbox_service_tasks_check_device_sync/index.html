@@ -6796,6 +6796,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/specs/003-design-context-files/spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Context File References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/specs/004-broker-event-subscriptions/spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broker Event Subscriptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/specs/005-nornir-test-workflows/spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir Test Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -8272,16 +8356,17 @@
 <li><strong>vlans</strong> — calls <code>sync_vlans(dry_run=True)</code> for VLANs and interface assignments</li>
 <li><strong>prefixes</strong> — calls <code>sync_device_prefixes(dry_run=True)</code></li>
 <li><strong>ip_addresses</strong> — calls <code>sync_device_ip(dry_run=True)</code></li>
+<li><strong>vrrp</strong> — calls <code>sync_vrrp(dry_run=True)</code></li>
+<li><strong>bgp_asns</strong> - calls <code>sync_bgp_asn(dry_run=True)</code> before peerings</li>
 <li><strong>bgp_peerings</strong> — calls <code>sync_bgp_peerings(dry_run=True)</code></li>
 <li><strong>bgp_communities</strong> — calls <code>sync_bgp_community(dry_run=True)</code> for route targets and BGP plugin communities</li>
-<li><strong>vrrp</strong> — calls <code>sync_vrrp(dry_run=True)</code></li>
 </ul>
 <p>Each sub-check can be enabled or disabled independently.</p>
 <h2 id="sync-task-arguments">Sync Task Arguments<a class="headerlink" href="#sync-task-arguments" title="Permanent link">¤</a></h2>
 <p>Use <code>sync_kwargs</code> to configure how individual dry-run synchronizers calculate
 drift. Supported keys are <code>sync_device_inventory</code>, <code>sync_device_interfaces</code>,
 <code>sync_vrfs</code>, <code>sync_vlans</code>, <code>sync_device_prefixes</code>, <code>sync_device_ip</code>,
-<code>sync_vrrp</code>, <code>sync_bgp_community</code>, and <code>sync_bgp_peerings</code>. Values are keyword
+<code>sync_vrrp</code>, <code>sync_bgp_community</code>, <code>sync_bgp_asn</code>, and <code>sync_bgp_peerings</code>. Values are keyword
 argument dictionaries accepted by the corresponding task. Keep <code>instance</code>,
 <code>timeout</code>, <code>devices</code>, <code>branch</code>, and <code>dry_run</code> at the <code>check_device_sync</code> level;
 all subordinate tasks are always called with <code>dry_run=True</code>.</p>
@@ -8294,8 +8379,12 @@ all subordinate tasks are always called with <code>dry_run=True</code>.</p>
 <span class="nt">sync_bgp_peerings</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">active</span>
 </code></pre></div>
+<p>BGP ASN checking runs before peerings, followed by communities. All three are
+enabled by default. Set
+<code>check_bgp_asns=False</code> to disable it. Dry-run checks need no RIR and report
+missing ASNs as drift.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
-<p>Both coordinated tasks include inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities, and BGP peerings. Every selected device has all nine category keys. Disabled categories are <code>None</code>; failed categories are <code>False</code>. Sync results contain child task summaries or dry-run previews, while checks return booleans for drift state. The <code>diff</code> dictionary retains child dry-run details under the same category keys, with <code>None</code> for unexecuted checks or stages. MAC synchronization is available through its standalone task.</p>
+<p>Both coordinated tasks include inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities, BGP ASNs, and BGP peerings. Every selected device has all ten category keys. Disabled categories are <code>None</code>; failed categories are <code>False</code>. Sync results contain child task summaries or dry-run previews, while checks return booleans for drift state. The <code>diff</code> dictionary retains child dry-run details under the same category keys, with <code>None</code> for unexecuted checks or stages. MAC synchronization is available through its standalone task.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
     <span class="s2">"result"</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">"ceos-spine-1"</span><span class="p">:</span> <span class="p">{</span>
@@ -8306,6 +8395,7 @@ all subordinate tasks are always called with <code>dry_run=True</code>.</p>
             <span class="s2">"vlans"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">"prefixes"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">"ip_addresses"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"bgp_asns"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">"bgp_peerings"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">"bgp_communities"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">"vrrp"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
@@ -8318,6 +8408,7 @@ all subordinate tasks are always called with <code>dry_run=True</code>.</p>
         <span class="s2">"vlans"</span><span class="p">:</span> <span class="p">{},</span>
         <span class="s2">"prefixes"</span><span class="p">:</span> <span class="p">{},</span>
         <span class="s2">"ip_addresses"</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">"bgp_asns"</span><span class="p">:</span> <span class="p">{},</span>
         <span class="s2">"bgp_peerings"</span><span class="p">:</span> <span class="p">{},</span>
         <span class="s2">"bgp_communities"</span><span class="p">:</span> <span class="p">{},</span>
         <span class="s2">"vrrp"</span><span class="p">:</span> <span class="p">{},</span>
@@ -8329,7 +8420,7 @@ all subordinate tasks are always called with <code>dry_run=True</code>.</p>
 <ul>
 <li>No data is written to NetBox.</li>
 <li><code>Result.diff</code> contains the raw dry-run detail from each enabled sub-task.</li>
-<li>Prefix, global VLAN, BGP community, and route-target drift affects every selected device; interface VLAN and VRRP drift is assessed per device.</li>
+<li>Prefix, VRF, VLAN, VRRP, BGP ASN, and BGP community drift is assessed per device. Shared objects affect their reporting devices.</li>
 <li>Device names can be supplied directly or resolved from Nornir filters.</li>
 </ul>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
@@ -8340,7 +8431,7 @@ all subordinate tasks are always called with <code>dry_run=True</code>.</p>
 <div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>check-sync<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>ceos-leaf-2
 </code></pre></div>
 <p>Check only interface and IP address sync:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>check-sync<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>check-inventory<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-vrfs<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-vlans<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-prefixes<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-bgp-peerings<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-bgp-communities<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-vrrp<span class="w"> </span><span class="nb">false</span>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>check-sync<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>check-inventory<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-vrfs<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-vlans<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-prefixes<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-bgp-asns<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-bgp-peerings<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-bgp-communities<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-vrrp<span class="w"> </span><span class="nb">false</span>
 </code></pre></div>
 <p>Resolve devices using a Nornir group filter:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>check-sync<span class="w"> </span>devices<span class="w"> </span>FG<span class="w"> </span>leafs
@@ -8390,6 +8481,7 @@ all subordinate tasks are always called with <code>dry_run=True</code>.</p>
             <span class="s2">"check_vrfs"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">"check_vlans"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">"check_prefixes"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">"check_bgp_asns"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">"check_bgp_peerings"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">"check_bgp_communities"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">"check_vrrp"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
@@ -8430,6 +8522,7 @@ root
 <span class="w">            </span>├──<span class="w"> </span>check-vlans:<span class="w">    </span>Check<span class="w"> </span>VLAN<span class="w"> </span>and<span class="w"> </span>interface<span class="w"> </span>assignment<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">            </span>├──<span class="w"> </span>check-prefixes:<span class="w">    </span>Check<span class="w"> </span>prefix<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">            </span>├──<span class="w"> </span>check-ip-addresses:<span class="w">    </span>Check<span class="w"> </span>IP<span class="w"> </span>addresses<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
+<span class="w">            </span>├──<span class="w"> </span>check-bgp-asns:<span class="w">    </span>Check<span class="w"> </span>BGP<span class="w"> </span>ASN<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">            </span>├──<span class="w"> </span>check-bgp-peerings:<span class="w">    </span>Check<span class="w"> </span>BGP<span class="w"> </span>peerings<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">            </span>├──<span class="w"> </span>check-bgp-communities:<span class="w">    </span>Check<span class="w"> </span>BGP<span class="w"> </span>communities<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
 <span class="w">            </span>├──<span class="w"> </span>check-vrrp:<span class="w">    </span>Check<span class="w"> </span>VRRP<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">'True'</span>
@@ -8459,12 +8552,12 @@ nf#
 
         <p>Check if NetBox device data is in sync with live device data.</p>
 <p>Calls the inventory, interface, VRF, VLAN, prefix, IP address, BGP
-peering, BGP community, and VRRP synchronizers in dry-run mode and produces
+ASN, peering, BGP community, and VRRP synchronizers in dry-run mode and produces
 a per-device report.</p>
 <p><code>Result.diff</code> contains the full dry-run detail from each sub-task, keyed by
 sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code>, <code>vlans</code>,
 <code>prefixes</code>, <code>ip_addresses</code>, <code>bgp_peerings</code>, <code>bgp_communities</code>,
-<code>vrrp</code>).</p>
+<code>vrrp</code>, <code>bgp_asns</code>).</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -8656,6 +8749,22 @@ sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>check_bgp_asns</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Check BGP ASN sync state. Defaults to True.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>check_bgp_peerings</code>
             </td>
             <td>
@@ -8732,7 +8841,7 @@ Defaults to False.</p>
 <code>nf://</code> YAML file containing that dictionary. Supported keys
 are <code>sync_device_inventory</code>, <code>sync_device_interfaces</code>,
 <code>sync_vrfs</code>, <code>sync_vlans</code>, <code>sync_device_prefixes</code>,
-<code>sync_device_ip</code>, <code>sync_vrrp</code>, <code>sync_bgp_community</code>, and
+<code>sync_device_ip</code>, <code>sync_vrrp</code>, <code>sync_bgp_community</code>, <code>sync_bgp_asn</code>, and
 <code>sync_bgp_peerings</code>.</p>
               </div>
             </td>
@@ -8825,6 +8934,7 @@ are <code>sync_device_inventory</code>, <code>sync_device_interfaces</code>,
         "vlans":         True | False | None,
         "prefixes":      True | False | None,
         "ip_addresses":  True | False | None,
+        "bgp_asns": True | False | None,
         "bgp_peerings":  True | False | None,
         "bgp_communities": True | False | None,
         "vrrp":          True | False | None,
@@ -9227,7 +9337,20 @@ are <code>sync_device_inventory</code>, <code>sync_device_interfaces</code>,
 <span class="normal">1567</span>
 <span class="normal">1568</span>
 <span class="normal">1569</span>
-<span class="normal">1570</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1570</span>
+<span class="normal">1571</span>
+<span class="normal">1572</span>
+<span class="normal">1573</span>
+<span class="normal">1574</span>
+<span class="normal">1575</span>
+<span class="normal">1576</span>
+<span class="normal">1577</span>
+<span class="normal">1578</span>
+<span class="normal">1579</span>
+<span class="normal">1580</span>
+<span class="normal">1581</span>
+<span class="normal">1582</span>
+<span class="normal">1583</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CheckDeviceSyncInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CheckDeviceSyncResult</span><span class="p">,</span>
@@ -9259,19 +9382,20 @@ are <code>sync_device_inventory</code>, <code>sync_device_interfaces</code>,
     <span class="n">check_vrrp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">ignore_deletions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">sync_kwargs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">check_bgp_asns</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Check if NetBox device data is in sync with live device data.</span>
 
 <span class="sd">    Calls the inventory, interface, VRF, VLAN, prefix, IP address, BGP</span>
-<span class="sd">    peering, BGP community, and VRRP synchronizers in dry-run mode and produces</span>
+<span class="sd">    ASN, peering, BGP community, and VRRP synchronizers in dry-run mode and produces</span>
 <span class="sd">    a per-device report.</span>
 
 <span class="sd">    ``Result.diff`` contains the full dry-run detail from each sub-task, keyed by</span>
 <span class="sd">    sub-task name (``inventory``, ``interfaces``, ``vrfs``, ``vlans``,</span>
 <span class="sd">    ``prefixes``, ``ip_addresses``, ``bgp_peerings``, ``bgp_communities``,</span>
-<span class="sd">    ``vrrp``).</span>
+<span class="sd">    ``vrrp``, ``bgp_asns``).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab Job object.</span>
@@ -9285,6 +9409,7 @@ are <code>sync_device_inventory</code>, <code>sync_device_interfaces</code>,
 <span class="sd">        check_vlans (bool): Check VLAN and interface assignment sync state.</span>
 <span class="sd">        check_prefixes (bool): Check prefix sync state. Defaults to True.</span>
 <span class="sd">        check_ip_addresses (bool): Check IP address sync state. Defaults to True.</span>
+<span class="sd">        check_bgp_asns (bool): Check BGP ASN sync state. Defaults to True.</span>
 <span class="sd">        check_bgp_peerings (bool): Check BGP peering sync state. Defaults to True.</span>
 <span class="sd">        check_bgp_communities (bool): Check BGP community sync state. Defaults to True.</span>
 <span class="sd">        check_vrrp (bool): Check VRRP sync state. Defaults to True.</span>
@@ -9294,7 +9419,7 @@ are <code>sync_device_inventory</code>, <code>sync_device_interfaces</code>,
 <span class="sd">            ``nf://`` YAML file containing that dictionary. Supported keys</span>
 <span class="sd">            are ``sync_device_inventory``, ``sync_device_interfaces``,</span>
 <span class="sd">            ``sync_vrfs``, ``sync_vlans``, ``sync_device_prefixes``,</span>
-<span class="sd">            ``sync_device_ip``, ``sync_vrrp``, ``sync_bgp_community``, and</span>
+<span class="sd">            ``sync_device_ip``, ``sync_vrrp``, ``sync_bgp_community``, ``sync_bgp_asn``, and</span>
 <span class="sd">            ``sync_bgp_peerings``.</span>
 <span class="sd">        **kwargs: Nornir host filter arguments (e.g. ``FL``, ``FC``, ``FB``).</span>
 
@@ -9314,6 +9439,7 @@ are <code>sync_device_inventory</code>, <code>sync_device_interfaces</code>,
 <span class="sd">                    "vlans":         True | False | None,</span>
 <span class="sd">                    "prefixes":      True | False | None,</span>
 <span class="sd">                    "ip_addresses":  True | False | None,</span>
+<span class="sd">                    "bgp_asns": True | False | None,</span>
 <span class="sd">                    "bgp_peerings":  True | False | None,</span>
 <span class="sd">                    "bgp_communities": True | False | None,</span>
 <span class="sd">                    "vrrp":          True | False | None,</span>
@@ -9366,6 +9492,7 @@ are <code>sync_device_inventory</code>, <code>sync_device_interfaces</code>,
         <span class="s2">"ip_addresses"</span><span class="p">,</span>
         <span class="s2">"vrrp"</span><span class="p">,</span>
         <span class="s2">"bgp_communities"</span><span class="p">,</span>
+        <span class="s2">"bgp_asns"</span><span class="p">,</span>
         <span class="s2">"bgp_peerings"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">categories</span><span class="p">)</span>
@@ -9431,15 +9558,8 @@ are <code>sync_device_inventory</code>, <code>sync_device_interfaces</code>,
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">vrf_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="n">global_vrf_diff</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">section</span><span class="p">:</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="p">{})</span>
-            <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"vrfs"</span><span class="p">,</span> <span class="s2">"route_targets"</span><span class="p">,</span> <span class="s2">"routing_policies"</span><span class="p">)</span>
-        <span class="p">}</span>
         <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
-            <span class="n">device_diff</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="o">**</span><span class="n">global_vrf_diff</span><span class="p">,</span>
-                <span class="s2">"interfaces"</span><span class="p">:</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"interfaces"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{}),</span>
-            <span class="p">}</span>
+            <span class="n">device_diff</span> <span class="o">=</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"vrfs"</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span>
                 <span class="n">device_diff</span><span class="p">,</span> <span class="n">ignore_deletions</span><span class="o">=</span><span class="n">ignore_deletions</span>
             <span class="p">)</span>
@@ -9461,14 +9581,8 @@ are <code>sync_device_inventory</code>, <code>sync_device_interfaces</code>,
         <span class="k">if</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">vlan_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
-            <span class="n">device_diff</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">"vlans"</span><span class="p">:</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"vlans"</span><span class="p">,</span> <span class="p">{}),</span>
-                <span class="s2">"interfaces"</span><span class="p">:</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"interfaces"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                    <span class="n">device</span><span class="p">,</span> <span class="p">{}</span>
-                <span class="p">),</span>
-            <span class="p">}</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"vlans"</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span>
-                <span class="n">device_diff</span><span class="p">,</span> <span class="n">ignore_deletions</span><span class="o">=</span><span class="n">ignore_deletions</span>
+                <span class="n">vlan_result</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{}),</span> <span class="n">ignore_deletions</span><span class="o">=</span><span class="n">ignore_deletions</span>
             <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">"vlans"</span><span class="p">]</span> <span class="o">=</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">diff</span>
         <span class="n">check_results</span><span class="p">[</span><span class="s2">"vlans"</span><span class="p">]</span> <span class="o">=</span> <span class="n">vlan_result</span>
@@ -9487,11 +9601,11 @@ are <code>sync_device_inventory</code>, <code>sync_device_interfaces</code>,
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">prefix_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="n">prefixes_in_sync</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span>
-            <span class="n">prefix_result</span><span class="o">.</span><span class="n">diff</span><span class="p">,</span> <span class="n">ignore_deletions</span><span class="o">=</span><span class="n">ignore_deletions</span>
-        <span class="p">)</span>
         <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"prefixes"</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefixes_in_sync</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"prefixes"</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span>
+                <span class="n">prefix_result</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{}),</span>
+                <span class="n">ignore_deletions</span><span class="o">=</span><span class="n">ignore_deletions</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">"prefixes"</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">diff</span>
         <span class="n">check_results</span><span class="p">[</span><span class="s2">"prefixes"</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix_result</span>
 
@@ -9537,27 +9651,26 @@ are <code>sync_device_inventory</code>, <code>sync_device_interfaces</code>,
         <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">"vrrp"</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">diff</span>
         <span class="n">check_results</span><span class="p">[</span><span class="s2">"vrrp"</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrrp_result</span>
 
-    <span class="c1"># --- check BGP communities ---</span>
-    <span class="k">if</span> <span class="n">check_bgp_communities</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"checking BGP community sync state"</span><span class="p">)</span>
-        <span class="n">community_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_bgp_community</span><span class="p">(</span>
+    <span class="c1"># --- check BGP ASNs before peerings ---</span>
+    <span class="k">if</span> <span class="n">check_bgp_asns</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"checking BGP ASN sync state"</span><span class="p">)</span>
+        <span class="n">asn_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_bgp_asn</span><span class="p">(</span>
             <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
             <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
             <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
             <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
             <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
-            <span class="o">**</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sync_bgp_community"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
+            <span class="o">**</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sync_bgp_asn"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="n">community_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">community_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="n">communities_in_sync</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span>
-            <span class="n">community_result</span><span class="o">.</span><span class="n">diff</span><span class="p">,</span> <span class="n">ignore_deletions</span><span class="o">=</span><span class="n">ignore_deletions</span>
-        <span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">asn_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"bgp_communities"</span><span class="p">]</span> <span class="o">=</span> <span class="n">communities_in_sync</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">"bgp_communities"</span><span class="p">]</span> <span class="o">=</span> <span class="n">community_result</span><span class="o">.</span><span class="n">diff</span>
-        <span class="n">check_results</span><span class="p">[</span><span class="s2">"bgp_communities"</span><span class="p">]</span> <span class="o">=</span> <span class="n">community_result</span>
+            <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">asn_result</span><span class="o">.</span><span class="n">diff</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"bgp_asns"</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span>
+                    <span class="n">asn_result</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="n">device</span><span class="p">],</span> <span class="n">ignore_deletions</span><span class="o">=</span><span class="n">ignore_deletions</span>
+                <span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">"bgp_asns"</span><span class="p">]</span> <span class="o">=</span> <span class="n">asn_result</span><span class="o">.</span><span class="n">diff</span>
+        <span class="n">check_results</span><span class="p">[</span><span class="s2">"bgp_asns"</span><span class="p">]</span> <span class="o">=</span> <span class="n">asn_result</span>
 
     <span class="c1"># --- check BGP peerings ---</span>
     <span class="k">if</span> <span class="n">check_bgp_peerings</span><span class="p">:</span>
@@ -9579,6 +9692,28 @@ are <code>sync_device_inventory</code>, <code>sync_device_interfaces</code>,
             <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">"bgp_peerings"</span><span class="p">]</span> <span class="o">=</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">diff</span>
         <span class="n">check_results</span><span class="p">[</span><span class="s2">"bgp_peerings"</span><span class="p">]</span> <span class="o">=</span> <span class="n">bgp_result</span>
+
+    <span class="c1"># --- check BGP communities ---</span>
+    <span class="k">if</span> <span class="n">check_bgp_communities</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"checking BGP community sync state"</span><span class="p">)</span>
+        <span class="n">community_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_bgp_community</span><span class="p">(</span>
+            <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
+            <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+            <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+            <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
+            <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+            <span class="o">**</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sync_bgp_community"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">community_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">community_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"bgp_communities"</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span>
+                <span class="n">community_result</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{}),</span>
+                <span class="n">ignore_deletions</span><span class="o">=</span><span class="n">ignore_deletions</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">"bgp_communities"</span><span class="p">]</span> <span class="o">=</span> <span class="n">community_result</span><span class="o">.</span><span class="n">diff</span>
+        <span class="n">check_results</span><span class="p">[</span><span class="s2">"bgp_communities"</span><span class="p">]</span> <span class="o">=</span> <span class="n">community_result</span>
 
     <span class="k">for</span> <span class="n">category</span><span class="p">,</span> <span class="n">child_result</span> <span class="ow">in</span> <span class="n">check_results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="ow">or</span> <span class="n">child_result</span><span class="o">.</span><span class="n">failed</span>
@@ -9603,6 +9738,7 @@ are <code>sync_device_inventory</code>, <code>sync_device_interfaces</code>,
         <span class="s2">"ip_addresses"</span><span class="p">:</span> <span class="n">check_ip_addresses</span><span class="p">,</span>
         <span class="s2">"vrrp"</span><span class="p">:</span> <span class="n">check_vrrp</span><span class="p">,</span>
         <span class="s2">"bgp_communities"</span><span class="p">:</span> <span class="n">check_bgp_communities</span><span class="p">,</span>
+        <span class="s2">"bgp_asns"</span><span class="p">:</span> <span class="n">check_bgp_asns</span><span class="p">,</span>
         <span class="s2">"bgp_peerings"</span><span class="p">:</span> <span class="n">check_bgp_peerings</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">device_data</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>

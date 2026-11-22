@@ -6796,6 +6796,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/specs/003-design-context-files/spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Context File References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/specs/004-broker-event-subscriptions/spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broker Event Subscriptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/specs/005-nornir-test-workflows/spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir Test Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -8272,15 +8356,20 @@ fixed sequence:</p>
 <li><strong>vlans</strong> — calls <code>sync_vlans</code></li>
 <li><strong>ip_addresses</strong> — calls <code>sync_device_ip</code></li>
 <li><strong>vrrp</strong> — calls <code>sync_vrrp</code></li>
-<li><strong>bgp_communities</strong> - calls <code>sync_bgp_community</code></li>
+<li><strong>bgp_asns</strong> - calls <code>sync_bgp_asn</code></li>
 <li><strong>bgp_peerings</strong> — calls <code>sync_bgp_peerings</code></li>
+<li><strong>bgp_communities</strong> - calls <code>sync_bgp_community</code></li>
 </ol>
 <h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
-<p>The <code>sync_all</code> task orchestrates nine subordinate sync tasks in sequence. Each task collects live device data,
+<p>The <code>sync_all</code> task orchestrates ten subordinate sync tasks in sequence. Each task collects live device data,
 compares it against NetBox state, and applies reconciliation operations. When <code>dry_run=True</code>, all tasks preview changes
 without writing. When <code>with_approval=True</code>, each stage waits for user confirmation before applying changes.
 If VLAN synchronization fails, <code>sync_all</code> returns immediately and does not run
-IP address, VRRP, BGP community, or BGP peering synchronization.</p>
+IP address, VRRP, BGP community, BGP ASN, or BGP peering synchronization.</p>
+<p>ASN synchronization runs immediately before peerings. Creating missing ASNs
+requires an existing RIR in <code>sync_kwargs["sync_bgp_asn"]["rir"]</code>. Without it,
+existing ASNs can still be updated, but missing ASN creation is skipped. Use
+<code>sync_kwargs={"sync_bgp_asn": False}</code> to skip the ASN stage.</p>
 <h2 id="execution-modes">Execution Modes<a class="headerlink" href="#execution-modes" title="Permanent link">¤</a></h2>
 <p><strong>Dry-run mode</strong> (<code>dry_run=True</code>) previews all changes without writing to NetBox.</p>
 <p><strong>With Approval</strong> — Pass <code>with_approval=True</code> to use the interactive NFCLI workflow. Each sync stage displays its preview, and waits for review before applying that stage. Declining a stage stops <code>sync_all</code> at that point, returns the declined dry-run result, and skips later stages. Any earlier approved stages remain applied.</p>
@@ -8329,6 +8418,9 @@ task as keyword arguments:</p>
 <span class="nt">sync_vrrp</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">name_template</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">device</span><span class="nv"> </span><span class="s">}}-{{</span><span class="nv"> </span><span class="s">interface</span><span class="nv"> </span><span class="s">}}-vrrp-{{</span><span class="nv"> </span><span class="s">group_id</span><span class="nv"> </span><span class="s">}}"</span>
 
+<span class="nt">sync_bgp_asn</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">rir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Private</span>
+
 <span class="nt">sync_bgp_peerings</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">process_deletions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">  </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">active</span>
@@ -8336,7 +8428,7 @@ task as keyword arguments:</p>
 </code></pre></div>
 <p>The supported keys are <code>sync_device_inventory</code>, <code>sync_vlans</code>,
 <code>sync_device_prefixes</code>, <code>sync_vrfs</code>, <code>sync_device_interfaces</code>,
-<code>sync_bgp_community</code>, <code>sync_device_ip</code>, <code>sync_vrrp</code>, and <code>sync_bgp_peerings</code>. Refer to each
+<code>sync_bgp_community</code>, <code>sync_bgp_asn</code>, <code>sync_device_ip</code>, <code>sync_vrrp</code>, and <code>sync_bgp_peerings</code>. Refer to each
 task's documentation for its accepted arguments. Missing keys run with the
 subordinate task's defaults. Set a key to <code>false</code> to skip that task and continue
 with the next stage:</p>
@@ -8346,8 +8438,8 @@ with the next stage:</p>
 <p>Keep <code>instance</code>, <code>timeout</code>, <code>devices</code>, <code>branch</code>, <code>dry_run</code>, and <code>with_approval</code>
 at the <code>sync_all</code> level rather than repeating them inside a task dictionary.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
-<p>Both coordinated tasks include inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities, and BGP peerings. Every selected device has all nine category keys. Disabled categories are <code>None</code>; failed categories are <code>False</code>. Sync results contain child task summaries or dry-run previews, while checks return booleans for drift state. The <code>diff</code> dictionary retains child dry-run details under the same category keys, with <code>None</code> for unexecuted checks or stages. MAC synchronization is available through its standalone task.</p>
-<p>The result structure aggregates the outcomes of all nine subordinate sync tasks. When <code>dry_run=True</code> the same structure is returned but no changes are written to NetBox. VLAN, prefix, and VRF results describe shared NetBox objects, so the same shared result is included under each selected device. The VLAN category retains separate object and <code>interfaces</code> sections. The VRF category retains separate <code>vrfs</code>, <code>route_targets</code>, <code>routing_policies</code>, and <code>interfaces</code> sections. Each <code>interfaces</code> section contains only the current device.</p>
+<p>Both coordinated tasks include inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities, BGP ASNs, and BGP peerings. Every selected device has all ten category keys. Disabled categories are <code>None</code>; failed categories are <code>False</code>. Sync results contain child task summaries or dry-run previews, while checks return booleans for drift state. The <code>diff</code> dictionary retains child dry-run details under the same category keys, with <code>None</code> for unexecuted checks or stages. MAC synchronization is available through its standalone task.</p>
+<p>The result structure aggregates the outcomes of all ten subordinate sync tasks. When <code>dry_run=True</code> the same structure is returned but no changes are written to NetBox. Prefix results contain only prefixes reported by the current device. The VLAN category contains the current device's <code>created</code>, <code>updated</code>, <code>deleted</code>, and <code>in_sync</code> reference lists. The VRF category retains separate <code>vrfs</code>, <code>route_targets</code>, <code>routing_policies</code>, and <code>interfaces</code> sections. VRF actions are reported only for devices observing the VRF. Interface actions are directly under <code>interfaces</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
     <span class="c1"># per-device results — one entry per resolved device</span>
     <span class="s2">"result"</span><span class="p">:</span> <span class="p">{</span>
@@ -8359,22 +8451,10 @@ at the <code>sync_all</code> level rather than repeating them inside a task dict
                 <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
             <span class="p">},</span>
             <span class="s2">"vlans"</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">"vlans"</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">"site:DC1"</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">"create"</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
-                        <span class="s2">"update"</span><span class="p">:</span> <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>
-                        <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[],</span>
-                        <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
-                    <span class="p">},</span>
-                <span class="p">},</span>
-                <span class="s2">"interfaces"</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">"ceos-spine-1"</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">"create"</span><span class="p">:</span> <span class="p">[],</span>
-                        <span class="s2">"update"</span><span class="p">:</span> <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>
-                        <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[],</span>
-                        <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
-                    <span class="p">},</span>
-                <span class="p">},</span>
+                <span class="s2">"created"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"site:DC1:100"</span><span class="p">],</span>
+                <span class="s2">"updated"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"site:DC1:110"</span><span class="p">],</span>
+                <span class="s2">"deleted"</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[],</span>
             <span class="p">},</span>
             <span class="s2">"prefixes"</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">"created"</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
@@ -8401,12 +8481,10 @@ at the <code>sync_all</code> level rather than repeating them inside a task dict
                     <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[],</span>
                 <span class="p">},</span>
                 <span class="s2">"interfaces"</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">"ceos-spine-1"</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">"create"</span><span class="p">:</span> <span class="p">[],</span>
-                        <span class="s2">"update"</span><span class="p">:</span> <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>
-                        <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[],</span>
-                        <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
-                    <span class="p">},</span>
+                    <span class="s2">"create"</span><span class="p">:</span> <span class="p">[],</span>
+                    <span class="s2">"update"</span><span class="p">:</span> <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>
+                    <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[],</span>
+                    <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
                 <span class="p">},</span>
             <span class="p">},</span>
             <span class="s2">"interfaces"</span><span class="p">:</span> <span class="p">{</span>
@@ -8427,6 +8505,7 @@ at the <code>sync_all</code> level rather than repeating them inside a task dict
                 <span class="s2">"deleted"</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
                 <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
             <span class="p">},</span>
+            <span class="s2">"bgp_asns"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"created"</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span> <span class="s2">"updated"</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span> <span class="s2">"deleted"</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">]},</span>
             <span class="s2">"bgp_peerings"</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">"create"</span><span class="p">:</span>  <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>
                 <span class="s2">"update"</span><span class="p">:</span>  <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>
@@ -8444,7 +8523,7 @@ at the <code>sync_all</code> level rather than repeating them inside a task dict
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>Preview all nine sync categories:</p>
+<p>Preview all ten sync categories:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync all devices ceos-spine-1 ceos-spine-2 dry-run
 </code></pre></div>
 <p>Preview, prompt for review, and apply the changes:</p>
@@ -8499,7 +8578,7 @@ at the <code>sync_all</code> level rather than repeating them inside a task dict
 root
 └── netbox:    Netbox service
     └── sync:    Sync Netbox data
-        └── all:    Sync inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities and BGP peerings
+        └── all:    Sync inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities, BGP ASNs and BGP peerings
             ├── timeout:    Job timeout
             ├── workers:    Filter worker to target, default 'any'
             ├── verbose-result:    Control output details, default 'False'
@@ -8544,7 +8623,7 @@ ask the interactive client for review, and only then apply that stage.</p>
         "inventory":     {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]},
         "vlans":         {
             "vlans": {"&lt;scope&gt;": {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]}},
-            "interfaces": {"&lt;device&gt;": {"created": [], "updated": [...], "deleted": [], "in_sync": [...]}},
+            "interfaces": {"created": [], "updated": [...], "deleted": [], "in_sync": [...]},
         },
         "prefixes":      {"created": [...], "updated": [...], "in_sync": [...]},
         "vrfs":          {
@@ -8557,6 +8636,7 @@ ask the interactive client for review, and only then apply that stage.</p>
         "ip_addresses":  {"created": [...], "updated": [...], "in_sync": [...]},
         "vrrp":          {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]},
         "bgp_communities": {"route_targets": {...}, "communities": {...}},
+        "bgp_asns": {"created": [...], "updated": [...], "deleted": [], "in_sync": [...]},
         "bgp_peerings":  {"create": [...],  "update": {...},  "delete": [...],  "in_sync": [...]},
     }
 }
@@ -8740,7 +8820,7 @@ to <code>False</code> to skip that task.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Per-device results with all nine category keys. Successful</p>
+                <p>Per-device results with all ten category keys. Successful</p>
               </div>
             </td>
           </tr>
@@ -8800,20 +8880,7 @@ to <code>False</code> to skip that task.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\devices_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1572</span>
-<span class="normal">1573</span>
-<span class="normal">1574</span>
-<span class="normal">1575</span>
-<span class="normal">1576</span>
-<span class="normal">1577</span>
-<span class="normal">1578</span>
-<span class="normal">1579</span>
-<span class="normal">1580</span>
-<span class="normal">1581</span>
-<span class="normal">1582</span>
-<span class="normal">1583</span>
-<span class="normal">1584</span>
-<span class="normal">1585</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1585</span>
 <span class="normal">1586</span>
 <span class="normal">1587</span>
 <span class="normal">1588</span>
@@ -9368,7 +9435,64 @@ to <code>False</code> to skip that task.</p>
 <span class="normal">2137</span>
 <span class="normal">2138</span>
 <span class="normal">2139</span>
-<span class="normal">2140</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">2140</span>
+<span class="normal">2141</span>
+<span class="normal">2142</span>
+<span class="normal">2143</span>
+<span class="normal">2144</span>
+<span class="normal">2145</span>
+<span class="normal">2146</span>
+<span class="normal">2147</span>
+<span class="normal">2148</span>
+<span class="normal">2149</span>
+<span class="normal">2150</span>
+<span class="normal">2151</span>
+<span class="normal">2152</span>
+<span class="normal">2153</span>
+<span class="normal">2154</span>
+<span class="normal">2155</span>
+<span class="normal">2156</span>
+<span class="normal">2157</span>
+<span class="normal">2158</span>
+<span class="normal">2159</span>
+<span class="normal">2160</span>
+<span class="normal">2161</span>
+<span class="normal">2162</span>
+<span class="normal">2163</span>
+<span class="normal">2164</span>
+<span class="normal">2165</span>
+<span class="normal">2166</span>
+<span class="normal">2167</span>
+<span class="normal">2168</span>
+<span class="normal">2169</span>
+<span class="normal">2170</span>
+<span class="normal">2171</span>
+<span class="normal">2172</span>
+<span class="normal">2173</span>
+<span class="normal">2174</span>
+<span class="normal">2175</span>
+<span class="normal">2176</span>
+<span class="normal">2177</span>
+<span class="normal">2178</span>
+<span class="normal">2179</span>
+<span class="normal">2180</span>
+<span class="normal">2181</span>
+<span class="normal">2182</span>
+<span class="normal">2183</span>
+<span class="normal">2184</span>
+<span class="normal">2185</span>
+<span class="normal">2186</span>
+<span class="normal">2187</span>
+<span class="normal">2188</span>
+<span class="normal">2189</span>
+<span class="normal">2190</span>
+<span class="normal">2191</span>
+<span class="normal">2192</span>
+<span class="normal">2193</span>
+<span class="normal">2194</span>
+<span class="normal">2195</span>
+<span class="normal">2196</span>
+<span class="normal">2197</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncAllInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncAllResult</span><span class="p">,</span>
@@ -9410,7 +9534,7 @@ to <code>False</code> to skip that task.</p>
 <span class="sd">                "inventory":     {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]},</span>
 <span class="sd">                "vlans":         {</span>
 <span class="sd">                    "vlans": {"&lt;scope&gt;": {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]}},</span>
-<span class="sd">                    "interfaces": {"&lt;device&gt;": {"created": [], "updated": [...], "deleted": [], "in_sync": [...]}},</span>
+<span class="sd">                    "interfaces": {"created": [], "updated": [...], "deleted": [], "in_sync": [...]},</span>
 <span class="sd">                },</span>
 <span class="sd">                "prefixes":      {"created": [...], "updated": [...], "in_sync": [...]},</span>
 <span class="sd">                "vrfs":          {</span>
@@ -9423,6 +9547,7 @@ to <code>False</code> to skip that task.</p>
 <span class="sd">                "ip_addresses":  {"created": [...], "updated": [...], "in_sync": [...]},</span>
 <span class="sd">                "vrrp":          {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]},</span>
 <span class="sd">                "bgp_communities": {"route_targets": {...}, "communities": {...}},</span>
+<span class="sd">                "bgp_asns": {"created": [...], "updated": [...], "deleted": [], "in_sync": [...]},</span>
 <span class="sd">                "bgp_peerings":  {"create": [...],  "update": {...},  "delete": [...],  "in_sync": [...]},</span>
 <span class="sd">            }</span>
 <span class="sd">        }</span>
@@ -9442,7 +9567,7 @@ to <code>False</code> to skip that task.</p>
 <span class="sd">        **kwargs: Nornir host filter arguments (e.g. ``FL``, ``FC``, ``FB``).</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Result: Per-device results with all nine category keys. Successful</span>
+<span class="sd">        Result: Per-device results with all ten category keys. Successful</span>
 <span class="sd">        sections contain child task results, including previews in dry-run</span>
 <span class="sd">        mode; failed sections are False and skipped or unexecuted sections</span>
 <span class="sd">        are None. Diff contains child diffs keyed by category, with None for</span>
@@ -9490,6 +9615,7 @@ to <code>False</code> to skip that task.</p>
         <span class="s2">"ip_addresses"</span><span class="p">,</span>
         <span class="s2">"vrrp"</span><span class="p">,</span>
         <span class="s2">"bgp_communities"</span><span class="p">,</span>
+        <span class="s2">"bgp_asns"</span><span class="p">,</span>
         <span class="s2">"bgp_peerings"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">categories</span><span class="p">)</span>
@@ -9578,7 +9704,9 @@ to <code>False</code> to skip that task.</p>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
         <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"prefixes"</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">result</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"prefixes"</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">device</span><span class="p">,</span> <span class="p">{</span><span class="s2">"created"</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">"updated"</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">"deleted"</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[]}</span>
+            <span class="p">)</span>
         <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"prefixes"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
@@ -9670,15 +9798,15 @@ to <code>False</code> to skip that task.</p>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"sync all stopped because VRF sync failed"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
         <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
-            <span class="n">device_interfaces</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"interfaces"</span><span class="p">]:</span>
-                <span class="n">device_interfaces</span><span class="p">[</span><span class="n">device</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"interfaces"</span><span class="p">][</span><span class="n">device</span><span class="p">]</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"vrfs"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">"vrfs"</span><span class="p">:</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"vrfs"</span><span class="p">],</span>
-                <span class="s2">"route_targets"</span><span class="p">:</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"route_targets"</span><span class="p">],</span>
-                <span class="s2">"routing_policies"</span><span class="p">:</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"routing_policies"</span><span class="p">],</span>
-                <span class="s2">"interfaces"</span><span class="p">:</span> <span class="n">device_interfaces</span><span class="p">,</span>
-            <span class="p">}</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"vrfs"</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">device</span><span class="p">,</span>
+                <span class="p">{</span>
+                    <span class="s2">"vrfs"</span><span class="p">:</span> <span class="p">{},</span>
+                    <span class="s2">"route_targets"</span><span class="p">:</span> <span class="p">{},</span>
+                    <span class="s2">"routing_policies"</span><span class="p">:</span> <span class="p">{},</span>
+                    <span class="s2">"interfaces"</span><span class="p">:</span> <span class="p">{},</span>
+                <span class="p">},</span>
+            <span class="p">)</span>
         <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"vrfs"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
@@ -9723,13 +9851,9 @@ to <code>False</code> to skip that task.</p>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"sync all stopped because VLAN sync failed"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
         <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
-            <span class="n">device_interfaces</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"interfaces"</span><span class="p">]:</span>
-                <span class="n">device_interfaces</span><span class="p">[</span><span class="n">device</span><span class="p">]</span> <span class="o">=</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"interfaces"</span><span class="p">][</span><span class="n">device</span><span class="p">]</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"vlans"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">"vlans"</span><span class="p">:</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"vlans"</span><span class="p">],</span>
-                <span class="s2">"interfaces"</span><span class="p">:</span> <span class="n">device_interfaces</span><span class="p">,</span>
-            <span class="p">}</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"vlans"</span><span class="p">]</span> <span class="o">=</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">device</span><span class="p">,</span> <span class="p">{</span><span class="s2">"created"</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">"updated"</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">"deleted"</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[]}</span>
+            <span class="p">)</span>
         <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"vlans"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
@@ -9837,12 +9961,12 @@ to <code>False</code> to skip that task.</p>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"sync all stopped because VRRP review was declined"</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
 
-    <span class="c1"># --- sync BGP communities ---</span>
-    <span class="k">if</span> <span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sync_bgp_community"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"skipping BGP community sync"</span><span class="p">)</span>
+    <span class="c1"># --- sync BGP ASNs ---</span>
+    <span class="k">if</span> <span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sync_bgp_asn"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"skipping BGP ASN sync"</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"syncing BGP communities"</span><span class="p">)</span>
-        <span class="n">community_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_bgp_community</span><span class="p">(</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"syncing BGP ASNs"</span><span class="p">)</span>
+        <span class="n">asn_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_bgp_asn</span><span class="p">(</span>
             <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
             <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
             <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
@@ -9850,41 +9974,33 @@ to <code>False</code> to skip that task.</p>
             <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
             <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
             <span class="n">with_approval</span><span class="o">=</span><span class="n">with_approval</span><span class="p">,</span>
-            <span class="o">**</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sync_bgp_community"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
+            <span class="o">**</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sync_bgp_asn"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="n">community_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="s2">"bgp community sync completed with errors"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span>
-            <span class="p">)</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">community_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">"bgp_communities"</span><span class="p">]</span> <span class="o">=</span> <span class="n">community_result</span><span class="o">.</span><span class="n">diff</span>
+        <span class="k">if</span> <span class="n">asn_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"bgp ASN sync completed with errors"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">asn_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">"bgp_asns"</span><span class="p">]</span> <span class="o">=</span> <span class="n">asn_result</span><span class="o">.</span><span class="n">diff</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
-            <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">community_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span>
+            <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">asn_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="n">community_result</span><span class="o">.</span><span class="n">failed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">community_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"bgp_communities"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="c1"># Keep successful device results when only some resources failed.</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"bgp_asns"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">asn_result</span><span class="o">.</span><span class="n">resources_failed</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="n">asn_result</span><span class="o">.</span><span class="n">failed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">asn_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span>
+                <span class="k">else</span> <span class="n">asn_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">asn_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="s2">"sync all stopped because BGP community sync failed"</span><span class="p">,</span>
-                <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">,</span>
+                <span class="s2">"sync all stopped because BGP ASN sync failed"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
-        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"bgp_communities"</span><span class="p">]</span> <span class="o">=</span> <span class="n">community_result</span><span class="o">.</span><span class="n">result</span>
-        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">community_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"bgp_communities"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="n">community_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="s2">"sync all stopped because a sync stage failed"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span>
-            <span class="p">)</span>
-            <span class="k">return</span> <span class="n">ret</span>
-        <span class="k">if</span> <span class="n">community_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">"skipped"</span> <span class="ow">and</span> <span class="n">community_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">asn_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">"skipped"</span> <span class="ow">and</span> <span class="n">asn_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"skipped"</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"sync all stopped because BGP community review was declined"</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"sync all stopped because BGP ASN review was declined"</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># --- sync BGP peerings ---</span>
@@ -9932,6 +10048,58 @@ to <code>False</code> to skip that task.</p>
             <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"skipped"</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"sync all stopped because BGP peerings review was declined"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="c1"># --- sync BGP communities ---</span>
+    <span class="k">if</span> <span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sync_bgp_community"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"skipping BGP community sync"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"syncing BGP communities"</span><span class="p">)</span>
+        <span class="n">community_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_bgp_community</span><span class="p">(</span>
+            <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
+            <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+            <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+            <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
+            <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+            <span class="n">with_approval</span><span class="o">=</span><span class="n">with_approval</span><span class="p">,</span>
+            <span class="o">**</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sync_bgp_community"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">community_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="s2">"bgp community sync completed with errors"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"WARNING"</span>
+            <span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">community_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">"bgp_communities"</span><span class="p">]</span> <span class="o">=</span> <span class="n">community_result</span><span class="o">.</span><span class="n">diff</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">community_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">community_result</span><span class="o">.</span><span class="n">failed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">community_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"bgp_communities"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="s2">"sync all stopped because BGP community sync failed"</span><span class="p">,</span>
+                <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"bgp_communities"</span><span class="p">]</span> <span class="o">=</span> <span class="n">community_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">device</span><span class="p">,</span> <span class="p">{}</span>
+            <span class="p">)</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">community_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"bgp_communities"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">community_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="s2">"sync all stopped because a sync stage failed"</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">"ERROR"</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">if</span> <span class="n">community_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">"skipped"</span> <span class="ow">and</span> <span class="n">community_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"skipped"</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"sync all stopped because BGP community review was declined"</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
 
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync all complete for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)"</span><span class="p">)</span>

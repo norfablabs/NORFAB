@@ -6785,6 +6785,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/specs/003-design-context-files/spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Context File References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/specs/004-broker-event-subscriptions/spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broker Event Subscriptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/specs/005-nornir-test-workflows/spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir Test Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -8321,9 +8405,20 @@ type, and relate to <code>dcim.device</code>. A missing field is ignored.</p>
 <code>preserve_description=False</code> to replace them with parsed live descriptions.
 Newly created ASNs still receive the parsed live description when available.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
-<p>Results are grouped under <code>global</code> and contain <code>created</code>, <code>updated</code>, <code>deleted</code>,
+<p>Results are keyed by reporting device and contain <code>created</code>, <code>updated</code>, <code>deleted</code>,
 and <code>in_sync</code> ASN lists. Dry-run output uses <code>create</code>, <code>update</code>, <code>delete</code>, and
-<code>in_sync</code>. The <code>delete</code> list is always empty.</p>
+<code>in_sync</code>. The <code>delete</code> list is always empty.
+Local and remote ASNs appear under each device observing them. Shared ASNs are
+written once. Device custom-field associations still include only local ASNs.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"edge-1"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"created"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">65001</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"updated"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">"deleted"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">"in_sync"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">65002</span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
 <h2 id="bulk-request-batching">Bulk Request Batching<a class="headerlink" href="#bulk-request-batching" title="Permanent link">¤</a></h2>
 <p>List-based NetBox writes are sent as sequential requests containing at most
 <code>batch_size</code> objects. The default is 1000; set any integer greater than zero to
@@ -8615,7 +8710,7 @@ observed. ASNs and device associations are never deleted.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Global ASN synchronization actions.</p>
+                <p>Per-device ASN synchronization actions.</p>
               </div>
             </td>
           </tr>
@@ -8625,7 +8720,9 @@ observed. ASNs and device associations are never deleted.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\bgp_asn_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">233</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
 <span class="normal">234</span>
 <span class="normal">235</span>
 <span class="normal">236</span>
@@ -8977,7 +9074,25 @@ observed. ASNs and device associations are never deleted.</p>
 <span class="normal">582</span>
 <span class="normal">583</span>
 <span class="normal">584</span>
-<span class="normal">585</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">585</span>
+<span class="normal">586</span>
+<span class="normal">587</span>
+<span class="normal">588</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span>
+<span class="normal">596</span>
+<span class="normal">597</span>
+<span class="normal">598</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span>
+<span class="normal">602</span>
+<span class="normal">603</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncBgpAsnInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncBgpAsnResult</span><span class="p">,</span>
@@ -9029,13 +9144,13 @@ observed. ASNs and device associations are never deleted.</p>
 <span class="sd">        **kwargs: Nornir FFun host filters.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Result: Global ASN synchronization actions.</span>
+<span class="sd">        Result: Per-device ASN synchronization actions.</span>
 <span class="sd">    """</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">devices</span> <span class="ow">or</span> <span class="p">[])</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
         <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_bgp_asn"</span><span class="p">,</span>
-        <span class="n">result</span><span class="o">=</span><span class="n">SyncActionSummaryMap</span><span class="p">()</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span>
+        <span class="n">result</span><span class="o">=</span><span class="p">{},</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
         <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
         <span class="n">diff</span><span class="o">=</span><span class="p">{},</span>
@@ -9153,8 +9268,11 @@ observed. ASNs and device associations are never deleted.</p>
     <span class="p">)</span>
 
     <span class="n">live_asns</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">asn_devices</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">asn</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">observations</span><span class="p">):</span>
         <span class="n">records</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">observations</span><span class="p">[</span><span class="n">asn</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">"device"</span><span class="p">])</span>
+        <span class="c1"># Remote and local observations both contribute to this device's ASN results.</span>
+        <span class="n">asn_devices</span><span class="p">[</span><span class="n">asn</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">record</span><span class="p">[</span><span class="s2">"device"</span><span class="p">]</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">}</span>
         <span class="n">live_asns</span><span class="p">[</span><span class="n">asn</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">"description"</span><span class="p">:</span> <span class="nb">next</span><span class="p">(</span>
                 <span class="p">(</span>
@@ -9215,10 +9333,8 @@ observed. ASNs and device associations are never deleted.</p>
     <span class="n">in_sync</span> <span class="o">=</span> <span class="n">asn_diff</span><span class="p">[</span><span class="s2">"in_sync"</span><span class="p">]</span>
     <span class="n">full_diff</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">"global"</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">"create"</span><span class="p">:</span> <span class="n">create_numbers</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">asn_diff</span><span class="p">,</span>
             <span class="s2">"update"</span><span class="p">:</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">asn</span><span class="p">):</span> <span class="n">changes</span> <span class="k">for</span> <span class="n">asn</span><span class="p">,</span> <span class="n">changes</span> <span class="ow">in</span> <span class="n">update</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
-            <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">"in_sync"</span><span class="p">:</span> <span class="n">in_sync</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">}</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
@@ -9227,10 +9343,25 @@ observed. ASNs and device associations are never deleted.</p>
         <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">in_sync</span><span class="p">)</span><span class="si">}</span><span class="s2"> in sync"</span>
     <span class="p">)</span>
 
-    <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="n">full_diff</span>
-    <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"global"</span><span class="p">:</span> <span class="n">SyncActionSummary</span><span class="p">(</span><span class="n">in_sync</span><span class="o">=</span><span class="n">in_sync</span><span class="p">)</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()}</span>
+    <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="n">device</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"create"</span><span class="p">:</span> <span class="p">[</span><span class="n">asn</span> <span class="k">for</span> <span class="n">asn</span> <span class="ow">in</span> <span class="n">create_numbers</span> <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">asn_devices</span><span class="p">[</span><span class="n">asn</span><span class="p">]],</span>
+            <span class="s2">"update"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">asn</span><span class="p">):</span> <span class="n">changes</span>
+                <span class="k">for</span> <span class="n">asn</span><span class="p">,</span> <span class="n">changes</span> <span class="ow">in</span> <span class="n">update</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">asn_devices</span><span class="p">[</span><span class="n">asn</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="s2">"delete"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"in_sync"</span><span class="p">:</span> <span class="p">[</span><span class="n">asn</span> <span class="k">for</span> <span class="n">asn</span> <span class="ow">in</span> <span class="n">in_sync</span> <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">asn_devices</span><span class="p">[</span><span class="n">asn</span><span class="p">]],</span>
+        <span class="p">}</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"created"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"updated"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"deleted"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">"in_sync"</span><span class="p">:</span> <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"in_sync"</span><span class="p">],</span>
+        <span class="p">}</span>
     <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">full_diff</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">diff</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span><span class="n">full_diff</span><span class="p">):</span>
@@ -9240,7 +9371,7 @@ observed. ASNs and device associations are never deleted.</p>
         <span class="n">job</span><span class="p">,</span> <span class="s2">"BGP ASN sync"</span><span class="p">,</span> <span class="n">full_diff</span>
     <span class="p">):</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">"skipped"</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">full_diff</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">diff</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"review declined; changes were not applied"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
@@ -9288,7 +9419,9 @@ observed. ASNs and device associations are never deleted.</p>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">return</span> <span class="n">ret</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"global"</span><span class="p">][</span><span class="s2">"created"</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">asn</span> <span class="k">for</span> <span class="n">asn</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">asn</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">asn_devices</span><span class="p">[</span><span class="n">asn</span><span class="p">]:</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"created"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">asn</span><span class="p">)</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">create_items</span><span class="p">)</span><span class="si">}</span><span class="s2"> NetBox ASN(s)"</span><span class="p">)</span>
 
     <span class="n">update_payloads</span> <span class="o">=</span> <span class="p">[]</span>
@@ -9320,13 +9453,15 @@ observed. ASNs and device associations are never deleted.</p>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">return</span> <span class="n">ret</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">"global"</span><span class="p">][</span><span class="s2">"updated"</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">asn</span> <span class="k">for</span> <span class="n">asn</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">asn</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">asn_devices</span><span class="p">[</span><span class="n">asn</span><span class="p">]:</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">"updated"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">asn</span><span class="p">)</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">"updated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update_payloads</span><span class="p">)</span><span class="si">}</span><span class="s2"> NetBox ASN(s)"</span><span class="p">)</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">"bgp asn sync complete"</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync BGP ASNs complete: "</span>
-        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">'global'</span><span class="p">][</span><span class="s1">'created'</span><span class="p">])</span><span class="si">}</span><span class="s2"> created, "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">create_items</span><span class="p">)</span><span class="si">}</span><span class="s2"> created, "</span>
         <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update</span><span class="p">)</span><span class="si">}</span><span class="s2"> updated, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">in_sync</span><span class="p">)</span><span class="si">}</span><span class="s2"> in sync"</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>

@@ -6839,6 +6839,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/specs/003-design-context-files/spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Context File References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/specs/004-broker-event-subscriptions/spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broker Event Subscriptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/specs/005-nornir-test-workflows/spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir Test Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -8524,9 +8608,10 @@ Approval cannot override a rejection from another rule.</p>
 <h3 id="built-in-task-guardrails-nornir-cli">Built-In Task Guardrails: Nornir CLI<a class="headerlink" href="#built-in-task-guardrails-nornir-cli" title="Permanent link">¤</a></h3>
 <p>Nornir <code>cli</code> includes protections without any inventory configuration:</p>
 <ul>
-<li>Before submission, reject restart commands, configuration-mode commands,
-  <code>commit</code>, destructive operations, shell access, software changes, and outbound
-  <code>ssh</code> or <code>telnet</code> sessions.</li>
+<li>Before submission, reject restart commands, including a reboot/reload/restart
+  command following a semicolon, configuration-mode commands, <code>commit</code>,
+  destructive operations, shell access, software changes, and outbound <code>ssh</code> or
+  <code>telnet</code> sessions.</li>
 <li>Before returning output, redact device passwords, SNMP communities,
   RADIUS/TACACS keys, authentication keys, HTTP credentials, Linux password
   hashes, and private-key contents.</li>
@@ -8535,7 +8620,8 @@ Approval cannot override a rejection from another rule.</p>
 as <code>username admin secret 5 example-secret</code> becomes
 <code>username admin secret 5 REDACTED</code>.</p>
 <p>Nornir <code>cfg</code> has different rules, including rejection of operational command
-escapes and selected destructive commands. Check a task's rules before adding
+escapes and selected destructive commands. Like <code>cli</code>, it rejects reboot, reload,
+or restart commands following a semicolon. Check a task's rules before adding
 approval: an inventory rule requesting approval for <code>cli</code> command <code>reload</code>
 cannot override its built-in rejection.</p>
 <h2 id="configure-result-guardrails">Configure Result Guardrails<a class="headerlink" href="#configure-result-guardrails" title="Permanent link">¤</a></h2>
@@ -8548,8 +8634,8 @@ protections:</p>
 <ul>
 <li>Replace common labelled passwords, secrets, tokens, and credential keys with
   <code>REDACTED</code>. Coverage includes authentication headers and cookies, connection
-  URL credentials, common network secrets, private-key blocks, password hashes,
-  and recognizable service tokens.</li>
+  URL credentials, common network secrets (including IOS <code>key-string</code> values),
+  private-key blocks, password hashes, and recognizable service tokens.</li>
 <li>Limit the combined response across all workers to <strong>100000 characters</strong>.
   An oversized response is omitted, rather than truncated. It returns
   an entry for each responding worker with <code>result: {}</code>, <code>failed: false</code>,
