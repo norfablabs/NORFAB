@@ -36,6 +36,7 @@ keyed by interface name and showing previous and desired VLAN assignments.
 The diff retains this preview after writes are applied. Existing VLANs are matched
 by VID and scope independently of interface assignments.
 Check `errors` for skipped VLANs, missing interfaces, and conflicting live data.
+Skipped name updates remain visible in the diff; selected values already matching NetBox do not trigger writes.
 The task does not delete VLAN records, so `deleted` remains empty. Shared VLAN writes may appear under multiple contributing devices.
 
 Interface names mapped to the same NetBox interface contribute to one membership

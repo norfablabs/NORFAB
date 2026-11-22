@@ -1,8 +1,9 @@
-# 0.26.6 (Draft)
+# 0.26.6
 
 ## BUGS
 
-1. Fixed Netbox `check_device_sync` marking matching devices out of sync when another device reports different attributes for a shared VLAN. 
+1. Fixed Netbox `check_device_sync` marking matching devices out of sync when another device reports different attributes for a shared VLAN.
+2. Fixed Netbox `sync_vlans` hiding drift for skipped name updates and sending unnecessary updates when a shared VLAN's selected value already matches NetBox.
 
 ## CHANGES
 

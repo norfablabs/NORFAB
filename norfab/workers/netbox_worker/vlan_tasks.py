@@ -976,15 +976,6 @@ class NetboxVlansTasks:
             job.event(message, severity="ERROR")
             log.error(message)
             ret.errors.append(message)
-        # Exclude skipped changes from the diff used to plan writes.
-        for scope, vid in skipped_vlans:
-            for device in contributors[scope, vid]:
-                if (vid, scope) in from_netbox[device]["vlans"]:
-                    from_live[device]["vlans"][vid, scope] = from_netbox[device][
-                        "vlans"
-                    ][vid, scope]
-                else:
-                    from_live[device]["vlans"].pop((vid, scope), None)
         # Compare all device VLANs before collecting shared NetBox writes.
         vlan_diff = DeepDiff(
             {device: data["vlans"] for device, data in from_netbox.items()},
@@ -1030,6 +1021,9 @@ class NetboxVlansTasks:
                 device, (vid, scope) = path[:2]
                 if (vid, scope) not in from_live[device]["vlans"]:
                     continue
+                # Keep skipped VLAN drift visible without including it in write batches.
+                if (scope, vid) in skipped_vlans:
+                    continue
                 existing = vlan_records[scope, vid]
                 if existing is None:
                     creates[scope, vid] = {
@@ -1044,9 +1038,12 @@ class NetboxVlansTasks:
                     # Read only the changed field from the device selected for that field.
                     field = path[2]
                     source, _ = sources[scope, vid][field]
-                    updates.setdefault((scope, vid), {"id": existing.id})[field] = (
-                        from_live[source]["vlans"][vid, scope][field]
-                    )
+                    value = from_live[source]["vlans"][vid, scope][field]
+                    # Another device's drift may select a value already present in NetBox.
+                    if value != from_netbox[device]["vlans"][vid, scope][field]:
+                        updates.setdefault((scope, vid), {"id": existing.id})[
+                            field
+                        ] = value
         creates, updates = sorted(creates.items()), sorted(updates.items())
         # Report each shared VLAN write under every device that contributed to it.
         for action, items in (("created", creates), ("updated", updates)):
@@ -1193,7 +1190,8 @@ class NetboxVlansTasks:
                     and key in after
                     and (device, key) not in changed_memberships
                 ):
-                    preview[device]["in_sync"].add(label)
+                    if (device, (vid, scope)) not in changed_vlans:
+                        preview[device]["in_sync"].add(label)
                     continue
                 if (device, name) in interfaces:
                     # Membership changes update VLAN usage, not the VLAN record's existence.

@@ -886,6 +886,46 @@ class TestSyncVlanMemberships:
             [{"id": 1050, "name": "new-50"}, {"id": 1102, "name": "new-102"}]
         )
 
+    def test_skipped_vlan_rename_retains_observed_drift(self) -> None:
+        """A VLAN name update blocked by a name collision must still report drift."""
+        result, nb, _, _ = self._run(
+            {"leaf-1": [self._live(name="shared")]},
+            vlans=[self._vlan(50, name="old"), self._vlan(60, name="shared")],
+            dry_run=False,
+        )
+
+        assert not result.failed
+        assert any("skipping VLAN update" in error for error in result.errors)
+        nb.ipam.vlans.update.assert_not_called()
+        # Skipping an unsafe write must not hide drift from check-sync.
+        assert result.diff["leaf-1"]["vlans"]["site:lab"]["update"] == {
+            "50": {"name": {"old_value": "old", "new_value": "shared"}}
+        }
+        assert "site:lab:50" not in result.result["leaf-1"]["in_sync"]
+        assert result.result["leaf-1"]["updated"] == []
+
+    def test_shared_vlan_winner_matching_netbox_does_not_write(self) -> None:
+        """Conflicting devices must not trigger a write when the winner matches NetBox."""
+        result, nb, _, _ = self._run(
+            {
+                "leaf-1": [self._live(name="USERS")],
+                "leaf-2": [self._live(name="OFFICE")],
+            },
+            vlans=[self._vlan(50, name="USERS")],
+            dry_run=False,
+        )
+
+        assert not result.failed
+        assert any("source conflict (name)" in error for error in result.errors)
+        assert result.diff["leaf-1"]["vlans"]["site:lab"]["in_sync"] == [50]
+        assert result.diff["leaf-2"]["vlans"]["site:lab"]["update"] == {
+            "50": {"name": {"old_value": "USERS", "new_value": "OFFICE"}}
+        }
+        # The selected source already matches NetBox, despite the other device's drift.
+        nb.ipam.vlans.update.assert_not_called()
+        assert result.result["leaf-1"]["updated"] == []
+        assert result.result["leaf-2"]["updated"] == []
+
     def test_conflicting_group_vlan_rename_is_reported_and_skipped(self) -> None:
         group = TestVlanResolution._group(30)
         result, nb, _, _ = self._run(
