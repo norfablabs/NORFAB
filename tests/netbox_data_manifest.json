@@ -24,6 +24,7 @@
       "test_netbox_graphql_with_branch"
     ],
     "test_interfaces.py": [
+      "test_get_interfaces_with_branch_bypasses_cache",
       "test_sync_device_interfaces_with_branch",
       "test_create_device_interfaces_with_branch"
     ],
@@ -310,11 +311,18 @@
     },
     "test_interfaces.py::TestGetInterfaces": {
       "mode": "main_readonly",
-      "coverage": "Reads fceos4:eth8 and fceos4:eth9. No NetBox records are changed.",
+      "coverage": "Reads interfaces on the listed devices, including fceos4:eth1, eth8, eth9, eth11, and loopback0. Checks the SFP-1G-T inventory item on eth1, 1.0.1.4/32 on loopback0, and 10.0.1.1/30 and connected endpoints on eth11. The branch case is listed separately.",
       "devices": [
         "ceos1",
         "fceos4"
       ]
+    },
+    "test_interfaces.py::TestGetInterfaces::test_get_interfaces_with_branch_bypasses_cache": {
+      "mode": "branch_feature",
+      "branches": ["norfab-get-interfaces-cache"],
+      "interfaces": ["fceos4:NORFAB-GET-INTERFACES-CACHE"],
+      "ownership": "Creates its own interface on main and changes its description only on the owned branch.",
+      "cleanup": "Deletes the owned branch and main interface in finally."
     },
     "test_inventory.py::TestGetNornirInventory": {
       "mode": "main_readonly",
@@ -560,6 +568,7 @@
     },
     "test_vrfs.py::TestSyncVrfs": {
       "mode": "main_mutating",
+      "coverage": "The Netbox-only association test creates and removes TEST_VRF_SYNC_KEEP_ME with devices-field membership on fn-ceos-lf-1.",
       "devices": [
         "fn-ceos-lf-1",
         "fn-ceos-lf-2"
@@ -567,7 +576,8 @@
       "vrfs": [
         "TEST_VRF_SYNC_CONTROL_PLANE",
         "TEST_VRF_SYNC_TENANT_A",
-        "TEST_VRF_SYNC_TENANT_B"
+        "TEST_VRF_SYNC_TENANT_B",
+        "TEST_VRF_SYNC_KEEP_ME"
       ],
       "interfaces": [
         "Ethernet1",

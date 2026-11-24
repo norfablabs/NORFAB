@@ -1,6 +1,7 @@
 from collections.abc import Iterator
 from types import SimpleNamespace
 from typing import Any
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -79,8 +80,11 @@ class TestSyncVrfs:
     }
 
     @pytest.fixture(autouse=True)
-    def cleanup_test_vrfs(self, nfclient: Any) -> Iterator[None]:
-        self.nb = get_pynetbox(nfclient)
+    def cleanup_test_vrfs(self, request: pytest.FixtureRequest) -> Iterator[None]:
+        if "nfclient" not in request.fixturenames:
+            yield
+            return
+        self.nb = get_pynetbox(request.getfixturevalue("nfclient"))
         created_custom_fields = []
         for field_name in (
             "devices",
@@ -242,6 +246,269 @@ class TestSyncVrfs:
                 },
             },
         }
+
+    def test_shared_vrf_reports_only_the_device_with_drift(self) -> None:
+        devices = [
+            SimpleNamespace(
+                id=index, name=name, device_type=SimpleNamespace(model="test")
+            )
+            for index, name in enumerate(("leaf-a", "leaf-b"), 1)
+        ]
+        target = SimpleNamespace(id=10, name="65000:10")
+        new_target = SimpleNamespace(id=20, name="65000:20")
+        vrf = SimpleNamespace(
+            id=30,
+            name="BLUE",
+            description="Users",
+            import_targets=[target],
+            export_targets=[],
+            custom_fields={"devices": [{"id": device.id} for device in devices]},
+        )
+        vrfs = Mock()
+        vrfs.filter.return_value = [vrf]
+        vrfs.update.return_value = [vrf]
+        targets = Mock()
+        targets.filter.return_value = [target]
+        targets.create.return_value = [new_target]
+        interfaces = Mock()
+        interfaces.filter.return_value = [
+            SimpleNamespace(id=device.id, name="Ethernet1", device=device, vrf=vrf)
+            for device in devices
+        ]
+        nb = SimpleNamespace(
+            dcim=SimpleNamespace(
+                devices=SimpleNamespace(filter=lambda **kwargs: devices),
+                interfaces=interfaces,
+            ),
+            ipam=SimpleNamespace(vrfs=vrfs, route_targets=targets),
+            extras=SimpleNamespace(custom_fields=Mock()),
+        )
+        nb.extras.custom_fields.filter.return_value = [SimpleNamespace(name="devices")]
+        live = {
+            device.name: [
+                {
+                    "name": "BLUE",
+                    "description": "Users",
+                    "interfaces": ["Ethernet1"],
+                    "address_families": {
+                        "ipv4": {
+                            "rt_import": (
+                                ["65000:10", "65000:20"]
+                                if device.name == "leaf-b"
+                                else ["65000:10"]
+                            ),
+                            "rt_export": [],
+                        }
+                    },
+                }
+            ]
+            for device in devices
+        }
+        worker = SimpleNamespace(
+            name="test",
+            default_instance="test",
+            is_url=lambda value: False,
+            _get_pynetbox=lambda *args, **kwargs: nb,
+            has_plugin=lambda *args: False,
+            bulk_filter=lambda endpoint, **kwargs: endpoint.filter(**kwargs),
+            make_diff=lambda source, current: NetboxWorker.make_diff(
+                None, source, current
+            ),
+            client=SimpleNamespace(
+                run_job=lambda *args, **kwargs: {"worker": {"result": live}}
+            ),
+        )
+        job = SimpleNamespace(event=Mock())
+
+        empty = NetboxVrfsTasks.sync_vrfs(worker, job, devices=[])
+        assert empty.failed is True
+        assert empty.errors == ["no devices specified"]
+        job.event.assert_called_once_with("no devices specified", severity="ERROR")
+
+        with (
+            patch.object(nb.dcim.devices, "filter", return_value=[]),
+            patch.object(worker.client, "run_job") as collect,
+        ):
+            missing = NetboxVrfsTasks.sync_vrfs(
+                worker, job, devices=["leaf-b", "leaf-a"]
+            )
+        assert missing.failed is True
+        assert missing.resources_failed == ["leaf-a", "leaf-b"]
+        assert missing.errors == [
+            "requested devices not found in NetBox: leaf-a, leaf-b"
+        ]
+        collect.assert_not_called()
+
+        with patch.object(worker, "make_diff", wraps=worker.make_diff) as make_diff:
+            preview = NetboxVrfsTasks.sync_vrfs(
+                worker, job, devices=["leaf-b", "leaf-a"], dry_run=True
+            )
+        assert make_diff.call_count == 2
+        assert [
+            (query.kwargs["device_id"], query.kwargs["name"])
+            for query in interfaces.filter.call_args_list
+        ] == [(1, ["Ethernet1"]), (2, ["Ethernet1"])]
+        assert preview.diff["leaf-a"]["vrfs"]["in_sync"] == ["BLUE"]
+        assert preview.diff["leaf-a"]["route_targets"]["create"] == []
+        assert preview.diff["leaf-b"]["vrfs"]["update"]["BLUE"] == {
+            "import_targets": {
+                "old_value": ["65000:10"],
+                "new_value": ["65000:10", "65000:20"],
+            }
+        }
+        assert preview.diff["leaf-b"]["route_targets"]["create"] == ["65000:20"]
+        vrfs.update.assert_not_called()
+
+        with patch(
+            "norfab.workers.netbox_worker.vrf_tasks.review_sync_task_result",
+            return_value=False,
+        ) as review:
+            declined = NetboxVrfsTasks.sync_vrfs(
+                worker, job, devices=["leaf-a", "leaf-b"], with_approval=True
+            )
+        review.assert_called_once_with(job, "VRF sync", preview.diff)
+        assert declined.status == "skipped"
+        assert declined.result == preview.diff
+        vrfs.update.assert_not_called()
+
+        applied = NetboxVrfsTasks.sync_vrfs(worker, job, devices=["leaf-a", "leaf-b"])
+        assert applied.diff == preview.diff
+        assert applied.result["leaf-a"]["vrfs"]["updated"] == []
+        assert applied.result["leaf-b"]["vrfs"]["updated"] == ["BLUE"]
+        targets.create.assert_called_once_with([{"name": "65000:20"}])
+        vrfs.update.assert_called_once_with([{"id": 30, "import_targets": [10, 20]}])
+        interfaces.update.assert_not_called()
+
+        leaf_a_family = live["leaf-a"][0]["address_families"]["ipv4"]
+        leaf_b_family = live["leaf-b"][0]["address_families"]["ipv4"]
+        leaf_a_family["rt_import"], leaf_b_family["rt_import"] = (
+            leaf_b_family["rt_import"],
+            leaf_a_family["rt_import"],
+        )
+        live["leaf-b"][0]["description"] = "Other users"
+        vrfs.update.return_value = []
+        conflicting = NetboxVrfsTasks.sync_vrfs(
+            worker, job, devices=["leaf-a", "leaf-b"]
+        )
+        assert conflicting.result["leaf-a"]["vrfs"]["updated"] == ["BLUE"]
+        assert conflicting.result["leaf-b"]["vrfs"]["updated"] == []
+        assert conflicting.diff["leaf-b"]["vrfs"]["update"]["BLUE"] == {
+            "description": {"old_value": "Users", "new_value": "Other users"}
+        }
+
+        with (
+            patch.object(targets, "filter", return_value=[target, new_target]),
+            patch.object(
+                vrfs, "update", side_effect=RuntimeError("shared write failed")
+            ),
+        ):
+            failed_write = NetboxVrfsTasks.sync_vrfs(
+                worker, job, devices=["leaf-a", "leaf-b"]
+            )
+        assert failed_write.failed is True
+        assert failed_write.resources_failed == []
+        assert failed_write.result["leaf-a"]["vrfs"]["updated"] == []
+
+        with (
+            patch.object(targets, "filter", side_effect=RuntimeError("read failed")),
+            pytest.raises(RuntimeError, match="read failed"),
+        ):
+            NetboxVrfsTasks.sync_vrfs(worker, job, devices=["leaf-a", "leaf-b"])
+        assert vrfs.update.call_count == 2
+        assert targets.create.call_count == 2
+        interfaces.update.assert_not_called()
+
+        vrf.import_targets.append(new_target)
+        live["leaf-b"][0]["description"] = "Other users"
+        rerun = NetboxVrfsTasks.sync_vrfs(worker, job, devices=["leaf-b", "leaf-a"])
+        assert rerun.diff["leaf-a"]["vrfs"]["in_sync"] == ["BLUE"]
+        assert rerun.diff["leaf-b"]["vrfs"]["update"]["BLUE"] == {
+            "description": {"old_value": "Users", "new_value": "Other users"}
+        }
+        assert rerun.result["leaf-b"]["vrfs"]["updated"] == []
+        assert vrfs.update.call_count == 2
+
+        live["leaf-b"][0]["description"] = "Users"
+        leaf_b_interface = interfaces.filter.return_value[1]
+        leaf_b_interface.vrf = None
+        interfaces.update.side_effect = RuntimeError("write failed")
+        partial = NetboxVrfsTasks.sync_vrfs(worker, job, devices=["leaf-a", "leaf-b"])
+        assert partial.failed is True
+        job.event.assert_any_call(
+            "failed to update interfaces batch 1: write failed", severity="ERROR"
+        )
+        assert partial.resources_failed == ["leaf-b"]
+        assert partial.result["leaf-a"]["interfaces"]["in_sync"] == ["Ethernet1"]
+        assert partial.result["leaf-b"]["interfaces"]["updated"] == []
+        assert partial.diff["leaf-b"]["interfaces"]["update"] == {
+            "Ethernet1": {"vrf": {"old_value": None, "new_value": "BLUE"}}
+        }
+
+        interfaces.update.side_effect = None
+        interfaces.update.return_value = []
+        recovered = NetboxVrfsTasks.sync_vrfs(worker, job, devices=["leaf-a", "leaf-b"])
+        assert recovered.result["leaf-b"]["interfaces"]["updated"] == ["Ethernet1"]
+        interfaces.update.assert_called_with([{"id": leaf_b_interface.id, "vrf": 30}])
+        assert vrfs.update.call_count == 2
+
+        del live["leaf-b"]
+        incomplete = NetboxVrfsTasks.sync_vrfs(
+            worker, job, devices=["leaf-b", "leaf-a"], dry_run=True
+        )
+        assert incomplete.failed is False
+        assert incomplete.resources_failed == ["leaf-b"]
+        assert set(incomplete.diff) == {"leaf-a"}
+        assert incomplete.diff["leaf-a"]["vrfs"]["in_sync"] == ["BLUE"]
+
+        with patch.object(
+            worker.client,
+            "run_job",
+            return_value={
+                "worker": {
+                    "result": live,
+                    "resources_failed": ["leaf-b", "leaf-b", "outside-selection"],
+                }
+            },
+        ):
+            collected = NetboxVrfsTasks.sync_vrfs(
+                worker, job, devices=["leaf-a", "leaf-b"], dry_run=True
+            )
+        assert collected.resources_failed == ["leaf-b"]
+
+        vrf.custom_fields["devices"] = [{"id": 2}]
+        membership = NetboxVrfsTasks.sync_vrfs(
+            worker, job, devices=["leaf-a"], dry_run=True
+        )
+        assert membership.diff["leaf-a"]["vrfs"]["update"]["BLUE"] == {
+            "devices": {"old_value": [2], "new_value": [1, 2]}
+        }
+        assert membership.diff["leaf-a"]["interfaces"]["update"] == {}
+
+        vrfs.filter.return_value = []
+        vrfs.create.return_value = [SimpleNamespace(name="BLUE", id=31)]
+        targets.filter.return_value = [target, new_target]
+        interfaces.filter.return_value[0].vrf = None
+        interfaces.update.return_value = [interfaces.filter.return_value[0]]
+        created = NetboxVrfsTasks.sync_vrfs(worker, job, devices=["leaf-a"])
+        assert created.result["leaf-a"]["vrfs"]["created"] == ["BLUE"]
+        assert created.result["leaf-a"]["interfaces"]["updated"] == ["Ethernet1"]
+        vrfs.create.assert_called_once_with(
+            [
+                {
+                    "name": "BLUE",
+                    "description": "Users",
+                    "import_targets": [10, 20],
+                    "export_targets": [],
+                    "custom_fields": {"devices": [1]},
+                }
+            ]
+        )
+        interfaces.update.assert_called_with([{"id": 1, "vrf": 31}])
+
+        live["leaf-a"][0]["interfaces"] = []
+        interfaces.filter.reset_mock()
+        NetboxVrfsTasks.sync_vrfs(worker, job, devices=["leaf-a"], dry_run=True)
+        interfaces.filter.assert_not_called()
 
     def test_ipv6_routing_policies_from_getter(self, nfclient: Any) -> None:
         worker = self._stub_worker([self._ipv6_record()], plugin_installed=True)
@@ -584,9 +851,12 @@ class TestSyncVrfs:
                 assert result["result"][device]["vrfs"]["created"] == sorted(
                     self.VRF_NAMES
                 )
+                assert result["diff"][device]["vrfs"]["create"] == sorted(
+                    self.VRF_NAMES
+                )
                 assert (
                     "65100:303" in result["result"][device]["route_targets"]["created"]
-                )
+                ) == (device == self.DEVICE_2)
                 assert (
                     "TEST_VRF_SYNC_TENANT_A" in result["diff"][device]["vrfs"]["create"]
                 )
@@ -666,13 +936,19 @@ class TestSyncVrfs:
         assert "does_not_exist" not in tenant_a.custom_fields
 
     def test_unmatched_netbox_vrf_is_not_deleted(self, nfclient: Any) -> None:
-        self.nb.ipam.vrfs.create(name="TEST_VRF_SYNC_KEEP_ME")
+        device = self.nb.dcim.devices.get(name=self.DEVICE_1)
+        self.nb.ipam.vrfs.create(
+            name="TEST_VRF_SYNC_KEEP_ME", custom_fields={"devices": [device.id]}
+        )
         try:
             response = self._sync(nfclient, [self.DEVICE_1])
             for result in self._successful_results(response):
                 device_result = result["result"][self.DEVICE_1]
                 assert device_result["vrfs"]["deleted"] == []
-                assert result["diff"][self.DEVICE_1]["vrfs"]["delete"] == []
+                vrf_diff = result["diff"][self.DEVICE_1]["vrfs"]
+                assert vrf_diff["delete"] == []
+                assert "TEST_VRF_SYNC_KEEP_ME" not in vrf_diff["update"]
+                assert "TEST_VRF_SYNC_KEEP_ME" not in device_result["vrfs"]["updated"]
             assert self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_KEEP_ME") is not None
         finally:
             self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_KEEP_ME").delete()

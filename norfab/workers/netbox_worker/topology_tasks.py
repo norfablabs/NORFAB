@@ -14,6 +14,25 @@ from .netbox_models import (
 log = logging.getLogger(__name__)
 
 
+TOPOLOGY_DEVICES_QUERY = """
+query TopologyDevicesQuery($filters: DeviceFilter!, $offset: Int!, $limit: Int!) {
+    devices: device_list(
+        filters: $filters
+        pagination: {offset: $offset, limit: $limit}
+    ) {
+        name
+        status
+        platform {slug}
+        primary_ip4 {address}
+        role {name color}
+        site {name}
+        tags {name}
+        device_type {model manufacturer {name}}
+    }
+}
+"""
+
+
 TOPOLOGY_INTERFACES_QUERY = """
 query TopologyInterfacesQuery(
     $devices: [String!]!
@@ -65,20 +84,20 @@ query TopologyInterfacesQuery(
 # --------------------------------------------------------------------------
 
 
-def _build_node(dev: Any, color: Union[str, None] = None) -> Dict[str, Any]:
-    """Build a topology node dict from a pynetbox device record."""
+def _build_node(device: dict) -> Dict[str, Any]:
+    """Build a topology node from a GraphQL device record."""
     return {
-        "id": dev.name,
-        "name": dev.name,
-        "type": dev.platform.slug if dev.platform else None,
-        "ip": dev.primary_ip4.address if dev.primary_ip4 else None,
-        "status": dev.status.value,
-        "role": dev.role.name,
-        "site": dev.site.name,
-        "tags": [t.name for t in dev.tags] if dev.tags else [],
-        "manufacturer": dev.device_type.manufacturer.name,
-        "device_type": dev.device_type.model,
-        "color": color,
+        "id": device["name"],
+        "name": device["name"],
+        "type": (device["platform"] or {}).get("slug"),
+        "ip": (device["primary_ip4"] or {}).get("address"),
+        "status": device["status"],
+        "role": device["role"]["name"],
+        "site": device["site"]["name"],
+        "tags": [tag["name"] for tag in device["tags"]],
+        "manufacturer": device["device_type"]["manufacturer"]["name"],
+        "device_type": device["device_type"]["model"],
+        "color": device["role"]["color"],
     }
 
 
@@ -128,7 +147,7 @@ class NetboxTopologyTasks:
             instance (str, optional): NetBox instance name; uses the default instance
                 when omitted.
             devices (list, optional): List of device names to include in the topology.
-                When omitted all devices in NetBox are fetched. After building links,
+                Other filters can select devices when names are omitted. After building links,
                 any remote device connected to a filtered device that is not already
                 in the list is automatically fetched and added as an adjacent node so
                 every link endpoint always has a corresponding node entry.
@@ -151,7 +170,7 @@ class NetboxTopologyTasks:
                 Defaults to False.
             branch (str, optional): NetBox branching plugin branch name to use.
             timeout (int, optional): Timeout in seconds for Nornir host resolution
-                when Fx filter arguments are used. Defaults to 60.
+                when Fx filter arguments are used. Defaults to 600.
             **kwargs: Nornir host filter arguments (e.g. ``FC``, ``FL``, ``FB``,
                 ``FG``, ``FO``, ``FP``, ``FH``, ``FR``, ``FT``) passed to
                 ``get_nornir_hosts`` to resolve additional devices from the Nornir
@@ -213,7 +232,7 @@ class NetboxTopologyTasks:
                 f"minimum required version is {self.compatible_ge_v4}"
             )
 
-        devices = devices or []
+        devices = list(devices or [])
 
         # resolve additional devices from Nornir Fx filter arguments
         if kwargs:
@@ -222,7 +241,7 @@ class NetboxTopologyTasks:
                 if host not in devices:
                     devices.append(host)
 
-        # build pynetbox REST filter params
+        # Preserve the existing filter summary in the dry-run response.
         device_filter_params: Dict[str, Any] = {}
         if devices:
             device_filter_params["name"] = devices
@@ -241,8 +260,46 @@ class NetboxTopologyTasks:
         if sites:
             device_filter_params["site"] = sites
 
+        filters = {}
+        name_filter = {}
+        if devices:
+            name_filter["in_list"] = devices
+        if device_contains:
+            name_filter["i_contains"] = device_contains
+        if device_regex:
+            name_filter["regex"] = device_regex
+        if name_filter:
+            filters["name"] = name_filter
+        for field, values in (("role", role), ("platform", platform), ("site", sites)):
+            if values:
+                filters[field] = {"slug": {"in_list": values}}
+        if manufacturers:
+            filters["device_type"] = {
+                "manufacturer": {"slug": {"in_list": manufacturers}}
+            }
+        if status:
+            statuses = [f"STATUS_{value.upper().replace('-', '_')}" for value in status]
+            if self.nb_version[instance] >= (4, 5, 0):
+                filters["status"] = {"in_list": statuses}
+            else:
+                status_filter = {"status": statuses[-1]}
+                for value in reversed(statuses[:-1]):
+                    status_filter = {"status": value, "OR": status_filter}
+                filters["AND"] = status_filter
+
+        if kwargs and not devices and not filters:
+            filters["name"] = {"in_list": []}
+
         if dry_run is True:
             job.event("dry-run requested, returning topology query parameters")
+            device_dry = self.netbox_graphql(
+                job=job,
+                query=TOPOLOGY_DEVICES_QUERY,
+                variables={"filters": filters, "offset": 0, "limit": 50},
+                instance=instance,
+                branch=branch,
+                dry_run=True,
+            )
             intf_dry = self.netbox_graphql(
                 job=job,
                 query=TOPOLOGY_INTERFACES_QUERY,
@@ -254,43 +311,30 @@ class NetboxTopologyTasks:
             ret.dry_run = True
             ret.result = {
                 "device_filter": device_filter_params,
+                "device_graphql": device_dry.result,
                 "graphql": intf_dry.result,
             }
             return ret
 
-        nb = self._get_pynetbox(instance, branch=branch, job=job)
+        if kwargs and not devices and not device_filter_params:
+            return ret
 
-        # --- step 1: fetch device data for nodes via pynetbox REST ---
-        job.event(
-            "fetching device data from '{}'".format(instance)
-            + (
-                f" using {len(device_filter_params)} filter(s)"
-                if device_filter_params
-                else ""
-            )
+        job.event(f"fetching topology devices from '{instance}'")
+        device_result = self.netbox_graphql(
+            job=job,
+            query=TOPOLOGY_DEVICES_QUERY,
+            variables={"filters": filters},
+            instance=instance,
+            branch=branch,
         )
-        all_nb_devices = self.bulk_filter(
-            nb.dcim.devices,
-            **device_filter_params,
-            fields="name,platform,primary_ip4,status,role,site,tags,device_type",
-        )
-        device_names = set()
-        role_slugs: set = set()
-        for dev in all_nb_devices:
-            device_names.add(dev.name)
-            if dev.role:
-                role_slugs.add(dev.role.slug)
+        if device_result.failed:
+            ret.failed = True
+            ret.errors.extend(device_result.errors)
+            return ret
 
-        # fetch role colors
-        role_colors: Dict[str, str] = {}
-        if role_slugs:
-            job.event("fetching role colors for {} role(s)".format(len(role_slugs)))
-            for role in self.bulk_filter(nb.dcim.device_roles, slug=list(role_slugs)):
-                role_colors[role.slug] = role.color
-
-        for dev in all_nb_devices:
-            color = role_colors.get(dev.role.slug) if dev.role else None
-            ret.result.nodes.append(_build_node(dev, color=color))
+        for device in device_result.result.get("devices", []):
+            ret.result.nodes.append(_build_node(device))
+        device_names = {node["name"] for node in ret.result.nodes}
 
         if not device_names:
             log.info(
@@ -373,25 +417,21 @@ class NetboxTopologyTasks:
             job.event(
                 f"fetching data for {len(missing_device_names)} additional connected device(s)"
             )
-            extra_nb_devices = self.bulk_filter(
-                nb.dcim.devices,
-                name=list(missing_device_names),
-                fields="name,platform,primary_ip4,status,role,site,tags,device_type",
+            adjacent_result = self.netbox_graphql(
+                job=job,
+                query=TOPOLOGY_DEVICES_QUERY,
+                variables={
+                    "filters": {"name": {"in_list": sorted(missing_device_names)}}
+                },
+                instance=instance,
+                branch=branch,
             )
-            extra_role_slugs = {
-                dev.role.slug
-                for dev in extra_nb_devices
-                if dev.role and dev.role.slug not in role_colors
-            }
-            if extra_role_slugs:
-                for role in self.bulk_filter(
-                    nb.dcim.device_roles, slug=list(extra_role_slugs)
-                ):
-                    role_colors[role.slug] = role.color
-            for dev in extra_nb_devices:
-                device_names.add(dev.name)
-                color = role_colors.get(dev.role.slug) if dev.role else None
-                ret.result.nodes.append(_build_node(dev, color=color))
+            if adjacent_result.failed:
+                ret.failed = True
+                ret.errors.extend(adjacent_result.errors)
+                return ret
+            for device in adjacent_result.result.get("devices", []):
+                ret.result.nodes.append(_build_node(device))
 
         log.info(
             f"{self.name} - Get topology: Built topology with "

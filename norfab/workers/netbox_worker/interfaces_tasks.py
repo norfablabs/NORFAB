@@ -9,6 +9,7 @@ from norfab.core.worker import Job, Task
 from norfab.models import Result
 from norfab.utils.text import expand_alphanumeric_range
 
+from .netbox_exceptions import UnsupportedNetboxVersion
 from .netbox_models import (
     CreateDeviceInterfacesInput,
     CreateDeviceInterfacesResult,
@@ -33,6 +34,118 @@ from .netbox_worker_utilities import (
 )
 
 log = logging.getLogger(__name__)
+
+
+INTERFACES_QUERY = """
+query InterfacesQuery(
+    $devices: [String!]!
+    $interfaces: [String!]
+    $regex: String
+    $ip_addresses: Boolean!
+    $inventory_items: Boolean!
+    $offset: Int!
+    $limit: Int!
+) {
+    interfaces: interface_list(
+        filters: {device: {name: {in_list: $devices}}, name: {in_list: $interfaces, i_regex: $regex}}
+        pagination: {offset: $offset, limit: $limit}
+    ) {
+        id
+        name
+        device {id name}
+        label
+        type
+        enabled
+        description
+        mtu
+        speed
+        duplex
+        mode
+        parent {id name}
+        lag {id name}
+        bridge {id name}
+        bridge_interfaces {id name}
+        member_interfaces {name}
+        child_interfaces {
+            name
+            vrf {name}
+            ip_addresses @include(if: $ip_addresses) {...InterfaceIP}
+        }
+        vrf {id name}
+        untagged_vlan {id vid name}
+        tagged_vlans {id vid name}
+        tags {id name slug}
+        custom_fields
+        last_updated
+        wwn
+        mark_connected
+        mac_addresses {id mac_address}
+        cable {id label type status}
+        connected_endpoints {
+            ... on InterfaceType {id name label device {id name}}
+            ... on FrontPortType {id name device {id name}}
+            ... on RearPortType {id name device {id name}}
+            ... on ProviderNetworkType {id name}
+        }
+        ip_addresses @include(if: $ip_addresses) {...InterfaceIP}
+    }
+    inventory_items: inventory_item_list(
+        filters: {
+            device: {name: {in_list: $devices}}
+            component_type: {app_label: {exact: "dcim"}, model: {exact: "interface"}}
+        }
+        pagination: {offset: $offset, limit: $limit}
+    ) @include(if: $inventory_items) {
+        id
+        name
+        component {... on InterfaceType {id}}
+        role {id name}
+        manufacturer {id name}
+        custom_fields
+        label
+        description
+        tags {id name slug}
+        asset_tag
+        serial
+        part_id
+    }
+}
+
+fragment InterfaceIP on IPAddressType {
+    id
+    address
+    family {value label}
+    vrf {id name}
+    status
+    role
+    dns_name
+    description
+    custom_fields
+    last_updated
+    tenant {id name}
+    tags {id name slug}
+}
+"""
+
+
+INTERFACES_FRESHNESS_QUERY = """
+query InterfacesFreshnessQuery(
+    $devices: [String!]!
+    $interfaces: [String!]
+    $regex: String
+    $offset: Int!
+    $limit: Int!
+) {
+    interfaces: interface_list(
+        filters: {device: {name: {in_list: $devices}}, name: {in_list: $interfaces, i_regex: $regex}}
+        pagination: {offset: $offset, limit: $limit}
+    ) {
+        name
+        device {name}
+        last_updated
+    }
+}
+"""
 
 
 def _empty_interface_connection_context(interface: object) -> dict:
@@ -202,217 +315,160 @@ class NetboxInterfacesTasks:
         brief: bool = False,
         raise_on_empty: bool = True,
     ) -> Result:
-        """
-        Retrieve device interfaces from Netbox using Pynetbox REST API.
+        """Retrieve device interfaces from NetBox using GraphQL.
 
         Args:
-            job: NorFab Job object containing relevant metadata
-            instance (str, optional): Netbox instance name.
-            devices (list, optional): List of devices to retrieve interfaces for.
-            interface_list (list, optional): List of interface names to retrieve.
-            interface_regex (str, optional): Regex pattern to match interfaces by name.
-            ip_addresses (bool, optional): If True, retrieves interface IPs. Defaults to False.
-            inventory_items (bool, optional): If True, retrieves interface inventory items. Defaults to False.
-            dry_run (bool, optional): If True, only return REST filter params, do not run. Defaults to False.
-            cache: ``True`` - use cache if up to date; ``False`` - skip cache;
-                ``"refresh"`` - fetch and overwrite cache; ``"force"`` - use cache without staleness check.
-                Missing requested interfaces trigger a fresh fetch.
-            brief (bool, optional): If True, return stripped-down interface data for MCP/LLM context
-                window optimization. Full data is still fetched; brief mode only affects what is returned.
-            raise_on_empty (bool, optional): Raise an error when no interfaces match.
-                Defaults to True.
+            job: NorFab job for progress events.
+            instance: NetBox instance. Defaults to the worker's default instance.
+            devices: Device names to retrieve interfaces for.
+            interface_list: Interface names to match.
+            interface_regex: Regular expression to match interface names.
+            ip_addresses: Include assigned IP addresses.
+            inventory_items: Include inventory items assigned to interfaces.
+            dry_run: Return the interface filters without querying NetBox.
+            cache: Use the configured default, check freshness with True, bypass
+                with False, refetch with "refresh", or skip timestamp checks with "force".
+            branch: NetBox branch name. Branch reads bypass the cache.
+            brief: Return only the brief interface fields.
+            raise_on_empty: Raise an error when no interfaces match.
 
         Returns:
-            dict: Dictionary keyed by device name with interface details.
+            Result with interfaces keyed by device and interface name, or the
+            filter parameters for a dry run.
 
-        This task performs no filtering of data returned by `pynetbox.dcim.interfaces.filter`,
-        as a result use netbox REST API explorer to understand resulting data structure, REST
-        API browser available at `http://<netbox url>/api/dcim/interfaces/`. In addition
-        use nfcli to explore interfaces data:
-
-        ```
-        nf#netbox get interfaces devices fceos4 interface-list eth201 | kv
-
-        netbox-worker-1.1.fceos4.eth201.display: eth201
-        netbox-worker-1.1.fceos4.eth201.device.name: fceos4
-        ...
-        ```
-
-        Can also pipe results through `json`, `yaml`, `nested` or `pprint`  formatters to output
-        results in  certain format.
+        Raises:
+            UnsupportedNetboxVersion: The instance does not support this GraphQL query.
+            Exception: The query fails or no interfaces match and raise_on_empty is set.
         """
         instance = instance or self.default_instance
-        nb = self._get_pynetbox(instance, branch=branch, job=job)
         devices = devices or []
         cache = self.cache_use if cache is None else cache
         if branch is not None:
             cache = False
-        log.info(
-            f"{self.name} - Get interfaces: Fetching interfaces for {len(devices)} device(s) from '{instance}'"
-        )
+
         ret = Result(
-            task=f"{self.name}:get_interfaces_pynetbox",
-            result={d: {} for d in devices},
+            task=f"{self.name}:get_interfaces",
+            result={device: {} for device in devices},
             resources=[instance],
         )
-        filter_params = {}
-        all_interfaces = []
-        children_by_parent_id = {}  # parent_id -> [child intf, ...]
-        member_intf_by_lag_id = {}  # lag_id    -> [member intf, ...]
-        ip_by_intf_id = {}
-        inv_by_intf_id = {}
-        last_updated_by_device = {}
-
-        # build REST filter params
-        if devices:
-            filter_params["device"] = devices
-        if interface_list:
-            filter_params["name"] = interface_list
-        if interface_regex:
-            filter_params["name__regex"] = interface_regex
-
-        if dry_run is True:
+        if dry_run:
+            filter_params = {}
+            if devices:
+                filter_params["device"] = devices
+            if interface_list:
+                filter_params["name"] = interface_list
+            if interface_regex:
+                filter_params["name__regex"] = interface_regex
             ret.result = {"filter_params": filter_params}
             ret.dry_run = True
             return ret
 
-        job.event(f"retrieving interfaces for {len(devices)} device(s)")
-
-        devices_to_fetch = list(devices)
-
-        if cache == True or cache == "force":
-            job.event(f"checking cache for {len(devices)} device(s)")
-            # quick REST call to get current last_updated for all matching interfaces
-            result = self.bulk_filter(
-                nb.dcim.interfaces, **filter_params, fields="name,last_updated,device"
+        if self.nb_version[instance] < self.compatible_ge_v4:
+            raise UnsupportedNetboxVersion(
+                f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
+                f"minimum required version is {self.compatible_ge_v4}"
             )
-            # build per-device last_updated map
-            for intf in result:
-                last_updated_by_device.setdefault(intf.device.name, {})[
-                    intf.name
-                ] = intf.last_updated
-
-            self.cache.expire()  # remove expired items from cache
-            devices_to_fetch = []
-            for device_name, intf_last_updated in last_updated_by_device.items():
-                device_cache_key = f"get_interfaces::{device_name}"
-                if (
-                    device_cache_key in self.cache
-                    and intf_last_updated.keys() <= self.cache[device_cache_key].keys()
-                ) and (
-                    cache == "force"
-                    or all(
-                        self.cache[device_cache_key]
-                        .get(intf_name, {})
-                        .get("last_updated")
-                        == lu
-                        for intf_name, lu in intf_last_updated.items()
-                    )
-                ):
-                    # serve requested interfaces from cache
-                    for intf_name in intf_last_updated.keys():
-                        ret.result[device_name][intf_name] = self.cache[
-                            device_cache_key
-                        ][intf_name]
-                    job.event(
-                        f"serving '{device_name}' interfaces from cache ({len(intf_last_updated)} interface(s))"
-                    )
-                else:
-                    devices_to_fetch.append(device_name)
-                    job.event(
-                        f"'{device_name}' cache miss or stale, fetching fresh data"
-                    )
-        elif cache == False or cache == "refresh":
-            pass  # fetch all devices fresh
-
-        # build fetch filter params restricted to devices needing fresh data
+        variables = {
+            "devices": devices,
+            "interfaces": interface_list or None,
+            "regex": interface_regex or None,
+        }
+        cache_keys = {
+            device: f"get_interfaces::graphql::{instance}::{device}::{ip_addresses}::{inventory_items}"
+            for device in devices
+        }
+        devices_to_fetch = devices
         if devices and cache in (True, "force"):
-            fetch_filter_params = {**filter_params, "device": devices_to_fetch}
-        else:
-            fetch_filter_params = filter_params
-
-        # fetch all matching interfaces in one call
-        if devices_to_fetch:
-            job.event(
-                f"fetching interfaces from NetBox for {len(devices_to_fetch)} device(s)"
+            job.event("checking interface cache")
+            freshness = self.netbox_graphql(
+                job=job,
+                instance=instance,
+                query=INTERFACES_FRESHNESS_QUERY,
+                variables=variables,
             )
-            all_interfaces = self.bulk_filter(nb.dcim.interfaces, **fetch_filter_params)
-            job.event(f"retrieved {len(all_interfaces)} interface(s) from NetBox")
+            freshness.raise_for_status(
+                f"{self.name} - interface freshness query failed"
+            )
+            timestamps = {}
+            for interface in freshness.result.get("interfaces", []):
+                device = interface["device"]["name"]
+                if device in ret.result:
+                    timestamps.setdefault(device, {})[interface["name"]] = interface[
+                        "last_updated"
+                    ]
 
-        if (
-            raise_on_empty
-            and not all_interfaces
-            and not any(ret.result.get(d) for d in devices)
-        ):
+            self.cache.expire()
+            devices_to_fetch = []
+            for device, interfaces in timestamps.items():
+                cached = self.cache.get(cache_keys[device], {})
+                if all(
+                    name in cached
+                    and (cache == "force" or cached[name]["last_updated"] == timestamp)
+                    for name, timestamp in interfaces.items()
+                ):
+                    ret.result[device] = {name: cached[name] for name in interfaces}
+                else:
+                    devices_to_fetch.append(device)
+
+        if devices_to_fetch:
+            job.event(f"fetching interfaces for {len(devices_to_fetch)} device(s)")
+            response = self.netbox_graphql(
+                job=job,
+                instance=instance,
+                branch=branch,
+                query=INTERFACES_QUERY,
+                variables={
+                    **variables,
+                    "devices": devices_to_fetch,
+                    "ip_addresses": ip_addresses,
+                    "inventory_items": inventory_items,
+                },
+            )
+            response.raise_for_status(f"{self.name} - interface query failed")
+
+            items_by_interface = {}
+            for item in response.result.get("inventory_items", []):
+                component = item.pop("component")
+                if component and component.get("id"):
+                    items_by_interface.setdefault(int(component["id"]), []).append(item)
+
+            for interface in response.result.get("interfaces", []):
+                device = interface["device"]["name"]
+                if device not in ret.result:
+                    continue
+                interface["id"] = int(interface["id"])
+                for field in ("type", "mode", "duplex"):
+                    if interface[field]:
+                        interface[field] = {"value": interface[field]}
+                interface["member_interfaces"] = [
+                    member["name"] for member in interface["member_interfaces"]
+                ]
+                interface.setdefault("ip_addresses", [])
+                for ip in interface["ip_addresses"]:
+                    ip["id"] = int(ip["id"])
+                for child in interface["child_interfaces"]:
+                    child["vrf"] = child["vrf"]["name"] if child["vrf"] else None
+                    child.setdefault("ip_addresses", [])
+                    for ip in child["ip_addresses"]:
+                        ip["id"] = int(ip["id"])
+                interface["inventory_items"] = items_by_interface.get(
+                    interface["id"], []
+                )
+                ret.result[device][interface["name"]] = interface
+
+            if cache is not False:
+                for device in devices_to_fetch:
+                    self.cache.set(
+                        cache_keys[device], ret.result[device], expire=self.cache_ttl
+                    )
+
+        if raise_on_empty and not any(ret.result.values()):
             raise Exception(
                 f"{self.name} - no interfaces data returned by '{instance}' "
                 f"for devices {', '.join(devices)}"
             )
-
-        # build relationship lookup maps from fetched data
-        for intf in all_interfaces:
-            if intf.parent:
-                children_by_parent_id.setdefault(intf.parent.id, []).append(intf)
-            if intf.lag:
-                member_intf_by_lag_id.setdefault(intf.lag.id, []).append(intf)
-
-        # fetch IP addresses if requested (one bulk call keyed by assigned_object_id)
-        if ip_addresses and devices_to_fetch:
-            job.event(f"fetching IP addresses for {len(devices_to_fetch)} device(s)")
-            for ip in self.bulk_filter(nb.ipam.ip_addresses, device=devices_to_fetch):
-                if (
-                    ip.assigned_object_id
-                    and ip.assigned_object_type == "dcim.interface"
-                ):
-                    ip_by_intf_id.setdefault(ip.assigned_object_id, []).append(dict(ip))
-
-        # fetch inventory items if requested (one bulk call keyed by component_id)
-        if inventory_items and devices_to_fetch:
-            job.event(f"fetching inventory items for {len(devices_to_fetch)} device(s)")
-            for item in self.bulk_filter(
-                nb.dcim.inventory_items, device=devices_to_fetch
-            ):
-                if item.component_id and item.component_type == "dcim.interface":
-                    inv_by_intf_id.setdefault(item.component_id, []).append(dict(item))
-
-        # transform pynetbox records into result dict keyed by device / interface name
-        for intf in all_interfaces:
-            device_name = intf.device.name
-            if device_name not in ret.result:  # Netbox issue #16299
-                continue
-
-            intf_data = dict(intf)
-            # add extra fields
-            intf_data["child_interfaces"] = [
-                {
-                    "name": c.name,
-                    "vrf": c.vrf.name if c.vrf else None,
-                    "ip_addresses": ip_by_intf_id.get(c.id, []),
-                }
-                for c in children_by_parent_id.get(intf.id, [])
-            ]
-            intf_data["member_interfaces"] = [
-                m.name for m in member_intf_by_lag_id.get(intf.id, [])
-            ]
-            intf_data["ip_addresses"] = ip_by_intf_id.get(intf.id, [])
-            intf_data["inventory_items"] = inv_by_intf_id.get(intf.id, [])
-            ret.result[device_name][intf.name] = intf_data
-
-        # cache freshly fetched interfaces per device
-        if cache != False:
-            job.event(f"caching interfaces data for {len(devices_to_fetch)} device(s)")
-            for device_name in devices_to_fetch:
-                if device_name in ret.result:
-                    cache_key = f"get_interfaces::{device_name}"
-                    self.cache.set(
-                        cache_key,
-                        ret.result[device_name],
-                        expire=self.cache_ttl,
-                    )
-
         if brief:
             ret.result = make_interfaces_brief(ret.result)
-
         return ret
 
     @Task(

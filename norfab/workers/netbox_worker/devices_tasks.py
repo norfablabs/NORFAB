@@ -1387,10 +1387,9 @@ class NetboxDevicesTasks:
             )
             if vrf_result.errors:
                 ret.errors.extend(vrf_result.errors)
-            for device in devices:
-                device_diff = vrf_result.diff.get(device, {})
-                ret.result[device]["vrfs"] = not sync_diff_has_changes(
-                    device_diff, ignore_deletions=ignore_deletions
+            for device, data in (vrf_result.diff or {}).items():
+                ret.result.setdefault(device, {})["vrfs"] = not sync_diff_has_changes(
+                    data, ignore_deletions=ignore_deletions
                 )
             ret.diff["vrfs"] = vrf_result.diff
             check_results["vrfs"] = vrf_result
@@ -1878,29 +1877,15 @@ class NetboxDevicesTasks:
                 job.event("VRF sync completed with errors", severity="WARNING")
                 ret.errors.extend(vrf_result.errors)
             ret.diff["vrfs"] = vrf_result.diff
+            vrf_failed_devices = set(vrf_result.resources_failed)
             ret.resources_failed = sorted(
-                set(ret.resources_failed) | set(vrf_result.resources_failed)
+                set(ret.resources_failed) | vrf_failed_devices
             )
-            if vrf_result.failed and not vrf_result.resources_failed:
-                for device in devices:
-                    ret.result[device]["vrfs"] = False
-                ret.failed = True
-                job.event("sync all stopped because VRF sync failed", severity="ERROR")
-                return ret
-            for device in devices:
-                ret.result[device]["vrfs"] = vrf_result.result.get(
-                    device,
-                    {
-                        "vrfs": {},
-                        "route_targets": {},
-                        "routing_policies": {},
-                        "interfaces": {},
-                    },
-                )
-            for device in devices:
-                if device in vrf_result.resources_failed:
-                    ret.result[device]["vrfs"] = False
-            if vrf_result.failed:
+            for device, data in (vrf_result.result or {}).items():
+                if device in ret.result and device not in vrf_failed_devices:
+                    ret.result[device]["vrfs"] = data
+            devices = [device for device in devices if device not in vrf_failed_devices]
+            if vrf_result.failed or not devices:
                 ret.failed = True
                 job.event(
                     "sync all stopped because a sync stage failed", severity="ERROR"

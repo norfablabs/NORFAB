@@ -19,6 +19,7 @@ except ModuleNotFoundError as exc:
 pytestmark = pytest.mark.nornir
 
 
+@pytest.mark.netbox_get_interfaces
 class TestNBCreateIp:
     @pytest.fixture
     def allocation_pool(self, nfclient: Any) -> Iterator[Any]:

@@ -597,6 +597,7 @@ class TestGetTopology:
             assert (
                 "graphql" in res["result"]
             ), f"{worker} - no graphql in dry run result"
+            assert "TopologyDevicesQuery" in res["result"]["device_graphql"]["data"]
 
     def test_get_topology_adjacent_nodes(self, nfclient):
         """Devices connected to the filtered set must also appear as nodes."""
@@ -604,13 +605,14 @@ class TestGetTopology:
             "netbox",
             "get_topology",
             workers="any",
-            kwargs={"devices": self.devices},
+            kwargs={"devices": self.devices[:1]},
         )
         pprint.pprint(ret)
 
         for worker, res in ret.items():
             assert not res["errors"], f"{worker} - received error"
             node_ids = {n["id"] for n in res["result"]["nodes"]}
+            assert node_ids - {self.devices[0]}
             # every link endpoint must have a corresponding node entry
             for link in res["result"]["links"]:
                 assert (
@@ -883,7 +885,8 @@ class TestGetTopology:
                 f"{node_ids - matching_ids - linked_ids}"
             )
 
-    def test_get_topology_filter_status(self, nfclient):
+    @pytest.mark.parametrize("statuses", [["active"], ["planned", "active"]])
+    def test_get_topology_filter_status(self, nfclient, statuses):
         """status filter must return only devices with the given status."""
         ret = nfclient.run_job(
             "netbox",
@@ -891,7 +894,7 @@ class TestGetTopology:
             workers="any",
             kwargs={
                 "devices": [f"bulk-conn-{number:02d}" for number in range(1, 11)],
-                "status": ["active"],
+                "status": statuses,
             },
         )
         pprint.pprint(ret)

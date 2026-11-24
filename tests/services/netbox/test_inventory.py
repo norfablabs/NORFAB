@@ -144,6 +144,7 @@ class TestGetNornirInventory:
                     k in data["data"] for k in self.device_data_keys
                 ), f"{worker}:{device} not all nbdata returned"
 
+    @pytest.mark.netbox_get_interfaces
     def test_with_devices_add_interfaces(self, nfclient):
         ret = nfclient.run_job(
             "netbox",
@@ -174,6 +175,7 @@ class TestGetNornirInventory:
                         ]
                     ), f"{worker}:{device}:{intf_name} not all interface data returned"
 
+    @pytest.mark.netbox_get_interfaces
     def test_with_devices_add_interfaces_with_ip_and_inventory(self, nfclient):
         ret = nfclient.run_job(
             "netbox",

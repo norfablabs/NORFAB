@@ -7,7 +7,7 @@ tags:
 
 > task api name: `get_interfaces`
 
-Retrieves interface data from NetBox for one or more devices using the REST API. The task can include related IP addresses, inventory items, child interfaces, and LAG member relationships.
+Retrieves interface data from NetBox for one or more devices using the GraphQL API. The task can include related IP addresses, inventory items, child interfaces, and LAG member relationships.
 
 ## Inputs
 
@@ -20,7 +20,7 @@ Retrieves interface data from NetBox for one or more devices using the REST API.
 | `inventory_items` | No | Include inventory items attached to interfaces |
 | `instance` | No | NetBox instance name to target |
 | `branch` | No | NetBox Branching plugin branch name to read from |
-| `dry_run` | No | Return REST filter parameters without querying NetBox |
+| `dry_run` | No | Return filter parameters without querying NetBox |
 | `cache` | No | Cache usage mode: `True`, `False`, `refresh`, or `force` |
 | `brief` | No | Return a stripped-down interface payload for smaller context windows |
 | `raise_on_empty` | No | Raise an error when no interfaces match; defaults to `True` |
@@ -34,7 +34,7 @@ Normal mode returns a dictionary keyed by device name and interface name:
     "ceos-leaf-1": {
         "Ethernet1": {
             "name": "Ethernet1",
-            "type": {"value": "1000base-t", "label": "1000BASE-T"},
+            "type": {"value": "1000base-t"},
             "enabled": True,
             "ip_addresses": [{"address": "192.0.2.1/31"}],
             "inventory_items": [],
@@ -86,7 +86,7 @@ Normal mode returns a dictionary keyed by device name and interface name:
     nf#netbox get interfaces devices ceos-leaf-1 inventory-items cache refresh
     ```
 
-    Preview REST filters:
+    Preview interface filters:
 
     ```bash
     nf#netbox get interfaces devices ceos-leaf-1 interface-list Ethernet1 dry-run
@@ -167,7 +167,7 @@ root
             ├── interface-regex:    Regex pattern to match interfaces by name
             ├── ip-addresses:    Retrieves interface IP addresses
             ├── inventory-items:    Retrieves interface inventory items
-            ├── dry-run:    Only return query content, do not run it
+            ├── dry-run:    Return filter parameters without querying NetBox
             ├── cache:    Cache usage mode
             ├── brief:    Return stripped-down interface data
             └── raise-on-empty:    Raise an error when no interfaces match

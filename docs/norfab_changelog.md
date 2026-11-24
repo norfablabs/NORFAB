@@ -1,3 +1,17 @@
+# 0.26.7
+
+## BUGS
+
+1. Fixed Netbox `sync_vrfs` and `check_device_sync` reporting shared VRF drift for devices that already match. VRF and interface assignment diffs reflect each device's own state, and shared VRF writes are batched by name.
+2. Fixed Netbox `sync_vrfs` crediting devices for shared updates that applied none of their requested changes. Netbox `sync_all` skips later stages for devices listed in `resources_failed` by `sync_vrfs`.
+
+## CHANGES
+
+1. Netbox `get_interfaces` now retrieves interface data through GraphQL.
+2. Netbox `get_topology` now retrieves device nodes and role colors through GraphQL and includes a device query preview in dry runs.
+
+---
+
 # 0.26.6
 
 ## BUGS

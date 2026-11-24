@@ -625,6 +625,34 @@ sync_device_interfaces:
         assert result.result["device-2"]["inventory"] == {"updated": ["chassis"]}
         assert result.result["device-2"]["prefixes"] is None
 
+    @pytest.mark.parametrize("includes_payload", [True, False])
+    def test_sync_all_skips_later_stages_for_device_with_failed_vrf_sync(
+        self, includes_payload: bool
+    ) -> None:
+        worker = self._worker([])
+        vrf_results = {"device-1": {"vrfs": {}}}
+        if includes_payload:
+            vrf_results["device-2"] = {"vrfs": {}}
+        worker.sync_vrfs = lambda **kwargs: Result(
+            task="sync_vrfs",
+            resources_failed=["device-2"],
+            result=vrf_results,
+        )
+        remaining_devices = []
+        sync_vlans = worker.sync_vlans
+        worker.sync_vlans = lambda **kwargs: (
+            remaining_devices.extend(kwargs["devices"]) or sync_vlans(**kwargs)
+        )
+        result = NetboxDevicesTasks.sync_all(
+            worker, self._job(), devices=["device-1", "device-2"]
+        )
+        assert not result.failed
+        assert result.resources_failed == ["device-2"]
+        assert set(result.result) == {"device-1", "device-2"}
+        assert result.result["device-2"]["vrfs"] is None
+        assert result.result["device-1"]["vrfs"] == {"vrfs": {}}
+        assert remaining_devices == ["device-1"]
+
     def test_dry_run_preserves_child_data(self) -> None:
         worker = self._worker([])
         preview = {
@@ -683,6 +711,7 @@ sync_device_interfaces:
                     result=_result,
                     failed=True,
                     errors=["batch failed"],
+                    resources_failed=["device-1"] if _task == "sync_vrfs" else [],
                 )
             ),
         )
@@ -694,8 +723,16 @@ sync_device_interfaces:
         )
 
         assert result.failed
-        assert result.result["device-1"][self.RESULT_CATEGORIES[failed_task]] is False
-        assert set(result.result["device-1"]) == set(self.RESULT_CATEGORIES.values())
+        if failed_task == "sync_vrfs":
+            assert result.result["device-1"]["vrfs"] is None
+            assert result.resources_failed == ["device-1"]
+        else:
+            assert (
+                result.result["device-1"][self.RESULT_CATEGORIES[failed_task]] is False
+            )
+            assert set(result.result["device-1"]) == set(
+                self.RESULT_CATEGORIES.values()
+            )
         task_names = [task_name for task_name, _ in self.TASKS]
         assert calls == task_names[: task_names.index(failed_task) + 1]
 

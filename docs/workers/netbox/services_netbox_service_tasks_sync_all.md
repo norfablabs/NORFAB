@@ -116,6 +116,9 @@ at the `sync_all` level rather than repeating them inside a task dictionary.
 
 ## Output
 
+In `sync_all`, devices reported in `resources_failed` by the VRF task retain
+earlier stage results and skip later stages.
+
 Both coordinated tasks include inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities, BGP ASNs, and BGP peerings. Every selected device has all ten category keys. Disabled categories are `None`; failed categories are `False`. Sync results contain child task summaries or dry-run previews, while checks return booleans for drift state. The `diff` dictionary retains child dry-run details under the same category keys, with `None` for unexecuted checks or stages. MAC synchronization is available through its standalone task.
 
 The result structure aggregates the outcomes of all ten subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox. Prefix results contain only prefixes reported by the current device. The VLAN category contains the current device's `created`, `updated`, `deleted`, and `in_sync` reference lists. The VRF category retains separate `vrfs`, `route_targets`, `routing_policies`, and `interfaces` sections. VRF actions are reported only for devices observing the VRF. Interface actions are directly under `interfaces`.

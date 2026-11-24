@@ -1923,7 +1923,7 @@ class GetInterfacesInput(
         alias="interface-regex",
     )
     ip_addresses: StrictBool = Field(
-        None,
+        False,
         description="If True, retrieves interface IP addresses",
         alias="ip-addresses",
         json_schema_extra={"presence": True},

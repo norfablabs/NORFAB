@@ -112,22 +112,14 @@ description in that order becomes the NetBox description; the description is
 empty when no device supplies one. For existing VRFs, the default
 `preserve_description=None` keeps the NetBox description when this aggregate
 live description is empty. Set it to `True` to always retain the NetBox value,
-or `False` to always apply the live value, including an empty string. Different
-descriptions from multiple devices are resolved by this rule and are not
-reported as conflicts.
+or `False` to always apply the live value, including an empty string. Each
+device's diff applies the same preservation setting to its own description.
+A device's description can still differ after a shared write.
 
-Import and export route-target lists from every reporting device and address
-family are combined and deduplicated in first-seen order. The shared `make_diff` method compares
-that aggregate with NetBox and ignores route-target order. If it finds an
-import or export route-target difference for an existing VRF, the task combines
-the current NetBox list with live targets that are not already in that list and
-places the combined list in the update. For a new VRF, or an existing VRF with
-an empty target set, the live aggregate populates the association. Route-target
-differences are not reported as errors, and all reporting devices are added to
-the device custom field.
-
-Routing-policy lists use the same first-seen deduplication and additive update
-policy. Only changed custom fields are written for an existing VRF.
+Each device's diff compares its own import and export targets and routing
+policies, retaining existing NetBox values. The shared write adds values from
+all reporting devices and extends the configured devices field. List order
+does not affect the comparison.
 
 ## Multi-device aggregation example
 
@@ -177,7 +169,6 @@ TENANT_A:
     - edge-b
 ```
 
-The task preserves first-seen order while removing duplicate aggregate values.
 NetBox stores VRF route targets as object relationships, so the resulting VRF is associated with
 import targets `65000:100`, `65000:200`, and `65000:300`, and export targets
 `65000:100` and `65000:400`.
@@ -195,23 +186,16 @@ export targets `65000:100` and `65000:999`, the task produces this state:
 | Route-target object `65000:999` | Retained in NetBox. |
 | Device associations | `edge-a` and `edge-b` are added; devices already recorded on the VRF are retained. |
 
-The shared `make_diff` method initially detects the difference between the raw
-live aggregate and the current NetBox VRF. The task then replaces the
-route-target value in that update plan with the combined list. An order-only
-difference does not update the VRF. A missing live membership extends the
-existing relationship and does not add an error to the result. A NetBox-only
-membership is retained in the merged update.
-
-Because the comparison uses the raw live aggregate before the merge, a
-NetBox-only route target remains a difference on later runs. The task can report
-the VRF as updated again, but the NetBox-only association remains attached and
-is never removed.
+Existing route targets and routing policies retained in NetBox do not cause
+drift on later runs.
 
 ## Output
 
 Results and diffs are keyed by device, with `vrfs`, `route_targets`,
-`routing_policies`, and `interfaces` sections. Shared VRF actions appear under
-every device observing that VRF.
+`routing_policies`, and `interfaces` sections. A device reports its own
+changes. A confirmed shared VRF create appears for each device that reported
+the missing VRF. A confirmed update appears for devices whose diff includes
+at least one change applied by the shared write.
 Dry-run returns the standard sync diff:
 
 ```json
@@ -269,8 +253,8 @@ Dry-run returns the standard sync diff:
 }
 ```
 
-Live runs use completed-action verbs. The prepared plan remains available in
-the top-level `diff` field:
+Live runs use completed-action verbs. The top-level `diff` and `in_sync`
+lists describe the pre-write comparison.
 
 ```json
 {
@@ -319,15 +303,18 @@ the top-level `diff` field:
 
 The `route_targets` and `routing_policies` sections report only missing
 objects that the task plans to create or has created. Their update, delete,
-and in-sync categories remain empty. Association changes are reported as
-fields of the corresponding VRF update.
+and in-sync categories remain empty. Changes to the configured devices field
+appear under its field name in the VRF diff. Interface assignments appear
+under `interfaces`. Missing live data and missing mapped interfaces are
+reported in `resources_failed`.
+Shared write failures fail the task. Interface batch failures also list the
+devices in the failed batch in `resources_failed`.
 
 ## Deletions
 
 The task does not delete VRFs, route-target or routing-policy objects, their
 associations, device associations, or interface assignments that are absent from live VRF
-data. A selected device set does not prove that existing NetBox data is stale,
-so `delete` and `deleted` remain empty.
+data. The `delete` and `deleted` lists remain empty.
 
 | Condition | Action |
 |-----------|--------|

@@ -370,6 +370,125 @@ class TestGetInterfaces:
                     else:
                         assert "mac_address" in intf_data
 
+    def test_get_interfaces_cache_isolates_enrichment(self, nfclient: Any) -> None:
+        for cache, enrich in [("refresh", False), ("force", True), ("force", False)]:
+            result = nfclient.run_job(
+                "netbox",
+                "get_interfaces",
+                workers=["netbox-worker-1.1"],
+                kwargs={
+                    "devices": ["fceos4"],
+                    "interface_list": ["eth1", "loopback0"],
+                    "cache": cache,
+                    "ip_addresses": enrich,
+                    "inventory_items": enrich,
+                },
+            )["netbox-worker-1.1"]
+            assert not result["failed"], result["errors"]
+            interfaces = result["result"]["fceos4"]
+            ips = interfaces["loopback0"]["ip_addresses"]
+            items = interfaces["eth1"]["inventory_items"]
+            if enrich:
+                assert "1.0.1.4/32" in {ip["address"] for ip in ips}
+                assert "SFP-1G-T" in {item["name"] for item in items}
+            else:
+                assert ips == items == []
+
+    def test_get_interfaces_with_branch_bypasses_cache(
+        self, nfclient: Any, netbox: Any
+    ) -> None:
+        worker = "netbox-worker-1.1"
+        branch = "norfab-get-interfaces-cache"
+        device = "fceos4"
+        name = "NORFAB-GET-INTERFACES-CACHE"
+        delete_branch(branch, nfclient)
+        interface = netbox.dcim.interfaces.create(
+            device=netbox.dcim.devices.get(name=device).id,
+            name=name,
+            type="virtual",
+            description="main",
+        )
+        kwargs = {"devices": [device], "interface_list": [name], "cache": "refresh"}
+        try:
+            for target, expected in [
+                (None, "main"),
+                (branch, "branch"),
+                (None, "main"),
+            ]:
+                if target:
+                    update = nfclient.run_job(
+                        "netbox",
+                        "crud_update",
+                        workers=[worker],
+                        kwargs={
+                            "object_type": "dcim.interfaces",
+                            "data": {"id": interface.id, "description": expected},
+                            "branch": target,
+                        },
+                    )[worker]
+                    assert not update["failed"], update["errors"]
+                result = nfclient.run_job(
+                    "netbox",
+                    "get_interfaces",
+                    workers=[worker],
+                    kwargs={**kwargs, "branch": target},
+                )[worker]
+                assert not result["failed"], result["errors"]
+                assert result["result"][device][name]["description"] == expected
+                kwargs["cache"] = "force"
+        finally:
+            delete_branch(branch, nfclient)
+            interface.delete()
+
+    def test_get_interfaces_brief_preserves_full_cache(self, nfclient: Any) -> None:
+        worker = "netbox-worker-1.1"
+        kwargs = {
+            "devices": ["fceos4"],
+            "interface_list": ["eth11"],
+            "ip_addresses": True,
+        }
+        for brief, cache in [(True, "refresh"), (False, "force")]:
+            result = nfclient.run_job(
+                "netbox",
+                "get_interfaces",
+                workers=[worker],
+                kwargs={**kwargs, "brief": brief, "cache": cache},
+            )[worker]
+            assert not result["failed"], result["errors"]
+            if brief:
+                projected = result["result"]["fceos4"]["eth11"]
+            else:
+                full = result["result"]["fceos4"]["eth11"]
+
+        endpoint = full["connected_endpoints"][0]
+        peer = projected["connected_endpoints"][0]
+        assert "last_updated" in full
+        assert projected.keys() == {
+            "id",
+            "name",
+            "description",
+            "enabled",
+            "custom_fields",
+            "vrf",
+            "type",
+            "ip_addresses",
+            "connected_endpoints",
+        }
+        assert projected["type"] == full["type"]["value"]
+        assert projected["vrf"] == full["vrf"]
+        ip = next(ip for ip in full["ip_addresses"] if ip["address"] == "10.0.1.1/30")
+        assert {
+            "id": ip["id"],
+            "address": "10.0.1.1/30",
+            "family": "IPv4",
+        } in projected["ip_addresses"]
+        assert peer == {
+            "id": endpoint["id"],
+            "name": endpoint["name"],
+            "device_name": endpoint["device"]["name"],
+            "device_id": endpoint["device"]["id"],
+        }
+
 
 @pytest.mark.netbox_update_interfaces_description
 class TestUpdateInterfacesDescription:

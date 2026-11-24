@@ -43,7 +43,7 @@ At least one NetBox device filter or Nornir host filter is required.
 
 Returns topology data with `nodes` and `links`.
 
-When `branch` is supplied, both device REST reads and connection GraphQL reads use that branch.
+When `branch` is supplied, device and interface GraphQL reads use that branch.
 
 ```json
 {
@@ -159,14 +159,13 @@ When `branch` is supplied, both device REST reads and connection GraphQL reads u
 
 ## Filtering Devices
 
-The task provides several filtering parameters, all resolved via the NetBox REST API before
-interface connections are queried.
+GraphQL device filters select the starting nodes before interface connections are queried.
 
 | Parameter         | Description                                                                 |
 |-------------------|-----------------------------------------------------------------------------|
 | `devices`         | Exact device name list                                                      |
-| `device_contains` | Case-insensitive substring match on device name (NetBox `name__ic` filter)  |
-| `device_regex`    | Regular-expression match on device name (NetBox `name__re` filter)          |
+| `device_contains` | Case-insensitive substring match on device name  |
+| `device_regex`    | Regular-expression match on device name          |
 | `role`            | List of device role slugs (e.g. `["spine", "leaf"]`)                        |
 | `platform`        | List of platform slugs (e.g. `["arista-eos", "cisco-ios"]`)                 |
 | `manufacturers`   | List of manufacturer slugs (e.g. `["arista", "cisco"]`)                     |
@@ -208,11 +207,10 @@ corresponding node entry — and lets you visualise partial topologies without o
 For example, if you query only `spine-1` but it has cables to `leaf-1` and `leaf-2`, the
 result will contain three nodes (`spine-1`, `leaf-1`, `leaf-2`) and all links between them.
 
-Adjacent nodes are fetched in a single additional REST call after the interface connection
-query, so the overhead is minimal regardless of how many extra devices are discovered.
+An additional paginated GraphQL query fetches any adjacent nodes after the interface query.
 
-Pass `dry_run=True` to inspect the REST filter parameters and GraphQL query that would
-be sent to NetBox without executing any network calls:
+Pass `dry_run=True` to inspect the filter summary and previews of both GraphQL queries.
+During a live run, the interface query uses the names returned by the device query.
 
 ```python
 result = client.run_job(
