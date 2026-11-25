@@ -11,15 +11,20 @@ The `sync_all` task synchronizes device data from live devices into NetBox in a
 fixed sequence:
 
 1. **inventory** — calls `sync_device_inventory`
-2. **prefixes** — calls `sync_device_prefixes`
-3. **interfaces** — calls `sync_device_interfaces`
-4. **vrfs** — calls `sync_vrfs`
+2. **interfaces** — calls `sync_device_interfaces`
+3. **vrfs** — calls `sync_vrfs`
+4. **prefixes** — calls `sync_device_prefixes`
 5. **vlans** — calls `sync_vlans`
 6. **ip_addresses** — calls `sync_device_ip`
 7. **vrrp** — calls `sync_vrrp`
 8. **bgp_asns** - calls `sync_bgp_asn`
 9. **bgp_peerings** — calls `sync_bgp_peerings`
 10. **bgp_communities** - calls `sync_bgp_community`
+
+With VRF-aware prefix sync, the VRF stage provisions named VRFs before
+the prefix stage. A dry run previews VRF creation and still reports
+VRFs that the prefix stage needs but cannot find in NetBox. If you disable
+the VRF stage, provision the required VRFs beforehand.
 
 ## How It Works
 

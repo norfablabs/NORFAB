@@ -1429,10 +1429,14 @@ class NetboxDevicesTasks:
             )
             if prefix_result.errors:
                 ret.errors.extend(prefix_result.errors)
+            prefix_diff = prefix_result.diff or {}
             for device in devices:
-                ret.result[device]["prefixes"] = not sync_diff_has_changes(
-                    prefix_result.diff.get(device, {}),
-                    ignore_deletions=ignore_deletions,
+                ret.result[device]["prefixes"] = (
+                    device in prefix_diff
+                    and not sync_diff_has_changes(
+                        prefix_diff[device],
+                        ignore_deletions=ignore_deletions,
+                    )
                 )
             ret.diff["prefixes"] = prefix_result.diff
             check_results["prefixes"] = prefix_result
@@ -1494,8 +1498,9 @@ class NetboxDevicesTasks:
             ret.errors.extend(asn_result.errors)
             for device in devices:
                 if device in asn_result.diff:
+                    diff = asn_result.diff[device]
                     ret.result[device]["bgp_asns"] = not sync_diff_has_changes(
-                        asn_result.diff[device], ignore_deletions=ignore_deletions
+                        diff, ignore_deletions=ignore_deletions
                     )
             ret.diff["bgp_asns"] = asn_result.diff
             check_results["bgp_asns"] = asn_result
@@ -1609,7 +1614,7 @@ class NetboxDevicesTasks:
     ) -> Result:
         """
         Synchronize all device data from live devices into NetBox in sequence:
-        inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP,
+        inventory, interfaces, VRFs, prefixes, VLANs, IP addresses, VRRP,
         BGP communities, and BGP peerings.
 
         Pass ``dry_run=True`` to preview changes without writing to NetBox.
@@ -1762,55 +1767,6 @@ class NetboxDevicesTasks:
                 )
                 return ret
 
-        # --- sync prefixes ---
-        if sync_kwargs.get("sync_device_prefixes") is False:
-            job.event("skipping prefix sync")
-        else:
-            job.event("syncing prefixes")
-            prefix_result = self.sync_device_prefixes(
-                job=job,
-                instance=instance,
-                dry_run=dry_run,
-                timeout=timeout,
-                devices=list(devices),
-                branch=branch,
-                with_approval=with_approval,
-                **(sync_kwargs.get("sync_device_prefixes") or {}),
-            )
-            if prefix_result.errors:
-                job.event("prefix sync completed with errors", severity="WARNING")
-                ret.errors.extend(prefix_result.errors)
-            ret.diff["prefixes"] = prefix_result.diff
-            ret.resources_failed = sorted(
-                set(ret.resources_failed) | set(prefix_result.resources_failed)
-            )
-            if prefix_result.failed and not prefix_result.resources_failed:
-                for device in devices:
-                    ret.result[device]["prefixes"] = False
-                ret.failed = True
-                job.event(
-                    "sync all stopped because prefix sync failed", severity="ERROR"
-                )
-                return ret
-            for device in devices:
-                ret.result[device]["prefixes"] = prefix_result.result.get(
-                    device, {"created": [], "updated": [], "deleted": [], "in_sync": []}
-                )
-            for device in devices:
-                if device in prefix_result.resources_failed:
-                    ret.result[device]["prefixes"] = False
-            if prefix_result.failed:
-                ret.failed = True
-                job.event(
-                    "sync all stopped because a sync stage failed", severity="ERROR"
-                )
-                return ret
-            if prefix_result.status == "skipped" and prefix_result.dry_run:
-                ret.status = "skipped"
-                ret.dry_run = True
-                job.event("sync all stopped because prefix review was declined")
-                return ret
-
         # --- sync interfaces before assigning them to VRFs ---
         if sync_kwargs.get("sync_device_interfaces") is False:
             job.event("skipping interface sync")
@@ -1895,6 +1851,60 @@ class NetboxDevicesTasks:
                 ret.status = "skipped"
                 ret.dry_run = True
                 job.event("sync all stopped because VRF review was declined")
+                return ret
+
+        # --- sync prefixes ---
+        if sync_kwargs.get("sync_device_prefixes") is False:
+            job.event("skipping prefix sync")
+        else:
+            job.event("syncing prefixes")
+            prefix_result = self.sync_device_prefixes(
+                job=job,
+                instance=instance,
+                dry_run=dry_run,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+                with_approval=with_approval,
+                **(sync_kwargs.get("sync_device_prefixes") or {}),
+            )
+            if prefix_result.errors:
+                job.event("prefix sync completed with errors", severity="WARNING")
+                ret.errors.extend(prefix_result.errors)
+            ret.diff["prefixes"] = prefix_result.diff
+            ret.resources_failed = sorted(
+                set(ret.resources_failed) | set(prefix_result.resources_failed)
+            )
+            if prefix_result.failed and not prefix_result.resources_failed:
+                for device in devices:
+                    ret.result[device]["prefixes"] = False
+                ret.failed = True
+                job.event(
+                    "sync all stopped because prefix sync failed", severity="ERROR"
+                )
+                return ret
+            prefix_failed_devices = set(prefix_result.resources_failed)
+            for device in devices:
+                ret.result[device]["prefixes"] = (
+                    False
+                    if device in prefix_failed_devices
+                    else prefix_result.result.get(device, False)
+                )
+            devices = [
+                device
+                for device in devices
+                if ret.result[device]["prefixes"] is not False
+            ]
+            if prefix_result.failed or not devices:
+                ret.failed = True
+                job.event(
+                    "sync all stopped because a sync stage failed", severity="ERROR"
+                )
+                return ret
+            if prefix_result.status == "skipped" and prefix_result.dry_run:
+                ret.status = "skipped"
+                ret.dry_run = True
+                job.event("sync all stopped because prefix review was declined")
                 return ret
 
         # --- sync VLANs after interfaces exist ---
@@ -2064,7 +2074,7 @@ class NetboxDevicesTasks:
                     False
                     if device in asn_result.resources_failed
                     or (asn_result.failed and not asn_result.resources_failed)
-                    else asn_result.result.get(device, {})
+                    else asn_result.result.get(device, False)
                 )
             if asn_result.failed:
                 ret.failed = True

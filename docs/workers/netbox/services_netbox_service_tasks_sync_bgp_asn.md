@@ -7,40 +7,30 @@ using the Nornir TTP `bgp_asn` getter and reconciles them with NetBox IPAM.
 It updates descriptions only when requested and optionally records the devices
 on which each local ASN was observed. It never deletes ASNs or device associations.
 
-## Inputs
-
-| Parameter | Required | Default | Description |
-| --- | --- | --- | --- |
-| `devices` | Conditional | `None` | NetBox and Nornir device names; a device or Nornir filter is required |
-| `rir` | For creation | `None` | Existing NetBox RIR name used to create missing ASNs |
-| `device_custom_field` | No | `devices` | Multi-object ASN custom field related to `dcim.device` |
-| `ignore_asn_by_range` | No | `None` | ASN values or numerical ranges to exclude, such as `65000` or `65100-65200` |
-| `preserve_description` | No | `True` | Keep existing NetBox ASN descriptions unchanged |
-| `instance` | No | Worker default | NetBox instance to target |
-| `branch` | No | `None` | NetBox Branching plugin branch |
-| `dry_run` | No | `False` | Return the calculated diff without writing |
-| `with_approval` | No | `False` | Request approval before writing |
-| `timeout` | No | `600` | Host-resolution and parsing timeout in seconds |
-| Nornir filters | Conditional | — | Select devices using `FB`, `FC`, `FG`, `FL`, and other FFun filters |
-
-Existing ASNs can be updated without `rir`. If missing ASNs are discovered and
-`rir` is omitted or does not exist, the task reports the issue, skips their
-creation, and continues updating existing ASNs.
+Existing local ASNs can be updated without `rir`. Creating missing ASNs
+requires an existing RIR. If you supply an invalid RIR, the task stops before
+collecting data.
 
 The device custom field must be assigned to `ipam.asn`, use the multi-object
-type, and relate to `dcim.device`. A missing field is ignored.
+type, and relate to `dcim.device`. The task accepts either field membership or
+an ASN reference on a NetBox BGP session for that device as association evidence.
+The task only writes field memberships for local ASNs. If a device has
+neither a configured field nor session evidence, the task only compares ASN
+existence and can create missing ASNs.
 
 By default, existing NetBox ASN descriptions are preserved. Set
-`preserve_description=False` to replace them with parsed live descriptions.
-Newly created ASNs still receive the parsed live description when available.
+`preserve_description=False` to apply the selected peer-group label to the
+shared ASN when it is observed locally and association evidence is available.
+New ASNs receive a parsed label when available.
 
 ## Output
 
 Results are keyed by reporting device and contain `created`, `updated`, `deleted`,
 and `in_sync` ASN lists. Dry-run output uses `create`, `update`, `delete`, and
 `in_sync`. The `delete` list is always empty.
-Local and remote ASNs appear under each device observing them. Shared ASNs are
-written once. Device custom-field associations still include only local ASNs.
+Observed ASNs appear under each reporting device. Shared ASNs are written once.
+Association updates show a boolean change for that device. The diff uses
+`device_associated` when only sessions provide association evidence.
 
 ```json
 {
@@ -82,7 +72,7 @@ successful batches.
     nf# netbox sync bgp-asn devices edge-1 dry-run
     ```
 
-    Override existing descriptions with parsed live values:
+    Apply the selected peer-group label to existing ASN descriptions:
 
     ```bash
     nf# netbox sync bgp-asn devices edge-1 preserve-description false
@@ -108,12 +98,8 @@ successful batches.
 
 ## Notes and Gotchas
 
-- When several devices report the same ASN, the first non-empty description in
-  device-name order is used.
-- Device custom-field associations are added only for parser records where
-  `local_asn` is `True`.
-- Existing ASN descriptions are preserved unless `preserve_description` is
-  disabled.
+- When several devices report the same ASN, the first non-empty peer-group
+  label in device-name order is used.
 - Existing device associations are preserved and newly observed devices are
   appended.
 - `with_approval` cannot be combined with the NFCLI `nowait` option.

@@ -479,6 +479,7 @@
         "fn-prefix-sp-1",
         "fn-prefix-sp-2"
       ],
+      "sites": ["NORFAB-LAB", "SALTNORNIR-LAB"],
       "prefixes": [
         "10.85.251.1/32",
         "10.85.252.1/32",
@@ -486,6 +487,7 @@
         "10.85.250.250/32",
         "10.85.15.32/30"
       ],
+      "vrfs": ["TEST_SYNC_PREFIX_VRF"],
       "cleanup": "Delete only exact prefixes, IPs, interface, and VRF created by this class."
     },
     "test_vlans.py::TestCreateVlan": {

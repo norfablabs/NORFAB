@@ -2,6 +2,7 @@ import copy
 import fnmatch
 import ipaddress
 import logging
+from collections import Counter
 from itertools import islice
 from typing import Any, Union
 
@@ -1367,7 +1368,9 @@ class NetboxIpTasks:
                         continue
                     # Normalize IPv6 spellings for NetBox matching
                     ip = ipaddress.ip_interface(str(ip_data["ip"]))
-                    host_address = ip.ip  # Host address object without the prefix length.
+                    host_address = (
+                        ip.ip
+                    )  # Host address object without the prefix length.
                     ip = str(ip)
                     if filter_prefix_net and host_address not in filter_prefix_net:
                         continue
@@ -1806,6 +1809,8 @@ class NetboxIpTasks:
         by prefix alone when ``ignore_vrf=True`` and by prefix plus VRF otherwise.
         Site association is left unchanged by default. When ``ignore_site=False``,
         the site of the alphabetically first device reporting a prefix is used.
+        With VRF matching enabled, named VRFs must already exist in NetBox.
+        Missing VRFs are reported through ``resources_failed``, including in dry runs.
 
         Args:
             job: NorFab Job object containing relevant metadata.
@@ -1821,6 +1826,7 @@ class NetboxIpTasks:
             filter_by_name: Interface-name glob filter.
             filter_by_description: Interface-description glob filter.
             filter_by_prefix: Include prefixes within this network only.
+            batch_size: Maximum prefixes per NetBox write request.
             **kwargs: Nornir host filter arguments.
 
         Returns:
@@ -1828,18 +1834,37 @@ class NetboxIpTasks:
                 ``Result.diff`` contains a per-device reconciliation plan with
                 ``create``, ``update``, ``delete``, and ``in_sync`` actions;
                 ``delete`` is always empty because this task does not delete prefixes.
+                Applied writes are credited to devices whose state they satisfy.
+                A device at a different site can retain drift after a shared write.
+
+        Raises:
+            ValueError: If batch size or a network filter is invalid.
         """
-        devices = list(devices or [])
+        if batch_size < 1:
+            raise ValueError("batch_size must be positive")
+        ignore_nets = [
+            ipaddress.ip_network(value, strict=False)
+            for value in (
+                [ignore_ranges]
+                if isinstance(ignore_ranges, str)
+                else ignore_ranges or DEFAULT_IGNORE_RANGES
+            )
+        ]
+        filter_net = (
+            ipaddress.ip_network(filter_by_prefix, strict=False)
+            if filter_by_prefix
+            else None
+        )
+
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:sync_device_prefixes",
             result={},
-            resources=[instance],
             diff={},
+            resources=[instance],
             dry_run=dry_run,
         )
-        nb = self._get_pynetbox(instance, branch=branch, job=job)
-
+        devices = list(devices or [])
         if kwargs:
             job.event("resolving devices from Nornir filters")
             devices.extend(self.get_nornir_hosts(kwargs, timeout))
@@ -1851,34 +1876,27 @@ class NetboxIpTasks:
             ret.failed = True
             return ret
 
-        nb_devices = {
+        # Validate device selection before asking Nornir to collect live data.
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
+        device_sites = {
             device.name: device.site.id
             for device in self.bulk_filter(
-                nb.dcim.devices,
-                name=devices,
-                fields="name,site",
+                nb.dcim.devices, name=devices, fields="name,site"
             )
         }
-        for device_name in [name for name in devices if name not in nb_devices]:
-            msg = f"{device_name} - device not found in Netbox"
-            log.error(msg)
-            job.event(msg, severity="ERROR")
-            ret.errors.append(msg)
-        devices = [name for name in devices if name in nb_devices]
+        for device in devices:
+            if device not in device_sites:
+                msg = f"{device} - device not found in Netbox"
+                log.error(msg)
+                ret.errors.append(msg)
+                job.event(msg, severity="ERROR")
+                ret.resources_failed.append(device)
+        devices = [device for device in devices if device in device_sites]
         if not devices:
             ret.failed = True
             return ret
 
-        for device in devices:
-            ret.result[device] = {
-                "created": [],
-                "updated": [],
-                "deleted": [],
-                "in_sync": [],
-            }
-            ret.diff[device] = {"create": [], "update": {}, "delete": [], "in_sync": []}
-
-        normalised_live_all = collect_live_interface_ip_data(
+        live_interfaces = collect_live_interface_ip_data(
             client=self.client,
             job=job,
             ret=ret,
@@ -1887,212 +1905,244 @@ class NetboxIpTasks:
             filter_by_name=filter_by_name,
             filter_by_description=filter_by_description,
         )
-
         job.event("collecting live prefix candidates")
-        ignore_ranges = ignore_ranges or DEFAULT_IGNORE_RANGES
-        if isinstance(ignore_ranges, str):
-            ignore_ranges = [ignore_ranges]
-        ignore_nets = [
-            ipaddress.ip_network(str(prefix), strict=False) for prefix in ignore_ranges
-        ]
-        filter_prefix_net = (
-            ipaddress.ip_network(filter_by_prefix, strict=False)
-            if filter_by_prefix
-            else None
-        )
-        desired_prefixes = {}
+        live_prefixes = {}
         prefix_devices = {}
-        for device_name in sorted(normalised_live_all):
-            if device_name not in nb_devices:
+        failed_devices = set(ret.resources_failed)
+        for device in devices:
+            if device in failed_devices:
                 continue
-            site_id = nb_devices[device_name]
-            for interface_data in normalised_live_all[device_name].values():
-                vrf_name = interface_data["vrf"]
-                if ignore_vrf:
-                    vrf_name = None
-                elif vrf_name and vrf_name.lower() in ["global", "default"]:
-                    vrf_name = None
-                for address_data in (interface_data.get("ipv4_addresses") or []) + (
-                    interface_data.get("ipv6_addresses") or []
-                ):
-                    address = address_data["ip"]
-                    prefix_net = ipaddress.ip_interface(str(address)).network
-                    if any(
-                        prefix_net.version == ignore_net.version
-                        and prefix_net.subnet_of(ignore_net)
-                        for ignore_net in ignore_nets
-                    ):
-                        continue
-                    if filter_prefix_net and (
-                        prefix_net.version != filter_prefix_net.version
-                        or not prefix_net.subnet_of(filter_prefix_net)
-                    ):
-                        continue
-                    prefix = str(prefix_net)
-                    key = prefix if ignore_vrf else (prefix, vrf_name)
-                    # Keep every contributor before shared prefixes are deduplicated.
-                    prefix_devices.setdefault(key, set()).add(device_name)
-                    desired_prefixes.setdefault(
-                        key,
-                        {"prefix": prefix, "vrf": vrf_name, "site": site_id},
-                    )
+            if device not in live_interfaces:
+                msg = f"{device} - no live interface data returned"
+                ret.errors.append(msg)
+                job.event(msg, severity="ERROR")
+                failed_devices.add(device)
+                continue
 
-        if not desired_prefixes:
+            identities = set()
+            for interface in live_interfaces[device].values():
+                vrf = interface["vrf"] or ""
+                if ignore_vrf or vrf.lower() in ("global", "default"):
+                    vrf = ""
+                for address in (interface.get("ipv4_addresses") or []) + (
+                    interface.get("ipv6_addresses") or []
+                ):
+                    network = ipaddress.ip_interface(str(address["ip"])).network
+                    if any(
+                        network.version == ignored.version
+                        and network.subnet_of(ignored)
+                        for ignored in ignore_nets
+                    ):
+                        continue
+                    if filter_net and (
+                        network.version != filter_net.version
+                        or not network.subnet_of(filter_net)
+                    ):
+                        continue
+                    identities.add((str(network), vrf))
+
+            # An empty entry identifies successful collection with no candidates.
+            fields = {} if ignore_site else {"site": device_sites[device]}
+            live_prefixes[device] = dict.fromkeys(sorted(identities), fields)
+            for key in live_prefixes[device]:
+                prefix_devices.setdefault(key, []).append(device)
+
+        ret.resources_failed = sorted(failed_devices)
+        if not live_prefixes:
+            ret.failed = True
+            return ret
+
+        # Prefix existence is independent of device interface/IP assignments.
+        records = {}
+        if prefix_devices:
+            job.event(f"collected {len(prefix_devices)} unique prefix candidate(s)")
+            for record in self.bulk_filter(
+                nb.ipam.prefixes,
+                prefix=sorted({prefix for prefix, _ in prefix_devices}),
+                fields="id,prefix,vrf,scope_type,scope_id",
+            ):
+                vrf = "" if ignore_vrf or not record.vrf else record.vrf.name
+                key = (record.prefix, vrf)
+                if key in prefix_devices and (
+                    key not in records or record.id < records[key].id
+                ):
+                    records[key] = record
+        current_fields = {}
+        for key, record in records.items():
+            fields = {}
+            if not ignore_site:
+                fields["site"] = (
+                    record.scope_id if record.scope_type == "dcim.site" else None
+                )
+            current_fields[key] = fields
+
+        # Project shared records onto each device so site drift stays device-specific.
+        netbox_prefixes = {
+            device: {key: current_fields[key] for key in prefixes if key in records}
+            for device, prefixes in live_prefixes.items()
+        }
+
+        diff = self.make_diff(live_prefixes, netbox_prefixes)
+        required_vrfs = {
+            vrf
+            for prefix, vrf in prefix_devices
+            if vrf and (prefix, vrf) not in records
+        }
+        vrf_ids = {}
+        if required_vrfs:
+            for vrf in self.bulk_filter(
+                nb.ipam.vrfs, name=sorted(required_vrfs), fields="id,name"
+            ):
+                if vrf.name in required_vrfs:
+                    vrf_ids.setdefault(vrf.name, vrf.id)
+        missing_vrfs = required_vrfs - vrf_ids.keys()
+        for vrf in sorted(missing_vrfs):
+            msg = f"required VRF '{vrf}' not found in NetBox; sync VRFs before prefixes"
+            log.error(msg)
+            job.event(msg, severity="ERROR")
+            ret.errors.append(msg)
+        for (_, vrf), contributors in prefix_devices.items():
+            if vrf in missing_vrfs:
+                failed_devices.update(contributors)
+        ret.resources_failed = sorted(failed_devices)
+
+        labels = {}
+        for device, prefixes in live_prefixes.items():
+            counts = Counter(prefix for prefix, _ in prefixes)
+            names = {
+                (prefix, vrf): (
+                    f"{prefix} (VRF: {vrf or 'global'})"
+                    if counts[prefix] > 1
+                    else prefix
+                )
+                for prefix, vrf in prefixes
+            }
+            labels[device] = names
+            actions = diff[device]
+            ret.diff[device] = {
+                "create": sorted(names[key] for key in actions["create"]),
+                "update": {
+                    names[key]: actions["update"][key]
+                    for key in sorted(actions["update"])
+                },
+                "delete": [],
+                "in_sync": sorted(names[key] for key in actions["in_sync"]),
+            }
+            ret.result[device] = {
+                "created": ret.diff[device]["create"] if dry_run else [],
+                "updated": sorted(ret.diff[device]["update"]) if dry_run else [],
+                "deleted": [],
+                "in_sync": ret.diff[device]["in_sync"],
+            }
+        if not prefix_devices:
             job.event("no prefixes found in live data")
             return ret
-        job.event(f"collected {len(desired_prefixes)} unique prefix candidate(s)")
-
-        nb_prefixes = self.bulk_filter(
-            nb.ipam.prefixes,
-            prefix=sorted({item["prefix"] for item in desired_prefixes.values()}),
-            fields="id,prefix,vrf,scope_type,scope_id",
-        )
-        create_prefixes = {}
-        update_prefixes = {}
-        for key, desired in desired_prefixes.items():
-            matching = [
-                prefix
-                for prefix in nb_prefixes
-                if prefix.prefix == desired["prefix"]
-                and (
-                    ignore_vrf
-                    or (prefix.vrf.name if prefix.vrf else None) == desired["vrf"]
-                )
-            ]
-            if not matching:
-                payload = {"prefix": desired["prefix"]}
-                if not ignore_site:
-                    payload.update(
-                        {"scope_type": "dcim.site", "scope_id": desired["site"]}
-                    )
-                create_prefixes[key] = payload
-                for device in prefix_devices[key]:
-                    ret.diff[device]["create"].append(desired["prefix"])
-                continue
-
-            current = min(matching, key=lambda prefix: prefix.id)
-            current_site = (
-                getattr(current, "scope_id", None)
-                if getattr(current, "scope_type", None) == "dcim.site"
-                else None
-            )
-            if not ignore_site and current_site != desired["site"]:
-                update_prefixes[key] = {
-                    "id": current.id,
-                    "scope_type": "dcim.site",
-                    "scope_id": desired["site"],
-                }
-                changes = {
-                    "site": {
-                        "old_value": current_site,
-                        "new_value": desired["site"],
-                    }
-                }
-                for device in prefix_devices[key]:
-                    ret.diff[device]["update"][desired["prefix"]] = changes
-            else:
-                for device in prefix_devices[key]:
-                    ret.diff[device]["in_sync"].append(desired["prefix"])
-
-        for device, actions in ret.diff.items():
-            for action in ("create", "in_sync"):
-                actions[action] = sorted(set(actions[action]))
-            actions["update"] = dict(sorted(actions["update"].items()))
-            ret.result[device]["created"] = actions["create"]
-            ret.result[device]["updated"] = list(actions["update"])
-            ret.result[device]["in_sync"] = actions["in_sync"]
         if dry_run:
-            ret.dry_run = True
             return ret
-        if not sync_diff_has_changes(ret.diff):
-            job.event("no prefix sync changes required")
-            return ret
-        if with_approval:
-            # Review shared objects once, while returning each device's own preview.
-            approval_preview = {
-                action: sorted(
-                    {
-                        prefix
-                        for actions in ret.result.values()
-                        for prefix in actions[action]
-                    }
-                )
-                for action in ("created", "updated", "deleted", "in_sync")
-            }
-            if not review_sync_task_result(job, "prefix sync", approval_preview):
-                ret.status = "skipped"
-                ret.dry_run = True
-                ret.messages.append("review declined; changes were not applied")
-                return ret
-        # Preview actions are planned; live results must contain only completed writes.
-        for actions in ret.result.values():
-            actions["created"] = []
-            actions["updated"] = []
-        vrf_ids = {}
-        for key in list(create_prefixes):
-            vrf_name = desired_prefixes[key]["vrf"]
-            if vrf_name is None:
-                continue
-            if vrf_name not in vrf_ids:
-                vrf_ids[vrf_name] = resolve_vrf(vrf_name, nb, job, ret, self.name)
-            if vrf_ids[vrf_name] is None:
-                create_prefixes.pop(key)
-                continue
-            create_prefixes[key]["vrf"] = vrf_ids[vrf_name]
 
-        if update_prefixes:
-            update_items = list(update_prefixes.items())
-            total_batches = (len(update_items) + batch_size - 1) // batch_size
-            for batch_start in range(0, len(update_items), batch_size):
-                batch = update_items[batch_start : batch_start + batch_size]
-                batch_number = batch_start // batch_size + 1
+        # Devices were sorted before collection. The first contributor selects
+        # the shared write, and only matching contributors receive credit.
+        updates = []
+        creates = []
+        for key, contributors in prefix_devices.items():
+            prefix, vrf = key
+            if vrf in missing_vrfs:
+                continue
+            winner = contributors[0]
+            fields = live_prefixes[winner][key]
+            record = records.get(key)
+            if record is not None and fields == current_fields[key]:
+                continue
+            payload = {"id": record.id} if record is not None else {"prefix": prefix}
+            if record is None and vrf:
+                payload["vrf"] = vrf_ids[vrf]
+            if not ignore_site:
+                payload.update(scope_type="dcim.site", scope_id=fields["site"])
+            satisfied = [
+                device
+                for device in contributors
+                if live_prefixes[device][key] == fields
+            ]
+            if record is None:
+                creates.append((key, payload, satisfied))
+            else:
+                updates.append((key, payload, satisfied))
+
+        if not updates and not creates:
+            if not missing_vrfs:
+                job.event("no prefix sync changes required")
+            return ret
+        if with_approval and not review_sync_task_result(job, "prefix sync", ret.diff):
+            ret.status = "skipped"
+            ret.dry_run = True
+            ret.messages.append("review declined; changes were not applied")
+            for device, actions in ret.diff.items():
+                ret.result[device]["created"] = actions["create"]
+                ret.result[device]["updated"] = sorted(actions["update"])
+            return ret
+
+        if updates:
+            total_batches = (len(updates) + batch_size - 1) // batch_size
+            for offset in range(0, len(updates), batch_size):
+                batch = updates[offset : offset + batch_size]
+                batch_number = offset // batch_size + 1
+                payloads = [payload for _, payload, _ in batch]
                 msg = f"updating prefix batch {batch_number}/{total_batches} ({len(batch)} prefix(es))"
                 job.event(msg)
                 log.info(msg)
+                error = None
                 try:
-                    nb.ipam.prefixes.update([payload for _, payload in batch])
+                    written = nb.ipam.prefixes.update(payloads)
                 except Exception as exc:
-                    msg = f"failed to update prefix batch {batch_number}/{total_batches}: {exc}"
-                    ret.errors.append(msg)
-                    ret.failed = True
+                    error = str(exc)
+                if error is not None or not written or len(written) != len(batch):
+                    msg = f"failed to update prefix batch {batch_number}/{total_batches}: {error or 'incomplete response'}"
                     log.error(msg)
+                    ret.errors.append(msg)
                     job.event(msg, severity="ERROR")
-                    return ret
-                for key, _ in batch:
-                    # Report a completed shared write to all of its contributors.
-                    for device in prefix_devices[key]:
-                        ret.result[device]["updated"].append(
-                            desired_prefixes[key]["prefix"]
-                        )
-            job.event(f"updated {len(update_prefixes)} prefix(es)")
-        if create_prefixes:
-            create_items = list(create_prefixes.items())
-            total_batches = (len(create_items) + batch_size - 1) // batch_size
-            for batch_start in range(0, len(create_items), batch_size):
-                batch = create_items[batch_start : batch_start + batch_size]
-                batch_number = batch_start // batch_size + 1
+                    ret.failed = True
+                    for _, _, devices in updates[offset:] + creates:
+                        failed_devices.update(devices)
+                    break
+                for key, _, devices in batch:
+                    for device in devices:
+                        ret.result[device]["updated"].append(labels[device][key])
+            else:
+                job.event(f"updated {len(updates)} prefix(es)")
+
+        if creates and not ret.failed:
+            total_batches = (len(creates) + batch_size - 1) // batch_size
+            for offset in range(0, len(creates), batch_size):
+                batch = creates[offset : offset + batch_size]
+                batch_number = offset // batch_size + 1
+                payloads = [payload for _, payload, _ in batch]
                 msg = f"creating prefix batch {batch_number}/{total_batches} ({len(batch)} prefix(es))"
                 job.event(msg)
                 log.info(msg)
+                error = None
                 try:
-                    nb.ipam.prefixes.create([payload for _, payload in batch])
+                    written = nb.ipam.prefixes.create(payloads)
                 except Exception as exc:
-                    msg = f"failed to create prefix batch {batch_number}/{total_batches}: {exc}"
-                    ret.errors.append(msg)
-                    ret.failed = True
+                    error = str(exc)
+                if error is not None or not written or len(written) != len(batch):
+                    msg = f"failed to create prefix batch {batch_number}/{total_batches}: {error or 'incomplete response'}"
                     log.error(msg)
+                    ret.errors.append(msg)
                     job.event(msg, severity="ERROR")
-                    return ret
-                for key, _ in batch:
-                    for device in prefix_devices[key]:
-                        ret.result[device]["created"].append(
-                            desired_prefixes[key]["prefix"]
-                        )
-            job.event(f"created {len(create_prefixes)} prefix(es)")
+                    ret.failed = True
+                    for _, _, devices in creates[offset:]:
+                        failed_devices.update(devices)
+                    break
+                for key, _, devices in batch:
+                    for device in devices:
+                        ret.result[device]["created"].append(labels[device][key])
+            else:
+                job.event(f"created {len(creates)} prefix(es)")
 
+        ret.resources_failed = sorted(failed_devices)
         for actions in ret.result.values():
-            for action in actions:
-                actions[action] = sorted(set(actions[action]))
-
-        job.event("device prefix sync complete")
+            for values in actions.values():
+                values.sort()
+        if not ret.failed:
+            job.event("device prefix sync complete")
         return ret

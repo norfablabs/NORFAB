@@ -1,9 +1,10 @@
 import logging
 from typing import Any, Union
 
+from pynetbox import RequestError
+
 from norfab.core.worker import Job, Task
 from norfab.models import Result
-from norfab.utils.text import expand_alphanumeric_range
 
 from .netbox_models import (
     CreateBgpAsnInput,
@@ -17,7 +18,6 @@ from .netbox_worker_utilities import (
     merge_array_values,
     merge_resolved_custom_fields,
     review_sync_task_result,
-    sync_diff_has_changes,
 )
 
 log = logging.getLogger(__name__)
@@ -262,8 +262,11 @@ class NetboxBgpAsnTasks:
 
         Existing ASNs are updated without requiring an RIR. Missing ASNs are
         created only when ``rir`` identifies an existing NetBox RIR. The
-        selected ASN custom field records devices on which each ASN was
-        observed. ASNs and device associations are never deleted.
+        selected ASN custom field and NetBox BGP sessions provide device
+        association evidence. Existing ASN updates apply only to devices that
+        report the ASN as local. Without association evidence sources for a
+        device, the task only compares ASN existence.
+        ASNs, memberships, and peerings are never deleted by this task.
 
         Args:
             job: NorFab job object.
@@ -276,7 +279,9 @@ class NetboxBgpAsnTasks:
             rir: NetBox RIR name required when creating missing ASNs.
             device_custom_field: ASN custom field containing associated devices.
             ignore_asn_by_range: ASN values or numerical ranges to ignore.
-            preserve_description: Keep existing NetBox ASN descriptions unchanged.
+            preserve_description: Keep existing NetBox ASN descriptions unchanged
+                by default. False applies the selected peer-group label.
+            batch_size: Maximum number of ASN records per write request.
             **kwargs: Nornir FFun host filters.
 
         Returns:
@@ -301,6 +306,18 @@ class NetboxBgpAsnTasks:
         )
         nb = self._get_pynetbox(instance, branch=branch, job=job)
 
+        # Validate creation prerequisites before collecting reconciliation data.
+        rir_obj = None
+        if rir is not None:
+            rir_matches = self.bulk_filter(nb.ipam.rirs, name=rir, fields="id,name")
+            if len(rir_matches) != 1:
+                msg = f"RIR '{rir}' must match exactly one NetBox RIR"
+                job.event(msg, severity="ERROR")
+                ret.errors.append(msg)
+                ret.failed = True
+                return ret
+            rir_obj = rir_matches[0]
+
         if kwargs:
             job.event("resolving devices from Nornir filters")
             devices.extend(self.get_nornir_hosts(kwargs, timeout))
@@ -313,34 +330,22 @@ class NetboxBgpAsnTasks:
             ret.failed = True
             return ret
 
-        nb_devices = {
-            device.name: device
-            for device in self.bulk_filter(
-                nb.dcim.devices,
-                name=devices,
-                fields="id,name",
-            )
-        }
-        for device_name in [name for name in devices if name not in nb_devices]:
-            msg = f"device '{device_name}' not found in NetBox"
-            job.event(msg, severity="ERROR")
-            log.error(f"{self.name} - Sync BGP ASNs: {msg}")
-            ret.errors.append(msg)
-        devices = [name for name in devices if name in nb_devices]
-        if not devices:
-            ret.failed = True
-            return ret
-        job.event(f"validated {len(devices)} NetBox device(s)")
+        # Keep ignore ranges as bounds, including reversed ranges and comma lists.
+        ignored_ranges = []
+        for expression in ignore_asn_by_range or []:
+            for token in expression.split(","):
+                first, separator, last = token.strip().partition("-")
+                try:
+                    start, end = int(first), int(last if separator else first)
+                except ValueError:
+                    msg = f"invalid ignored ASN range '{token}'"
+                    job.event(msg, severity="ERROR")
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    return ret
+                ignored_ranges.append((min(start, end), max(start, end)))
 
-        if not nb.extras.custom_fields.get(name=device_custom_field):
-            device_custom_field = None
-
-        ignored_asns = {
-            int(asn)
-            for asn_range in ignore_asn_by_range or []
-            for asn in expand_alphanumeric_range(f"[{asn_range}]")
-        }
-
+        # Collect ASN numbers, labels, and the parser's local ownership marker.
         job.event(f"collecting live BGP ASNs from {len(devices)} device(s)")
         parse_data = self.client.run_job(
             "nornir",
@@ -350,254 +355,326 @@ class NetboxBgpAsnTasks:
             timeout=timeout,
         )
         observations = {}
-        result_devices = set()
-        failed_devices = set()
-        parsed_count = 0
-        for worker_name, worker_data in parse_data.items():
-            resources_failed = worker_data.get("resources_failed") or []
-            if resources_failed:
-                failed_devices.update(resources_failed)
-                ret.resources_failed = sorted(
-                    set(ret.resources_failed) | set(resources_failed)
-                )
-                msg = (
-                    f"{worker_name} failed to fetch BGP ASN data from devices "
-                    f"{', '.join(sorted(resources_failed))}"
-                )
-                job.event(msg, severity="ERROR")
-                log.error(f"{self.name} - Sync BGP ASNs: {msg}")
-                ret.errors.append(msg)
-            if worker_data["failed"]:
-                msg = f"worker '{worker_name}' failed to collect live BGP ASN data"
-                job.event(msg, severity="ERROR")
-                log.error(f"{self.name} - Sync BGP ASNs: {msg}")
-                ret.errors.append(msg)
+        for worker_data in (parse_data or {}).values():
+            if worker_data.get("failed"):
                 continue
-            for device_name, records in worker_data["result"].items():
-                if device_name not in nb_devices:
+            for device, records in (worker_data.get("result") or {}).items():
+                if device not in devices or not isinstance(records, list):
                     continue
-                result_devices.add(device_name)
+                device_asns = {}
                 for record in records:
-                    if record["asn"] in ignored_asns:
+                    asn = int(record["asn"])
+                    if any(start <= asn <= end for start, end in ignored_ranges):
                         continue
-                    observations.setdefault(record["asn"], []).append(
-                        {
-                            "device": device_name,
-                            "description": record["description"] or "",
-                            "local_asn": record.get("local_asn", True),
-                        }
+                    label, local = device_asns.get(asn, ("", False))
+                    device_asns[asn] = (
+                        label or record.get("description") or "",
+                        local or record.get("local_asn") is True,
                     )
-                    parsed_count += 1
+                collected = observations.setdefault(device, {})
+                for asn, (label, local) in device_asns.items():
+                    previous_label, previous_local = collected.get(asn, ("", False))
+                    collected[asn] = (previous_label or label, previous_local or local)
 
-        for device_name in devices:
-            if device_name not in result_devices and device_name not in failed_devices:
-                msg = f"device '{device_name}' is missing a live BGP ASN result"
-                job.event(msg, severity="ERROR")
-                log.error(f"{self.name} - Sync BGP ASNs: {msg}")
-                ret.errors.append(msg)
-        if not result_devices:
-            ret.failed = True
-            return ret
-        job.event(
-            f"parsed {parsed_count} live BGP ASN record(s) from "
-            f"{len(result_devices)} device(s)"
-        )
-
-        live_asns = {}
-        asn_devices = {}
-        for asn in sorted(observations):
-            records = sorted(observations[asn], key=lambda item: item["device"])
-            # Remote and local observations both contribute to this device's ASN results.
-            asn_devices[asn] = {record["device"] for record in records}
-            live_asns[asn] = {
-                "description": next(
-                    (
-                        record["description"]
-                        for record in records
-                        if record["description"]
-                    ),
-                    "",
-                )
-            }
-            if device_custom_field:
-                live_asns[asn][device_custom_field] = sorted(
-                    {
-                        nb_devices[record["device"]].id
-                        for record in records
-                        if record["local_asn"] is True
-                    }
-                )
-
-        netbox_asns = {}
-        netbox_objects = {}
-        asn_numbers = list(live_asns)
-        netbox_asn_records = (
-            self.bulk_filter(
-                nb.ipam.asns,
-                asn=asn_numbers,
-                fields="id,asn,description,custom_fields",
+        # Resolve the selected devices and discard observations for missing devices.
+        nb_devices = {
+            device.name: device
+            for device in self.bulk_filter(
+                nb.dcim.devices,
+                name=devices,
+                fields="id,name",
             )
-            if asn_numbers
-            else []
-        )
-        for asn in netbox_asn_records:
-            current = {"description": asn.description}
-            live_asns[asn.asn]["description"] = apply_description_policy(
-                live_asns[asn.asn]["description"],
-                current["description"],
-                preserve_description,
-            )
-            if device_custom_field:
-                current[device_custom_field] = [
-                    device["id"]
-                    for device in (asn.custom_fields[device_custom_field] or [])
-                ]
-                live_asns[asn.asn][device_custom_field] = sorted(
-                    set(current[device_custom_field])
-                    | set(live_asns[asn.asn][device_custom_field])
-                )
-            netbox_asns[asn.asn] = current
-            netbox_objects[asn.asn] = asn
-
-        asn_diff = self.make_diff(
-            {"asns": live_asns},
-            {"asns": netbox_asns},
-        )["asns"]
-        asn_diff["delete"] = []
-        create_numbers = asn_diff["create"]
-        update = asn_diff["update"]
-        in_sync = asn_diff["in_sync"]
-        full_diff = {
-            "global": {
-                **asn_diff,
-                "update": {str(asn): changes for asn, changes in update.items()},
-            }
         }
-        job.event(
-            "bgp asn sync diff complete: "
-            f"{len(create_numbers)} create, {len(update)} update, "
-            f"{len(in_sync)} in sync"
-        )
+        for device_name in devices:
+            if device_name not in nb_devices:
+                msg = f"device '{device_name}' not found in NetBox"
+                job.event(msg, severity="ERROR")
+                ret.errors.append(msg)
+                ret.resources_failed.append(device_name)
+        observations = {
+            device: asns
+            for device, asns in observations.items()
+            if device in nb_devices
+        }
 
         for device in devices:
+            if device in nb_devices and device not in observations:
+                ret.resources_failed.append(device)
+                msg = f"device '{device}' is missing a live BGP ASN result"
+                job.event(msg, severity="ERROR")
+                ret.errors.append(msg)
+        ret.resources_failed.sort()
+        if not observations:
+            ret.failed = True
+            return ret
+
+        # Read the configured ASN field, the shared ASN catalog, and NetBox sessions.
+        if device_custom_field:
+            definitions = self.bulk_filter(
+                nb.extras.custom_fields,
+                name=device_custom_field,
+                object_type="ipam.asn",
+                type="multiobject",
+                fields="name,related_object_type",
+            )
+            if not any(
+                field.related_object_type == "dcim.device" for field in definitions
+            ):
+                device_custom_field = None
+
+        asn_devices = {}
+        for device in sorted(observations):
+            for asn in sorted(observations[device]):
+                asn_devices.setdefault(asn, []).append(device)
+        netbox_objects = {
+            int(record.asn): record
+            for record in (
+                self.bulk_filter(
+                    nb.ipam.asns,
+                    asn=sorted(asn_devices),
+                    fields="id,asn,description,custom_fields",
+                )
+                if asn_devices
+                else []
+            )
+        }
+
+        # Index both ASN references on each session by its NetBox device.
+        session_members = {}
+        devices_with_sessions = set()
+        if asn_devices:
+            devices_by_id = {nb_devices[device].id: device for device in observations}
+            try:
+                sessions = self.bulk_filter(
+                    nb.plugins.bgp.session,
+                    device_id=list(devices_by_id),
+                    fields="device,local_as,remote_as",
+                )
+            except RequestError as exc:
+                job.event(
+                    f"netbox BGP sessions are unavailable: {exc}", severity="WARNING"
+                )
+            else:
+                for session in sessions:
+                    if session.device is None or session.device.id not in devices_by_id:
+                        continue
+                    for reference in (session.local_as, session.remote_as):
+                        if reference is not None:
+                            devices_with_sessions.add(session.device.id)
+                            session_members.setdefault(int(reference.asn), set()).add(
+                                session.device.id
+                            )
+
+        # Build comparable ASN records for each device.
+        live = {device: {} for device in observations}
+        netbox = {device: {} for device in observations}
+        create_descriptions = {}
+        stored_members = {}
+        for asn, observers in asn_devices.items():
+            record = netbox_objects.get(asn)
+            local_observers = [
+                device for device in observers if observations[device][asn][1]
+            ]
+            description_sources = observers
+            if record is not None:
+                description_sources = [
+                    device
+                    for device in local_observers
+                    if device_custom_field
+                    or nb_devices[device].id in devices_with_sessions
+                ]
+            source = next(
+                (
+                    device
+                    for device in description_sources
+                    if observations[device][asn][0]
+                ),
+                description_sources[0] if description_sources else None,
+            )
+            description = observations[source][asn][0] if source is not None else ""
+            members = set()
+            if record is None:
+                create_descriptions[asn] = description
+            elif device_custom_field:
+                members = {
+                    int(
+                        value["id"]
+                        if isinstance(value, dict)
+                        else getattr(value, "id", value)
+                    )
+                    for value in (record.custom_fields or {}).get(device_custom_field)
+                    or []
+                }
+                stored_members[asn] = members
+
+            for device in observers:
+                live[device][asn] = {}
+                if record is not None:
+                    netbox[device][asn] = {}
+                device_id = nb_devices[device].id
+                if device in local_observers and (
+                    device_custom_field or device_id in devices_with_sessions
+                ):
+                    associated = (
+                        device_id in members
+                        or device_id in session_members.get(asn, ())
+                    )
+                    field = device_custom_field or "device_associated"
+                    live[device][asn][field] = True
+                    if record is not None:
+                        netbox[device][asn][field] = associated
+            if record is not None and source is not None:
+                live[source][asn]["description"] = apply_description_policy(
+                    description, record.description, preserve_description
+                )
+                netbox[source][asn]["description"] = record.description or ""
+
+        device_diffs = self.make_diff(live, netbox)
+
+        # Publish the same per-device diff for dry runs, approval, and applied results.
+        for device, diff in device_diffs.items():
             ret.diff[device] = {
-                "create": [asn for asn in create_numbers if device in asn_devices[asn]],
+                **diff,
                 "update": {
-                    str(asn): changes
-                    for asn, changes in update.items()
-                    if device in asn_devices[asn]
+                    str(asn): changes for asn, changes in diff["update"].items()
                 },
-                "delete": [],
-                "in_sync": [asn for asn in in_sync if device in asn_devices[asn]],
             }
             ret.result[device] = {
                 "created": [],
                 "updated": [],
                 "deleted": [],
-                "in_sync": ret.diff[device]["in_sync"],
+                "in_sync": diff["in_sync"],
             }
+
         if dry_run:
             ret.result = ret.diff
-            ret.dry_run = True
             return ret
-        if not sync_diff_has_changes(full_diff):
-            job.event("no BGP ASN sync changes required")
+        if ret.failed:
             return ret
-        if with_approval and not review_sync_task_result(
-            job, "BGP ASN sync", full_diff
-        ):
+        # Merge device-level actions into one payload per ASN.
+        creates = {}
+        updates = {}
+        for device, diff in sorted(device_diffs.items()):
+            for asn in diff["create"]:
+                creates.setdefault(asn, []).append(device)
+            for asn, changes in diff["update"].items():
+                if "description" not in changes and device_custom_field not in changes:
+                    continue
+                payload, affected = updates.setdefault(
+                    asn, ({"id": netbox_objects[asn].id}, [])
+                )
+                if "description" in changes:
+                    payload["description"] = changes["description"]["new_value"]
+                if device_custom_field in changes:
+                    if "custom_fields" not in payload:
+                        payload["custom_fields"] = {
+                            device_custom_field: stored_members[asn].copy()
+                        }
+                    payload["custom_fields"][device_custom_field].add(
+                        nb_devices[device].id
+                    )
+                affected.append(device)
+
+        # Prepare create payloads only when a valid RIR is available.
+        create_items = []
+        if rir_obj:
+            for asn, devices in sorted(creates.items()):
+                payload = {
+                    "asn": asn,
+                    "rir": rir_obj.id,
+                    "description": create_descriptions[asn],
+                }
+                if device_custom_field:
+                    payload["custom_fields"] = {
+                        device_custom_field: sorted(
+                            nb_devices[device].id
+                            for device in devices
+                            if live[device][asn].get(device_custom_field)
+                        )
+                    }
+                create_items.append((asn, payload, devices))
+        elif creates:
+            msg = "cannot create missing ASNs: no RIR provided, use 'rir' parameter"
+            job.event(msg, severity="WARNING")
+            log.warning(f"{self.name} - {msg}")
+            ret.errors.append(msg)
+
+        update_items = []
+        for asn, (payload, affected) in sorted(updates.items()):
+            if "custom_fields" in payload:
+                fields = payload["custom_fields"]
+                fields[device_custom_field] = sorted(fields[device_custom_field])
+            update_items.append((asn, payload, affected))
+
+        if not create_items and not update_items:
+            job.event("no BGP ASN writes planned")
+            return ret
+        job.event(
+            f"planned {len(create_items)} ASN creates and {len(update_items)} updates"
+        )
+        if with_approval and not review_sync_task_result(job, "BGP ASN sync", ret.diff):
             ret.status = "skipped"
             ret.result = ret.diff
             ret.dry_run = True
             ret.messages.append("review declined; changes were not applied")
             return ret
 
-        rir_obj = nb.ipam.rirs.get(name=rir) if rir else None
-        if rir and not rir_obj:
-            msg = f"RIR '{rir}' not found in NetBox, ASN creation will be skipped"
-            job.event(msg, severity="WARNING")
-            log.warning(f"{self.name} - {msg}")
-            ret.errors.append(msg)
-
-        create_items = []
-        if rir_obj:
-            for asn in create_numbers:
-                desired = live_asns[asn]
-                payload = {
-                    "asn": asn,
-                    "rir": rir_obj.id,
-                    "description": desired["description"],
-                }
-                if device_custom_field:
-                    payload["custom_fields"] = {
-                        device_custom_field: desired[device_custom_field]
+        # Create missing ASNs in batches and record each successful create.
+        total_batches = (len(create_items) + batch_size - 1) // batch_size
+        for offset in range(0, len(create_items), batch_size):
+            batch = create_items[offset : offset + batch_size]
+            batch_number = offset // batch_size + 1
+            msg = f"creating ASN batch {batch_number}/{total_batches} ({len(batch)} ASN(s))"
+            job.event(msg)
+            log.info(msg)
+            try:
+                nb.ipam.asns.create([payload for _, payload, _ in batch])
+            except Exception as exc:
+                msg = f"failed ASN create batch {batch_number}/{total_batches}: {exc}"
+                job.event(msg, severity="ERROR")
+                ret.errors.append(msg)
+                ret.failed = True
+                # Include the failed batch and writes skipped after the failure.
+                ret.resources_failed = sorted(
+                    set(ret.resources_failed)
+                    | {
+                        device
+                        for _, _, devices in create_items[offset:] + update_items
+                        for device in devices
                     }
-                create_items.append((asn, payload))
-        elif create_numbers and not rir:
-            msg = "cannot create missing ASNs: no RIR provided, use 'rir' parameter"
-            job.event(msg, severity="WARNING")
-            log.warning(f"{self.name} - {msg}")
-            ret.errors.append(msg)
-        if create_items:
-            total_batches = (len(create_items) + batch_size - 1) // batch_size
-            for batch_start in range(0, len(create_items), batch_size):
-                batch = create_items[batch_start : batch_start + batch_size]
-                batch_number = batch_start // batch_size + 1
-                msg = f"creating ASN batch {batch_number}/{total_batches} ({len(batch)} ASN(s))"
-                job.event(msg)
-                log.info(msg)
-                try:
-                    nb.ipam.asns.create([payload for _, payload in batch])
-                except Exception as exc:
-                    msg = f"failed to create ASN batch {batch_number}/{total_batches}: {exc}"
-                    job.event(msg, severity="ERROR")
-                    log.error(msg)
-                    ret.errors.append(msg)
-                    ret.failed = True
-                    return ret
-                for asn, _ in batch:
-                    for device in asn_devices[asn]:
-                        ret.result[device]["created"].append(asn)
-            job.event(f"created {len(create_items)} NetBox ASN(s)")
+                )
+                return ret
+            for asn, _, devices in batch:
+                for device in devices:
+                    ret.result[device]["created"].append(asn)
 
-        update_payloads = []
-        for asn in sorted(update):
-            desired = live_asns[asn]
-            payload = {"id": netbox_objects[asn].id}
-            for field in update[asn]:
-                if field == "description":
-                    payload[field] = desired[field]
-                elif field == device_custom_field:
-                    payload["custom_fields"] = {
-                        device_custom_field: desired[device_custom_field]
+        # Update existing ASNs in batches and credit only devices that needed the update.
+        total_batches = (len(update_items) + batch_size - 1) // batch_size
+        for offset in range(0, len(update_items), batch_size):
+            batch = update_items[offset : offset + batch_size]
+            batch_number = offset // batch_size + 1
+            msg = f"updating ASN batch {batch_number}/{total_batches} ({len(batch)} ASN(s))"
+            job.event(msg)
+            log.info(msg)
+            try:
+                nb.ipam.asns.update([payload for _, payload, _ in batch])
+            except Exception as exc:
+                msg = f"failed ASN update batch {batch_number}/{total_batches}: {exc}"
+                job.event(msg, severity="ERROR")
+                ret.errors.append(msg)
+                ret.failed = True
+                ret.resources_failed = sorted(
+                    set(ret.resources_failed)
+                    | {
+                        device
+                        for _, _, devices in update_items[offset:]
+                        for device in devices
                     }
-            update_payloads.append((asn, payload))
-        if update_payloads:
-            total_batches = (len(update_payloads) + batch_size - 1) // batch_size
-            for batch_start in range(0, len(update_payloads), batch_size):
-                batch = update_payloads[batch_start : batch_start + batch_size]
-                batch_number = batch_start // batch_size + 1
-                msg = f"updating ASN batch {batch_number}/{total_batches} ({len(batch)} ASN(s))"
-                job.event(msg)
-                log.info(msg)
-                try:
-                    nb.ipam.asns.update([payload for _, payload in batch])
-                except Exception as exc:
-                    msg = f"failed to update ASN batch {batch_number}/{total_batches}: {exc}"
-                    job.event(msg, severity="ERROR")
-                    log.error(msg)
-                    ret.errors.append(msg)
-                    ret.failed = True
-                    return ret
-                for asn, _ in batch:
-                    for device in asn_devices[asn]:
-                        ret.result[device]["updated"].append(asn)
-            job.event(f"updated {len(update_payloads)} NetBox ASN(s)")
+                )
+                return ret
+            for asn, _, devices in batch:
+                for device in devices:
+                    ret.result[device]["updated"].append(asn)
 
         job.event("bgp asn sync complete")
-        log.info(
-            f"{self.name} - Sync BGP ASNs complete: "
-            f"{len(create_items)} created, "
-            f"{len(update)} updated, {len(in_sync)} in sync"
-        )
         return ret

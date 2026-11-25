@@ -1,3 +1,16 @@
+# 0.26.8 (draft)
+
+## BUGS
+
+1. Fixed Netbox `sync_device_prefixes` and `check_device_sync` reporting shared prefix drift for devices that already match. Prefix sync credits a shared write only to devices whose prefix requirements it fulfills.
+2. Fixed Netbox `sync_bgp_asn` reporting shared ASN membership changes for devices that already match. It derives device associations from both the ASN devices field and Netbox BGP sessions.
+
+## CHANGES
+
+1. Netbox `sync_device_prefixes` requires named VRFs to exist when VRF matching is enabled. Missing VRFs are reported per device. `sync_all` runs VRF sync before prefix sync.
+
+---
+
 # 0.26.7
 
 ## BUGS

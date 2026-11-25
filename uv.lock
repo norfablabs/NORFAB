@@ -3437,7 +3437,7 @@ wheels = [
 
 [[package]]
 name = "norfab"
-version = "0.26.6"
+version = "0.26.7"
 source = { editable = "." }
 dependencies = [
     { name = "gitpython" },

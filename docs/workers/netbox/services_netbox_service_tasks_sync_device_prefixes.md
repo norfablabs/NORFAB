@@ -27,7 +27,8 @@ synchronized before its source interface exists in NetBox.
 
 ## Output
 
-Results are keyed by device. Shared prefixes appear under each reporting device:
+Results are keyed by device. Applied creates and updates appear under each
+device whose prefix requirements the write fulfilled:
 
 ```json
 {
@@ -40,7 +41,7 @@ Results are keyed by device. Shared prefixes appear under each reporting device:
 }
 ```
 
-The top-level `diff` field contains a reconciliation plan per device:
+The top-level `diff` field shows each device's state before writes:
 
 ```json
 {
@@ -55,9 +56,14 @@ The top-level `diff` field contains a reconciliation plan per device:
 
 The task does not delete prefixes, so `delete` is always empty.
 
-Dry-run returns the same structure without writing to NetBox. With
-`with_approval=True`, the prepared result is shown for approval before any
-prefixes are written.
+Dry-run action lists describe each device's proposed changes. With
+`with_approval=True`, you review the same per-device diff before writes run.
+If devices sharing a prefix require different sites, the alphabetically
+first device determines the written site. Other devices can continue to
+show site drift on later runs.
+
+If a device reports the same CIDR in multiple VRFs, its entries include the
+VRF, for example `192.0.2.0/24 (VRF: BLUE)`.
 
 ## VRF Handling
 
@@ -69,7 +75,10 @@ prefixes are written.
 
 With `ignore_vrf=False`:
 
-- The live interface VRF is resolved by name; a missing VRF is created.
+- Named VRFs must already exist in NetBox. Run `sync_vrfs` before standalone
+  prefix sync. If a required VRF is missing, affected devices appear in
+  `resources_failed` and their prefixes in that VRF are skipped. Dry runs
+  also report missing VRFs and retain the prefix drift in `diff`.
 - Prefixes are matched by canonical prefix and VRF.
 - If the same prefix exists in another VRF, that object is preserved and a new
   prefix is created in the live VRF.

@@ -398,23 +398,26 @@ class TestSyncDevicePrefixes:
         assert set(by_vrf) == {self.WRONG_VRF, self.CONTROL_PLANE_VRF}
         assert by_vrf[self.WRONG_VRF].id == wrong_prefix.id
 
-    def test_vrf_aware_creates_missing_live_vrf(self, nfclient):
+    @pytest.mark.parametrize("dry_run", [False, True])
+    def test_vrf_aware_requires_existing_live_vrf(self, nfclient, dry_run):
         ret = self._sync(
             nfclient,
             [self.DEVICE],
             filter_by_name=self.NEW_VRF_INTERFACE,
             ignore_vrf=False,
+            dry_run=dry_run,
         )
-        pprint.pprint(ret)
-        for worker, result in ret.items():
-            assert not result["failed"], f"{worker} failed - {result}"
-            assert result["result"][self.DEVICE]["created"] == [self.NEW_VRF_PREFIX]
+        assert ret
+        for result in ret.values():
+            assert result["resources_failed"] == [self.DEVICE]
+            assert any(self.NEW_VRF in error for error in result["errors"])
+            assert result["diff"][self.DEVICE]["create"] == [self.NEW_VRF_PREFIX]
+            if not dry_run:
+                assert result["result"][self.DEVICE]["created"] == []
 
         nb = get_pynetbox(nfclient)
-        vrf = nb.ipam.vrfs.get(name=self.NEW_VRF)
-        assert vrf is not None
-        prefix = nb.ipam.prefixes.get(prefix=self.NEW_VRF_PREFIX, vrf_id=vrf.id)
-        assert prefix is not None
+        assert nb.ipam.vrfs.get(name=self.NEW_VRF) is None
+        assert nb.ipam.prefixes.get(prefix=self.NEW_VRF_PREFIX) is None
 
     def test_ignore_site_false_updates_prefix_to_device_site(self, nfclient):
         nb = get_pynetbox(nfclient)
@@ -469,9 +472,37 @@ class TestSyncDevicePrefixes:
             pprint.pprint(ret)
             for worker, result in ret.items():
                 assert not result["failed"], f"{worker} failed - {result}"
+                assert result["result"]["fn-prefix-sp-1"]["created"] == [
+                    self.ANYCAST_PREFIX
+                ]
+                assert result["result"]["fn-prefix-sp-2"]["created"] == []
                 for device in ("fn-prefix-sp-1", "fn-prefix-sp-2"):
-                    assert result["result"][device]["created"] == [self.ANYCAST_PREFIX]
                     assert result["diff"][device]["create"] == [self.ANYCAST_PREFIX]
+
+            for devices in (
+                ["fn-prefix-sp-1", "fn-prefix-sp-2"],
+                ["fn-prefix-sp-2", "fn-prefix-sp-1"],
+            ):
+                repeated = self._sync(
+                    nfclient,
+                    devices,
+                    filter_by_prefix=self.ANYCAST_PREFIX,
+                    ignore_site=False,
+                )
+                for result in repeated.values():
+                    assert not result["failed"], result
+                    assert result["diff"]["fn-prefix-sp-1"]["in_sync"] == [
+                        self.ANYCAST_PREFIX
+                    ]
+                    assert result["diff"]["fn-prefix-sp-2"]["update"] == {
+                        self.ANYCAST_PREFIX: {
+                            "site": {
+                                "old_value": first_site.id,
+                                "new_value": second_site.id,
+                            }
+                        }
+                    }
+                    assert result["result"]["fn-prefix-sp-2"]["updated"] == []
 
             prefix = nb.ipam.prefixes.get(prefix=self.ANYCAST_PREFIX)
             assert prefix.scope.name == first_site.name

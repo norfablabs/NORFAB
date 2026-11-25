@@ -291,6 +291,7 @@ nav:
     - Design Context File References: development/specs/003-design-context-files/spec.md
     - Broker Event Subscriptions: development/specs/004-broker-event-subscriptions/spec.md
     - Nornir Test Workflows: development/specs/005-nornir-test-workflows/spec.md
+    - Markdown Agent Definitions: development/specs/006-markdown-agent-definitions/spec.md
   - NFWeb Developer Guide: development/nfweb_developer_guide.md
   - Docker Development: development/norfab_docker_development.md
   - Documentation Style Guide: development/documentation_style_guide.md

@@ -191,13 +191,6 @@ def test_netbox_inventory_timeout_and_retry_model() -> None:
 class TestSyncAllOrchestration:
     TASKS = [
         ("sync_device_inventory", {"device-1": {}}),
-        (
-            "sync_device_prefixes",
-            {
-                "device-1": {"created": [], "updated": [], "in_sync": []},
-                "other-device": {},
-            },
-        ),
         ("sync_device_interfaces", {"device-1": {}}),
         (
             "sync_vrfs",
@@ -214,6 +207,13 @@ class TestSyncAllOrchestration:
                     "routing_policies": {},
                     "interfaces": {},
                 },
+            },
+        ),
+        (
+            "sync_device_prefixes",
+            {
+                "device-1": {"created": [], "updated": [], "in_sync": []},
+                "other-device": {},
             },
         ),
         (
@@ -670,6 +670,39 @@ sync_device_interfaces:
         assert result.result["device-1"]["bgp_communities"] == preview["device-1"]
         assert result.diff["bgp_communities"] == preview
         assert set(result.diff) == set(self.RESULT_CATEGORIES.values())
+
+    def test_check_sync_reports_each_devices_prefix_drift_and_coverage(self) -> None:
+        worker = self._worker([])
+        prefix_diff = {
+            "device-1": {"in_sync": ["192.0.2.0/24"]},
+            "device-2": {
+                "update": {"192.0.2.0/24": {"site": {"old_value": 1, "new_value": 2}}}
+            },
+            "device-3": {},
+        }
+        worker.sync_device_prefixes = lambda **kwargs: Result(
+            task="sync_device_prefixes", diff=prefix_diff
+        )
+
+        result = NetboxDevicesTasks.check_device_sync(
+            worker,
+            self._job(),
+            devices=["device-1", "device-2", "device-3", "missing-device"],
+            **{
+                f"check_{category}": category == "prefixes"
+                for category in self.RESULT_CATEGORIES.values()
+            },
+        )
+
+        assert {
+            device: actions["prefixes"] for device, actions in result.result.items()
+        } == {
+            "device-1": True,
+            "device-2": False,
+            "device-3": True,
+            "missing-device": False,
+        }
+        assert result.diff["prefixes"] == prefix_diff
 
     @pytest.mark.parametrize("failed", [True, False])
     def test_check_sync_marks_failed_devices(self, failed: bool) -> None:
