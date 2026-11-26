@@ -354,8 +354,13 @@ class NetboxBgpAsnTasks:
             workers="all",
             timeout=timeout,
         )
-        observations = {}
+        live_asn = {}
         for worker_data in (parse_data or {}).values():
+            ret.messages.extend(worker_data.get("messages") or [])
+            ret.resources_unsupported.extend(
+                worker_data.get("resources_unsupported") or []
+            )
+            ret.resources_failed.extend(worker_data.get("resources_failed") or [])
             if worker_data.get("failed"):
                 continue
             for device, records in (worker_data.get("result") or {}).items():
@@ -371,12 +376,22 @@ class NetboxBgpAsnTasks:
                         label or record.get("description") or "",
                         local or record.get("local_asn") is True,
                     )
-                collected = observations.setdefault(device, {})
+                collected = live_asn.setdefault(device, {})
                 for asn, (label, local) in device_asns.items():
                     previous_label, previous_local = collected.get(asn, ("", False))
                     collected[asn] = (previous_label or label, previous_local or local)
 
-        # Resolve the selected devices and discard observations for missing devices.
+        ret.resources_unsupported = sorted(
+            set(ret.resources_unsupported) - live_asn.keys()
+        )
+        ret.resources_failed = sorted(set(ret.resources_failed) - live_asn.keys())
+        if ret.resources_unsupported:
+            devices = sorted(set(devices) - set(ret.resources_unsupported))
+            if not devices:
+                ret.failed = True
+                return ret
+
+        # Resolve the selected devices and discard live data for missing devices.
         nb_devices = {
             device.name: device
             for device in self.bulk_filter(
@@ -391,20 +406,18 @@ class NetboxBgpAsnTasks:
                 job.event(msg, severity="ERROR")
                 ret.errors.append(msg)
                 ret.resources_failed.append(device_name)
-        observations = {
-            device: asns
-            for device, asns in observations.items()
-            if device in nb_devices
+        live_asn = {
+            device: asns for device, asns in live_asn.items() if device in nb_devices
         }
 
         for device in devices:
-            if device in nb_devices and device not in observations:
+            if device in nb_devices and device not in live_asn:
                 ret.resources_failed.append(device)
                 msg = f"device '{device}' is missing a live BGP ASN result"
                 job.event(msg, severity="ERROR")
                 ret.errors.append(msg)
-        ret.resources_failed.sort()
-        if not observations:
+        ret.resources_failed = sorted(set(ret.resources_failed))
+        if not live_asn:
             ret.failed = True
             return ret
 
@@ -423,8 +436,8 @@ class NetboxBgpAsnTasks:
                 device_custom_field = None
 
         asn_devices = {}
-        for device in sorted(observations):
-            for asn in sorted(observations[device]):
+        for device in sorted(live_asn):
+            for asn in sorted(live_asn[device]):
                 asn_devices.setdefault(asn, []).append(device)
         netbox_objects = {
             int(record.asn): record
@@ -443,7 +456,7 @@ class NetboxBgpAsnTasks:
         session_members = {}
         devices_with_sessions = set()
         if asn_devices:
-            devices_by_id = {nb_devices[device].id: device for device in observations}
+            devices_by_id = {nb_devices[device].id: device for device in live_asn}
             try:
                 sessions = self.bulk_filter(
                     nb.plugins.bgp.session,
@@ -466,14 +479,14 @@ class NetboxBgpAsnTasks:
                             )
 
         # Build comparable ASN records for each device.
-        live = {device: {} for device in observations}
-        netbox = {device: {} for device in observations}
+        live = {device: {} for device in live_asn}
+        netbox_asn = {device: {} for device in live_asn}
         create_descriptions = {}
         stored_members = {}
         for asn, observers in asn_devices.items():
             record = netbox_objects.get(asn)
             local_observers = [
-                device for device in observers if observations[device][asn][1]
+                device for device in observers if live_asn[device][asn][1]
             ]
             description_sources = observers
             if record is not None:
@@ -484,14 +497,10 @@ class NetboxBgpAsnTasks:
                     or nb_devices[device].id in devices_with_sessions
                 ]
             source = next(
-                (
-                    device
-                    for device in description_sources
-                    if observations[device][asn][0]
-                ),
+                (device for device in description_sources if live_asn[device][asn][0]),
                 description_sources[0] if description_sources else None,
             )
-            description = observations[source][asn][0] if source is not None else ""
+            description = live_asn[source][asn][0] if source is not None else ""
             members = set()
             if record is None:
                 create_descriptions[asn] = description
@@ -510,7 +519,7 @@ class NetboxBgpAsnTasks:
             for device in observers:
                 live[device][asn] = {}
                 if record is not None:
-                    netbox[device][asn] = {}
+                    netbox_asn[device][asn] = {}
                 device_id = nb_devices[device].id
                 if device in local_observers and (
                     device_custom_field or device_id in devices_with_sessions
@@ -522,14 +531,14 @@ class NetboxBgpAsnTasks:
                     field = device_custom_field or "device_associated"
                     live[device][asn][field] = True
                     if record is not None:
-                        netbox[device][asn][field] = associated
+                        netbox_asn[device][asn][field] = associated
             if record is not None and source is not None:
                 live[source][asn]["description"] = apply_description_policy(
                     description, record.description, preserve_description
                 )
-                netbox[source][asn]["description"] = record.description or ""
+                netbox_asn[source][asn]["description"] = record.description or ""
 
-        device_diffs = self.make_diff(live, netbox)
+        device_diffs = self.make_diff(live, netbox_asn)
 
         # Publish the same per-device diff for dry runs, approval, and applied results.
         for device, diff in device_diffs.items():

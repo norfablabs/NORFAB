@@ -1726,7 +1726,7 @@ class TestSyncAll:
     SPINE1_TEST_MAC = "02:00:00:11:00:09"  # created by sync_mac_addresses on Ethernet9
     SPINE1_TEST_IP = "10.3.15.33/30"  # created by sync_device_ip on Ethernet9
     TEST_VRRP_INTERFACE = "Ethernet1"
-    TEST_VRRP_KEY = "Ethernet1:vrrp3:250"
+    TEST_VRRP_KEY = "assignment/Ethernet1:vrrp3:250"
     TEST_VRRP_ADDRESS = "10.3.250.1/32"
 
     # ------------------------------------------------------------------ #
@@ -1977,7 +1977,7 @@ class TestSyncAll:
         for worker, res in ret.items():
             assert not res["failed"], f"{worker} failed - {res.get('errors')}"
             for device in self.SPINE_DEVICES:
-                assert self.TEST_VRRP_KEY in res["result"][device]["vrrp"]["created"]
+                assert self.TEST_VRRP_KEY in res["result"][device]["vrrp"]["create"]
 
         nb = get_pynetbox(None)
         group_ids = set()
@@ -2034,9 +2034,9 @@ class TestSyncAll:
                     f"{worker}:{device} unexpected IP creates on 2nd run: "
                     f"{ip_data.get('created')}"
                 )
-                assert not vrrp_data.get("created"), (
+                assert not vrrp_data.get("create"), (
                     f"{worker}:{device} unexpected VRRP creates on 2nd run: "
-                    f"{vrrp_data.get('created')}"
+                    f"{vrrp_data.get('create')}"
                 )
                 assert intf_data.get(
                     "in_sync"

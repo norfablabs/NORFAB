@@ -1,4 +1,4 @@
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from typing import Any
 
 import pytest
@@ -10,6 +10,14 @@ pytestmark = [
     pytest.mark.netbox,
     pytest.mark.netbox_sync_vrrp,
 ]
+
+
+def _assignment_keys(identities: Sequence[str]) -> list[str]:
+    return [
+        key.removeprefix("assignment/")
+        for key in identities
+        if key.startswith("assignment/")
+    ]
 
 
 class TestSyncVrrp:
@@ -239,7 +247,14 @@ class TestSyncVrrp:
             assert validated["result"] == result["result"]
             assert validated["diff"] == result["diff"]
             actions = preview
-            assert actions["create"] == self.ALL_KEYS
+            assert result["result"] == result["diff"]
+            assert _assignment_keys(actions["create"]) == self.ALL_KEYS
+            assert sum(key.startswith("group/") for key in actions["create"]) == len(
+                self.ALL_KEYS
+            )
+            assert sum(key.startswith("vip/") for key in actions["create"]) == len(
+                self.ALL_KEYS
+            )
             assert actions["update"] == {}
             assert actions["delete"] == []
             assert actions["in_sync"] == []
@@ -266,7 +281,7 @@ class TestSyncVrrp:
         response = self._sync_vrrp(nfclient)
         for result in self._successful_results(response):
             assert set(self.DUAL_STACK_KEYS).issubset(
-                result["result"][self.DEVICE]["created"]
+                _assignment_keys(result["result"][self.DEVICE]["create"])
             )
 
         nb = get_pynetbox(nfclient)
@@ -342,17 +357,26 @@ class TestSyncVrrp:
             )
 
         dry_run = self._sync_vrrp(nfclient, dry_run=True)
-        key = self.KEYS[10]
-        for result in self._successful_results(dry_run):
-            assert result["result"][self.DEVICE]["update"][key]["virtual_address"] == {
-                "old_value": None,
-                "new_value": self.VIRTUAL_ADDRESSES[10].split("/")[0],
-            }
-
-        response = self._sync_vrrp(nfclient)
-
-        for result in self._successful_results(response):
-            assert result["result"][self.DEVICE]["updated"] == [key]
+        address = self.VIRTUAL_ADDRESSES[10].split("/")[0]
+        vip_key = f"vip/group:{group_id}/{address}"
+        for response in (dry_run, self._sync_vrrp(nfclient)):
+            for result in self._successful_results(response):
+                actions = result["result"][self.DEVICE]
+                if reuse_existing:
+                    assert actions["update"] == {
+                        vip_key: {
+                            "assigned_object_type": {
+                                "old_value": None,
+                                "new_value": "ipam.fhrpgroup",
+                            },
+                            "assigned_object_id": {
+                                "old_value": None,
+                                "new_value": f"group:{group_id}",
+                            },
+                        }
+                    }
+                else:
+                    assert actions["create"] == [vip_key]
         virtual_ips = list(
             nb.ipam.ip_addresses.filter(
                 assigned_object_type="ipam.fhrpgroup",
@@ -385,14 +409,16 @@ class TestSyncVrrp:
         vip.update({"role": role})
 
         dry_run = self._successful_results(self._sync_vrrp(nfclient, dry_run=True))[0]
-        assert dry_run["diff"][self.DEVICE]["update"][self.KEYS[10]]["role"] == {
+        address = self.VIRTUAL_ADDRESSES[10].split("/")[0]
+        vip_key = f"vip/group:{original_group_id}/{address}"
+        assert dry_run["diff"][self.DEVICE]["update"][vip_key]["role"] == {
             "old_value": role,
             "new_value": "vrrp",
         }
         assert getattr(nb.ipam.ip_addresses.get(id=vip.id).role, "value", None) == role
 
         result = self._successful_results(self._sync_vrrp(nfclient))[0]
-        assert result["result"][self.DEVICE]["updated"] == [self.KEYS[10]]
+        assert list(result["result"][self.DEVICE]["update"]) == [vip_key]
         updated = nb.ipam.ip_addresses.get(id=vip.id)
         assert updated.role.value == "vrrp"
         assert updated.assigned_object_id == original_group_id
@@ -402,7 +428,10 @@ class TestSyncVrrp:
             == 1
         )
         repeated = self._successful_results(self._sync_vrrp(nfclient))[0]
-        assert repeated["result"][self.DEVICE]["in_sync"] == self.ALL_KEYS
+        assert (
+            _assignment_keys(repeated["result"][self.DEVICE]["in_sync"])
+            == self.ALL_KEYS
+        )
 
     @pytest.mark.usefixtures("sync_vrrp_fixture")
     def test_sync_vrrp_reuses_preferred_existing_virtual_ip(
@@ -527,7 +556,10 @@ class TestSyncVrrp:
         then repeat with that template and require all memberships in sync."""
         first_response = self._sync_vrrp(nfclient)
         for result in self._successful_results(first_response):
-            assert result["result"][self.DEVICE]["created"] == self.ALL_KEYS
+            assert (
+                _assignment_keys(result["result"][self.DEVICE]["create"])
+                == self.ALL_KEYS
+            )
 
         nb = get_pynetbox(nfclient)
         for group_id, interface_name in self.INTERFACES.items():
@@ -561,9 +593,9 @@ class TestSyncVrrp:
         second_response = self._sync_vrrp(nfclient)
         for result in self._successful_results(second_response):
             actions = result["result"][self.DEVICE]
-            assert actions["created"] == []
-            assert actions["updated"] == []
-            assert actions["in_sync"] == self.ALL_KEYS
+            assert actions["create"] == []
+            assert actions["update"] == {}
+            assert _assignment_keys(actions["in_sync"]) == self.ALL_KEYS
 
         rename_response = self._sync_vrrp(
             nfclient,
@@ -571,8 +603,12 @@ class TestSyncVrrp:
         )
         for result in self._successful_results(rename_response):
             actions = result["result"][self.DEVICE]
-            assert actions["created"] == []
-            assert actions["updated"] == self.ALL_KEYS
+            assert actions["create"] == []
+            assert len(actions["update"]) == len(self.ALL_KEYS)
+            assert all(
+                key.startswith("group/") and set(changes) == {"name"}
+                for key, changes in actions["update"].items()
+            )
 
         for group_id, interface_name in self.INTERFACES.items():
             interface = nb.dcim.interfaces.get(device=self.DEVICE, name=interface_name)
@@ -588,9 +624,9 @@ class TestSyncVrrp:
         )
         for result in self._successful_results(final_response):
             actions = result["result"][self.DEVICE]
-            assert actions["created"] == []
-            assert actions["updated"] == []
-            assert actions["in_sync"] == self.ALL_KEYS
+            assert actions["create"] == []
+            assert actions["update"] == {}
+            assert _assignment_keys(actions["in_sync"]) == self.ALL_KEYS
 
     @pytest.mark.usefixtures("sync_vrrp_fixture")
     def test_priority_update_only_changes_assignment(self, nfclient: Any) -> None:
@@ -617,11 +653,11 @@ class TestSyncVrrp:
         result = self._successful_results(self._sync_vrrp(nfclient))[0]
 
         assert result["diff"][self.DEVICE]["update"] == {
-            self.KEYS[10]: {
+            f"assignment/{self.KEYS[10]}": {
                 "priority": {"old_value": 1, "new_value": self.PRIORITIES[10]}
             }
         }
-        assert result["result"][self.DEVICE]["updated"] == [self.KEYS[10]]
+        assert result["result"] == result["diff"]
         assert (
             nb.ipam.fhrp_group_assignments.get(id=assignment.id).priority
             == self.PRIORITIES[10]
@@ -648,16 +684,12 @@ class TestSyncVrrp:
         result = self._successful_results(self._sync_vrrp(nfclient))[0]
 
         preview = result["diff"][self.DEVICE]
-        assert preview["create"] == []
-        assert preview["update"] == {
-            self.KEYS[10]: {
-                "virtual_address": {
-                    "old_value": self.STALE_VIP_ADDRESS.split("/")[0],
-                    "new_value": self.VIRTUAL_ADDRESSES[10].split("/")[0],
-                }
-            }
-        }
-        assert result["result"][self.DEVICE]["updated"] == [self.KEYS[10]]
+        new_host = self.VIRTUAL_ADDRESSES[10].split("/")[0]
+        stale_host = self.STALE_VIP_ADDRESS.split("/")[0]
+        assert preview["create"] == [f"vip/group:{group_id}/{new_host}"]
+        assert preview["delete"] == [f"vip/group:{group_id}/{stale_host}"]
+        assert preview["update"] == {}
+        assert result["result"] == result["diff"]
         assert nb.ipam.fhrp_group_assignments.get(id=assignment.id).group.id == group_id
         assert nb.ipam.ip_addresses.get(id=vip.id).address == self.STALE_VIP_ADDRESS
         assert (
@@ -667,7 +699,10 @@ class TestSyncVrrp:
             == group_id
         )
         repeated = self._successful_results(self._sync_vrrp(nfclient))[0]
-        assert repeated["result"][self.DEVICE]["in_sync"] == self.ALL_KEYS
+        assert (
+            _assignment_keys(repeated["result"][self.DEVICE]["in_sync"])
+            == self.ALL_KEYS
+        )
 
     def _cleanup_vrrp_vrf_records(self) -> None:
         ips = list(self.nb.ipam.ip_addresses.filter(address=self.VRF_ADDRESS))
@@ -757,12 +792,18 @@ class TestSyncVrrp:
             record["interface"]: record["vrf"] for record in records
         } == self.VRF_INTERFACE_VRFS
         dry_run = self._sync_vrrp_vrfs(nfclient, dry_run=True, vip_use_vrf=vip_use_vrf)
-        assert dry_run["result"][self.VRF_DEVICES[0]]["create"] == self.VRF_KEYS
+        assert (
+            _assignment_keys(dry_run["result"][self.VRF_DEVICES[0]]["create"])
+            == self.VRF_KEYS
+        )
         assert not list(self.nb.ipam.ip_addresses.filter(address=self.VRF_ADDRESS))
         first = self._sync_vrrp_vrfs(
             nfclient, devices=[self.VRF_DEVICES[0]], vip_use_vrf=vip_use_vrf
         )
-        assert first["result"][self.VRF_DEVICES[0]]["created"] == self.VRF_KEYS
+        assert (
+            _assignment_keys(first["result"][self.VRF_DEVICES[0]]["create"])
+            == self.VRF_KEYS
+        )
         ips = list(self.nb.ipam.ip_addresses.filter(address=self.VRF_ADDRESS))
         assert len(ips) == 3
         assert all(str(ip.address) == f"{self.VRF_ADDRESS}/24" for ip in ips)
@@ -779,7 +820,10 @@ class TestSyncVrrp:
         second = self._sync_vrrp_vrfs(
             nfclient, devices=[self.VRF_DEVICES[1]], vip_use_vrf=not vip_use_vrf
         )
-        assert second["result"][self.VRF_DEVICES[1]]["created"] == self.VRF_KEYS
+        assert (
+            _assignment_keys(second["result"][self.VRF_DEVICES[1]]["create"])
+            == self.VRF_KEYS
+        )
         assignments = list(
             self.nb.ipam.fhrp_group_assignments.filter(device=self.VRF_DEVICES)
         )
@@ -802,9 +846,11 @@ class TestSyncVrrp:
         } == names
         repeated = self._sync_vrrp_vrfs(nfclient, vip_use_vrf=not vip_use_vrf)
         for device in self.VRF_DEVICES:
-            assert repeated["result"][device]["in_sync"] == self.VRF_KEYS
-            assert repeated["result"][device]["created"] == []
-            assert repeated["result"][device]["updated"] == []
+            assert (
+                _assignment_keys(repeated["result"][device]["in_sync"]) == self.VRF_KEYS
+            )
+            assert repeated["result"][device]["create"] == []
+            assert repeated["result"][device]["update"] == {}
         after_ips = list(self.nb.ipam.ip_addresses.filter(address=self.VRF_ADDRESS))
         assert {ip.id: ip.vrf.id if ip.vrf else None for ip in after_ips} == {
             ip.id: ip.vrf.id if ip.vrf else None for ip in ips
@@ -840,7 +886,7 @@ class TestSyncVrrp:
         } == blue_interfaces
         repeated = self._sync_vrrp_vrfs(nfclient, vip_use_vrf=True)
         assert all(
-            repeated["result"][device]["in_sync"] == self.VRF_KEYS
+            _assignment_keys(repeated["result"][device]["in_sync"]) == self.VRF_KEYS
             for device in self.VRF_DEVICES
         )
 
@@ -917,7 +963,7 @@ class TestSyncVrrp:
                     for error in result["errors"]
                 )
                 assert (
-                    result["result"][self.VRF_DEVICES[0]]["created"]
+                    _assignment_keys(result["result"][self.VRF_DEVICES[0]]["create"])
                     == self.VRF_KEYS[1:]
                 )
             assert not list(self.nb.ipam.vrfs.filter(name="TEST_VRRP_BLUE"))
@@ -1017,7 +1063,7 @@ class TestSyncVrrpEmptyResult:
 
         Verify the FakeNOS getter returns an empty list and the selected
         device has no existing NetBox assignments. Run sync and require an
-        error-free result with all four action-summary lists empty. Re-read
+        error-free result with all four action collections empty. Re-read
         assignments to confirm the empty state remains unchanged."""
         parsed = nfclient.run_job(
             "nornir",
@@ -1058,11 +1104,12 @@ class TestSyncVrrpEmptyResult:
             assert result["failed"] is False
             assert result["errors"] == []
             assert result["result"][self.DEVICE] == {
-                "created": [],
-                "updated": [],
-                "deleted": [],
+                "create": [],
+                "update": {},
+                "delete": [],
                 "in_sync": [],
             }
+            assert result["result"] == result["diff"]
         assignments_after = {
             assignment.id
             for interface_id in interface_ids
@@ -1107,8 +1154,11 @@ class TestSyncVrrpEmptyResult:
             for result in response.values():
                 assert result["failed"] is False
                 assert result["errors"] == []
-                assert result["diff"][self.DEVICE]["delete"] == [key]
-                assert result["result"][self.DEVICE]["deleted"] == []
+                assert result["diff"][self.DEVICE]["delete"] == [
+                    f"assignment/{key}",
+                    f"group/group:{group.id}",
+                ]
+                assert result["result"] == result["diff"]
             assert nb.ipam.fhrp_group_assignments.get(id=assignment.id) is not None
         finally:
             if assignment is not None:
@@ -1245,8 +1295,12 @@ class TestSyncVrrpAristaPeers:
 
         key = f"{self.INTERFACE}:vrrp3:{self.GROUP_ID}"
         for result in self._successful_results(response):
-            assert result["result"][self.DEVICES[0]]["created"] == [key]
-            assert result["result"][self.DEVICES[1]]["created"] == [key]
+            assert _assignment_keys(result["result"][self.DEVICES[0]]["create"]) == [
+                key
+            ]
+            assert _assignment_keys(result["result"][self.DEVICES[1]]["create"]) == [
+                key
+            ]
 
         vrrp3_group_ids = set()
         for device_name in self.DEVICES:
@@ -1283,18 +1337,23 @@ class TestSyncVrrpAristaPeers:
         Apply sync, then verify each interface has one assignment with its live
         priority and both assignments reference the same VRRPv3 group. Inspect
         the group's VRID, deterministic name, and single /24 VIP. Repeat sync
-        and require both peers to report in sync without creations or updates."""
+        and require both peers to report in sync without creations or updates.
+        Change one assignment priority and verify drift is scoped to that peer."""
         key = f"{self.INTERFACE}:vrrp3:{self.GROUP_ID}"
 
         dry_run = self._sync_vrrp(nfclient, dry_run=True)
         for result in self._successful_results(dry_run):
             for device_name in self.DEVICES:
-                assert result["result"][device_name]["create"] == [key]
+                assert _assignment_keys(result["result"][device_name]["create"]) == [
+                    key
+                ]
 
         first_sync = self._sync_vrrp(nfclient)
         for result in self._successful_results(first_sync):
             for device_name in self.DEVICES:
-                assert result["result"][device_name]["created"] == [key]
+                assert _assignment_keys(result["result"][device_name]["create"]) == [
+                    key
+                ]
 
         group_ids = set()
         for device_name in self.DEVICES:
@@ -1327,9 +1386,26 @@ class TestSyncVrrpAristaPeers:
         for result in self._successful_results(second_sync):
             for device_name in self.DEVICES:
                 actions = result["result"][device_name]
-                assert actions["created"] == []
-                assert actions["updated"] == []
-                assert actions["in_sync"] == [key]
+                assert actions["create"] == []
+                assert actions["update"] == {}
+                assert _assignment_keys(actions["in_sync"]) == [key]
+
+        matching, changed = self.DEVICES
+        interface = self.nb.dcim.interfaces.get(device=changed, name=self.INTERFACE)
+        assignment = self.nb.ipam.fhrp_group_assignments.get(interface_id=interface.id)
+        expected_priority = self.PRIORITIES[changed]
+        assignment.update({"priority": expected_priority + 1})
+
+        result = self._successful_results(self._sync_vrrp(nfclient, dry_run=True))[0]
+        assert _assignment_keys(result["diff"][matching]["in_sync"]) == [key]
+        assert result["diff"][changed]["update"] == {
+            f"assignment/{key}": {
+                "priority": {
+                    "old_value": expected_priority + 1,
+                    "new_value": expected_priority,
+                }
+            }
+        }
 
     @pytest.mark.parametrize("repair_existing", [False, True])
     def test_sync_vrrp_joins_existing_group_in_later_call(
@@ -1347,7 +1423,7 @@ class TestSyncVrrpAristaPeers:
         first_device, second_device = self.DEVICES
         first_sync = self._sync_vrrp(nfclient, devices=[first_device])
         for result in self._successful_results(first_sync):
-            assert result["result"][first_device]["created"] == [key]
+            assert _assignment_keys(result["result"][first_device]["create"]) == [key]
         vip = self.nb.ipam.ip_addresses.get(address=self.VIRTUAL_ADDRESS)
         group_id = vip.assigned_object_id
         group_name = self.nb.ipam.fhrp_groups.get(id=group_id).name
@@ -1358,11 +1434,17 @@ class TestSyncVrrpAristaPeers:
 
         dry_run = self._sync_vrrp(nfclient, devices=devices, dry_run=True)
         for result in self._successful_results(dry_run):
-            assert result["result"][second_device]["create"] == [key]
+            actions = result["result"][second_device]
+            assert actions["create"] == [f"assignment/{key}"]
+            if repair_existing:
+                assert actions["update"][f"group/group:{group_id}"]["auth_type"] == {
+                    "old_value": "md5",
+                    "new_value": None,
+                }
 
         second_sync = self._sync_vrrp(nfclient, devices=devices)
         for result in self._successful_results(second_sync):
-            assert result["result"][second_device]["created"] == [key]
+            assert _assignment_keys(result["result"][second_device]["create"]) == [key]
         interface = self.nb.dcim.interfaces.get(
             device=second_device, name=self.INTERFACE
         )
@@ -1378,7 +1460,7 @@ class TestSyncVrrpAristaPeers:
 
         repeated_sync = self._sync_vrrp(nfclient, devices=[second_device])
         for result in self._successful_results(repeated_sync):
-            assert result["result"][second_device]["in_sync"] == [key]
-            assert result["result"][second_device]["created"] == []
-            assert result["result"][second_device]["updated"] == []
+            assert _assignment_keys(result["result"][second_device]["in_sync"]) == [key]
+            assert result["result"][second_device]["create"] == []
+            assert result["result"][second_device]["update"] == {}
         assert self.nb.ipam.fhrp_groups.get(id=group_id).name == group_name

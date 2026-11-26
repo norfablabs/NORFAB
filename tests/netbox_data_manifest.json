@@ -568,6 +568,12 @@
         210
       ]
     },
+    "test_vrfs.py::TestSyncVrfs::test_sync_vrfs_skips_unsupported_device": {
+      "mode": "main_mutating",
+      "devices": ["fn-vrf-unsupported-console"],
+      "ownership": "Creates one disposable device and deletes only its returned record. Reads the seeded Arista cEOS device type, VirtualRouter role, and SALTNORNIR-LAB site as creation references.",
+      "coverage": "Checks the missing device result before creation and the unsupported platform result after creation. The dry run does not write VRFs."
+    },
     "test_vrfs.py::TestSyncVrfs": {
       "mode": "main_mutating",
       "coverage": "The Netbox-only association test creates and removes TEST_VRF_SYNC_KEEP_ME with devices-field membership on fn-ceos-lf-1.",
@@ -604,6 +610,12 @@
         4200000302
       ]
     },
+    "test_bgp_asn.py::TestSyncBgpAsn::test_multiple_devices_are_aggregated": {
+      "mode": "main_mutating",
+      "devices": ["fn-asn-unsupported-console"],
+      "ownership": "Creates and deletes only the named console device. Reads the seeded Arista cEOS device type, VirtualRouter role, and SALTNORNIR-LAB site as creation references. The class manifest covers the existing router and ASN records.",
+      "coverage": "Checks mixed supported and unsupported devices through ASN sync and both coordinators."
+    },
     "test_bgp_community.py::TestSyncBgpCommunity": {
       "mode": "main_mutating",
       "devices": [
@@ -611,6 +623,8 @@
         "fn-ceos-lf-2"
       ],
       "unreachable_device": "fn-bgp-community-unreachable",
+      "unsupported_device": "fn-bgp-community-unsupported-linux",
+      "unsupported_device_ownership": "The unsupported-platform test creates and deletes this device. It reads the seeded Arista cEOS device type, VirtualRouter role, and SALTNORNIR-LAB site.",
       "route_targets": ["65000:200", "65000:999"],
       "communities": [
         "65000:100",
@@ -671,7 +685,7 @@
     },
     "test_fhrp.py::TestSyncVrrpAristaPeers": {
       "mode": "main_mutating",
-      "coverage": "Includes test_sync_vrrp_joins_existing_group_in_later_call: syncs owned peers separately, verifies VIP and group reuse, preserved name, dry-run and idempotency, including joining a group whose authentication is repaired in the same call. Uses the class-owned Vlan250 and 198.18.252.1 records and existing cleanup.",
+      "coverage": "Includes test_sync_vrrp_joins_existing_group_in_later_call: syncs owned peers separately, verifies VIP and group reuse, preserved name, dry-run and idempotency, including joining a group whose authentication is repaired in the same call. The shared-peer test also changes one owned assignment priority and checks device-scoped drift. Uses the class-owned Vlan250 and 198.18.252.1 records and existing cleanup.",
       "devices": [
         "fn-ceos-lf-1",
         "fn-ceos-lf-2"
@@ -679,6 +693,12 @@
       "virtual_addresses": [
         "198.18.252.1"
       ]
+    },
+    "test_inventory.py::TestSyncDeviceInventory::test_inventory_stage_skips_unsupported_device": {
+      "mode": "main_mutating",
+      "devices": ["fn-inventory-unsupported-console"],
+      "ownership": "Creates and deletes only the named device. Reads seeded Arista cEOS device type, VirtualRouter role, and SALTNORNIR-LAB site as creation references.",
+      "coverage": "Runs inventory dry-run and both coordinators against an unsupported platform. The sync and check calls do not write to NetBox."
     },
     "test_inventory.py::TestSyncDeviceInventory": {
       "mode": "main_mutating",

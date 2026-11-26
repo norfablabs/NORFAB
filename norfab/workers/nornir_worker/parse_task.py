@@ -2,7 +2,7 @@ import logging
 from copy import deepcopy
 from typing import Any, Union
 
-from nornir_salt.plugins.functions import FFun_functions
+from nornir_salt.plugins.functions import FFun, FFun_functions
 from ttp import ttp
 from ttp_templates import get_template
 
@@ -198,7 +198,8 @@ class ParseTask:
             **kwargs: Additional arguments forwarded to Nornir host filtering and the CLI collection task.
 
         Returns:
-            Result containing per-host TTP parsing output.
+            Result containing per-host TTP parsing output and selected hosts whose
+            platforms have no matching template input in ``resources_unsupported``.
 
         Raises:
             RuntimeError: If ``strict=True`` and a host produces empty results.
@@ -236,14 +237,26 @@ class ParseTask:
                     }
                 )
 
-        job.event(
-            f"collecting output from {len(filtered_nornir.inventory.hosts)} devices for {len(cli_runs)} TTP template input(s)"
-        )
-
-        # collect commands output from devices
+        # Track selected hosts that have no matching template input.
+        selected_hosts = filtered_nornir.inventory.hosts
+        unsupported_hosts = set(selected_hosts) if cli_runs else set()
         host_parsers = {}
         host_templates = {}
         for cli_run in cli_runs:
+            platform = cli_run["params"].get("platform")
+            hosts = (
+                FFun(filtered_nornir, FM=platform).inventory.hosts
+                if platform
+                else selected_hosts
+            )
+            # Skip collection for unmatched inputs and keep their candidate hosts tracked.
+            if not hosts:
+                continue
+            unsupported_hosts.difference_update(hosts)
+            job.event(
+                f"collecting output from {len(hosts)} devices for TTP input "
+                f"'{cli_run['input_name']}'"
+            )
             cli_run_filters = {
                 k: cli_run["params"][k]
                 for k in cli_run["params"].keys()
@@ -254,8 +267,8 @@ class ParseTask:
                 **kwargs,
                 **cli_run_filters,
             }
-            if cli_run["params"].get("platform"):
-                cli_run_kwargs["FM"] = cli_run["params"]["platform"]
+            if platform:
+                cli_run_kwargs["FM"] = platform
             result = self.cli(
                 job=job, commands=cli_run["commands"], **cli_run_kwargs, plugin=plugin
             )
@@ -302,6 +315,15 @@ class ParseTask:
                     job.event(msg, severity="ERROR")
                     if strict:
                         raise RuntimeError(msg)
+
+        # report unsupported_hosts that matched no template input.
+        ret.resources_unsupported = sorted(unsupported_hosts)
+        if ret.resources_unsupported:
+            template_name = f"getter '{get}'" if get else "template"
+            ret.messages.append(
+                f"TTP {template_name} does not support: "
+                f"{', '.join(ret.resources_unsupported)}"
+            )
 
         # parse once all inputs for each host have been populated
         for hname, parser in host_parsers.items():

@@ -1,4 +1,5 @@
 import pprint
+from typing import Any
 
 import pytest
 from pydantic import ValidationError
@@ -489,7 +490,10 @@ class TestSyncDeviceInventory:
     ]
 
     @pytest.fixture(autouse=True)
-    def sync_inventory_fixture(self, nfclient):
+    def sync_inventory_fixture(self, nfclient, request):
+        if request.node.name == "test_inventory_stage_skips_unsupported_device":
+            yield
+            return
         self._ensure_netbox_device()
         self._cleanup_netbox()
         self._ensure_netbox_device()
@@ -671,6 +675,68 @@ class TestSyncDeviceInventory:
     @staticmethod
     def _result_text(result):
         return "\n".join(result["errors"] + result["messages"])
+
+    def test_inventory_stage_skips_unsupported_device(self, nfclient: Any) -> None:
+        nb = get_pynetbox(nfclient)
+        name = "fn-inventory-unsupported-console"
+        assert nb.dcim.devices.get(name=name) is None
+        device = nb.dcim.devices.create(
+            name=name,
+            device_type=nb.dcim.device_types.get(model="Arista cEOS").id,
+            role=nb.dcim.device_roles.get(name="VirtualRouter").id,
+            site=nb.dcim.sites.get(name="SALTNORNIR-LAB").id,
+            status="active",
+        )
+        categories = {
+            "interfaces": "sync_device_interfaces",
+            "prefixes": "sync_device_prefixes",
+            "vlans": "sync_vlans",
+            "ip_addresses": "sync_device_ip",
+            "vrrp": "sync_vrrp",
+            "bgp_asns": "sync_bgp_asn",
+            "bgp_peerings": "sync_bgp_peerings",
+            "bgp_communities": "sync_bgp_community",
+        }
+        try:
+            for task, options in (
+                ("sync_device_inventory", {"dry_run": True}),
+                (
+                    "sync_all",
+                    {
+                        "dry_run": True,
+                        "sync_kwargs": dict.fromkeys(categories.values(), False),
+                    },
+                ),
+                (
+                    "check_device_sync",
+                    {
+                        "check_vrfs": False,
+                        **{f"check_{key}": False for key in categories},
+                    },
+                ),
+            ):
+                response = nfclient.run_job(
+                    "netbox", task, workers="any", kwargs={"devices": [name], **options}
+                )
+                assert response
+                for result in response.values():
+                    assert not result["failed"]
+                    assert result["resources_failed"] == result["errors"] == []
+                    assert any(name in message for message in result["messages"])
+                    if task == "sync_device_inventory":
+                        assert result["resources_unsupported"] == [name]
+                        assert result["result"] == result["diff"] == {}
+                    else:
+                        assert result["resources_unsupported"] == []
+                        assert result["result"][name]["inventory"] is None
+                    if task == "check_device_sync":
+                        assert result["result"][name]["in_sync"] is None
+                    if task == "sync_all":
+                        assert any(
+                            "Skipped VRF sync" in msg for msg in result["messages"]
+                        )
+        finally:
+            device.delete()
 
     def test_sync_device_inventory_dry_run_reports_raw_diff(self, nfclient):
         ret = self._sync(nfclient, dry_run=True)

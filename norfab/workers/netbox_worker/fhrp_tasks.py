@@ -1,6 +1,5 @@
 import ipaddress
 import logging
-from copy import deepcopy
 from typing import Any, Union
 
 from jinja2 import Environment, StrictUndefined, TemplateError
@@ -10,7 +9,6 @@ from norfab.models import Result
 
 from .netbox_models import (
     NetboxFastApiArgs,
-    SyncActionSummary,
     SyncVrrpInput,
     SyncVrrpResult,
 )
@@ -79,10 +77,10 @@ class NetboxFhrpTasks:
             **kwargs: Nornir host filters, combined with the device names.
 
         Returns:
-            Result: Per-device ``created``, ``updated``, ``deleted``, and
-            ``in_sync`` lists. Dry runs and declined approval return a preview
-            with ``create``, ``update``, ``delete``, and ``in_sync`` actions
-            instead. The ``diff`` field always contains the preview.
+            Result: Per-device ``create``, ``update``, ``delete``, and
+            ``in_sync`` actions for groups, VIPs, and assignments. Both
+            ``result`` and ``diff`` report the comparison made before writes.
+            Deletion candidates are reported and retained.
             Errors describe collection failures, missing objects, IP ownership
             conflicts, ambiguous group matches, or invalid live virtual addresses.
             Records with missing or invalid virtual addresses are reported and
@@ -128,6 +126,7 @@ class NetboxFhrpTasks:
         for device in devices:
             if device not in nb_devices:
                 ret.errors.append(f"device '{device}' not found in NetBox")
+                ret.resources_failed.append(device)
         devices = [device for device in devices if device in nb_devices]
         if not devices:
             ret.failed = True
@@ -145,8 +144,7 @@ class NetboxFhrpTasks:
             for interface_id, interface in interfaces.items()
         }
 
-        # The getter supplies defaults. Validate VIPs while translating device
-        # values to NetBox values and resolving the actual NetBox interface.
+        # Normalize live records and match them to NetBox interfaces.
         job.event("collecting live VRRP data")
         parsed = self.client.run_job(
             "nornir",
@@ -157,6 +155,7 @@ class NetboxFhrpTasks:
         )
         live = {}
         seen = set()
+        incomplete = set()
         for worker, data in parsed.items():
             failed = data["resources_failed"]
             ret.resources_failed = sorted(set(ret.resources_failed) | set(failed))
@@ -178,6 +177,7 @@ class NetboxFhrpTasks:
                         ret.errors.append(
                             f"interface '{device}:{interface}' not found in NetBox"
                         )
+                        incomplete.add(device)
                         continue
                     group_id = record["group"]
                     protocol = VRRP_PROTOCOLS[record["protocol"]]
@@ -195,6 +195,7 @@ class NetboxFhrpTasks:
                         job.event(msg, severity="ERROR")
                         log.error(f"{self.name} - Sync VRRP: {msg}")
                         ret.errors.append(msg)
+                        incomplete.add(device)
                         continue
                     auth = record["authentication_type"]
                     if auth in ("text", "simple", "plain", "cleartext"):
@@ -207,8 +208,10 @@ class NetboxFhrpTasks:
                         authentication_type=auth,
                         interface_id=interface_id,
                     )
-        for device in set(devices) - seen - set(ret.resources_failed):
+        missing = set(devices) - seen - set(ret.resources_failed)
+        for device in sorted(missing):
             ret.errors.append(f"device '{device}' is missing a live VRRP result")
+        ret.resources_failed = sorted(set(ret.resources_failed) | missing | incomplete)
         peers = {}
         # Sort peers so a shared group's name always uses the same first peer.
         for member, data in sorted(live.items()):
@@ -220,8 +223,7 @@ class NetboxFhrpTasks:
             )
             peers.setdefault(vrrp_peer_identity, []).append(member)
 
-        # Load selected memberships and all matching VIP owners. These two
-        # sources discover relevant groups, including unselected peer devices.
+        # Discover relevant groups from selected assignments and matching VIP owners.
         job.event("loading NetBox VRRP groups, VIPs, and memberships")
         selected_assignments = self.bulk_filter(
             nb.ipam.fhrp_group_assignments,
@@ -309,8 +311,7 @@ class NetboxFhrpTasks:
                 ),
             )
 
-        # Normalize IPs once. Group VIPs and address lookups share the same data,
-        # including whether an unassigned IP has already been reserved by a plan.
+        # Index VIPs by host address and share reservation state across lookups.
         ips, candidates = {}, {}
         for ip in {ip.id: ip for ip in [*matching_ips, *owned_ips]}.values():
             vrrp_vip_identity = str(ipaddress.ip_interface(str(ip.address)).ip)
@@ -345,8 +346,7 @@ class NetboxFhrpTasks:
                 key=lambda ip: (ip["data"]["role"] not in ("vip", "vrrp"), ip["id"])
             )
 
-        # Named VIP VRFs define group context. Otherwise infer it from every
-        # assigned interface, including peers outside the selected devices.
+        # Infer routing context from all member interfaces when VIP VRFs are absent.
         for group in groups.values():
             group["infer_vrf"] = not group["vrfs"]
         external_ids = set()
@@ -386,12 +386,13 @@ class NetboxFhrpTasks:
             if vip_use_vrf and vrf_names
             else set()
         )
-        group_live, vip_live = {}, {}
-        assignment_live = {device: {} for device in devices}
+        group_live = {}
+        live_state = {device: {} for device in devices}
+        netbox_state = {device: {} for device in devices}
+        record_ids = {}
         new_vips = {}
 
-        # Resolve each live peer bucket once. Membership anchors support VIP
-        # and authentication changes; new peers discover groups by VIP/context.
+        # Resolve each peer set by existing memberships and matching VIPs in its VRF.
         for vrrp_peer_identity, members in peers.items():
             protocol, group_id, vrrp_vip_identity, vrf = vrrp_peer_identity
             desired = live[members[0]]
@@ -547,31 +548,47 @@ class NetboxFhrpTasks:
                 ip_record["reserved"] = True
                 vip["address"] = ip_record["data"]["address"]
                 group["vips"][vrrp_vip_identity] = ip_record
-            vip_live.setdefault(vrrp_group_identity, {})[vrrp_vip_identity] = vip
+            group_key = f"group/{vrrp_group_identity}"
+            vip_key = f"vip/{vrrp_group_identity}/{vrrp_vip_identity}"
+            record_ids[group_key] = group["id"]
+            if ip_record is not None:
+                record_ids[vip_key] = ip_record["id"]
+            # Add the resolved group, VIP, and assignment to each peer's snapshot.
             for device, vrrp_interface_identity in members:
                 data = live[(device, vrrp_interface_identity)]
-                assignment_live[device][vrrp_interface_identity] = dict(
+                assignment_key = f"assignment/{vrrp_interface_identity}"
+                live_state[device][group_key] = {
+                    **fields,
+                    "auth_type": data["authentication_type"],
+                }
+                live_state[device][vip_key] = vip
+                live_state[device][assignment_key] = dict(
                     group=vrrp_group_identity,
                     interface_type="dcim.interface",
                     interface_id=data["interface_id"],
                     priority=data["priority"],
                 )
+                if group["id"] is not None:
+                    netbox_state[device][group_key] = group["data"]
+                if ip_record is not None:
+                    netbox_state[device][vip_key] = ip_record["data"]
 
-        # Comparable fields are already prepared. Extra current records become
-        # deletion candidates, which this additive sync never applies.
-        assignment_current = {
-            device: {identity: item["data"] for identity, item in records.items()}
-            for device, records in assignments.items()
-        }
-        group_current = {
-            identity: group["data"]
-            for identity, group in groups.items()
-            if group["id"] is not None
-        }
-        vip_current = {
-            identity: {address: ip["data"] for address, ip in group["vips"].items()}
-            for identity, group in groups.items()
-        }
+        # Report NetBox-only records as deletion candidates for fully observed devices.
+        incomplete = set(ret.resources_failed)
+        for device, records in assignments.items():
+            for identity, record in records.items():
+                assignment_key = f"assignment/{identity}"
+                if device not in incomplete or assignment_key in live_state[device]:
+                    netbox_state[device][assignment_key] = record["data"]
+                    group_ref = record["data"]["group"]
+                    group = groups[group_ref]
+                    netbox_state[device][f"group/{group_ref}"] = group["data"]
+                    for address, ip in group["vips"].items():
+                        if ip["data"]["assigned_object_id"] == group_ref:
+                            netbox_state[device][f"vip/{group_ref}/{address}"] = ip[
+                                "data"
+                            ]
+                    record_ids[(device, assignment_key)] = record["id"]
 
         # Resolve masks once per new address and share them across VRF groups.
         if new_vips:
@@ -594,134 +611,89 @@ class NetboxFhrpTasks:
                 for vip in vips:
                     vip["address"] = f"{host}/{length}"
 
-        # Three comparisons, each shaped like the API objects it controls.
-        # Local group references connect all three plans before new IDs exist.
-        group_diff = self.make_diff({"groups": group_live}, {"groups": group_current})[
-            "groups"
-        ]
-        vip_diff = self.make_diff(vip_live, vip_current)
-        assignment_diff = self.make_diff(assignment_live, assignment_current)
-        # Add group/VIP changes to each affected membership's public preview.
-        # Copy the assignment diff so the original still drives only its own writes.
-        preview = deepcopy(assignment_diff)
-        for device, actions in preview.items():
-            for vrrp_interface_identity, assignment in assignment_live[device].items():
-                if vrrp_interface_identity in actions["create"]:
-                    continue
-                vrrp_group_identity = assignment["group"]
-                address = live[(device, vrrp_interface_identity)]["virtual_address"]
-                changes = dict(group_diff["update"].get(vrrp_group_identity, {}))
-                if "auth_type" in changes:
-                    changes["authentication_type"] = changes.pop("auth_type")
-                vip_changes = vip_diff[vrrp_group_identity]["update"].get(address, {})
-                if (
-                    address in vip_diff[vrrp_group_identity]["create"]
-                    or "assigned_object_id" in vip_changes
-                ):
-                    old_addresses = [
-                        address
-                        for address, ip in vip_current[vrrp_group_identity].items()
-                        if ip["assigned_object_id"] == vrrp_group_identity
-                    ]
-                    changes["virtual_address"] = {
-                        "old_value": (
-                            old_addresses[0] if len(old_addresses) == 1 else None
-                        ),
-                        "new_value": address,
-                    }
-                if "role" in vip_changes:
-                    changes["role"] = vip_changes["role"]
-                if changes:
-                    actions["update"].setdefault(vrrp_interface_identity, {}).update(
-                        changes
-                    )
-                    if vrrp_interface_identity in actions["in_sync"]:
-                        actions["in_sync"].remove(vrrp_interface_identity)
-            actions["update"] = dict(sorted(actions["update"].items()))
-        ret.diff = preview
+        # Return the same pre-write comparison for dry runs and applied syncs.
+        diff = self.make_diff(live_state, netbox_state)
+        ret.diff = ret.result = diff
         if dry_run:
-            ret.result = preview
             return ret
-        ret.result = {
-            device: SyncActionSummary(
-                created=actions["create"],
-                updated=list(actions["update"]),
-                in_sync=actions["in_sync"],
-            ).model_dump()
-            for device, actions in preview.items()
-        }
-        if not sync_diff_has_changes(preview, ignore_deletions=True):
+        if not sync_diff_has_changes(diff, ignore_deletions=True):
             job.event("no VRRP changes required; deletion candidates are retained")
             return ret
-        if with_approval and not review_sync_task_result(job, "VRRP sync", preview):
+        if with_approval and not review_sync_task_result(job, "VRRP sync", diff):
             ret.status = "skipped"
             ret.dry_run = True
-            ret.result = preview
             ret.messages.append("review declined; changes were not applied")
             return ret
 
-        # Apply in dependency order. Generic object relations require IDs;
-        # ordinary VRF relations use the name already supplied by the getter.
+        # Deduplicate shared group and VIP writes while keeping assignments device-scoped.
+        creates = {"group": {}, "vip": {}, "assignment": {}}
+        updates = {"group": {}, "vip": {}, "assignment": {}}
+        for device in devices:
+            actions = diff[device]
+            for key in actions["create"]:
+                kind = key.partition("/")[0]
+                write_key = (device, key) if kind == "assignment" else key
+                creates[kind][write_key] = dict(live_state[device][key])
+            for key, changes in actions["update"].items():
+                kind = key.partition("/")[0]
+                write_key = (device, key) if kind == "assignment" else key
+                updates[kind][write_key] = {
+                    "id": record_ids[write_key],
+                    **{field: change["new_value"] for field, change in changes.items()},
+                }
+
         job.event("applying VRRP group changes")
-        for vrrp_group_identity in group_diff["create"]:
-            groups[vrrp_group_identity]["id"] = nb.ipam.fhrp_groups.create(
-                **group_live[vrrp_group_identity]
-            ).id
-        updates = [
-            dict(
-                id=groups[vrrp_group_identity]["id"],
-                **{field: change["new_value"] for field, change in changes.items()},
-            )
-            for vrrp_group_identity, changes in group_diff["update"].items()
-        ]
-        if updates:
-            nb.ipam.fhrp_groups.update(updates)
-        # VIPs and memberships share payload preparation. Update existing VIP
-        # roles before creating duplicates so NetBox permits shared addresses.
-        job.event("applying VRRP VIP and interface assignment changes")
-        for endpoint, desired, diff, records, relation in (
-            (
-                nb.ipam.ip_addresses,
-                vip_live,
-                vip_diff,
-                {identity: group["vips"] for identity, group in groups.items()},
-                "assigned_object_id",
-            ),
-            (
-                nb.ipam.fhrp_group_assignments,
-                assignment_live,
-                assignment_diff,
-                assignments,
-                "group",
-            ),
-        ):
-            creates, updates = [], []
-            for scope, actions in diff.items():
-                creates.extend(
-                    dict(desired[scope][identity]) for identity in actions["create"]
+        if creates["group"]:
+            matching_fields = ("protocol", "group_id", "name")
+            pending = {}
+            for key, fields in creates["group"].items():
+                identity = tuple(fields[field] for field in matching_fields)
+                pending.setdefault(identity, []).append(key)
+
+            # Split identical matching fields across batches to resolve IDs unambiguously.
+            while pending:
+                batch = {identity: keys.pop() for identity, keys in pending.items()}
+                created = nb.ipam.fhrp_groups.create(
+                    [creates["group"][key] for key in batch.values()]
                 )
-                updates.extend(
-                    dict(
-                        id=records[scope][identity]["id"],
-                        **{
-                            field: change["new_value"]
-                            for field, change in changes.items()
-                        },
+                created_ids = {
+                    tuple(
+                        getattr(record, field) for field in matching_fields
+                    ): record.id
+                    for record in created
+                }
+                if len(created) != len(batch) or created_ids.keys() != batch.keys():
+                    message = (
+                        "could not match created VRRP groups to the requested groups"
                     )
-                    for identity, changes in actions["update"].items()
-                )
-            for fields in [*creates, *updates]:
+                    ret.errors.append(message)
+                    ret.failed = True
+                    job.event(message, severity="ERROR")
+                    return ret
+                for identity, key in batch.items():
+                    groups[key.removeprefix("group/")]["id"] = created_ids[identity]
+                pending = {identity: keys for identity, keys in pending.items() if keys}
+        if updates["group"]:
+            nb.ipam.fhrp_groups.update(list(updates["group"].values()))
+
+        # Resolve group references to NetBox IDs before writing VIPs and assignments.
+        job.event("applying VRRP VIP and interface assignment changes")
+        for kind, endpoint, relation in (
+            ("vip", nb.ipam.ip_addresses, "assigned_object_id"),
+            ("assignment", nb.ipam.fhrp_group_assignments, "group"),
+        ):
+            new_records = list(creates[kind].values())
+            changed_records = list(updates[kind].values())
+            for fields in [*new_records, *changed_records]:
                 if relation in fields:
                     fields[relation] = groups[fields[relation]]["id"]
-            # NetBox validates duplicate roles against existing records, so
-            # normalize existing VIP roles before submitting new duplicates.
-            if updates and relation == "assigned_object_id":
-                endpoint.update(updates)
-            if creates:
-                endpoint.create(creates)
-            # Memberships retain their existing create-before-update ordering.
-            if updates and relation == "group":
-                endpoint.update(updates)
+            # Normalize existing VIP roles before submitting new duplicates.
+            if changed_records and kind == "vip":
+                endpoint.update(changed_records)
+            if new_records:
+                endpoint.create(new_records)
+            if changed_records and kind == "assignment":
+                endpoint.update(changed_records)
 
         job.event("vrrp sync complete; deletion candidates are retained")
         return ret

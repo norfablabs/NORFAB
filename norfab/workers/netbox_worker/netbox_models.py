@@ -1604,7 +1604,7 @@ class SyncDeviceInventoryResult(Result):
 class CheckDeviceSyncResult(Result):
     result: dict[StrictStr, Any] = Field(
         {},
-        description="Per-device sync checks: True for no drift, False for drift or failure, None when disabled",
+        description="Per-device sync checks: True for no drift, False for drift or failure, None when disabled or unsupported",
     )
 
 
@@ -3070,7 +3070,7 @@ class SyncVrrpInput(
 
 
 class SyncVrrpDeviceDiff(BaseModel):
-    """Public VRRP actions keyed by interface, protocol, and VRID."""
+    """Public VRRP actions keyed by group, VIP, or assignment identity."""
 
     create: List[StrictStr]
     update: Dict[StrictStr, Dict[StrictStr, Any]]
@@ -3079,13 +3079,13 @@ class SyncVrrpDeviceDiff(BaseModel):
 
 
 class SyncVrrpResult(Result):
-    result: Union[Dict[StrictStr, SyncVrrpDeviceDiff], SyncActionSummaryMap] = Field(
-        default_factory=SyncActionSummaryMap,
-        description="Per-device action summaries, or action previews for dry runs and declined approval",
+    result: Dict[StrictStr, SyncVrrpDeviceDiff] = Field(
+        default_factory=dict,
+        description="Per-device group, VIP, and assignment actions computed before writes",
     )
     diff: Dict[StrictStr, SyncVrrpDeviceDiff] = Field(
         default_factory=dict,
-        description="Per-device interface actions including group and VIP field changes",
+        description="Per-device group, VIP, and assignment actions computed before writes",
     )
 
 

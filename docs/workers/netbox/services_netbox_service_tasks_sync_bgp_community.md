@@ -17,7 +17,9 @@ matched by value and live community-set name so NetBox can hold several
 standard communities with the same value. The task creates missing objects and
 extends their optional community-name custom field with missing live names. An
 optional multi-object custom field associates each community with the devices
-on which it was observed. The task never deletes NetBox objects or associations.
+on which it was observed. When the field is unavailable for an object type,
+the task can create missing records of that type and leaves existing records
+unchanged. The task never deletes NetBox objects or associations.
 
 ## How It Works
 
@@ -27,8 +29,7 @@ on which it was observed. The task never deletes NetBox objects or associations.
    with the TTP Templates `bgp_communities` getter.
 4. Group route targets by community value and BGP plugin communities by
    community value plus live community-set name.
-5. Compare live route targets and BGP plugin communities with matching NetBox
-   objects.
+5. Compare each device's names and membership with matching NetBox objects.
 6. Return the diff or apply bulk create and update operations.
 
 For BGP plugin communities, existing NetBox objects are matched in this order:
@@ -260,10 +261,12 @@ successful batches.
 
 ## Notes and Gotchas
 
+- Devices on platforms without a BGP community parser are skipped and listed
+  in `resources_unsupported`.
 - The NetBox BGP plugin must accept each non-route-target value returned by the
   getter. Unsupported values produce NetBox API validation errors.
-- The selected devices define the complete live alias set written to the
-  custom field. Use the full intended device scope for globally shared values.
+- A shared record can be in sync for one device and need an update for another.
+  The task combines the required changes into one write per record.
 - NetBox-only objects are retained because a scoped live query cannot prove
   that a globally shared community is stale.
 - `with_approval` cannot be combined with the NFCLI `nowait` option.

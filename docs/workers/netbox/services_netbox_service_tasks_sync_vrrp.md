@@ -100,19 +100,24 @@ not group selection. A missing required VRF is reported and that VIP is skipped.
 
 ## Output
 
-Results contain per-device `created`, `updated`, `deleted`, and `in_sync`
-assignment keys (`interface:protocol:group_id`). Dry-run results, `diff`, and
-approval previews use the compatible per-device action structure:
+Each device's diff reflects its own groups, VIPs, and interface assignments.
+For example, changing one peer's priority appears only in that peer's diff.
+When both peers need a change to a shared group or VIP, each reports the
+change and NetBox receives one update.
+
+Both `result` and `diff` contain the same per-device comparison, computed
+before any writes. Each action uses entity identities such as
+`group/group:42`, `vip/group:42/192.0.2.1`, or
+`assignment/Ethernet1:vrrp3:10`. New groups and VIPs that reference them use
+a temporary group reference in the comparison.
 
 | Action | Contents |
 | --- | --- |
-| `create` | New interface memberships. |
-| `update` | Group, VIP, and priority changes with old/new field values. |
-| `delete` | Stale interface memberships; reported only. |
-| `in_sync` | Memberships requiring no changes. |
+| `create` | Missing group, VIP, or assignment identities. |
+| `update` | Changed identities with old and new field values. |
+| `delete` | Identities present only in NetBox. Sync retains these records. |
+| `in_sync` | Identities that already match. |
 
-Shared group/VIP changes appear for every affected peer and apply once.
-**Sync is additive:** existing groups, VIPs, and assignments are never deleted.
 Use `dry_run=True` to preview or `with_approval=True` to review changes.
 Dry runs also report VIP ownership conflicts and missing required VRFs.
 

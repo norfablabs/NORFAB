@@ -1,4 +1,16 @@
 hosts:
+  fn-bgp-community-unsupported-linux:
+    hostname: 127.0.0.1
+    platform: linux
+  fn-asn-unsupported-console:
+    hostname: 127.0.0.1
+    platform: linux
+  fn-inventory-unsupported-console:
+    hostname: 127.0.0.1
+    platform: linux
+  fn-vrf-unsupported-console:
+    hostname: 127.0.0.1
+    platform: linux
   fn-vrrp-vrf-1:
     hostname: 127.0.0.1
     platform: arista_eos

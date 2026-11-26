@@ -4,10 +4,23 @@
 
 1. Fixed Netbox `sync_device_prefixes` and `check_device_sync` reporting shared prefix drift for devices that already match. Prefix sync credits a shared write only to devices whose prefix requirements it fulfills.
 2. Fixed Netbox `sync_bgp_asn` reporting shared ASN membership changes for devices that already match. It derives device associations from both the ASN devices field and Netbox BGP sessions.
+3. Fixed Netbox `sync_bgp_community` and `check_device_sync` reporting drift for every device that shares a route target or BGP community. Each device's diff now reflects its own community names and membership. Shared writes remain batched.
+4. Netbox `sync_vrrp` compares groups, VIPs, and assignments per device. Shared Netbox changes are applied once, and group creation is batched.
 
 ## CHANGES
 
 1. Netbox `sync_device_prefixes` requires named VRFs to exist when VRF matching is enabled. Missing VRFs are reported per device. `sync_all` runs VRF sync before prefix sync.
+2. Netbox `sync_vrrp` returns the per-device comparison in both `result` and `diff`, with separate group, VIP, and assignment identities. The VRRP stage of `sync_all` returns the same action format.
+
+## ENHANCEMENTS
+
+1. Nornir `parse_ttp` skips devices when the selected getter or template has no parser for their platform and lists them in `resources_unsupported`.
+2. Netbox `sync_bgp_asn` skips devices on platforms with no BGP ASN parser and lists them in `resources_unsupported`.
+3. Netbox `sync_all` reports skipped BGP ASN stages in `messages`, leaves `bgp_asns` as `None` for affected devices, and continues with other stages.
+4. Netbox `check_device_sync` reports skipped BGP ASN checks in `messages` and leaves `bgp_asns` as `None` for affected devices. The overall `in_sync` value reflects the checks that ran.
+5. Netbox `sync_vrfs` skips devices on platforms with no VRF parser and lists them in `resources_unsupported`. `sync_all` and `check_device_sync` report the skipped VRF stage in `messages` and continue with other stages.
+6. Netbox `sync_device_inventory` skips devices on platforms with no inventory parser and lists them in `resources_unsupported`. `sync_all` and `check_device_sync` report the skipped inventory stage in `messages` and continue with other stages.
+7. Netbox `sync_bgp_community` skips devices on platforms with no BGP community parser and lists them in `resources_unsupported`. `sync_all` and `check_device_sync` report the skipped community stage in `messages` and continue with other stages.
 
 ---
 

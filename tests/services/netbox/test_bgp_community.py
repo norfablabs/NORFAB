@@ -159,6 +159,21 @@ class TestSyncBgpCommunity:
                 assert actions["communities"]["in_sync"] == self.COMMUNITY_KEYS[device]
 
         assert len(list(self.nb.ipam.route_targets.filter(name="65000:200"))) == 1
+        first_device = self.nb.dcim.devices.get(name=self.DEVICES[0])
+        route_target.custom_fields["community_devices"] = [first_device.id]
+        route_target.save()
+        response = self._sync(nfclient, device_custom_field="community_devices")
+        for result in self._successful_results(response):
+            first, second = (result["result"][device] for device in self.DEVICES)
+            assert first["route_targets"]["in_sync"] == ["65000:200"]
+            assert first["route_targets"]["updated"] == []
+            assert second["route_targets"]["updated"] == ["65000:200"]
+        route_target = self.nb.ipam.route_targets.get(name="65000:200")
+        assert (
+            self._custom_field_device_ids(route_target, "community_devices")
+            == device_ids
+        )
+
         blue_export.custom_fields["community_name"] = ""
         blue_export.save()
         checks = nfclient.run_job(
@@ -197,6 +212,23 @@ class TestSyncBgpCommunity:
                 ]
                 == {}
             )
+
+        customer_export.delete()
+        blue_export.custom_fields["community_name"] = "BLUE_EXPORT, CUSTOMER_EXPORT"
+        blue_export.save()
+        response = self._sync(nfclient, device_custom_field="community_devices")
+        for result in self._successful_results(response):
+            first, second = (result["result"][device] for device in self.DEVICES)
+            assert (
+                first["communities"]["in_sync"] == self.COMMUNITY_KEYS[self.DEVICES[0]]
+            )
+            assert first["communities"]["updated"] == []
+            assert second["communities"]["updated"] == ["65000:100::CUSTOMER_EXPORT"]
+        blue_export = self._community_by_description("65000:100", "BLUE_EXPORT")
+        assert (
+            self._custom_field_device_ids(blue_export, "community_devices")
+            == device_ids
+        )
 
     def test_custom_field_name_and_no_deletions(self, nfclient: Any) -> None:
         self.nb.ipam.route_targets.create(
@@ -364,12 +396,49 @@ class TestSyncBgpCommunity:
             self.nb.dcim.devices.get(name=self.DEVICES[1]).id
         }
 
-    def test_missing_device_custom_field_is_ignored(self, nfclient: Any) -> None:
+    def test_missing_device_custom_field_allows_creates_only(
+        self, nfclient: Any
+    ) -> None:
         response = self._sync(nfclient, device_custom_field="does_not_exist")
 
         for result in self._successful_results(response):
             for device, actions in result["result"].items():
                 assert actions["route_targets"]["created"] == ["65000:200"]
+
+        route_target = self.nb.ipam.route_targets.get(name="65000:200")
+        route_target.custom_fields["community_name"] = "existing"
+        route_target.save()
+
+        response = self._sync(nfclient, device_custom_field="does_not_exist")
+        for result in self._successful_results(response):
+            for device, actions in result["result"].items():
+                assert actions["route_targets"]["updated"] == []
+                assert actions["communities"]["updated"] == []
+                update = result["diff"][device]["route_targets"]["update"]["65000:200"]
+                assert update["does_not_exist"]["old_value"] is None
+        route_target = self.nb.ipam.route_targets.get(name="65000:200")
+        assert route_target.custom_fields["community_name"] == "existing"
+
+    def test_unsupported_platform_is_skipped(self, nfclient: Any) -> None:
+        name = "fn-bgp-community-unsupported-linux"
+        device = self.nb.dcim.devices.create(
+            name=name,
+            device_type=self.nb.dcim.device_types.get(model="Arista cEOS").id,
+            role=self.nb.dcim.device_roles.get(name="VirtualRouter").id,
+            site=self.nb.dcim.sites.get(name="SALTNORNIR-LAB").id,
+            status="active",
+        )
+        try:
+            for devices in ([name], [self.DEVICES[0], name]):
+                response = self._sync(nfclient, devices=devices, dry_run=True)
+                for result in self._successful_results(response):
+                    assert result["resources_unsupported"] == [name]
+                    assert result["resources_failed"] == []
+                    assert set(result["diff"]) == set(devices) - {name}
+                    assert result["result"] == result["diff"]
+                    assert any(name in message for message in result["messages"])
+        finally:
+            device.delete()
 
     def test_resources_failed_are_reported(self, nfclient: Any) -> None:
         failed_device = "fn-bgp-community-unreachable"

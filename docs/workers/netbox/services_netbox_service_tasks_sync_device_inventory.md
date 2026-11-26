@@ -280,6 +280,9 @@ inventory record.
 
 ## Output
 
+Inventory sync skips devices on platforms with no inventory parser and lists
+them in `resources_unsupported`.
+
 **Dry-run mode** (`dry_run=True`) returns the raw diff without writing to
 NetBox:
 

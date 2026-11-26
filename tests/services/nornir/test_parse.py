@@ -12,6 +12,37 @@ pytestmark = [
 
 class TestNornirParseTasks:
 
+    @pytest.mark.parametrize("include_router", [False, True])
+    def test_parse_ttp_reports_unsupported_platform(
+        self, nfclient: NFPClient, include_router: bool
+    ) -> None:
+        console = "fn-asn-unsupported-console"
+        router = "fn-ceos-lf-1"
+        devices = [console, router] if include_router else [console]
+
+        response = nfclient.run_job(
+            "nornir",
+            "parse_ttp",
+            workers=["nornir-worker-4"],
+            kwargs={"get": "bgp_asn", "FL": devices, "strict": True},
+        )
+
+        result = response["nornir-worker-4"]
+        assert result["resources_unsupported"] == [console]
+        assert result["errors"] == result["resources_failed"] == []
+        assert not result["failed"]
+        assert console not in result["resources"]
+        assert any(console in message for message in result["messages"])
+        if include_router:
+            assert set(result["result"]) == {router}
+            assert {row["asn"] for row in result["result"][router]} == {
+                4200000101,
+                4200000200,
+                4200000301,
+            }
+        else:
+            assert result["result"] == {}
+
     def test_nornir_parse_napalm_get_facts(self, nfclient):
         ret = nfclient.run_job(
             "nornir",

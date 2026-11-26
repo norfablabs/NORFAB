@@ -178,6 +178,10 @@ class NetboxVrfsTasks:
         )
         records_by_device = {}
         for worker, response in (parsed or {}).items():
+            ret.messages.extend(response.get("messages") or [])
+            ret.resources_unsupported.extend(
+                response.get("resources_unsupported") or []
+            )
             worker_failures = response.get("resources_failed") or []
             ret.resources_failed.extend(worker_failures)
             if worker_failures:
@@ -190,6 +194,15 @@ class NetboxVrfsTasks:
             if not response.get("failed"):
                 records_by_device.update(response.get("result") or {})
 
+        # A usable result takes precedence over another worker's unsupported report.
+        ret.resources_unsupported = sorted(
+            set(ret.resources_unsupported)
+            - {
+                device
+                for device, records in records_by_device.items()
+                if isinstance(records, list)
+            }
+        )
         live_vrfs = {}
         live_interfaces = {}
         policy_field_names = sorted(set(policy_fields.values()))
@@ -197,6 +210,8 @@ class NetboxVrfsTasks:
         additive_fields = (*target_fields, *policy_field_names)
         # Keep empty results distinct from missing or invalid device data.
         for device in devices:
+            if device in ret.resources_unsupported:
+                continue
             records = records_by_device.get(device)
             if (
                 device not in nb_devices
@@ -255,6 +270,8 @@ class NetboxVrfsTasks:
                 live_interfaces[key] = name
 
         if not live_vrfs:
+            if not ret.errors:
+                return ret
             ret.errors.append("no usable live VRF data")
             for message in ret.errors:
                 job.event(message, severity="ERROR")

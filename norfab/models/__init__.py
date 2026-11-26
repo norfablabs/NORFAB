@@ -115,6 +115,7 @@ class Result(BaseModel, use_enum_values=True):
         juuid (Optional[str]): Job UUID associated with the task.
         resources (Optional[List[str]]): list of resources names worked on by the task.
         resources_failed (Optional[List[str]]): list of resources that failed.
+        resources_unsupported (List[str]): Resources the task does not support.
         status (Optional[str]): Status of the job, `status` attribute values:
 
             - 'completed' - task was executed successfully and resources were found
@@ -155,6 +156,9 @@ class Result(BaseModel, use_enum_values=True):
     )
     resources_failed: Optional[List[StrictStr]] = Field(
         [], description="List of resources that failed during task execution"
+    )
+    resources_unsupported: List[StrictStr] = Field(
+        [], description="Resources the task does not support"
     )
     status: Optional[ResultStatuses] = Field(None, description="Task status")
     task_started: Optional[StrictStr] = Field(

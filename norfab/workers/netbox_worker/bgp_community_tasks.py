@@ -9,7 +9,7 @@ from .netbox_models import (
     SyncBgpCommunityInput,
     SyncBgpCommunityResult,
 )
-from .netbox_worker_utilities import review_sync_task_result, sync_diff_has_changes
+from .netbox_worker_utilities import review_sync_task_result
 
 log = logging.getLogger(__name__)
 
@@ -75,7 +75,9 @@ class NetboxBgpCommunityTasks:
         deleted. When the configured custom field exists, it stores the sorted,
         comma-separated live community-set names observed for each object. The
         selected device custom field records devices on which each community was
-        observed.
+        observed. Existing records can be updated only when that field applies
+        to their object type. Platforms without a parser are reported in
+        `resources_unsupported`. Missing live data is reported per device.
 
         Args:
             job: NorFab job object.
@@ -87,6 +89,7 @@ class NetboxBgpCommunityTasks:
             branch: NetBox Branching plugin branch name.
             community_name_field: Optional custom field for community-set names.
             device_custom_field: Community custom field containing associated devices.
+            batch_size: Maximum number of records per NetBox write.
             **kwargs: Nornir FFun host filters.
 
         Returns:
@@ -150,6 +153,7 @@ class NetboxBgpCommunityTasks:
             job.event(msg, severity="ERROR")
             log.error(f"{self.name} - {msg}")
             ret.errors.append(msg)
+            ret.resources_failed.append(device_name)
         devices = [name for name in devices if name in netbox_devices]
         if not devices:
             ret.failed = True
@@ -169,37 +173,49 @@ class NetboxBgpCommunityTasks:
             log.warning(f"{self.name} - {msg}")
             community_name_field = False
 
-        if not nb.extras.custom_fields.get(name=device_custom_field):
-            device_custom_field = None
+        endpoints = {
+            "route_targets": (nb.ipam.route_targets, "name", "ipam.routetarget"),
+        }
+        if has_bgp_plugin:
+            endpoints["communities"] = (
+                nb.plugins.bgp.community,
+                "value",
+                "netbox_bgp.community",
+            )
+        device_field = nb.extras.custom_fields.get(name=device_custom_field)
+        device_object_types = (
+            getattr(device_field, "object_types", None)
+            or getattr(device_field, "content_types", None)
+            or []
+        )
 
         msg = f"collecting live BGP communities from {len(devices)} device(s)"
         job.event(msg)
         log.info(f"{self.name} - {msg}")
-        parse_data = self.client.run_job(
+        parsed = self.client.run_job(
             "nornir",
             "parse_ttp",
             kwargs={"get": "bgp_communities", "FL": devices},
             workers="all",
             timeout=timeout,
         )
-
-        # Collect live records once. Route targets are always reconciled; other
-        # community types wait for the BGP plugin-specific flow below.
-        route_target_observations = {}
-        bgp_community_observations = []
-        result_devices = set()
-        failed_devices = set()
+        # Keep each device's live names separate until comparison.
+        observations = {}
+        identities = {community_type: {} for community_type in endpoints}
+        reported_failures = set()
+        unsupported = set()
         parsed_count = 0
-        for worker_name, worker_data in parse_data.items():
-            resources_failed = worker_data.get("resources_failed") or []
-            if resources_failed:
-                failed_devices.update(resources_failed)
-                ret.resources_failed = sorted(
-                    set(ret.resources_failed) | set(resources_failed)
-                )
+        for worker_name, worker_data in parsed.items():
+            ret.messages.extend(worker_data.get("messages") or [])
+            unsupported.update(worker_data.get("resources_unsupported") or [])
+            failures = (
+                set(worker_data.get("resources_failed") or []) & netbox_devices.keys()
+            )
+            if failures:
+                reported_failures.update(failures)
                 msg = (
                     f"{worker_name} failed to fetch BGP community data from devices "
-                    f"{', '.join(sorted(resources_failed))}"
+                    f"{', '.join(sorted(failures))}"
                 )
                 job.event(msg, severity="ERROR")
                 log.error(f"{self.name} - {msg}")
@@ -210,495 +226,392 @@ class NetboxBgpCommunityTasks:
                 log.error(f"{self.name} - {msg}")
                 ret.errors.append(msg)
                 continue
-            worker_result = worker_data.get("result")
-            if not isinstance(worker_result, dict):
+            records_by_device = worker_data.get("result")
+            if not isinstance(records_by_device, dict):
                 msg = f"worker '{worker_name}' returned malformed community data"
                 job.event(msg, severity="ERROR")
                 log.error(f"{self.name} - {msg}")
                 ret.errors.append(msg)
                 continue
-            for device_name, records in worker_result.items():
-                if device_name not in netbox_devices:
+            for device, records in records_by_device.items():
+                if device not in netbox_devices or device in failures:
                     continue
-                result_devices.add(device_name)
                 if not isinstance(records, list):
-                    msg = f"device '{device_name}' community result is not a list"
+                    msg = f"device '{device}' community result is not a list"
                     job.event(msg, severity="ERROR")
                     log.error(f"{self.name} - {msg}")
                     ret.errors.append(msg)
+                    reported_failures.add(device)
                     continue
-                for record in records:
-                    if not isinstance(record, dict) or not all(
+                if any(
+                    not isinstance(record, dict)
+                    or not all(
                         isinstance(record.get(field), str) and record[field].strip()
                         for field in ("value", "type")
-                    ):
-                        msg = f"device '{device_name}' returned malformed community record"
-                        job.event(msg, severity="ERROR")
-                        log.error(f"{self.name} - {msg}")
-                        ret.errors.append(msg)
-                        continue
+                    )
+                    for record in records
+                ):
+                    msg = f"device '{device}' returned malformed community record"
+                    job.event(msg, severity="ERROR")
+                    log.error(f"{self.name} - {msg}")
+                    ret.errors.append(msg)
+                    reported_failures.add(device)
+                    continue
+                # An empty parser result still confirms that the device was collected.
+                community_types = observations.setdefault(
+                    device, {community_type: {} for community_type in endpoints}
+                )
+                for record in records:
                     value = record["value"].strip()
-                    # netbox bgp plugin does not accept communites with no ':' in the value
                     if ":" not in value:
                         continue
-                    name = (
-                        record.get("name", "").strip()
-                        if isinstance(record.get("name", ""), str)
-                        else ""
+                    name = record.get("name")
+                    name = name.strip() if isinstance(name, str) else ""
+                    community_type = (
+                        "route_targets"
+                        if record["type"].strip().lower() == "rt"
+                        else "communities"
                     )
-                    if record["type"].strip().lower() == "rt":
-                        route_target_observations.setdefault(value, []).append(
-                            {"device": device_name, "name": name}
-                        )
-                        parsed_count += 1
-                    else:
-                        bgp_community_observations.append(
-                            {"device": device_name, "value": value, "name": name}
-                        )
-                        if has_bgp_plugin:
-                            parsed_count += 1
+                    if community_type not in endpoints:
+                        continue
+                    parsed_count += 1
+                    key = (
+                        value
+                        if community_type == "route_targets"
+                        else f"{value}::{name or NO_COMMUNITY_NAME}"
+                    )
+                    identities[community_type][key] = (value, name)
+                    names = community_types[community_type].setdefault(key, set())
+                    if name:
+                        names.add(name)
 
-        for device_name in devices:
-            if device_name not in result_devices and device_name not in failed_devices:
-                msg = f"device '{device_name}' is missing a live community result"
-                job.event(msg, severity="ERROR")
-                log.error(f"{self.name} - {msg}")
-                ret.errors.append(msg)
-        if not result_devices:
-            ret.failed = True
+        # A usable result takes precedence over another worker's unsupported report.
+        unsupported = (unsupported & netbox_devices.keys()) - observations.keys()
+        ret.resources_unsupported = sorted(unsupported - reported_failures)
+        missing = (
+            netbox_devices.keys() - observations.keys() - set(ret.resources_unsupported)
+        )
+        for device in sorted(missing - reported_failures):
+            msg = f"device '{device}' is missing a live community result"
+            job.event(msg, severity="ERROR")
+            log.error(f"{self.name} - {msg}")
+            ret.errors.append(msg)
+        ret.resources_failed.extend(sorted(missing))
+        if not observations:
+            ret.failed = bool(ret.errors)
             return ret
         msg = (
             f"parsed {parsed_count} live community record(s) from "
-            f"{len(result_devices)} device(s)"
+            f"{len(observations)} device(s)"
         )
         job.event(msg)
         log.info(f"{self.name} - {msg}")
 
-        # Route targets are unique by NetBox IPAM name, so value-only matching
-        # is safe here and remains separate from plugin community matching.
-        msg = "matching live route targets with NetBox"
-        job.event(msg)
-        log.info(f"{self.name} - Matching live route targets with NetBox")
-        normalised_live = {"route_targets": {}}
-        normalised_nb = {"route_targets": {}}
-        nb_community_objects = {"route_targets": {}}
-        community_key_data = {}
-        community_devices = {"route_targets": {}, "communities": {}}
-        for device in devices:
-            ret.result[device] = {}
-            ret.diff[device] = {}
-
-        for sname, records in sorted(route_target_observations.items()):
-            # Track live contributors independently of merged Netbox device associations.
-            community_devices["route_targets"][sname] = {
-                record["device"] for record in records
-            }
-            live_names = sorted(
-                {record["name"] for record in records if record["name"]}
+        live = {device: {} for device in sorted(observations)}
+        netbox = {device: {} for device in live}
+        matched = {}
+        for community_type, (endpoint, value_field, object_type) in endpoints.items():
+            has_devices = object_type in device_object_types
+            keys = identities[community_type]
+            values = sorted({value for value, _ in keys.values()})
+            label = (
+                "route targets"
+                if community_type == "route_targets"
+                else "BGP plugin communities"
             )
-            normalised_live["route_targets"][sname] = (
-                {community_name_field: ", ".join(live_names)}
-                if community_name_field and live_names
-                else {}
-            )
-            if device_custom_field:
-                normalised_live["route_targets"][sname][device_custom_field] = sorted(
-                    {netbox_devices[record["device"]].id for record in records}
-                )
-
-        route_target_snames = list(normalised_live["route_targets"])
-        nb_communities_result = (
-            self.bulk_filter(
-                nb.ipam.route_targets,
-                name=route_target_snames,
-                fields="id,name,custom_fields",
-            )
-            if route_target_snames
-            else []
-        )
-        for nb_community in nb_communities_result:
-            sname = str(nb_community.name)
-            normalised_nb["route_targets"][sname] = {}
-            if community_name_field:
-                custom_fields = nb_community.custom_fields or {}
-                current_value = str(custom_fields.get(community_name_field) or "")
-                normalised_nb["route_targets"][sname] = {
-                    community_name_field: current_value
-                }
-                normalised_live["route_targets"][sname].update(
-                    normalise_community_name_field(
-                        current_value,
-                        community_name_field,
-                        normalised_live["route_targets"][sname].get(
-                            community_name_field, ""
-                        ),
-                    )
-                )
-            if device_custom_field:
-                custom_fields = nb_community.custom_fields or {}
-                current_devices = [
-                    device["id"]
-                    for device in (custom_fields.get(device_custom_field) or [])
-                ]
-                normalised_nb["route_targets"][sname][
-                    device_custom_field
-                ] = current_devices
-                normalised_live["route_targets"][sname][device_custom_field] = sorted(
-                    set(current_devices)
-                    | set(normalised_live["route_targets"][sname][device_custom_field])
-                )
-            nb_community_objects["route_targets"][sname] = nb_community
-
-        if has_bgp_plugin:
-            # Standard BGP communities may share the same value, so keep the
-            # live name in the sync key and match NetBox from most-specific to
-            # least-specific identity.
-            msg = "matching live BGP plugin communities with NetBox"
+            msg = f"matching live {label} with NetBox"
             job.event(msg)
-            log.info(f"{self.name} - Matching live BGP plugin communities with NetBox")
-            normalised_live["communities"] = {}
-            normalised_nb["communities"] = {}
-            nb_community_objects["communities"] = {}
-
-            for record in bgp_community_observations:
-                sname = f"{record['value']}::{record['name'] or NO_COMMUNITY_NAME}"
-                community_devices["communities"].setdefault(sname, set()).add(
-                    record["device"]
-                )
-                community_key_data[sname] = {
-                    "value": record["value"],
-                    "name": record["name"],
-                }
-                normalised_live["communities"].setdefault(sname, {})
-                if community_name_field and record["name"]:
-                    normalised_live["communities"][sname][community_name_field] = (
-                        record["name"]
-                    )
-                if device_custom_field:
-                    device_ids = normalised_live["communities"][sname].setdefault(
-                        device_custom_field, []
-                    )
-                    device_id = netbox_devices[record["device"]].id
-                    if device_id not in device_ids:
-                        device_ids.append(device_id)
-
-            for sname in normalised_live["communities"]:
-                if device_custom_field:
-                    normalised_live["communities"][sname][device_custom_field] = sorted(
-                        normalised_live["communities"][sname][device_custom_field]
+            log.info(f"{self.name} - {msg}")
+            candidates = {}
+            if values:
+                fields = f"id,{value_field},custom_fields"
+                if community_type == "communities":
+                    fields += ",description"
+                for row in self.bulk_filter(
+                    endpoint, fields=fields, **{value_field: values}
+                ):
+                    candidates.setdefault(str(getattr(row, value_field)), []).append(
+                        row
                     )
 
-            community_values = sorted(
-                {data["value"] for data in community_key_data.values()}
-            )
-            nb_communities_result = (
-                self.bulk_filter(
-                    nb.plugins.bgp.community,
-                    value=community_values,
-                    fields="id,value,description,custom_fields",
-                )
-                if community_values
-                else []
-            )
-            nb_communities_by_value = {}
-            for nb_community in nb_communities_result:
-                nb_communities_by_value.setdefault(str(nb_community.value), []).append(
-                    nb_community
-                )
-
-            for sname, data in sorted(community_key_data.items()):
-                nb_community = None
-                candidates = nb_communities_by_value.get(data["value"], [])
-                name = data["name"]
-                # Prefer explicit community-name custom-field containment,
-                # then description, then an unlabeled same-value object.
-                if community_name_field and name:
-                    for candidate in candidates:
-                        custom_fields = candidate.custom_fields or {}
-                        current_value = str(
-                            custom_fields.get(community_name_field) or ""
-                        )
-                        current_names = {
-                            current_name.strip()
-                            for current_name in current_value.split(",")
-                            if current_name.strip()
-                        }
-                        if name in current_names:
-                            nb_community = candidate
-                            break
-                if nb_community is None and name:
-                    for candidate in candidates:
-                        current_description = str(
-                            getattr(candidate, "description", "") or ""
-                        ).strip()
-                        if current_description == name:
-                            nb_community = candidate
-                            break
-                if nb_community is None and not name and candidates:
-                    nb_community = candidates[0]
-                if nb_community is None and name:
-                    for candidate in candidates:
-                        custom_fields = candidate.custom_fields or {}
-                        current_names = (
-                            {
-                                current_name.strip()
-                                for current_name in str(
-                                    custom_fields.get(community_name_field) or ""
-                                ).split(",")
-                                if current_name.strip()
-                            }
-                            if community_name_field
-                            else set()
-                        )
-                        current_description = str(
-                            getattr(candidate, "description", "") or ""
-                        ).strip()
-                        if not current_names and not current_description:
-                            nb_community = candidate
-                            break
-                if nb_community is None:
+            # Prefer a stored alias, then a matching description, then an unlabeled record.
+            for key, (value, name) in sorted(keys.items()):
+                identity = (community_type, key)
+                rows = candidates.get(value, [])
+                if not rows:
                     continue
-                normalised_nb["communities"][sname] = {}
-                if community_name_field:
-                    custom_fields = nb_community.custom_fields or {}
-                    current_value = str(
-                        custom_fields.get(community_name_field) or ""
-                    )
-                    normalised_nb["communities"][sname] = {
-                        community_name_field: current_value
+                if community_type == "route_targets" or not name:
+                    matched[identity] = rows[0]
+                    continue
+                named, described, unlabeled = None, None, None
+                for row in rows:
+                    custom_fields = row.custom_fields or {}
+                    names = {
+                        item.strip()
+                        for item in str(
+                            custom_fields.get(community_name_field) or ""
+                        ).split(",")
+                        if item.strip()
                     }
-                    normalised_live["communities"][sname].update(
-                        normalise_community_name_field(
-                            current_value,
-                            community_name_field,
-                            normalised_live["communities"][sname].get(
-                                community_name_field, ""
-                            ),
-                        )
-                    )
-                if device_custom_field:
-                    custom_fields = nb_community.custom_fields or {}
-                    current_devices = [
-                        device["id"]
-                        for device in (custom_fields.get(device_custom_field) or [])
-                    ]
-                    normalised_nb["communities"][sname][
-                        device_custom_field
-                    ] = current_devices
-                    normalised_live["communities"][sname][device_custom_field] = sorted(
-                        set(current_devices)
-                        | set(
-                            normalised_live["communities"][sname][device_custom_field]
-                        )
-                    )
-                nb_community_objects["communities"][sname] = nb_community
+                    description = (row.description or "").strip()
+                    if name in names:
+                        named = row
+                        break
+                    if described is None and name == description:
+                        described = row
+                    if unlabeled is None and not names and not description:
+                        unlabeled = row
+                row = named or described or unlabeled
+                if row is not None:
+                    matched[identity] = row
 
-        communities_diff = self.make_diff(normalised_live, normalised_nb)
-        full_diff = {}
-        for scope, actions in sorted(communities_diff.items()):
-            actions["delete"] = []
-            full_diff[scope] = {
-                "create": sorted(actions["create"]),
-                "update": {
-                    sname: actions["update"][sname]
-                    for sname in sorted(actions["update"])
-                },
-                "delete": [],
-                "in_sync": sorted(actions["in_sync"]),
-            }
-            # Attribute each batch action only to devices observing its exact live key.
-            actions = full_diff[scope]
-            owners = community_devices[scope]
-            for device in devices:
-                ret.diff[device][scope] = {
-                    "create": [
-                        name for name in actions["create"] if device in owners[name]
-                    ],
-                    "update": {
-                        name: value
-                        for name, value in actions["update"].items()
-                        if device in owners[name]
-                    },
+            # Add only this device's ID and names to the stored values.
+            for device in live:
+                device_id = netbox_devices[device].id
+                desired = live[device]
+                current = netbox[device]
+                for key, names in sorted(observations[device][community_type].items()):
+                    identity = (community_type, key)
+                    row = matched.get(identity)
+                    custom_fields = (row.custom_fields or {}) if row is not None else {}
+                    stored_names = str(custom_fields.get(community_name_field) or "")
+                    device_ids = (
+                        {
+                            member["id"]
+                            for member in custom_fields.get(device_custom_field) or []
+                        }
+                        if has_devices
+                        else set()
+                    )
+                    desired[identity] = normalise_community_name_field(
+                        stored_names, community_name_field, ", ".join(sorted(names))
+                    )
+                    if has_devices or row is not None:
+                        desired[identity][device_custom_field] = sorted(
+                            device_ids | {device_id}
+                        )
+                    if row is not None:
+                        current[identity] = normalise_community_name_field(
+                            stored_names, community_name_field, ""
+                        )
+                        current[identity][device_custom_field] = (
+                            sorted(device_ids) if has_devices else None
+                        )
+
+        # Compare both community types together and unpack the tuple keys for callers.
+        diff = self.make_diff(live, netbox)
+        for device in live:
+            ret.diff[device] = {
+                community_type: {
+                    "create": [],
                     "delete": [],
-                    "in_sync": [
-                        name for name in actions["in_sync"] if device in owners[name]
-                    ],
+                    "update": {},
+                    "in_sync": [],
                 }
-                ret.result[device][scope] = {
-                    "created": [],
-                    "updated": [],
-                    "deleted": [],
-                    "in_sync": ret.diff[device][scope]["in_sync"],
-                }
+                for community_type in endpoints
+            }
+            for action, identities_for_action in diff[device].items():
+                for identity in identities_for_action:
+                    community_type, key = identity
+                    entries = ret.diff[device][community_type][action]
+                    if action == "update":
+                        entries[key] = identities_for_action[identity]
+                    else:
+                        entries.append(key)
 
-        create_count = sum(len(actions["create"]) for actions in full_diff.values())
-        update_count = sum(len(actions["update"]) for actions in full_diff.values())
-        in_sync_count = sum(len(actions["in_sync"]) for actions in full_diff.values())
+        # Merge writes by physical record and track which device actions each write fulfills.
+        writes = {}
+        for community_type, (_, value_field, object_type) in endpoints.items():
+            has_devices = object_type in device_object_types
+            keys = identities[community_type]
+            writes[community_type] = {"create": {}, "update": {}}
+            blocked = set()
+            for device in live:
+                actions = ret.diff[device][community_type]
+                for action in ("create", "update"):
+                    for key in actions[action]:
+                        identity = (community_type, key)
+                        if action == "update" and not has_devices:
+                            blocked.add(device)
+                            continue
+                        if action == "create":
+                            value, name = keys[key]
+                            payload = {value_field: value}
+                            if community_type == "communities" and name:
+                                payload["description"] = name
+                            write_key = key
+                        else:
+                            write_key = matched[identity].id
+                            payload = {"id": write_key}
+                        payload, affected = writes[community_type][action].setdefault(
+                            write_key, (payload, [])
+                        )
+                        affected.append((device, key))
+                        fields = live[device][identity]
+                        if action == "update":
+                            fields = {
+                                field: change["new_value"]
+                                for field, change in actions[action][key].items()
+                            }
+                        if not fields:
+                            continue
+                        custom_fields = payload.setdefault("custom_fields", {})
+                        if device_custom_field in fields:
+                            custom_fields[device_custom_field] = sorted(
+                                set(custom_fields.get(device_custom_field, []))
+                                | set(fields[device_custom_field])
+                            )
+                        if community_name_field in fields:
+                            custom_fields.update(
+                                normalise_community_name_field(
+                                    custom_fields.get(community_name_field, ""),
+                                    community_name_field,
+                                    fields[community_name_field],
+                                )
+                            )
+            if blocked:
+                msg = (
+                    f"custom field '{device_custom_field}' unavailable for "
+                    f"{community_type.replace('_', ' ')}; existing records cannot be updated "
+                    f"for {', '.join(sorted(blocked))}"
+                )
+                ret.messages.append(msg)
+                job.event(msg, severity="WARNING")
+
+        create_count = sum(len(actions["create"]) for actions in writes.values())
+        update_count = sum(len(actions["update"]) for actions in writes.values())
+        in_sync_count = sum(
+            len(actions["in_sync"])
+            for community_types in ret.diff.values()
+            for actions in community_types.values()
+        )
         msg = (
-            "bgp community sync diff complete: "
-            f"{create_count} create, {update_count} update, "
-            f"{in_sync_count} in sync"
+            f"bgp community sync diff complete: "
+            f"{create_count} create, {update_count} update, {in_sync_count} in sync"
         )
         job.event(msg)
         log.info(f"{self.name} - {msg}")
 
         if dry_run:
             ret.result = ret.diff
-            ret.dry_run = True
             return ret
-        if not sync_diff_has_changes(full_diff):
-            job.event("no BGP community sync changes required")
-            return ret
-        if with_approval and not review_sync_task_result(
-            job, "BGP community sync", full_diff
+        has_writes = bool(create_count or update_count)
+        if (
+            with_approval
+            and has_writes
+            and not review_sync_task_result(job, "BGP community sync", ret.diff)
         ):
             ret.status = "skipped"
-            ret.result = ret.diff
             ret.dry_run = True
+            ret.result = ret.diff
             ret.messages.append("review declined; changes were not applied")
             return ret
 
-        # Apply route targets and plugin communities separately to keep the
-        # NetBox API writes explicit.
-        create_snames = full_diff["route_targets"]["create"]
-        create_items = []
-        for sname in create_snames:
-            payload = {"name": sname}
-            if normalised_live["route_targets"][sname]:
-                payload["custom_fields"] = normalised_live["route_targets"][sname]
-            create_items.append((sname, payload))
-        if create_items:
-            msg = f"creating {len(create_items)} route target(s) in NetBox"
-            job.event(msg)
-            log.info(f"{self.name} - {msg}")
-            total_batches = (len(create_items) + batch_size - 1) // batch_size
-            for batch_start in range(0, len(create_items), batch_size):
-                batch = create_items[batch_start : batch_start + batch_size]
-                batch_number = batch_start // batch_size + 1
-                msg = f"creating route target batch {batch_number}/{total_batches} ({len(batch)} target(s))"
-                job.event(msg)
-                log.info(msg)
-                try:
-                    nb.ipam.route_targets.create([payload for _, payload in batch])
-                except Exception as exc:
-                    msg = f"failed to create route target batch {batch_number}/{total_batches}: {exc}"
-                    job.event(msg, severity="ERROR")
-                    log.error(msg)
-                    ret.errors.append(msg)
-                    ret.failed = True
-                    return ret
-                # Report completed shared writes without duplicating Netbox requests.
-                for name, _ in batch:
-                    for device in community_devices["route_targets"][name]:
-                        ret.result[device]["route_targets"]["created"].append(name)
+        for device, community_types in ret.diff.items():
+            ret.result[device] = {
+                community_type: {
+                    "created": [],
+                    "updated": [],
+                    "deleted": [],
+                    "in_sync": actions["in_sync"],
+                }
+                for community_type, actions in community_types.items()
+            }
+        if not has_writes:
+            job.event("no BGP community sync changes required")
+            return ret
 
-        update_items = [
-            (
-                sname,
-                {
-                    "id": nb_community_objects["route_targets"][sname].id,
-                    "custom_fields": normalised_live["route_targets"][sname],
-                },
-            )
-            for sname in full_diff["route_targets"]["update"]
-        ]
-        if update_items:
-            msg = f"updating {len(update_items)} route target(s) in NetBox"
-            job.event(msg)
-            log.info(f"{self.name} - {msg}")
-            total_batches = (len(update_items) + batch_size - 1) // batch_size
-            for batch_start in range(0, len(update_items), batch_size):
-                batch = update_items[batch_start : batch_start + batch_size]
-                batch_number = batch_start // batch_size + 1
-                msg = f"updating route target batch {batch_number}/{total_batches} ({len(batch)} target(s))"
-                job.event(msg)
-                log.info(msg)
-                try:
-                    nb.ipam.route_targets.update([payload for _, payload in batch])
-                except Exception as exc:
-                    msg = f"failed to update route target batch {batch_number}/{total_batches}: {exc}"
-                    job.event(msg, severity="ERROR")
-                    log.error(msg)
-                    ret.errors.append(msg)
-                    ret.failed = True
-                    return ret
-                for name, _ in batch:
-                    for device in community_devices["route_targets"][name]:
-                        ret.result[device]["route_targets"]["updated"].append(name)
-
-        if has_bgp_plugin:
-            create_snames = full_diff["communities"]["create"]
-            create_items = []
-            for sname in create_snames:
-                community_data = community_key_data[sname]
-                payload = {"value": community_data["value"]}
-                if community_data["name"]:
-                    payload["description"] = community_data["name"]
-                if normalised_live["communities"][sname]:
-                    payload["custom_fields"] = normalised_live["communities"][sname]
-                create_items.append((sname, payload))
-            if create_items:
-                msg = f"creating {len(create_items)} BGP community object(s) in NetBox"
-                job.event(msg)
-                log.info(f"{self.name} - {msg}")
-                total_batches = (len(create_items) + batch_size - 1) // batch_size
-                for batch_start in range(0, len(create_items), batch_size):
-                    batch = create_items[batch_start : batch_start + batch_size]
-                    batch_number = batch_start // batch_size + 1
-                    msg = f"creating BGP community batch {batch_number}/{total_batches} ({len(batch)} community object(s))"
-                    job.event(msg)
-                    log.info(msg)
-                    try:
-                        nb.plugins.bgp.community.create(
-                            [payload for _, payload in batch]
-                        )
-                    except Exception as exc:
-                        msg = f"failed to create BGP community batch {batch_number}/{total_batches}: {exc}"
-                        job.event(msg, severity="ERROR")
-                        log.error(msg)
-                        ret.errors.append(msg)
-                        ret.failed = True
-                        return ret
-                    for name, _ in batch:
-                        for device in community_devices["communities"][name]:
-                            ret.result[device]["communities"]["created"].append(name)
-
-            update_items = [
-                (
-                    sname,
-                    {
-                        "id": nb_community_objects["communities"][sname].id,
-                        "custom_fields": normalised_live["communities"][sname],
-                    },
+        for community_type, actions in writes.items():
+            endpoint = endpoints[community_type][0]
+            if community_type == "route_targets":
+                label, plural, unit = "route target", "route target(s)", "targets"
+            else:
+                label, plural, unit = (
+                    "BGP community",
+                    "BGP community object(s)",
+                    "objects",
                 )
-                for sname in full_diff["communities"]["update"]
-            ]
-            if update_items:
-                msg = f"updating {len(update_items)} BGP community object(s) in NetBox"
+            creates = actions["create"]
+            create_keys = list(creates)
+            if create_keys:
+                msg = f"creating {len(create_keys)} {plural} in NetBox"
                 job.event(msg)
                 log.info(f"{self.name} - {msg}")
-                total_batches = (len(update_items) + batch_size - 1) // batch_size
-                for batch_start in range(0, len(update_items), batch_size):
-                    batch = update_items[batch_start : batch_start + batch_size]
-                    batch_number = batch_start // batch_size + 1
-                    msg = f"updating BGP community batch {batch_number}/{total_batches} ({len(batch)} community object(s))"
-                    job.event(msg)
-                    log.info(msg)
-                    try:
-                        nb.plugins.bgp.community.update(
-                            [payload for _, payload in batch]
-                        )
-                    except Exception as exc:
-                        msg = f"failed to update BGP community batch {batch_number}/{total_batches}: {exc}"
-                        job.event(msg, severity="ERROR")
-                        log.error(msg)
-                        ret.errors.append(msg)
-                        ret.failed = True
-                        return ret
-                    for name, _ in batch:
-                        for device in community_devices["communities"][name]:
-                            ret.result[device]["communities"]["updated"].append(name)
+            total_batches = (len(create_keys) + batch_size - 1) // batch_size
+            for start in range(0, len(create_keys), batch_size):
+                batch = create_keys[start : start + batch_size]
+                batch_number = start // batch_size + 1
+                msg = (
+                    f"creating {label} batch {batch_number}/{total_batches} "
+                    f"({len(batch)} {unit})"
+                )
+                job.event(msg)
+                log.info(msg)
+                try:
+                    endpoint.create([creates[key][0] for key in batch])
+                except Exception as exc:
+                    msg = f"failed to create {label} batch {batch_number}/{total_batches}: {exc}"
+                    job.event(msg, severity="ERROR")
+                    log.error(msg)
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    break
+                for write_key in batch:
+                    _, affected = creates.pop(write_key)
+                    for device, key in affected:
+                        ret.result[device][community_type]["created"].append(key)
+            if ret.failed:
+                break
 
+            updates = actions["update"]
+            update_keys = list(updates)
+            if update_keys:
+                msg = f"updating {len(update_keys)} {plural} in NetBox"
+                job.event(msg)
+                log.info(f"{self.name} - {msg}")
+            total_batches = (len(update_keys) + batch_size - 1) // batch_size
+            for start in range(0, len(update_keys), batch_size):
+                batch = update_keys[start : start + batch_size]
+                batch_number = start // batch_size + 1
+                msg = (
+                    f"updating {label} batch {batch_number}/{total_batches} "
+                    f"({len(batch)} {unit})"
+                )
+                job.event(msg)
+                log.info(msg)
+                try:
+                    endpoint.update([updates[key][0] for key in batch])
+                except Exception as exc:
+                    msg = f"failed to update {label} batch {batch_number}/{total_batches}: {exc}"
+                    job.event(msg, severity="ERROR")
+                    log.error(msg)
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    break
+                for write_key in batch:
+                    _, affected = updates.pop(write_key)
+                    for device, key in affected:
+                        ret.result[device][community_type]["updated"].append(key)
+            if ret.failed:
+                break
+
+        for community_types in ret.result.values():
+            for actions in community_types.values():
+                actions["created"].sort()
+                actions["updated"].sort()
+        # Successful batches were removed from the plan, leaving failed and pending writes.
+        if ret.failed:
+            ret.resources_failed = sorted(
+                set(ret.resources_failed)
+                | {
+                    device
+                    for actions in writes.values()
+                    for items in actions.values()
+                    for _, affected in items.values()
+                    for device, _ in affected
+                }
+            )
+            return ret
         msg = (
             f"bgp community sync complete: {create_count} created, "
             f"{update_count} updated, {in_sync_count} in sync"

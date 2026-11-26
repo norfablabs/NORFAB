@@ -29,6 +29,8 @@ Results are keyed by reporting device and contain `created`, `updated`, `deleted
 and `in_sync` ASN lists. Dry-run output uses `create`, `update`, `delete`, and
 `in_sync`. The `delete` list is always empty.
 Observed ASNs appear under each reporting device. Shared ASNs are written once.
+BGP ASN sync skips devices on platforms with no BGP ASN parser and lists them
+in `resources_unsupported`.
 Association updates show a boolean change for that device. The diff uses
 `device_associated` when only sessions provide association evidence.
 

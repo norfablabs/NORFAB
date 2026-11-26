@@ -1,11 +1,8 @@
 from collections.abc import Iterator
 from typing import Any
-from unittest.mock import MagicMock
 
 import pytest
 
-from norfab.workers.netbox_worker.bgp_asn_tasks import NetboxBgpAsnTasks
-from norfab.workers.netbox_worker.netbox_worker import NetboxWorker
 from tests.services.netbox.common import get_pynetbox
 
 pytestmark = [pytest.mark.netbox, pytest.mark.netbox_sync_bgp_asn]
@@ -721,12 +718,32 @@ class TestSyncBgpAsn:
         transit = self.nb.ipam.asns.get(asn=4200000200)
         assert transit.description == "Old description"
 
-    def test_multiple_devices_are_aggregated(self, nfclient: Any) -> None:
+    def test_multiple_devices_are_aggregated(
+        self, nfclient: Any, request: pytest.FixtureRequest
+    ) -> None:
+        console = "fn-asn-unsupported-console"
+        assert self.nb.dcim.devices.get(name=console) is None
+        device = self.nb.dcim.devices.create(
+            name=console,
+            device_type=self.nb.dcim.device_types.get(model="Arista cEOS").id,
+            role=self.nb.dcim.device_roles.get(name="VirtualRouter").id,
+            site=self.nb.dcim.sites.get(name="SALTNORNIR-LAB").id,
+            status="active",
+        )
+        request.addfinalizer(device.delete)
+        devices = [self.DEVICE_1, self.DEVICE_2, console]
         response = self._sync(
-            nfclient, devices=[self.DEVICE_1, self.DEVICE_2], rir=self.RIR
+            nfclient,
+            devices=devices,
+            rir=self.RIR,
+            batch_size=1,
+            ignore_asn_by_range=["4294967295-4200001000"],
         )
 
         for result in self._successful_results(response):
+            assert result["resources_unsupported"] == [console]
+            assert result["resources_failed"] == []
+            assert any(console in message for message in result["messages"])
             assert set(result["result"]) == {self.DEVICE_1, self.DEVICE_2}
             assert set(result["result"][self.DEVICE_1]["created"]) == self.DEVICE_1_ASNS
             assert set(result["result"][self.DEVICE_2]["created"]) == self.DEVICE_2_ASNS
@@ -748,7 +765,7 @@ class TestSyncBgpAsn:
             "sync_all",
             workers="any",
             kwargs={
-                "devices": [self.DEVICE_1, self.DEVICE_2],
+                "devices": devices,
                 "sync_kwargs": {
                     **{
                         task: False
@@ -769,6 +786,9 @@ class TestSyncBgpAsn:
             },
         )
         for result in self._successful_results(coordinated):
+            assert result["result"][console]["bgp_asns"] is None
+            assert result["resources_unsupported"] == result["resources_failed"] == []
+            assert any(console in message for message in result["messages"])
             assert (
                 set(result["result"][self.DEVICE_1]["bgp_asns"]["in_sync"])
                 == self.DEVICE_1_ASNS
@@ -786,7 +806,7 @@ class TestSyncBgpAsn:
             "check_device_sync",
             workers="any",
             kwargs={
-                "devices": [self.DEVICE_1, self.DEVICE_2],
+                "devices": devices,
                 **{
                     f"check_{category}": False
                     for category in (
@@ -805,6 +825,10 @@ class TestSyncBgpAsn:
             },
         )
         for result in self._successful_results(checks):
+            assert result["result"][console]["bgp_asns"] is None
+            assert result["resources_unsupported"] == result["resources_failed"] == []
+            assert any(console in message for message in result["messages"])
+            assert result["result"][console]["in_sync"] is None
             assert result["result"][self.DEVICE_1]["bgp_asns"] is False
             assert result["result"][self.DEVICE_2]["bgp_asns"] is True
             assert result["result"][self.DEVICE_1]["in_sync"] is False
@@ -812,6 +836,18 @@ class TestSyncBgpAsn:
             assert set(result["diff"]["bgp_asns"][self.DEVICE_1]["update"]) == {
                 "4200000101"
             }
+
+    def test_invalid_rir_stops_before_collection(self, nfclient: Any) -> None:
+        missing_rir = "TEST_ASN_SYNC_RIR_DOES_NOT_EXIST"
+        assert self.nb.ipam.rirs.get(name=missing_rir) is None
+        response = self._sync(nfclient, devices=["no-such-device"], rir=missing_rir)
+        assert response
+        for result in response.values():
+            assert result["failed"]
+            assert result["errors"] == [
+                f"RIR '{missing_rir}' must match exactly one NetBox RIR"
+            ]
+            assert result["diff"] == result["result"] == {}
 
     def test_custom_device_field_and_range_filter(self, nfclient: Any) -> None:
         response = self._sync(
@@ -855,132 +891,3 @@ class TestSyncBgpAsn:
             assert result["result"][self.DEVICE_1]["deleted"] == []
             assert result["diff"][self.DEVICE_1]["delete"] == []
         assert self.nb.ipam.asns.get(asn=4200000999) is not None
-
-
-@pytest.mark.parametrize(
-    "custom_field, fail_update", [(True, False), (False, False), (True, True)]
-)
-def test_shared_asn_per_device_comparison(
-    custom_field: bool, fail_update: bool, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    worker = NetboxBgpAsnTasks()
-    worker.name = "netbox-test"
-    worker.default_instance = "test"
-    nb = MagicMock()
-    if fail_update:
-        nb.ipam.asns.update.side_effect = RuntimeError("test update failure")
-    worker._get_pynetbox = MagicMock(return_value=nb)
-    worker.make_diff = NetboxWorker.make_diff.__get__(worker)
-    leaf_a = MagicMock(name="leaf_a", id=1)
-    leaf_a.name = "leaf-a"
-    leaf_b = MagicMock(name="leaf_b", id=2)
-    leaf_b.name = "leaf-b"
-    asn = MagicMock(id=10, asn=65000, description="NetBox label")
-    asn.custom_fields = {"devices": []}
-    worker.bulk_filter = MagicMock(
-        side_effect=lambda endpoint, **kwargs: {
-            nb.dcim.devices: [leaf_a, leaf_b],
-            nb.extras.custom_fields: (
-                [MagicMock(related_object_type="dcim.device")] if custom_field else []
-            ),
-            nb.ipam.asns: [asn],
-            nb.ipam.rirs: [MagicMock(id=20)],
-            nb.plugins.bgp.session: [
-                MagicMock(device=leaf_a, local_as=asn, remote_as=asn)
-            ],
-        }[endpoint]
-    )
-    worker.client = MagicMock()
-    worker.client.run_job.side_effect = [
-        {
-            "worker": {
-                "result": {
-                    "leaf-a": [
-                        {"asn": 65000, "local_asn": True, "description": "first"}
-                    ],
-                    "leaf-b": [
-                        {"asn": 65000, "local_asn": True, "description": "second"},
-                        *(
-                            [
-                                {"asn": 65001, "local_asn": True},
-                                {"asn": 65002, "local_asn": True},
-                            ]
-                            if custom_field
-                            else []
-                        ),
-                        {"asn": 4294967295},
-                    ],
-                }
-            }
-        },
-    ]
-
-    job = MagicMock()
-    approval = MagicMock(return_value=True)
-    monkeypatch.setattr(
-        "norfab.workers.netbox_worker.bgp_asn_tasks.review_sync_task_result", approval
-    )
-    result = worker.sync_bgp_asn(
-        job=job,
-        devices=["leaf-b", "leaf-a"],
-        with_approval=True,
-        rir="test-rir" if custom_field else None,
-        batch_size=1,
-        ignore_asn_by_range=["4294967295-65003"],
-    )
-
-    assert result.failed is fail_update
-    assert result.resources_failed == (["leaf-b"] if fail_update else [])
-    if fail_update:
-        assert "test update failure" in result.errors[0]
-    else:
-        assert result.errors == []
-    assert result.diff["leaf-a"]["in_sync"] == [65000]
-    assert result.result["leaf-a"]["updated"] == []
-    if custom_field:
-        approval.assert_called_once_with(job, "BGP ASN sync", result.diff)
-        assert result.result["leaf-b"]["created"] == [65001, 65002]
-        assert [args[0] for args, _ in nb.ipam.asns.create.call_args_list] == [
-            [
-                {
-                    "asn": number,
-                    "rir": 20,
-                    "description": "",
-                    "custom_fields": {"devices": [2]},
-                }
-            ]
-            for number in (65001, 65002)
-        ]
-        assert result.diff["leaf-b"]["update"] == {
-            "65000": {"devices": {"old_value": False, "new_value": True}}
-        }
-        assert result.result["leaf-b"]["updated"] == ([] if fail_update else [65000])
-        nb.ipam.asns.update.assert_called_once_with(
-            [{"id": 10, "custom_fields": {"devices": [2]}}]
-        )
-    else:
-        approval.assert_not_called()
-        assert result.diff["leaf-b"]["update"] == {}
-        assert result.diff["leaf-b"]["in_sync"] == [65000]
-        assert result.result["leaf-b"]["updated"] == []
-        nb.ipam.asns.update.assert_not_called()
-    worker.client.run_job.assert_called_once()
-
-
-def test_invalid_rir_stops_before_collection() -> None:
-    worker = NetboxBgpAsnTasks()
-    worker.name = "netbox-test"
-    worker.default_instance = "test"
-    nb = MagicMock()
-    worker._get_pynetbox = MagicMock(return_value=nb)
-    worker.bulk_filter = MagicMock(return_value=[])
-    worker.client = MagicMock()
-
-    result = worker.sync_bgp_asn(job=MagicMock(), devices=["leaf-a"], rir="missing")
-
-    assert result.failed
-    assert "RIR 'missing'" in result.errors[0]
-    worker.bulk_filter.assert_called_once_with(
-        nb.ipam.rirs, name="missing", fields="id,name"
-    )
-    worker.client.run_job.assert_not_called()

@@ -81,7 +81,10 @@ class TestSyncVrfs:
 
     @pytest.fixture(autouse=True)
     def cleanup_test_vrfs(self, request: pytest.FixtureRequest) -> Iterator[None]:
-        if "nfclient" not in request.fixturenames:
+        if (
+            "nfclient" not in request.fixturenames
+            or request.node.name == "test_sync_vrfs_skips_unsupported_device"
+        ):
             yield
             return
         self.nb = get_pynetbox(request.getfixturevalue("nfclient"))
@@ -247,6 +250,38 @@ class TestSyncVrfs:
             },
         }
 
+    def test_sync_vrfs_skips_unsupported_device(self, nfclient: Any) -> None:
+        nb = get_pynetbox(nfclient)
+        name = "fn-vrf-unsupported-console"
+        assert nb.dcim.devices.get(name=name) is None
+        kwargs = {"devices": [name], "dry_run": True}
+
+        missing = nfclient.run_job("netbox", "sync_vrfs", workers="any", kwargs=kwargs)
+        assert missing
+        for result in missing.values():
+            assert result["resources_failed"] == [name]
+
+        device = nb.dcim.devices.create(
+            name=name,
+            device_type=nb.dcim.device_types.get(model="Arista cEOS").id,
+            role=nb.dcim.device_roles.get(name="VirtualRouter").id,
+            site=nb.dcim.sites.get(name="SALTNORNIR-LAB").id,
+            status="active",
+        )
+        try:
+            response = nfclient.run_job(
+                "netbox", "sync_vrfs", workers="any", kwargs=kwargs
+            )
+            assert response
+            for result in response.values():
+                assert result["resources_unsupported"] == [name]
+                assert not result["failed"]
+                assert result["resources_failed"] == result["errors"] == []
+                assert result["result"] == result["diff"] == {}
+                assert any(name in message for message in result["messages"])
+        finally:
+            device.delete()
+
     def test_shared_vrf_reports_only_the_device_with_drift(self) -> None:
         devices = [
             SimpleNamespace(
@@ -324,20 +359,6 @@ class TestSyncVrfs:
         assert empty.failed is True
         assert empty.errors == ["no devices specified"]
         job.event.assert_called_once_with("no devices specified", severity="ERROR")
-
-        with (
-            patch.object(nb.dcim.devices, "filter", return_value=[]),
-            patch.object(worker.client, "run_job") as collect,
-        ):
-            missing = NetboxVrfsTasks.sync_vrfs(
-                worker, job, devices=["leaf-b", "leaf-a"]
-            )
-        assert missing.failed is True
-        assert missing.resources_failed == ["leaf-a", "leaf-b"]
-        assert missing.errors == [
-            "requested devices not found in NetBox: leaf-a, leaf-b"
-        ]
-        collect.assert_not_called()
 
         with patch.object(worker, "make_diff", wraps=worker.make_diff) as make_diff:
             preview = NetboxVrfsTasks.sync_vrfs(

@@ -594,7 +594,12 @@ class NetboxDevicesTasks:
 
         live_records_by_device = {device_name: [] for device_name in devices}
         failed_devices = set()
+        parsed_devices = set()
         for worker_name, worker_data in parse_data.items():
+            ret.messages.extend(worker_data.get("messages") or [])
+            ret.resources_unsupported.extend(
+                worker_data.get("resources_unsupported") or []
+            )
             resources_failed = worker_data.get("resources_failed") or []
             if resources_failed:
                 failed_devices.update(resources_failed)
@@ -618,13 +623,27 @@ class NetboxDevicesTasks:
             for device_name, host_inventory in worker_data["result"].items():
                 if device_name not in live_records_by_device:
                     continue
-                if host_inventory and isinstance(host_inventory, list):
+                if isinstance(host_inventory, list):
+                    parsed_devices.add(device_name)
                     live_records_by_device[device_name].extend(host_inventory)
+
+        ret.resources_unsupported = sorted(
+            set(ret.resources_unsupported) - parsed_devices
+        )
+        if (
+            not ret.errors
+            and not parse_worker_errors
+            and set(devices).issubset(ret.resources_unsupported)
+        ):
+            return ret
 
         # Normalize live and NetBox state.
         job.event("normalising live and NetBox inventory data")
         for device_name in devices:
-            if device_name in failed_devices:
+            if (
+                device_name in failed_devices
+                or device_name in ret.resources_unsupported
+            ):
                 continue
             records = live_records_by_device[device_name]
             if transform_function:
@@ -1541,19 +1560,28 @@ class NetboxDevicesTasks:
             if community_result.errors:
                 ret.errors.extend(community_result.errors)
             for device in devices:
-                ret.result[device]["bgp_communities"] = not sync_diff_has_changes(
-                    community_result.diff.get(device, {}),
-                    ignore_deletions=ignore_deletions,
-                )
+                if device in community_result.diff:
+                    ret.result[device]["bgp_communities"] = not sync_diff_has_changes(
+                        community_result.diff[device],
+                        ignore_deletions=ignore_deletions,
+                    )
             ret.diff["bgp_communities"] = community_result.diff
             check_results["bgp_communities"] = community_result
 
         for category, child_result in check_results.items():
+            unsupported_devices = child_result.resources_unsupported
+            if unsupported_devices:
+                ret.messages.append(
+                    f"Skipped {category} check for unsupported devices: "
+                    f"{', '.join(sorted(unsupported_devices))}"
+                )
             ret.failed = ret.failed or child_result.failed
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | set(child_result.resources_failed)
             )
             for device in devices:
+                if device in unsupported_devices:
+                    continue
                 if device in child_result.resources_failed or (
                     child_result.failed and not child_result.resources_failed
                 ):
@@ -1575,10 +1603,13 @@ class NetboxDevicesTasks:
             "bgp_peerings": check_bgp_peerings,
         }
         for device, device_data in ret.result.items():
-            device_data["in_sync"] = all(
-                device_data.get(category) is True
+            outcomes = [
+                device_data[category]
                 for category, checked in checked_categories.items()
-                if checked
+                if checked and device_data[category] is not None
+            ]
+            device_data["in_sync"] = (
+                all(outcomes) if outcomes else None if check_results else True
             )
 
         log.info(
@@ -1736,6 +1767,11 @@ class NetboxDevicesTasks:
                 job.event("inventory sync completed with errors", severity="WARNING")
                 ret.errors.extend(inventory_result.errors)
             ret.diff["inventory"] = inventory_result.diff
+            if inventory_result.resources_unsupported:
+                ret.messages.append(
+                    "Skipped inventory sync for unsupported devices: "
+                    f"{', '.join(inventory_result.resources_unsupported)}"
+                )
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | set(inventory_result.resources_failed)
             )
@@ -1833,6 +1869,11 @@ class NetboxDevicesTasks:
                 job.event("VRF sync completed with errors", severity="WARNING")
                 ret.errors.extend(vrf_result.errors)
             ret.diff["vrfs"] = vrf_result.diff
+            if vrf_result.resources_unsupported:
+                ret.messages.append(
+                    "Skipped VRF sync for unsupported devices: "
+                    f"{', '.join(vrf_result.resources_unsupported)}"
+                )
             vrf_failed_devices = set(vrf_result.resources_failed)
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | vrf_failed_devices
@@ -2065,10 +2106,18 @@ class NetboxDevicesTasks:
                 job.event("bgp ASN sync completed with errors", severity="WARNING")
                 ret.errors.extend(asn_result.errors)
             ret.diff["bgp_asns"] = asn_result.diff
+            unsupported_devices = asn_result.resources_unsupported
+            if unsupported_devices:
+                ret.messages.append(
+                    "Skipped BGP ASN sync for unsupported devices: "
+                    f"{', '.join(sorted(unsupported_devices))}"
+                )
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | set(asn_result.resources_failed)
             )
             for device in devices:
+                if device in unsupported_devices:
+                    continue
                 # Keep successful device results when only some resources failed.
                 ret.result[device]["bgp_asns"] = (
                     False
@@ -2156,6 +2205,12 @@ class NetboxDevicesTasks:
                 )
                 ret.errors.extend(community_result.errors)
             ret.diff["bgp_communities"] = community_result.diff
+            unsupported_devices = community_result.resources_unsupported
+            if unsupported_devices:
+                ret.messages.append(
+                    "Skipped BGP community sync for unsupported devices: "
+                    f"{', '.join(unsupported_devices)}"
+                )
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | set(community_result.resources_failed)
             )
@@ -2169,6 +2224,8 @@ class NetboxDevicesTasks:
                 )
                 return ret
             for device in devices:
+                if device in unsupported_devices:
+                    continue
                 ret.result[device]["bgp_communities"] = community_result.result.get(
                     device, {}
                 )

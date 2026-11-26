@@ -191,6 +191,9 @@ drift on later runs.
 
 ## Output
 
+VRF sync skips devices on platforms with no VRF parser and lists them in
+`resources_unsupported`.
+
 Results and diffs are keyed by device, with `vrfs`, `route_targets`,
 `routing_policies`, and `interfaces` sections. A device reports its own
 changes. A confirmed shared VRF create appears for each device that reported
