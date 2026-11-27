@@ -96,6 +96,8 @@ def collect_live_interface_ip_data(
 
     normalised_live_all = {}
     for worker_name, worker_data in parse_data.items():
+        ret.messages.extend(worker_data["messages"])
+        ret.resources_unsupported.extend(worker_data["resources_unsupported"])
         resources_failed = worker_data.get("resources_failed") or []
         if resources_failed:
             ret.resources_failed = sorted(
@@ -110,6 +112,7 @@ def collect_live_interface_ip_data(
             ret.errors.append(msg)
         if worker_data.get("failed"):
             msg = f"{worker_name} - failed to parse interface data from devices"
+            ret.errors.append(msg)
             log.warning(msg)
             job.event(msg, severity="WARNING")
             continue
@@ -139,6 +142,7 @@ def collect_live_interface_ip_data(
                 filtered[interface_name] = interface
             normalised_live_all[device_name] = filtered
 
+    ret.resources_unsupported = sorted(set(ret.resources_unsupported))
     live_interface_count = sum(len(v) for v in normalised_live_all.values())
     job.event(f"normalised IP data from {live_interface_count} live interface(s)")
     return normalised_live_all
@@ -1209,6 +1213,8 @@ class NetboxIpTasks:
                 corresponding ``create``, ``update``, ``delete``, and ``in_sync``
                 reconciliation plan; ``delete`` is always empty because this task
                 does not delete IP addresses.
+                Devices without an interface parser are listed in
+                ``resources_unsupported``.
         """
         devices = devices or []
         if self.is_url(interface_map):
@@ -1318,6 +1324,13 @@ class NetboxIpTasks:
             filter_by_name=filter_by_name,
             filter_by_description=filter_by_description,
         )
+
+        devices = [
+            device for device in devices if device not in ret.resources_unsupported
+        ]
+        if not devices:
+            ret.failed = bool(ret.errors)
+            return ret
 
         # fetch interfaces data from NetBox to resolve interface IDs
         job.event("fetching NetBox interfaces to resolve IP assignments")
@@ -1836,6 +1849,8 @@ class NetboxIpTasks:
                 ``delete`` is always empty because this task does not delete prefixes.
                 Applied writes are credited to devices whose state they satisfy.
                 A device at a different site can retain drift after a shared write.
+                Devices without an interface parser are listed in
+                ``resources_unsupported``.
 
         Raises:
             ValueError: If batch size or a network filter is invalid.
@@ -1905,6 +1920,13 @@ class NetboxIpTasks:
             filter_by_name=filter_by_name,
             filter_by_description=filter_by_description,
         )
+        devices = [
+            device for device in devices if device not in ret.resources_unsupported
+        ]
+        if not devices:
+            ret.failed = bool(ret.errors)
+            return ret
+
         job.event("collecting live prefix candidates")
         live_prefixes = {}
         prefix_devices = {}

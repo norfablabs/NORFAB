@@ -285,7 +285,8 @@ class NetboxBgpAsnTasks:
             **kwargs: Nornir FFun host filters.
 
         Returns:
-            Result: Per-device ASN synchronization actions.
+            Result: Per-device ASN synchronization actions and devices skipped in
+                ``resources_unsupported``.
         """
         devices = list(devices or [])
         instance = instance or self.default_instance
@@ -355,13 +356,14 @@ class NetboxBgpAsnTasks:
             timeout=timeout,
         )
         live_asn = {}
-        for worker_data in (parse_data or {}).values():
+        for worker_name, worker_data in (parse_data or {}).items():
             ret.messages.extend(worker_data.get("messages") or [])
             ret.resources_unsupported.extend(
                 worker_data.get("resources_unsupported") or []
             )
             ret.resources_failed.extend(worker_data.get("resources_failed") or [])
             if worker_data.get("failed"):
+                ret.errors.append(f"worker '{worker_name}' failed to collect BGP ASNs")
                 continue
             for device, records in (worker_data.get("result") or {}).items():
                 if device not in devices or not isinstance(records, list):
@@ -381,10 +383,13 @@ class NetboxBgpAsnTasks:
                     previous_label, previous_local = collected.get(asn, ("", False))
                     collected[asn] = (previous_label or label, previous_local or local)
 
-        ret.resources_unsupported = sorted(
-            set(ret.resources_unsupported) - live_asn.keys()
-        )
         ret.resources_failed = sorted(set(ret.resources_failed) - live_asn.keys())
+        ret.resources_unsupported = sorted(
+            set(ret.resources_unsupported) - set(ret.resources_failed)
+        )
+        # Exit successfully when no selected device has a matching parser.
+        if not ret.errors and set(devices).issubset(ret.resources_unsupported):
+            return ret
         if ret.resources_unsupported:
             devices = sorted(set(devices) - set(ret.resources_unsupported))
             if not devices:

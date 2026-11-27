@@ -13,7 +13,7 @@ Synchronises BGP sessions between live network devices and the NetBox BGP plugin
 
 **Data collection** — NetBox worker fetches every existing BGP session directly from the NetBox BGP plugin so sessions with duplicate names remain distinct. In parallel, Nornir service parses BGP neighbor data from devices using `parse_ttp` with `get="bgp_neighbors"`.
 
-**Normalisation and diff** — Both datasets are normalised to flat comparable dictionaries keyed by the five-part identity `(device, local address, local ASN, remote address, remote ASN)`. Session names remain updateable attributes. `DeepDiff` classifies each session as `create`, `update`, `delete`, or `in_sync`.
+**Normalisation and diff** — Both datasets are normalised to flat comparable dictionaries keyed by the five-part identity `(device, local address, local ASN, remote address or prefix, remote ASN)`. Session names remain updateable attributes. `DeepDiff` classifies each session as `create`, `update`, `delete`, or `in_sync`.
 
 **NetBox writes** — Sessions are created, updated, or (when `process_deletions=True`) deleted in NetBox. IP addresses and ASNs are resolved from IPAM or created on-demand. On create, all related objects (peer groups, routing policies, prefix lists) are resolved or created by name.
 
@@ -37,6 +37,17 @@ Synchronises BGP sessions between live network devices and the NetBox BGP plugin
 - **NetBox BGP plugin** (`netbox-bgp`) must be installed and enabled on the NetBox instance.
 - **Nornir service** must have a TTP getter that handles `get="bgp_neighbors"`.
 
+## Dynamic Peering
+
+Cisco IOS XR and Junos dynamic ranges require a `ttp-templates` build that exposes
+`remote_address_range` and `netbox-bgp` 0.20.0 or later. Sync records each
+configured range as a BGP session with a remote prefix and skips individual
+neighbors learned from the range. It uses the first exact IPAM prefix match
+across all VRFs. If no match exists, it creates a prefix without a VRF.
+The parser must supply both ASNs and either a local IP or a source interface.
+When only a source interface is supplied, sync uses its first NetBox IP of the
+same address family as the range.
+
 ## Session Naming Convention
 
 By default, NetBox session names follow:
@@ -47,7 +58,7 @@ By default, NetBox session names follow:
 
 For example, device `ceos-leaf-1` with a parsed session `to-spine-1` becomes `ceos-leaf-1_to-spine-1`.
 
-Use the `name_template` parameter to customise the naming scheme. The template is a Python format string with the following variables:
+Use the `name_template` parameter to customise the naming scheme. The Jinja2 template accepts these variables.
 
 | Variable | Description |
 |---|---|
@@ -56,7 +67,8 @@ Use the `name_template` parameter to customise the naming scheme. The template i
 | `description` | Session description |
 | `local_address` | Local IP address string |
 | `local_as` | Local AS number string |
-| `remote_address` | Remote IP address string |
+| `remote_address` | Remote IP address or `None` for a configured range |
+| `remote_prefix` | Configured range CIDR or `None` |
 | `remote_as` | Remote AS number string |
 | `vrf` | VRF name or `None` |
 | `state` | Device-reported state (e.g. `established`) |
@@ -69,7 +81,7 @@ Use the `name_template` parameter to customise the naming scheme. The template i
 Example:
 
 ```
-name_template="{device}_BGP_{name}"
+name_template="{{device}}_BGP_{{name}}"
 # ceos-leaf-1_BGP_to-spine-1
 ```
 
@@ -102,8 +114,11 @@ name_template="{device}_BGP_{name}"
 
 ## Output
 
-Existing sessions are matched by device, local address and AS, and remote
-address and AS. Updates use their NetBox IDs, including when a session has no
+Devices without a BGP neighbor parser are listed in `resources_unsupported`.
+Deletion processing requires a live reply from the device.
+
+Existing sessions are matched by device, local address and AS, remote address
+or prefix, and remote AS. Updates use their NetBox IDs, including when a session has no
 name. An unnamed matched session receives the rendered `name_template` name;
 dry-run and live update results show that rendered name.
 

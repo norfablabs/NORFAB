@@ -12,6 +12,9 @@ first if their interfaces are missing.
 
 ## Output
 
+Devices without a matching VLAN parser are listed in `resources_unsupported`
+and omitted from the result and diff.
+
 Each worker returns `created`, `updated`, `deleted`, and `in_sync` lists per
 device. All references use `scope:VID`, such as `group:CAMPUS:100`. Membership
 changes place the affected VLAN in `updated`. A newly created VLAN can also appear

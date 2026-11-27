@@ -85,6 +85,7 @@ class NetboxFhrpTasks:
             conflicts, ambiguous group matches, or invalid live virtual addresses.
             Records with missing or invalid virtual addresses are reported and
             skipped while valid records continue to synchronize.
+            Devices without a VRRP parser are listed in ``resources_unsupported``.
         """
         instance = instance or self.default_instance
         ret = Result(
@@ -157,6 +158,8 @@ class NetboxFhrpTasks:
         seen = set()
         incomplete = set()
         for worker, data in parsed.items():
+            ret.messages.extend(data["messages"])
+            ret.resources_unsupported.extend(data["resources_unsupported"])
             failed = data["resources_failed"]
             ret.resources_failed = sorted(set(ret.resources_failed) | set(failed))
             if failed:
@@ -208,6 +211,13 @@ class NetboxFhrpTasks:
                         authentication_type=auth,
                         interface_id=interface_id,
                     )
+        ret.resources_unsupported = sorted(set(ret.resources_unsupported))
+        devices = [
+            device for device in devices if device not in ret.resources_unsupported
+        ]
+        if not devices:
+            ret.failed = bool(ret.errors)
+            return ret
         missing = set(devices) - seen - set(ret.resources_failed)
         for device in sorted(missing):
             ret.errors.append(f"device '{device}' is missing a live VRRP result")

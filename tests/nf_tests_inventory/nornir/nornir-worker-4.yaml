@@ -7,7 +7,7 @@ hosts:
     platform: linux
   fn-inventory-unsupported-console:
     hostname: 127.0.0.1
-    platform: linux
+    platform: mikrotik_routeros
   fn-vrf-unsupported-console:
     hostname: 127.0.0.1
     platform: linux
@@ -118,6 +118,20 @@ hosts:
     username: nornir
     password: nornir
     port: 6235
+    groups:
+      - junos_params
+  fn-bgp-dynamic-xr:
+    hostname: 127.0.0.1
+    platform: cisco_xr
+    username: nornir
+    password: nornir
+    port: 6236
+  fn-bgp-dynamic-junos:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    username: nornir
+    password: nornir
+    port: 6237
     groups:
       - junos_params
   fn-ipam-sp-1:

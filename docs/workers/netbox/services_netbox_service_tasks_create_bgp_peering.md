@@ -16,6 +16,12 @@ When deriving a missing remote address, the task uses the first interface IP in 
 Supply `tenant` as an existing tenant name for a new session. Bulk entries specify
 their own tenant, and reverse sessions inherit it. Existing sessions remain unchanged.
 
+With `netbox-bgp` 0.20.0 or later, bulk entries can use `remote_prefix` for dynamic
+peering. The task uses the first exact IPAM match across all VRFs or creates a
+prefix without a VRF. A prefix session represents a range and has no mirror session.
+If the entry supplies only a local interface, the task uses its first IP in the
+same address family as the remote prefix.
+
 1. Client submits `create_bgp_peering` request to NetBox worker
 2. NetBox worker validates that the BGP plugin is installed
 3. Worker resolves the RIR ID once (when `rir` is provided) for on-demand ASN creation
@@ -62,15 +68,15 @@ Sessions that already exist in NetBox appear in `exists` regardless of dry-run m
 By default, sessions are named using:
 
 ```text
-{device}_{local_address}_{remote_address}
+{{device}}_{{vrf}}_{{remote_prefix or remote_address}}
 ```
 
-Use the `name_template` parameter for a custom naming scheme. The template is a Python format string with the variables `device`, `local_address`, and `remote_address`.
+Use a Jinja2 `name_template` for custom names. Use `remote_address` for an IP peer and `remote_prefix` for a configured range.
 
 Example:
 
 ```text
-name_template="{device}_BGP_{local_address}"
+name_template="{{device}}_BGP_{{local_address}}"
 # ceos-spine-1_BGP_10.0.0.1
 ```
 

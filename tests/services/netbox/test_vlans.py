@@ -284,7 +284,9 @@ class TestSyncVlanMemberships:
         worker.name, worker.default_instance = "test", "test"
         worker._get_pynetbox = Mock(return_value=nb)
         worker.client = Mock()
-        worker.client.run_job.return_value = {"nornir": {"result": records}}
+        worker.client.run_job.return_value = {
+            "nornir": {"result": records, "resources_unsupported": []}
+        }
         worker.bulk_filter = lambda endpoint, **filters: list(
             endpoint.filter(**filters)
         )

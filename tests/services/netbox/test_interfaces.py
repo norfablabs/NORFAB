@@ -1,14 +1,18 @@
 import pprint
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
 from pydantic import ValidationError
 
+from norfab.models import Result
+from norfab.workers.netbox_worker.interfaces_tasks import NetboxInterfacesTasks
 from norfab.workers.netbox_worker.netbox_models import (
     GetInterfacesInput,
     SyncAllInput,
     SyncDeviceInterfacesInput,
 )
+from norfab.workers.netbox_worker.netbox_worker import NetboxWorker
 
 try:
     from tests.services.netbox.common import (
@@ -39,6 +43,62 @@ except ModuleNotFoundError as exc:
     )
 
 pytestmark = pytest.mark.netbox
+
+
+@pytest.mark.netbox_worker
+def test_sync_interfaces_classifies_support_from_configuration() -> None:
+    def parse_ttp(
+        _service: str, _task: str, *, kwargs: dict, **_options: object
+    ) -> dict:
+        if kwargs["get"] == "interfaces":
+            return {
+                "worker-one": Result(
+                    result={}, resources_unsupported=["console"]
+                ).model_dump(),
+                "worker-two": Result(result={"router": []}).model_dump(),
+            }
+        return {
+            "worker-one": Result(
+                result={}, resources_unsupported=kwargs["FL"]
+            ).model_dump()
+        }
+
+    worker = SimpleNamespace(
+        name="netbox-test",
+        default_instance="test",
+        is_url=lambda value: False,
+        _get_pynetbox=lambda *args, **kwargs: SimpleNamespace(
+            dcim=SimpleNamespace(devices=object())
+        ),
+        bulk_filter=lambda endpoint, **kwargs: [
+            SimpleNamespace(
+                id=index, name=name, device_type=SimpleNamespace(model="test")
+            )
+            for index, name in enumerate(kwargs["name"], start=1)
+        ],
+        get_interfaces=lambda **kwargs: Result(
+            result={
+                "console": {"eth0": {"id": 101, "type": {"value": "other"}}},
+                "router": {},
+            }
+        ),
+        client=SimpleNamespace(run_job=parse_ttp),
+        make_diff=lambda source, target: NetboxWorker.make_diff(None, source, target),
+    )
+
+    result = NetboxInterfacesTasks.sync_device_interfaces(
+        worker,
+        job=SimpleNamespace(event=lambda *args, **kwargs: None),
+        devices=["console", "router"],
+        dry_run=True,
+        process_deletions=True,
+    )
+
+    assert not result.failed
+    assert result.errors == result.resources_failed == []
+    assert result.resources_unsupported == ["console"]
+    assert set(result.result) == set(result.diff) == {"router"}
+    assert result.diff["router"]["delete"] == []
 
 
 @pytest.mark.netbox_get_interfaces

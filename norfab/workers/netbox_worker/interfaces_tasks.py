@@ -981,9 +981,10 @@ class NetboxInterfacesTasks:
                 ``parse_ttp`` (e.g. ``FL``, ``FC``, ``FB``).
 
         Returns:
-            dict: Per-device action summary. Structure depends on ``dry_run``; see
-                above. Diff details are available in ``res["diff"]`` for non
-                dry-run mode.
+            Result: Per-device action summaries or dry-run plans, with the
+                comparison in ``diff``. Devices without a configuration parser
+                are listed in ``resources_unsupported`` and omitted from the result
+                and diff.
         """
         devices = list(devices or [])
         if self.is_url(interface_map):
@@ -1127,11 +1128,65 @@ class NetboxInterfacesTasks:
             workers="all",
             timeout=timeout,
         )
-        job.event(f"retrieving live interface status for {len(devices)} devices")
+        live_device_config = {}
+        for wname, wdata in (parse_data or {}).items():
+            ret.resources_unsupported.extend(wdata["resources_unsupported"])
+            resources_failed = wdata.get("resources_failed") or []
+            if resources_failed:
+                ret.resources_failed = sorted(
+                    set(ret.resources_failed) | set(resources_failed)
+                )
+                msg = (
+                    f"{wname} failed to fetch interface data from devices "
+                    f"{', '.join(sorted(resources_failed))}"
+                )
+                job.event(msg, severity="ERROR")
+                log.error(f"{self.name} - {msg}")
+                ret.errors.append(msg)
+            if wdata["failed"]:
+                msg = f"{wname} - failed to parse interface data from devices"
+                ret.errors.append(msg)
+                log.warning(msg)
+                job.event(msg, severity="WARNING")
+                continue
+            for device_name, records in wdata["result"].items():
+                live_device_config.setdefault(device_name, []).extend(records)
+
+        ret.resources_unsupported = sorted(
+            set(ret.resources_unsupported) - set(ret.resources_failed)
+        )
+        if ret.resources_unsupported:
+            ret.messages.append(
+                "TTP getter 'interfaces' does not support: "
+                f"{', '.join(ret.resources_unsupported)}"
+            )
+        # Exit successfully when no selected device has a matching parser.
+        if not ret.errors and set(devices).issubset(ret.resources_unsupported):
+            return ret
+        if not live_device_config:
+            msg = "no interfaces parsing results collected for devices"
+            job.event(msg, severity="ERROR")
+            ret.failed = True
+            ret.errors.append(msg)
+            return ret
+
+        for device_name in sorted(set(devices) - live_device_config.keys()):
+            normalised_nb_all.pop(device_name)
+            if device_name in ret.resources_unsupported:
+                continue
+            msg = (
+                f"{device_name} - parsing returned no interfaces data, skipping device"
+            )
+            log.error(msg)
+            job.event(msg, severity="ERROR")
+
+        job.event(
+            f"retrieving live interface status for {len(live_device_config)} devices"
+        )
         parse_status_data = self.client.run_job(
             "nornir",
             "parse_ttp",
-            kwargs={"get": "interfaces_status", "FL": devices},
+            kwargs={"get": "interfaces_status", "FL": sorted(live_device_config)},
             workers="all",
             timeout=timeout,
         )
@@ -1163,102 +1218,62 @@ class NetboxInterfacesTasks:
         # Normalize live interface data per device.
         job.event("normalising live interface data")
         normalised_live_all = {}
-        for wname, wdata in parse_data.items():
-            resources_failed = wdata.get("resources_failed") or []
-            if resources_failed:
-                ret.resources_failed = sorted(
-                    set(ret.resources_failed) | set(resources_failed)
-                )
-                msg = (
-                    f"{wname} failed to fetch interface data from devices "
-                    f"{', '.join(sorted(resources_failed))}"
-                )
-                job.event(msg, severity="ERROR")
-                log.error(f"{self.name} - {msg}")
-                ret.errors.append(msg)
-            if wdata.get("failed"):
-                msg = f"{wname} - failed to parse interface data from devices"
-                log.warning(msg)
-                job.event(msg, severity="WARNING")
-                continue
-            for device_name, host_interfaces in wdata["result"].items():
-                normalised_live_all.setdefault(device_name, {})
-                for data in host_interfaces or []:
-                    status = interface_status.get(device_name, {}).get(
-                        data.get("name"), {}
+        for device_name, host_interfaces in live_device_config.items():
+            normalised_live_all[device_name] = {}
+            for data in host_interfaces:
+                status = interface_status.get(device_name, {}).get(data.get("name"), {})
+                mapped_names = {
+                    field: data.get(field) for field in ("name", "parent", "lag")
+                }
+                for field, live_name in mapped_names.items():
+                    mapped_names[field] = map_interface_name(
+                        live_name,
+                        interface_map,
+                        device_name,
+                        nb_devices_data[device_name]["device_type"],
                     )
-                    mapped_names = {
-                        field: data.get(field) for field in ("name", "parent", "lag")
-                    }
-                    for field, live_name in mapped_names.items():
-                        mapped_names[field] = map_interface_name(
-                            live_name,
-                            interface_map,
-                            device_name,
-                            nb_devices_data[device_name]["device_type"],
-                        )
-                    intf_name = mapped_names["name"]
-                    if filter_by_name and not fnmatch.fnmatch(
-                        intf_name, filter_by_name
-                    ):
-                        continue
-                    if filter_by_description and not fnmatch.fnmatch(
-                        str(data.get("description") or ""), filter_by_description
-                    ):
-                        continue
-
-                    normalised_live_all[device_name][intf_name] = {
-                        "type": data["type"],
-                        "enabled": bool(
-                            data.get("enabled", data.get("is_enabled", True))
-                        ),
-                        "parent": mapped_names["parent"],
-                        "lag": mapped_names["lag"],
-                        "mtu": data.get("mtu"),
-                        "speed": data.get("speed"),
-                        "duplex": data.get("duplex"),
-                        "description": str(data.get("description") or ""),
-                        "mode": data.get("mode"),
-                    }
-                    interface = normalised_live_all[device_name][intf_name]
-                    status_mtu = status.get("mtu")
-                    if interface["mtu"] is None and status_mtu and status_mtu > 0:
-                        interface["mtu"] = status_mtu
-                    status_speed = status.get("speed_bps")
-                    if interface["speed"] is None and status_speed and status_speed > 0:
-                        interface["speed"] = status_speed // 1_000
-                    if interface["duplex"] is None:
-                        interface["duplex"] = status.get("duplex")
-                    # Preserve existing NetBox values when live data has no usable value.
-                    nb_interface = normalised_nb_all.get(device_name, {}).get(intf_name)
-                    if nb_interface:
-                        interface["description"] = apply_description_policy(
-                            interface["description"],
-                            nb_interface["description"],
-                            preserve_description,
-                        )
-                        for field in ("mtu", "speed"):
-                            if interface[field] in (None, 0) and nb_interface[field]:
-                                interface[field] = nb_interface[field]
+                intf_name = mapped_names["name"]
+                if filter_by_name and not fnmatch.fnmatch(intf_name, filter_by_name):
+                    continue
+                if filter_by_description and not fnmatch.fnmatch(
+                    str(data.get("description") or ""), filter_by_description
+                ):
+                    continue
+                interface = {
+                    "type": data["type"],
+                    "enabled": bool(data.get("enabled", data.get("is_enabled", True))),
+                    "parent": mapped_names["parent"],
+                    "lag": mapped_names["lag"],
+                    "mtu": data.get("mtu"),
+                    "speed": data.get("speed"),
+                    "duplex": data.get("duplex"),
+                    "description": str(data.get("description") or ""),
+                    "mode": data.get("mode"),
+                }
+                status_mtu = status.get("mtu")
+                if interface["mtu"] is None and status_mtu and status_mtu > 0:
+                    interface["mtu"] = status_mtu
+                status_speed = status.get("speed_bps")
+                if interface["speed"] is None and status_speed and status_speed > 0:
+                    interface["speed"] = status_speed // 1_000
+                if interface["duplex"] is None:
+                    interface["duplex"] = status.get("duplex")
+                # Preserve existing NetBox values when live data has no usable value.
+                nb_interface = normalised_nb_all.get(device_name, {}).get(intf_name)
+                if nb_interface:
+                    interface["description"] = apply_description_policy(
+                        interface["description"],
+                        nb_interface["description"],
+                        preserve_description,
+                    )
+                    for field in ("mtu", "speed"):
+                        if interface[field] in (None, 0) and nb_interface[field]:
+                            interface[field] = nb_interface[field]
+                normalised_live_all[device_name][intf_name] = interface
         live_interface_count = sum(len(v) for v in normalised_live_all.values())
         job.event(
             f"normalised {live_interface_count} live interface(s) after applying filters"
         )
-
-        # remove devices that returned no parsing results
-        for device_name in devices:
-            if device_name not in normalised_live_all:
-                msg = f"{device_name} - parsing returned no interfaces data, skipping device"
-                log.error(msg)
-                job.event(msg, severity="ERROR")
-                normalised_nb_all.pop(device_name)
-        if not normalised_nb_all:
-            job.event(
-                "no interface parsing results collected for devices", severity="ERROR"
-            )
-            ret.failed = True
-            ret.errors.append("no interfaces parsing results collected for devices")
-            return ret
 
         # Single diff on the full normalised datasets
         job.event("calculating interface sync diff")
@@ -1780,6 +1795,8 @@ class NetboxInterfacesTasks:
         Returns:
             Result: Per-device action summary with ``created``, ``updated``, and
                 ``in_sync`` MAC address lists.
+                Devices without an interface parser are listed in
+                ``resources_unsupported``.
         """
         devices = devices or []
         instance = instance or self.default_instance
@@ -1852,6 +1869,8 @@ class NetboxInterfacesTasks:
         job.event("collecting live MAC address candidates")
         all_mac_live: dict = {}  # {mac: {"device": ..., "interface": ...}}
         for wname, wdata in parse_data.items():
+            ret.messages.extend(wdata["messages"])
+            ret.resources_unsupported.extend(wdata["resources_unsupported"])
             resources_failed = wdata.get("resources_failed") or []
             if resources_failed:
                 ret.resources_failed = sorted(
@@ -1866,6 +1885,7 @@ class NetboxInterfacesTasks:
                 ret.errors.append(msg)
             if wdata.get("failed"):
                 msg = f"{wname} - failed to parse interface data from devices"
+                ret.errors.append(msg)
                 log.warning(msg)
                 job.event(msg, severity="WARNING")
                 continue
@@ -1893,6 +1913,14 @@ class NetboxInterfacesTasks:
                         "interface": intf_name,
                     }
 
+        ret.resources_unsupported = sorted(set(ret.resources_unsupported))
+        devices = [
+            device for device in devices if device not in ret.resources_unsupported
+        ]
+        if not devices:
+            ret.diff = {}
+            ret.failed = bool(ret.errors)
+            return ret
         if not all_mac_live:
             log.info(
                 f"{self.name} - Sync MAC addresses: no MAC addresses found in live data"

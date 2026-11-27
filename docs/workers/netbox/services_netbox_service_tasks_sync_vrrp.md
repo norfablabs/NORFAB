@@ -100,6 +100,8 @@ not group selection. A missing required VRF is reported and that VIP is skipped.
 
 ## Output
 
+Devices without a VRRP parser are listed in `resources_unsupported`.
+
 Each device's diff reflects its own groups, VIPs, and interface assignments.
 For example, changing one peer's priority appears only in that peer's diff.
 When both peers need a change to a shared group or VIP, each reports the

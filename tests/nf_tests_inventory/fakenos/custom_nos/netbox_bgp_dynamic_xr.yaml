@@ -1,0 +1,29 @@
+name: NETBOX_BGP_DYNAMIC_XR
+
+initial_prompt: "{base_prompt}#"
+
+commands:
+  show bgp vrf all neighbors:
+    output: |
+      BGP neighbor is 198.18.246.1, vrf NORFAB-BGP-DYNAMIC-XR-1
+       Remote AS 4200002462, local AS 4200002461, external link, Dynamic
+        BGP state = Established
+        Local host: 198.18.246.65, Local port: 179
+      BGP neighbor is 198.18.246.2
+       Remote AS 4200002462, local AS 4200002461, external link, Dynamic
+        BGP state = Established
+        Local host: 198.18.246.67, Local port: 179
+      BGP neighbor is 198.18.246.66
+       Remote AS 4200002462, local AS 4200002461, external link
+       Description: static neighbor
+        BGP state = Established
+        Local host: 198.18.246.65, Local port: 179
+  show run formal router bgp | inc neighbor:
+    output: |
+      router bgp 4200002461 vrf NORFAB-BGP-DYNAMIC-XR-1 neighbor 198.18.246.0/27 remote-as 4200002462
+      router bgp 4200002461 vrf NORFAB-BGP-DYNAMIC-XR-1 neighbor 198.18.246.0/27 update-source Loopback245
+      router bgp 4200002461 vrf NORFAB-BGP-DYNAMIC-XR-1 neighbor 198.18.246.0/27 description configured dynamic range
+      router bgp 4200002461 neighbor 198.18.246.0/26 remote-as 4200002462
+      router bgp 4200002461 neighbor 198.18.246.0/26 update-source Loopback246
+      router bgp 4200002461 neighbor 198.18.246.0/26 description existing dynamic range
+      router bgp 4200002461 neighbor 198.18.246.66 remote-as 4200002462

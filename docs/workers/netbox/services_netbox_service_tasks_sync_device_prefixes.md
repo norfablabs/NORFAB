@@ -27,6 +27,8 @@ synchronized before its source interface exists in NetBox.
 
 ## Output
 
+Devices without an interface parser are listed in `resources_unsupported`.
+
 Results are keyed by device. Applied creates and updates appear under each
 device whose prefix requirements the write fulfilled:
 

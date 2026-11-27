@@ -62,6 +62,20 @@ hosts:
     platform: juniper_junos
     nos:
       plugin: NETBOX_BGP_JUNOS_3
+  fn-bgp-dynamic-xr:
+    username: nornir
+    password: nornir
+    port: 6236
+    platform: cisco_xr
+    nos:
+      plugin: NETBOX_BGP_DYNAMIC_XR
+  fn-bgp-dynamic-junos:
+    username: nornir
+    password: nornir
+    port: 6237
+    platform: juniper_junos
+    nos:
+      plugin: NETBOX_BGP_DYNAMIC_JUNOS
   fn-ipam-sp-1:
     username: nornir
     password: nornir

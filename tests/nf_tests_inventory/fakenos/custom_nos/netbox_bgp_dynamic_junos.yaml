@@ -1,0 +1,56 @@
+name: NETBOX_BGP_DYNAMIC_JUNOS
+initial_prompt: 'nornir@{base_prompt}>'
+
+commands:
+  set cli screen-length 0:
+    output: Screen length set to 0
+  set cli screen-width 511:
+    output: Screen width set to 511
+  set cli complete-on-space off:
+    output: Disabling complete-on-space
+  'show bgp neighbor | display json':
+    output: |
+      {
+        "bgp-information": [
+          {
+            "bgp-peer": [
+              {
+                "peer-address": [{"data": "198.18.245.1+179"}],
+                "local-address": [{"data": "198.18.245.65+179"}],
+                "peer-as": [{"data": "4200002452"}],
+                "local-as": [{"data": "4200002451"}],
+                "peer-state": [{"data": "Established"}],
+                "peer-type": [{"data": "External"}],
+                "peer-group": [{"data": "NORFAB-BGP-DYNAMIC-JUNOS-VRF"}],
+                "peer-cfg-rti": [{"data": "NORFAB-BGP-DYNAMIC-JUNOS-1"}]
+              },
+              {
+                "peer-address": [{"data": "198.18.245.66+179"}],
+                "local-address": [{"data": "198.18.245.67+179"}],
+                "peer-as": [{"data": "4200002452"}],
+                "local-as": [{"data": "4200002451"}],
+                "peer-state": [{"data": "Established"}],
+                "peer-type": [{"data": "External"}],
+                "peer-group": [{"data": "NORFAB-BGP-DYNAMIC-JUNOS-DEFAULT"}],
+                "peer-cfg-rti": [{"data": "master"}],
+                "description": [{"data": "static neighbor"}]
+              }
+            ]
+          }
+        ]
+      }
+  'show configuration | display inheritance | display set | match "protocols bgp group"':
+    output: |
+      set routing-instances NORFAB-BGP-DYNAMIC-JUNOS-1 protocols bgp group NORFAB-BGP-DYNAMIC-JUNOS-VRF type external
+      set routing-instances NORFAB-BGP-DYNAMIC-JUNOS-1 protocols bgp group NORFAB-BGP-DYNAMIC-JUNOS-VRF peer-as 4200002452
+      set routing-instances NORFAB-BGP-DYNAMIC-JUNOS-1 protocols bgp group NORFAB-BGP-DYNAMIC-JUNOS-VRF local-as 4200002451
+      set routing-instances NORFAB-BGP-DYNAMIC-JUNOS-1 protocols bgp group NORFAB-BGP-DYNAMIC-JUNOS-VRF local-address 198.18.245.65
+      set routing-instances NORFAB-BGP-DYNAMIC-JUNOS-1 protocols bgp group NORFAB-BGP-DYNAMIC-JUNOS-VRF description "configured dynamic range"
+      set routing-instances NORFAB-BGP-DYNAMIC-JUNOS-1 protocols bgp group NORFAB-BGP-DYNAMIC-JUNOS-VRF allow 198.18.245.0/27
+      set protocols bgp group NORFAB-BGP-DYNAMIC-JUNOS-DEFAULT type external
+      set protocols bgp group NORFAB-BGP-DYNAMIC-JUNOS-DEFAULT peer-as 4200002452
+      set protocols bgp group NORFAB-BGP-DYNAMIC-JUNOS-DEFAULT local-as 4200002451
+      set protocols bgp group NORFAB-BGP-DYNAMIC-JUNOS-DEFAULT local-address 198.18.245.67
+      set protocols bgp group NORFAB-BGP-DYNAMIC-JUNOS-DEFAULT description "existing dynamic range"
+      set protocols bgp group NORFAB-BGP-DYNAMIC-JUNOS-DEFAULT allow 198.18.245.0/26
+      set protocols bgp group NORFAB-BGP-DYNAMIC-JUNOS-DEFAULT neighbor 198.18.245.66 description "static neighbor"

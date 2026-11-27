@@ -446,6 +446,27 @@
       ],
       "cleanup": "Delete sessions on fn-bgp-* devices and unassigned addresses and source ASNs in the BGP-owned ranges."
     },
+    "test_bgp.py::TestSyncBgpPeerings::test_sync_bgp_peerings_dynamic[ios-xr]": {
+      "device": "fn-bgp-dynamic-xr",
+      "interfaces": ["Loopback245", "Loopback246"],
+      "source_ips": ["198.18.246.65/32 (NORFAB-BGP-DYNAMIC-XR-1)", "198.18.246.67/32 (global)"],
+      "vrfs": ["NORFAB-BGP-DYNAMIC-XR-1", "NORFAB-BGP-DYNAMIC-XR-2"],
+      "ip_ranges": ["198.18.246.0/24"],
+      "prefixes": ["198.18.246.0/27 (global)", "198.18.246.0/26 (one in each test VRF)"],
+      "asns": [4200002461, 4200002462],
+      "read_only": "XVR9000 device type, VirtualRouter role, NORFAB-LAB site, and lab RIR.",
+      "cleanup": "Require the reserved records and range to be empty at setup. Delete only the dedicated device's sessions, addresses and prefixes in the reserved range, the two ASNs, the VRFs, and the device with its interfaces."
+    },
+    "test_bgp.py::TestSyncBgpPeerings::test_sync_bgp_peerings_dynamic[junos]": {
+      "device": "fn-bgp-dynamic-junos",
+      "vrfs": ["NORFAB-BGP-DYNAMIC-JUNOS-1", "NORFAB-BGP-DYNAMIC-JUNOS-2"],
+      "ip_ranges": ["198.18.245.0/24"],
+      "prefixes": ["198.18.245.0/27 (global)", "198.18.245.0/26 (one in each test VRF)"],
+      "asns": [4200002451, 4200002452],
+      "peer_groups": ["NORFAB-BGP-DYNAMIC-JUNOS-VRF", "NORFAB-BGP-DYNAMIC-JUNOS-DEFAULT"],
+      "read_only": "vMX device type, VirtualRouter role, NORFAB-LAB site, and lab RIR.",
+      "cleanup": "Require the reserved records and range to be empty at setup. Delete only the dedicated device's sessions, peer groups, addresses and prefixes in the reserved range, the two ASNs, the VRFs, and the device."
+    },
     "test_sync.py::TestCheckDeviceSync": {
       "mode": "main_read_only",
       "devices": ["fn-ceos-sp-1", "fn-ceos-sp-2"],
@@ -697,8 +718,12 @@
     "test_inventory.py::TestSyncDeviceInventory::test_inventory_stage_skips_unsupported_device": {
       "mode": "main_mutating",
       "devices": ["fn-inventory-unsupported-console"],
-      "ownership": "Creates and deletes only the named device. Reads seeded Arista cEOS device type, VirtualRouter role, and SALTNORNIR-LAB site as creation references.",
-      "coverage": "Runs inventory dry-run and both coordinators against an unsupported platform. The sync and check calls do not write to NetBox."
+      "interfaces": ["eth0"],
+      "ip_addresses": ["2001:db8:adfe::1/128", "2001:db8:adfe::2/128"],
+      "asns": [4200999790, 4200999791],
+      "bgp_sessions": ["fn-inventory-unsupported-console-bgp"],
+      "ownership": "Creates the named device, its eth0 interface, two IP addresses, two ASNs, and one BGP session. Deletes only its own records. Reads seeded Arista cEOS device type, VirtualRouter role, SALTNORNIR-LAB site, and lab RIR.",
+      "coverage": "Runs all sync tasks and both coordinators against an unsupported platform. Verifies that interface and BGP peering sync preserve existing records with deletions enabled."
     },
     "test_inventory.py::TestSyncDeviceInventory": {
       "mode": "main_mutating",
@@ -715,7 +740,9 @@
       "read_only": "Reads fn-bgp-sp-1 as the parent device and the lab RIR; uses ASNs 64999 and 64998 through the existing BGP creation test lifecycle.",
       "interfaces": ["fn-bgp-sp-1:norfab-bgp-dual-stack"],
       "ip_addresses": ["192.0.2.240/31", "2001:db8:bf::/127"],
-      "ownership": "Creates and deletes its own interface and assigned addresses in finally. Peering requests use dry_run and do not create sessions or peer IPs."
+      "prefixes": ["2001:db8:bf:10::/64 (global)"],
+      "sessions": ["fn-bgp-sp-1_test_bulk_prefix_family"],
+      "ownership": "Creates and deletes its own interface and assigned addresses in finally. Static peering requests use dry_run. The bulk range case verifies the session and prefix do not exist before creating them and deletes both in finally."
     },
     "test_bgp.py::TestCreateBgpPeering::create_tenant": {
       "mode": "main_mutating",

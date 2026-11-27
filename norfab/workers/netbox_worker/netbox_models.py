@@ -1,4 +1,5 @@
 import builtins
+import ipaddress
 import re
 from enum import Enum
 from typing import Any, Dict, List, Literal, Union
@@ -12,6 +13,7 @@ from pydantic import (
     StrictFloat,
     StrictInt,
     StrictStr,
+    field_validator,
     model_validator,
 )
 
@@ -341,6 +343,9 @@ class BgpSessionCommonFields(BaseModel):
 class BgpSessionBulkCreateFields(BgpSessionCommonFields):
     """Fields for a single BGP session entry used in bulk_create."""
 
+    remote_prefix: Union[None, StrictStr] = Field(
+        None, description="Remote CIDR prefix, resolved or created in NetBox IPAM"
+    )
     tenant: Union[None, StrictStr] = Field(None, description="Existing tenant name")
     name: Union[None, StrictStr] = Field(
         None, description="Session name; derived from name_template when omitted"
@@ -363,16 +368,26 @@ class BgpSessionBulkCreateFields(BgpSessionCommonFields):
         None, description="NetBox IP address filters when remote_address is omitted"
     )
 
+    @field_validator("remote_prefix")
+    @classmethod
+    def validate_remote_prefix(cls, value: Union[None, str]) -> Union[None, str]:
+        if value:
+            ipaddress.ip_network(value, strict=False)
+        return value
+
     @model_validator(mode="after")
     def validate_required_fields(self) -> "BgpSessionBulkCreateFields":
+        if self.remote_prefix and (self.remote_address or self.remote_ip_query):
+            raise ValueError("Specify either remote_prefix or a remote IP address.")
         if self.local_interface:
             return self
         if (self.local_address or self.local_ip_query) and (
-            self.remote_address or self.remote_ip_query
+            self.remote_address or self.remote_ip_query or self.remote_prefix
         ):
             return self
         raise ValueError(
-            "Bulk session entries require device and either local_interface or local and remote addresses or IP queries."
+            "Bulk session entries require a device and either a local interface "
+            "or a local IP and remote endpoint."
         )
 
 
@@ -430,11 +445,11 @@ class CreateBgpPeeringInput(
         None, description="NetBox IP address filters when remote_address is omitted"
     )
     name_template: Union[None, StrictStr] = Field(
-        "{{device}}_{{vrf}}_{{remote_address}}",
+        "{{device}}_{{vrf}}_{{remote_prefix or remote_address}}",
         description=("Jinja2 template string for BGP session names."),
         examples=[
             "Available variables: device, remote_device, "
-            "local_address, remote_address. Default: '{{device}}_{{vrf}}_{{remote_address}}'."
+            "local_address, remote_address, remote_prefix."
         ],
     )
     create_reverse: bool = Field(
@@ -469,8 +484,7 @@ class CreateBgpPeeringInput(
     @model_validator(mode="before")
     @classmethod
     def validate_single_or_bulk_pre(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        bulk_create = values.get("bulk_create")
-        if bulk_create is None:
+        if not values.get("bulk_create"):
             if not values.get("device"):
                 raise ValueError("Single-session mode requires 'device'.")
             if not any(
@@ -479,6 +493,13 @@ class CreateBgpPeeringInput(
             ):
                 raise ValueError(
                     "Single-session mode requires 'local_address', 'local_interface', or 'local_ip_query'."
+                )
+            if not any(
+                values.get(field)
+                for field in ("remote_address", "local_interface", "remote_ip_query")
+            ):
+                raise ValueError(
+                    "Single-session mode requires 'remote_address', 'local_interface', or 'remote_ip_query'."
                 )
         return values
 

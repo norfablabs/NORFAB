@@ -594,7 +594,6 @@ class NetboxDevicesTasks:
 
         live_records_by_device = {device_name: [] for device_name in devices}
         failed_devices = set()
-        parsed_devices = set()
         for worker_name, worker_data in parse_data.items():
             ret.messages.extend(worker_data.get("messages") or [])
             ret.resources_unsupported.extend(
@@ -624,12 +623,10 @@ class NetboxDevicesTasks:
                 if device_name not in live_records_by_device:
                     continue
                 if isinstance(host_inventory, list):
-                    parsed_devices.add(device_name)
                     live_records_by_device[device_name].extend(host_inventory)
 
-        ret.resources_unsupported = sorted(
-            set(ret.resources_unsupported) - parsed_devices
-        )
+        ret.resources_unsupported = sorted(set(ret.resources_unsupported))
+        # Exit successfully when no selected device has a matching parser.
         if (
             not ret.errors
             and not parse_worker_errors
@@ -1428,6 +1425,8 @@ class NetboxDevicesTasks:
             if vlan_result.errors:
                 ret.errors.extend(vlan_result.errors)
             for device in devices:
+                if device in vlan_result.resources_unsupported:
+                    continue
                 ret.result[device]["vlans"] = not sync_diff_has_changes(
                     vlan_result.diff.get(device, {}), ignore_deletions=ignore_deletions
                 )
@@ -1450,6 +1449,8 @@ class NetboxDevicesTasks:
                 ret.errors.extend(prefix_result.errors)
             prefix_diff = prefix_result.diff or {}
             for device in devices:
+                if device in prefix_result.resources_unsupported:
+                    continue
                 ret.result[device]["prefixes"] = (
                     device in prefix_diff
                     and not sync_diff_has_changes(
@@ -1777,7 +1778,8 @@ class NetboxDevicesTasks:
             )
             if inventory_result.failed and not inventory_result.resources_failed:
                 for device in devices:
-                    ret.result[device]["inventory"] = False
+                    if device not in inventory_result.resources_unsupported:
+                        ret.result[device]["inventory"] = False
                 ret.failed = True
                 job.event(
                     "sync all stopped because device inventory sync failed",
@@ -1822,12 +1824,19 @@ class NetboxDevicesTasks:
                 job.event("interface sync completed with errors", severity="WARNING")
                 ret.errors.extend(intf_result.errors)
             ret.diff["interfaces"] = intf_result.diff
+            unsupported_devices = intf_result.resources_unsupported
+            if unsupported_devices:
+                ret.messages.append(
+                    "Skipped interface sync for unsupported devices: "
+                    f"{', '.join(unsupported_devices)}"
+                )
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | set(intf_result.resources_failed)
             )
             if intf_result.failed and not intf_result.resources_failed:
                 for device in devices:
-                    ret.result[device]["interfaces"] = False
+                    if device not in unsupported_devices:
+                        ret.result[device]["interfaces"] = False
                 ret.failed = True
                 job.event(
                     "sync all stopped because interface sync failed", severity="ERROR"
@@ -1913,12 +1922,19 @@ class NetboxDevicesTasks:
                 job.event("prefix sync completed with errors", severity="WARNING")
                 ret.errors.extend(prefix_result.errors)
             ret.diff["prefixes"] = prefix_result.diff
+            unsupported_devices = prefix_result.resources_unsupported
+            if unsupported_devices:
+                ret.messages.append(
+                    "Skipped prefix sync for unsupported devices: "
+                    f"{', '.join(unsupported_devices)}"
+                )
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | set(prefix_result.resources_failed)
             )
             if prefix_result.failed and not prefix_result.resources_failed:
                 for device in devices:
-                    ret.result[device]["prefixes"] = False
+                    if device not in unsupported_devices:
+                        ret.result[device]["prefixes"] = False
                 ret.failed = True
                 job.event(
                     "sync all stopped because prefix sync failed", severity="ERROR"
@@ -1926,6 +1942,8 @@ class NetboxDevicesTasks:
                 return ret
             prefix_failed_devices = set(prefix_result.resources_failed)
             for device in devices:
+                if device in unsupported_devices:
+                    continue
                 ret.result[device]["prefixes"] = (
                     False
                     if device in prefix_failed_devices
@@ -1967,20 +1985,28 @@ class NetboxDevicesTasks:
                 job.event("VLAN sync completed with errors", severity="WARNING")
                 ret.errors.extend(vlan_result.errors)
             ret.diff["vlans"] = vlan_result.diff
+            unsupported_devices = vlan_result.resources_unsupported
+            if unsupported_devices:
+                ret.messages.append(
+                    "Skipped VLAN sync for unsupported devices: "
+                    f"{', '.join(unsupported_devices)}"
+                )
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | set(vlan_result.resources_failed)
             )
             if vlan_result.failed and not vlan_result.resources_failed:
                 for device in devices:
-                    ret.result[device]["vlans"] = False
+                    if device not in unsupported_devices:
+                        ret.result[device]["vlans"] = False
                 ret.failed = True
                 job.event("sync all stopped because VLAN sync failed", severity="ERROR")
                 return ret
             for device in devices:
+                if device in unsupported_devices:
+                    continue
                 ret.result[device]["vlans"] = vlan_result.result.get(
                     device, {"created": [], "updated": [], "deleted": [], "in_sync": []}
                 )
-            for device in devices:
                 if device in vlan_result.resources_failed:
                     ret.result[device]["vlans"] = False
             if vlan_result.failed:
@@ -2014,12 +2040,19 @@ class NetboxDevicesTasks:
                 job.event("IP address sync completed with errors", severity="WARNING")
                 ret.errors.extend(ip_result.errors)
             ret.diff["ip_addresses"] = ip_result.diff
+            unsupported_devices = ip_result.resources_unsupported
+            if unsupported_devices:
+                ret.messages.append(
+                    "Skipped IP address sync for unsupported devices: "
+                    f"{', '.join(unsupported_devices)}"
+                )
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | set(ip_result.resources_failed)
             )
             if ip_result.failed and not ip_result.resources_failed:
                 for device in devices:
-                    ret.result[device]["ip_addresses"] = False
+                    if device not in unsupported_devices:
+                        ret.result[device]["ip_addresses"] = False
                 ret.failed = True
                 job.event(
                     "sync all stopped because IP address sync failed", severity="ERROR"
@@ -2061,12 +2094,19 @@ class NetboxDevicesTasks:
                 job.event("VRRP sync completed with errors", severity="WARNING")
                 ret.errors.extend(vrrp_result.errors)
             ret.diff["vrrp"] = vrrp_result.diff
+            unsupported_devices = vrrp_result.resources_unsupported
+            if unsupported_devices:
+                ret.messages.append(
+                    "Skipped VRRP sync for unsupported devices: "
+                    f"{', '.join(unsupported_devices)}"
+                )
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | set(vrrp_result.resources_failed)
             )
             if vrrp_result.failed and not vrrp_result.resources_failed:
                 for device in devices:
-                    ret.result[device]["vrrp"] = False
+                    if device not in unsupported_devices:
+                        ret.result[device]["vrrp"] = False
                 ret.failed = True
                 job.event("sync all stopped because VRRP sync failed", severity="ERROR")
                 return ret
@@ -2156,12 +2196,19 @@ class NetboxDevicesTasks:
                 job.event("BGP peerings sync completed with errors", severity="WARNING")
                 ret.errors.extend(bgp_result.errors)
             ret.diff["bgp_peerings"] = bgp_result.diff
+            unsupported_devices = bgp_result.resources_unsupported
+            if unsupported_devices:
+                ret.messages.append(
+                    "Skipped BGP peering sync for unsupported devices: "
+                    f"{', '.join(unsupported_devices)}"
+                )
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | set(bgp_result.resources_failed)
             )
             if bgp_result.failed and not bgp_result.resources_failed:
                 for device in devices:
-                    ret.result[device]["bgp_peerings"] = False
+                    if device not in unsupported_devices:
+                        ret.result[device]["bgp_peerings"] = False
                 ret.failed = True
                 job.event(
                     "sync all stopped because BGP peering sync failed", severity="ERROR"
@@ -2216,7 +2263,8 @@ class NetboxDevicesTasks:
             )
             if community_result.failed and not community_result.resources_failed:
                 for device in devices:
-                    ret.result[device]["bgp_communities"] = False
+                    if device not in unsupported_devices:
+                        ret.result[device]["bgp_communities"] = False
                 ret.failed = True
                 job.event(
                     "sync all stopped because BGP community sync failed",

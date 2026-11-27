@@ -1,4 +1,5 @@
 import pprint
+from contextlib import ExitStack
 from typing import Any
 
 import pytest
@@ -687,8 +688,10 @@ class TestSyncDeviceInventory:
             site=nb.dcim.sites.get(name="SALTNORNIR-LAB").id,
             status="active",
         )
-        categories = {
+        stages = {
+            "inventory": "sync_device_inventory",
             "interfaces": "sync_device_interfaces",
+            "vrfs": "sync_vrfs",
             "prefixes": "sync_device_prefixes",
             "vlans": "sync_vlans",
             "ip_addresses": "sync_device_ip",
@@ -697,46 +700,66 @@ class TestSyncDeviceInventory:
             "bgp_peerings": "sync_bgp_peerings",
             "bgp_communities": "sync_bgp_community",
         }
-        try:
-            for task, options in (
-                ("sync_device_inventory", {"dry_run": True}),
-                (
-                    "sync_all",
-                    {
-                        "dry_run": True,
-                        "sync_kwargs": dict.fromkeys(categories.values(), False),
-                    },
-                ),
-                (
-                    "check_device_sync",
-                    {
-                        "check_vrfs": False,
-                        **{f"check_{key}": False for key in categories},
-                    },
-                ),
+        with ExitStack() as cleanup:
+            cleanup.callback(device.delete)
+            interface = nb.dcim.interfaces.create(
+                device=device.id, name="eth0", type="other"
+            )
+            local_ip = nb.ipam.ip_addresses.create(address="2001:db8:adfe::1/128")
+            cleanup.callback(local_ip.delete)
+            remote_ip = nb.ipam.ip_addresses.create(address="2001:db8:adfe::2/128")
+            cleanup.callback(remote_ip.delete)
+            rir = nb.ipam.rirs.get(name="lab")
+            local_as = nb.ipam.asns.create(asn=4200999790, rir=rir.id)
+            cleanup.callback(local_as.delete)
+            remote_as = nb.ipam.asns.create(asn=4200999791, rir=rir.id)
+            cleanup.callback(remote_as.delete)
+            session = nb.plugins.bgp.session.create(
+                name=f"{name}-bgp",
+                device=device.id,
+                local_address=local_ip.id,
+                remote_address=remote_ip.id,
+                local_as=local_as.id,
+                remote_as=remote_as.id,
+                status="planned",
+            )
+            cleanup.callback(session.delete)
+            for task in (
+                *stages.values(),
+                "sync_mac_addresses",
+                "sync_all",
+                "check_device_sync",
             ):
+                options = (
+                    {"process_deletions": True}
+                    if task in ("sync_device_interfaces", "sync_bgp_peerings")
+                    else {} if task == "check_device_sync" else {"dry_run": True}
+                )
                 response = nfclient.run_job(
                     "netbox", task, workers="any", kwargs={"devices": [name], **options}
                 )
                 assert response
                 for result in response.values():
-                    assert not result["failed"]
+                    assert not result["failed"], (task, result["errors"])
                     assert result["resources_failed"] == result["errors"] == []
-                    assert any(name in message for message in result["messages"])
-                    if task == "sync_device_inventory":
+                    if task in ("sync_all", "check_device_sync"):
+                        assert result["resources_unsupported"] == []
+                        assert all(
+                            result["result"][name][key] is None for key in stages
+                        )
+                        assert result["diff"] == dict.fromkeys(stages, {})
+                        assert sum(
+                            message.startswith("Skipped ") and name in message
+                            for message in result["messages"]
+                        ) == len(stages)
+                        if task == "check_device_sync":
+                            assert result["result"][name]["in_sync"] is None
+                    else:
                         assert result["resources_unsupported"] == [name]
                         assert result["result"] == result["diff"] == {}
-                    else:
-                        assert result["resources_unsupported"] == []
-                        assert result["result"][name]["inventory"] is None
-                    if task == "check_device_sync":
-                        assert result["result"][name]["in_sync"] is None
-                    if task == "sync_all":
-                        assert any(
-                            "Skipped VRF sync" in msg for msg in result["messages"]
-                        )
-        finally:
-            device.delete()
+                        assert any(name in message for message in result["messages"])
+            assert nb.dcim.interfaces.get(interface.id) is not None
+            assert nb.plugins.bgp.session.get(session.id) is not None
 
     def test_sync_device_inventory_dry_run_reports_raw_diff(self, nfclient):
         ret = self._sync(nfclient, dry_run=True)

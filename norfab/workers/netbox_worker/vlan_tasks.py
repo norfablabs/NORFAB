@@ -579,6 +579,7 @@ class NetboxVlansTasks:
         Returns:
             Result: Per-device created, updated, deleted and in_sync references.
                 Diff contains per-device VLAN actions by scope and interface field changes.
+                Devices without a VLAN parser are listed in ``resources_unsupported``.
         """
         instance = instance or self.default_instance
         ret = Result(
@@ -672,6 +673,7 @@ class NetboxVlansTasks:
         )
         live_by_device = {}
         for worker, response in parsed.items():
+            ret.resources_unsupported.extend(response["resources_unsupported"])
             resources_failed = response.get("resources_failed") or []
             if resources_failed:
                 ret.resources_failed = sorted(
@@ -689,6 +691,14 @@ class NetboxVlansTasks:
                 continue
             for device, records in response["result"].items():
                 live_by_device.setdefault(device, []).extend(records)
+        ret.resources_unsupported = sorted(
+            set(ret.resources_unsupported) - set(ret.resources_failed)
+        )
+        if ret.resources_unsupported:
+            ret.messages.append(
+                "TTP getter 'vlans' does not support: "
+                f"{', '.join(ret.resources_unsupported)}"
+            )
         live_vlans = []
         interface_names_by_device = {}
         for device, records in sorted(live_by_device.items()):
@@ -791,6 +801,9 @@ class NetboxVlansTasks:
                 fields="id,name,vid_ranges,scope_type,scope_id,scope",
             ):
                 groups[group.id] = group
+        # Exit successfully when none of the selected devices supports VLAN parsing.
+        if not ret.errors and set(devices).issubset(ret.resources_unsupported):
+            return ret
         if not live_by_device:
             message = "no live VLAN data collected"
             job.event(message, severity="ERROR")

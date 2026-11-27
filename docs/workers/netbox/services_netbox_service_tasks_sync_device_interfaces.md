@@ -12,6 +12,9 @@ it also clears the untagged VLAN and tagged VLAN list in the same request.
 
 Devices may begin with no interfaces in NetBox. The task treats an empty
 current interface set as valid and creates interfaces discovered from live data.
+Devices without a matching TTP interface configuration parser are listed in
+`resources_unsupported` and omitted from the result and diff. The task can
+still sync interfaces when the operational status getter lacks a parser.
 
 ## How It Works
 

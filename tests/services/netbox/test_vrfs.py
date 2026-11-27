@@ -282,6 +282,38 @@ class TestSyncVrfs:
         finally:
             device.delete()
 
+    def test_vrf_collection_failure_takes_precedence_over_unsupported(self) -> None:
+        self.nb = Mock()
+        self.nb.dcim.devices.filter.return_value = [
+            SimpleNamespace(name="failed-device"),
+            SimpleNamespace(name="unsupported-device"),
+        ]
+        self.nb.extras.custom_fields.filter.return_value = []
+        worker = self._stub_worker([], plugin_installed=False)
+        worker.client.run_job = Mock(
+            return_value={
+                "worker-one": {
+                    "resources_unsupported": ["failed-device", "unsupported-device"],
+                },
+                "worker-two": {
+                    "failed": True,
+                    "resources_failed": ["failed-device"],
+                },
+            }
+        )
+
+        result = NetboxVrfsTasks.sync_vrfs(
+            worker,
+            self._stub_job(),
+            devices=["failed-device", "unsupported-device"],
+            dry_run=True,
+        )
+
+        assert result.failed
+        assert result.resources_failed == ["failed-device"]
+        assert result.resources_unsupported == ["unsupported-device"]
+        assert result.result == result.diff == {}
+
     def test_shared_vrf_reports_only_the_device_with_drift(self) -> None:
         devices = [
             SimpleNamespace(

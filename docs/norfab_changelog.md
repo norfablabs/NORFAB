@@ -6,11 +6,14 @@
 2. Fixed Netbox `sync_bgp_asn` reporting shared ASN membership changes for devices that already match. It derives device associations from both the ASN devices field and Netbox BGP sessions.
 3. Fixed Netbox `sync_bgp_community` and `check_device_sync` reporting drift for every device that shares a route target or BGP community. Each device's diff now reflects its own community names and membership. Shared writes remain batched.
 4. Netbox `sync_vrrp` compares groups, VIPs, and assignments per device. Shared Netbox changes are applied once, and group creation is batched.
+5. Fixed Netbox `sync_vrfs` classifying a device as both failed and unsupported when Nornir workers disagree.
+6. Fixed Netbox `sync_bgp_asn` reporting a failure when every selected device is unsupported.
 
 ## CHANGES
 
 1. Netbox `sync_device_prefixes` requires named VRFs to exist when VRF matching is enabled. Missing VRFs are reported per device. `sync_all` runs VRF sync before prefix sync.
 2. Netbox `sync_vrrp` returns the per-device comparison in both `result` and `diff`, with separate group, VIP, and assignment identities. The VRRP stage of `sync_all` returns the same action format.
+3. Netbox interface and BGP ASN sync report Nornir parser worker failures in `errors`, including when another worker returns usable data.
 
 ## ENHANCEMENTS
 
@@ -21,6 +24,13 @@
 5. Netbox `sync_vrfs` skips devices on platforms with no VRF parser and lists them in `resources_unsupported`. `sync_all` and `check_device_sync` report the skipped VRF stage in `messages` and continue with other stages.
 6. Netbox `sync_device_inventory` skips devices on platforms with no inventory parser and lists them in `resources_unsupported`. `sync_all` and `check_device_sync` report the skipped inventory stage in `messages` and continue with other stages.
 7. Netbox `sync_bgp_community` skips devices on platforms with no BGP community parser and lists them in `resources_unsupported`. `sync_all` and `check_device_sync` report the skipped community stage in `messages` and continue with other stages.
+8. Netbox `sync_bgp_peerings` syncs Cisco IOS XR and Junos dynamic peering ranges as remote prefixes and skips learned neighbors. Missing prefixes are created without a VRF. Sync can resolve the local IP from the configured source interface.
+9. Netbox `create_bgp_peering` accepts remote prefixes in bulk requests and uses a same-family source IP when deriving it from an interface.
+10. Netbox `sync_device_interfaces` lists devices without an interface configuration parser in `resources_unsupported`. `sync_all` and `check_device_sync` report those skips and continue with other categories.
+11. Netbox `sync_vlans` lists devices without a VLAN parser in `resources_unsupported`. Both coordinators report the skip and leave the device's VLAN category unset.
+12. Netbox IP address and prefix sync skip devices without an interface parser. Both coordinators leave those categories unset for unsupported devices.
+13. Netbox VRRP, BGP peering, and standalone MAC sync list devices without a matching parser in `resources_unsupported`. Both coordinators report the skipped VRRP and BGP peering categories.
+14. Netbox BGP peering sync preserves existing sessions when live collection is missing for a device, including when deletions are enabled.
 
 ---
 

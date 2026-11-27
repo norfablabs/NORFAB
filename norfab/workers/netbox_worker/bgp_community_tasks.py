@@ -285,9 +285,11 @@ class NetboxBgpCommunityTasks:
                     if name:
                         names.add(name)
 
-        # A usable result takes precedence over another worker's unsupported report.
-        unsupported = (unsupported & netbox_devices.keys()) - observations.keys()
+        unsupported &= netbox_devices.keys()
         ret.resources_unsupported = sorted(unsupported - reported_failures)
+        # Exit successfully when no selected device has a matching parser.
+        if not ret.errors and set(devices).issubset(ret.resources_unsupported):
+            return ret
         missing = (
             netbox_devices.keys() - observations.keys() - set(ret.resources_unsupported)
         )
@@ -298,7 +300,7 @@ class NetboxBgpCommunityTasks:
             ret.errors.append(msg)
         ret.resources_failed.extend(sorted(missing))
         if not observations:
-            ret.failed = bool(ret.errors)
+            ret.failed = True
             return ret
         msg = (
             f"parsed {parsed_count} live community record(s) from "

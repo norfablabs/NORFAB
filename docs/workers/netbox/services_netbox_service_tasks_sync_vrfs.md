@@ -192,7 +192,8 @@ drift on later runs.
 ## Output
 
 VRF sync skips devices on platforms with no VRF parser and lists them in
-`resources_unsupported`.
+`resources_unsupported`. If workers report both an unsupported platform and a
+collection failure for a device, the device is listed in `resources_failed`.
 
 Results and diffs are keyed by device, with `vrfs`, `route_targets`,
 `routing_policies`, and `interfaces` sections. A device reports its own

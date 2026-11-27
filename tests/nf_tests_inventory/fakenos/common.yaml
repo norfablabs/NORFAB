@@ -22,6 +22,8 @@ nos_plugins:
   NETBOX_BGP_LF_2: nf://fakenos/custom_nos/netbox_bgp_lf_2.yaml
   NETBOX_BGP_LF_3: nf://fakenos/custom_nos/netbox_bgp_lf_3.yaml
   NETBOX_BGP_JUNOS_3: nf://fakenos/custom_nos/netbox_bgp_junos_3.yaml
+  NETBOX_BGP_DYNAMIC_XR: nf://fakenos/custom_nos/netbox_bgp_dynamic_xr.yaml
+  NETBOX_BGP_DYNAMIC_JUNOS: nf://fakenos/custom_nos/netbox_bgp_dynamic_junos.yaml
   NETBOX_IPAM_SP_1: nf://fakenos/custom_nos/netbox_ipam_sp_1.yaml
   NETBOX_IPAM_SP_2: nf://fakenos/custom_nos/netbox_ipam_sp_2.yaml
   NETBOX_IPAM_LF_1: nf://fakenos/custom_nos/netbox_ipam_lf_1.yaml

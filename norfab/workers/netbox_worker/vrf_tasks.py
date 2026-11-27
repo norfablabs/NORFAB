@@ -89,7 +89,9 @@ class NetboxVrfsTasks:
 
         Returns:
             Result: Per-device VRF, route-target, routing-policy, and interface actions.
-                Missing collection, and missing mapped interfaces are reported through `resources_failed`.
+                Devices without a matching parser are reported in
+                ``resources_unsupported``. Collection and interface mapping failures
+                are reported in ``resources_failed``.
         """
         # Resolve the selected devices and collect covered live observations.
         instance = instance or self.default_instance
@@ -194,15 +196,13 @@ class NetboxVrfsTasks:
             if not response.get("failed"):
                 records_by_device.update(response.get("result") or {})
 
-        # A usable result takes precedence over another worker's unsupported report.
+        # A collection failure takes precedence over a skip.
         ret.resources_unsupported = sorted(
-            set(ret.resources_unsupported)
-            - {
-                device
-                for device, records in records_by_device.items()
-                if isinstance(records, list)
-            }
+            set(ret.resources_unsupported) - set(ret.resources_failed)
         )
+        # Exit when no devices have VRF parser support.
+        if not ret.errors and set(devices).issubset(ret.resources_unsupported):
+            return ret
         live_vrfs = {}
         live_interfaces = {}
         policy_field_names = sorted(set(policy_fields.values()))
@@ -270,8 +270,6 @@ class NetboxVrfsTasks:
                 live_interfaces[key] = name
 
         if not live_vrfs:
-            if not ret.errors:
-                return ret
             ret.errors.append("no usable live VRF data")
             for message in ret.errors:
                 job.event(message, severity="ERROR")

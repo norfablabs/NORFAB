@@ -23,6 +23,8 @@ The task follows a three-step pipeline:
 
 ## Output
 
+Devices without an interface parser are listed in `resources_unsupported`.
+
 Both dry-run and live-run return the same structure, keyed by device name:
 
 ```json

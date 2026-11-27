@@ -1,7 +1,11 @@
 import pprint
+from collections.abc import Iterator
 from typing import Any
 
 import pytest
+from pynetbox.core.api import Api
+
+from norfab.core.client import NFPClient
 
 try:
     from tests.services.netbox.common import (
@@ -300,6 +304,7 @@ BGP_CREATE_SESSIONS_TEST_DEVICES = [
     "fn-bgp-lf-3",
     "fn-bgp-junos-3",
 ]
+BGP_DYNAMIC_TEST = "test_sync_bgp_peerings_dynamic"
 
 
 def delete_bgp_sessions(devices=BGP_CREATE_SESSIONS_TEST_DEVICES):
@@ -312,8 +317,16 @@ def delete_bgp_sessions(devices=BGP_CREATE_SESSIONS_TEST_DEVICES):
 
 
 @pytest.fixture(scope="module", autouse=True)
-def cleanup_bgp_source_data():
+def cleanup_bgp_source_data(request: pytest.FixtureRequest) -> Iterator[None]:
     """Remove only BGP sync records in its dedicated NetBox address space."""
+    if not any(
+        item.path == request.node.path
+        and getattr(item, "originalname", item.name) != BGP_DYNAMIC_TEST
+        for item in request.session.items
+    ):
+        yield
+        return
+
     ranges = [
         "10.81.0.0/16",
         "10.82.0.0/16",
@@ -348,11 +361,201 @@ def cleanup_bgp_source_data():
 @pytest.mark.netbox_sync_bgp_peerings
 class TestSyncBgpPeerings:
 
-    def setup_method(self):
+    @pytest.fixture(autouse=True)
+    def cleanup_shared_bgp_sessions(
+        self, request: pytest.FixtureRequest
+    ) -> Iterator[None]:
+        if request.node.originalname == BGP_DYNAMIC_TEST:
+            yield
+            return
+        delete_bgp_sessions()
+        yield
         delete_bgp_sessions()
 
-    def teardown_method(self):
-        delete_bgp_sessions()
+    @pytest.mark.parametrize(
+        ("platform", "device_model", "address_stem", "asns"),
+        [
+            pytest.param(
+                "xr", "XVR9000", "198.18.246", [4200002461, 4200002462], id="ios-xr"
+            ),
+            pytest.param(
+                "junos", "vMX", "198.18.245", [4200002451, 4200002452], id="junos"
+            ),
+        ],
+    )
+    def test_sync_bgp_peerings_dynamic(
+        self,
+        nfclient: NFPClient,
+        netbox: Api,
+        platform: str,
+        device_model: str,
+        address_stem: str,
+        asns: list[int],
+    ) -> None:
+        """Sync configured IOS XR and Junos ranges and ignore learned neighbors."""
+        from ttp_templates.utils.models import BgpNeighborRecord
+
+        if "remote_address_range" not in BgpNeighborRecord.model_fields:
+            pytest.skip("requires ttp-templates with dynamic BGP ranges")
+
+        device_name = f"fn-bgp-dynamic-{platform}"
+        subnet = f"{address_stem}.0/24"
+        new_prefix = f"{address_stem}.0/27"
+        existing_prefix = f"{address_stem}.0/26"
+        vrf_names = [f"NORFAB-BGP-DYNAMIC-{platform.upper()}-{i}" for i in (1, 2)]
+        peer_groups = (
+            ["NORFAB-BGP-DYNAMIC-JUNOS-VRF", "NORFAB-BGP-DYNAMIC-JUNOS-DEFAULT"]
+            if platform == "junos"
+            else []
+        )
+        learned_address = f"{address_stem}.1"
+        static_address = f"{address_stem}.66"
+        learned_name = f"{device_name}_{vrf_names[0]}_{learned_address}"
+        static_name = f"{device_name}_default_{static_address}"
+        new_name = f"{device_name}_{vrf_names[0]}_{new_prefix}"
+        existing_name = f"{device_name}_default_{existing_prefix}"
+
+        assert not netbox.dcim.devices.get(name=device_name)
+        assert not list(netbox.ipam.vrfs.filter(name=vrf_names))
+        assert not list(netbox.ipam.prefixes.filter(within_include=subnet))
+        assert not list(netbox.ipam.ip_addresses.filter(parent=subnet))
+        assert not list(netbox.ipam.asns.filter(asn=asns))
+        if peer_groups:
+            assert not list(netbox.plugins.bgp.peer_group.filter(name=peer_groups))
+        device = netbox.dcim.devices.create(
+            name=device_name,
+            device_type=netbox.dcim.device_types.get(model=device_model).id,
+            role=netbox.dcim.device_roles.get(name="VirtualRouter").id,
+            site=netbox.dcim.sites.get(name="NORFAB-LAB").id,
+        )
+        vrfs = []
+        kwargs = {"devices": [device_name], "rir": "lab", "process_deletions": True}
+
+        def sync(**options: Any) -> dict:
+            (result,) = nfclient.run_job(
+                "netbox",
+                "sync_bgp_peerings",
+                workers="any",
+                kwargs={**kwargs, **options},
+            ).values()
+            assert not result["failed"], result
+            assert not result["errors"], result
+            return result["result"][device_name]
+
+        try:
+            for name in vrf_names:
+                vrf = netbox.ipam.vrfs.create(name=name)
+                vrfs.append(vrf)
+                netbox.ipam.prefixes.create(prefix=existing_prefix, vrf=vrf.id)
+            if platform == "xr":
+                for name, host, vrf_id in (
+                    ("Loopback245", 65, vrfs[0].id),
+                    ("Loopback246", 67, None),
+                ):
+                    interface = netbox.dcim.interfaces.create(
+                        device=device.id, name=name, type="virtual", vrf=vrf_id
+                    )
+                    netbox.ipam.ip_addresses.create(
+                        address=f"{address_stem}.{host}/32",
+                        vrf=vrf_id,
+                        assigned_object_type="dcim.interface",
+                        assigned_object_id=interface.id,
+                    )
+            first_match, second_match = netbox.ipam.prefixes.filter(
+                prefix=existing_prefix
+            )
+
+            preview = sync(dry_run=True)
+            expected_names = {new_name, existing_name, static_name}
+            assert set(preview["create"]) == expected_names
+            filtered = sync(
+                dry_run=True, ignore_peer_ranges=[new_prefix, f"{static_address}/32"]
+            )
+            assert filtered["create"] == [existing_name]
+            assert not list(netbox.ipam.prefixes.filter(prefix=new_prefix))
+            assert not list(netbox.plugins.bgp.session.filter(device_id=device.id))
+
+            assert set(sync()["created"]) == expected_names
+            prefix = netbox.ipam.prefixes.get(prefix=new_prefix)
+            assert prefix and prefix.vrf is None
+            sessions = {
+                session.name: session
+                for session in netbox.plugins.bgp.session.filter(device_id=device.id)
+            }
+            assert set(sessions) == expected_names
+            assert sessions[new_name].remote_prefix.id == prefix.id
+            assert sessions[new_name].remote_address is None
+            assert sessions[new_name].custom_fields["vrf"]["id"] == vrfs[0].id
+            assert sessions[existing_name].remote_prefix.id == first_match.id
+            assert (
+                sessions[new_name].local_address.address.split("/")[0]
+                == f"{address_stem}.65"
+            )
+            assert (
+                sessions[existing_name].local_address.address.split("/")[0]
+                == f"{address_stem}.67"
+            )
+            assert {
+                record.id
+                for record in netbox.ipam.prefixes.filter(prefix=existing_prefix)
+            } == {
+                first_match.id,
+                second_match.id,
+            }
+            assert (
+                sessions[static_name].remote_address.address.split("/")[0]
+                == static_address
+            )
+            for address in (learned_address, f"{address_stem}.2"):
+                assert not list(netbox.ipam.ip_addresses.filter(q=f"{address}/"))
+
+            # A learned neighbor stored by an earlier sync is out of scope.
+            learned_ip = netbox.ipam.ip_addresses.create(
+                address=f"{learned_address}/32"
+            )
+            learned = netbox.plugins.bgp.session.create(
+                name=learned_name,
+                device=device.id,
+                local_address=sessions[new_name].local_address.id,
+                local_as=sessions[new_name].local_as.id,
+                remote_address=learned_ip.id,
+                remote_as=sessions[new_name].remote_as.id,
+                custom_fields={"vrf": vrfs[0].id},
+            )
+            sessions[new_name].update({"description": "old description"})
+            preview = sync(dry_run=True)
+            assert set(preview["update"]) == {new_name}
+            assert preview["delete"] == []
+            assert sync()["updated"] == [new_name]
+            assert (
+                netbox.plugins.bgp.session.get(sessions[new_name].id).description
+                == "configured dynamic range"
+            )
+            assert set(sync()["in_sync"]) == expected_names
+            assert netbox.plugins.bgp.session.get(learned.id)
+            if platform == "xr":
+                netbox.ipam.ip_addresses.get(
+                    sessions[new_name].local_address.id
+                ).update({"assigned_object_type": None, "assigned_object_id": None})
+                preview = sync(dry_run=True)
+                assert not preview["delete"]
+                assert new_name not in preview["in_sync"]
+        finally:
+            for session in netbox.plugins.bgp.session.filter(device_id=device.id):
+                session.delete()
+            if peer_groups:
+                for group in netbox.plugins.bgp.peer_group.filter(name=peer_groups):
+                    group.delete()
+            for endpoint, filters in (
+                (netbox.ipam.ip_addresses, {"parent": subnet}),
+                (netbox.ipam.prefixes, {"within_include": subnet}),
+                (netbox.ipam.asns, {"asn": asns}),
+            ):
+                for record in endpoint.filter(**filters):
+                    record.delete()
+            device.delete()
+            for vrf in vrfs:
+                vrf.delete()
 
     def test_sync_bgp_peerings_basic(self, nfclient):
         """Run task, verify created list is non-empty, sessions exist in NetBox."""
@@ -1622,9 +1825,13 @@ class TestCreateBgpPeering:
     def test_interface_peer_derivation_matches_local_family(
         self, nfclient: Any
     ) -> None:
-        """Derive each peer from the first interface IP in the queried family."""
+        """Use an interface IP from the requested family for static and range peers."""
         nb = get_pynetbox(nfclient)
         device = BGP_CREATE_SESSIONS_TEST_DEVICES[0]
+        prefix = "2001:db8:bf:10::/64"
+        name = f"{device}_test_bulk_prefix_family"
+        assert not list(nb.ipam.prefixes.filter(prefix=prefix))
+        assert not nb.plugins.bgp.session.get(device=device, name=name)
         interface = nb.dcim.interfaces.create(
             device=nb.dcim.devices.get(name=device).id,
             name="norfab-bgp-dual-stack",
@@ -1665,7 +1872,40 @@ class TestCreateBgpPeering:
                     assert not result["failed"], result
                     assert not result["errors"], result
                     assert result["result"]["create"] == [peer]
+
+            entry = {
+                "name": name,
+                "device": device,
+                "local_interface": interface.name,
+                "local_as": _TEST_LOCAL_AS,
+                "remote_as": _TEST_REMOTE_AS,
+                "remote_prefix": "2001:0db8:00bf:0010::1/64",
+            }
+            for cidr, action in (
+                (entry["remote_prefix"], "created"),
+                (prefix, "exists"),
+            ):
+                (result,) = nfclient.run_job(
+                    "netbox",
+                    "create_bgp_peering",
+                    workers="any",
+                    kwargs={
+                        "bulk_create": [{**entry, "remote_prefix": cidr}],
+                        "rir": "lab",
+                    },
+                ).values()
+                assert not result["failed"], result
+                assert not result["errors"], result
+                assert result["result"][action] == [name]
+                session = nb.plugins.bgp.session.get(device=device, name=name)
+                assert session.local_address.id == addresses[1].id
+                assert session.remote_prefix.prefix == prefix
         finally:
+            session = nb.plugins.bgp.session.get(device=device, name=name)
+            if session:
+                session.delete()
+            for record in nb.ipam.prefixes.filter(prefix=prefix):
+                record.delete()
             for address in addresses:
                 address.delete()
             interface.delete()
